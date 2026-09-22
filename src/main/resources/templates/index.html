@@ -79,26 +79,26 @@
 									<option th:each="s : ${stores}" th:value="${s.id}" th:text="${s.name}"></option>
 								</select>
 								<div th:id="'stockHint_' + ${p.id}" class="d-none mt-1"></div>
+							</div>
 
-								<div class="mb-2">
-									<select name="orderType" class="form-select form-select-sm"
-										th:id="'typeSelect_' + ${p.id}" th:onchange="'toggleRentDates(' + ${p.id} + ')'"
-										required>
-										<option value="BUY">Mua Đứt</option>
-										<option value="RENT">Thuê Sản Phẩm</option>
-									</select>
-								</div>
+							<div class="mb-2">
+								<select name="orderType" class="form-select form-select-sm"
+									th:id="'typeSelect_' + ${p.id}" th:onchange="'toggleRentDates(' + ${p.id} + ')'"
+									required>
+									<option value="BUY">Mua Đứt</option>
+									<option value="RENT">Thuê Sản Phẩm</option>
+								</select>
+							</div>
 
-								<div th:id="'rentDates_' + ${p.id}" class="d-none bg-light p-2 rounded mb-2 border">
-									<label class="form-label small mb-1">Ngày bắt đầu thuê:</label>
-									<input type="date" name="rentStartDate" class="form-control form-control-sm mb-1">
-									<label class="form-label small mb-1">Ngày kết thúc thuê:</label>
-									<input type="date" name="rentEndDate" class="form-control form-control-sm">
-								</div>
+							<div th:id="'rentDates_' + ${p.id}" class="d-none bg-light p-2 rounded mb-2 border">
+								<label class="form-label small mb-1">Ngày bắt đầu thuê:</label>
+								<input type="date" name="rentStartDate" class="form-control form-control-sm mb-1">
+								<label class="form-label small mb-1">Ngày kết thúc thuê:</label>
+								<input type="date" name="rentEndDate" class="form-control form-control-sm">
+							</div>
 
-								<button type="submit" th:id="'submitBtn_' + ${p.id}"
-									class="btn btn-outline-primary btn-sm w-100">+ Thêm Vào Giỏ Hàng</button>
-								Hàng</button>
+							<button type="submit" th:id="'submitBtn_' + ${p.id}"
+								class="btn btn-outline-primary btn-sm w-100">+ Thêm Vào Giỏ Hàng</button>
 						</form>
 
 						<div sec:authorize="!hasRole('CUSTOMER')" class="mt-3">

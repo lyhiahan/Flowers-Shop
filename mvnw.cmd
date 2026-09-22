@@ -28,6 +28,9 @@
 @REM ----------------------------------------------------------------------------
 
 @IF "%__MVNW_ARG0_NAME__%"=="" (SET __MVNW_ARG0_NAME__=%~nx0)
+@IF "%JAVA_HOME%"=="C:\Java\jdk1.8.0_431" (
+  @IF EXIST "C:\Program Files\Java\latest\jdk-26" SET "JAVA_HOME=C:\Program Files\Java\latest\jdk-26"
+)
 @SET __MVNW_CMD__=
 @SET __MVNW_ERROR__=
 @SET __MVNW_PSMODULEP_SAVE=%PSModulePath%
