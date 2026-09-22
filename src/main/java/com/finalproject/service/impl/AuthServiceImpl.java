@@ -120,6 +120,7 @@ public class AuthServiceImpl implements AuthService {
                 .code(code)
                 .type(type)
                 .expiredAt(LocalDateTime.now().plusSeconds(120))
+                .createdAt(LocalDateTime.now())
                 .isUsed(false)
                 .build();
         otpRepository.save(otp);
