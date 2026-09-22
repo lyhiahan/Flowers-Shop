@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Trang Chủ - Rental Shop</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+	<!-- Navbar điều hướng -->
+	<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+		<div class="container">
+			<a class="navbar-brand fw-bold" th:href="@{/}">🏕️ RENTAL SHOP</a>
+			<div class="d-flex align-items-center">
+				<div sec:authorize="isAuthenticated()" class="text-light me-3">
+					Xin chào, <span class="text-warning fw-bold" sec:authentication="name"></span>!
+				</div>
+				<a sec:authorize="hasRole('CUSTOMER')" th:href="@{/cart}" class="btn btn-outline-light btn-sm me-2">Giỏ
+					Hàng</a>
+				<a sec:authorize="hasRole('CUSTOMER')" th:href="@{/customer/orders}"
+					class="btn btn-outline-info btn-sm me-2">Đơn Hàng Của Tôi</a>
+				<a sec:authorize="hasRole('STAFF')" th:href="@{/staff/orders}" class="btn btn-warning btn-sm me-2">Bàn
+					Làm Việc Nhân Viên</a>
+				<a sec:authorize="hasRole('MANAGER')" th:href="@{/manager/dashboard}"
+					class="btn btn-success btn-sm me-2">Báo Cáo Quản Lý</a>
+				<a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/products}"
+					class="btn btn-danger btn-sm me-2">Trang Quản Trị Admin</a>
+
+				<a sec:authorize="!isAuthenticated()" th:href="@{/login}" class="btn btn-primary btn-sm me-2">Đăng
+					Nhập</a>
+				<a sec:authorize="!isAuthenticated()" th:href="@{/register}" class="btn btn-outline-light btn-sm">Đăng
+					Ký</a>
+				<a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="btn btn-outline-danger btn-sm">Đăng
+					Xuất</a>
+			</div>
+		</div>
+	</nav>
+
+	<div class="container py-5">
+		<h3 class="mb-4">Sản Phẩm Nổi Bật</h3>
+
+		<div class="row row-cols-1 row-cols-md-3 g-4">
+			<div class="col" th:each="p : ${products}">
+				<div class="card h-100 shadow-sm border-0">
+					<div class="card-body">
+						<span class="badge bg-secondary mb-2" th:text="${p.category.name}"></span>
+						<h5 class="card-title fw-bold" th:text="${p.name}"></h5>
+						<p class="card-text text-muted small" th:text="${p.description}"></p>
+
+						<div class="border-top pt-2 mt-2">
+							<div class="d-flex justify-content-between">
+								<span class="text-muted">Giá mua:</span>
+								<strong class="text-primary"
+									th:text="${#numbers.formatDecimal(p.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+							</div>
+							<div class="d-flex justify-content-between">
+								<span class="text-muted">Giá thuê:</span>
+								<strong class="text-success"
+									th:text="${#numbers.formatDecimal(p.priceRentPerDay, 0, 'COMMA', 0, 'POINT')} + ' đ/ngày'"></strong>
+							</div>
+							<div class="d-flex justify-content-between">
+								<span class="text-muted">Tiền cọc:</span>
+								<strong class="text-warning"
+									th:text="${#numbers.formatDecimal(p.depositFee, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+							</div>
+						</div>
+
+						<!-- Form thêm vào giỏ hàng -->
+						<form sec:authorize="hasRole('CUSTOMER')" th:action="@{/cart/add}" method="post" class="mt-3">
+							<input type="hidden" name="productId" th:value="${p.id}">
+
+							<div class="mb-2">
+								<select name="storeId" class="form-select form-select-sm"
+									th:id="'storeSelect_' + ${p.id}" th:onchange="'verifyStock(' + ${p.id} + ')'"
+									required>
+									<option value="">-- Chọn chi nhánh nhận hàng --</option>
+									<option th:each="s : ${stores}" th:value="${s.id}" th:text="${s.name}"></option>
+								</select>
+								<div th:id="'stockHint_' + ${p.id}" class="d-none mt-1"></div>
+
+								<div class="mb-2">
+									<select name="orderType" class="form-select form-select-sm"
+										th:id="'typeSelect_' + ${p.id}" th:onchange="'toggleRentDates(' + ${p.id} + ')'"
+										required>
+										<option value="BUY">Mua Đứt</option>
+										<option value="RENT">Thuê Sản Phẩm</option>
+									</select>
+								</div>
+
+								<div th:id="'rentDates_' + ${p.id}" class="d-none bg-light p-2 rounded mb-2 border">
+									<label class="form-label small mb-1">Ngày bắt đầu thuê:</label>
+									<input type="date" name="rentStartDate" class="form-control form-control-sm mb-1">
+									<label class="form-label small mb-1">Ngày kết thúc thuê:</label>
+									<input type="date" name="rentEndDate" class="form-control form-control-sm">
+								</div>
+
+								<button type="submit" th:id="'submitBtn_' + ${p.id}"
+									class="btn btn-outline-primary btn-sm w-100">+ Thêm Vào Giỏ Hàng</button>
+								Hàng</button>
+						</form>
+
+						<div sec:authorize="!hasRole('CUSTOMER')" class="mt-3">
+							<a th:href="@{/login}" class="btn btn-light btn-sm w-100 text-muted">Đăng nhập để đặt
+								hàng</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		function toggleRentDates(productId) {
+			var select = document.getElementById('typeSelect_' + productId);
+			var dateBox = document.getElementById('rentDates_' + productId);
+			if (select.value === 'RENT') {
+				dateBox.classList.remove('d-none');
+			} else {
+				dateBox.classList.add('d-none');
+			}
+		}
+
+		// Hàm gọi Ajax kiểm tra tồn kho realtime và gợi ý điều phối
+		function verifyStock(productId) {
+			var storeSelect = document.getElementById('storeSelect_' + productId);
+			var storeId = storeSelect.value;
+			var hintBox = document.getElementById('stockHint_' + productId);
+			var submitBtn = document.getElementById('submitBtn_' + productId);
+
+			if (!storeId) {
+				hintBox.classList.add('d-none');
+				submitBtn.disabled = false;
+				return;
+			}
+
+			fetch('/api/inventory/check?productId=' + productId + '&storeId=' + storeId)
+				.then(response => response.json())
+				.then(data => {
+					hintBox.classList.remove('d-none');
+					if (data.available) {
+						hintBox.className = "alert alert-success py-1 px-2 small mb-2";
+						hintBox.innerHTML = "✅ Còn sẵn <strong>" + data.currentStock + "</strong> sản phẩm tại kho.";
+						submitBtn.disabled = false;
+					} else {
+						hintBox.className = "alert alert-warning py-1 px-2 small mb-2";
+						var html = "❌ Chi nhánh này vừa hết hàng! <br/>";
+						if (data.alternativeSuggestion) {
+							html += "📍 <em>" + data.alternativeSuggestion + "</em>";
+						}
+						hintBox.innerHTML = html;
+						submitBtn.disabled = true; // Chặn thêm vào giỏ nếu kho hết hàng
+					}
+				})
+				.catch(err => console.error("Lỗi check kho:", err));
+		}
+	</script>
+</body>
+
+</html>
