@@ -35,6 +35,7 @@ public class GlobalExceptionHandler {
     // 4. Bắt các lỗi Runtime chung
     @ExceptionHandler(Exception.class)
     public String handleGeneralException(Exception ex, Model model) {
+        ex.printStackTrace();
         model.addAttribute("errorMessage", "Đã xảy ra lỗi: " + ex.getMessage());
         return "common/error";
     }

@@ -1,11 +1,16 @@
 package com.finalproject.enums;
 
 public enum OrderStatus {
-    PENDING,    // Chờ duyệt
-    CONFIRMED,  // Đã duyệt đơn
-    RENTING,    // Đang thuê đồ
-    RETURNED,   // Đã trả đồ
-    OVERDUE,    // Quá hạn trả
-    COMPLETED,  // Hoàn tất đơn mua hoặc tất toán thuê
-    CANCELLED   // Đã hủy đơn
+    PENDING,    // Đơn hàng mới / Chờ tiếp nhận
+    CONFIRMED,  // Đã xác nhận đơn
+    PREPARING,  // Đang cắm hoa & chuẩn bị
+    PICKED_UP,  // Đã lấy hàng / Shipper nhận đơn
+    DELIVERING, // Đang giao hoa đến khách
+    DELIVERED,  // Đã giao thành công
+    COMPLETED,  // Giao hoa hoàn tất
+    CANCELLED,  // Đã hủy đơn
+    REFUNDED,   // Trả hàng - Hoàn tiền
+    RENTING,    // Đang thuê phụ kiện/cổng hoa
+    RETURNED,   // Đã hoàn trả phụ kiện
+    OVERDUE     // Quá hạn hoàn trả
 }

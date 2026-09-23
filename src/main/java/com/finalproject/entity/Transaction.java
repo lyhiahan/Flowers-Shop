@@ -1,0 +1,48 @@
+package com.finalproject.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "transactions")
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+public class Transaction {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "store_id")
+    private Store store;
+
+    @Column(name = "is_up", nullable = false)
+    @Builder.Default
+    private Boolean isUp = true; // true: cộng tiền (nạp/thu nhập), false: trừ tiền (rút tiền/chi phí)
+
+    @Column(nullable = false)
+    private BigDecimal amount;
+
+    @Column(length = 30)
+    @Builder.Default
+    private String type = "ORDER_PAYMENT"; // ORDER_PAYMENT, WITHDRAWAL, COMMISSION_FEE, REFUND
+
+    @Column(length = 500)
+    private String description;
+
+    @Column(length = 20)
+    @Builder.Default
+    private String status = "COMPLETED"; // PENDING, COMPLETED, REJECTED
+
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    public void prePersist() {
+        if (createdAt == null) createdAt = LocalDateTime.now();
+    }
+}

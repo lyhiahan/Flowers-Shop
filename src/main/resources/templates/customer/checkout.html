@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Xác Nhận Đặt Hoa & Thanh Toán - Bloom Flower Chain</title>
+    <!-- Google Fonts & Bootstrap 5 & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --flower-primary: #e11d48;
+            --flower-primary-dark: #be123c;
+            --flower-soft-pink: #fff1f2;
+            --flower-gold: #b45309;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #fcf8f8;
+            color: #1f2937;
+        }
+        .font-serif {
+            font-family: 'Playfair Display', Georgia, serif;
+        }
+        .flower-card {
+            border: 1px solid #ffe4e6;
+            border-radius: 16px;
+        }
+        .payment-option {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .payment-option:hover {
+            border-color: #e11d48 !important;
+            background-color: #fff1f2 !important;
+        }
+        .greeting-badge {
+            background-color: #fff7ed;
+            border: 1px dashed #fdba74;
+            color: #9a3412;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.82rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top shadow-sm" style="background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(8px); border-bottom: 1px solid #ffe4e6;">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/}">
+                <span class="fs-4">🌸</span>
+                <div>
+                    <span class="font-serif fw-bold text-dark fs-5 tracking-wide">BLOOM FLOWER</span>
+                    <span class="badge ms-1 text-uppercase" style="background-color: #fff1f2; color: #e11d48; font-size: 0.65rem;">Chain Store</span>
+                </div>
+            </a>
+            <div class="d-flex align-items-center gap-2">
+                <div sec:authorize="isAuthenticated()" class="text-secondary me-2 small">
+                    Xin chào, <strong class="text-danger" sec:authentication="name"></strong>
+                </div>
+                <a th:href="@{/cart}" class="btn btn-sm btn-outline-danger rounded-pill px-3 position-relative">
+                    <i class="bi bi-bag-heart me-1"></i> Giỏ Hàng
+                </a>
+                <a th:href="@{/customer/orders}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                    <i class="bi bi-clock-history me-1"></i> Đơn Hoa Của Tôi
+                </a>
+                <a th:href="@{/}" class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                    <i class="bi bi-shop me-1"></i> Cửa Hàng
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="font-serif fw-bold mb-1 text-dark">💳 Xác Nhận Đơn Hoa & Thanh Toán</h3>
+                <p class="text-muted small mb-0">Kiểm tra thông tin giao hoa, người nhận, lời chúc thiệp và bảng tính chi phí</p>
+            </div>
+            <a th:href="@{/cart}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại Giỏ Hàng
+            </a>
+        </div>
+
+        <form th:action="@{/checkout}" method="post">
+            <!-- Chuyển các ID sản phẩm được chọn -->
+            <input th:each="item : ${checkoutItems}" type="hidden" name="selectedItemIds" th:value="${item.id}">
+
+            <div class="row g-4">
+                <!-- Cột trái: Chi tiết sản phẩm & Thông tin nhận hoa -->
+                <div class="col-lg-8">
+                    
+                    <!-- Bảng chi tiết hóa đơn hoa & khung sự kiện -->
+                    <div class="card flower-card shadow-sm bg-white mb-4 overflow-hidden">
+                        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                            <h5 class="font-serif fw-bold mb-0 text-dark">💐 Danh Sách Hoa & Khung Sự Kiện Đặt Hàng</h5>
+                            <span class="badge bg-light text-danger border"><span th:text="${#lists.size(checkoutItems)}"></span> mẫu hoa</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle mb-0">
+                                <thead class="table-light text-center small text-muted">
+                                <tr>
+                                    <th class="text-start">Mẫu hoa & Chi nhánh</th>
+                                    <th>Phân loại</th>
+                                    <th>Số ngày thuê</th>
+                                    <th>Đơn giá</th>
+                                    <th>SL</th>
+                                    <th>Tiền cọc</th>
+                                    <th class="text-end">Thành tiền</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="item : ${checkoutItems}">
+                                    <!-- Tên sản phẩm & Chi nhánh & Lời chúc -->
+                                    <td>
+                                        <div class="fw-bold text-dark" th:text="${item.product.name}"></div>
+                                        <div class="small text-muted mt-1">
+                                            📍 Chi nhánh: <strong class="text-secondary" th:text="${item.store.name}"></strong>
+                                        </div>
+                                        <div th:if="${item.deliveryDate != null}" class="small text-danger mt-1">
+                                            📅 Ngày nhận hoa: <strong th:text="${item.deliveryDate}"></strong>
+                                        </div>
+                                        <div th:if="${item.greetingMessage != null and !item.greetingMessage.isEmpty()}" class="greeting-badge mt-2">
+                                            💌 Thiệp: <span th:text="${item.greetingMessage}"></span>
+                                        </div>
+                                    </td>
+
+                                    <!-- Phân loại -->
+                                    <td class="text-center">
+                                        <span th:if="${item.orderType.name() == 'BUY'}" class="badge bg-danger">HOA TƯƠI</span>
+                                        <span th:if="${item.orderType.name() == 'RENT'}" class="badge bg-warning text-dark">THUÊ KHUNG</span>
+                                    </td>
+
+                                    <!-- SỐ NGÀY THUÊ (Hiển thị rõ ràng) -->
+                                    <td class="text-center">
+                                        <div th:if="${item.orderType.name() == 'RENT'}">
+                                            <span class="badge bg-info text-dark px-2 py-1 fs-6 fw-bold" th:text="${item.rentalDays} + ' ngày'"></span>
+                                            <div class="small text-muted mt-1" style="font-size: 0.78rem;">
+                                                <span th:text="${item.rentStartDate}"></span><br/>→ <span th:text="${item.rentEndDate}"></span>
+                                            </div>
+                                        </div>
+                                        <div th:if="${item.orderType.name() == 'BUY'}" class="text-muted small">
+                                            —
+                                        </div>
+                                    </td>
+
+                                    <!-- ĐƠN GIÁ 1 NGÀY / GIÁ BÁN (Hiển thị rõ ràng) -->
+                                    <td class="text-center">
+                                        <div th:if="${item.orderType.name() == 'RENT'}">
+                                            <strong class="text-success" th:text="${#numbers.formatDecimal(item.dailyRate, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                                            <span class="text-muted d-block small" style="font-size: 0.75rem;">/ 1 ngày</span>
+                                        </div>
+                                        <div th:if="${item.orderType.name() == 'BUY'}">
+                                            <strong class="text-danger" th:text="${#numbers.formatDecimal(item.product.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                                        </div>
+                                    </td>
+
+                                    <!-- Số lượng -->
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark border px-2 py-1 fw-bold" th:text="'x ' + ${item.quantity}"></span>
+                                    </td>
+
+                                    <!-- Tiền cọc -->
+                                    <td class="text-center">
+                                        <div th:if="${item.orderType.name() == 'RENT'}">
+                                            <strong class="text-warning" th:text="${#numbers.formatDecimal(item.depositAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                                            <span class="text-muted d-block small" style="font-size: 0.75rem;" th:text="'(' + ${#numbers.formatDecimal(item.product.depositFee, 0, 'COMMA', 0, 'POINT')} + ' đ/cái)'"></span>
+                                        </div>
+                                        <div th:if="${item.orderType.name() == 'BUY'}" class="text-muted small">
+                                            0 đ
+                                        </div>
+                                    </td>
+
+                                    <!-- TỔNG THÀNH TIỀN DÒNG -->
+                                    <td class="text-end">
+                                        <div th:if="${item.orderType.name() == 'RENT'}">
+                                            <div class="fw-bold fs-6 text-danger" th:text="${#numbers.formatDecimal(item.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></div>
+                                            <div class="text-muted small" style="font-size: 0.75rem;">
+                                                Tiền thuê: <span th:text="${#numbers.formatDecimal(item.rentAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span><br/>
+                                                + Cọc: <span th:text="${#numbers.formatDecimal(item.depositAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                                            </div>
+                                        </div>
+                                        <div th:if="${item.orderType.name() == 'BUY'}">
+                                            <strong class="fs-6 text-danger" th:text="${#numbers.formatDecimal(item.buyAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Form Thông tin người nhận hoa & Lời chúc thiệp -->
+                    <div class="card flower-card shadow-sm bg-white mb-4">
+                        <div class="card-header bg-white py-3 border-bottom">
+                            <h6 class="font-serif fw-bold mb-0 text-dark">
+                                <i class="bi bi-person-heart text-danger me-2"></i>Thông Tin Người Nhận Hoa & Lời Chúc Thiệp
+                            </h6>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row g-3">
+                                <!-- Chọn nhanh từ sổ địa chỉ -->
+                                <div th:if="${!#lists.isEmpty(addresses)}" class="col-12">
+                                    <label class="form-label small fw-semibold text-danger">⚡ Chọn nhanh từ Sổ Địa Chỉ của bạn:</label>
+                                    <select class="form-select bg-light border-danger-subtle" onchange="fillAddress(this)">
+                                        <option value="">-- Bấm chọn địa chỉ nhận hàng đã lưu --</option>
+                                        <option th:each="a : ${addresses}" 
+                                                th:value="${a.id}" 
+                                                th:data-name="${a.recipientName}"
+                                                th:data-phone="${a.phone}"
+                                                th:data-address="${a.addressDetail}"
+                                                th:text="${a.recipientName + ' - ' + a.phone + ' (' + a.addressDetail + ')' + (a.isDefault ? ' [Mặc định]' : '')}">
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold text-secondary">Họ và tên người nhận hoa (*)</label>
+                                    <input type="text" id="recipientNameInput" name="recipientName" class="form-control rounded-3" 
+                                           th:value="${customer != null ? customer.fullName : ''}" 
+                                           placeholder="VD: Chị Mai Lan / Anh Tuấn" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold text-secondary">Số điện thoại liên hệ giao hoa (*)</label>
+                                    <input type="tel" id="recipientPhoneInput" name="recipientPhone" class="form-control rounded-3" 
+                                           th:value="${customer != null ? customer.phone : ''}" 
+                                           placeholder="VD: 0901234567" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label small fw-semibold text-secondary">Địa chỉ giao hoa tận nơi (*)</label>
+                                    <input type="text" id="recipientAddressInput" name="recipientAddress" class="form-control rounded-3" 
+                                           th:value="${customer != null ? customer.address : ''}" 
+                                           placeholder="VD: Tòa nhà Bitexco, Số 2 Hải Triều, P. Bến Nghé, Quận 1, TP.HCM" required>
+                                    <div class="form-text small text-muted">
+                                        📍 Nếu bạn muốn tự đến lấy tại chi nhánh, vui lòng ghi rõ <em>"Nhận trực tiếp tại cửa hàng"</em>.
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label small fw-semibold text-secondary">
+                                        💌 Thông điệp in trên thiệp hoa / banner chúc mừng:
+                                    </label>
+                                    <textarea name="greetingMessage" class="form-control rounded-3" rows="2" 
+                                              placeholder="VD: Mừng khai trương hồng phát! Chúc công ty ngày càng phát đạt và thành công rực rỡ!"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Cột phải: Tổng thanh toán & Phương thức thanh toán -->
+                <div class="col-lg-4">
+                    <div class="card flower-card shadow-sm bg-white sticky-top" style="top: 90px;">
+                        <div class="card-body p-4">
+                            <h5 class="font-serif fw-bold mb-3 border-bottom pb-2 text-dark">TỔNG KẾT THANH TOÁN</h5>
+
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Tiền hoa & thuê khung:</span>
+                                <strong th:text="${#numbers.formatDecimal(subtotalRentAndBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                            </div>
+
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Tiền cọc đảm bảo:</span>
+                                <strong class="text-warning" th:text="${#numbers.formatDecimal(totalDeposit, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                            </div>
+
+                            <!-- Nhập và chọn mã giảm giá Voucher -->
+                            <div class="my-3 p-3 bg-light rounded-3 border">
+                                <label class="form-label fw-bold small text-dark mb-1">🎟️ Mã Khuyến Mãi / Voucher</label>
+                                <input type="text" name="voucherCode" id="voucherInput" class="form-control text-uppercase mb-1" placeholder="Nhập mã (VD: FLOWER10)">
+                                <div th:if="${!#lists.isEmpty(vouchers)}" class="mt-2">
+                                    <small class="text-muted d-block mb-1" style="font-size: 0.72rem;">Mã gợi ý có sẵn:</small>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        <span th:each="v : ${vouchers}" class="badge bg-danger-subtle text-danger border"
+                                              style="cursor: pointer;"
+                                              th:data-code="${v.code}"
+                                              onclick="document.getElementById('voucherInput').value = this.getAttribute('data-code')"
+                                              th:text="${v.code + ' (' + v.name + ')'}"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-warning py-2 px-3 small my-3 rounded-3" style="font-size: 0.8rem; background-color: #fffbeb; border-color: #fde68a;">
+                                ℹ️ <strong>Chính sách cọc khung/cổng hoa:</strong> Tiền cọc sẽ được hoàn trả lại 100% cho bạn sau khi chi nhánh nhận lại khung/chân kệ nguyên vẹn.
+                            </div>
+
+                            <hr>
+
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <span class="fw-bold fs-6">TỔNG CỘNG:</span>
+                                <span class="fs-3 fw-bold text-danger" th:text="${#numbers.formatDecimal(grandTotal, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                            </div>
+
+                            <!-- Chọn Phương thức thanh toán -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold small text-dark mb-2">Phương Thức Thanh Toán (*)</label>
+                                <div class="d-flex flex-column gap-2">
+                                    <div class="form-check p-3 border rounded-3 payment-option bg-white">
+                                        <input class="form-check-input ms-0 me-2" type="radio" name="paymentMethod" id="pay_cod" value="COD" checked>
+                                        <label class="form-check-label fw-bold text-dark" for="pay_cod">
+                                            💵 Tiền mặt khi nhận hoa (COD)
+                                        </label>
+                                        <div class="text-muted small ps-4" style="font-size: 0.78rem;">Thanh toán trực tiếp cho shipper giao hoa tận nơi</div>
+                                    </div>
+
+                                    <div class="form-check p-3 border rounded-3 payment-option bg-white">
+                                        <input class="form-check-input ms-0 me-2" type="radio" name="paymentMethod" id="pay_bank" value="BANK_TRANSFER">
+                                        <label class="form-check-label fw-bold text-dark" for="pay_bank">
+                                            🏦 Chuyển khoản ngân hàng (VietQR)
+                                        </label>
+                                        <div class="text-muted small ps-4" style="font-size: 0.78rem;">Quét mã QR thanh toán nhanh qua app ngân hàng</div>
+                                    </div>
+
+                                    <div class="form-check p-3 border rounded-3 payment-option bg-white">
+                                        <input class="form-check-input ms-0 me-2" type="radio" name="paymentMethod" id="pay_vnpay" value="VNPAY">
+                                        <label class="form-check-label fw-bold text-dark" for="pay_vnpay">
+                                            💳 Cổng VNPAY / ATM / Visa
+                                        </label>
+                                        <div class="text-muted small ps-4" style="font-size: 0.78rem;">Thẻ nội địa và quốc tế bảo mật qua VNPAY</div>
+                                    </div>
+
+                                    <div class="form-check p-3 border rounded-3 payment-option bg-white">
+                                        <input class="form-check-input ms-0 me-2" type="radio" name="paymentMethod" id="pay_momo" value="MOMO">
+                                        <label class="form-check-label fw-bold text-dark" for="pay_momo">
+                                            📱 Ví điện tử MoMo
+                                        </label>
+                                        <div class="text-muted small ps-4" style="font-size: 0.78rem;">Thanh toán siêu tốc qua ứng dụng MoMo</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-danger w-100 py-3 fw-bold fs-5 rounded-pill shadow">
+                                🌸 Hoàn Tất Đặt Hoa
+                            </button>
+
+                            <div class="mt-3 text-center">
+                                <a th:href="@{/cart}" class="text-secondary small text-decoration-none">
+                                    ← Quay lại giỏ hàng
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function fillAddress(selectElem) {
+            const opt = selectElem.options[selectElem.selectedIndex];
+            if (opt && opt.value) {
+                document.getElementById('recipientNameInput').value = opt.getAttribute('data-name') || '';
+                document.getElementById('recipientPhoneInput').value = opt.getAttribute('data-phone') || '';
+                document.getElementById('recipientAddressInput').value = opt.getAttribute('data-address') || '';
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

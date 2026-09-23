@@ -34,4 +34,51 @@ public class CartItem {
 
     private LocalDate rentStartDate;
     private LocalDate rentEndDate;
+
+    private LocalDate deliveryDate; // Ngày nhận/giao hoa
+    @Column(length = 500)
+    private String greetingMessage; // Lời chúc trên thiệp/banner hoa tươi
+
+    public long getRentalDays() {
+        if (orderType == OrderType.RENT && rentStartDate != null && rentEndDate != null) {
+            long days = java.time.temporal.ChronoUnit.DAYS.between(rentStartDate, rentEndDate);
+            return days <= 0 ? 1 : days;
+        }
+        return 0;
+    }
+
+    public java.math.BigDecimal getDailyRate() {
+        return product != null && product.getPriceRentPerDay() != null ? product.getPriceRentPerDay() : java.math.BigDecimal.ZERO;
+    }
+
+    public java.math.BigDecimal getRentAmount() {
+        if (orderType == OrderType.RENT) {
+            return getDailyRate()
+                    .multiply(java.math.BigDecimal.valueOf(getRentalDays()))
+                    .multiply(java.math.BigDecimal.valueOf(quantity != null ? quantity : 1));
+        }
+        return java.math.BigDecimal.ZERO;
+    }
+
+    public java.math.BigDecimal getDepositAmount() {
+        if (orderType == OrderType.RENT && product != null && product.getDepositFee() != null) {
+            return product.getDepositFee().multiply(java.math.BigDecimal.valueOf(quantity != null ? quantity : 1));
+        }
+        return java.math.BigDecimal.ZERO;
+    }
+
+    public java.math.BigDecimal getBuyAmount() {
+        if (orderType == OrderType.BUY && product != null && product.getPriceBuy() != null) {
+            return product.getPriceBuy().multiply(java.math.BigDecimal.valueOf(quantity != null ? quantity : 1));
+        }
+        return java.math.BigDecimal.ZERO;
+    }
+
+    public java.math.BigDecimal getTotalAmount() {
+        if (orderType == OrderType.BUY) {
+            return getBuyAmount();
+        } else {
+            return getRentAmount().add(getDepositAmount());
+        }
+    }
 }

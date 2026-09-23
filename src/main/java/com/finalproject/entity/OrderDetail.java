@@ -36,4 +36,12 @@ public class OrderDetail {
     private LocalDate rentStartDate;
     private LocalDate rentEndDate;
     private LocalDate actualReturnDate;
+
+    public long getRentalDays() {
+        if (orderType == OrderType.RENT && rentStartDate != null && rentEndDate != null) {
+            long days = java.time.temporal.ChronoUnit.DAYS.between(rentStartDate, rentEndDate);
+            return days <= 0 ? 1 : days;
+        }
+        return 0;
+    }
 }

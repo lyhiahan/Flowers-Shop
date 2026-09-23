@@ -20,7 +20,46 @@ public class Store {
     @Column(length = 20)
     private String phone;
 
-    private Boolean status; // true: Hoạt động, false: Tạm ngưng
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id")
+    private User owner;
+
+    @Column(length = 1000)
+    private String bio;
+
+    @Column(length = 500)
+    private String avatar;
+
+    @Column(length = 500)
+    private String cover;
+
+    @Column(name = "featured_images", columnDefinition = "NVARCHAR(MAX)")
+    private String featuredImages;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "commission_id")
+    private Commission commission;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "store_level_id")
+    private StoreLevel storeLevel;
+
+    @Builder.Default
+    private Boolean status = true; // true: Hoạt động, false: Tạm ngưng do vi phạm
+
+    @Column(name = "is_open")
+    @Builder.Default
+    private Boolean isOpen = true; // true: Đang mở cửa bán, false: Tạm đóng cửa
+
+    @Builder.Default
+    private Integer point = 0;
+
+    @Builder.Default
+    private Double rating = 5.0;
+
+    @Column(name = "e_wallet", precision = 18, scale = 2)
+    @Builder.Default
+    private java.math.BigDecimal eWallet = java.math.BigDecimal.ZERO;
 
     private Double latitude;
     private Double longitude;

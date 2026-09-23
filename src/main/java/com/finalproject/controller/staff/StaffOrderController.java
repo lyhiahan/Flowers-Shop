@@ -16,7 +16,7 @@ import java.security.Principal;
 import java.util.List;
 
 @Controller
-@RequestMapping("/staff/orders")
+@RequestMapping({"/manager/orders", "/staff/orders"})
 @RequiredArgsConstructor
 public class StaffOrderController {
 

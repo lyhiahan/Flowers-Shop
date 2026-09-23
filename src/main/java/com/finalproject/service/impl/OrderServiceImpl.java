@@ -27,16 +27,45 @@ public class OrderServiceImpl implements OrderService {
     private final StoreInventoryRepository storeInventoryRepository;
     private final PaymentRepository paymentRepository;
     private final UserRepository userRepository;
+    private final StoreRepository storeRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final com.finalproject.service.VoucherService voucherService;
+    private final TransactionRepository transactionRepository;
 
     @Override
     @Transactional
-    public List<Order> checkout(String username, PaymentMethod paymentMethod) {
-        Cart cart = cartService.getCartByUsername(username);
-        List<CartItem> items = cart.getItems();
+    public List<Order> checkout(String username, List<Long> selectedCartItemIds, PaymentMethod paymentMethod) {
+        return checkout(username, selectedCartItemIds, paymentMethod, null, null, null, null, null);
+    }
 
-        if (items == null || items.isEmpty()) {
+    @Override
+    @Transactional
+    public List<Order> checkout(String username, List<Long> selectedCartItemIds, PaymentMethod paymentMethod,
+                                 String recipientName, String recipientPhone, String recipientAddress, String greetingMessage) {
+        return checkout(username, selectedCartItemIds, paymentMethod, recipientName, recipientPhone, recipientAddress, greetingMessage, null);
+    }
+
+    @Override
+    @Transactional
+    public List<Order> checkout(String username, List<Long> selectedCartItemIds, PaymentMethod paymentMethod,
+                                 String recipientName, String recipientPhone, String recipientAddress, String greetingMessage, String voucherCode) {
+        Cart cart = cartService.getCartByUsername(username);
+        List<CartItem> allItems = cart.getItems();
+
+        if (allItems == null || allItems.isEmpty()) {
             throw new IllegalStateException("Giỏ hàng của bạn đang trống!");
+        }
+
+        List<CartItem> items;
+        if (selectedCartItemIds != null && !selectedCartItemIds.isEmpty()) {
+            items = allItems.stream()
+                    .filter(i -> selectedCartItemIds.contains(i.getId()))
+                    .collect(Collectors.toList());
+            if (items.isEmpty()) {
+                throw new IllegalStateException("Vui lòng chọn ít nhất 1 sản phẩm để thanh toán!");
+            }
+        } else {
+            items = new ArrayList<>(allItems);
         }
 
         User user = cart.getUser();
@@ -62,11 +91,25 @@ public class OrderServiceImpl implements OrderService {
                 BigDecimal totalDeposit = BigDecimal.ZERO;
                 List<OrderDetail> orderDetails = new ArrayList<>();
 
+                CartItem firstItem = subItems.get(0);
+                java.time.LocalDate delivDate = firstItem.getDeliveryDate() != null ? firstItem.getDeliveryDate() : java.time.LocalDate.now();
+                String greetingMsg = firstItem.getGreetingMessage();
+
+                String finalRecipientName = (recipientName != null && !recipientName.trim().isEmpty()) ? recipientName.trim() : user.getFullName();
+                String finalRecipientPhone = (recipientPhone != null && !recipientPhone.trim().isEmpty()) ? recipientPhone.trim() : user.getPhone();
+                String finalRecipientAddress = (recipientAddress != null && !recipientAddress.trim().isEmpty()) ? recipientAddress.trim() : user.getAddress();
+                String finalGreeting = (greetingMessage != null && !greetingMessage.trim().isEmpty()) ? greetingMessage.trim() : greetingMsg;
+
                 Order order = Order.builder()
                         .user(user)
                         .pickupStore(store)
                         .orderType(orderType)
                         .status(OrderStatus.PENDING)
+                        .deliveryDate(delivDate)
+                        .greetingMessage(finalGreeting)
+                        .recipientName(finalRecipientName)
+                        .recipientPhone(finalRecipientPhone)
+                        .recipientAddress(finalRecipientAddress)
                         .createdAt(LocalDateTime.now())
                         .build();
 
@@ -119,13 +162,31 @@ public class OrderServiceImpl implements OrderService {
                     orderDetails.add(detail);
                 }
 
-                order.setTotalAmount(totalAmount);
+                // Áp dụng voucher nếu có
+                BigDecimal discount = BigDecimal.ZERO;
+                if (voucherCode != null && !voucherCode.trim().isEmpty()) {
+                    Voucher v = voucherService.findByCode(voucherCode.trim());
+                    if (v != null) {
+                        try {
+                            discount = voucherService.calculateDiscount(v, totalAmount, BigDecimal.valueOf(30000));
+                            order.setVoucher(v);
+                            order.setDiscountAmount(discount);
+                            v.setUsedCount(v.getUsedCount() + 1);
+                            voucherService.createVoucher(v);
+                        } catch (Exception ignored) {}
+                    }
+                }
+
+                BigDecimal finalAmount = totalAmount.subtract(discount).max(BigDecimal.ZERO);
+                order.setTotalAmount(finalAmount);
                 order.setTotalDeposit(totalDeposit);
+                order.setPaymentMethod(paymentMethod != null ? paymentMethod.name() : "COD");
+                order.setPaymentStatus(paymentMethod == PaymentMethod.COD ? "UNPAID" : "PAID");
                 order.setOrderDetails(orderDetails);
                 Order savedOrder = orderRepository.save(order);
 
                 // 3. Tạo bản ghi thanh toán (Payment)
-                BigDecimal paymentTotal = totalAmount.add(totalDeposit);
+                BigDecimal paymentTotal = finalAmount.add(totalDeposit);
                 Payment payment = Payment.builder()
                         .order(savedOrder)
                         .method(paymentMethod)
@@ -143,8 +204,10 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-        // Xóa sạch giỏ hàng sau khi đặt thành công
-        cartService.clearCart(username);
+        // Xóa các sản phẩm đã thanh toán khỏi giỏ hàng
+        for (CartItem processedItem : items) {
+            cartService.removeCartItem(username, processedItem.getId());
+        }
         return createdOrders;
     }
 
@@ -153,6 +216,93 @@ public class OrderServiceImpl implements OrderService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại"));
         return orderRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
+    }
+
+    @Override
+    public List<Order> getOrdersByUsernameAndStatus(String username, OrderStatus status) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại"));
+        if (status == null) {
+            return orderRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
+        }
+        return orderRepository.findByUserIdAndStatusOrderByCreatedAtDesc(user.getId(), status);
+    }
+
+    @Override
+    public List<Order> getOrdersByStore(Long storeId) {
+        return orderRepository.findByPickupStoreIdOrderByCreatedAtDesc(storeId);
+    }
+
+    @Override
+    public List<Order> getAllOrders() {
+        return orderRepository.findAll(org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"));
+    }
+
+    @Override
+    public Order getOrderById(Long orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng ID: " + orderId));
+    }
+
+    @Override
+    @Transactional
+    public void updateOrderStatus(Long orderId, OrderStatus status) {
+        Order order = getOrderById(orderId);
+        order.setStatus(status);
+
+        // Khi đơn hàng giao thành công hoặc hoàn tất, tự động cộng doanh thu vào ví của cửa hàng (trừ 10% hoa hồng sàn)
+        if (status == OrderStatus.DELIVERED || status == OrderStatus.COMPLETED) {
+            order.setPaymentStatus("PAID");
+            Store store = order.getPickupStore();
+            if (store != null && order.getTotalAmount() != null) {
+                // Hoa hồng sàn 10%
+                BigDecimal storeIncome = order.getTotalAmount().multiply(BigDecimal.valueOf(0.90));
+                store.setEWallet(store.getEWallet().add(storeIncome));
+                storeRepository.save(store);
+
+                // Ghi nhật ký dòng tiền
+                transactionRepository.save(Transaction.builder()
+                        .store(store)
+                        .amount(storeIncome)
+                        .type("ORDER_PAYMENT")
+                        .isUp(true)
+                        .description("Thu nhập đơn hàng #" + order.getId() + " sau khi trừ 10% phí sàn")
+                        .status("COMPLETED")
+                        .build());
+            }
+        }
+
+        orderRepository.save(order);
+    }
+
+    @Override
+    @Transactional
+    public void assignShipper(Long orderId, Long shipperId) {
+        Order order = getOrderById(orderId);
+        User shipper = userRepository.findById(shipperId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhân viên giao hàng"));
+
+        order.setShipper(shipper);
+        if (order.getStatus() == OrderStatus.CONFIRMED || order.getStatus() == OrderStatus.PREPARING) {
+            order.setStatus(OrderStatus.PICKED_UP);
+        }
+        orderRepository.save(order);
+    }
+
+    @Override
+    @Transactional
+    public void requestRefund(String username, Long orderId) {
+        Order order = getOrderById(orderId);
+        if (!order.getUser().getUsername().equals(username)) {
+            throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền yêu cầu hoàn tiền đơn này!");
+        }
+
+        if (order.getStatus() != OrderStatus.DELIVERED && order.getStatus() != OrderStatus.COMPLETED) {
+            throw new IllegalStateException("Chỉ có thể yêu cầu trả hàng - hoàn tiền cho đơn đã giao!");
+        }
+
+        order.setStatus(OrderStatus.REFUNDED);
+        orderRepository.save(order);
     }
 
     @Override

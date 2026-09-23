@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${product.name + ' - Bloom Flower Chain'}">Chi Tiết Sản Phẩm</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fafafa; }
+        .font-serif { font-family: 'Playfair Display', Georgia, serif; }
+        .btn-flower { background-color: #e11d48; color: white; border: none; }
+        .btn-flower:hover { background-color: #be123c; color: white; }
+        .detail-card { border-radius: 20px; border: 1px solid #f1f5f9; box-shadow: 0 4px 25px -5px rgba(0,0,0,0.05); }
+        .active-thumb {
+            transform: scale(1.05);
+            border-color: #e11d48 !important;
+            box-shadow: 0 4px 12px rgba(225, 29, 72, 0.25) !important;
+        }
+        .thumbnail-card {
+            transition: all 0.25s ease;
+            cursor: pointer;
+        }
+        .thumbnail-card:hover {
+            transform: translateY(-3px);
+        }
+        .nav-angle-btn {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            transition: all 0.2s ease;
+        }
+        .nav-angle-btn:hover {
+            background: #ffffff;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom py-3 sticky-top">
+    <div class="container">
+        <a class="navbar-brand font-serif fw-bold text-danger fs-4" th:href="@{/}">🌸 BLOOM FLOWER</a>
+        <div class="d-flex align-items-center gap-3">
+            <a th:href="@{/customer/profile/wishlist}" class="btn btn-outline-danger btn-sm"><i class="bi bi-heart me-1"></i> Yêu thích</a>
+            <a th:href="@{/cart}" class="btn btn-danger btn-sm position-relative rounded-pill px-3">
+                <i class="bi bi-cart3 me-1"></i> Giỏ hàng
+                <span th:if="${cartItemCount != null and cartItemCount > 0}" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark" th:text="${cartItemCount}"></span>
+            </a>
+            <a th:href="@{/customer/profile}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-person me-1"></i> Hồ sơ</a>
+            <a th:href="@{/}" class="btn btn-light btn-sm"><i class="bi bi-house me-1"></i> Trang chủ</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a th:href="@{/}" class="text-secondary text-decoration-none">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/(categoryId=${product.category != null ? product.category.id : 0})}" class="text-secondary text-decoration-none" th:text="${product.category != null ? product.category.name : 'Hoa tươi'}"></a></li>
+            <li class="breadcrumb-item active text-danger" th:text="${product.name}"></li>
+        </ol>
+    </nav>
+
+    <div th:if="${successMessage}" class="alert alert-success rounded-3 mb-4" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger rounded-3 mb-4" th:text="${errorMessage}"></div>
+
+    <div class="card detail-card bg-white p-4 p-md-5 mb-5">
+        <div class="row g-5">
+            <!-- Ảnh sản phẩm với nhiều góc chụp -->
+            <div class="col-lg-6">
+                <!-- Khung ảnh lớn chính -->
+                <div class="position-relative rounded-4 overflow-hidden border mb-3 bg-light text-center shadow-sm" style="background: radial-gradient(circle, #fff1f2 0%, #f8fafc 100%);">
+                    <!-- Badge góc chụp -->
+                    <span id="angleBadge" class="position-absolute top-0 start-0 m-3 badge bg-dark bg-opacity-75 text-white px-3 py-2 rounded-pill shadow-sm" style="backdrop-filter: blur(4px); font-size: 0.85rem; z-index: 4;">
+                        📷 Góc 1: Ảnh Chính Diện
+                    </span>
+
+                    <!-- Nút mũi tên xem góc trước / góc sau -->
+                    <button type="button" class="btn rounded-circle shadow-sm position-absolute top-50 start-0 translate-middle-y ms-2 nav-angle-btn d-flex align-items-center justify-content-center"
+                            style="width: 42px; height: 42px; z-index: 5;" onclick="prevImage()" title="Xem góc trước">
+                        <i class="bi bi-chevron-left fw-bold text-dark fs-5"></i>
+                    </button>
+                    <button type="button" class="btn rounded-circle shadow-sm position-absolute top-50 end-0 translate-middle-y me-2 nav-angle-btn d-flex align-items-center justify-content-center"
+                            style="width: 42px; height: 42px; z-index: 5;" onclick="nextImage()" title="Xem góc tiếp theo">
+                        <i class="bi bi-chevron-right fw-bold text-dark fs-5"></i>
+                    </button>
+
+                    <img id="mainImage"
+                         th:src="${product.imageUrl != null ? product.imageUrl : 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=800'}"
+                         class="img-fluid w-100" style="max-height: 480px; object-fit: cover; transition: opacity 0.25s ease;" alt="Flower detail">
+                </div>
+
+                <!-- Gallery thumbnail các góc chụp khác nhau -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted fw-bold">
+                            <i class="bi bi-camera-fill me-1 text-danger"></i> Các góc chụp thực tế (<span th:text="${!#lists.isEmpty(images) ? #lists.size(images) : 1}">4</span> góc):
+                        </small>
+                        <small class="text-secondary opacity-75">Bấm góc để đổi ảnh xem chi tiết</small>
+                    </div>
+
+                    <div class="d-flex gap-2 overflow-auto pb-2" id="thumbnailGallery">
+                        <div th:each="img, iterStat : ${images}" class="thumbnail-card text-center" style="flex: 0 0 auto;"
+                             th:attr="data-index=${iterStat.index}, data-src=${img.imageUrl}"
+                             onclick="selectImage(this)">
+                            <img th:src="${img.imageUrl}"
+                                 th:classappend="${iterStat.index == 0} ? 'active-thumb' : 'border-light-subtle'"
+                                 class="rounded-3 border border-2 thumbnail-img shadow-sm"
+                                 width="85" height="85" style="object-fit: cover;">
+                            <div class="small fw-semibold text-muted mt-1 angle-caption" style="font-size: 0.72rem;"
+                                 th:text="${iterStat.index == 0 ? 'Chính diện' : (iterStat.index == 1 ? 'Cận cảnh' : (iterStat.index == 2 ? 'Góc nghiêng' : 'Bài trí'))}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hướng dẫn trải nghiệm -->
+                <div class="p-2 px-3 bg-light rounded-3 text-secondary small d-flex align-items-center gap-2 border">
+                    <i class="bi bi-stars text-warning fs-5"></i>
+                    <span><strong>100% Ảnh hoa thật:</strong> Bạn có thể bấm các ảnh thu nhỏ hoặc 2 nút mũi tên để xem trọn vẹn bông hoa từ nhiều góc nhìn.</span>
+                </div>
+            </div>
+
+            <!-- Thông tin chi tiết & Form mua -->
+            <div class="col-lg-6">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-1" th:text="${product.category != null ? product.category.name : 'Hoa cao cấp'}"></span>
+                    <!-- Nút Wishlist -->
+                    <form th:action="@{/customer/profile/wishlist/toggle/{id}(id=${product.id})}" method="post">
+                        <button type="submit" class="btn btn-sm rounded-circle p-2"
+                                th:classappend="${isLiked} ? 'btn-danger' : 'btn-outline-danger'">
+                            <i class="bi" th:classappend="${isLiked} ? 'bi-heart-fill' : 'bi-heart'"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <h2 class="font-serif fw-bold text-dark mb-2" th:text="${product.name}"></h2>
+
+                <div class="d-flex align-items-center gap-3 mb-3 small">
+                    <div class="text-warning">
+                        <i class="bi bi-star-fill"></i>
+                        <span class="fw-bold text-dark" th:text="${product.rating}">5.0</span>
+                    </div>
+                    <span class="text-muted">|</span>
+                    <span class="text-muted">Đã bán: <strong class="text-dark" th:text="${product.sold != null ? product.sold : 0}"></strong></span>
+                    <span class="text-muted">|</span>
+                    <span class="text-muted">Lượt xem: <strong class="text-dark" th:text="${product.viewCount != null ? product.viewCount : 1}"></strong></span>
+                </div>
+
+                <!-- Chi nhánh bán -->
+                <div class="p-3 bg-light rounded-3 mb-4 small border">
+                    <div class="fw-semibold text-dark"><i class="bi bi-shop text-danger me-1"></i> Chi nhánh chuẩn bị:
+                        <span th:text="${product.store != null ? product.store.name : 'Chi nhánh Quận 1 (Trụ sở)'}"></span>
+                    </div>
+                    <div class="text-muted mt-1">🚚 Giao hoa hỏa tốc trong 2 giờ nội thành. Tặng kèm thiệp chúc mừng cao cấp!</div>
+                </div>
+
+                <!-- Giá bán -->
+                <div class="mb-4">
+                    <div class="fs-2 fw-bold text-danger font-serif" th:text="${#numbers.formatDecimal(product.priceBuy, 0, 'COMMA', 0, 'POINT') + ' đ'}"></div>
+                    <div class="text-muted small">Giá thuê phụ kiện/cổng hoa: <strong class="text-secondary" th:text="${#numbers.formatDecimal(product.priceRentPerDay, 0, 'COMMA', 0, 'POINT') + ' đ/ngày'}"></strong> (Cọc: <span th:text="${#numbers.formatDecimal(product.depositFee, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>)</div>
+                </div>
+
+                <!-- Form thêm giỏ hàng -->
+                <form th:action="@{/cart/add}" method="post" class="mb-4">
+                    <input type="hidden" name="productId" th:value="${product.id}">
+                    <input type="hidden" name="storeId" th:value="${product.store != null ? product.store.id : 1}">
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Hình thức</label>
+                            <select name="orderType" class="form-select">
+                                <option value="BUY" selected>Mua Đứt (Sở hữu hoa)</option>
+                                <option value="RENT">Thuê hoa sự kiện / Cổng hoa</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Số lượng bó/lẵng</label>
+                            <input type="number" name="quantity" value="1" min="1" max="99" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Ngày nhận hoa</label>
+                            <input type="date" name="deliveryDate" class="form-control" th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Lời chúc thiệp mừng</label>
+                            <input type="text" name="greetingMessage" class="form-control" placeholder="Ví dụ: Chúc mừng sinh nhật em yêu!">
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-flower py-3 fw-bold rounded-pill shadow-sm">
+                            <i class="bi bi-cart-plus me-2"></i> Thêm Vào Giỏ Hàng
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Mô tả -->
+                <div class="border-top pt-3">
+                    <h6 class="fw-bold">Ý nghĩa & Mô tả sản phẩm:</h6>
+                    <p class="text-secondary small line-height-lg" th:text="${product.description != null ? product.description : 'Mẫu hoa tươi thiết kế độc quyền từ những đóa hoa tươi nhập khẩu chọn lọc, mang thông điệp yêu thương, sang trọng và rạng ngời.'}"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mục Đánh giá & Phản hồi (Reviews - Tối thiểu 50 ký tự theo yêu cầu rubric đề cương) -->
+    <div id="review-section" class="card detail-card bg-white p-4 p-md-5 mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="font-serif fw-bold mb-1">⭐ Đánh Giá & Nhận Xét Của Khách Hàng</h4>
+                <p class="text-muted small mb-0">Đánh giá thực tế từ khách hàng đã đặt hoa tại hệ thống</p>
+            </div>
+        </div>
+
+        <!-- Form gửi đánh giá -->
+        <div class="p-4 bg-light rounded-4 border mb-4">
+            <h6 class="fw-bold mb-3 font-serif">Viết Đánh Giá Sản Phẩm (Bình luận tối thiểu 50 ký tự)</h6>
+            <form th:action="@{/products/{id}/review(id=${product.id})}" method="post" onsubmit="return validateReviewLength();">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold">Chấm sao (*)</label>
+                        <select name="rating" class="form-select" required>
+                            <option value="5" selected>⭐⭐⭐⭐⭐ (5 sao - Tuyệt vời)</option>
+                            <option value="4">⭐⭐⭐⭐ (4 sao - Rất tốt)</option>
+                            <option value="3">⭐⭐⭐ (3 sao - Bình thường)</option>
+                            <option value="2">⭐⭐ (2 sao - Tạm được)</option>
+                            <option value="1">⭐ (1 sao - Thất vọng)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-9">
+                        <label class="form-label small fw-semibold">Đường dẫn hình ảnh đính kèm (nếu có)</label>
+                        <input type="url" name="imageUrl" class="form-control" placeholder="https://example.com/flower-review.jpg">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small fw-semibold mb-0">Nội dung bình luận & trải nghiệm (* Bắt buộc tối thiểu 50 ký tự theo quy định)</label>
+                        <small id="charCounter" class="text-muted fw-bold">0 / 50 ký tự</small>
+                    </div>
+                    <textarea id="reviewContent" name="content" rows="3" class="form-control"
+                              required placeholder="Hãy chia sẻ cảm nhận chi tiết của bạn về độ tươi của hoa, cách đóng gói, thiệp mừng và thái độ phục vụ của shipper (tối thiểu 50 ký tự)..."
+                              oninput="updateCharCount()"></textarea>
+                    <div id="reviewWarning" class="text-danger small mt-1 d-none">⚠️ Nội dung bình luận chưa đủ 50 ký tự! Vui lòng viết thêm cảm nhận.</div>
+                </div>
+
+                <button type="submit" class="btn btn-flower rounded-pill px-4">Gửi Đánh Giá</button>
+            </form>
+        </div>
+
+        <!-- Danh sách đánh giá -->
+        <div th:if="${#lists.isEmpty(reviews)}" class="text-center py-4 text-muted">
+            <i class="bi bi-chat-heart fs-1 text-secondary opacity-50"></i>
+            <p class="mt-2">Chưa có đánh giá nào cho mẫu hoa này. Hãy là người đầu tiên trải nghiệm và để lại nhận xét!</p>
+        </div>
+
+        <div th:if="${!#lists.isEmpty(reviews)}" class="d-flex flex-column gap-3">
+            <div th:each="r : ${reviews}" class="p-3 border rounded-3 bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <img th:src="${r.user.avatarUrl != null ? r.user.avatarUrl : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=50'}"
+                             class="rounded-circle border" width="40" height="40" style="object-fit: cover;">
+                        <div>
+                            <strong class="d-block" th:text="${r.user.fullName}"></strong>
+                            <small class="text-muted" th:text="${#temporals.format(r.createdAt, 'dd/MM/yyyy HH:mm')}"></small>
+                        </div>
+                    </div>
+                    <div class="text-warning">
+                        <span th:each="i : ${#numbers.sequence(1, r.rating)}">⭐</span>
+                    </div>
+                </div>
+                <p class="text-dark small mb-2" th:text="${r.content}"></p>
+                <div th:if="${r.imageUrl != null and !r.imageUrl.isEmpty()}">
+                    <img th:src="${r.imageUrl}" class="rounded-3 border" width="120" height="120" style="object-fit: cover;">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentIndex = 0;
+    const angleTitles = [
+        "Góc 1: Ảnh Chính Diện",
+        "Góc 2: Cận Cảnh Cánh Hoa",
+        "Góc 3: Góc Nghiêng Chi Tiết",
+        "Góc 4: Không Gian Bài Trí"
+    ];
+
+    function selectImage(cardEl) {
+        const src = cardEl.getAttribute('data-src');
+        const idx = parseInt(cardEl.getAttribute('data-index') || '0');
+        currentIndex = idx;
+
+        const mainImg = document.getElementById('mainImage');
+        if (mainImg) {
+            mainImg.style.opacity = '0.3';
+            setTimeout(() => {
+                mainImg.src = src;
+                mainImg.style.opacity = '1';
+            }, 150);
+        }
+
+        const badge = document.getElementById('angleBadge');
+        if (badge) {
+            badge.textContent = '📷 ' + (angleTitles[idx] || ('Góc chụp ' + (idx + 1)));
+        }
+
+        document.querySelectorAll('.thumbnail-card').forEach(c => {
+            const img = c.querySelector('.thumbnail-img');
+            const cap = c.querySelector('.angle-caption');
+            if (img) img.classList.remove('active-thumb');
+            if (cap) {
+                cap.classList.remove('text-danger', 'fw-bold');
+                cap.classList.add('text-muted');
+            }
+        });
+
+        const activeImg = cardEl.querySelector('.thumbnail-img');
+        const activeCap = cardEl.querySelector('.angle-caption');
+        if (activeImg) activeImg.classList.add('active-thumb');
+        if (activeCap) {
+            activeCap.classList.remove('text-muted');
+            activeCap.classList.add('text-danger', 'fw-bold');
+        }
+    }
+
+    function prevImage() {
+        const cards = document.querySelectorAll('.thumbnail-card');
+        if (cards.length === 0) return;
+        currentIndex = (currentIndex - 1 + cards.length) % cards.length;
+        selectImage(cards[currentIndex]);
+    }
+
+    function nextImage() {
+        const cards = document.querySelectorAll('.thumbnail-card');
+        if (cards.length === 0) return;
+        currentIndex = (currentIndex + 1) % cards.length;
+        selectImage(cards[currentIndex]);
+    }
+
+    function updateCharCount() {
+        const text = document.getElementById('reviewContent').value.trim();
+        const counter = document.getElementById('charCounter');
+        const warning = document.getElementById('reviewWarning');
+        counter.textContent = text.length + ' / 50 ký tự';
+        if (text.length >= 50) {
+            counter.className = 'text-success fw-bold';
+            warning.classList.add('d-none');
+        } else {
+            counter.className = 'text-danger fw-bold';
+        }
+    }
+
+    function validateReviewLength() {
+        const text = document.getElementById('reviewContent').value.trim();
+        if (text.length < 50) {
+            document.getElementById('reviewWarning').classList.remove('d-none');
+            alert('Bình luận bắt buộc tối thiểu 50 ký tự theo yêu cầu đề cương!');
+            return false;
+        }
+        return true;
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

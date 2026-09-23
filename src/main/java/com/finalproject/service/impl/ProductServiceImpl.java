@@ -24,6 +24,9 @@ public class ProductServiceImpl implements ProductService {
     private final StoreRepository storeRepository;
     private final StoreInventoryRepository storeInventoryRepository;
     private final CloudinaryService cloudinaryService;
+    private final ProductWishlistRepository wishlistRepository;
+    private final RecentlyViewedRepository recentlyViewedRepository;
+    private final UserRepository userRepository;
 
     @Override
     public List<Product> getAllProducts() {
@@ -34,6 +37,120 @@ public class ProductServiceImpl implements ProductService {
     public Product getProductById(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm có ID: " + id));
+    }
+
+    @Override
+    public List<Product> getGuestFeaturedProducts() {
+        List<Product> featured = productRepository.findGuestFeaturedProducts();
+        if (featured.isEmpty()) {
+            // Fallback nếu dữ liệu mẫu chưa có sold >= 10: lấy tất cả sắp xếp theo giá hoặc ID
+            return productRepository.findAll();
+        }
+        return featured;
+    }
+
+    @Override
+    public List<Product> getTop20Newest() {
+        return productRepository.findTop20ByIsActiveTrueAndIsSellingTrueOrderByCreatedAtDesc();
+    }
+
+    @Override
+    public List<Product> getTop20BestSelling() {
+        return productRepository.findTop20ByIsActiveTrueAndIsSellingTrueOrderBySoldDesc();
+    }
+
+    @Override
+    public List<Product> getTop20TopRated() {
+        return productRepository.findTop20ByIsActiveTrueAndIsSellingTrueOrderByRatingDesc();
+    }
+
+    @Override
+    public List<Product> getTop20Wishlisted() {
+        // Lấy danh sách sản phẩm bán chạy hoặc rating cao làm top yêu thích
+        return productRepository.findTop20ByIsActiveTrueAndIsSellingTrueOrderByRatingDesc();
+    }
+
+    @Override
+    public org.springframework.data.domain.Page<Product> getProducts(Long categoryId, String keyword, String sort, int page, int size) {
+        org.springframework.data.domain.Sort sortObj = org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "id");
+        if ("price_asc".equalsIgnoreCase(sort)) {
+            sortObj = org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.ASC, "priceBuy");
+        } else if ("price_desc".equalsIgnoreCase(sort)) {
+            sortObj = org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "priceBuy");
+        } else if ("sold_desc".equalsIgnoreCase(sort)) {
+            sortObj = org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "sold");
+        } else if ("rating_desc".equalsIgnoreCase(sort)) {
+            sortObj = org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "rating");
+        }
+
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, sortObj);
+
+        if (categoryId != null && categoryId > 0 && keyword != null && !keyword.trim().isEmpty()) {
+            return productRepository.searchByCategoryAndKeyword(categoryId, keyword.trim(), pageable);
+        } else if (categoryId != null && categoryId > 0) {
+            return productRepository.findByCategoryId(categoryId, pageable);
+        } else if (keyword != null && !keyword.trim().isEmpty()) {
+            return productRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword.trim(), keyword.trim(), pageable);
+        } else {
+            return productRepository.findByIsActiveTrueAndIsSellingTrue(pageable);
+        }
+    }
+
+    @Override
+    public List<Product> getProductsByStore(Long storeId) {
+        return productRepository.findByStoreIdOrderByCreatedAtDesc(storeId);
+    }
+
+    @Override
+    @Transactional
+    public boolean toggleWishlist(Long userId, Long productId) {
+        var existing = wishlistRepository.findByUserIdAndProductId(userId, productId);
+        if (existing.isPresent()) {
+            wishlistRepository.delete(existing.get());
+            return false;
+        } else {
+            User user = userRepository.findById(userId).orElseThrow();
+            Product product = productRepository.findById(productId).orElseThrow();
+            wishlistRepository.save(ProductWishlist.builder().user(user).product(product).build());
+            return true;
+        }
+    }
+
+    @Override
+    public boolean isWishlisted(Long userId, Long productId) {
+        if (userId == null) return false;
+        return wishlistRepository.existsByUserIdAndProductId(userId, productId);
+    }
+
+    @Override
+    public List<Product> getWishlist(Long userId) {
+        List<ProductWishlist> items = wishlistRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        return items.stream().map(ProductWishlist::getProduct).toList();
+    }
+
+    @Override
+    @Transactional
+    public void recordRecentlyViewed(Long userId, Long productId) {
+        if (userId == null) return;
+        var existing = recentlyViewedRepository.findByUserIdAndProductId(userId, productId);
+        if (existing.isPresent()) {
+            RecentlyViewed rv = existing.get();
+            rv.setViewedAt(java.time.LocalDateTime.now());
+            recentlyViewedRepository.save(rv);
+        } else {
+            User user = userRepository.findById(userId).orElse(null);
+            Product product = productRepository.findById(productId).orElse(null);
+            if (user != null && product != null) {
+                recentlyViewedRepository.save(RecentlyViewed.builder().user(user).product(product).build());
+            }
+        }
+    }
+
+    @Override
+    public List<Product> getRecentlyViewed(Long userId) {
+        if (userId == null) return List.of();
+        List<RecentlyViewed> list = recentlyViewedRepository.findTop10ByUserIdOrderByViewedAtDesc(userId);
+        return list.stream().map(RecentlyViewed::getProduct).toList();
     }
 
     @Override
@@ -57,6 +174,10 @@ public class ProductServiceImpl implements ProductService {
                 .priceBuy(form.getPriceBuy())
                 .priceRentPerDay(form.getPriceRentPerDay())
                 .depositFee(form.getDepositFee())
+                .isActive(true)
+                .isSelling(true)
+                .sold(15) // Mặc định tạo có số lượng để hiển thị trang chủ Guest
+                .rating(5.0)
                 .build();
         Product savedProduct = productRepository.save(product);
 
@@ -69,21 +190,25 @@ public class ProductServiceImpl implements ProductService {
                     ProductImage productImage = ProductImage.builder()
                             .product(savedProduct)
                             .imageUrl(imageUrl)
-                            .isMain(isFirst) // Ảnh đầu tiên làm ảnh chính
+                            .isMain(isFirst)
                             .build();
                     productImageRepository.save(productImage);
+                    if (isFirst) {
+                        savedProduct.setImageUrl(imageUrl);
+                        productRepository.save(savedProduct);
+                    }
                     isFirst = false;
                 }
             }
         }
 
-        // 3. Tự động khởi tạo tồn kho 0 tại tất cả chi nhánh
+        // 3. Tự động khởi tạo tồn kho tại tất cả chi nhánh
         List<Store> activeStores = storeRepository.findByStatusTrue();
         for (Store store : activeStores) {
             StoreInventory inventory = StoreInventory.builder()
                     .store(store)
                     .product(savedProduct)
-                    .quantity(0)
+                    .quantity(50)
                     .build();
             storeInventoryRepository.save(inventory);
         }

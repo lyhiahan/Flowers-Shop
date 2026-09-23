@@ -6,4 +6,7 @@ public interface AuthService {
     void registerCustomer(RegisterRequest request);
     boolean verifyOtp(String email, String otpCode);
     void resendOtp(String email);
+    void forgotPassword(String email);
+    boolean verifyForgotPasswordOtp(String email, String otpCode);
+    void resetPassword(String email, String otpCode, String newPassword);
 }

@@ -38,6 +38,21 @@ public class CartController {
             redirectAttributes.addFlashAttribute("successMessage", "Đã thêm sản phẩm vào giỏ hàng thành công!");
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            return "redirect:/";
+        }
+        return "redirect:/cart";
+    }
+
+    @PostMapping("/update-quantity/{id}")
+    public String handleUpdateQuantity(Principal principal,
+                                       @PathVariable("id") Long id,
+                                       @RequestParam("quantity") Integer quantity,
+                                       RedirectAttributes redirectAttributes) {
+        try {
+            cartService.updateQuantity(principal.getName(), id, quantity);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật số lượng thành công!");
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
         return "redirect:/cart";
     }

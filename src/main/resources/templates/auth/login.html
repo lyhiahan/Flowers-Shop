@@ -2,41 +2,97 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Đăng Nhập - Rental Shop</title>
+    <title>Đăng Nhập - Bloom Flower Chain</title>
+    <!-- Google Fonts & Bootstrap 5 & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --flower-primary: #e11d48;
+            --flower-soft-pink: #fff1f2;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #fff1f2 0%, #fef2f2 50%, #fdf2f8 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        .font-serif {
+            font-family: 'Playfair Display', Georgia, serif;
+        }
+        .login-card {
+            border: 1px solid #ffe4e6;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px -5px rgba(225, 29, 72, 0.1), 0 8px 10px -6px rgba(225, 29, 72, 0.1);
+        }
+        .demo-pill {
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.78rem;
+        }
+        .demo-pill:hover {
+            transform: scale(1.03);
+        }
+    </style>
 </head>
-<body class="bg-light">
+<body>
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-5">
-            <div class="card shadow-sm border-0">
+            <div class="card login-card bg-white p-2">
                 <div class="card-body p-4">
                     <div class="text-center mb-4">
-                        <h3 class="fw-bold">🏕️ RENTAL SHOP</h3>
-                        <p class="text-muted">Đăng nhập tài khoản của bạn</p>
+                        <div class="fs-1 mb-2">🌸</div>
+                        <h3 class="font-serif fw-bold text-dark mb-1">BLOOM FLOWER</h3>
+                        <p class="text-muted small">Hệ Thống Chuỗi Cửa Hàng Hoa Tươi Toàn Quốc</p>
                     </div>
 
-                    <div th:if="${errorMessage}" class="alert alert-danger py-2 small" th:text="${errorMessage}"></div>
-                    <div th:if="${successMessage}" class="alert alert-success py-2 small" th:text="${successMessage}"></div>
+                    <div th:if="${errorMessage}" class="alert alert-danger py-2 small rounded-3" th:text="${errorMessage}"></div>
+                    <div th:if="${successMessage}" class="alert alert-success py-2 small rounded-3" th:text="${successMessage}"></div>
 
                     <form th:action="@{/perform_login}" method="post">
                         <div class="mb-3">
-                            <label class="form-label">Tên đăng nhập</label>
-                            <input type="text" name="username" class="form-control" required autofocus placeholder="Nhập username">
+                            <label class="form-label small fw-semibold text-secondary">Tên đăng nhập</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-person"></i></span>
+                                <input type="text" id="usernameInput" name="username" class="form-control border-start-0 ps-0" required autofocus placeholder="Nhập username">
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Mật khẩu</label>
-                            <input type="password" name="password" class="form-control" required placeholder="Nhập mật khẩu">
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label small fw-semibold text-secondary mb-0">Mật khẩu</label>
+                                <a th:href="@{/forgot-password}" class="text-danger small text-decoration-none">Quên mật khẩu?</a>
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-lock"></i></span>
+                                <input type="password" id="passwordInput" name="password" class="form-control border-start-0 ps-0" required placeholder="Nhập mật khẩu">
+                            </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100 py-2 mb-3">Đăng Nhập</button>
+                        <button type="submit" class="btn btn-danger w-100 py-3 fw-bold rounded-pill shadow-sm mb-3">
+                            🌸 Đăng Nhập
+                        </button>
                     </form>
 
+                    <!-- Tài khoản mẫu để test nhanh -->
+                    <div class="p-3 bg-light rounded-3 border mb-3">
+                        <div class="text-muted small fw-semibold mb-2">⚡ Chọn nhanh tài khoản demo (Pass: 123456):</div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="badge bg-dark demo-pill p-2" onclick="fillCreds('admin', '123456')">👑 Admin (Quản Trị Sàn)</span>
+                            <span class="badge bg-primary demo-pill p-2" onclick="fillCreds('manager_q1', '123456')">🏢 Manager (Quản Lý Q1)</span>
+                            <span class="badge bg-success demo-pill p-2" onclick="fillCreds('vendor_flower', '123456')">🏪 Vendor (Chủ Shop Hoa)</span>
+                            <span class="badge bg-warning text-dark demo-pill p-2" onclick="fillCreds('shipper_nhanh', '123456')">🛵 Shipper (Giao Hàng)</span>
+                            <span class="badge bg-danger demo-pill p-2" onclick="fillCreds('khachhang', '123456')">🛍️ Khách Hàng (User)</span>
+                        </div>
+                    </div>
+
                     <div class="text-center text-muted small">
-                        Chưa có tài khoản? <a th:href="@{/register}" class="text-decoration-none">Đăng ký ngay</a>
+                        Chưa có tài khoản? <a th:href="@{/register}" class="text-danger fw-semibold text-decoration-none">Đăng ký ngay</a>
                         <div class="mt-2">
-                            <a th:href="@{/}" class="text-secondary text-decoration-none">← Quay lại trang chủ</a>
+                            <a th:href="@{/}" class="text-secondary text-decoration-none">← Quay lại trang chủ hoa tươi</a>
                         </div>
                     </div>
                 </div>
@@ -44,5 +100,12 @@
         </div>
     </div>
 </div>
+
+<script>
+    function fillCreds(u, p) {
+        document.getElementById('usernameInput').value = u;
+        document.getElementById('passwordInput').value = p;
+    }
+</script>
 </body>
 </html>

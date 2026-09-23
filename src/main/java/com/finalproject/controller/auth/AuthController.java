@@ -102,4 +102,46 @@ public class AuthController {
         }
         return "redirect:/verify-otp?email=" + email;
     }
+
+    @GetMapping("/forgot-password")
+    public String showForgotPasswordForm() {
+        return "auth/forgot-password";
+    }
+
+    @PostMapping("/forgot-password")
+    public String handleForgotPassword(@RequestParam("email") String email,
+                                       RedirectAttributes redirectAttributes,
+                                       Model model) {
+        try {
+            authService.forgotPassword(email);
+            redirectAttributes.addFlashAttribute("successMessage", "Mã OTP đặt lại mật khẩu đã được gửi đến email của bạn!");
+            return "redirect:/reset-password?email=" + email;
+        } catch (Exception ex) {
+            model.addAttribute("errorMessage", ex.getMessage());
+            return "auth/forgot-password";
+        }
+    }
+
+    @GetMapping("/reset-password")
+    public String showResetPasswordForm(@RequestParam("email") String email, Model model) {
+        model.addAttribute("email", email);
+        return "auth/reset-password";
+    }
+
+    @PostMapping("/reset-password")
+    public String handleResetPassword(@RequestParam("email") String email,
+                                      @RequestParam("otpCode") String otpCode,
+                                      @RequestParam("newPassword") String newPassword,
+                                      RedirectAttributes redirectAttributes,
+                                      Model model) {
+        try {
+            authService.resetPassword(email, otpCode, newPassword);
+            redirectAttributes.addFlashAttribute("successMessage", "Đặt lại mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.");
+            return "redirect:/login";
+        } catch (Exception ex) {
+            model.addAttribute("email", email);
+            model.addAttribute("errorMessage", ex.getMessage());
+            return "auth/reset-password";
+        }
+    }
 }

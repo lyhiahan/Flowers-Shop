@@ -1,6 +1,8 @@
 package com.finalproject.repository;
 
 import com.finalproject.entity.Product;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,4 +16,34 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("SELECT p FROM Product p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Product> searchByName(@Param("keyword") String keyword);
+
+    // Phân trang theo danh mục
+    Page<Product> findByCategoryId(Long categoryId, Pageable pageable);
+
+    // Phân trang tìm kiếm theo từ khóa (tên hoặc mô tả)
+    Page<Product> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String name, String desc, Pageable pageable);
+
+    // Phân trang kết hợp cả danh mục và từ khóa
+    @Query("SELECT p FROM Product p WHERE p.category.id = :categoryId AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Product> searchByCategoryAndKeyword(@Param("categoryId") Long categoryId, @Param("keyword") String keyword, Pageable pageable);
+
+    // Guest: Sản phẩm có số lượng bán trên 10, sắp xếp giảm dần
+    @Query("SELECT p FROM Product p WHERE p.isActive = true AND p.isSelling = true AND p.sold >= 10 ORDER BY p.sold DESC")
+    List<Product> findGuestFeaturedProducts();
+
+    // Top 20 Mới nhất
+    List<Product> findTop20ByIsActiveTrueAndIsSellingTrueOrderByCreatedAtDesc();
+
+    // Top 20 Bán chạy nhất
+    List<Product> findTop20ByIsActiveTrueAndIsSellingTrueOrderBySoldDesc();
+
+    // Top 20 Đánh giá cao nhất
+    List<Product> findTop20ByIsActiveTrueAndIsSellingTrueOrderByRatingDesc();
+
+    // Sản phẩm của cửa hàng
+    List<Product> findByStoreIdOrderByCreatedAtDesc(Long storeId);
+    Page<Product> findByStoreId(Long storeId, Pageable pageable);
+
+    // Tìm kiếm toàn sàn phân trang
+    Page<Product> findByIsActiveTrueAndIsSellingTrue(Pageable pageable);
 }

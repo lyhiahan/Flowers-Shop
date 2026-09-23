@@ -19,6 +19,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
+    private final CustomAuthenticationSuccessHandler successHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -42,17 +43,19 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/manager/**").hasRole("MANAGER")
-                .requestMatchers("/staff/**").hasRole("STAFF")
-                .requestMatchers("/customer/**", "/cart/**", "/checkout/**").hasRole("CUSTOMER")
-                .requestMatchers("/", "/products/**", "/login", "/register", "/verify-otp", "/resend-otp", "/ws/**", "/css/**", "/js/**", "/images/**").permitAll()
+                .dispatcherTypeMatchers(jakarta.servlet.DispatcherType.FORWARD, jakarta.servlet.DispatcherType.ERROR).permitAll()
+                .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
+                .requestMatchers("/manager", "/manager/**").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers("/vendor", "/vendor/**").hasAnyRole("ADMIN", "MANAGER", "VENDOR")
+                .requestMatchers("/shipper", "/shipper/**").hasRole("SHIPPER")
+                .requestMatchers("/customer/**", "/cart", "/cart/**", "/checkout", "/checkout/**").hasRole("CUSTOMER")
+                .requestMatchers("/", "/products/**", "/product/**", "/login", "/register", "/verify-otp", "/resend-otp", "/forgot-password", "/reset-password", "/api/public/**", "/ws/**", "/css/**", "/js/**", "/images/**", "/error", "/favicon.ico", "/webjars/**").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/perform_login")
-                .defaultSuccessUrl("/", true)
+                .successHandler(successHandler)
                 .failureUrl("/login?error=true")
                 .permitAll()
             )

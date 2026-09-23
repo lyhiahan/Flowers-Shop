@@ -33,6 +33,30 @@ public class User {
 
     private String avatarUrl;
 
+    @Column(length = 500)
+    private String cover;
+
+    @Builder.Default
+    private Integer point = 0;
+
+    @Column(name = "e_wallet", precision = 18, scale = 2)
+    @Builder.Default
+    private java.math.BigDecimal eWallet = java.math.BigDecimal.ZERO;
+
+    @Column(name = "is_email_active", nullable = false)
+    @Builder.Default
+    private Boolean isEmailActive = true;
+
+    @Column(name = "otp_code", length = 10)
+    private String otpCode;
+
+    @Column(name = "otp_expiry")
+    private java.time.LocalDateTime otpExpiry;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_level_id")
+    private UserLevel userLevel;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Role role;

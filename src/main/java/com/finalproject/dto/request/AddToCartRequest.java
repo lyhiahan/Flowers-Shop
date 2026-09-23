@@ -25,4 +25,9 @@ public class AddToCartRequest {
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate rentEndDate;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private LocalDate deliveryDate;
+
+    private String greetingMessage;
 }

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản Lý Đơn Đặt Hoa - Kênh Cửa Hàng</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .font-serif { font-family: 'Playfair Display', Georgia, serif; }
+        .sidebar { background: #1e293b; min-height: 100vh; color: #e2e8f0; }
+        .sidebar a { color: #94a3b8; text-decoration: none; padding: 10px 16px; border-radius: 8px; display: flex; align-items: center; gap: 10px; font-weight: 500; }
+        .sidebar a:hover, .sidebar a.active { background: #334155; color: #38bdf8; }
+        .badge-status { font-size: 0.8rem; padding: 6px 12px; border-radius: 20px; }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 p-3 sidebar">
+            <div class="d-flex align-items-center gap-2 mb-4 px-2">
+                <span class="fs-4">💐</span>
+                <div>
+                    <h6 class="font-serif fw-bold text-white mb-0">BLOOM STORE</h6>
+                    <small class="text-secondary" th:text="${store != null ? store.name : 'Chi nhánh'}"></small>
+                </div>
+            </div>
+            <nav class="d-flex flex-column gap-1">
+                <a th:href="@{/manager/orders}" class="active"><i class="bi bi-bag-check-fill"></i> Quản Lý Đơn Hàng</a>
+                <a th:href="@{/manager/products}"><i class="bi bi-flower1"></i> Kho Mẫu Hoa</a>
+                <a th:href="@{/manager/wallet}"><i class="bi bi-wallet2"></i> Ví Cửa Hàng & Rút Tiền</a>
+                <a th:href="@{/manager/vouchers}"><i class="bi bi-ticket-perforated-fill"></i> Khuyến Mãi Shop</a>
+                <a th:href="@{/manager/analytics}"><i class="bi bi-graph-up-arrow"></i> Báo Cáo Doanh Thu</a>
+                <a th:href="@{/manager/stores}"><i class="bi bi-shop"></i> Thông Tin Chi Nhánh</a>
+                <hr class="border-secondary my-2">
+                <a th:href="@{/}"><i class="bi bi-house-door"></i> Xem Website Khách</a>
+                <a th:href="@{/logout}" class="text-danger"><i class="bi bi-box-arrow-right"></i> Đăng Xuất</a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10 p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="font-serif fw-bold mb-1">📦 Danh Sách Đơn Đặt Hoa & Dịch Vụ</h3>
+                    <p class="text-muted small mb-0">Tiếp nhận đơn, cập nhật tiến độ cắm hoa và điều phối nhân viên giao hàng</p>
+                </div>
+            </div>
+
+            <!-- Flash alerts -->
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small" role="alert">
+                <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show py-2 small" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- Filter Status Tabs -->
+            <div class="d-flex flex-wrap gap-2 mb-4 bg-white p-3 rounded-3 shadow-sm border">
+                <a th:href="@{/manager/orders(status='ALL')}" class="btn btn-sm rounded-pill px-3"
+                   th:classappend="${currentStatus == 'ALL' or currentStatus == null} ? 'btn-primary' : 'btn-outline-secondary'">Tất Cả Đơn</a>
+                <a th:href="@{/manager/orders(status='PENDING')}" class="btn btn-sm rounded-pill px-3"
+                   th:classappend="${currentStatus == 'PENDING'} ? 'btn-secondary' : 'btn-outline-secondary'">⏳ Chờ Xác Nhận</a>
+                <a th:href="@{/manager/orders(status='CONFIRMED')}" class="btn btn-sm rounded-pill px-3"
+                   th:classappend="${currentStatus == 'CONFIRMED'} ? 'btn-info text-dark' : 'btn-outline-secondary'">✅ Đã Nhận</a>
+                <a th:href="@{/manager/orders(status='PREPARING')}" class="btn btn-sm rounded-pill px-3"
+                   th:classappend="${currentStatus == 'PREPARING'} ? 'btn-danger' : 'btn-outline-secondary'">🌸 Đang Cắm Hoa</a>
+                <a th:href="@{/manager/orders(status='DELIVERING')}" class="btn btn-sm rounded-pill px-3"
+                   th:classappend="${currentStatus == 'DELIVERING'} ? 'btn-warning text-dark' : 'btn-outline-secondary'">🚚 Đang Giao</a>
+                <a th:href="@{/manager/orders(status='DELIVERED')}" class="btn btn-sm rounded-pill px-3"
+                   th:classappend="${currentStatus == 'DELIVERED'} ? 'btn-success' : 'btn-outline-secondary'">📦 Đã Giao Tới</a>
+                <a th:href="@{/manager/orders(status='COMPLETED')}" class="btn btn-sm rounded-pill px-3"
+                   th:classappend="${currentStatus == 'COMPLETED'} ? 'btn-success' : 'btn-outline-secondary'">🎉 Hoàn Thành</a>
+                <a th:href="@{/manager/orders(status='CANCELLED')}" class="btn btn-sm rounded-pill px-3"
+                   th:classappend="${currentStatus == 'CANCELLED'} ? 'btn-dark' : 'btn-outline-secondary'">❌ Đã Hủy</a>
+            </div>
+
+            <!-- Orders Table -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light small text-secondary">
+                            <tr>
+                                <th class="ps-3">Mã Đơn</th>
+                                <th>Khách Hàng / Nhận</th>
+                                <th>Chi Tiết Hoa</th>
+                                <th>Tổng Tiền</th>
+                                <th>Hẹn Giao</th>
+                                <th>Trạng Thái</th>
+                                <th class="text-end pe-3">Thao Tác</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:if="${#lists.isEmpty(orders)}">
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <div class="fs-2 mb-2">🌸</div>
+                                    Không có đơn đặt hoa nào trong danh mục này.
+                                </td>
+                            </tr>
+                            <tr th:each="o : ${orders}">
+                                <td class="ps-3">
+                                    <strong class="text-primary" th:text="'#' + ${o.id}"></strong>
+                                    <div class="small text-muted" th:text="${#temporals.format(o.createdAt, 'dd/MM HH:mm')}"></div>
+                                </td>
+                                <td>
+                                    <strong th:text="${o.recipientName != null ? o.recipientName : o.user.fullName}"></strong>
+                                    <div class="small text-muted"><i class="bi bi-telephone me-1"></i><span th:text="${o.recipientPhone != null ? o.recipientPhone : o.user.phone}"></span></div>
+                                    <div class="small text-muted text-truncate" style="max-width: 220px;" th:text="${o.recipientAddress != null ? o.recipientAddress : o.user.address}"></div>
+                                </td>
+                                <td>
+                                    <div th:each="d : ${o.orderDetails}" class="small">
+                                        • <span class="fw-semibold" th:text="${d.product.name}"></span>
+                                        <span class="text-muted">(x<span th:text="${d.quantity}"></span>)</span>
+                                    </div>
+                                    <div th:if="${o.greetingMessage != null and !o.greetingMessage.isEmpty()}" class="small text-danger fst-italic mt-1">
+                                        <i class="bi bi-chat-quote me-1"></i>"<span th:text="${o.greetingMessage}"></span>"
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong class="text-danger" th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                                    <div class="small text-muted" th:text="${o.paymentMethod}"></div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border" th:text="${o.deliveryDate != null ? o.deliveryDate : 'Hôm nay'}"></span>
+                                    <div th:if="${o.shipper != null}" class="small text-success mt-1">
+                                        <i class="bi bi-bicycle me-1"></i><span th:text="${o.shipper.fullName}"></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span th:if="${o.status.name() == 'PENDING'}" class="badge bg-secondary badge-status">Chờ Xác Nhận</span>
+                                    <span th:if="${o.status.name() == 'CONFIRMED'}" class="badge bg-info text-dark badge-status">Đã Tiếp Nhận</span>
+                                    <span th:if="${o.status.name() == 'PREPARING'}" class="badge bg-danger badge-status">Đang Cắm Hoa</span>
+                                    <span th:if="${o.status.name() == 'DELIVERING'}" class="badge bg-warning text-dark badge-status">Đang Giao</span>
+                                    <span th:if="${o.status.name() == 'DELIVERED'}" class="badge bg-success badge-status">Đã Giao Tới</span>
+                                    <span th:if="${o.status.name() == 'COMPLETED'}" class="badge bg-success badge-status">Hoàn Thành</span>
+                                    <span th:if="${o.status.name() == 'CANCELLED'}" class="badge bg-dark badge-status">Đã Hủy</span>
+                                </td>
+                                <td class="text-end pe-3">
+                                    <div class="btn-group btn-group-sm">
+                                        <!-- Tiếp nhận đơn -->
+                                        <form th:if="${o.status.name() == 'PENDING'}" th:action="@{'/manager/orders/update-status/' + ${o.id}}" method="post" class="d-inline">
+                                            <input type="hidden" name="status" value="CONFIRMED">
+                                            <button type="submit" class="btn btn-outline-info btn-sm">Nhận Đơn</button>
+                                        </form>
+
+                                        <!-- Cắm hoa -->
+                                        <form th:if="${o.status.name() == 'CONFIRMED'}" th:action="@{'/manager/orders/update-status/' + ${o.id}}" method="post" class="d-inline">
+                                            <input type="hidden" name="status" value="PREPARING">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">Cắm Hoa</button>
+                                        </form>
+
+                                        <!-- Điều phối Shipper -->
+                                        <button th:if="${o.status.name() == 'PREPARING'}" class="btn btn-warning btn-sm"
+                                                data-bs-toggle="modal" th:data-bs-target="'#assignModal_' + ${o.id}">
+                                            Giao Shipper
+                                        </button>
+
+                                        <!-- Hoàn tất đơn -->
+                                        <form th:if="${o.status.name() == 'DELIVERED'}" th:action="@{'/manager/orders/update-status/' + ${o.id}}" method="post" class="d-inline">
+                                            <input type="hidden" name="status" value="COMPLETED">
+                                            <button type="submit" class="btn btn-success btn-sm">Hoàn Tất</button>
+                                        </form>
+                                    </div>
+
+                                    <!-- Modal chọn Shipper -->
+                                    <div class="modal fade text-start" th:id="'assignModal_' + ${o.id}" tabindex="-1">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <form th:action="@{'/manager/orders/assign-shipper/' + ${o.id}}" method="post">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title font-serif">Điều Phối Shipper Đơn #<span th:text="${o.id}"></span></h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <label class="form-label small fw-semibold">Chọn tài xế giao hoa:</label>
+                                                        <select name="shipperId" class="form-select" required>
+                                                            <option value="">-- Chọn nhân viên giao hàng --</option>
+                                                            <option th:each="s : ${shippers}" th:value="${s.id}" th:text="${s.fullName} + ' (' + ${s.phone} + ')'"></option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                                                        <button type="submit" class="btn btn-primary btn-sm">Xác Nhận & Giao Hàng</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

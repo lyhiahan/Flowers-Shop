@@ -112,6 +112,51 @@ public class AuthServiceImpl implements AuthService {
         createAndSendOtp(user, OtpType.ACTIVATE_ACCOUNT);
     }
 
+    @Override
+    @Transactional
+    public void forgotPassword(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản với email: " + email));
+
+        createAndSendOtp(user, OtpType.RESET_PASSWORD);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean verifyForgotPasswordOtp(String email, String otpCode) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với email: " + email));
+
+        OtpVerification otp = otpRepository
+                .findTopByUserIdAndCodeAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
+                        user.getId(), otpCode, OtpType.RESET_PASSWORD)
+                .orElse(null);
+
+        return otp != null && !otp.getExpiredAt().isBefore(LocalDateTime.now());
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(String email, String otpCode, String newPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản với email: " + email));
+
+        OtpVerification otp = otpRepository
+                .findTopByUserIdAndCodeAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
+                        user.getId(), otpCode, OtpType.RESET_PASSWORD)
+                .orElseThrow(() -> new IllegalArgumentException("Mã OTP không hợp lệ!"));
+
+        if (otp.getExpiredAt().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Mã OTP đã hết hạn! Vui lòng yêu cầu mã mới.");
+        }
+
+        otp.setIsUsed(true);
+        otpRepository.save(otp);
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
     private void createAndSendOtp(User user, OtpType type) {
         String code = OtpUtil.generateOtp();
 

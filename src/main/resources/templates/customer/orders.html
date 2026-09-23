@@ -1,107 +1,244 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Đơn Hàng Của Tôi - Rental Shop</title>
+    <title>Lịch Sử Đơn Đặt Hoa - Bloom Flower Chain</title>
+    <!-- Google Fonts & Bootstrap 5 & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --flower-primary: #e11d48;
+            --flower-soft-pink: #fff1f2;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #fcf8f8;
+            color: #1f2937;
+        }
+        .font-serif {
+            font-family: 'Playfair Display', Georgia, serif;
+        }
+        .flower-card {
+            border: 1px solid #ffe4e6;
+            border-radius: 16px;
+        }
+        .greeting-box {
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+            border: 1px dashed #f97316;
+            border-radius: 12px;
+            padding: 12px 16px;
+        }
+    </style>
 </head>
-<body class="bg-light">
-<div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2>📦 Lịch Sử Đơn Hàng</h2>
-            <p class="text-muted mb-0">Theo dõi trạng thái các đơn hàng Mua và Thuê của bạn</p>
-        </div>
-        <a th:href="@{/}" class="btn btn-outline-secondary">← Quay về Trang chủ</a>
-    </div>
+<body>
 
-    <div th:if="${successMessage}" class="alert alert-success py-2" th:text="${successMessage}"></div>
-    <div th:if="${errorMessage}" class="alert alert-danger py-2" th:text="${errorMessage}"></div>
-
-    <div th:if="${#lists.isEmpty(orders)}" class="card shadow-sm border-0 text-center p-5">
-        <div class="mb-3 fs-1 text-muted">📦</div>
-        <h4 class="text-muted">Bạn chưa có đơn hàng nào</h4>
-        <p class="text-muted">Các đơn đặt mua và thuê của bạn sẽ xuất hiện tại đây sau khi bạn đặt hàng.</p>
-        <div>
-            <a th:href="@{/}" class="btn btn-primary px-4 mt-2">Dạo Cửa Hàng Ngay</a>
-        </div>
-    </div>
-
-    <div th:if="${not #lists.isEmpty(orders)}" class="space-y-4">
-        <div th:each="o : ${orders}" class="card shadow-sm border-0 mb-4">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top shadow-sm" style="background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(8px); border-bottom: 1px solid #ffe4e6;">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/}">
+                <span class="fs-4">🌸</span>
                 <div>
-                    <span class="fw-bold fs-5" th:text="'Đơn Hàng #' + ${o.id}"></span>
-                    <span th:if="${o.orderType.name() == 'BUY'}" class="badge bg-primary ms-2">MUA ĐỨT</span>
-                    <span th:if="${o.orderType.name() == 'RENT'}" class="badge bg-warning text-dark ms-2">THUÊ ĐỒ</span>
-                    <span class="text-muted small ms-3" th:text="${#temporals.format(o.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                    <span class="font-serif fw-bold text-dark fs-5 tracking-wide">BLOOM FLOWER</span>
+                    <span class="badge ms-1 text-uppercase" style="background-color: #fff1f2; color: #e11d48; font-size: 0.65rem;">Chain Store</span>
                 </div>
-                <div>
-                    <span class="badge" th:classappend="${o.status.name() == 'PENDING' ? 'bg-secondary' : 
-                                                        (o.status.name() == 'CONFIRMED' ? 'bg-info text-dark' : 
-                                                        (o.status.name() == 'RENTING' ? 'bg-warning text-dark' : 
-                                                        (o.status.name() == 'OVERDUE' ? 'bg-danger' : 
-                                                        (o.status.name() == 'COMPLETED' ? 'bg-success' : 
-                                                        (o.status.name() == 'RETURNED' ? 'bg-success' : 'bg-dark')))))}"
-                          th:text="${o.status}"></span>
+            </a>
+            <div class="d-flex align-items-center gap-2">
+                <div sec:authorize="isAuthenticated()" class="text-secondary me-2 small">
+                    Xin chào, <strong class="text-danger" sec:authentication="name"></strong>
                 </div>
-            </div>
-
-            <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <small class="text-muted d-block">Chi nhánh xuất kho:</small>
-                        <strong th:text="${o.pickupStore.name}"></strong> - <span class="small text-muted" th:text="${o.pickupStore.address}"></span>
-                    </div>
-                    <div class="col-md-6" th:if="${o.returnStore != null}">
-                        <small class="text-muted d-block">Chi nhánh nhận trả (Trả chéo kho):</small>
-                        <strong th:text="${o.returnStore.name}"></strong> - <span class="small text-muted" th:text="${o.returnStore.address}"></span>
-                    </div>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="table table-sm align-middle mb-0">
-                        <thead class="table-light">
-                        <tr>
-                            <th>Sản phẩm</th>
-                            <th>Số lượng</th>
-                            <th>Đơn giá</th>
-                            <th th:if="${o.orderType.name() == 'RENT'}">Hạn thuê</th>
-                            <th th:if="${o.orderType.name() == 'RENT'}">Tiền cọc</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="d : ${o.orderDetails}">
-                            <td class="fw-bold" th:text="${d.product.name}"></td>
-                            <td th:text="${d.quantity}"></td>
-                            <td th:text="${#numbers.formatDecimal(d.unitPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
-                            <td th:if="${o.orderType.name() == 'RENT'}">
-                                <span th:text="${d.rentStartDate}"></span> → <strong th:text="${d.rentEndDate}"></strong>
-                            </td>
-                            <td th:if="${o.orderType.name() == 'RENT'}" th:text="${#numbers.formatDecimal(d.depositFee, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-3">
-                    <div>
-                        <span class="me-3">Tổng tiền: <strong class="text-primary" th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong></span>
-                        <span class="me-3" th:if="${o.totalDeposit != null and o.totalDeposit > 0}">Tiền cọc: <strong class="text-warning" th:text="${#numbers.formatDecimal(o.totalDeposit, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong></span>
-                        <span th:if="${o.fineAmount != null and o.fineAmount > 0}">Tiền phạt: <strong class="text-danger" th:text="${#numbers.formatDecimal(o.fineAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong></span>
-                    </div>
-                    <div>
-                        <!-- Nút hủy đơn khi đơn còn PENDING -->
-                        <form th:if="${o.status.name() == 'PENDING'}" th:action="@{'/customer/orders/cancel/' + ${o.id}}" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')">
-                                Hủy Đơn Hàng
-                            </button>
-                        </form>
-                    </div>
-                </div>
+                <a th:href="@{/cart}" class="btn btn-sm btn-outline-danger rounded-pill px-3 position-relative">
+                    <i class="bi bi-bag-heart me-1"></i> Giỏ Hàng
+                    <span th:if="${cartItemCount != null and cartItemCount > 0}" class="badge bg-danger rounded-pill ms-1" th:text="${cartItemCount}"></span>
+                </a>
+                <a th:href="@{/customer/orders}" class="btn btn-sm btn-danger rounded-pill px-3 active">
+                    <i class="bi bi-clock-history me-1"></i> Đơn Hoa Của Tôi
+                </a>
+                <a th:href="@{/}" class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                    <i class="bi bi-shop me-1"></i> Cửa Hàng
+                </a>
+                <a th:href="@{/logout}" class="btn btn-sm btn-outline-danger rounded-pill px-2" title="Đăng xuất">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
             </div>
         </div>
+    </nav>
+
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="font-serif fw-bold mb-1 text-dark">📦 Lịch Sử Đơn Đặt Hoa & Dịch Vụ</h3>
+                <p class="text-muted small mb-0">Theo dõi tiến độ thợ cắm hoa, đơn vị vận chuyển và lịch giao hoa</p>
+            </div>
+            <a th:href="@{/}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="bi bi-arrow-left me-1"></i> Tiếp tục xem hoa
+            </a>
+        </div>
+
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small rounded-3" role="alert">
+            <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show py-2 small rounded-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i> <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Khi chưa có đơn hàng -->
+        <div th:if="${#lists.isEmpty(orders)}" class="card flower-card shadow-sm text-center p-5 bg-white my-4">
+            <div class="mb-3 fs-1">📦</div>
+            <h4 class="font-serif text-dark fw-bold">Bạn chưa có đơn đặt hoa nào</h4>
+            <p class="text-muted small">Các đơn hoa tươi và thuê khung sự kiện của bạn sẽ xuất hiện tại đây sau khi đặt hàng.</p>
+            <div>
+                <a th:href="@{/}" class="btn btn-danger rounded-pill px-4 mt-2">Dạo Cửa Hàng Hoa Ngay</a>
+            </div>
+        </div>
+
+        <!-- Danh sách đơn hàng -->
+        <div th:if="${not #lists.isEmpty(orders)}" class="d-flex flex-column gap-4">
+            <div th:each="o : ${orders}" class="card flower-card shadow-sm bg-white overflow-hidden">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 border-bottom">
+                    <div>
+                        <span class="font-serif fw-bold fs-5 text-dark" th:text="'Đơn Hoa #' + ${o.id}"></span>
+                        <span th:if="${o.orderType.name() == 'BUY'}" class="badge bg-danger ms-2">HOA TƯƠI</span>
+                        <span th:if="${o.orderType.name() == 'RENT'}" class="badge bg-warning text-dark ms-2">THUÊ KHUNG SỰ KIỆN</span>
+                        <span class="text-muted small ms-3">
+                            <i class="bi bi-calendar-check me-1"></i><span th:text="${#temporals.format(o.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                        </span>
+                    </div>
+                    <div>
+                        <!-- Status Badges with florist styling -->
+                        <span th:if="${o.status.name() == 'PENDING'}" class="badge bg-secondary px-3 py-2 rounded-pill">
+                            ⏳ Chờ Xác Nhận
+                        </span>
+                        <span th:if="${o.status.name() == 'CONFIRMED'}" class="badge bg-info text-dark px-3 py-2 rounded-pill">
+                            ✅ Đã Tiếp Nhận Đơn
+                        </span>
+                        <span th:if="${o.status.name() == 'PREPARING'}" class="badge px-3 py-2 rounded-pill text-white" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);">
+                            🌸 Đang Cắm Hoa Nghệ Thuật
+                        </span>
+                        <span th:if="${o.status.name() == 'DELIVERING'}" class="badge px-3 py-2 rounded-pill text-white" style="background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);">
+                            🚚 Đang Giao Hoa Tới Người Nhận
+                        </span>
+                        <span th:if="${o.status.name() == 'COMPLETED'}" class="badge bg-success px-3 py-2 rounded-pill">
+                            🎉 Giao Hoa Thành Công
+                        </span>
+                        <span th:if="${o.status.name() == 'RENTING'}" class="badge bg-warning text-dark px-3 py-2 rounded-pill">
+                            🎪 Đang Sử Dụng Khung Cổng Hoa
+                        </span>
+                        <span th:if="${o.status.name() == 'RETURNED'}" class="badge bg-success px-3 py-2 rounded-pill">
+                            📦 Đã Trả Khung (Hoàn Cọc)
+                        </span>
+                        <span th:if="${o.status.name() == 'CANCELLED'}" class="badge bg-dark px-3 py-2 rounded-pill">
+                            ❌ Đã Hủy
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    <!-- Chi nhánh & Thông tin người nhận -->
+                    <div class="row g-3 mb-3 p-3 rounded-3 bg-light border">
+                        <div class="col-md-6">
+                            <small class="text-muted d-block fw-semibold mb-1">
+                                <i class="bi bi-shop text-danger me-1"></i>Chi nhánh chuẩn bị hoa:
+                            </small>
+                            <strong class="text-dark" th:text="${o.pickupStore.name}"></strong>
+                            <div class="small text-muted" th:text="${o.pickupStore.address}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block fw-semibold mb-1">
+                                <i class="bi bi-person-heart text-danger me-1"></i>Thông tin người nhận & Địa chỉ giao:
+                            </small>
+                            <strong class="text-dark" th:text="${o.recipientName != null ? o.recipientName : o.user.fullName}"></strong>
+                            <span class="badge bg-white text-dark border ms-1" th:text="${o.recipientPhone != null ? o.recipientPhone : o.user.phone}"></span>
+                            <div class="small text-muted" th:text="${o.recipientAddress != null ? o.recipientAddress : o.user.address}"></div>
+                            <div th:if="${o.deliveryDate != null}" class="small text-danger fw-bold mt-1">
+                                📅 Ngày hẹn giao hoa: <span th:text="${o.deliveryDate}"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lời chúc thiệp chúc mừng nếu có -->
+                    <div th:if="${o.greetingMessage != null and !o.greetingMessage.isEmpty()}" class="greeting-box mb-3">
+                        <div class="small fw-bold text-danger mb-1">
+                            <i class="bi bi-envelope-paper-heart-fill me-1"></i> Lời chúc in trên thiệp hoa / banner:
+                        </div>
+                        <div class="fst-italic text-dark" th:text="'&quot;' + ${o.greetingMessage} + '&quot;'"></div>
+                    </div>
+
+                    <!-- Bảng chi tiết sản phẩm -->
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead class="table-light small text-muted">
+                            <tr>
+                                <th>Mẫu Hoa / Sản phẩm</th>
+                                <th>Số lượng</th>
+                                <th>Đơn giá</th>
+                                <th th:if="${o.orderType.name() == 'RENT'}">Thời gian thuê</th>
+                                <th th:if="${o.orderType.name() == 'RENT'}">Tiền cọc</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="d : ${o.orderDetails}">
+                                <td class="fw-bold text-dark">
+                                    💐 <span th:text="${d.product.name}"></span>
+                                </td>
+                                <td><span class="badge bg-light text-dark border" th:text="'x ' + ${d.quantity}"></span></td>
+                                <td class="text-danger fw-semibold" th:text="${#numbers.formatDecimal(d.unitPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                                <td th:if="${o.orderType.name() == 'RENT'}">
+                                    <span class="badge bg-info text-dark" th:text="${d.rentStartDate} + ' → ' + ${d.rentEndDate}"></span>
+                                </td>
+                                <td th:if="${o.orderType.name() == 'RENT'}" class="text-warning fw-semibold" th:text="${#numbers.formatDecimal(d.depositFee, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                                <td class="text-end">
+                                    <!-- Nút đánh giá khi đơn hoàn thành -->
+                                    <a th:if="${o.status.name() == 'COMPLETED' or o.status.name() == 'DELIVERED'}" 
+                                       th:href="@{/product/{id}(id=${d.product.id})}" 
+                                       class="btn btn-outline-warning btn-sm rounded-pill px-3 py-1">
+                                        ⭐ Viết Đánh Giá
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Footer tổng tiền & hủy đơn / hoàn tiền -->
+                    <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-3 flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-3">
+                            <div>
+                                <span class="text-muted small">Tổng tiền hoa:</span>
+                                <strong class="text-danger fs-5 ms-1" th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                            </div>
+                            <div th:if="${o.totalDeposit != null and o.totalDeposit > 0}">
+                                <span class="text-muted small">Tiền cọc:</span>
+                                <strong class="text-warning ms-1" th:text="${#numbers.formatDecimal(o.totalDeposit, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                            </div>
+                            <div th:if="${o.fineAmount != null and o.fineAmount > 0}">
+                                <span class="text-muted small">Phụ phí trễ:</span>
+                                <strong class="text-danger ms-1" th:text="${#numbers.formatDecimal(o.fineAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <!-- Nút yêu cầu hoàn tiền nếu đã giao hoặc gặp sự cố -->
+                            <form th:if="${o.status.name() == 'DELIVERED' or o.status.name() == 'COMPLETED'}" th:action="@{'/customer/orders/refund/' + ${o.id}}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="return confirm('Gửi yêu cầu hoàn tiền cho đơn hàng này?')">
+                                    <i class="bi bi-arrow-return-left me-1"></i> Yêu Cầu Hoàn Tiền
+                                </button>
+                            </form>
+                            <!-- Nút hủy đơn khi đơn còn PENDING -->
+                            <form th:if="${o.status.name() == 'PENDING'}" th:action="@{'/customer/orders/cancel/' + ${o.id}}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="return confirm('Bạn có chắc chắn muốn hủy đơn đặt hoa này?')">
+                                    <i class="bi bi-x-circle me-1"></i> Hủy Đơn Hàng
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
