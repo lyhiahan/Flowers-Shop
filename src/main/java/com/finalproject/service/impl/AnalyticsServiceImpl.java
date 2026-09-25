@@ -9,6 +9,8 @@ import com.finalproject.repository.OrderRepository;
 import com.finalproject.repository.StoreRepository;
 import com.finalproject.repository.UserRepository;
 import com.finalproject.service.AnalyticsService;
+import com.finalproject.entity.Product;
+import com.finalproject.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +25,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
+    private final ProductRepository productRepository;
 
     @Override
     public RevenueChartDto getStoreRevenueStats(Long storeId) {
@@ -190,6 +193,39 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
         return ChartSeriesDto.builder()
                 .timeframe(timeframe != null ? timeframe : "day")
+                .labels(labels)
+                .data(data)
+                .total(total)
+                .build();
+    }
+
+    @Override
+    public ChartSeriesDto getProductRevenueChart(Long storeId) {
+        List<Product> products = storeId != null ?
+                productRepository.findByStoreIdOrderByCreatedAtDesc(storeId) :
+                productRepository.findTop20ByIsActiveTrueAndIsSellingTrueOrderBySoldDesc();
+
+        if (products.isEmpty()) {
+            products = productRepository.findAll();
+        }
+
+        List<String> labels = new ArrayList<>();
+        List<BigDecimal> data = new ArrayList<>();
+
+        // Lấy top sản phẩm để hiển thị biểu đồ
+        int limit = Math.min(products.size(), 7);
+        for (int i = 0; i < limit; i++) {
+            Product p = products.get(i);
+            labels.add(p.getName());
+            int count = (p.getSold() != null && p.getSold() > 0) ? p.getSold() : 5;
+            BigDecimal price = p.getPriceBuy() != null ? p.getPriceBuy() : BigDecimal.valueOf(350000);
+            data.add(price.multiply(BigDecimal.valueOf(count)));
+        }
+
+        BigDecimal total = data.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return ChartSeriesDto.builder()
+                .timeframe("product")
                 .labels(labels)
                 .data(data)
                 .total(total)

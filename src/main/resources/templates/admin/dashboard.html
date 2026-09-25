@@ -235,8 +235,8 @@
                     <span class="badge bg-danger" style="font-size: 0.68rem;">ADMIN TOÀN QUYỀN</span>
                 </div>
             </div>
-            <a th:href="@{/logout}" class="btn btn-outline-danger btn-sm w-100 mt-3 d-flex align-items-center justify-content-center gap-2">
-                <i class="bi bi-box-arrow-right"></i> Đăng Xuất
+            <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#signOutModal" class="btn btn-outline-danger btn-sm w-100 mt-3 d-flex align-items-center justify-content-center gap-2">
+                <i class="bi bi-box-arrow-right"></i> Sign out (Đăng Xuất)
             </a>
         </div>
     </aside>
@@ -656,5 +656,29 @@
     }
     /*]]>*/
 </script>
+    <!-- Modal Xác Nhận Đăng Xuất (Sign Out Modal) -->
+    <div class="modal fade" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title font-serif fw-bold text-dark" id="signOutModalLabel">
+                        🌸 Xác Nhận Đăng Xuất (Sign Out)
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-3 text-secondary">
+                    Bạn có chắc chắn muốn đăng xuất khỏi tài khoản Quản trị viên?
+                </div>
+                <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancelSignOut">
+                        Cancel (Hủy)
+                    </button>
+                    <a th:href="@{/logout}" class="btn btn-danger rounded-pill px-4 fw-semibold" id="btnConfirmSignOut">
+                        Confirm (Xác Nhận)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

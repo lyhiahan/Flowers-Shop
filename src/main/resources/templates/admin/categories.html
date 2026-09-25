@@ -89,11 +89,42 @@
                             <td><strong class="text-dark" th:text="${c.name}"></strong></td>
                             <td class="small text-muted" th:text="${c.description}"></td>
                             <td class="text-end pe-3">
+                                <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 me-1" data-bs-toggle="modal" th:data-bs-target="'#editCatModal_' + ${c.id}">
+                                    <i class="bi bi-pencil"></i> Sửa
+                                </button>
                                 <form th:action="@{'/admin/categories/delete/' + ${c.id}}" method="post" class="d-inline">
                                     <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="return confirm('Bạn có chắc muốn xóa danh mục này?')">
                                         <i class="bi bi-trash"></i> Xóa
                                     </button>
                                 </form>
+
+                                <!-- Modal Sửa Danh Mục -->
+                                <div class="modal fade text-start" th:id="'editCatModal_' + ${c.id}" tabindex="-1">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <form th:action="@{'/admin/categories/update/' + ${c.id}}" method="post">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title font-serif">🏷️ Chỉnh Sửa Danh Mục Hoa</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <label class="form-label small fw-semibold">Tên danh mục hoa:</label>
+                                                        <input type="text" name="name" class="form-control" th:value="${c.name}" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small fw-semibold">Mô tả ngắn:</label>
+                                                        <textarea name="description" rows="3" class="form-control" th:text="${c.description}"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                                                    <button type="submit" class="btn btn-primary btn-sm">Lưu Thay Đổi</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         </tbody>

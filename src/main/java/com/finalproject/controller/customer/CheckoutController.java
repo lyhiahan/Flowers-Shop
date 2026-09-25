@@ -15,9 +15,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Controller
 @RequestMapping("/checkout")
@@ -27,6 +29,7 @@ public class CheckoutController {
     private final CartService cartService;
     private final OrderService orderService;
     private final UserRepository userRepository;
+    private final com.finalproject.repository.StoreRepository storeRepository;
     private final com.finalproject.service.UserService userService;
     private final com.finalproject.service.VoucherService voucherService;
 
@@ -76,6 +79,7 @@ public class CheckoutController {
         model.addAttribute("customer", customer);
         model.addAttribute("addresses", customer != null ? userService.getUserAddresses(customer.getId()) : List.of());
         model.addAttribute("vouchers", voucherService.getAvailableVouchers(null));
+        model.addAttribute("stores", storeRepository.findByStatusTrue());
         model.addAttribute("checkoutItems", checkoutItems);
         model.addAttribute("subtotalRentAndBuy", subtotalRentAndBuy);
         model.addAttribute("totalDeposit", totalDeposit);
@@ -95,11 +99,14 @@ public class CheckoutController {
             @RequestParam(value = "recipientAddress", required = false) String recipientAddress,
             @RequestParam(value = "greetingMessage", required = false) String greetingMessage,
             @RequestParam(value = "voucherCode", required = false) String voucherCode,
+            @RequestParam(value = "deliveryDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate deliveryDate,
+            @RequestParam(value = "shippingMethod", required = false, defaultValue = "DELIVERY") String shippingMethod,
+            @RequestParam(value = "pickupStoreId", required = false) Long pickupStoreId,
             RedirectAttributes redirectAttributes) {
 
         try {
-            orderService.checkout(principal.getName(), selectedItemIds, paymentMethod, recipientName, recipientPhone, recipientAddress, greetingMessage, voucherCode);
-            redirectAttributes.addFlashAttribute("successMessage", "🌸 Đặt hoa thành công! Đơn hàng của bạn đã được chuyển đến bộ phận cắm hoa và chuẩn bị giao.");
+            orderService.checkout(principal.getName(), selectedItemIds, paymentMethod, recipientName, recipientPhone, recipientAddress, greetingMessage, voucherCode, deliveryDate, shippingMethod, pickupStoreId);
+            redirectAttributes.addFlashAttribute("successMessage", "🌸 Đặt hoa thành công! Đơn hàng của bạn đã được chuyển đến chi nhánh cắm hoa để chuẩn bị.");
             return "redirect:/customer/orders";
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());

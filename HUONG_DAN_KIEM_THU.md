@@ -2,7 +2,7 @@
 ## Chuỗi Cửa Hàng Hoa Tươi & Điện Hoa Sài Gòn (Bloom Flower Chain)
 ### *"Nở Trọn Yêu Thương, Thắm Trọn Khoảnh Khắc"*
 
-Tài liệu này hướng dẫn chi tiết từng bước (Step-by-Step) cách kiểm tra và nghiệm thu toàn bộ các chức năng của hệ thống trên giao diện web thực tế (Chrome / Edge / Firefox) theo đúng Đề cương khảo sát phân tích hệ thống và Rubric đánh giá.
+Tài liệu này hướng dẫn chi tiết từng bước (Step-by-Step) cách kiểm tra và nghiệm thu toàn bộ các chức năng của hệ thống trên giao diện web thực tế (Chrome / Edge / Firefox) theo đúng Đề cương đặc tả yêu cầu chức năng hệ thống bán hoa tươi (100% mô hình Bán hoa - Không cho thuê).
 
 ---
 
@@ -11,17 +11,15 @@ Tài liệu này hướng dẫn chi tiết từng bước (Step-by-Step) cách k
 - **Địa chỉ trang web**: [http://localhost:8080](http://localhost:8080)
 - **Mật khẩu chung cho tất cả tài khoản**: `123456`
 
-### Danh sách tài khoản thử nghiệm cho 4 vai trò (Roles):
+### Danh sách tài khoản thử nghiệm theo các vai trò:
 
 | Vai Trò (Actor / Role) | Tên Đăng Nhập | Mật Khẩu | Trang Đích Tự Động Khi Đăng Nhập |
 |:---|:---|:---:|:---|
 | **1. Khách vãng lai (Guest)** | *(Không cần đăng nhập)* | - | [http://localhost:8080/](http://localhost:8080/) |
-| **2. Khách hàng (Customer)** | `khachhang` | `123456` | [http://localhost:8080/](http://localhost:8080/) |
-| **3. Quản lý chi nhánh (Manager)** | `manager_q1` | `123456` | [http://localhost:8080/manager/dashboard](http://localhost:8080/manager/dashboard) |
-| **4. Nhân viên giao hàng (Shipper)** | `shipper_nhanh` | `123456` | [http://localhost:8080/shipper/orders](http://localhost:8080/shipper/orders) |
-| **5. Quản trị viên (Admin)** | `admin` | `123456` | [http://localhost:8080/admin/dashboard](http://localhost:8080/admin/dashboard) |
-
-*(Lưu ý: Role `STAFF` đã được loại bỏ hoàn toàn khỏi toàn bộ hệ thống).*
+| **2. Người mua (Customer)** | `khachhang` | `123456` | [http://localhost:8080/](http://localhost:8080/) |
+| **3. Người bán (Vendor / Manager)** | `manager_q1` | `123456` | [http://localhost:8080/manager/dashboard](http://localhost:8080/manager/dashboard) |
+| **4. Quản trị viên (Admin)** | `admin` | `123456` | [http://localhost:8080/admin/dashboard](http://localhost:8080/admin/dashboard) |
+| **5. Nhân viên giao hàng (Shipper)** | `shipper_nhanh` | `123456` | [http://localhost:8080/shipper/orders](http://localhost:8080/shipper/orders) |
 
 ---
 
@@ -29,238 +27,96 @@ Tài liệu này hướng dẫn chi tiết từng bước (Step-by-Step) cách k
 
 ---
 
-### VAI TRÒ 1: KHÁCH VÃNG LAI (GUEST - KHÔNG CẦN ĐĂNG NHẬP)
+### PHẦN 3.1.1: PHÍA KHÁCH VÃNG LAI (GUEST)
 
-Khách vãng lai là người dùng truy cập website chưa có tài khoản hoặc chưa đăng nhập.
+Khách vãng lai là người dùng truy cập website khi chưa đăng nhập.
 
-#### Bước 1.1: Xem Trang chủ & Danh mục Bán Chạy (sold >= 10)
-- **Thao tác**: Mở trình duyệt truy cập [http://localhost:8080/](http://localhost:8080/)
-- **Kỳ vọng hiển thị**:
-  1. Header, banner hoa tươi sắc nét, thanh tìm kiếm từ khóa.
-  2. Mục **"Top Hoa Bán Chạy Nhất Chuỗi (Đã Bán > 10)"**:
-     - Hiển thị danh sách các mẫu hoa có lượng bán từ 10 sản phẩm trở lên.
-     - Sắp xếp theo thứ tự giảm dần của số lượng bán (`sold DESC` như: 125, 110, 95, 88...).
-     - Mỗi sản phẩm có huy hiệu màu đỏ nổi bật `Đã bán: X`.
-
-#### Bước 1.2: Tìm kiếm mẫu hoa theo từ khóa
-- **Thao tác**: Nhập chữ `Lan` hoặc `Hồng` hoặc `Hoa` vào ô tìm kiếm ở đầu trang rồi bấm nút **Tìm Kiếm** (hoặc truy cập [http://localhost:8080/?keyword=Lan](http://localhost:8080/?keyword=Lan)).
-- **Kỳ vọng**: Danh sách sản phẩm lập tức lọc ra các mẫu hoa có tên hoặc mô tả chứa từ khóa.
-
-#### Bước 1.3: Lọc theo Danh mục hoa (Thanh Chọn Nhanh Shopee-Style & Bộ Lọc)
-- **Thao tác**: 
-  1. Ngay bên dưới thanh tìm kiếm ở đầu trang (phong cách Shopee), bấm trực tiếp vào một danh mục mong muốn (ví dụ: *Hoa Bó Tươi Nghệ Thuật*, *Giỏ & Hộp Hoa Cao Cấp*, *Lan Hồ Điệp Hoàng Gia*, *Phụ Kiện Hoa & Khung Sự Kiện*...).
-  2. Hoặc cuộn xuống mục bộ lọc danh mục và bấm vào các thẻ danh mục (Pills).
-- **Kỳ vọng**: 
-  - Danh mục được chọn lập tức sáng viền/gạch chân vàng nổi bật (`active`).
-  - Danh sách sản phẩm bên dưới được lọc chuẩn xác 100% các sản phẩm thuộc danh mục do Admin quản lý.
-
-#### Bước 1.4: Sắp xếp theo giá (Tăng dần / Giảm dần)
-- **Thao tác**: 
-  - Chọn sắp xếp **"Giá tăng dần"** (hoặc link [http://localhost:8080/?sort=price_asc](http://localhost:8080/?sort=price_asc)): Các mẫu hoa có giá thấp sẽ đứng đầu.
-  - Chọn sắp xếp **"Giá giảm dần"** (hoặc link [http://localhost:8080/?sort=price_desc](http://localhost:8080/?sort=price_desc)): Các kệ hoa/lẵng hoa cao cấp giá cao sẽ đứng đầu.
-
-#### Bước 1.5: Xem Tabs Top 20 & Phân trang
-- **Thao tác**:
-  - Bấm vào tab **"🔥 Top 20 Bán Chạy Nhất"** ([http://localhost:8080/?tab=bestseller](http://localhost:8080/?tab=bestseller)).
-  - Bấm vào tab **"✨ 20 Mẫu Mới Nhất"** ([http://localhost:8080/?tab=newest](http://localhost:8080/?tab=newest)).
-  - Bấm vào các số trang `1`, `2` ở cuối danh sách sản phẩm để kiểm tra phân trang.
-- **Kỳ vọng**: Dữ liệu chuyển trang mượt mà, đúng số lượng sản phẩm mỗi trang.
-
-#### Bước 1.6: Xem Chi tiết mẫu hoa
-- **Thao tác**: Bấm vào xem một mẫu hoa bất kỳ (ví dụ: [http://localhost:8080/product/1](http://localhost:8080/product/1)).
-- **Kỳ vọng**: Hiển thị ảnh mẫu hoa, giá mua đứt, đơn giá thuê theo ngày, tiền cọc hoàn lại, thông tin chi nhánh cung cấp, đánh giá sao của khách hàng.
+| STT | Chức Năng | Mô Tả | Đường Dẫn / Cách Kiểm Thử |
+|:---:|:---|:---|:---|
+| **1** | **Đăng ký (UC_001 - Sign up)** | Đăng ký tạo tài khoản người dùng | **Main Flow**:<br>1. Vào hệ thống website [http://localhost:8080/](http://localhost:8080/)<br>2. Chọn nút **Sign in** (Đăng Nhập) trên header<br>3. Chọn chức năng **Sign up** (Đăng ký ngay)<br>4. Nhập đầy đủ thông tin tài khoản (Tên đăng nhập, Mật khẩu, Họ tên, Email, SĐT, Địa chỉ)<br>5. Bấm vào nút **Sign up**<br>6. Hiển thị hộp thoại xác nhận thông tin (Confirm Modal)<br>7. Bấm nút **Confirm**<br>8. Thông báo đăng ký thành công (chuyển sang bước xác thực OTP kích hoạt tài khoản)<br><br>**Alternative Flow**:<br>7a. Bấm nút **Cancel**<br>8a. Hủy thao tác (đóng modal xác nhận, giữ nguyên form đã nhập)<br><br>**Exception Flow**:<br>8b. Thông tin tài khoản không hợp lệ, email hoặc số điện thoại đã tồn tại<br>8b1. Hiển thị thông báo đăng ký thất bại màu đỏ rõ ràng. |
+| **2** | **Xem/Tìm kiếm sản phẩm** | Tìm kiếm, xem danh sách, chi tiết sản phẩm hoa | - Trang chủ [http://localhost:8080/](http://localhost:8080/): Xem Top hoa bán chạy (đã bán &ge; 10), danh mục hoa, top 20 mới nhất, top 20 đánh giá cao.<br>- Ô tìm kiếm trên đầu trang: Nhập từ khóa (vd: `Hồng`, `Lan`, `Hoa`) bấm Tìm Kiếm.<br>- Chi tiết mẫu hoa [http://localhost:8080/product/1](http://localhost:8080/product/1): Xem ảnh hoa, giá bán, mô tả, đánh giá từ khách hàng. |
+| **3** | **Xem/Tìm kiếm cửa hàng** | Tìm kiếm, xem danh sách cửa hàng và tham quan cửa hàng | - Truy cập link **Cửa Hàng** trên thanh điều hướng [http://localhost:8080/stores](http://localhost:8080/stores).<br>- Tìm kiếm chi nhánh theo tên hoặc địa chỉ quận/huyện.<br>- Bấm **"Ghé Thăm Gian Hàng"** [http://localhost:8080/stores/1](http://localhost:8080/stores/1): Xem ảnh đại diện, ảnh bìa, hotline, địa chỉ và toàn bộ danh mục hoa do cửa hàng cung cấp. |
+| **4** | **Xem/Tìm kiếm người dùng** | Tìm kiếm, xem danh sách người dùng và tham quan trang người dùng | - Truy cập link **Người Dùng** trên thanh điều hướng [http://localhost:8080/users](http://localhost:8080/users).<br>- Tìm kiếm người dùng theo họ tên, username, email.<br>- Bấm xem hồ sơ công khai [http://localhost:8080/users/2](http://localhost:8080/users/2): Xem avatar, ảnh bìa, ngày tham gia và giới thiệu bản thân. |
 
 ---
 
-### VAI TRÒ 2: KHÁCH HÀNG (CUSTOMER)
+### PHẦN 3.1.2: PHÍA NGƯỜI MUA (CUSTOMER)
 
-#### Bước 2.1: Đăng nhập tài khoản Khách Hàng
-- **Thao tác**: Bấm **Đăng Nhập** ở góc trên bên phải trang chủ, điền:
-  - Tên đăng nhập: `khachhang`
-  - Mật khẩu: `123456`
-- **Kỳ vọng**: Đăng nhập thành công, góc phải hiển thị tên khách hàng và số lượng giỏ hàng.
+Đăng nhập tài khoản `khachhang` / `123456`.
 
-#### Bước 2.2: Thêm vào giỏ hàng (+1) và tự động chuyển đến giỏ hàng
-- **Thao tác**: 
-  1. Tại trang chi tiết một mẫu hoa (ví dụ: `/product/1`), chọn loại đơn: **"Thuê Sự Kiện"** hoặc **"Mua Luôn"**.
-  2. Chọn ngày bắt đầu thuê và ngày kết thúc thuê (nếu chọn Thuê).
-  3. Bấm nút **"Thêm Vào Giỏ Hàng"**.
-- **Kỳ vọng**:
-  - Số lượng giỏ hàng trên header tự động tăng lên (+1).
-  - Hệ thống tự động chuyển thẳng người dùng vào trang Giỏ Hàng ([http://localhost:8080/cart](http://localhost:8080/cart)).
-
-#### Bước 2.3: Chọn lại số lượng, chọn sản phẩm và thanh toán trong giỏ hàng
-- **Thao tác**: Tại trang Giỏ hàng ([http://localhost:8080/cart](http://localhost:8080/cart)):
-  1. Thử bấm nút `+` hoặc `-` để tăng/giảm số lượng sản phẩm -> Giá tiền tự động tính lại.
-  2. Bấm nút **"Tiến Hành Đặt Hàng"** để sang trang Thanh Toán.
-
-#### Bước 2.4: Kiểm tra trang Thanh Toán (Checkout)
-- **Thao tác**: Tại trang [http://localhost:8080/checkout](http://localhost:8080/checkout), quan sát phần tóm tắt thanh toán:
-- **Kỳ vọng hiển thị rõ ràng**:
-  1. **Đơn giá thuê 1 ngày** (nếu là đơn thuê).
-  2. **Số ngày thuê**.
-  3. **Tiền cọc đảm bảo hoàn lại** (Chính sách cọc khung/chân kệ hoa).
-  4. **Tổng thành tiền thanh toán**.
-  5. Ô chọn **Mã Voucher / Giảm Giá** (thử nhập `FLOWER10` hoặc bấm gợi ý có sẵn).
-  6. Ô chọn địa chỉ giao nhận hoa và thiệp lời chúc mừng.
-  7. Chọn hình thức: **Thanh toán khi nhận hàng (COD)** hoặc **Chuyển khoản / VNPAY**.
-  8. Bấm **"Xác Nhận Đặt Đơn Hoa"** -> Hệ thống tạo đơn thành công và chuyển vào trang Lịch sử đơn hàng.
-
-#### Bước 2.5: Kiểm tra Lịch sử đơn hàng & Hủy đơn
-- **Thao tác**: Vào trang [http://localhost:8080/customer/orders](http://localhost:8080/customer/orders).
-- **Kỳ vọng**:
-  - Thấy đơn hoa vừa đặt với mã số đơn, ngày giờ, tổng tiền và trạng thái `PENDING (Chờ xác nhận)`.
-  - Có nút **"Hủy Đơn Hàng"**: Bấm vào để thử hủy đơn -> Đơn lập tức chuyển sang `CANCELLED (Đã hủy)`.
-
-#### Bước 2.6: Kiểm tra ràng buộc Đánh Giá (Review >= 50 ký tự)
-- **Thao tác kiểm tra tính hợp lệ của bài đánh giá theo Rubric**:
-  1. Vào trang chi tiết hoa [http://localhost:8080/product/1](http://localhost:8080/product/1), cuộn xuống mục **"Viết Đánh Giá Của Bạn"**.
-  2. **Thử đánh giá ngắn (< 50 ký tự)**: Nhập `"Hoa dep lam shop"` rồi bấm gửi -> **Hệ thống chặn lại và báo lỗi đỏ**: *"Nội dung nhận xét tối thiểu 50 ký tự để đảm bảo chất lượng đánh giá!"*.
-  3. **Đánh giá chuẩn (>= 50 ký tự)**: Nhập nội dung dài trên 50 ký tự (Ví dụ: *"Mẫu hoa tươi rất đẹp và thơm ngát, cánh hoa cứng cáp giao đúng giờ hẹn, cảm ơn shop rất nhiều!"*) rồi bấm gửi -> **Hệ thống chấp thuận và hiển thị ngay trên danh sách đánh giá**.
-
-#### Bước 2.7: Kiểm tra Danh sách Yêu Thích & Đã Xem Gần Đây
-- **Thao tác**:
-  - Bấm nút icon trái tim ở một sản phẩm -> Vào [http://localhost:8080/customer/wishlist](http://localhost:8080/customer/wishlist) kiểm tra danh sách yêu thích.
-  - Vào [http://localhost:8080/customer/recently-viewed](http://localhost:8080/customer/recently-viewed) kiểm tra các mẫu hoa đã xem gần đây.
+| STT | Chức Năng | Mô Tả | Đường Dẫn / Cách Kiểm Thử |
+|:---:|:---|:---|:---|
+| **1** | **Đăng nhập (UC_002 - Sign in)** | Đăng nhập vào hệ thống (Customer, Vendor, Admin) | **Main Flow**:<br>1. Vào hệ thống website [http://localhost:8080/](http://localhost:8080/)<br>2. Chọn nút **Sign in** (Đăng Nhập) trên thanh điều hướng<br>3. Nhập email (hoặc số điện thoại, hoặc username) và mật khẩu<br>4. Bấm vào nút **Sign in (Đăng Nhập)**<br>5. Đăng nhập thành công<br>6. Hệ thống dẫn đến trang tương ứng:<br>   - Khách hàng (Customer): Giao diện mua hoa trang chủ [http://localhost:8080/](http://localhost:8080/)<br>   - Quản trị viên (Admin): Trang quản lý hệ thống [http://localhost:8080/admin/dashboard](http://localhost:8080/admin/dashboard)<br>   - Quản lý / Người bán (Vendor): Trang quản trị chi nhánh [http://localhost:8080/manager/dashboard](http://localhost:8080/manager/dashboard)<br><br>**Exception Flow**:<br>5a. Email hoặc điện thoại không hợp lệ, mật khẩu không trùng khớp<br>5a1. Đăng nhập thất bại<br>6a. Hiển thị thông báo màu đỏ: *"Đăng nhập thất bại: Email, số điện thoại hoặc mật khẩu không chính xác!"* |
+| **2** | **Đăng xuất (UC_003 - Sign out)** | Đăng xuất khỏi hệ thống (Customer, Vendor, Admin) | **Main Flow**:<br>1. Chọn biểu tượng **Account** (`<i class="bi bi-person-circle"></i>`) trên Header hoặc Sidebar, hiển thị dropdown menu<br>2. Chọn nút **Sign out (Đăng Xuất)**<br>3. Hiển thị hộp thoại modal yêu cầu xác nhận: *"Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?"*<br>4. Bấm nút **Confirm (Xác Nhận)**<br>5. Đăng xuất thành công, hệ thống hủy phiên đăng nhập và trở về giao diện dành cho Khách (Guest) tại [http://localhost:8080/](http://localhost:8080/)<br><br>**Alternative Flow**:<br>4a. Bấm nút **Cancel (Hủy)**<br>5a. Hủy thao tác (đóng modal, tiếp tục duy trì đăng nhập bình thường). |
+| **3** | **Khôi phục mật khẩu (UC_004 - Password Recovery)** | Tạo mật khẩu mới khi người dùng quên mật khẩu | **Main Flow**:<br>1. Vào hệ thống website [http://localhost:8080/](http://localhost:8080/)<br>2. Chọn nút **Sign in (Đăng Nhập)** trên thanh header<br>3. Nhập email tài khoản (ví dụ: `khachhang@gmail.com`)<br>4. Chọn liên kết **Forgot password? Send email**<br>5. Hệ thống xác thực email và gửi email yêu cầu tạo mật khẩu mới về email người dùng (đồng thời hiển thị mã OTP và liên kết tạo mật khẩu mới trên màn hình console)<br>6. Người dùng kiểm tra email và chọn liên kết **Change password** (hoặc truy cập link có sẵn mã OTP: `http://localhost:8080/reset-password?email=...&otpCode=...`)<br>7. Hệ thống chuyển đến trang tạo mật khẩu mới<br>8. Hiển thị form tạo mật khẩu mới với email và mã xác thực đã được nạp sẵn<br>9. Nhập mật khẩu mới (tối thiểu 6 ký tự)<br>10. Bấm **Save (Lưu Mật Khẩu Mới)**<br>11. Thay đổi thành công: Hiển thị thông báo *"Thay đổi mật khẩu thành công!"*<br>12. Chọn nút **Back to Login** hoặc **Quay lại trang chủ** để tiếp tục sử dụng website.<br><br>**Post-conditions**:<br>- Thành công: Mật khẩu mới được cập nhật vào database (BCrypt), đăng nhập bằng mật khẩu mới thành công.<br>- Thất bại: Nếu mã OTP sai hoặc mật khẩu mới dưới 6 ký tự, hiển thị thông báo lỗi và mật khẩu mới không được tạo. |
+| **4** | **Quản lý tài khoản cá nhân** | Thay đổi mật khẩu tài khoản | Vào menu cá nhân -> Chọn **Đổi Mật Khẩu** ([http://localhost:8080/customer/change-password](http://localhost:8080/customer/change-password)), nhập mật khẩu cũ và mật khẩu mới -> Xác nhận đổi. |
+| **5** | **Quản lý thông tin cá nhân** | Xem, sửa thông tin cá nhân, ảnh đại diện, ảnh bìa | Vào **Hồ Sơ Cá Nhân** ([http://localhost:8080/customer/profile](http://localhost:8080/customer/profile)): Xem và cập nhật họ tên, số điện thoại, giới thiệu, tải lên ảnh đại diện (avatar) và ảnh bìa (cover). |
+| **6** | **Quản lý địa chỉ cá nhân** | Xem, sửa, xóa địa chỉ cá nhân | Tại trang [http://localhost:8080/customer/profile](http://localhost:8080/customer/profile), phần **Sổ Địa Chỉ Giao Hàng**: Thêm địa chỉ mới, bấm nút **Sửa** để chỉnh sửa thông tin địa chỉ hoặc nút **Xóa** địa chỉ không dùng. |
+| **7** | **Quản lý đơn hàng** | Xem lịch sử mua hàng, theo dõi trạng thái, hủy đơn hàng | Vào **Đơn Mua Của Tôi** ([http://localhost:8080/customer/orders](http://localhost:8080/customer/orders)): Xem các đơn đã đặt, theo dõi trạng thái đơn hàng (Chờ xác nhận, Đang cắm hoa, Đang giao, Đã giao, Hoàn thành). Khi đơn ở trạng thái Chờ xác nhận, bấm nút **"Hủy Đơn Hàng"**. |
+| **8** | **Quản lý giỏ hàng** | Xem, thêm, cập nhật sản phẩm trong giỏ hàng | - Tại trang chi tiết sản phẩm: Chọn số lượng, bấm **Thêm Vào Giỏ Hàng**.<br>- Tại trang Giỏ hàng ([http://localhost:8080/cart](http://localhost:8080/cart)): Xem danh sách, bấm `+` hoặc `-` để cập nhật số lượng, bấm xóa sản phẩm. |
+| **9** | **Đặt hàng** | Đặt hàng, thanh toán hoa | - Bấm **Tiến Hành Thanh Toán** từ giỏ hàng sang [http://localhost:8080/checkout](http://localhost:8080/checkout).<br>- **Hình thức nhận hàng**:<br>  + *Giao hàng tận nơi*: Nhập địa chỉ nhận, hệ thống tự động điều phối chi nhánh gần nhất.<br>  + *Đến lấy trực tiếp*: Chọn chi nhánh mong muốn đến nhận hoa.<br>- **Lời chúc đi kèm**: Có thể nhập lời nhắn thiệp (cho phép để trống).<br>- Chọn hình thức thanh toán (COD / VNPay / Chuyển khoản) -> Bấm **Xác Nhận Đặt Hoa**. |
+| **10** | **Phản hồi, đánh giá** | Phản hồi, đánh giá sản phẩm đã mua | Sau khi đơn hoàn thành, vào chi tiết đơn hàng hoặc trang sản phẩm để đánh giá sao (1-5 sao) và viết nhận xét (yêu cầu tối thiểu 50 ký tự) -> Gửi đánh giá. |
+| **11** | **Theo dõi sản phẩm** | Theo dõi, sưu tầm các sản phẩm yêu thích | - Tại trang chi tiết sản phẩm [http://localhost:8080/product/1](http://localhost:8080/product/1), bấm nút **"Thêm vào Yêu thích"**.<br>- Xem danh sách tại [http://localhost:8080/customer/wishlist](http://localhost:8080/customer/wishlist). |
+| **12** | **Theo dõi cửa hàng** | Theo dõi, sưu tầm các cửa hàng yêu thích | - Tại trang chi tiết cửa hàng [http://localhost:8080/stores/1](http://localhost:8080/stores/1), bấm nút **"Theo Dõi Cửa Hàng"**.<br>- Xem danh sách các cửa hàng đang theo dõi tại [http://localhost:8080/customer/followed-stores](http://localhost:8080/customer/followed-stores). |
 
 ---
 
-### VAI TRÒ 3: QUẢN LÝ CHI NHÁNH (MANAGER / VENDOR)
+### PHẦN 3.1.3: PHÍA NGƯỜI BÁN (VENDOR / MANAGER)
 
-#### Bước 3.1: Đăng nhập Quản Lý Chi Nhánh
-- **Thao tác**: Đăng xuất tài khoản khách hàng, sau đó đăng nhập:
-  - Tên đăng nhập: `manager_q1`
-  - Mật khẩu: `123456`
-- **Kỳ vọng**: Hệ thống **tự động chuyển hướng** vào trang Quản Trị Chi Nhánh: [http://localhost:8080/manager/dashboard](http://localhost:8080/manager/dashboard).
+Đăng nhập tài khoản `manager_q1` / `123456`.
 
-#### Bước 3.2: Kiểm tra Quản lý đơn hàng & Điều phối Shipper
-- **Thao tác**: Vào menu **"Đơn Hàng Chi Nhánh"** ([http://localhost:8080/manager/orders](http://localhost:8080/manager/orders)).
-- **Kỳ vọng**:
-  - Hiển thị danh sách các đơn hoa khách đặt tại chi nhánh Quận 1.
-  - Có các nút cập nhật trạng thái: **Xác nhận đơn (CONFIRMED)**.
-  - Có ô dropdown chọn và gán tài xế giao hoa (**Shipper Nhanh**) để đi giao hàng cho khách.
-
-#### Bước 3.3: Kiểm tra Quản lý Mẫu Hoa (Giá bán >= Giá nhập)
-- **Thao tác**: Vào menu **"Kho Mẫu Hoa"** ([http://localhost:8080/manager/products](http://localhost:8080/manager/products)).
-- **Kỳ vọng**:
-  - Danh sách mẫu hoa của chi nhánh, số lượng tồn kho, giá bán, giá thuê.
-  - Bấm **"Thêm Mẫu Hoa Mới"**: Thử nhập giá bán nhỏ hơn giá nhập (Ví dụ: Nhập 100.000đ nhưng Bán 50.000đ) -> Hệ thống chặn lại không cho tạo vì vi phạm quy định chống bán lỗ của hệ thống.
-
-#### Bước 3.4: Kiểm tra Ví Doanh Thu & Lệnh Rút Tiền
-- **Thao tác**: Vào menu **"Ví Doanh Thu"** ([http://localhost:8080/manager/wallet](http://localhost:8080/manager/wallet)).
-- **Kỳ vọng**:
-  - Hiển thị số dư ví điện tử của cửa hàng, tổng tiền bán hoa đã thu.
-  - Có form tạo yêu cầu rút tiền về tài khoản ngân hàng (Vietcombank, MB Bank...).
-
-#### Bước 3.5: Xem Báo Cáo & Danh sách mạng lưới chi nhánh
-- **Thao tác**:
-  - Vào **"Thống Kê Doanh Thu"** ([http://localhost:8080/manager/analytics](http://localhost:8080/manager/analytics)): Xem biểu đồ doanh thu chi nhánh.
-  - Vào **"Mạng Lưới Chi Nhánh"** ([http://localhost:8080/manager/stores](http://localhost:8080/manager/stores)): Xem danh sách tất cả các chi nhánh khác trong chuỗi Bloom Flower để hỗ trợ khách mượn chi nhánh A trả hoa chi nhánh B.
+| STT | Chức Năng | Mô Tả | Đường Dẫn / Cách Kiểm Thử |
+|:---:|:---|:---|:---|
+| **1** | **Tạo cửa hàng** | Tạo cửa hàng mới cho phép kinh doanh trong hệ thống | Truy cập [http://localhost:8080/manager/stores/create](http://localhost:8080/manager/stores/create): Nhập tên cửa hàng, hotline, địa chỉ, ảnh đại diện, ảnh bìa, ảnh đặc trưng -> Bấm **Đăng Ký Chi Nhánh**. |
+| **2** | **Quản lý các cửa hàng cá nhân** | Xem danh sách các cửa hàng sở hữu và hợp tác | Truy cập [http://localhost:8080/manager/stores](http://localhost:8080/manager/stores): Xem danh sách các cửa hàng với huy hiệu rõ ràng: `Sở hữu` (cửa hàng do tài khoản làm chủ) hoặc `Hợp tác` (chi nhánh tham gia quản lý, điều hành). |
+| **3** | **Quản lý thông tin cửa hàng** | Xem, chỉnh sửa thông tin cửa hàng, ảnh đại diện, ảnh bìa, ảnh đặc trưng | Tại danh sách cửa hàng, bấm **"Chỉnh Sửa"** ([http://localhost:8080/manager/stores/edit/1](http://localhost:8080/manager/stores/edit/1)): Cập nhật tên shop, hotline, địa chỉ, giới thiệu, ảnh đại diện (avatar), ảnh bìa (cover), ảnh đặc trưng (featured images) và trạng thái mở cửa đón khách (`isOpen`). |
+| **4** | **Quản lý nhân viên cửa hàng** | Xem, thêm, xóa nhân viên (đối tác) của cửa hàng | Truy cập [http://localhost:8080/manager/staff](http://localhost:8080/manager/staff):<br>- Xem danh sách nhân sự tại chi nhánh.<br>- Bấm **"Thêm Nhân Viên Mới"**: Nhập username, họ tên, SĐT, chọn vai trò (`Quản lý / Đối tác` hoặc `Nhân viên giao hàng`).<br>- Bấm nút **"Xóa Khỏi Shop"** để xóa nhân viên khỏi chi nhánh. |
+| **5** | **Quản lý đơn hàng của cửa hàng** | Xem, cập nhật trạng thái, theo dõi trạng thái các đơn hàng của cửa hàng | Truy cập [http://localhost:8080/manager/orders](http://localhost:8080/manager/orders):<br>- Lọc đơn theo tab: Chờ xác nhận, Đã nhận, Đang cắm hoa, Đang giao, Đã giao, Hoàn thành, Đã hủy.<br>- Bấm nút cập nhật tiến độ: **Nhận Đơn** &rarr; **Cắm Hoa** &rarr; **Giao Shipper** (chọn tài xế) &rarr; **Hoàn Tất**. |
+| **6** | **Quản lý sản phẩm của cửa hàng** | Xem, thêm, lưu trữ (hoặc kinh doanh), sửa sản phẩm của cửa hàng | Truy cập [http://localhost:8080/manager/products](http://localhost:8080/manager/products):<br>- Xem danh sách mẫu hoa của shop.<br>- Bấm **"Thêm Mẫu Hoa Mới"**: Điền tên, danh mục, giá bán, link ảnh, mô tả ý nghĩa hoa.<br>- Bấm nút **"Sửa"**: Chỉnh sửa thông tin, giá bán mẫu hoa.<br>- Bấm nút **"Lưu Trữ" / "Kinh Doanh"**: Chuyển đổi linh hoạt giữa trạng thái kinh doanh mở bán và trạng thái lưu trữ tạm ẩn khỏi gian hàng. |
+| **7** | **Quản lý ví điện tử của cửa hàng** | Xem lịch sử giao dịch của cửa hàng, rút tiền | Truy cập [http://localhost:8080/manager/wallet](http://localhost:8080/manager/wallet):<br>- Xem số dư ví doanh thu cửa hàng và biến động dòng tiền.<br>- Bấm **"Rút Tiền"**: Điền số tiền cần rút, tên ngân hàng, số tài khoản, tên chủ thẻ -> Gửi yêu cầu rút tiền thành công. |
+| **8** | **Thống kê doanh thu** | Thống kê doanh thu theo sản phẩm, đơn hàng của cửa hàng, theo từng loại thời gian (giờ, ngày, tháng, năm), theo loại biểu đồ (đường, cột, tròn) | Truy cập [http://localhost:8080/manager/analytics](http://localhost:8080/manager/analytics):<br>- **Phân loại**: Bấm chọn **Theo Đơn Hàng** hoặc **Theo Sản Phẩm**.<br>- **Thời gian**: Bấm chọn **Theo Giờ**, **Theo Ngày**, **Theo Tháng**, **Theo Năm**.<br>- **Loại biểu đồ**: Bấm nút chuyển đổi qua lại giữa biểu đồ **Cột (Bar)**, **Đường (Line)** và **Tròn (Pie/Doughnut)**. |
 
 ---
 
-### VAI TRÒ 4: NHÂN VIÊN GIAO HÀNG (SHIPPER)
+### PHẦN 3.1.4: PHÍA QUẢN TRỊ VIÊN (ADMIN)
 
-#### Bước 4.1: Đăng nhập Nhân Viên Giao Hàng
-- **Thao tác**: Đăng xuất, sau đó đăng nhập:
-  - Tên đăng nhập: `shipper_nhanh`
-  - Mật khẩu: `123456`
-- **Kỳ vọng**: Hệ thống **tự động chuyển thẳng** vào trang giao hàng của Shipper: [http://localhost:8080/shipper/orders](http://localhost:8080/shipper/orders).
+Đăng nhập tài khoản `admin` / `123456`.
 
-#### Bước 4.2: Kiểm tra Quản lý đơn giao & Tiền COD đã thu
-- **Thao tác**: Tại trang [http://localhost:8080/shipper/orders](http://localhost:8080/shipper/orders), quan sát:
-  1. **3 Thẻ thống kê đầu trang**:
-     - *Đơn đang đi giao*
-     - *Đã giao thành công*
-     - *Tiền COD đã thu nộp về shop*
-  2. **Thông tin chi tiết từng đơn hàng**:
-     - Địa chỉ lấy hoa tại cửa hàng chi nhánh.
-     - Địa chỉ nhận hoa của khách hàng và nút bấm gọi điện thoại (`tel:09...`).
-     - Mẫu hoa cần giao và lời chúc trên thiệp.
-     - Số tiền cần thu hộ (COD).
-  3. **Thao tác giao hàng**: Bấm nút **"Đã Giao Tận Tay"** -> Trạng thái đơn lập tức chuyển thành `DELIVERED (Giao thành công)`, tiền COD tự động cộng vào thống kê.
-
----
-
-### VAI TRÒ 5: QUẢN TRỊ VIÊN TOÀN HỆ THỐNG (ADMIN)
-
-#### Bước 5.1: Đăng nhập Quản Trị Viên (Admin)
-- **Thao tác**: Đăng xuất, sau đó đăng nhập:
-  - Tên đăng nhập: `admin`
-  - Mật khẩu: `123456`
-- **Kỳ vọng**: Hệ thống **tự động chuyển hướng** vào trang quản trị tối cao: [http://localhost:8080/admin/dashboard](http://localhost:8080/admin/dashboard).
-
-#### Bước 5.2: Kiểm tra Dashboard 3 Biểu Đồ & Đa Chu Kỳ (Giờ, Ngày, Tháng, Năm)
-- **Thao tác**: Tại trang [http://localhost:8080/admin/dashboard](http://localhost:8080/admin/dashboard):
-  1. Quan sát các nút chọn thời gian: **Theo Giờ**, **Theo Ngày**, **Theo Tháng**, **Theo Năm**. Thử bấm lần lượt từng nút.
-  2. Quan sát nút chọn dạng biểu đồ: **Đường (Line)**, **Cột (Bar)**, **Tròn (Pie)**.
-- **Kỳ vọng**:
-  - **Biểu đồ 1**: Thống kê doanh thu bán & thuê hoa toàn sàn.
-  - **Biểu đồ 2**: Thống kê số lượng người dùng mới gia nhập hệ thống.
-  - **Biểu đồ 3**: Thống kê số lượng cửa hàng / chi nhánh mới gia nhập chuỗi.
-  - Dữ liệu và biểu đồ tự động cập nhật ngay lập tức theo chu kỳ và dạng biểu đồ được chọn.
-
-#### Bước 5.3: Quản lý người dùng (Khóa / Mở Khóa tài khoản)
-- **Thao tác**: Vào menu **"Quản Lý Người Dùng"** ([http://localhost:8080/admin/users](http://localhost:8080/admin/users)).
-- **Kỳ vọng**:
-  - Hiển thị danh sách tất cả người dùng trong hệ thống (Customer, Manager, Shipper).
-  - Có nút gạt / nút bấm **"Khóa Tài Khoản"** và **"Mở Khóa"**.
-  - Thử bấm khóa một tài khoản: Trạng thái chuyển sang `Bị khóa`, người dùng đó sẽ không thể đăng nhập cho đến khi được Admin mở khóa lại.
-
-#### Bước 5.4: Quản lý cửa hàng (Cấp phép / Cấm cửa hàng)
-- **Thao tác**: Vào menu **"Quản Lý Cửa Hàng"** ([http://localhost:8080/admin/stores](http://localhost:8080/admin/stores)).
-- **Kỳ vọng**:
-  - Hiển thị danh sách các chi nhánh trong chuỗi.
-  - Có nút **"Cấm Hoạt Động"** / **"Cấp Phép"**: Khi cấm, chi nhánh đó sẽ không thể đăng bán mẫu hoa mới trên sàn.
-
-#### Bước 5.5: Quản lý mẫu hoa toàn chuỗi
-- **Thao tác**: Vào menu **"Duyệt Mẫu Hoa"** ([http://localhost:8080/admin/products-manage](http://localhost:8080/admin/products-manage)).
-- **Kỳ vọng**: Xem toàn bộ các mẫu hoa của tất cả chi nhánh, có quyền cấp phép hoặc cấm hiển thị mẫu hoa vi phạm.
-
-#### Bước 5.6: Giám sát toàn bộ đơn hàng
-- **Thao tác**: Vào menu **"Toàn Chuỗi Đơn Hàng"** ([http://localhost:8080/admin/orders-manage](http://localhost:8080/admin/orders-manage)).
-- **Kỳ vọng**: Xem tất cả các đơn hàng của mọi chi nhánh, có thể theo dõi và cập nhật trạng thái đơn hàng khi cần can thiệp xử lý khiếu nại.
-
-#### Bước 5.7: Cấu hình các phân hệ nghiệp vụ hệ thống
-Admin có thể kiểm tra đầy đủ các màn hình cấu hình danh mục và chính sách sàn:
-1. **Danh mục hoa**: [http://localhost:8080/admin/categories](http://localhost:8080/admin/categories) (Thêm mới, sửa danh mục).
-2. **Hoa hồng chiết khấu sàn**: [http://localhost:8080/admin/commissions](http://localhost:8080/admin/commissions) (Cấu hình % chiết khấu từng gói).
-3. **Đơn vị vận chuyển & Cước phí**: [http://localhost:8080/admin/deliveries](http://localhost:8080/admin/deliveries).
-4. **Mã giảm giá sàn (Voucher)**: [http://localhost:8080/admin/vouchers](http://localhost:8080/admin/vouchers) (Tạo voucher giảm % hoặc Freeship toàn sàn).
-5. **Cấp bậc khách hàng (User Levels)**: [http://localhost:8080/admin/user-levels](http://localhost:8080/admin/user-levels) (Đồng, Bạc, Vàng, Kim Cương).
-6. **Cấp bậc chi nhánh (Store Levels)**: [http://localhost:8080/admin/store-levels](http://localhost:8080/admin/store-levels).
-7. **Phong cách mẫu hoa**: [http://localhost:8080/admin/styles](http://localhost:8080/admin/styles).
-8. **Sổ cái tài chính & Dòng tiền**: [http://localhost:8080/admin/transactions](http://localhost:8080/admin/transactions).
+| STT | Chức Năng | Mô Tả | Đường Dẫn / Cách Kiểm Thử |
+|:---:|:---|:---|:---|
+| **1** | **Thống kê doanh thu hệ thống** | Thống kê doanh thu toàn sàn theo giờ, ngày, tháng, năm; biểu đồ đường, cột, tròn | [http://localhost:8080/admin/dashboard](http://localhost:8080/admin/dashboard): Chọn khung giờ/ngày/tháng/năm và đổi loại biểu đồ. |
+| **2** | **Thống kê người dùng mới** | Thống kê số lượng người tham gia theo giờ, ngày, tháng, năm; biểu đồ đường, cột, tròn | [http://localhost:8080/admin/dashboard](http://localhost:8080/admin/dashboard): Xem biểu đồ tăng trưởng thành viên mới. |
+| **3** | **Thống kê cửa hàng mới** | Thống kê số cửa hàng gia nhập chuỗi theo giờ, ngày, tháng, năm; biểu đồ đường, cột, tròn | [http://localhost:8080/admin/dashboard](http://localhost:8080/admin/dashboard): Xem biểu đồ phát triển mạng lưới chi nhánh. |
+| **4** | **Quản lý người dùng hệ thống** | Xem danh sách người dùng toàn hệ thống | [http://localhost:8080/admin/users](http://localhost:8080/admin/users): Xem họ tên, email, vai trò, số điện thoại người dùng. |
+| **5** | **Quản lý cửa hàng trong hệ thống** | Xem danh sách, cấp phép (hoặc cấm) cửa hàng trong hệ thống | [http://localhost:8080/admin/stores](http://localhost:8080/admin/stores): Bấm nút **Cấp Phép** / **Cấm Hoạt Động** cửa hàng. |
+| **6** | **Quản lý sản phẩm trong hệ thống** | Xem danh sách, cấp phép (hoặc cấm) sản phẩm trong hệ thống | [http://localhost:8080/admin/products](http://localhost:8080/admin/products): Bấm nút **Duyệt Bán** / **Cấm Bán** mẫu hoa. |
+| **7** | **Quản lý đơn hàng trong hệ thống** | Xem danh sách đơn hàng toàn chuỗi | [http://localhost:8080/admin/orders](http://localhost:8080/admin/orders): Theo dõi tổng giá trị, tiến độ đơn hàng và chi nhánh phục vụ. |
+| **8** | **Quản lý cấp độ người dùng** | Xem, thêm, xóa, sửa cấp bậc thành viên | [http://localhost:8080/admin/user-levels](http://localhost:8080/admin/user-levels): Thêm cấp độ (Đồng, Bạc, Vàng, Kim Cương), chỉnh sửa điều kiện điểm số, xóa cấp độ. |
+| **9** | **Quản lý cấp độ cửa hàng** | Xem, thêm, xóa, sửa cấp bậc cửa hàng | [http://localhost:8080/admin/store-levels](http://localhost:8080/admin/store-levels): Quản lý thứ hạng chi nhánh theo doanh thu và uy tín. |
+| **10** | **Quản lý loại sản phẩm** | Xem, thêm, xóa, sửa danh mục hoa | [http://localhost:8080/admin/categories](http://localhost:8080/admin/categories): Thêm danh mục mới, bấm nút **Sửa** (cập nhật tên, icon), bấm nút **Xóa** danh mục. |
+| **11** | **Quản lý thuộc tính sản phẩm** | Xem, thêm, xóa, sửa các đặc tính mẫu hoa | [http://localhost:8080/admin/styles](http://localhost:8080/admin/styles): Quản lý phong cách (Cổ điển, Hiện đại, Tối giản, Hàn Quốc...). |
+| **12** | **Quản lý hình thức vận chuyển** | Xem, thêm, xóa, sửa đơn vị vận chuyển | [http://localhost:8080/admin/deliveries](http://localhost:8080/admin/deliveries): Cài đặt đơn vị giao hoa (Hỏa tốc 2H, Tiết kiệm, Grab...). |
+| **13** | **Quản lý mức hoa hồng** | Xem, thêm, xóa, sửa tỷ lệ chiết khấu sàn | [http://localhost:8080/admin/commissions](http://localhost:8080/admin/commissions): Thiết lập mức hoa hồng áp dụng cho các chi nhánh. |
+| **14** | **Quản lý giao dịch hệ thống** | Xem nhật ký các giao dịch dòng tiền toàn sàn | [http://localhost:8080/admin/transactions](http://localhost:8080/admin/transactions): Kiểm soát lịch sử nạp tiền, rút tiền, thanh toán đơn hàng. |
 
 ---
 
-### VAI TRÒ 6: BẢO MẬT PHÂN QUYỀN RBAC & XÁC NHẬN LOẠI BỎ ROLE STAFF
+### PHẦN 3.1.5: PHÍA NHÂN VIÊN GIAO HÀNG (SHIPPER)
 
-- **Mục tiêu**: Xác nhận rằng vai trò `STAFF` đã bị loại bỏ hoàn toàn, hệ thống chỉ còn 4 vai trò chuẩn (`ADMIN`, `MANAGER`, `CUSTOMER`, `SHIPPER`).
-- **Thao tác kiểm tra**:
-  1. Đăng xuất khỏi mọi tài khoản.
-  2. Vào trang đăng nhập [http://localhost:8080/login](http://localhost:8080/login).
-  3. Thử đăng nhập tài khoản cũ `staff_q1` với mật khẩu `123456`.
-- **Kỳ vọng**: Hệ thống từ chối đăng nhập và báo lỗi đăng nhập không thành công, không thể truy cập bất kỳ tài nguyên nào.
+Đăng nhập tài khoản `shipper_nhanh` / `123456`.
+
+| STT | Chức Năng | Mô Tả | Đường Dẫn / Cách Kiểm Thử |
+|:---:|:---|:---|:---|
+| **1** | **Xem đơn hàng được điều phối** | Xem danh sách các đơn hoa tươi được cửa hàng phân công đi giao | Truy cập [http://localhost:8080/shipper/orders](http://localhost:8080/shipper/orders): Xem tên người nhận, số điện thoại, địa chỉ giao hàng, lời chúc thiệp kèm theo. |
+| **2** | **Cập nhật tiến độ giao hàng** | Nhận đơn đi giao & xác nhận giao hoa thành công | Bấm **"Bắt Đầu Giao"** (chuyển trạng thái đơn sang `DELIVERING`) &rarr; Bấm **"Đã Giao Thành Công"** (chuyển sang `DELIVERED`). |
 
 ---
 
-## 3. TỔNG KẾT BẢNG ĐÁNH GIÁ CHỨC NĂNG
+## 3. TỔNG KẾT NGHIỆM THU
 
-| STT | Chức năng kiểm thử | Kết quả đạt được | Trạng thái |
-|:---:|:---|:---|:---:|
-| 1 | Khách vãng lai xem hoa bán chạy `sold >= 10` xếp giảm dần | Hiển thị chính xác với nhãn `Đã bán: X` | **ĐẠT** |
-| 2 | Tìm kiếm, lọc theo danh mục, sắp xếp giá tăng/giảm | Bộ lọc hoạt động nhanh, chính xác | **ĐẠT** |
-| 3 | Tabs Top 20 (Bán chạy, Mới nhất, Đánh giá cao) & Phân trang | Hoạt động mượt mà | **ĐẠT** |
-| 4 | Giỏ hàng (+1 số lượng), tự động chuyển đến giỏ hàng | Hoạt động tức thì | **ĐẠT** |
-| 5 | Trang thanh toán hiển thị số ngày thuê, đơn giá, cọc, tổng tiền | Đầy đủ thông tin minh bạch | **ĐẠT** |
-| 6 | Đặt hàng, theo dõi lịch sử và hủy đơn | Tạo đơn & hủy đơn chuẩn xác | **ĐẠT** |
-| 7 | Kiểm tra ràng buộc độ dài đánh giá `>= 50 ký tự` | Dưới 50 ký tự bị chặn, trên 50 ký tự được lưu | **ĐẠT** |
-| 8 | Quản lý chi nhánh nhận đơn, điều phối Shipper | Gán tài xế giao hoa thành công | **ĐẠT** |
-| 9 | Quản lý mẫu hoa kiểm tra giá bán >= giá nhập | Chặn bán lỗ thành công | **ĐẠT** |
-| 10 | Shipper xem đơn, tiền COD, xác nhận đã giao | Cập nhật DELIVERED & tính COD chuẩn | **ĐẠT** |
-| 11 | Admin đăng nhập tự động vào `/admin/dashboard` | Chuyển hướng chính xác | **ĐẠT** |
-| 12 | Thống kê 3 biểu đồ theo 4 chu kỳ (Giờ, Ngày, Tháng, Năm) & 3 dạng | Trực quan hóa dữ liệu với Chart.js | **ĐẠT** |
-| 13 | Quản lý người dùng, khóa/mở khóa tài khoản | Hoạt động tốt | **ĐẠT** |
-| 14 | Quản lý, cấp phép / cấm cửa hàng và mẫu hoa | Hoạt động tốt | **ĐẠT** |
-| 15 | Loại bỏ hoàn toàn role STAFF | Bảo mật RBAC 4 Roles chuẩn hóa | **ĐẠT** |
+Hệ thống đã hoàn thiện 100% đầy đủ tất cả các yêu cầu chức năng theo đúng Đề cương khảo sát và Rubric đánh giá:
+1. **Phía Khách vãng lai (Guest)**: 4/4 chức năng (Đăng ký, Xem/Tìm sản phẩm, Xem/Tìm cửa hàng & tham quan gian hàng, Xem/Tìm người dùng & xem hồ sơ).
+2. **Phía Người mua (Customer)**: 12/12 chức năng (Đăng nhập, Đăng xuất, Quên mật khẩu, Đổi mật khẩu, Quản lý hồ sơ & ảnh đại diện/bìa, Quản lý địa chỉ [thêm/sửa/xóa], Quản lý đơn & hủy đơn, Giỏ hàng, Đặt hàng [Giao tận nơi tự động xếp chi nhánh gần nhất / Đến lấy tự chọn chi nhánh], Đánh giá &ge; 50 ký tự, Sưu tầm sản phẩm, Theo dõi cửa hàng).
+3. **Phía Người bán (Vendor / Manager)**: 8/8 chức năng (Tạo cửa hàng, Quản lý cửa hàng sở hữu & hợp tác, Quản lý thông tin & ảnh đại diện/bìa/ảnh đặc trưng, Quản lý nhân viên [xem/thêm/xóa], Quản lý đơn hàng [nhận/cắm hoa/giao shipper/hoàn tất], Quản lý sản phẩm [thêm/sửa/kinh doanh/lưu trữ], Quản lý ví & rút tiền, Thống kê doanh thu theo đơn hàng & theo sản phẩm, theo giờ/ngày/tháng/năm, đa biểu đồ đường/cột/tròn).
+4. **Phía Quản trị viên (Admin)**: 14/14 chức năng (3 Thống kê đa chu kỳ/biểu đồ + 11 Module Quản trị CRUD hoàn chỉnh).
+5. **Phía Nhân viên giao hàng (Shipper)**: Tiếp nhận đơn và cập nhật tiến độ giao hoa.

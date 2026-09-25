@@ -30,6 +30,7 @@
             <nav class="d-flex flex-column gap-1">
                 <a th:href="@{/manager/orders}"><i class="bi bi-bag-check"></i> Quản Lý Đơn Hàng</a>
                 <a th:href="@{/manager/products}"><i class="bi bi-flower1"></i> Kho Mẫu Hoa</a>
+                <a th:href="@{/manager/staff}"><i class="bi bi-people"></i> Nhân Viên Cửa Hàng</a>
                 <a th:href="@{/manager/wallet}"><i class="bi bi-wallet2"></i> Ví Cửa Hàng & Rút Tiền</a>
                 <a th:href="@{/manager/vouchers}"><i class="bi bi-ticket-perforated"></i> Khuyến Mãi Shop</a>
                 <a th:href="@{/manager/analytics}" class="active"><i class="bi bi-graph-up-arrow"></i> Báo Cáo Doanh Thu</a>
@@ -45,19 +46,29 @@
             <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                 <div>
                     <h3 class="font-serif fw-bold mb-1">📊 Thống Kê & Phân Tích Doanh Thu Chi Nhánh</h3>
-                    <p class="text-muted small mb-0">Theo dõi doanh thu bán hoa theo từng khung thời gian (giờ, ngày, tháng, năm)</p>
+                    <p class="text-muted small mb-0">Thống kê doanh thu theo sản phẩm, đơn hàng theo từng mốc thời gian (giờ, ngày, tháng, năm)</p>
                 </div>
 
-                <!-- Timeframe Selector -->
-                <div class="btn-group shadow-sm bg-white p-1 rounded-pill border">
-                    <a th:href="@{/manager/analytics(timeframe='hour')}" class="btn btn-sm rounded-pill px-3"
-                       th:classappend="${timeframe == 'hour'} ? 'btn-primary' : 'btn-light'">Theo Giờ</a>
-                    <a th:href="@{/manager/analytics(timeframe='day')}" class="btn btn-sm rounded-pill px-3"
-                       th:classappend="${timeframe == 'day' or timeframe == null} ? 'btn-primary' : 'btn-light'">Theo Ngày</a>
-                    <a th:href="@{/manager/analytics(timeframe='month')}" class="btn btn-sm rounded-pill px-3"
-                       th:classappend="${timeframe == 'month'} ? 'btn-primary' : 'btn-light'">Theo Tháng</a>
-                    <a th:href="@{/manager/analytics(timeframe='year')}" class="btn btn-sm rounded-pill px-3"
-                       th:classappend="${timeframe == 'year'} ? 'btn-primary' : 'btn-light'">Theo Năm</a>
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <!-- Filter Theo Đơn Hàng / Sản Phẩm -->
+                    <div class="btn-group shadow-sm bg-white p-1 rounded-pill border">
+                        <a th:href="@{/manager/analytics(type='order', timeframe=${timeframe})}" class="btn btn-sm rounded-pill px-3"
+                           th:classappend="${type == 'order' or type == null} ? 'btn-primary' : 'btn-light'">Theo Đơn Hàng</a>
+                        <a th:href="@{/manager/analytics(type='product')}" class="btn btn-sm rounded-pill px-3"
+                           th:classappend="${type == 'product'} ? 'btn-primary' : 'btn-light'">Theo Sản Phẩm</a>
+                    </div>
+
+                    <!-- Timeframe Selector (Khi xem theo đơn hàng) -->
+                    <div th:if="${type == 'order' or type == null}" class="btn-group shadow-sm bg-white p-1 rounded-pill border">
+                        <a th:href="@{/manager/analytics(type='order', timeframe='hour')}" class="btn btn-sm rounded-pill px-3"
+                           th:classappend="${timeframe == 'hour'} ? 'btn-primary' : 'btn-light'">Theo Giờ</a>
+                        <a th:href="@{/manager/analytics(type='order', timeframe='day')}" class="btn btn-sm rounded-pill px-3"
+                           th:classappend="${timeframe == 'day' or timeframe == null} ? 'btn-primary' : 'btn-light'">Theo Ngày</a>
+                        <a th:href="@{/manager/analytics(type='order', timeframe='month')}" class="btn btn-sm rounded-pill px-3"
+                           th:classappend="${timeframe == 'month'} ? 'btn-primary' : 'btn-light'">Theo Tháng</a>
+                        <a th:href="@{/manager/analytics(type='order', timeframe='year')}" class="btn btn-sm rounded-pill px-3"
+                           th:classappend="${timeframe == 'year'} ? 'btn-primary' : 'btn-light'">Theo Năm</a>
+                    </div>
                 </div>
             </div>
 
@@ -66,10 +77,14 @@
                 <div class="col-lg-8">
                     <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="font-serif fw-bold mb-0">📈 Xu Hướng Doanh Thu (Biểu đồ Đường & Cột)</h5>
+                            <h5 class="font-serif fw-bold mb-0">
+                                📈 Biểu Đồ Doanh Thu 
+                                <span class="small text-muted fw-normal" th:text="${type == 'product' ? '(Theo Sản Phẩm Hoa)' : '(Theo Đơn Hàng)'}"></span>
+                            </h5>
                             <div class="btn-group btn-group-sm">
                                 <button type="button" class="btn btn-outline-secondary active" id="btnBar" onclick="switchChart('bar')">Cột</button>
                                 <button type="button" class="btn btn-outline-secondary" id="btnLine" onclick="switchChart('line')">Đường</button>
+                                <button type="button" class="btn btn-outline-secondary" id="btnPie" onclick="switchChart('pie')">Tròn</button>
                             </div>
                         </div>
                         <canvas id="mainRevenueChart" height="220"></canvas>
@@ -91,7 +106,7 @@
     /*<![CDATA[*/
     var chartData = /*[[${revenueChart}]]*/ {};
     var labels = (chartData && chartData.labels) ? chartData.labels : ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-    var values = (chartData && chartData.values) ? chartData.values : [1200000, 2400000, 1800000, 3200000, 4500000, 6800000, 5200000];
+    var values = (chartData && chartData.data) ? chartData.data : [1200000, 2400000, 1800000, 3200000, 4500000, 6800000, 5200000];
 
     var ctx = document.getElementById('mainRevenueChart').getContext('2d');
     var currentChartType = 'bar';
@@ -102,7 +117,7 @@
             datasets: [{
                 label: 'Doanh thu (VNĐ)',
                 data: values,
-                backgroundColor: 'rgba(225, 29, 72, 0.7)',
+                backgroundColor: ['#e11d48', '#f43f5e', '#fb7185', '#fda4af', '#fca5a5', '#0284c7', '#10b981'],
                 borderColor: '#e11d48',
                 borderWidth: 2,
                 borderRadius: 8,
@@ -138,7 +153,20 @@
     function switchChart(type) {
         document.getElementById('btnBar').classList.toggle('active', type === 'bar');
         document.getElementById('btnLine').classList.toggle('active', type === 'line');
+        document.getElementById('btnPie').classList.toggle('active', type === 'pie');
         mainChart.config.type = type;
+        if (type === 'pie') {
+            mainChart.options.scales = {};
+        } else {
+            mainChart.options.scales = {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) { return value.toLocaleString() + ' đ'; }
+                    }
+                }
+            };
+        }
         mainChart.update();
     }
     /*]]>*/

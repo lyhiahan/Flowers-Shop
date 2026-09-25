@@ -45,11 +45,10 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .dispatcherTypeMatchers(jakarta.servlet.DispatcherType.FORWARD, jakarta.servlet.DispatcherType.ERROR).permitAll()
                 .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
-                .requestMatchers("/manager", "/manager/**").hasAnyRole("ADMIN", "MANAGER")
-                .requestMatchers("/vendor", "/vendor/**").hasAnyRole("ADMIN", "MANAGER", "VENDOR")
+                .requestMatchers("/manager", "/manager/**", "/vendor", "/vendor/**").hasAnyRole("ADMIN", "MANAGER", "VENDOR")
                 .requestMatchers("/shipper", "/shipper/**").hasRole("SHIPPER")
                 .requestMatchers("/customer/**", "/cart", "/cart/**", "/checkout", "/checkout/**").hasRole("CUSTOMER")
-                .requestMatchers("/", "/products/**", "/product/**", "/login", "/register", "/verify-otp", "/resend-otp", "/forgot-password", "/reset-password", "/api/public/**", "/ws/**", "/css/**", "/js/**", "/images/**", "/error", "/favicon.ico", "/webjars/**").permitAll()
+                .requestMatchers("/", "/products/**", "/product/**", "/stores/**", "/users/**", "/login", "/register", "/verify-otp", "/resend-otp", "/forgot-password", "/reset-password", "/api/public/**", "/ws/**", "/css/**", "/js/**", "/images/**", "/error", "/favicon.ico", "/webjars/**").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

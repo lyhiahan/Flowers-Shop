@@ -23,14 +23,21 @@ public class ManagerAnalyticsController {
 
     @GetMapping
     public String showAnalytics(@RequestParam(value = "timeframe", defaultValue = "day") String timeframe,
+                                @RequestParam(value = "type", defaultValue = "order") String type,
                                 Principal principal,
                                 Model model) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         Long storeId = user.getStore() != null ? user.getStore().getId() : 1L;
 
-        ChartSeriesDto revenueChart = analyticsService.getRevenueChart(timeframe, storeId);
+        ChartSeriesDto revenueChart;
+        if ("product".equalsIgnoreCase(type)) {
+            revenueChart = analyticsService.getProductRevenueChart(storeId);
+        } else {
+            revenueChart = analyticsService.getRevenueChart(timeframe, storeId);
+        }
 
         model.addAttribute("timeframe", timeframe);
+        model.addAttribute("type", type);
         model.addAttribute("revenueChart", revenueChart);
         model.addAttribute("store", user.getStore());
         return "manager/analytics";

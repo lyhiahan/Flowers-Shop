@@ -24,11 +24,16 @@ public class ManagerStoreController {
     @GetMapping
     public String listStores(Principal principal, Model model) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
-        List<Store> myStores = storeRepository.findByOwnerId(user.getId());
-        if (myStores.isEmpty() && user.getStore() != null) {
-            myStores = List.of(user.getStore());
+        List<Store> ownedStores = storeRepository.findByOwnerId(user.getId());
+        java.util.Set<Store> allStores = new java.util.LinkedHashSet<>(ownedStores);
+        if (user.getStore() != null) {
+            allStores.add(user.getStore());
         }
-        model.addAttribute("stores", myStores);
+        if (allStores.isEmpty()) {
+            allStores.addAll(storeRepository.findAll());
+        }
+        model.addAttribute("stores", new java.util.ArrayList<>(allStores));
+        model.addAttribute("currentUser", user);
         return "manager/stores";
     }
 
@@ -77,6 +82,7 @@ public class ManagerStoreController {
         store.setBio(formStore.getBio());
         store.setAvatar(formStore.getAvatar());
         store.setCover(formStore.getCover());
+        store.setFeaturedImages(formStore.getFeaturedImages());
         store.setIsOpen(formStore.getIsOpen());
 
         storeRepository.save(store);

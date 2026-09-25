@@ -14,6 +14,12 @@ public interface OrderService {
                          String recipientName, String recipientPhone, String recipientAddress, String greetingMessage);
     List<Order> checkout(String username, List<Long> selectedCartItemIds, PaymentMethod paymentMethod,
                          String recipientName, String recipientPhone, String recipientAddress, String greetingMessage, String voucherCode);
+    List<Order> checkout(String username, List<Long> selectedCartItemIds, PaymentMethod paymentMethod,
+                         String recipientName, String recipientPhone, String recipientAddress, String greetingMessage, String voucherCode,
+                         java.time.LocalDate deliveryDate);
+    List<Order> checkout(String username, List<Long> selectedCartItemIds, PaymentMethod paymentMethod,
+                         String recipientName, String recipientPhone, String recipientAddress, String greetingMessage, String voucherCode,
+                         java.time.LocalDate deliveryDate, String shippingMethod, Long pickupStoreId);
     List<Order> getOrdersByUsername(String username);
     List<Order> getOrdersByUsernameAndStatus(String username, com.finalproject.enums.OrderStatus status);
     List<Order> getOrdersByStore(Long storeId);

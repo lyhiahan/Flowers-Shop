@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${store.name + ' - Chi Tiết Cửa Hàng'}">Chi Tiết Cửa Hàng - Bloom Flower</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fafafa; }
+        .font-serif { font-family: 'Playfair Display', Georgia, serif; }
+        .store-header-card { border-radius: 20px; border: 1px solid #f1f5f9; background: white; }
+        .product-card { border-radius: 16px; border: 1px solid #f1f5f9; transition: transform 0.2s, box-shadow 0.2s; }
+        .product-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.06); }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg bg-white border-bottom py-3 sticky-top">
+        <div class="container">
+            <a class="navbar-brand font-serif fw-bold text-danger fs-4" th:href="@{/}">🌸 BLOOM FLOWER</a>
+            <div class="d-flex align-items-center gap-3">
+                <a th:href="@{/}" class="btn btn-light btn-sm"><i class="bi bi-house me-1"></i> Trang chủ</a>
+                <a th:href="@{/stores}" class="btn btn-outline-danger btn-sm active"><i class="bi bi-shop me-1"></i> Cửa hàng</a>
+                <a th:href="@{/users}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-people me-1"></i> Người dùng</a>
+                <div sec:authorize="isAuthenticated()">
+                    <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/customer/profile}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-person me-1"></i> Hồ sơ</a>
+                </div>
+                <div sec:authorize="!isAuthenticated()">
+                    <a th:href="@{/login}" class="btn btn-danger btn-sm rounded-pill px-3">Đăng nhập</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <!-- Thông tin cửa hàng -->
+        <div class="store-header-card p-4 p-md-5 mb-5 shadow-sm">
+            <div class="d-flex flex-column flex-md-row align-items-center gap-4 text-center text-md-start">
+                <img th:src="${store.avatar != null and !store.avatar.isEmpty() ? store.avatar : 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=150'}"
+                     class="rounded-circle border shadow-sm" width="100" height="100" style="object-fit: cover;">
+                <div class="flex-grow-1">
+                    <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-start gap-2 mb-2">
+                        <h2 class="font-serif fw-bold mb-0 text-dark" th:text="${store.name}"></h2>
+                        <span th:if="${store.isOpen != null and store.isOpen}" class="badge bg-success-subtle text-success rounded-pill">Đang mở cửa</span>
+                        <span th:if="${store.isOpen == null or !store.isOpen}" class="badge bg-secondary-subtle text-secondary rounded-pill">Tạm đóng</span>
+                        <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill" th:if="${store.rating != null}">
+                            ⭐ <span th:text="${store.rating}">5.0</span>
+                        </span>
+                    </div>
+                    <p class="text-muted mb-1"><i class="bi bi-geo-alt-fill text-danger me-1"></i> <span th:text="${store.address}"></span></p>
+                    <p class="text-muted mb-2"><i class="bi bi-telephone-fill text-primary me-1"></i> Hotline: <span th:text="${store.phone != null ? store.phone : 'Chưa cập nhật'}"></span></p>
+                    <p class="text-secondary small mb-0" th:text="${store.bio != null ? store.bio : 'Chào mừng bạn đến với chi nhánh cửa hàng hoa tươi của chúng tôi.'}"></p>
+                </div>
+                <div class="d-flex flex-column gap-2">
+                    <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/customer/store/follow/{id}(id=${store.id})}" method="post">
+                        <button type="submit" class="btn btn-sm rounded-pill px-3 w-100" th:classappend="${isFollowed} ? 'btn-secondary' : 'btn-danger'">
+                            <i class="bi me-1" th:classappend="${isFollowed} ? 'bi-check-lg' : 'bi-plus-lg'"></i>
+                            <span th:text="${isFollowed} ? 'Đang theo dõi' : 'Theo dõi cửa hàng'"></span>
+                        </button>
+                    </form>
+                    <a th:href="@{/stores}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                        <i class="bi bi-arrow-left me-1"></i> Danh sách cửa hàng
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Danh sách hoa tại cửa hàng này -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="font-serif fw-bold mb-1">💐 Mẫu Hoa Tại Chi Nhánh</h4>
+                <p class="text-muted small mb-0">Các mẫu hoa tươi hiện có sẵn tại cửa hàng này</p>
+            </div>
+            <span class="badge bg-light text-dark border px-3 py-2 rounded-pill" th:text="${#lists.size(products)} + ' mẫu hoa'"></span>
+        </div>
+
+        <div th:if="${#lists.isEmpty(products)}" class="text-center py-5 bg-white rounded-4 border p-5">
+            <div class="fs-1 text-secondary opacity-50 mb-3">🌸</div>
+            <h5>Chưa có sản phẩm nào tại chi nhánh này</h5>
+            <p class="text-muted small">Vui lòng quay lại sau hoặc tham quan các chi nhánh khác.</p>
+        </div>
+
+        <div th:if="${!#lists.isEmpty(products)}" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            <div class="col" th:each="p : ${products}">
+                <div class="card h-100 product-card bg-white overflow-hidden">
+                    <img th:src="${p.imageUrl != null and !p.imageUrl.isEmpty() ? p.imageUrl : 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=400'}"
+                         class="card-img-top" style="height: 220px; object-fit: cover;" alt="Hoa tươi">
+                    <div class="card-body d-flex flex-column p-4">
+                        <span class="badge bg-danger-subtle text-danger align-self-start rounded-pill mb-2" th:text="${p.category != null ? p.category.name : 'Hoa tươi'}"></span>
+                        <h6 class="card-title fw-bold text-dark font-serif" th:text="${p.name}"></h6>
+                        <p class="card-text text-muted small flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" th:text="${p.description}"></p>
+                        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                            <div>
+                                <span class="text-muted small d-block">Giá bán:</span>
+                                <strong class="text-danger fs-5 fw-bold" th:text="${#numbers.formatDecimal(p.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                            </div>
+                            <a th:href="@{/products/{id}(id=${p.id})}" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                Xem Chi Tiết
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

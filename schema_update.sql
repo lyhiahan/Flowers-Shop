@@ -284,3 +284,23 @@ BEGIN
     );
 END
 GO
+
+-- 17. Đồng bộ bảng otp_verifications
+IF EXISTS (SELECT * FROM sys.default_constraints WHERE parent_object_id = OBJECT_ID('dbo.otp_verifications') AND parent_column_id = COLUMNPROPERTY(OBJECT_ID('dbo.otp_verifications'), 'is_verified', 'ColumnId'))
+BEGIN
+    DECLARE @defName NVARCHAR(256);
+    SELECT @defName = name FROM sys.default_constraints WHERE parent_object_id = OBJECT_ID('dbo.otp_verifications') AND parent_column_id = COLUMNPROPERTY(OBJECT_ID('dbo.otp_verifications'), 'is_verified', 'ColumnId');
+    EXEC('ALTER TABLE dbo.otp_verifications DROP CONSTRAINT ' + @defName);
+END
+GO
+IF EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.otp_verifications') AND name = 'email')
+    ALTER TABLE dbo.otp_verifications DROP COLUMN email;
+IF EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.otp_verifications') AND name = 'otp_code')
+    ALTER TABLE dbo.otp_verifications DROP COLUMN otp_code;
+IF EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.otp_verifications') AND name = 'otp_type')
+    ALTER TABLE dbo.otp_verifications DROP COLUMN otp_type;
+IF EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.otp_verifications') AND name = 'expiry_time')
+    ALTER TABLE dbo.otp_verifications DROP COLUMN expiry_time;
+IF EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.otp_verifications') AND name = 'is_verified')
+    ALTER TABLE dbo.otp_verifications DROP COLUMN is_verified;
+GO

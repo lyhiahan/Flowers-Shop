@@ -17,7 +17,7 @@ public class AddToCartRequest {
 
     private Long productId;
     private Long storeId;
-    private OrderType orderType; // BUY hoặc RENT
+    private OrderType orderType = OrderType.BUY;
     private Integer quantity = 1;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)

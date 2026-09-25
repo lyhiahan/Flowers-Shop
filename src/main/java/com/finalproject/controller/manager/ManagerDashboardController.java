@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.security.Principal;
 
 @Controller
-@RequestMapping("/manager")
+@RequestMapping({"/manager", "/vendor"})
 @RequiredArgsConstructor
 public class ManagerDashboardController {
 
@@ -27,7 +27,7 @@ public class ManagerDashboardController {
                 .orElseThrow(() -> new AccessDeniedException("Người dùng không tồn tại"));
 
         if (manager.getStore() == null) {
-            throw new AccessDeniedException("Quản lý chưa được gán vào chi nhánh nào!");
+            return "redirect:/manager/stores";
         }
 
         RevenueChartDto stats = analyticsService.getStoreRevenueStats(manager.getStore().getId());

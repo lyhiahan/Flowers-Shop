@@ -18,9 +18,15 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Tên đăng nhập hoặc mật khẩu không chính xác: " + username));
+    public UserDetails loadUserByUsername(String input) throws UsernameNotFoundException {
+        if (input == null || input.trim().isEmpty()) {
+            throw new UsernameNotFoundException("Vui lòng nhập email, số điện thoại hoặc tên đăng nhập");
+        }
+        String cleanInput = input.trim();
+        User user = userRepository.findByUsername(cleanInput)
+                .or(() -> userRepository.findByEmail(cleanInput))
+                .or(() -> userRepository.findByPhone(cleanInput))
+                .orElseThrow(() -> new UsernameNotFoundException("Email, số điện thoại hoặc mật khẩu không chính xác: " + cleanInput));
 
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),

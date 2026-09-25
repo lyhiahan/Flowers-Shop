@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${(user.fullName != null ? user.fullName : user.username) + ' - Trang Cá Nhân'}">Trang Cá Nhân - Bloom Flower</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fafafa; }
+        .font-serif { font-family: 'Playfair Display', Georgia, serif; }
+        .profile-card { border-radius: 20px; border: 1px solid #f1f5f9; background: white; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg bg-white border-bottom py-3 sticky-top">
+        <div class="container">
+            <a class="navbar-brand font-serif fw-bold text-danger fs-4" th:href="@{/}">🌸 BLOOM FLOWER</a>
+            <div class="d-flex align-items-center gap-3">
+                <a th:href="@{/}" class="btn btn-light btn-sm"><i class="bi bi-house me-1"></i> Trang chủ</a>
+                <a th:href="@{/stores}" class="btn btn-outline-danger btn-sm"><i class="bi bi-shop me-1"></i> Cửa hàng</a>
+                <a th:href="@{/users}" class="btn btn-outline-secondary btn-sm active"><i class="bi bi-people me-1"></i> Người dùng</a>
+                <div sec:authorize="isAuthenticated()">
+                    <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/customer/profile}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-person me-1"></i> Hồ sơ</a>
+                </div>
+                <div sec:authorize="!isAuthenticated()">
+                    <a th:href="@{/login}" class="btn btn-danger btn-sm rounded-pill px-3">Đăng nhập</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="profile-card p-4 p-md-5 shadow-sm text-center">
+                    <img th:src="${user.avatarUrl != null and !user.avatarUrl.isEmpty() ? user.avatarUrl : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'}"
+                         class="rounded-circle border shadow-sm mb-3" width="120" height="120" style="object-fit: cover;">
+
+                    <h3 class="font-serif fw-bold mb-1 text-dark" th:text="${user.fullName != null ? user.fullName : user.username}"></h3>
+                    <p class="text-muted small mb-3" th:text="'@' + ${user.username}"></p>
+
+                    <div class="d-flex justify-content-center gap-2 mb-4">
+                        <span th:if="${user.role != null and user.role.name() == 'ADMIN'}" class="badge bg-danger-subtle text-danger rounded-pill px-3 py-2">Quản trị viên</span>
+                        <span th:if="${user.role != null and (user.role.name() == 'MANAGER' or user.role.name() == 'VENDOR')}" class="badge bg-success-subtle text-success rounded-pill px-3 py-2">Chủ cửa hàng</span>
+                        <span th:if="${user.role != null and user.role.name() == 'STAFF'}" class="badge bg-warning-subtle text-warning-emphasis rounded-pill px-3 py-2">Nhân viên</span>
+                        <span th:if="${user.role != null and user.role.name() == 'SHIPPER'}" class="badge bg-info-subtle text-info-emphasis rounded-pill px-3 py-2">Giao hàng</span>
+                        <span th:if="${user.role != null and user.role.name() == 'CUSTOMER'}" class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-2">Khách hàng thành viên</span>
+                    </div>
+
+                    <div class="row g-3 py-3 border-top border-bottom my-3">
+                        <div class="col-6">
+                            <span class="text-muted small d-block">Điểm thưởng tích lũy</span>
+                            <strong class="text-danger fs-5" th:text="${user.point != null ? user.point : 0} + ' điểm'"></strong>
+                        </div>
+                        <div class="col-6">
+                            <span class="text-muted small d-block">Hạng thành viên</span>
+                            <strong class="text-dark fs-5" th:text="${user.userLevel != null ? user.userLevel.name : 'Thành viên mới'}"></strong>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <a th:href="@{/users}" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                            <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

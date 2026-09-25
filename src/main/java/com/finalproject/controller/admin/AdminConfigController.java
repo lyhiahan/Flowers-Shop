@@ -42,6 +42,19 @@ public class AdminConfigController {
         return "redirect:/admin/categories";
     }
 
+    @PostMapping("/categories/update/{id}")
+    public String updateCategory(@PathVariable("id") Long id,
+                                @RequestParam("name") String name,
+                                @RequestParam(value = "description", required = false) String description,
+                                RedirectAttributes ra) {
+        Category cat = categoryRepository.findById(id).orElseThrow();
+        cat.setName(name);
+        cat.setDescription(description);
+        categoryRepository.save(cat);
+        ra.addFlashAttribute("successMessage", "Cập nhật danh mục [" + name + "] thành công!");
+        return "redirect:/admin/categories";
+    }
+
     @PostMapping("/categories/delete/{id}")
     public String deleteCategory(@PathVariable("id") Long id, RedirectAttributes ra) {
         try {
@@ -71,6 +84,30 @@ public class AdminConfigController {
         return "redirect:/admin/commissions";
     }
 
+    @PostMapping("/commissions/update/{id}")
+    public String updateCommission(@PathVariable("id") Long id,
+                                   @RequestParam("name") String name,
+                                   @RequestParam("cost") BigDecimal cost,
+                                   @RequestParam(value = "description", required = false) String description,
+                                   RedirectAttributes ra) {
+        Commission c = commissionRepository.findById(id).orElseThrow();
+        c.setName(name);
+        c.setCost(cost);
+        c.setDescription(description);
+        commissionRepository.save(c);
+        ra.addFlashAttribute("successMessage", "Cập nhật chính sách chiết khấu thành công!");
+        return "redirect:/admin/commissions";
+    }
+
+    @PostMapping("/commissions/delete/{id}")
+    public String deleteCommission(@PathVariable("id") Long id, RedirectAttributes ra) {
+        Commission c = commissionRepository.findById(id).orElseThrow();
+        c.setIsDeleted(true);
+        commissionRepository.save(c);
+        ra.addFlashAttribute("successMessage", "Xóa chính sách chiết khấu thành công!");
+        return "redirect:/admin/commissions";
+    }
+
     // --- 3. Quản lý Nhà vận chuyển (Deliveries) ---
     @GetMapping("/deliveries")
     public String listDeliveries(Model model) {
@@ -89,12 +126,36 @@ public class AdminConfigController {
         return "redirect:/admin/deliveries";
     }
 
+    @PostMapping("/deliveries/update/{id}")
+    public String updateDelivery(@PathVariable("id") Long id,
+                                 @RequestParam("name") String name,
+                                 @RequestParam("price") BigDecimal price,
+                                 @RequestParam(value = "description", required = false) String description,
+                                 RedirectAttributes ra) {
+        Delivery d = deliveryRepository.findById(id).orElseThrow();
+        d.setName(name);
+        d.setPrice(price);
+        d.setDescription(description);
+        deliveryRepository.save(d);
+        ra.addFlashAttribute("successMessage", "Cập nhật đơn vị vận chuyển thành công!");
+        return "redirect:/admin/deliveries";
+    }
+
     @PostMapping("/deliveries/toggle/{id}")
     public String toggleDelivery(@PathVariable("id") Long id, RedirectAttributes ra) {
         Delivery d = deliveryRepository.findById(id).orElseThrow();
         d.setIsActive(!Boolean.TRUE.equals(d.getIsActive()));
         deliveryRepository.save(d);
         ra.addFlashAttribute("successMessage", "Đã cập nhật trạng thái đơn vị vận chuyển!");
+        return "redirect:/admin/deliveries";
+    }
+
+    @PostMapping("/deliveries/delete/{id}")
+    public String deleteDelivery(@PathVariable("id") Long id, RedirectAttributes ra) {
+        Delivery d = deliveryRepository.findById(id).orElseThrow();
+        d.setIsDeleted(true);
+        deliveryRepository.save(d);
+        ra.addFlashAttribute("successMessage", "Xóa đơn vị vận chuyển thành công!");
         return "redirect:/admin/deliveries";
     }
 
@@ -151,6 +212,30 @@ public class AdminConfigController {
         return "redirect:/admin/user-levels";
     }
 
+    @PostMapping("/user-levels/update/{id}")
+    public String updateUserLevel(@PathVariable("id") Long id,
+                                  @RequestParam("name") String name,
+                                  @RequestParam("minPoint") int minPoint,
+                                  @RequestParam("discount") BigDecimal discount,
+                                  RedirectAttributes ra) {
+        UserLevel ul = userLevelRepository.findById(id).orElseThrow();
+        ul.setName(name);
+        ul.setMinPoint(minPoint);
+        ul.setDiscount(discount);
+        userLevelRepository.save(ul);
+        ra.addFlashAttribute("successMessage", "Cập nhật cấp bậc khách hàng thành công!");
+        return "redirect:/admin/user-levels";
+    }
+
+    @PostMapping("/user-levels/delete/{id}")
+    public String deleteUserLevel(@PathVariable("id") Long id, RedirectAttributes ra) {
+        UserLevel ul = userLevelRepository.findById(id).orElseThrow();
+        ul.setIsDeleted(true);
+        userLevelRepository.save(ul);
+        ra.addFlashAttribute("successMessage", "Xóa cấp bậc khách hàng thành công!");
+        return "redirect:/admin/user-levels";
+    }
+
     // --- 6. Quản lý Cấp độ cửa hàng (StoreLevel) ---
     @GetMapping("/store-levels")
     public String listStoreLevels(Model model) {
@@ -169,6 +254,30 @@ public class AdminConfigController {
         return "redirect:/admin/store-levels";
     }
 
+    @PostMapping("/store-levels/update/{id}")
+    public String updateStoreLevel(@PathVariable("id") Long id,
+                                   @RequestParam("name") String name,
+                                   @RequestParam("minPoint") int minPoint,
+                                   @RequestParam("discount") BigDecimal discount,
+                                   RedirectAttributes ra) {
+        StoreLevel sl = storeLevelRepository.findById(id).orElseThrow();
+        sl.setName(name);
+        sl.setMinPoint(minPoint);
+        sl.setDiscount(discount);
+        storeLevelRepository.save(sl);
+        ra.addFlashAttribute("successMessage", "Cập nhật cấp bậc chi nhánh thành công!");
+        return "redirect:/admin/store-levels";
+    }
+
+    @PostMapping("/store-levels/delete/{id}")
+    public String deleteStoreLevel(@PathVariable("id") Long id, RedirectAttributes ra) {
+        StoreLevel sl = storeLevelRepository.findById(id).orElseThrow();
+        sl.setIsDeleted(true);
+        storeLevelRepository.save(sl);
+        ra.addFlashAttribute("successMessage", "Xóa cấp bậc chi nhánh thành công!");
+        return "redirect:/admin/store-levels";
+    }
+
     // --- 7. Quản lý Thuộc tính sản phẩm (Style) ---
     @GetMapping("/styles")
     public String listStyles(Model model) {
@@ -181,6 +290,26 @@ public class AdminConfigController {
         Style s = Style.builder().name(name).isDeleted(false).build();
         styleRepository.save(s);
         ra.addFlashAttribute("successMessage", "Thêm nhóm thuộc tính [" + name + "] thành công!");
+        return "redirect:/admin/styles";
+    }
+
+    @PostMapping("/styles/update/{id}")
+    public String updateStyle(@PathVariable("id") Long id,
+                              @RequestParam("name") String name,
+                              RedirectAttributes ra) {
+        Style s = styleRepository.findById(id).orElseThrow();
+        s.setName(name);
+        styleRepository.save(s);
+        ra.addFlashAttribute("successMessage", "Cập nhật nhóm thuộc tính thành công!");
+        return "redirect:/admin/styles";
+    }
+
+    @PostMapping("/styles/delete/{id}")
+    public String deleteStyle(@PathVariable("id") Long id, RedirectAttributes ra) {
+        Style s = styleRepository.findById(id).orElseThrow();
+        s.setIsDeleted(true);
+        styleRepository.save(s);
+        ra.addFlashAttribute("successMessage", "Xóa nhóm thuộc tính thành công!");
         return "redirect:/admin/styles";
     }
 }

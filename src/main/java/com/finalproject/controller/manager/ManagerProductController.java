@@ -81,6 +81,30 @@ public class ManagerProductController {
         return "redirect:/manager/products";
     }
 
+    @PostMapping("/update/{id}")
+    public String updateProduct(@PathVariable("id") Long id,
+                                @RequestParam("name") String name,
+                                @RequestParam("categoryId") Long categoryId,
+                                @RequestParam("priceBuy") BigDecimal priceBuy,
+                                @RequestParam(value = "promotionalPrice", required = false) BigDecimal promotionalPrice,
+                                @RequestParam(value = "imageUrl", required = false) String imageUrl,
+                                @RequestParam(value = "description", required = false) String description,
+                                RedirectAttributes ra) {
+        Product p = productRepository.findById(id).orElseThrow();
+        Category cat = categoryRepository.findById(categoryId).orElseThrow();
+        p.setName(name);
+        p.setCategory(cat);
+        p.setPriceBuy(priceBuy);
+        p.setPromotionalPrice(promotionalPrice != null ? promotionalPrice : priceBuy);
+        if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+            p.setImageUrl(imageUrl.trim());
+        }
+        p.setDescription(description);
+        productRepository.save(p);
+        ra.addFlashAttribute("successMessage", "Cập nhật mẫu hoa [" + name + "] thành công!");
+        return "redirect:/manager/products";
+    }
+
     @PostMapping("/toggle-selling/{id}")
     public String toggleSelling(@PathVariable("id") Long id, RedirectAttributes ra) {
         Product p = productRepository.findById(id).orElseThrow();

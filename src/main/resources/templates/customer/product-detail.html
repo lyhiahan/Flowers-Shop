@@ -160,36 +160,18 @@
                 <!-- Giá bán -->
                 <div class="mb-4">
                     <div class="fs-2 fw-bold text-danger font-serif" th:text="${#numbers.formatDecimal(product.priceBuy, 0, 'COMMA', 0, 'POINT') + ' đ'}"></div>
-                    <div class="text-muted small">Giá thuê phụ kiện/cổng hoa: <strong class="text-secondary" th:text="${#numbers.formatDecimal(product.priceRentPerDay, 0, 'COMMA', 0, 'POINT') + ' đ/ngày'}"></strong> (Cọc: <span th:text="${#numbers.formatDecimal(product.depositFee, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>)</div>
                 </div>
 
                 <!-- Form thêm giỏ hàng -->
                 <form th:action="@{/cart/add}" method="post" class="mb-4">
                     <input type="hidden" name="productId" th:value="${product.id}">
                     <input type="hidden" name="storeId" th:value="${product.store != null ? product.store.id : 1}">
+                    <input type="hidden" name="orderType" value="BUY">
 
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold">Hình thức</label>
-                            <select name="orderType" class="form-select">
-                                <option value="BUY" selected>Mua Đứt (Sở hữu hoa)</option>
-                                <option value="RENT">Thuê hoa sự kiện / Cổng hoa</option>
-                            </select>
-                        </div>
+                    <div class="row g-3 mb-4">
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold">Số lượng bó/lẵng</label>
                             <input type="number" name="quantity" value="1" min="1" max="99" class="form-control">
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold">Ngày nhận hoa</label>
-                            <input type="date" name="deliveryDate" class="form-control" th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold">Lời chúc thiệp mừng</label>
-                            <input type="text" name="greetingMessage" class="form-control" placeholder="Ví dụ: Chúc mừng sinh nhật em yêu!">
                         </div>
                     </div>
 
@@ -198,6 +180,14 @@
                             <i class="bi bi-cart-plus me-2"></i> Thêm Vào Giỏ Hàng
                         </button>
                     </div>
+                </form>
+
+                <!-- Nút yêu thích / theo dõi mẫu hoa -->
+                <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/customer/wishlist/toggle/{productId}(productId=${product.id})}" method="post" class="mb-4">
+                    <button type="submit" class="btn btn-outline-danger w-100 rounded-pill py-2">
+                        <i class="bi me-1" th:classappend="${isLiked} ? 'bi-heart-fill' : 'bi-heart'"></i>
+                        <span th:text="${isLiked} ? 'Đã Lưu Vào Danh Sách Yêu Thích' : 'Thêm Vào Yêu Thích'"></span>
+                    </button>
                 </form>
 
                 <!-- Mô tả -->

@@ -33,12 +33,16 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void registerCustomer(RegisterRequest request) {
-        // 1. Kiểm tra trùng username hoặc email
+        // 1. Kiểm tra trùng username, email hoặc số điện thoại
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new IllegalArgumentException("Tên đăng nhập đã tồn tại trên hệ thống!");
+            throw new IllegalArgumentException("Thông tin không hợp lệ: Tên đăng nhập đã tồn tại trong hệ thống!");
         }
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Email này đã được sử dụng!");
+            throw new IllegalArgumentException("Thông tin không hợp lệ: Email đăng ký đã tồn tại trong hệ thống!");
+        }
+        if (request.getPhone() != null && !request.getPhone().trim().isEmpty()
+                && userRepository.existsByPhone(request.getPhone().trim())) {
+            throw new IllegalArgumentException("Thông tin không hợp lệ: Số điện thoại đăng ký đã tồn tại trong hệ thống!");
         }
 
         // 2. Tạo User ở trạng thái chưa kích hoạt (isActive = false)

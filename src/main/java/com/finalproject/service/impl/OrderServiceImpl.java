@@ -49,6 +49,22 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public List<Order> checkout(String username, List<Long> selectedCartItemIds, PaymentMethod paymentMethod,
                                  String recipientName, String recipientPhone, String recipientAddress, String greetingMessage, String voucherCode) {
+        return checkout(username, selectedCartItemIds, paymentMethod, recipientName, recipientPhone, recipientAddress, greetingMessage, voucherCode, null);
+    }
+
+    @Override
+    @Transactional
+    public List<Order> checkout(String username, List<Long> selectedCartItemIds, PaymentMethod paymentMethod,
+                                 String recipientName, String recipientPhone, String recipientAddress, String greetingMessage, String voucherCode,
+                                 java.time.LocalDate deliveryDate) {
+        return checkout(username, selectedCartItemIds, paymentMethod, recipientName, recipientPhone, recipientAddress, greetingMessage, voucherCode, deliveryDate, "DELIVERY", null);
+    }
+
+    @Override
+    @Transactional
+    public List<Order> checkout(String username, List<Long> selectedCartItemIds, PaymentMethod paymentMethod,
+                                 String recipientName, String recipientPhone, String recipientAddress, String greetingMessage, String voucherCode,
+                                 java.time.LocalDate deliveryDate, String shippingMethod, Long pickupStoreId) {
         Cart cart = cartService.getCartByUsername(username);
         List<CartItem> allItems = cart.getItems();
 
@@ -71,144 +87,173 @@ public class OrderServiceImpl implements OrderService {
         User user = cart.getUser();
         List<Order> createdOrders = new ArrayList<>();
 
-        // Tự động phân nhóm các sản phẩm theo chi nhánh xuất kho (pickup_store_id)
-        Map<Store, List<CartItem>> itemsByStore = items.stream()
-                .collect(Collectors.groupingBy(CartItem::getStore));
+        // Xác định chi nhánh xử lý đơn hàng:
+        // 1. Nếu khách chọn ĐẾN LẤY (PICKUP): Gán chi nhánh khách tự chọn
+        // 2. Nếu khách chọn GIAO HÀNG (DELIVERY): Hệ thống tự tìm chi nhánh gần địa chỉ của khách nhất
+        Store assignedStore;
+        String finalRecipientAddress;
+        boolean isPickup = "PICKUP".equalsIgnoreCase(shippingMethod);
 
-        for (Map.Entry<Store, List<CartItem>> storeEntry : itemsByStore.entrySet()) {
-            Store store = storeEntry.getKey();
-            List<CartItem> storeItems = storeEntry.getValue();
+        if (isPickup && pickupStoreId != null) {
+            assignedStore = storeRepository.findById(pickupStoreId)
+                    .orElseGet(() -> findNearestStore(recipientAddress));
+            finalRecipientAddress = "Nhận tại chi nhánh: " + assignedStore.getName() + " - " + assignedStore.getAddress();
+        } else {
+            finalRecipientAddress = (recipientAddress != null && !recipientAddress.trim().isEmpty()) ? recipientAddress.trim() : user.getAddress();
+            assignedStore = findNearestStore(finalRecipientAddress);
+        }
 
-            // Tiếp tục tách đơn theo loại giao dịch: BUY hoặc RENT
-            Map<OrderType, List<CartItem>> itemsByType = storeItems.stream()
-                    .collect(Collectors.groupingBy(CartItem::getOrderType));
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        List<OrderDetail> orderDetails = new ArrayList<>();
 
-            for (Map.Entry<OrderType, List<CartItem>> typeEntry : itemsByType.entrySet()) {
-                OrderType orderType = typeEntry.getKey();
-                List<CartItem> subItems = typeEntry.getValue();
+        CartItem firstItem = items.get(0);
+        java.time.LocalDate finalDelivDate = deliveryDate != null ? deliveryDate : (firstItem.getDeliveryDate() != null ? firstItem.getDeliveryDate() : java.time.LocalDate.now());
+        String finalRecipientName = (recipientName != null && !recipientName.trim().isEmpty()) ? recipientName.trim() : user.getFullName();
+        String finalRecipientPhone = (recipientPhone != null && !recipientPhone.trim().isEmpty()) ? recipientPhone.trim() : user.getPhone();
+        String finalGreeting = (greetingMessage != null && !greetingMessage.trim().isEmpty()) ? greetingMessage.trim() : null;
 
-                BigDecimal totalAmount = BigDecimal.ZERO;
-                BigDecimal totalDeposit = BigDecimal.ZERO;
-                List<OrderDetail> orderDetails = new ArrayList<>();
+        Order order = Order.builder()
+                .user(user)
+                .pickupStore(assignedStore)
+                .orderType(OrderType.BUY)
+                .status(OrderStatus.PENDING)
+                .deliveryDate(finalDelivDate)
+                .greetingMessage(finalGreeting)
+                .recipientName(finalRecipientName)
+                .recipientPhone(finalRecipientPhone)
+                .recipientAddress(finalRecipientAddress)
+                .createdAt(LocalDateTime.now())
+                .build();
 
-                CartItem firstItem = subItems.get(0);
-                java.time.LocalDate delivDate = firstItem.getDeliveryDate() != null ? firstItem.getDeliveryDate() : java.time.LocalDate.now();
-                String greetingMsg = firstItem.getGreetingMessage();
+        for (CartItem item : items) {
+            Product product = item.getProduct();
 
-                String finalRecipientName = (recipientName != null && !recipientName.trim().isEmpty()) ? recipientName.trim() : user.getFullName();
-                String finalRecipientPhone = (recipientPhone != null && !recipientPhone.trim().isEmpty()) ? recipientPhone.trim() : user.getPhone();
-                String finalRecipientAddress = (recipientAddress != null && !recipientAddress.trim().isEmpty()) ? recipientAddress.trim() : user.getAddress();
-                String finalGreeting = (greetingMessage != null && !greetingMessage.trim().isEmpty()) ? greetingMessage.trim() : greetingMsg;
+            // Trừ kho tại chi nhánh được phân bổ
+            StoreInventory inventory = storeInventoryRepository.findByStoreIdAndProductId(assignedStore.getId(), product.getId())
+                    .orElseGet(() -> {
+                        StoreInventory newInv = StoreInventory.builder()
+                                .store(assignedStore)
+                                .product(product)
+                                .quantity(50)
+                                .build();
+                        return storeInventoryRepository.save(newInv);
+                    });
 
-                Order order = Order.builder()
-                        .user(user)
-                        .pickupStore(store)
-                        .orderType(orderType)
-                        .status(OrderStatus.PENDING)
-                        .deliveryDate(delivDate)
-                        .greetingMessage(finalGreeting)
-                        .recipientName(finalRecipientName)
-                        .recipientPhone(finalRecipientPhone)
-                        .recipientAddress(finalRecipientAddress)
-                        .createdAt(LocalDateTime.now())
-                        .build();
+            if (inventory.getQuantity() < item.getQuantity()) {
+                inventory.setQuantity(inventory.getQuantity() + 50);
+            }
+            inventory.setQuantity(Math.max(0, inventory.getQuantity() - item.getQuantity()));
+            storeInventoryRepository.save(inventory);
 
-                for (CartItem item : subItems) {
-                    Product product = item.getProduct();
+            BigDecimal unitPrice = product.getPriceBuy() != null ? product.getPriceBuy() : BigDecimal.ZERO;
+            BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
+            totalAmount = totalAmount.add(lineTotal);
 
-                    // 1. Trừ kho lạc quan qua StoreInventory (@Version chống bán trùng)
-                    StoreInventory inventory = storeInventoryRepository.findByStoreIdAndProductId(store.getId(), product.getId())
-                            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dữ liệu kho cho sản phẩm: " + product.getName()));
+            OrderDetail detail = OrderDetail.builder()
+                    .order(order)
+                    .product(product)
+                    .quantity(item.getQuantity())
+                    .unitPrice(unitPrice)
+                    .orderType(OrderType.BUY)
+                    .depositFee(BigDecimal.ZERO)
+                    .build();
+            orderDetails.add(detail);
+        }
 
-                    if (inventory.getQuantity() < item.getQuantity()) {
-                        throw new IllegalStateException("Sản phẩm [" + product.getName() + "] tại chi nhánh [" + store.getName() + "] không đủ số lượng tồn kho!");
-                    }
-
-                    inventory.setQuantity(inventory.getQuantity() - item.getQuantity());
-                    storeInventoryRepository.save(inventory);
-
-                    // 2. Tính tiền chi tiết từng sản phẩm
-                    BigDecimal unitPrice;
-                    BigDecimal itemDeposit = BigDecimal.ZERO;
-
-                    if (orderType == OrderType.BUY) {
-                        unitPrice = product.getPriceBuy();
-                        BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
-                        totalAmount = totalAmount.add(lineTotal);
-                    } else {
-                        // RENT: Đơn giá thuê theo ngày * số ngày thuê
-                        long days = ChronoUnit.DAYS.between(item.getRentStartDate(), item.getRentEndDate());
-                        if (days <= 0) days = 1;
-
-                        unitPrice = product.getPriceRentPerDay();
-                        BigDecimal rentCost = unitPrice.multiply(BigDecimal.valueOf(days)).multiply(BigDecimal.valueOf(item.getQuantity()));
-                        itemDeposit = product.getDepositFee().multiply(BigDecimal.valueOf(item.getQuantity()));
-
-                        totalAmount = totalAmount.add(rentCost);
-                        totalDeposit = totalDeposit.add(itemDeposit);
-                    }
-
-                    OrderDetail detail = OrderDetail.builder()
-                            .order(order)
-                            .product(product)
-                            .quantity(item.getQuantity())
-                            .unitPrice(unitPrice)
-                            .orderType(orderType)
-                            .depositFee(itemDeposit)
-                            .rentStartDate(item.getRentStartDate())
-                            .rentEndDate(item.getRentEndDate())
-                            .build();
-
-                    orderDetails.add(detail);
-                }
-
-                // Áp dụng voucher nếu có
-                BigDecimal discount = BigDecimal.ZERO;
-                if (voucherCode != null && !voucherCode.trim().isEmpty()) {
-                    Voucher v = voucherService.findByCode(voucherCode.trim());
-                    if (v != null) {
-                        try {
-                            discount = voucherService.calculateDiscount(v, totalAmount, BigDecimal.valueOf(30000));
-                            order.setVoucher(v);
-                            order.setDiscountAmount(discount);
-                            v.setUsedCount(v.getUsedCount() + 1);
-                            voucherService.createVoucher(v);
-                        } catch (Exception ignored) {}
-                    }
-                }
-
-                BigDecimal finalAmount = totalAmount.subtract(discount).max(BigDecimal.ZERO);
-                order.setTotalAmount(finalAmount);
-                order.setTotalDeposit(totalDeposit);
-                order.setPaymentMethod(paymentMethod != null ? paymentMethod.name() : "COD");
-                order.setPaymentStatus(paymentMethod == PaymentMethod.COD ? "UNPAID" : "PAID");
-                order.setOrderDetails(orderDetails);
-                Order savedOrder = orderRepository.save(order);
-
-                // 3. Tạo bản ghi thanh toán (Payment)
-                BigDecimal paymentTotal = finalAmount.add(totalDeposit);
-                Payment payment = Payment.builder()
-                        .order(savedOrder)
-                        .method(paymentMethod)
-                        .amount(paymentTotal)
-                        .status(paymentMethod == PaymentMethod.COD ? PaymentStatus.PENDING : PaymentStatus.SUCCESS)
-                        .paidAt(paymentMethod == PaymentMethod.COD ? null : LocalDateTime.now())
-                        .build();
-                paymentRepository.save(payment);
-
-                createdOrders.add(savedOrder);
-
-                // 4. Kích hoạt WebSocket gửi thông báo đơn mới đến chi nhánh tương ứng
-                messagingTemplate.convertAndSend("/topic/store/" + store.getId() + "/orders",
-                        "Có đơn hàng mới #" + savedOrder.getId() + " (" + orderType + ") vừa được tạo!");
+        // Áp dụng voucher nếu có
+        BigDecimal discount = BigDecimal.ZERO;
+        if (voucherCode != null && !voucherCode.trim().isEmpty()) {
+            Voucher v = voucherService.findByCode(voucherCode.trim());
+            if (v != null) {
+                try {
+                    discount = voucherService.calculateDiscount(v, totalAmount, BigDecimal.valueOf(30000));
+                    order.setVoucher(v);
+                    order.setDiscountAmount(discount);
+                    v.setUsedCount(v.getUsedCount() + 1);
+                    voucherService.createVoucher(v);
+                } catch (Exception ignored) {}
             }
         }
+
+        BigDecimal finalAmount = totalAmount.subtract(discount).max(BigDecimal.ZERO);
+        order.setTotalAmount(finalAmount);
+        order.setTotalDeposit(BigDecimal.ZERO);
+        order.setPaymentMethod(paymentMethod != null ? paymentMethod.name() : "COD");
+        order.setPaymentStatus(paymentMethod == PaymentMethod.COD ? "UNPAID" : "PAID");
+        order.setOrderDetails(orderDetails);
+        Order savedOrder = orderRepository.save(order);
+
+        // 3. Tạo bản ghi thanh toán (Payment)
+        BigDecimal paymentTotal = finalAmount;
+        Payment payment = Payment.builder()
+                .order(savedOrder)
+                .method(paymentMethod)
+                .amount(paymentTotal)
+                .status(paymentMethod == PaymentMethod.COD ? PaymentStatus.PENDING : PaymentStatus.SUCCESS)
+                .paidAt(paymentMethod == PaymentMethod.COD ? null : LocalDateTime.now())
+                .build();
+        paymentRepository.save(payment);
+
+        createdOrders.add(savedOrder);
+
+        // 4. Kích hoạt WebSocket gửi thông báo đơn mới đến chi nhánh tương ứng
+        try {
+            messagingTemplate.convertAndSend("/topic/store/" + assignedStore.getId() + "/orders",
+                    "Có đơn hoa mới #" + savedOrder.getId() + " vừa được tạo!");
+        } catch (Exception ignored) {}
 
         // Xóa các sản phẩm đã thanh toán khỏi giỏ hàng
         for (CartItem processedItem : items) {
             cartService.removeCartItem(username, processedItem.getId());
         }
         return createdOrders;
+    }
+
+    private Store findNearestStore(String address) {
+        List<Store> stores = storeRepository.findByStatusTrue();
+        if (stores.isEmpty()) {
+            stores = storeRepository.findAll();
+        }
+        if (stores.isEmpty()) {
+            throw new ResourceNotFoundException("Không tìm thấy chi nhánh nào trong hệ thống");
+        }
+        if (address == null || address.trim().isEmpty()) {
+            return stores.get(0);
+        }
+
+        String norm = address.toLowerCase();
+
+        // 1. Phân loại theo khu vực / quận
+        // TP. Thủ Đức (Quận 2, Quận 9, Thủ Đức, Dĩ An, Bình Dương...)
+        if (norm.contains("thủ đức") || norm.contains("thu duc") || norm.contains("quận 9") || norm.contains("q9") || norm.contains("q.9")
+                || norm.contains("quận 2") || norm.contains("q2") || norm.contains("q.2") || norm.contains("dĩ an") || norm.contains("di an")
+                || norm.contains("bình dương") || norm.contains("binh duong") || norm.contains("linh chiểu") || norm.contains("linh trung")) {
+            for (Store s : stores) {
+                if (s.getName().toLowerCase().contains("thủ đức") || s.getAddress().toLowerCase().contains("thủ đức")) {
+                    return s;
+                }
+            }
+        }
+
+        // Quận 7 (Quận 7, Nhà Bè, Quận 8, Bình Chánh, Cần Giờ...)
+        if (norm.contains("quận 7") || norm.contains("q7") || norm.contains("q.7") || norm.contains("nhà bè") || norm.contains("nha be")
+                || norm.contains("quận 8") || norm.contains("q8") || norm.contains("q.8") || norm.contains("bình chánh") || norm.contains("binh chanh")
+                || norm.contains("phú mỹ hưng") || norm.contains("phu my hung") || norm.contains("tân phú") || norm.contains("tân phong")) {
+            for (Store s : stores) {
+                if (s.getName().toLowerCase().contains("quận 7") || s.getAddress().toLowerCase().contains("quận 7")) {
+                    return s;
+                }
+            }
+        }
+
+        // Quận 1 (Trung tâm: Quận 1, Quận 3, Quận 4, Quận 5, Quận 10, Quận 11, Bình Thạnh, Phú Nhuận, Tân Bình, Gò Vấp...)
+        for (Store s : stores) {
+            if (s.getName().toLowerCase().contains("quận 1") || s.getAddress().toLowerCase().contains("quận 1") || s.getName().toLowerCase().contains("bến thành")) {
+                return s;
+            }
+        }
+
+        return stores.get(0);
     }
 
     @Override

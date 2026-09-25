@@ -2,77 +2,124 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Đăng Ký Tài Khoản - Bloom Flower Chain</title>
+    <title>Đăng Ký Tài Khoản (Sign Up) - Bloom Flower Chain</title>
+    <!-- Google Fonts & Bootstrap 5 & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --flower-primary: #e11d48;
+            --flower-soft-pink: #fff1f2;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #fff1f2 0%, #fef2f2 50%, #fdf2f8 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        .font-serif {
+            font-family: 'Playfair Display', Georgia, serif;
+        }
+        .register-card {
+            border: 1px solid #ffe4e6;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px -5px rgba(225, 29, 72, 0.1), 0 8px 10px -6px rgba(225, 29, 72, 0.1);
+        }
+    </style>
 </head>
-<body class="bg-light">
+<body>
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0 rounded-4">
+        <div class="col-md-6 col-lg-5">
+            <div class="card register-card bg-white p-2">
                 <div class="card-body p-4">
                     <div class="text-center mb-4">
                         <div class="fs-1 mb-2">🌸</div>
-                        <h3 class="fw-bold text-dark">BLOOM FLOWER</h3>
-                        <p class="text-muted small">Đăng ký tài khoản khách hàng mới</p>
+                        <h3 class="font-serif fw-bold text-dark mb-1">BLOOM FLOWER</h3>
+                        <p class="text-muted small">Đăng Ký Tài Khoản Khách Hàng (Sign Up)</p>
                     </div>
 
-                    <div th:if="${errorMessage}" class="alert alert-danger py-2 small" th:text="${errorMessage}"></div>
+                    <!-- Thông báo lỗi (Exception Flow: 8b, 8b1) -->
+                    <div th:if="${errorMessage}" class="alert alert-danger py-2 small rounded-3" th:text="${errorMessage}"></div>
+                    <div th:if="${successMessage}" class="alert alert-success py-2 small rounded-3" th:text="${successMessage}"></div>
 
-                    <form th:action="@{/register}" th:object="${registerRequest}" method="post">
+                    <form id="registerForm" th:action="@{/register}" th:object="${registerRequest}" method="post">
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Tên đăng nhập (*)</label>
-                                <input type="text" th:field="*{username}" class="form-control"
-                                       th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''"
-                                       placeholder="Từ 4-50 ký tự" required>
-                                <div class="invalid-feedback" th:errors="*{username}"></div>
+                                <label class="form-label small fw-semibold text-secondary">Tên đăng nhập (*)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-person"></i></span>
+                                    <input type="text" id="usernameInput" th:field="*{username}" class="form-control border-start-0 ps-0"
+                                           th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''"
+                                           placeholder="Từ 4-50 ký tự" required autofocus>
+                                </div>
+                                <div class="invalid-feedback d-block small" th:errors="*{username}"></div>
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Mật khẩu (*)</label>
-                                <input type="password" th:field="*{password}" class="form-control"
-                                       th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''"
-                                       placeholder="Tối thiểu 6 ký tự" required>
-                                <div class="invalid-feedback" th:errors="*{password}"></div>
+                                <label class="form-label small fw-semibold text-secondary">Mật khẩu (*)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-lock"></i></span>
+                                    <input type="password" id="passwordInput" th:field="*{password}" class="form-control border-start-0 ps-0"
+                                           th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''"
+                                           placeholder="Tối thiểu 6 ký tự" required>
+                                </div>
+                                <div class="invalid-feedback d-block small" th:errors="*{password}"></div>
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Họ và tên (*)</label>
-                            <input type="text" th:field="*{fullName}" class="form-control"
-                                   th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid' : ''"
-                                   placeholder="Nguyễn Văn A" required>
-                            <div class="invalid-feedback" th:errors="*{fullName}"></div>
+                            <label class="form-label small fw-semibold text-secondary">Họ và tên (*)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-card-heading"></i></span>
+                                <input type="text" id="fullNameInput" th:field="*{fullName}" class="form-control border-start-0 ps-0"
+                                       th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid' : ''"
+                                       placeholder="VD: Nguyễn Văn A" required>
+                            </div>
+                            <div class="invalid-feedback d-block small" th:errors="*{fullName}"></div>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Email (*)</label>
-                            <input type="email" th:field="*{email}" class="form-control"
-                                   th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
-                                   placeholder="email@example.com" required>
-                            <div class="invalid-feedback" th:errors="*{email}"></div>
+                            <label class="form-label small fw-semibold text-secondary">Email (*)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
+                                <input type="email" id="emailInput" th:field="*{email}" class="form-control border-start-0 ps-0"
+                                       th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+                                       placeholder="email@example.com" required>
+                            </div>
+                            <div class="invalid-feedback d-block small" th:errors="*{email}"></div>
                             <div class="form-text text-muted small">Mã OTP kích hoạt tài khoản sẽ được gửi đến email này.</div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Số điện thoại</label>
-                                <input type="text" th:field="*{phone}" class="form-control" placeholder="0901234567">
+                                <label class="form-label small fw-semibold text-secondary">Số điện thoại</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-telephone"></i></span>
+                                    <input type="tel" id="phoneInput" th:field="*{phone}" class="form-control border-start-0 ps-0" placeholder="0901234567">
+                                </div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Địa chỉ</label>
-                                <input type="text" th:field="*{address}" class="form-control" placeholder="Quận/Huyện, Tỉnh/TP">
+                                <label class="form-label small fw-semibold text-secondary">Địa chỉ</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-geo-alt"></i></span>
+                                    <input type="text" id="addressInput" th:field="*{address}" class="form-control border-start-0 ps-0" placeholder="Quận/Huyện, TP">
+                                </div>
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100 py-2 mb-3">Đăng Ký & Nhận Mã OTP</button>
+                        <!-- Bước 5: Bấm nút Sign up -->
+                        <button type="button" id="btnSignUp" class="btn btn-danger w-100 py-3 fw-bold rounded-pill shadow-sm mb-3">
+                            🌸 Sign Up (Đăng Ký)
+                        </button>
                     </form>
 
                     <div class="text-center text-muted small">
-                        Đã có tài khoản? <a th:href="@{/login}" class="text-decoration-none">Đăng nhập ngay</a>
+                        Đã có tài khoản? <a th:href="@{/login}" class="text-danger fw-semibold text-decoration-none">Sign in (Đăng nhập ngay)</a>
                         <div class="mt-2">
-                            <a th:href="@{/}" class="text-secondary text-decoration-none">← Quay lại trang chủ</a>
+                            <a th:href="@{/}" class="text-secondary text-decoration-none">← Quay lại trang chủ hoa tươi</a>
                         </div>
                     </div>
                 </div>
@@ -80,5 +127,82 @@
         </div>
     </div>
 </div>
+
+<!-- Bước 6: Hộp thoại xác nhận thông tin đăng ký (Confirm Modal) -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title font-serif fw-bold text-dark" id="confirmModalLabel">
+                    🌸 Xác Nhận Đăng Ký Tài Khoản
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3">
+                <p class="text-secondary small mb-3">Vui lòng kiểm tra lại thông tin tài khoản của bạn trước khi xác nhận tạo tài khoản:</p>
+                <div class="bg-light p-3 rounded-3 small">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Tên đăng nhập:</span>
+                        <strong id="confirmUsername" class="text-dark"></strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Họ và tên:</span>
+                        <strong id="confirmFullName" class="text-dark"></strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Email:</span>
+                        <strong id="confirmEmail" class="text-dark"></strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Số điện thoại:</span>
+                        <strong id="confirmPhone" class="text-dark"></strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Địa chỉ:</span>
+                        <strong id="confirmAddress" class="text-dark"></strong>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
+                <!-- Bước 7a: Nút Cancel (Hủy thao tác) -->
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancel">
+                    Cancel (Hủy)
+                </button>
+                <!-- Bước 7: Nút Confirm (Xác nhận gửi đăng ký) -->
+                <button type="button" class="btn btn-danger rounded-pill px-4 fw-semibold" id="btnConfirm">
+                    Confirm (Xác Nhận)
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Bước 5: Bấm vào nút Sign up -> Kiểm tra dữ liệu & Hiển thị thông báo xác nhận (Bước 6)
+    document.getElementById('btnSignUp').addEventListener('click', function() {
+        var form = document.getElementById('registerForm');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        // Đổ thông tin vào modal xác nhận
+        document.getElementById('confirmUsername').textContent = document.getElementById('usernameInput').value;
+        document.getElementById('confirmFullName').textContent = document.getElementById('fullNameInput').value;
+        document.getElementById('confirmEmail').textContent = document.getElementById('emailInput').value;
+        document.getElementById('confirmPhone').textContent = document.getElementById('phoneInput').value || '(Chưa điền)';
+        document.getElementById('confirmAddress').textContent = document.getElementById('addressInput').value || '(Chưa điền)';
+
+        // Bước 6: Hiển thị thông báo xác nhận
+        var modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+        modal.show();
+    });
+
+    // Bước 7: Bấm nút Confirm -> Submit form lên server
+    document.getElementById('btnConfirm').addEventListener('click', function() {
+        document.getElementById('registerForm').submit();
+    });
+</script>
 </body>
 </html>

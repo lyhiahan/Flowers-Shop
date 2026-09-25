@@ -30,13 +30,14 @@
             <nav class="d-flex flex-column gap-1">
                 <a th:href="@{/manager/orders}" class="active"><i class="bi bi-bag-check-fill"></i> Quản Lý Đơn Hàng</a>
                 <a th:href="@{/manager/products}"><i class="bi bi-flower1"></i> Kho Mẫu Hoa</a>
+                <a th:href="@{/manager/staff}"><i class="bi bi-people"></i> Nhân Viên Cửa Hàng</a>
                 <a th:href="@{/manager/wallet}"><i class="bi bi-wallet2"></i> Ví Cửa Hàng & Rút Tiền</a>
                 <a th:href="@{/manager/vouchers}"><i class="bi bi-ticket-perforated-fill"></i> Khuyến Mãi Shop</a>
                 <a th:href="@{/manager/analytics}"><i class="bi bi-graph-up-arrow"></i> Báo Cáo Doanh Thu</a>
                 <a th:href="@{/manager/stores}"><i class="bi bi-shop"></i> Thông Tin Chi Nhánh</a>
                 <hr class="border-secondary my-2">
                 <a th:href="@{/}"><i class="bi bi-house-door"></i> Xem Website Khách</a>
-                <a th:href="@{/logout}" class="text-danger"><i class="bi bi-box-arrow-right"></i> Đăng Xuất</a>
+                <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#signOutModal" class="text-danger"><i class="bi bi-box-arrow-right"></i> Sign out (Đăng Xuất)</a>
             </nav>
         </div>
 
@@ -202,5 +203,29 @@
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Modal Xác Nhận Đăng Xuất (Sign Out Modal) -->
+    <div class="modal fade" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title font-serif fw-bold text-dark" id="signOutModalLabel">
+                        🌸 Xác Nhận Đăng Xuất (Sign Out)
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-3 text-secondary">
+                    Bạn có chắc chắn muốn đăng xuất khỏi hệ thống Bloom Flower?
+                </div>
+                <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancelSignOut">
+                        Cancel (Hủy)
+                    </button>
+                    <a th:href="@{/logout}" class="btn btn-danger rounded-pill px-4 fw-semibold" id="btnConfirmSignOut">
+                        Confirm (Xác Nhận)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

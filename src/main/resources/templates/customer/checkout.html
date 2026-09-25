@@ -202,8 +202,33 @@
                         </div>
                         <div class="card-body p-4">
                             <div class="row g-3">
+                                <!-- Chọn hình thức nhận hàng -->
+                                <div class="col-12">
+                                    <label class="form-label small fw-semibold text-secondary">Hình thức nhận hàng (*)</label>
+                                    <div class="d-flex gap-4 mt-1">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="shippingMethod" id="methodDelivery" value="DELIVERY" checked onchange="toggleShippingMethod()">
+                                            <label class="form-check-label" for="methodDelivery">Giao hàng tận nơi</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="shippingMethod" id="methodPickup" value="PICKUP" onchange="toggleShippingMethod()">
+                                            <label class="form-check-label" for="methodPickup">Đến lấy tại cửa hàng</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Nếu chọn Đến lấy: Dropdown chọn chi nhánh -->
+                                <div class="col-12 d-none" id="pickupStoreSection">
+                                    <label class="form-label small fw-semibold text-secondary">Chi nhánh đến lấy hoa (*)</label>
+                                    <select name="pickupStoreId" id="pickupStoreSelect" class="form-select rounded-3">
+                                        <option th:each="s : ${stores}" 
+                                                th:value="${s.id}" 
+                                                th:text="${s.name + ' - ' + s.address}"></option>
+                                    </select>
+                                </div>
+
                                 <!-- Chọn nhanh từ sổ địa chỉ -->
-                                <div th:if="${!#lists.isEmpty(addresses)}" class="col-12">
+                                <div th:if="${!#lists.isEmpty(addresses)}" class="col-12" id="savedAddressSection">
                                     <label class="form-label small fw-semibold text-danger">⚡ Chọn nhanh từ Sổ Địa Chỉ của bạn:</label>
                                     <select class="form-select bg-light border-danger-subtle" onchange="fillAddress(this)">
                                         <option value="">-- Bấm chọn địa chỉ nhận hàng đã lưu --</option>
@@ -224,24 +249,27 @@
                                            placeholder="VD: Chị Mai Lan / Anh Tuấn" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label small fw-semibold text-secondary">Số điện thoại liên hệ giao hoa (*)</label>
+                                    <label class="form-label small fw-semibold text-secondary">Số điện thoại liên hệ (*)</label>
                                     <input type="tel" id="recipientPhoneInput" name="recipientPhone" class="form-control rounded-3" 
                                            th:value="${customer != null ? customer.phone : ''}" 
                                            placeholder="VD: 0901234567" required>
                                 </div>
-                                <div class="col-12">
+
+                                <!-- Địa chỉ giao hoa -->
+                                <div class="col-12" id="deliveryAddressSection">
                                     <label class="form-label small fw-semibold text-secondary">Địa chỉ giao hoa tận nơi (*)</label>
                                     <input type="text" id="recipientAddressInput" name="recipientAddress" class="form-control rounded-3" 
                                            th:value="${customer != null ? customer.address : ''}" 
-                                           placeholder="VD: Tòa nhà Bitexco, Số 2 Hải Triều, P. Bến Nghé, Quận 1, TP.HCM" required>
-                                    <div class="form-text small text-muted">
-                                        📍 Nếu bạn muốn tự đến lấy tại chi nhánh, vui lòng ghi rõ <em>"Nhận trực tiếp tại cửa hàng"</em>.
-                                    </div>
+                                           placeholder="VD: Số 123 Lê Lợi, Phường Bến Nghé, Quận 1, TP.HCM" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold text-secondary">Ngày nhận hoa (*)</label>
+                                    <input type="date" name="deliveryDate" class="form-control rounded-3" 
+                                           th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" required>
                                 </div>
                                 <div class="col-12">
-                                    <label class="form-label small fw-semibold text-secondary">
-                                        💌 Thông điệp in trên thiệp hoa / banner chúc mừng:
-                                    </label>
+                                    <label class="form-label small fw-semibold text-secondary">Thông điệp in trên thiệp hoa / banner chúc mừng</label>
                                     <textarea name="greetingMessage" class="form-control rounded-3" rows="2" 
                                               placeholder="VD: Mừng khai trương hồng phát! Chúc công ty ngày càng phát đạt và thành công rực rỡ!"></textarea>
                                 </div>
@@ -355,6 +383,26 @@
                 document.getElementById('recipientNameInput').value = opt.getAttribute('data-name') || '';
                 document.getElementById('recipientPhoneInput').value = opt.getAttribute('data-phone') || '';
                 document.getElementById('recipientAddressInput').value = opt.getAttribute('data-address') || '';
+            }
+        }
+
+        function toggleShippingMethod() {
+            const isPickup = document.getElementById('methodPickup').checked;
+            const pickupSection = document.getElementById('pickupStoreSection');
+            const deliverySection = document.getElementById('deliveryAddressSection');
+            const savedAddressSection = document.getElementById('savedAddressSection');
+            const addressInput = document.getElementById('recipientAddressInput');
+
+            if (isPickup) {
+                pickupSection.classList.remove('d-none');
+                deliverySection.classList.add('d-none');
+                if (savedAddressSection) savedAddressSection.classList.add('d-none');
+                addressInput.removeAttribute('required');
+            } else {
+                pickupSection.classList.add('d-none');
+                deliverySection.classList.remove('d-none');
+                if (savedAddressSection) savedAddressSection.classList.remove('d-none');
+                addressInput.setAttribute('required', 'required');
             }
         }
     </script>

@@ -29,13 +29,14 @@
             <nav class="d-flex flex-column gap-1">
                 <a th:href="@{/manager/orders}"><i class="bi bi-bag-check"></i> Quản Lý Đơn Hàng</a>
                 <a th:href="@{/manager/products}" class="active"><i class="bi bi-flower1"></i> Kho Mẫu Hoa</a>
+                <a th:href="@{/manager/staff}"><i class="bi bi-people"></i> Nhân Viên Cửa Hàng</a>
                 <a th:href="@{/manager/wallet}"><i class="bi bi-wallet2"></i> Ví Cửa Hàng & Rút Tiền</a>
                 <a th:href="@{/manager/vouchers}"><i class="bi bi-ticket-perforated"></i> Khuyến Mãi Shop</a>
                 <a th:href="@{/manager/analytics}"><i class="bi bi-graph-up-arrow"></i> Báo Cáo Doanh Thu</a>
                 <a th:href="@{/manager/stores}"><i class="bi bi-shop"></i> Thông Tin Chi Nhánh</a>
                 <hr class="border-secondary my-2">
                 <a th:href="@{/}"><i class="bi bi-house-door"></i> Xem Website Khách</a>
-                <a th:href="@{/logout}" class="text-danger"><i class="bi bi-box-arrow-right"></i> Đăng Xuất</a>
+                <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#signOutModal" class="text-danger"><i class="bi bi-box-arrow-right"></i> Sign out (Đăng Xuất)</a>
             </nav>
         </div>
 
@@ -107,17 +108,70 @@
                                     <span class="text-warning fw-bold">★ <span th:text="${p.rating != null ? p.rating : '5.0'}"></span></span>
                                 </td>
                                 <td>
-                                    <span th:if="${p.isSelling == null or p.isSelling}" class="badge bg-success rounded-pill px-2 py-1">Đang Bán</span>
-                                    <span th:if="${p.isSelling != null and !p.isSelling}" class="badge bg-secondary rounded-pill px-2 py-1">Tạm Ẩn</span>
+                                    <span th:if="${p.isSelling == null or p.isSelling}" class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1">Kinh Doanh</span>
+                                    <span th:if="${p.isSelling != null and !p.isSelling}" class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-2 py-1">Lưu Trữ</span>
                                 </td>
                                 <td class="text-end pe-3">
+                                    <button type="button" class="btn btn-outline-primary btn-sm me-1" data-bs-toggle="modal" th:data-bs-target="'#editProductModal_' + ${p.id}">
+                                         <i class="bi bi-pencil"></i> Sửa
+                                    </button>
                                     <form th:action="@{'/manager/products/toggle-selling/' + ${p.id}}" method="post" class="d-inline">
-                                        <button type="submit" class="btn btn-sm"
-                                                th:classappend="${p.isSelling == null or p.isSelling} ? 'btn-outline-warning' : 'btn-outline-success'">
-                                            <i class="bi" th:classappend="${p.isSelling == null or p.isSelling} ? 'bi-eye-slash' : 'bi-eye'"></i>
-                                            <span th:text="${p.isSelling == null or p.isSelling} ? 'Tạm Ẩn' : 'Mở Bán'"></span>
-                                        </button>
+                                         <button type="submit" class="btn btn-sm"
+                                                 th:classappend="${p.isSelling == null or p.isSelling} ? 'btn-outline-warning' : 'btn-outline-success'">
+                                             <i class="bi" th:classappend="${p.isSelling == null or p.isSelling} ? 'bi-archive' : 'bi-shop'"></i>
+                                             <span th:text="${p.isSelling == null or p.isSelling} ? 'Lưu Trữ' : 'Kinh Doanh'"></span>
+                                         </button>
                                     </form>
+
+                                    <!-- Modal Sửa Mẫu Hoa -->
+                                    <div class="modal fade text-start" th:id="'editProductModal_' + ${p.id}" tabindex="-1">
+                                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <form th:action="@{'/manager/products/update/' + ${p.id}}" method="post">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title font-serif">🌸 Chỉnh Sửa Mẫu Hoa</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col-md-7">
+                                                                <label class="form-label small fw-semibold">Tên mẫu hoa (*):</label>
+                                                                <input type="text" name="name" class="form-control" th:value="${p.name}" required>
+                                                            </div>
+                                                            <div class="col-md-5">
+                                                                <label class="form-label small fw-semibold">Danh mục:</label>
+                                                                <select name="categoryId" class="form-select" required>
+                                                                    <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}" th:selected="${p.category != null and p.category.id == c.id}"></option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label small fw-semibold">Giá bán (VNĐ) (*):</label>
+                                                                <input type="number" name="priceBuy" class="form-control" th:value="${p.priceBuy}" required min="1000">
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label small fw-semibold">Giá khuyến mãi (VNĐ):</label>
+                                                                <input type="number" name="promotionalPrice" class="form-control" th:value="${p.promotionalPrice}">
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label small fw-semibold">Đường dẫn ảnh hoa (URL):</label>
+                                                            <input type="text" name="imageUrl" class="form-control" th:value="${p.imageUrl}">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label small fw-semibold">Mô tả ý nghĩa hoa:</label>
+                                                            <textarea name="description" rows="3" class="form-control" th:text="${p.description}"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                                                        <button type="submit" class="btn btn-primary btn-sm">Lưu Thay Đổi</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                             </tbody>
@@ -183,5 +237,29 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Modal Xác Nhận Đăng Xuất (Sign Out Modal) -->
+    <div class="modal fade" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title font-serif fw-bold text-dark" id="signOutModalLabel">
+                        🌸 Xác Nhận Đăng Xuất (Sign Out)
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-3 text-secondary">
+                    Bạn có chắc chắn muốn đăng xuất khỏi hệ thống Bloom Flower?
+                </div>
+                <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancelSignOut">
+                        Cancel (Hủy)
+                    </button>
+                    <a th:href="@{/logout}" class="btn btn-danger rounded-pill px-4 fw-semibold" id="btnConfirmSignOut">
+                        Confirm (Xác Nhận)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

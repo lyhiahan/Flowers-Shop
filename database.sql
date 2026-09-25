@@ -70,12 +70,13 @@ GO
 -- Bảng 3: Mã xác thực OTP (OtpVerification)
 CREATE TABLE dbo.otp_verifications (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
-    email VARCHAR(100) NOT NULL,
-    otp_code VARCHAR(6) NOT NULL,
-    otp_type VARCHAR(20) NOT NULL,
-    expiry_time DATETIME2 NOT NULL,
-    is_verified BIT NULL DEFAULT 0,
-    created_at DATETIME2 NULL
+    user_id BIGINT NOT NULL,
+    code VARCHAR(6) NOT NULL,
+    type VARCHAR(30) NOT NULL,
+    expired_at DATETIME2 NOT NULL,
+    is_used BIT NULL DEFAULT 0,
+    created_at DATETIME2 NULL,
+    CONSTRAINT FK_otp_verifications_users FOREIGN KEY (user_id) REFERENCES dbo.users(id) ON DELETE CASCADE
 );
 GO
 

@@ -54,7 +54,7 @@ public class CartServiceImpl implements CartService {
 
         Long storeId = request.getStoreId() != null ? request.getStoreId() : (product.getStore() != null ? product.getStore().getId() : 1L);
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Chi nhánh không tồn tại"));
+                .orElseGet(() -> storeRepository.findAll().stream().findFirst().orElseThrow(() -> new ResourceNotFoundException("Chi nhánh không tồn tại")));
 
         int addQty = (request.getQuantity() != null && request.getQuantity() > 0) ? request.getQuantity() : 1;
         java.time.LocalDate startDate = request.getRentStartDate();
