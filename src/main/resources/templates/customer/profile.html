@@ -69,7 +69,7 @@
                     <button class="nav-link w-100 rounded-3" id="address-tab" data-bs-toggle="pill" data-bs-target="#tab-address">Sổ Địa Chỉ Giao Hàng</button>
                 </li>
                 <li class="nav-item flex-fill">
-                    <button class="nav-link w-100 rounded-3" id="password-tab" data-bs-toggle="pill" data-bs-target="#tab-password">Đổi Mật Khẩu</button>
+                    <button class="nav-link w-100 rounded-3" id="password-tab" data-bs-toggle="pill" data-bs-target="#tab-password"><i class="bi bi-key-fill text-warning me-1"></i> Đổi Mật Khẩu</button>
                 </li>
             </ul>
 
@@ -145,20 +145,25 @@
                     </div>
                 </div>
 
-                <!-- Tab 3: Đổi mật khẩu -->
+                <!-- Tab 3: Đổi mật khẩu (UC_008) -->
                 <div class="tab-pane fade" id="tab-password">
                     <div class="card profile-card bg-white p-4">
-                        <h5 class="fw-bold mb-4 font-serif">Đổi Mật Khẩu Tài Khoản</h5>
-                        <form th:action="@{/customer/profile/change-password}" method="post">
+                        <div class="d-flex align-items-center gap-2 mb-4">
+                            <span class="fs-4 text-warning">🔑</span>
+                            <h5 class="fw-bold mb-0 font-serif">Đổi Mật Khẩu Tài Khoản (Account Management)</h5>
+                        </div>
+                        <form id="changePasswordForm" th:action="@{/customer/profile/change-password}" method="post">
                             <div class="mb-3">
                                 <label class="form-label fw-semibold small">Mật khẩu hiện tại (*)</label>
-                                <input type="password" name="oldPassword" class="form-control" required placeholder="Nhập mật khẩu đang dùng">
+                                <input type="password" id="inputOldPassword" name="oldPassword" class="form-control" required placeholder="Nhập mật khẩu đang dùng">
                             </div>
                             <div class="mb-4">
                                 <label class="form-label fw-semibold small">Mật khẩu mới (tối thiểu 6 ký tự) (*)</label>
-                                <input type="password" name="newPassword" class="form-control" required minlength="6" placeholder="Nhập mật khẩu mới">
+                                <input type="password" id="inputNewPassword" name="newPassword" class="form-control" required minlength="6" placeholder="Nhập mật khẩu mới">
                             </div>
-                            <button type="submit" class="btn btn-danger px-4 py-2 rounded-pill fw-bold">🔐 Cập Nhật Mật Khẩu</button>
+                            <button type="button" class="btn btn-danger px-4 py-2 rounded-pill fw-bold" id="btnSavePassword" onclick="handleSavePassword()">
+                                <i class="bi bi-save me-1"></i> Save
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -264,5 +269,61 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Xác Nhận Thay Đổi Mật Khẩu (Use case UC_008 Steps 7, 8, 8a) -->
+    <div class="modal fade" id="confirmPasswordModal" tabindex="-1" aria-labelledby="confirmPasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title font-serif fw-bold text-dark" id="confirmPasswordModalLabel">
+                        🔑 Xác Nhận Đổi Mật Khẩu
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-3 text-secondary">
+                    Bạn có chắc chắn muốn cập nhật mật khẩu mới cho tài khoản không?
+                </div>
+                <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancelPassword">
+                        Cancel (Hủy)
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" id="btnConfirmPassword" onclick="document.getElementById('changePasswordForm').submit();">
+                        Confirm (Xác Nhận)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function handleSavePassword() {
+            const oldP = document.getElementById('inputOldPassword')?.value;
+            const newP = document.getElementById('inputNewPassword')?.value;
+            if (!oldP || !newP) {
+                alert('Vui lòng nhập đầy đủ mật khẩu hiện tại và mật khẩu mới!');
+                return;
+            }
+            if (newP.length < 6) {
+                alert('Mật khẩu mới phải có tối thiểu 6 ký tự!');
+                return;
+            }
+            const modal = new bootstrap.Modal(document.getElementById('confirmPasswordModal'));
+            modal.show();
+        }
+
+        // Tự động chuyển đến tab Đổi mật khẩu nếu vừa có thông báo đổi mật khẩu
+        document.addEventListener('DOMContentLoaded', function() {
+            const successMsg = document.querySelector('.alert-success');
+            const errorMsg = document.querySelector('.alert-danger');
+            if ((successMsg && successMsg.textContent.includes('mật khẩu')) || 
+                (errorMsg && errorMsg.textContent.includes('mật khẩu'))) {
+                const passTab = document.getElementById('password-tab');
+                if (passTab) {
+                    bootstrap.Tab.getOrCreateInstance(passTab).show();
+                }
+            }
+        });
+    </script>
 </body>
 </html>
