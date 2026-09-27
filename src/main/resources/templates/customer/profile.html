@@ -325,11 +325,9 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label small fw-semibold">Số điện thoại (* - đúng 10 chữ số)</label>
-                            <input type="tel" id="addPhone" name="phone" class="form-control" required
-                                placeholder="0901234567" maxlength="10"
-                                oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);"
-                                pattern="[0-9]{10}" title="Số điện thoại phải đúng 10 chữ số">
-                            <div class="form-text text-muted small">Chỉ nhập đúng 10 chữ số, không được thiếu hay thừa.
+                            <input type="text" id="addPhone" name="phone" class="form-control" required
+                                placeholder="0901234567">
+                            <div class="form-text text-muted small">Chỉ nhập đúng 10 chữ số.
                             </div>
                         </div>
                         <div class="mb-3">
@@ -403,9 +401,8 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label small fw-semibold">Số điện thoại (* - đúng 10 chữ số)</label>
-                            <input type="tel" name="phone" class="form-control" th:value="${addr.phone}" required
-                                maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);"
-                                pattern="[0-9]{10}" title="Số điện thoại phải đúng 10 chữ số">
+                            <input type="text" name="phone" class="form-control" th:value="${addr.phone}" required
+                                placeholder="0901234567">
                         </div>
                         <div class="mb-3">
                             <label class="form-label small fw-semibold">Địa chỉ chi tiết (*)</label>
@@ -667,6 +664,17 @@
 
         // Hiển thị thông báo thất bại khi thêm địa chỉ (UC_010 Exception 11d1)
         function showAddressExceptionError(msg) {
+            // Ẩn tất cả thông báo thành công cũ (alert-success) đang có trên trang
+            document.querySelectorAll('.alert-success').forEach(el => {
+                el.classList.add('d-none');
+                el.style.display = 'none';
+            });
+            // Ẩn thông báo lỗi cũ nếu có
+            document.querySelectorAll('.alert-danger:not(#addressExceptionAlert)').forEach(el => {
+                el.classList.add('d-none');
+                el.style.display = 'none';
+            });
+
             // Đóng modal xác nhận nếu đang mở
             const confirmModalEl = document.getElementById('confirmAddAddressModal');
             if (confirmModalEl) {
@@ -692,6 +700,7 @@
             }
             alertBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-2"></i>' + msg;
             alertBox.classList.remove('d-none');
+            alertBox.style.display = '';
             alertBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
             // Thông báo popup cho người dùng
@@ -709,9 +718,9 @@
                 return;
             }
 
-            // Kiểm tra số điện thoại: phải đúng 10 chữ số (không được thiếu hay thừa)
+            // Kiểm tra số điện thoại: phải đúng 10 chữ số
             if (phone.length !== 10 || !/^[0-9]{10}$/.test(phone)) {
-                showAddressExceptionError('Thông báo thêm thất bại: Số điện thoại không hợp lệ (phải đúng 10 chữ số, không được thiếu hay thừa)!');
+                showAddressExceptionError('Thông báo thêm thất bại: Số điện thoại không hợp lệ (phải đúng 10 chữ số)');
                 document.getElementById('addPhone')?.focus();
                 return;
             }
@@ -764,10 +773,10 @@
                 return;
             }
 
-            // 11d. Kiểm tra định dạng số điện thoại (phải đúng 10 chữ số, không được thiếu hay thừa)
+            // 11d. Kiểm tra định dạng số điện thoại (phải đúng 10 chữ số)
             const phoneRegex = /^[0-9]{10}$/;
             if (!phoneRegex.test(phone)) {
-                showAddressExceptionError('Thông báo thêm thất bại: Số điện thoại không hợp lệ (phải đúng 10 chữ số, không được thiếu hay thừa)!');
+                showAddressExceptionError('Thông báo thêm thất bại: Số điện thoại không hợp lệ (phải đúng 10 chữ số)');
                 return;
             }
 

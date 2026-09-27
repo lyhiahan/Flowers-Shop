@@ -86,7 +86,7 @@ public class UserServiceImpl implements UserService {
 
         // Số điện thoại phải đúng 10 chữ số
         if (!phone.trim().matches("^[0-9]{10}$")) {
-            throw new IllegalArgumentException("Thông báo thêm thất bại: Số điện thoại không hợp lệ (phải đúng 10 chữ số, không được thiếu hay thừa)!");
+            throw new IllegalArgumentException("Thông báo thêm thất bại: Số điện thoại không hợp lệ (phải đúng 10 chữ số)");
         }
 
         String normDetail = normalizeAddress(addressDetail);
