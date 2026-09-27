@@ -1,336 +1,438 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Hồ Sơ Cá Nhân - Chuỗi Cửa Hàng Hoa Tươi</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fafafa; }
-        .font-serif { font-family: 'Playfair Display', Georgia, serif; }
-        .profile-card { border-radius: 16px; border: 1px solid #f1f5f9; box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05); }
-        .btn-flower { background-color: #e11d48; color: white; border: none; }
-        .btn-flower:hover { background-color: #be123c; color: white; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #fafafa;
+        }
+
+        .font-serif {
+            font-family: 'Playfair Display', Georgia, serif;
+        }
+
+        .profile-card {
+            border-radius: 16px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-flower {
+            background-color: #e11d48;
+            color: white;
+            border: none;
+        }
+
+        .btn-flower:hover {
+            background-color: #be123c;
+            color: white;
+        }
     </style>
 </head>
+
 <body>
-<nav class="navbar navbar-expand-lg bg-white border-bottom py-3 sticky-top">
-    <div class="container">
-        <a class="navbar-brand font-serif fw-bold text-danger fs-4" th:href="@{/}">🌸 HOA TƯƠI SÀI GÒN</a>
-        <div class="d-flex align-items-center gap-2">
-            <a th:href="@{/customer/orders}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-seam me-1"></i> Đơn hàng</a>
-            <a th:href="@{/customer/profile/wishlist}" class="btn btn-outline-danger btn-sm"><i class="bi bi-heart me-1"></i> Yêu thích</a>
-            <a th:href="@{/customer/profile/recently-viewed}" class="btn btn-outline-info btn-sm"><i class="bi bi-clock-history me-1"></i> Đã xem</a>
-            <a th:href="@{/}" class="btn btn-light btn-sm"><i class="bi bi-house me-1"></i> Trang chủ</a>
-            <button type="button" class="btn btn-outline-danger btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#signOutModal">
-                <i class="bi bi-box-arrow-right me-1"></i> Đăng Xuất
-            </button>
+    <nav class="navbar navbar-expand-lg bg-white border-bottom py-3 sticky-top">
+        <div class="container">
+            <a class="navbar-brand font-serif fw-bold text-danger fs-4" th:href="@{/}">🌸 HOA TƯƠI SÀI GÒN</a>
+            <div class="d-flex align-items-center gap-2">
+                <a th:href="@{/customer/orders}" class="btn btn-outline-secondary btn-sm"><i
+                        class="bi bi-box-seam me-1"></i> Đơn hàng</a>
+                <a th:href="@{/customer/profile/wishlist}" class="btn btn-outline-danger btn-sm"><i
+                        class="bi bi-heart me-1"></i> Yêu thích</a>
+                <a th:href="@{/customer/profile/recently-viewed}" class="btn btn-outline-info btn-sm"><i
+                        class="bi bi-clock-history me-1"></i> Đã xem</a>
+                <a th:href="@{/}" class="btn btn-light btn-sm"><i class="bi bi-house me-1"></i> Trang chủ</a>
+                <button type="button" class="btn btn-outline-danger btn-sm rounded-pill" data-bs-toggle="modal"
+                    data-bs-target="#signOutModal">
+                    <i class="bi bi-box-arrow-right me-1"></i> Đăng Xuất
+                </button>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
-<div class="container py-4">
-    <!-- Ảnh bìa và Nút Edit Cover Photo (UC_009 Steps 4a, 5a, 6a) -->
-    <div class="position-relative rounded-4 overflow-hidden mb-4 shadow-sm" style="height: 220px; background-color: #f1f5f9;">
-        <img id="coverPreviewImg" 
-             th:src="${user.cover != null and !#strings.isEmpty(user.cover) ? user.cover : 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=1200'}" 
-             alt="Cover Photo" class="w-100 h-100" style="object-fit: cover;">
-        <div class="position-absolute bottom-0 end-0 p-3">
-            <button type="button" class="btn btn-light btn-sm rounded-pill shadow fw-semibold px-3 py-2" id="btnEditCover" onclick="document.getElementById('coverFileInput').click();">
-                <i class="bi bi-camera me-1 text-danger"></i> Edit Cover Photo
-            </button>
+    <div class="container py-4">
+        <!-- Ảnh bìa và Nút Edit Cover Photo (UC_009 Steps 4a, 5a, 6a) -->
+        <div class="position-relative rounded-4 overflow-hidden mb-4 shadow-sm"
+            style="height: 220px; background-color: #f1f5f9;">
+            <img id="coverPreviewImg"
+                th:src="${user.cover != null and !#strings.isEmpty(user.cover) ? user.cover : 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=1200'}"
+                alt="Cover Photo" class="w-100 h-100" style="object-fit: cover;">
+            <div class="position-absolute bottom-0 end-0 p-3">
+                <button type="button" class="btn btn-light btn-sm rounded-pill shadow fw-semibold px-3 py-2"
+                    id="btnEditCover" onclick="document.getElementById('coverFileInput').click();">
+                    <i class="bi bi-camera me-1 text-danger"></i> Edit Cover Photo
+                </button>
+            </div>
         </div>
-    </div>
 
-    <div class="row g-4">
-        <!-- Sidebar hồ sơ -->
-        <div class="col-lg-4">
-            <div class="card profile-card bg-white p-4 text-center">
-                <!-- Avatar với nút icon camera (UC_009 Steps 4, 5, 6) -->
-                <div class="position-relative d-inline-block mx-auto mb-3">
-                    <img id="avatarPreviewImg" th:src="${user.avatarUrl != null and !#strings.isEmpty(user.avatarUrl) ? user.avatarUrl : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200'}"
-                         class="rounded-circle border border-3 border-danger p-1" width="130" height="130" style="object-fit: cover;">
-                    <button type="button" class="btn btn-danger btn-sm rounded-circle position-absolute bottom-0 end-0 shadow" 
+        <div class="row g-4">
+            <!-- Sidebar hồ sơ -->
+            <div class="col-lg-4">
+                <div class="card profile-card bg-white p-4 text-center">
+                    <!-- Avatar với nút icon camera (UC_009 Steps 4, 5, 6) -->
+                    <div class="position-relative d-inline-block mx-auto mb-3">
+                        <img id="avatarPreviewImg"
+                            th:src="${user.avatarUrl != null and !#strings.isEmpty(user.avatarUrl) ? user.avatarUrl : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200'}"
+                            class="rounded-circle border border-3 border-danger p-1" width="130" height="130"
+                            style="object-fit: cover;">
+                        <button type="button"
+                            class="btn btn-danger btn-sm rounded-circle position-absolute bottom-0 end-0 shadow"
                             style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center;"
-                            title="Chọn hình camera trên ảnh đại diện" id="btnEditAvatar" onclick="document.getElementById('avatarFileInput').click();">
-                        <i class="bi bi-camera-fill fs-6"></i>
-                    </button>
-                </div>
+                            title="Chọn hình camera trên ảnh đại diện" id="btnEditAvatar"
+                            onclick="document.getElementById('avatarFileInput').click();">
+                            <i class="bi bi-camera-fill fs-6"></i>
+                        </button>
+                    </div>
 
-                <h5 class="font-serif fw-bold mb-1" th:text="${user.fullName}"></h5>
-                <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-1 mb-3" th:text="${user.role}"></span>
+                    <h5 class="font-serif fw-bold mb-1" th:text="${user.fullName}"></h5>
+                    <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-1 mb-3"
+                        th:text="${user.role}"></span>
 
-                <div class="text-start border-top pt-3 small text-muted">
-                    <p class="mb-2"><i class="bi bi-person me-2 text-danger"></i> Username: <strong class="text-dark" th:text="${user.username}"></strong></p>
-                    <p class="mb-2"><i class="bi bi-envelope me-2 text-danger"></i> Email: <span class="text-dark" th:text="${user.email}"></span></p>
-                    <p class="mb-2"><i class="bi bi-telephone me-2 text-danger"></i> Phone: <span class="text-dark" th:text="${user.phone != null ? user.phone : 'Chưa cập nhật'}"></span></p>
-                    <p class="mb-0"><i class="bi bi-calendar-check me-2 text-danger"></i> Tham gia: <span class="text-dark" th:text="${user.createdDate}"></span></p>
-                </div>
+                    <div class="text-start border-top pt-3 small text-muted">
+                        <p class="mb-2"><i class="bi bi-person me-2 text-danger"></i> Username: <strong
+                                class="text-dark" th:text="${user.username}"></strong></p>
+                        <p class="mb-2"><i class="bi bi-envelope me-2 text-danger"></i> Email: <span class="text-dark"
+                                th:text="${user.email}"></span></p>
+                        <p class="mb-2"><i class="bi bi-telephone me-2 text-danger"></i> Phone: <span class="text-dark"
+                                th:text="${user.phone != null ? user.phone : 'Chưa cập nhật'}"></span></p>
+                        <p class="mb-0"><i class="bi bi-calendar-check me-2 text-danger"></i> Tham gia: <span
+                                class="text-dark" th:text="${user.createdDate}"></span></p>
+                    </div>
 
-                <div class="mt-4 border-top pt-3 d-grid gap-2">
-                    <button type="button" class="btn btn-light text-start fw-semibold" id="sidebarYourAddress" onclick="switchToAddressTab();">
-                        <i class="bi bi-geo-alt text-danger me-2"></i> Your address (Sổ địa chỉ)
-                    </button>
-                    <a th:href="@{/customer/profile/wishlist}" class="btn btn-light text-start"><i class="bi bi-heart text-danger me-2"></i> Sản phẩm yêu thích (Wishlist)</a>
-                    <a th:href="@{/customer/profile/recently-viewed}" class="btn btn-light text-start"><i class="bi bi-eye text-primary me-2"></i> Sản phẩm đã xem gần đây</a>
-                    <a th:href="@{/customer/profile/followed-stores}" class="btn btn-light text-start"><i class="bi bi-shop text-success me-2"></i> Cửa hàng đang theo dõi</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Nội dung chính: Sửa thông tin, Đổi MK, Sổ địa chỉ -->
-        <div class="col-lg-8">
-            <div th:if="${successMessage}" class="alert alert-success rounded-3 mb-4" th:text="${successMessage}"></div>
-            <div th:if="${errorMessage}" class="alert alert-danger rounded-3 mb-4" th:text="${errorMessage}"></div>
-
-            <!-- Tab điều hướng -->
-            <ul class="nav nav-pills mb-4 bg-white p-2 rounded-4 border" id="profileTab" role="tablist">
-                <li class="nav-item flex-fill">
-                    <button class="nav-link active w-100 rounded-3" id="info-tab" data-bs-toggle="pill" data-bs-target="#tab-info">Thông Tin Cá Nhân</button>
-                </li>
-                <li class="nav-item flex-fill">
-                    <button class="nav-link w-100 rounded-3" id="address-tab" data-bs-toggle="pill" data-bs-target="#tab-address"><i class="bi bi-geo-alt me-1"></i> Your address (Sổ Địa Chỉ)</button>
-                </li>
-                <li class="nav-item flex-fill">
-                    <button class="nav-link w-100 rounded-3" id="password-tab" data-bs-toggle="pill" data-bs-target="#tab-password"><i class="bi bi-key-fill text-warning me-1"></i> Đổi Mật Khẩu</button>
-                </li>
-            </ul>
-
-            <div class="tab-content">
-                <!-- Tab 1: Cập nhật thông tin (UC_009) -->
-                <div class="tab-pane fade show active" id="tab-info">
-                    <div class="card profile-card bg-white p-4">
-                        <div class="d-flex align-items-center gap-2 mb-4">
-                            <h5 class="fw-bold mb-0 font-serif">Chỉnh Sửa Thông Tin Cá Nhân</h5>
-                            <!-- Nút hình cây bút ở phần thông tin cá nhân (UC_009 Step 4b) -->
-                            <button type="button" class="btn btn-outline-danger btn-sm rounded-circle shadow-sm" id="btnEditProfileInfo" title="Chọn nút hình cây bút để chỉnh sửa thông tin cá nhân" onclick="toggleEditProfile()">
-                                <i class="bi bi-pencil-fill"></i>
-                            </button>
-                        </div>
-
-                        <form id="profileForm" th:action="@{/customer/profile/update}" method="post" enctype="multipart/form-data">
-                            <!-- Hidden inputs for avatar and cover files (triggered by Camera and Edit Cover Photo buttons) -->
-                            <input type="file" name="avatarFile" id="avatarFileInput" class="d-none" accept="image/*" onchange="handleFileSelected(this, 'avatar')">
-                            <input type="file" name="coverFile" id="coverFileInput" class="d-none" accept="image/*" onchange="handleFileSelected(this, 'cover')">
-
-                            <!-- Tùy chỉnh thông tin cá nhân: email, phone, firstname, lastname, id card (UC_009 Step 5b) -->
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold small">First name (Họ và tên đệm)</label>
-                                    <input type="text" id="inputFirstName" class="form-control" placeholder="Nguyễn Văn" oninput="syncFullName()" disabled>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold small">Last name (Tên)</label>
-                                    <input type="text" id="inputLastName" class="form-control" placeholder="Khách Hàng" oninput="syncFullName()" disabled>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold small">Họ và tên đầy đủ (*)</label>
-                                <input type="text" name="fullName" id="inputFullName" class="form-control" th:value="${user.fullName}" required disabled>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold small">Email (*)</label>
-                                    <input type="email" id="inputEmail" class="form-control bg-light" th:value="${user.email}" readonly title="Email tài khoản">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold small">Số điện thoại (Phone)</label>
-                                    <input type="text" name="phone" id="inputPhone" class="form-control" th:value="${user.phone}" placeholder="0901234567" disabled>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold small">CMND / CCCD (ID Card)</label>
-                                    <input type="text" id="inputIdCard" class="form-control" placeholder="07920100xxxx" disabled>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold small">Địa chỉ liên hệ chính</label>
-                                    <input type="text" name="address" id="inputAddress" class="form-control" th:value="${user.address}" placeholder="Số nhà, tên đường, phường/xã..." disabled>
-                                </div>
-                            </div>
-                            <!-- Nút Save (UC_009 Step 5b1) -->
-                            <button type="button" class="btn btn-flower px-4 py-2 rounded-pill fw-bold shadow-sm" id="btnSaveProfile" onclick="handleSaveProfile()" disabled>
-                                <i class="bi bi-save me-1"></i> Save
-                            </button>
-                        </form>
+                    <div class="mt-4 border-top pt-3 d-grid gap-2">
+                        <button type="button" class="btn btn-light text-start fw-semibold" id="sidebarYourAddress"
+                            onclick="switchToAddressTab();">
+                            <i class="bi bi-geo-alt text-danger me-2"></i> Your address (Sổ địa chỉ)
+                        </button>
+                        <a th:href="@{/customer/profile/wishlist}" class="btn btn-light text-start"><i
+                                class="bi bi-heart text-danger me-2"></i> Sản phẩm yêu thích (Wishlist)</a>
+                        <a th:href="@{/customer/profile/recently-viewed}" class="btn btn-light text-start"><i
+                                class="bi bi-eye text-primary me-2"></i> Sản phẩm đã xem gần đây</a>
+                        <a th:href="@{/customer/profile/followed-stores}" class="btn btn-light text-start"><i
+                                class="bi bi-shop text-success me-2"></i> Cửa hàng đang theo dõi</a>
                     </div>
                 </div>
+            </div>
 
-                <!-- Tab 2: Sổ địa chỉ nhận hàng (UC_010) -->
-                <div class="tab-pane fade" id="tab-address">
-                    <div class="card profile-card bg-white p-4">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h5 class="fw-bold mb-0 font-serif">Sổ Địa Chỉ Nhận Hàng (Your address)</h5>
-                            <!-- Nút New address (UC_010 Step 6) -->
-                            <button class="btn btn-sm btn-flower rounded-pill px-3 fw-semibold" id="btnNewAddress" data-bs-toggle="modal" data-bs-target="#modalAddAddress">
-                                <i class="bi bi-plus-lg me-1"></i> New address
-                            </button>
-                        </div>
+            <!-- Nội dung chính: Sửa thông tin, Đổi MK, Sổ địa chỉ -->
+            <div class="col-lg-8">
+                <div th:if="${successMessage}" class="alert alert-success rounded-3 mb-4" th:text="${successMessage}">
+                </div>
+                <div th:if="${errorMessage}" class="alert alert-danger rounded-3 mb-4" th:text="${errorMessage}"></div>
 
-                        <div th:if="${#lists.isEmpty(addresses)}" class="text-center py-5 text-muted">
-                            <i class="bi bi-geo-alt fs-1 text-secondary opacity-50"></i>
-                            <p class="mt-2">Bạn chưa có địa chỉ nhận hàng nào. Hãy thêm một địa chỉ để nhận hoa thuận tiện hơn!</p>
-                        </div>
+                <!-- Tab điều hướng -->
+                <ul class="nav nav-pills mb-4 bg-white p-2 rounded-4 border" id="profileTab" role="tablist">
+                    <li class="nav-item flex-fill">
+                        <button class="nav-link active w-100 rounded-3" id="info-tab" data-bs-toggle="pill"
+                            data-bs-target="#tab-info">Thông Tin Cá Nhân</button>
+                    </li>
+                    <li class="nav-item flex-fill">
+                        <button class="nav-link w-100 rounded-3" id="address-tab" data-bs-toggle="pill"
+                            data-bs-target="#tab-address"><i class="bi bi-geo-alt me-1"></i>Sổ Địa Chỉ</button>
+                    </li>
+                    <li class="nav-item flex-fill">
+                        <button class="nav-link w-100 rounded-3" id="password-tab" data-bs-toggle="pill"
+                            data-bs-target="#tab-password"><i class="bi bi-key-fill text-warning me-1"></i> Đổi Mật
+                            Khẩu</button>
+                    </li>
+                </ul>
 
-                        <div th:each="addr : ${addresses}" class="p-3 border rounded-3 mb-3 bg-light d-flex justify-content-between align-items-center address-item"
-                             th:data-recipient="${addr.recipientName}"
-                             th:data-detail="${addr.addressDetail}">
-                            <div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <strong th:text="${addr.recipientName}"></strong>
-                                    <span class="text-muted small">| SĐT: <span th:text="${addr.phone}"></span></span>
-                                    <span th:if="${addr.isDefault}" class="badge bg-danger rounded-pill">Mặc định</span>
-                                </div>
-                                <div class="text-secondary small mt-1" th:text="${addr.addressDetail}"></div>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <!-- Nút hình cây bút (UC_010 Step 6a) -->
-                                <button class="btn btn-outline-primary btn-sm rounded-circle" type="button" data-bs-toggle="modal" th:data-bs-target="'#modalEditAddress_' + ${addr.id}" title="Chọn nút hình cây bút ở địa chỉ muốn sửa">
-                                    <i class="bi bi-pencil"></i>
+                <div class="tab-content">
+                    <!-- Tab 1: Cập nhật thông tin (UC_009) -->
+                    <div class="tab-pane fade show active" id="tab-info">
+                        <div class="card profile-card bg-white p-4">
+                            <div class="d-flex align-items-center gap-2 mb-4">
+                                <h5 class="fw-bold mb-0 font-serif">Chỉnh Sửa Thông Tin Cá Nhân</h5>
+                                <!-- Nút hình cây bút ở phần thông tin cá nhân (UC_009 Step 4b) -->
+                                <button type="button" class="btn btn-outline-danger btn-sm rounded-circle shadow-sm"
+                                    id="btnEditProfileInfo" title="Chọn nút hình cây bút để chỉnh sửa thông tin cá nhân"
+                                    onclick="toggleEditProfile()">
+                                    <i class="bi bi-pencil-fill"></i>
                                 </button>
-                                <form th:if="${!addr.isDefault}" th:action="@{/customer/profile/address/set-default/{id}(id=${addr.id})}" method="post">
-                                    <button class="btn btn-outline-secondary btn-sm rounded-pill" type="submit">Đặt mặc định</button>
-                                </form>
-                                <!-- Nút hình thùng rác (UC_010 Step 6-8b) -->
-                                <form th:action="@{/customer/profile/address/delete/{id}(id=${addr.id})}" method="post" onsubmit="return confirm('Bạn có chắc muốn xóa địa chỉ này?');">
-                                    <button class="btn btn-outline-danger btn-sm rounded-circle" type="submit" title="Chọn nút hình thùng rác ở địa chỉ muốn xóa"><i class="bi bi-trash"></i></button>
-                                </form>
+                            </div>
+
+                            <form id="profileForm" th:action="@{/customer/profile/update}" method="post"
+                                enctype="multipart/form-data">
+                                <!-- Hidden inputs for avatar and cover files (triggered by Camera and Edit Cover Photo buttons) -->
+                                <input type="file" name="avatarFile" id="avatarFileInput" class="d-none"
+                                    accept="image/*" onchange="handleFileSelected(this, 'avatar')">
+                                <input type="file" name="coverFile" id="coverFileInput" class="d-none" accept="image/*"
+                                    onchange="handleFileSelected(this, 'cover')">
+
+                                <!-- Tùy chỉnh thông tin cá nhân: email, phone, firstname, lastname, id card (UC_009 Step 5b) -->
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold small">First name (Họ và tên đệm)</label>
+                                        <input type="text" id="inputFirstName" class="form-control"
+                                            placeholder="Nguyễn Văn" oninput="syncFullName()" disabled>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold small">Last name (Tên)</label>
+                                        <input type="text" id="inputLastName" class="form-control"
+                                            placeholder="Khách Hàng" oninput="syncFullName()" disabled>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold small">Họ và tên đầy đủ (*)</label>
+                                    <input type="text" name="fullName" id="inputFullName" class="form-control"
+                                        th:value="${user.fullName}" required disabled>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold small">Email (*)</label>
+                                        <input type="email" id="inputEmail" class="form-control bg-light"
+                                            th:value="${user.email}" readonly title="Email tài khoản">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold small">Số điện thoại (Phone)</label>
+                                        <input type="text" name="phone" id="inputPhone" class="form-control"
+                                            th:value="${user.phone}" placeholder="0901234567" disabled>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold small">CMND / CCCD (ID Card)</label>
+                                        <input type="text" id="inputIdCard" class="form-control"
+                                            placeholder="07920100xxxx" disabled>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold small">Địa chỉ liên hệ chính</label>
+                                        <input type="text" name="address" id="inputAddress" class="form-control"
+                                            th:value="${user.address}" placeholder="Số nhà, tên đường, phường/xã..."
+                                            disabled>
+                                    </div>
+                                </div>
+                                <!-- Nút Save (UC_009 Step 5b1) -->
+                                <button type="button" class="btn btn-flower px-4 py-2 rounded-pill fw-bold shadow-sm"
+                                    id="btnSaveProfile" onclick="handleSaveProfile()" disabled>
+                                    <i class="bi bi-save me-1"></i> Save
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Sổ địa chỉ nhận hàng (UC_010) -->
+                    <div class="tab-pane fade" id="tab-address">
+                        <div class="card profile-card bg-white p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="fw-bold mb-0 font-serif">Sổ Địa Chỉ Nhận Hàng (Your address)</h5>
+                                <!-- Nút New address (UC_010 Step 6) -->
+                                <button class="btn btn-sm btn-flower rounded-pill px-3 fw-semibold" id="btnNewAddress"
+                                    data-bs-toggle="modal" data-bs-target="#modalAddAddress">
+                                    <i class="bi bi-plus-lg me-1"></i> New address
+                                </button>
+                            </div>
+
+                            <div th:if="${#lists.isEmpty(addresses)}" class="text-center py-5 text-muted">
+                                <i class="bi bi-geo-alt fs-1 text-secondary opacity-50"></i>
+                                <p class="mt-2">Bạn chưa có địa chỉ nhận hàng nào. Hãy thêm một địa chỉ để nhận hoa
+                                    thuận tiện hơn!</p>
+                            </div>
+
+                            <div th:each="addr : ${addresses}"
+                                class="p-3 border rounded-3 mb-3 bg-light d-flex justify-content-between align-items-center address-item"
+                                th:data-recipient="${addr.recipientName}" th:data-detail="${addr.addressDetail}">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <strong th:text="${addr.recipientName}"></strong>
+                                        <span class="text-muted small">| SĐT: <span
+                                                th:text="${addr.phone}"></span></span>
+                                        <span th:if="${addr.isDefault}" class="badge bg-danger rounded-pill">Mặc
+                                            định</span>
+                                    </div>
+                                    <div class="text-secondary small mt-1" th:text="${addr.addressDetail}"></div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <!-- Nút hình cây bút (UC_010 Step 6a) -->
+                                    <button class="btn btn-outline-primary btn-sm rounded-circle" type="button"
+                                        data-bs-toggle="modal" th:data-bs-target="'#modalEditAddress_' + ${addr.id}"
+                                        title="Chọn nút hình cây bút ở địa chỉ muốn sửa">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <form th:if="${!addr.isDefault}"
+                                        th:action="@{/customer/profile/address/set-default/{id}(id=${addr.id})}"
+                                        method="post">
+                                        <button class="btn btn-outline-secondary btn-sm rounded-pill" type="submit">Đặt
+                                            mặc định</button>
+                                    </form>
+                                    <!-- Nút hình thùng rác (UC_010 Step 6-8b) -->
+                                    <form th:action="@{/customer/profile/address/delete/{id}(id=${addr.id})}"
+                                        method="post" onsubmit="return confirm('Bạn có chắc muốn xóa địa chỉ này?');">
+                                        <button class="btn btn-outline-danger btn-sm rounded-circle" type="submit"
+                                            title="Chọn nút hình thùng rác ở địa chỉ muốn xóa"><i
+                                                class="bi bi-trash"></i></button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Tab 3: Đổi mật khẩu (UC_008) -->
-                <div class="tab-pane fade" id="tab-password">
-                    <div class="card profile-card bg-white p-4">
-                        <div class="d-flex align-items-center gap-2 mb-4">
-                            <span class="fs-4 text-warning">🔑</span>
-                            <h5 class="fw-bold mb-0 font-serif">Đổi Mật Khẩu Tài Khoản (Account Management)</h5>
+                    <!-- Tab 3: Đổi mật khẩu (UC_008) -->
+                    <div class="tab-pane fade" id="tab-password">
+                        <div class="card profile-card bg-white p-4">
+                            <div class="d-flex align-items-center gap-2 mb-4">
+                                <span class="fs-4 text-warning">🔑</span>
+                                <h5 class="fw-bold mb-0 font-serif">Đổi Mật Khẩu Tài Khoản (Account Management)</h5>
+                            </div>
+                            <form id="changePasswordForm" th:action="@{/customer/profile/change-password}"
+                                method="post">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold small">Mật khẩu hiện tại (*)</label>
+                                    <input type="password" id="inputOldPassword" name="oldPassword" class="form-control"
+                                        required placeholder="Nhập mật khẩu đang dùng">
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold small">Mật khẩu mới (tối thiểu 6 ký tự)
+                                        (*)</label>
+                                    <input type="password" id="inputNewPassword" name="newPassword" class="form-control"
+                                        required minlength="6" placeholder="Nhập mật khẩu mới">
+                                </div>
+                                <button type="button" class="btn btn-danger px-4 py-2 rounded-pill fw-bold"
+                                    id="btnSavePassword" onclick="handleSavePassword()">
+                                    <i class="bi bi-save me-1"></i> Save
+                                </button>
+                            </form>
                         </div>
-                        <form id="changePasswordForm" th:action="@{/customer/profile/change-password}" method="post">
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold small">Mật khẩu hiện tại (*)</label>
-                                <input type="password" id="inputOldPassword" name="oldPassword" class="form-control" required placeholder="Nhập mật khẩu đang dùng">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal thêm địa chỉ mới (UC_010 Steps 6, 7, 8) -->
+    <div class="modal fade" id="modalAddAddress" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title font-serif fw-bold">New Address - Thêm Địa Chỉ Mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="addAddressForm" th:action="@{/customer/profile/address/add}" method="post"
+                    onsubmit="event.preventDefault(); handleSubmitNewAddress();">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Tên người nhận (*)</label>
+                            <input type="text" id="addRecipientName" name="recipientName" class="form-control" required
+                                placeholder="Ví dụ: Nguyễn Văn A">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Số điện thoại (* - đúng 10 chữ số)</label>
+                            <input type="tel" id="addPhone" name="phone" class="form-control" required
+                                placeholder="0901234567" maxlength="10"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);"
+                                pattern="[0-9]{10}" title="Số điện thoại phải đúng 10 chữ số">
+                            <div class="form-text text-muted small">Chỉ nhập đúng 10 chữ số, không được thiếu hay thừa.
                             </div>
-                            <div class="mb-4">
-                                <label class="form-label fw-semibold small">Mật khẩu mới (tối thiểu 6 ký tự) (*)</label>
-                                <input type="password" id="inputNewPassword" name="newPassword" class="form-control" required minlength="6" placeholder="Nhập mật khẩu mới">
-                            </div>
-                            <button type="button" class="btn btn-danger px-4 py-2 rounded-pill fw-bold" id="btnSavePassword" onclick="handleSavePassword()">
-                                <i class="bi bi-save me-1"></i> Save
-                            </button>
-                        </form>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Địa chỉ chi tiết (*)</label>
+                            <textarea id="addAddressDetail" name="addressDetail" class="form-control" rows="2" required
+                                placeholder="Số nhà, tên đường, Phường, Quận, Thành phố..."></textarea>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="isDefault" value="true"
+                                id="checkDefault">
+                            <label class="form-check-label small" for="checkDefault">Đặt làm địa chỉ nhận hàng mặc
+                                định</label>
+                        </div>
                     </div>
-                </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-light rounded-pill px-3"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <!-- Bấm nút Submit (UC_010 Step 8) -->
+                        <button type="button" class="btn btn-flower rounded-pill px-4" id="btnSubmitNewAddress"
+                            onclick="handleSubmitNewAddress()">Submit</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Modal thêm địa chỉ mới (UC_010 Steps 6, 7, 8) -->
-<div class="modal fade" id="modalAddAddress" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4 border-0">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title font-serif fw-bold">New Address - Thêm Địa Chỉ Mới</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <!-- Modal Xác Nhận Thêm Địa Chỉ (UC_010 Steps 9, 10, 10c) -->
+    <div class="modal fade" id="confirmAddAddressModal" tabindex="-1" aria-labelledby="confirmAddAddressModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title font-serif fw-bold text-dark" id="confirmAddAddressModalLabel">
+                        🌸 Xác Nhận Thêm Địa Chỉ
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-3 text-secondary">
+                    Bạn có chắc chắn muốn thêm địa chỉ nhận hàng mới này vào tài khoản không?
+                </div>
+                <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
+                    <!-- 10c. Bấm nút Cancel -> 11c. Hủy thao tác -->
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal"
+                        id="btnCancelAddAddress">
+                        Cancel
+                    </button>
+                    <!-- 10. Bấm nút Confirm -> 11. Thêm địa chỉ mới thành công -->
+                    <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" id="btnConfirmAddAddress"
+                        onclick="confirmSubmitAddress()">
+                        Confirm
+                    </button>
+                </div>
             </div>
-            <form id="addAddressForm" th:action="@{/customer/profile/address/add}" method="post">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Tên người nhận (*)</label>
-                        <input type="text" id="addRecipientName" name="recipientName" class="form-control" required placeholder="Ví dụ: Nguyễn Văn A">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Số điện thoại (*)</label>
-                        <input type="text" id="addPhone" name="phone" class="form-control" required placeholder="0901234567">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Địa chỉ chi tiết (*)</label>
-                        <textarea id="addAddressDetail" name="addressDetail" class="form-control" rows="2" required placeholder="Số nhà, tên đường, Phường, Quận, Thành phố..."></textarea>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="isDefault" value="true" id="checkDefault">
-                        <label class="form-check-label small" for="checkDefault">Đặt làm địa chỉ nhận hàng mặc định</label>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
-                    <!-- Bấm nút Submit (UC_010 Step 8) -->
-                    <button type="button" class="btn btn-flower rounded-pill px-4" id="btnSubmitNewAddress" onclick="handleSubmitNewAddress()">Submit</button>
-                </div>
-            </form>
         </div>
     </div>
-</div>
 
-<!-- Modal Xác Nhận Thêm Địa Chỉ (UC_010 Steps 9, 10, 10c) -->
-<div class="modal fade" id="confirmAddAddressModal" tabindex="-1" aria-labelledby="confirmAddAddressModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
-        <div class="modal-content rounded-4 border-0 shadow">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title font-serif fw-bold text-dark" id="confirmAddAddressModalLabel">
-                    🌸 Xác Nhận Thêm Địa Chỉ
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body py-3 text-secondary">
-                Bạn có chắc chắn muốn thêm địa chỉ nhận hàng mới này vào tài khoản không?
-            </div>
-            <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
-                <!-- 10c. Bấm nút Cancel -> 11c. Hủy thao tác -->
-                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancelAddAddress">
-                    Cancel
-                </button>
-                <!-- 10. Bấm nút Confirm -> 11. Thêm địa chỉ mới thành công -->
-                <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" id="btnConfirmAddAddress" onclick="confirmSubmitAddress()">
-                    Confirm
-                </button>
+    <!-- Modal sửa địa chỉ -->
+    <div th:each="addr : ${addresses}" class="modal fade" th:id="'modalEditAddress_' + ${addr.id}" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title font-serif fw-bold">Chỉnh Sửa Địa Chỉ</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/customer/profile/address/update/{id}(id=${addr.id})}" method="post">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Tên người nhận (*)</label>
+                            <input type="text" name="recipientName" class="form-control"
+                                th:value="${addr.recipientName}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Số điện thoại (* - đúng 10 chữ số)</label>
+                            <input type="tel" name="phone" class="form-control" th:value="${addr.phone}" required
+                                maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);"
+                                pattern="[0-9]{10}" title="Số điện thoại phải đúng 10 chữ số">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Địa chỉ chi tiết (*)</label>
+                            <textarea name="addressDetail" class="form-control" rows="2" th:text="${addr.addressDetail}"
+                                required></textarea>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="isDefault" value="true"
+                                th:checked="${addr.isDefault}" th:id="'editDef_' + ${addr.id}">
+                            <label class="form-check-label small" th:for="'editDef_' + ${addr.id}">Đặt làm địa chỉ nhận
+                                hàng mặc định</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-light rounded-pill px-3"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <!-- 8a. Bấm nút Save -->
+                        <button type="submit" class="btn btn-flower rounded-pill px-4">Save</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-</div>
-
-<!-- Modal sửa địa chỉ -->
-<div th:each="addr : ${addresses}" class="modal fade" th:id="'modalEditAddress_' + ${addr.id}" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4 border-0">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title font-serif fw-bold">Chỉnh Sửa Địa Chỉ</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form th:action="@{/customer/profile/address/update/{id}(id=${addr.id})}" method="post">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Tên người nhận (*)</label>
-                        <input type="text" name="recipientName" class="form-control" th:value="${addr.recipientName}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Số điện thoại (*)</label>
-                        <input type="text" name="phone" class="form-control" th:value="${addr.phone}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Địa chỉ chi tiết (*)</label>
-                        <textarea name="addressDetail" class="form-control" rows="2" th:text="${addr.addressDetail}" required></textarea>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="isDefault" value="true" th:checked="${addr.isDefault}" th:id="'editDef_' + ${addr.id}">
-                        <label class="form-check-label small" th:for="'editDef_' + ${addr.id}">Đặt làm địa chỉ nhận hàng mặc định</label>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
-                    <!-- 8a. Bấm nút Save -->
-                    <button type="submit" class="btn btn-flower rounded-pill px-4">Save</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
     <!-- Modal Xác Nhận Lưu Thông Tin Cá Nhân (UC_009 Steps 5b1, 5b2, 5b3, 5c3, 6b, 6c) -->
-    <div class="modal fade" id="confirmProfileModal" tabindex="-1" aria-labelledby="confirmProfileModalLabel" aria-hidden="true">
+    <div class="modal fade" id="confirmProfileModal" tabindex="-1" aria-labelledby="confirmProfileModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
             <div class="modal-content rounded-4 border-0 shadow">
                 <div class="modal-header border-0 pb-0">
@@ -343,10 +445,12 @@
                     Bạn có chắc chắn muốn lưu thông tin tài khoản đã chỉnh sửa?
                 </div>
                 <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancelProfile">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal"
+                        id="btnCancelProfile">
                         Cancel (Hủy)
                     </button>
-                    <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" id="btnConfirmProfile" onclick="submitProfileForm();">
+                    <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" id="btnConfirmProfile"
+                        onclick="submitProfileForm();">
                         Confirm (Xác Nhận)
                     </button>
                 </div>
@@ -368,10 +472,12 @@
                     Bạn có muốn cập nhật ảnh mới này cho tài khoản không?
                 </div>
                 <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancelImage">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal"
+                        id="btnCancelImage">
                         Cancel (Hủy)
                     </button>
-                    <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" id="btnConfirmImage" onclick="document.getElementById('profileForm').submit();">
+                    <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" id="btnConfirmImage"
+                        onclick="document.getElementById('profileForm').submit();">
                         Confirm (Xác Nhận)
                     </button>
                 </div>
@@ -380,7 +486,8 @@
     </div>
 
     <!-- Modal Xác Nhận Thay Đổi Mật Khẩu (Use case UC_008 Steps 7, 8, 8a) -->
-    <div class="modal fade" id="confirmPasswordModal" tabindex="-1" aria-labelledby="confirmPasswordModalLabel" aria-hidden="true">
+    <div class="modal fade" id="confirmPasswordModal" tabindex="-1" aria-labelledby="confirmPasswordModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
             <div class="modal-content rounded-4 border-0 shadow">
                 <div class="modal-header border-0 pb-0">
@@ -393,10 +500,12 @@
                     Bạn có chắc chắn muốn cập nhật mật khẩu mới cho tài khoản không?
                 </div>
                 <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancelPassword">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal"
+                        id="btnCancelPassword">
                         Cancel (Hủy)
                     </button>
-                    <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" id="btnConfirmPassword" onclick="document.getElementById('changePasswordForm').submit();">
+                    <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" id="btnConfirmPassword"
+                        onclick="document.getElementById('changePasswordForm').submit();">
                         Confirm (Xác Nhận)
                     </button>
                 </div>
@@ -418,10 +527,13 @@
                     Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?
                 </div>
                 <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancel" data-testid="btnCancel">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancel"
+                        data-testid="btnCancel">
                         Cancel
                     </button>
-                    <a th:href="@{/logout}" class="btn btn-danger rounded-pill px-4 fw-semibold text-white text-decoration-none" id="btnConfirm" data-testid="btnConfirm">
+                    <a th:href="@{/logout}"
+                        class="btn btn-danger rounded-pill px-4 fw-semibold text-white text-decoration-none"
+                        id="btnConfirm" data-testid="btnConfirm">
                         Confirm
                     </a>
                 </div>
@@ -435,24 +547,24 @@
         function handleFileSelected(input, type) {
             if (!input.files || input.files.length === 0) return;
             const file = input.files[0];
-            
+
             // Kiểm tra định dạng hợp lệ (chỉ chấp nhận hình ảnh)
             const validExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
             const fileName = file.name.toLowerCase();
             const fileExt = fileName.substring(fileName.lastIndexOf('.') + 1);
             const isValidFormat = validExtensions.includes(fileExt) && file.type.startsWith('image/');
             const isSizeValid = file.size <= 10 * 1024 * 1024; // Tối đa 10MB
-            
+
             if (!isValidFormat || !isSizeValid) {
                 // Exception 6d. Hình ảnh không hợp lệ -> 6d1. Thông báo cập nhật thất bại
                 input.value = '';
                 alert('Thông báo cập nhật thất bại: Hình ảnh không hợp lệ! Vui lòng chọn tệp hình ảnh (.jpg, .jpeg, .png, .webp) có dung lượng dưới 10MB.');
                 return;
             }
-            
+
             // Hiển thị preview ảnh ngay lập tức
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 if (type === 'avatar') {
                     const avatarImg = document.getElementById('avatarPreviewImg');
                     if (avatarImg) avatarImg.src = e.target.result;
@@ -474,15 +586,15 @@
         function toggleEditProfile() {
             const fields = ['inputFirstName', 'inputLastName', 'inputFullName', 'inputPhone', 'inputIdCard', 'inputAddress'];
             const isCurrentlyDisabled = document.getElementById('inputFirstName')?.disabled ?? true;
-            
+
             fields.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.disabled = !isCurrentlyDisabled;
             });
-            
+
             const btnSave = document.getElementById('btnSaveProfile');
             if (btnSave) btnSave.disabled = !isCurrentlyDisabled;
-            
+
             const btnEdit = document.getElementById('btnEditProfileInfo');
             if (btnEdit) {
                 if (isCurrentlyDisabled) {
@@ -591,11 +703,36 @@
             const recipient = document.getElementById('addRecipientName')?.value.trim();
             const phone = document.getElementById('addPhone')?.value.trim();
             const detail = document.getElementById('addAddressDetail')?.value.trim();
-            
+
             if (!recipient || !phone || !detail) {
                 alert('Vui lòng điền đầy đủ các thông tin địa chỉ!');
                 return;
             }
+
+            // Kiểm tra số điện thoại: phải đúng 10 chữ số (không được thiếu hay thừa)
+            if (phone.length !== 10 || !/^[0-9]{10}$/.test(phone)) {
+                showAddressExceptionError('Thông báo thêm thất bại: Số điện thoại không hợp lệ (phải đúng 10 chữ số, không được thiếu hay thừa)!');
+                document.getElementById('addPhone')?.focus();
+                return;
+            }
+
+            // Kiểm tra địa chỉ trùng lặp
+            const normNewDetail = normalizeAddress(detail);
+            const addressItems = document.querySelectorAll('.address-item');
+            let isDuplicate = false;
+            addressItems.forEach(item => {
+                const existingDetail = item.getAttribute('data-detail') || '';
+                const normExistingDetail = normalizeAddress(existingDetail);
+                if (normExistingDetail === normNewDetail) {
+                    isDuplicate = true;
+                }
+            });
+
+            if (isDuplicate) {
+                showAddressExceptionError('Thông báo thêm thất bại: Địa chỉ này đã tồn tại trong sổ địa chỉ của bạn!');
+                return;
+            }
+
             // 9. Hiển thị thông báo yêu cầu xác nhận
             const confirmModal = new bootstrap.Modal(document.getElementById('confirmAddAddressModal'));
             confirmModal.show();
@@ -656,7 +793,7 @@
         }
 
         // Khởi tạo trang khi tải xong
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Tách First name và Last name từ fullName hiện tại
             const currentFullName = document.getElementById('inputFullName')?.value || '';
             if (currentFullName) {
@@ -679,11 +816,11 @@
             const errorMsg = document.querySelector('.alert-danger');
             const urlParams = new URLSearchParams(window.location.search);
 
-            if (urlParams.get('tab') === 'address' || 
-                (successMsg && successMsg.textContent.toLowerCase().includes('địa chỉ')) || 
+            if (urlParams.get('tab') === 'address' ||
+                (successMsg && successMsg.textContent.toLowerCase().includes('địa chỉ')) ||
                 (errorMsg && errorMsg.textContent.toLowerCase().includes('địa chỉ'))) {
                 switchToAddressTab();
-            } else if ((successMsg && successMsg.textContent.includes('mật khẩu')) || 
+            } else if ((successMsg && successMsg.textContent.includes('mật khẩu')) ||
                 (errorMsg && errorMsg.textContent.includes('mật khẩu'))) {
                 const passTab = document.getElementById('password-tab');
                 if (passTab) {
@@ -693,4 +830,5 @@
         });
     </script>
 </body>
+
 </html>
