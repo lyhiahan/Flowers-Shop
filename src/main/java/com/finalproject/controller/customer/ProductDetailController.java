@@ -17,7 +17,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.security.Principal;
 
 @Controller
-@RequestMapping({"/products", "/product"})
 @RequiredArgsConstructor
 public class ProductDetailController {
 
@@ -28,7 +27,7 @@ public class ProductDetailController {
     private final UserRepository userRepository;
     private final CartService cartService;
 
-    @GetMapping("/{id}")
+    @GetMapping({"/product/{id}", "/products/{id}"})
     public String viewProductDetail(@PathVariable("id") Long id, Principal principal, Model model) {
         Product product = productService.getProductById(id);
 
@@ -68,7 +67,7 @@ public class ProductDetailController {
         return "customer/product-detail";
     }
 
-    @PostMapping("/{id}/review")
+    @PostMapping({"/product/{id}/review", "/products/{id}/review"})
     public String submitReview(@PathVariable("id") Long id,
                                @RequestParam("rating") int rating,
                                @RequestParam("content") String content,

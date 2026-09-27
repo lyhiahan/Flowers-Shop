@@ -29,39 +29,54 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // 1. Tạo 3 chi nhánh mẫu
-        Store storeA = storeRepository.findByName("Bloom Flower - Chi Nhánh Bến Thành (Quận 1)")
-                .orElseGet(() -> storeRepository.save(Store.builder()
-                        .name("Bloom Flower - Chi Nhánh Bến Thành (Quận 1)")
-                        .address("123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM")
-                        .phone("0281111222")
-                        .status(true)
-                        .isOpen(true)
-                        .rating(4.9)
-                        .eWallet(new BigDecimal("15500000"))
-                        .build()));
+        // 1. Tạo hoặc cập nhật 3 chi nhánh mẫu sang tiếng Việt thuần
+        Store storeA = storeRepository.findByName("Chi Nhánh Bến Thành (Quận 1)")
+                .orElseGet(() -> storeRepository.findByName("Bloom Flower - Chi Nhánh Bến Thành (Quận 1)")
+                        .map(s -> {
+                            s.setName("Chi Nhánh Bến Thành (Quận 1)");
+                            return storeRepository.save(s);
+                        })
+                        .orElseGet(() -> storeRepository.save(Store.builder()
+                                .name("Chi Nhánh Bến Thành (Quận 1)")
+                                .address("123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM")
+                                .phone("0281111222")
+                                .status(true)
+                                .isOpen(true)
+                                .rating(4.9)
+                                .eWallet(new BigDecimal("15500000"))
+                                .build())));
 
-        Store storeB = storeRepository.findByName("Bloom Flower - Chi Nhánh Phú Mỹ Hưng (Quận 7)")
-                .orElseGet(() -> storeRepository.save(Store.builder()
-                        .name("Bloom Flower - Chi Nhánh Phú Mỹ Hưng (Quận 7)")
-                        .address("456 Nguyễn Thị Thập, Tân Hưng, Quận 7, TP.HCM")
-                        .phone("0283333444")
-                        .status(true)
-                        .isOpen(true)
-                        .rating(4.8)
-                        .eWallet(new BigDecimal("8200000"))
-                        .build()));
+        Store storeB = storeRepository.findByName("Chi Nhánh Phú Mỹ Hưng (Quận 7)")
+                .orElseGet(() -> storeRepository.findByName("Bloom Flower - Chi Nhánh Phú Mỹ Hưng (Quận 7)")
+                        .map(s -> {
+                            s.setName("Chi Nhánh Phú Mỹ Hưng (Quận 7)");
+                            return storeRepository.save(s);
+                        })
+                        .orElseGet(() -> storeRepository.save(Store.builder()
+                                .name("Chi Nhánh Phú Mỹ Hưng (Quận 7)")
+                                .address("456 Nguyễn Thị Thập, Tân Hưng, Quận 7, TP.HCM")
+                                .phone("0283333444")
+                                .status(true)
+                                .isOpen(true)
+                                .rating(4.8)
+                                .eWallet(new BigDecimal("8200000"))
+                                .build())));
 
-        Store storeC = storeRepository.findByName("Bloom Flower - Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
-                .orElseGet(() -> storeRepository.save(Store.builder()
-                        .name("Bloom Flower - Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
-                        .address("1 Võ Văn Ngân, Linh Chiểu, Thủ Đức, TP.HCM")
-                        .phone("0285555666")
-                        .status(true)
-                        .isOpen(true)
-                        .rating(4.7)
-                        .eWallet(new BigDecimal("4300000"))
-                        .build()));
+        Store storeC = storeRepository.findByName("Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
+                .orElseGet(() -> storeRepository.findByName("Bloom Flower - Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
+                        .map(s -> {
+                            s.setName("Chi Nhánh Làng Đại Học (TP. Thủ Đức)");
+                            return storeRepository.save(s);
+                        })
+                        .orElseGet(() -> storeRepository.save(Store.builder()
+                                .name("Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
+                                .address("1 Võ Văn Ngân, Linh Chiểu, Thủ Đức, TP.HCM")
+                                .phone("0285555666")
+                                .status(true)
+                                .isOpen(true)
+                                .rating(4.7)
+                                .eWallet(new BigDecimal("4300000"))
+                                .build())));
 
         // 2. Tạo các tài khoản mẫu cho từng Role (mật khẩu mặc định: 123456)
         User admin = userRepository.findByUsername("admin").orElseGet(() -> userRepository.save(User.builder()
@@ -246,7 +261,7 @@ public class DataInitializer implements CommandLineRunner {
         // 7. Tạo danh sách hoa mẫu phong phú có sold >= 10 phục vụ tiêu chí Khách vãng lai (Guest)
         if (productRepository.count() < 5) {
             Product p1 = Product.builder()
-                    .name("Bó Hoa Hồng Đỏ Ecuador Nhập Khẩu 99 Bông 'Forever Love'")
+                    .name("Bó Hoa Hồng Đỏ Ecuador Nhập Khẩu 99 Bông 'Tình Yêu Vĩnh Cửu'")
                     .category(catTinhYeu)
                     .store(storeA)
                     .description("Bó hoa hồng đỏ nhập khẩu Ecuador size bông cực lớn, cánh dày nhung mịn, kết hợp lá bạc Dollar sang trọng biểu tượng tình yêu vĩnh cửu bất diệt.")
@@ -278,7 +293,7 @@ public class DataInitializer implements CommandLineRunner {
                     .build();
 
             Product p3 = Product.builder()
-                    .name("Hộp Hoa Sinh Nhật Tone Hồng Pastel 'Sweet Angel'")
+                    .name("Hộp Hoa Sinh Nhật Tone Hồng Pastel 'Thiên Thần Ngọt Ngào'")
                     .category(catSinhNhat)
                     .store(storeB)
                     .description("Hộp hoa cắm tròn xinh xắn phối giữa hoa hồng trà, hoa cẩm chướng hồng và hoa baby trắng bồng bềnh, thích hợp tặng bạn gái hoặc đồng nghiệp.")
@@ -375,5 +390,25 @@ public class DataInitializer implements CommandLineRunner {
                         .build());
             }
         }
+
+        // 8. Tự động chuẩn hóa toàn bộ tên sản phẩm trong CSDL nếu còn từ tiếng Anh
+        productRepository.findAll().forEach(p -> {
+            boolean changed = false;
+            if (p.getName() != null && p.getName().contains("Forever Love")) {
+                p.setName(p.getName().replace("'Forever Love'", "'Tình Yêu Vĩnh Cửu'").replace("Forever Love", "Tình Yêu Vĩnh Cửu"));
+                changed = true;
+            }
+            if (p.getName() != null && p.getName().contains("Sweet Angel")) {
+                p.setName(p.getName().replace("'Sweet Angel'", "'Thiên Thần Ngọt Ngào'").replace("Sweet Angel", "Thiên Thần Ngọt Ngào"));
+                changed = true;
+            }
+            if (p.getName() != null && p.getName().contains("Sweet Love")) {
+                p.setName(p.getName().replace("Sweet Love", "'Tình Yêu Ngọt Ngào'"));
+                changed = true;
+            }
+            if (changed) {
+                productRepository.save(p);
+            }
+        });
     }
 }

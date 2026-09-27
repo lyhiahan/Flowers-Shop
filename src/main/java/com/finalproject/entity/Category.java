@@ -16,4 +16,12 @@ public class Category {
 
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Category parent;
+
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
+    @Builder.Default
+    private java.util.List<Category> subCategories = new java.util.ArrayList<>();
 }

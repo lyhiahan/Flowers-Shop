@@ -3,10 +3,14 @@ package com.finalproject.controller.customer;
 import com.finalproject.entity.Product;
 import com.finalproject.entity.Store;
 import com.finalproject.repository.ProductRepository;
+import com.finalproject.repository.ReviewRepository;
 import com.finalproject.repository.StoreRepository;
 import com.finalproject.repository.UserFollowStoreRepository;
 import com.finalproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,31 +28,54 @@ public class StorePublicController {
 
     private final StoreRepository storeRepository;
     private final ProductRepository productRepository;
+    private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final UserFollowStoreRepository followStoreRepository;
 
     @GetMapping
-    public String listStores(@RequestParam(value = "keyword", required = false) String keyword, Model model) {
-        List<Store> stores;
+    public String listStores(
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "3") int size,
+            Model model) {
+        int pageNumber = Math.max(0, page - 1);
+        Pageable pageable = PageRequest.of(pageNumber, size);
+        Page<Store> storePage;
         if (keyword != null && !keyword.trim().isEmpty()) {
-            stores = storeRepository.searchActiveStores(keyword.trim());
+            storePage = storeRepository.searchActiveStores(keyword.trim(), pageable);
         } else {
-            stores = storeRepository.findByStatusTrue();
+            storePage = storeRepository.findByStatusTrue(pageable);
         }
 
-        model.addAttribute("stores", stores);
+        model.addAttribute("storePage", storePage);
+        model.addAttribute("stores", storePage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", storePage.getTotalPages());
+        model.addAttribute("totalItems", storePage.getTotalElements());
         model.addAttribute("keyword", keyword != null ? keyword.trim() : "");
         return "customer/stores";
     }
 
     @GetMapping("/{id}")
-    public String viewStore(@PathVariable("id") Long id, Principal principal, Model model) {
+    public String viewStore(
+            @PathVariable("id") Long id,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "tab", required = false, defaultValue = "collection") String tab,
+            Principal principal,
+            Model model) {
         Store store = storeRepository.findById(id).orElse(null);
         if (store == null) {
             return "redirect:/stores";
         }
 
-        List<Product> products = productRepository.findByStoreIdOrderByCreatedAtDesc(id);
+        List<Product> products;
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            products = productRepository.findByStoreIdAndNameContainingIgnoreCase(id, keyword.trim());
+        } else {
+            products = productRepository.findByStoreIdOrderByCreatedAtDesc(id);
+        }
+
+        var reviews = reviewRepository.findByStoreIdOrderByCreatedAtDesc(id);
 
         boolean isFollowed = false;
         if (principal != null) {
@@ -60,7 +87,10 @@ public class StorePublicController {
 
         model.addAttribute("store", store);
         model.addAttribute("products", products);
+        model.addAttribute("reviews", reviews);
         model.addAttribute("isFollowed", isFollowed);
+        model.addAttribute("keyword", keyword != null ? keyword.trim() : "");
+        model.addAttribute("currentTab", tab);
         return "customer/store-detail";
     }
 }

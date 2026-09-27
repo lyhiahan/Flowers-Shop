@@ -42,8 +42,25 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     // Sản phẩm của cửa hàng
     List<Product> findByStoreIdOrderByCreatedAtDesc(Long storeId);
+    List<Product> findByStoreIdAndNameContainingIgnoreCase(Long storeId, String name);
     Page<Product> findByStoreId(Long storeId, Pageable pageable);
 
     // Tìm kiếm toàn sàn phân trang
     Page<Product> findByIsActiveTrueAndIsSellingTrue(Pageable pageable);
+
+    @Query("SELECT p FROM Product p WHERE p.isActive = true AND p.isSelling = true " +
+           "AND (:categoryIds IS NULL OR p.category.id IN :categoryIds) " +
+           "AND (:keyword IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "AND (:minPrice IS NULL OR p.priceBuy >= :minPrice) " +
+           "AND (:maxPrice IS NULL OR p.priceBuy <= :maxPrice) " +
+           "AND (:minRating IS NULL OR p.rating >= :minRating) " +
+           "AND (:storeId IS NULL OR p.store.id = :storeId)")
+    Page<Product> filterProducts(
+            @Param("categoryIds") List<Long> categoryIds,
+            @Param("keyword") String keyword,
+            @Param("minPrice") java.math.BigDecimal minPrice,
+            @Param("maxPrice") java.math.BigDecimal maxPrice,
+            @Param("minRating") Double minRating,
+            @Param("storeId") Long storeId,
+            Pageable pageable);
 }

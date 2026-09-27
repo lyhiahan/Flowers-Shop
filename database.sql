@@ -15,29 +15,78 @@ GO
 -- ============================================================================
 -- 1. XÓA CÁC BẢNG NẾU ĐÃ TỒN TẠI (THEO THỨ TỰ RÀNG BUỘC KHÓA NGOẠI)
 -- ============================================================================
+IF OBJECT_ID('dbo.transactions', 'U') IS NOT NULL DROP TABLE dbo.transactions;
+IF OBJECT_ID('dbo.user_follow_store', 'U') IS NOT NULL DROP TABLE dbo.user_follow_store;
+IF OBJECT_ID('dbo.recently_viewed', 'U') IS NOT NULL DROP TABLE dbo.recently_viewed;
+IF OBJECT_ID('dbo.product_wishlists', 'U') IS NOT NULL DROP TABLE dbo.product_wishlists;
+IF OBJECT_ID('dbo.reviews', 'U') IS NOT NULL DROP TABLE dbo.reviews;
+IF OBJECT_ID('dbo.user_addresses', 'U') IS NOT NULL DROP TABLE dbo.user_addresses;
 IF OBJECT_ID('dbo.activity_logs', 'U') IS NOT NULL DROP TABLE dbo.activity_logs;
 IF OBJECT_ID('dbo.notifications', 'U') IS NOT NULL DROP TABLE dbo.notifications;
 IF OBJECT_ID('dbo.inventory_transfer_requests', 'U') IS NOT NULL DROP TABLE dbo.inventory_transfer_requests;
 IF OBJECT_ID('dbo.payments', 'U') IS NOT NULL DROP TABLE dbo.payments;
 IF OBJECT_ID('dbo.order_details', 'U') IS NOT NULL DROP TABLE dbo.order_details;
 IF OBJECT_ID('dbo.orders', 'U') IS NOT NULL DROP TABLE dbo.orders;
+IF OBJECT_ID('dbo.vouchers', 'U') IS NOT NULL DROP TABLE dbo.vouchers;
 IF OBJECT_ID('dbo.cart_items', 'U') IS NOT NULL DROP TABLE dbo.cart_items;
 IF OBJECT_ID('dbo.carts', 'U') IS NOT NULL DROP TABLE dbo.carts;
 IF OBJECT_ID('dbo.store_inventories', 'U') IS NOT NULL DROP TABLE dbo.store_inventories;
 IF OBJECT_ID('dbo.product_images', 'U') IS NOT NULL DROP TABLE dbo.product_images;
 IF OBJECT_ID('dbo.products', 'U') IS NOT NULL DROP TABLE dbo.products;
+IF OBJECT_ID('dbo.style_values', 'U') IS NOT NULL DROP TABLE dbo.style_values;
+IF OBJECT_ID('dbo.styles', 'U') IS NOT NULL DROP TABLE dbo.styles;
 IF OBJECT_ID('dbo.promotions', 'U') IS NOT NULL DROP TABLE dbo.promotions;
+IF OBJECT_ID('dbo.deliveries', 'U') IS NOT NULL DROP TABLE dbo.deliveries;
 IF OBJECT_ID('dbo.categories', 'U') IS NOT NULL DROP TABLE dbo.categories;
 IF OBJECT_ID('dbo.otp_verifications', 'U') IS NOT NULL DROP TABLE dbo.otp_verifications;
 IF OBJECT_ID('dbo.users', 'U') IS NOT NULL DROP TABLE dbo.users;
+IF OBJECT_ID('dbo.user_levels', 'U') IS NOT NULL DROP TABLE dbo.user_levels;
 IF OBJECT_ID('dbo.stores', 'U') IS NOT NULL DROP TABLE dbo.stores;
+IF OBJECT_ID('dbo.store_levels', 'U') IS NOT NULL DROP TABLE dbo.store_levels;
+IF OBJECT_ID('dbo.commissions', 'U') IS NOT NULL DROP TABLE dbo.commissions;
 GO
 
 -- ============================================================================
 -- 2. TẠO CÁC BẢNG DỮ LIỆU (CREATE TABLES)
 -- ============================================================================
 
--- Bảng 1: Chuỗi chi nhánh cửa hàng hoa (Stores)
+-- Bảng: Cấp bậc thành viên (User Levels)
+CREATE TABLE dbo.user_levels (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    name NVARCHAR(32) NOT NULL UNIQUE,
+    min_point INT NOT NULL UNIQUE,
+    discount DECIMAL(5,2) NOT NULL DEFAULT 0,
+    is_deleted BIT NOT NULL DEFAULT 0,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+GO
+
+-- Bảng: Cấp bậc cửa hàng (Store Levels)
+CREATE TABLE dbo.store_levels (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    name NVARCHAR(32) NOT NULL UNIQUE,
+    min_point INT NOT NULL UNIQUE,
+    discount DECIMAL(5,2) NOT NULL DEFAULT 0,
+    is_deleted BIT NOT NULL DEFAULT 0,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+GO
+
+-- Bảng: Chính sách chiết khấu / hoa hồng (Commissions)
+CREATE TABLE dbo.commissions (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    name NVARCHAR(32) NOT NULL UNIQUE,
+    cost DECIMAL(18,2) NOT NULL,
+    description NVARCHAR(3000),
+    is_deleted BIT NOT NULL DEFAULT 0,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+GO
+
+-- Bảng: Chuỗi chi nhánh cửa hàng hoa (Stores)
 CREATE TABLE dbo.stores (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     name NVARCHAR(150) NOT NULL,
@@ -45,11 +94,24 @@ CREATE TABLE dbo.stores (
     phone VARCHAR(20) NULL,
     latitude FLOAT NULL,
     longitude FLOAT NULL,
-    status BIT NULL DEFAULT 1
+    status BIT NULL DEFAULT 1,
+    owner_id BIGINT NULL,
+    bio NVARCHAR(1000) NULL,
+    avatar NVARCHAR(500) NULL,
+    cover NVARCHAR(500) NULL,
+    featured_images NVARCHAR(MAX) NULL,
+    commission_id BIGINT NULL,
+    store_level_id BIGINT NULL,
+    is_open BIT NOT NULL DEFAULT 1,
+    point INT NOT NULL DEFAULT 0,
+    rating FLOAT NOT NULL DEFAULT 5.0,
+    e_wallet DECIMAL(18,2) NOT NULL DEFAULT 0,
+    CONSTRAINT FK_stores_commissions FOREIGN KEY (commission_id) REFERENCES dbo.commissions(id),
+    CONSTRAINT FK_stores_store_levels FOREIGN KEY (store_level_id) REFERENCES dbo.store_levels(id)
 );
 GO
 
--- Bảng 2: Người dùng (Users: Khách hàng, Florist, Quản lý, Admin)
+-- Bảng: Người dùng (Users: Khách hàng, Quản lý, Admin, Nhân viên giao hàng)
 CREATE TABLE dbo.users (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
@@ -59,15 +121,23 @@ CREATE TABLE dbo.users (
     phone VARCHAR(20) NULL,
     address NVARCHAR(255) NULL,
     avatar_url VARCHAR(255) NULL,
-    role VARCHAR(20) NOT NULL, -- 'ADMIN', 'MANAGER', 'CUSTOMER'
+    cover NVARCHAR(500) NULL,
+    role VARCHAR(20) NOT NULL, -- 'ADMIN', 'MANAGER', 'CUSTOMER', 'SHIPPER'
     is_active BIT NULL DEFAULT 0,
     created_date DATE NULL,
     store_id BIGINT NULL,
-    CONSTRAINT FK_users_stores FOREIGN KEY (store_id) REFERENCES dbo.stores(id) ON DELETE SET NULL
+    point INT NOT NULL DEFAULT 0,
+    e_wallet DECIMAL(18,2) NOT NULL DEFAULT 0,
+    is_email_active BIT NOT NULL DEFAULT 1,
+    otp_code VARCHAR(10) NULL,
+    otp_expiry DATETIME NULL,
+    user_level_id BIGINT NULL,
+    CONSTRAINT FK_users_stores FOREIGN KEY (store_id) REFERENCES dbo.stores(id) ON DELETE SET NULL,
+    CONSTRAINT FK_users_user_levels FOREIGN KEY (user_level_id) REFERENCES dbo.user_levels(id)
 );
 GO
 
--- Bảng 3: Mã xác thực OTP (OtpVerification)
+-- Bảng: Mã xác thực OTP (OtpVerification)
 CREATE TABLE dbo.otp_verifications (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -80,7 +150,20 @@ CREATE TABLE dbo.otp_verifications (
 );
 GO
 
--- Bảng 4: Danh mục hoa tươi (Categories)
+-- Bảng: Đơn vị vận chuyển (Deliveries)
+CREATE TABLE dbo.deliveries (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    name NVARCHAR(100) NOT NULL UNIQUE,
+    description NVARCHAR(1000),
+    price DECIMAL(18,2) NOT NULL DEFAULT 0,
+    is_active BIT NOT NULL DEFAULT 1,
+    is_deleted BIT NOT NULL DEFAULT 0,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+GO
+
+-- Bảng: Danh mục hoa tươi (Categories)
 CREATE TABLE dbo.categories (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     name NVARCHAR(100) NOT NULL UNIQUE,
@@ -88,7 +171,30 @@ CREATE TABLE dbo.categories (
 );
 GO
 
--- Bảng 5: Sản phẩm hoa tươi & Phụ kiện sự kiện (Products)
+-- Bảng: Phong cách & Thiết kế hoa (Styles & Style Values)
+CREATE TABLE dbo.styles (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    name NVARCHAR(32) NOT NULL UNIQUE,
+    category_id BIGINT NULL,
+    is_deleted BIT NOT NULL DEFAULT 0,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_styles_categories FOREIGN KEY (category_id) REFERENCES dbo.categories(id) ON DELETE SET NULL
+);
+GO
+
+CREATE TABLE dbo.style_values (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    name NVARCHAR(32) NOT NULL,
+    style_id BIGINT NOT NULL,
+    is_deleted BIT NOT NULL DEFAULT 0,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_style_values_styles FOREIGN KEY (style_id) REFERENCES dbo.styles(id) ON DELETE CASCADE
+);
+GO
+
+-- Bảng: Sản phẩm hoa tươi & Phụ kiện sự kiện (Products)
 CREATE TABLE dbo.products (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     name NVARCHAR(200) NOT NULL,
@@ -98,11 +204,20 @@ CREATE TABLE dbo.products (
     price_rent_per_day NUMERIC(38,2) NOT NULL,
     deposit_fee NUMERIC(38,2) NOT NULL,
     category_id BIGINT NOT NULL,
-    CONSTRAINT FK_products_categories FOREIGN KEY (category_id) REFERENCES dbo.categories(id) ON DELETE CASCADE
+    sold INT NOT NULL DEFAULT 0,
+    rating FLOAT NOT NULL DEFAULT 5.0,
+    view_count INT NOT NULL DEFAULT 0,
+    store_id BIGINT NULL,
+    is_active BIT NOT NULL DEFAULT 1,
+    is_selling BIT NOT NULL DEFAULT 1,
+    promotional_price DECIMAL(18,2) NULL,
+    image_url NVARCHAR(500) NULL,
+    CONSTRAINT FK_products_categories FOREIGN KEY (category_id) REFERENCES dbo.categories(id) ON DELETE CASCADE,
+    CONSTRAINT FK_products_stores FOREIGN KEY (store_id) REFERENCES dbo.stores(id) ON DELETE SET NULL
 );
 GO
 
--- Bảng 6: Hình ảnh hoa tươi (ProductImages)
+-- Bảng: Hình ảnh hoa tươi (ProductImages)
 CREATE TABLE dbo.product_images (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     image_url VARCHAR(255) NOT NULL,
@@ -111,7 +226,7 @@ CREATE TABLE dbo.product_images (
 );
 GO
 
--- Bảng 7: Tồn kho hoa tươi theo chi nhánh (StoreInventories)
+-- Bảng: Tồn kho hoa tươi theo chi nhánh (StoreInventories)
 CREATE TABLE dbo.store_inventories (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     store_id BIGINT NOT NULL,
@@ -124,7 +239,7 @@ CREATE TABLE dbo.store_inventories (
 );
 GO
 
--- Bảng 8: Giỏ hàng (Carts)
+-- Bảng: Giỏ hàng (Carts)
 CREATE TABLE dbo.carts (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     user_id BIGINT NOT NULL UNIQUE,
@@ -132,7 +247,7 @@ CREATE TABLE dbo.carts (
 );
 GO
 
--- Bảng 9: Chi tiết giỏ hàng (CartItems)
+-- Bảng: Chi tiết giỏ hàng (CartItems)
 CREATE TABLE dbo.cart_items (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     cart_id BIGINT NOT NULL,
@@ -150,7 +265,40 @@ CREATE TABLE dbo.cart_items (
 );
 GO
 
--- Bảng 10: Đơn đặt hoa (Orders)
+-- Bảng: Mã giảm giá & Voucher (Vouchers)
+CREATE TABLE dbo.vouchers (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    code VARCHAR(50) NOT NULL UNIQUE,
+    name NVARCHAR(150) NOT NULL,
+    discount_type VARCHAR(20) NOT NULL, -- PERCENT, FIXED_AMOUNT, FREE_SHIP
+    discount_value DECIMAL(18,2) NOT NULL,
+    min_order_value DECIMAL(18,2) DEFAULT 0,
+    max_discount_amount DECIMAL(18,2) NULL,
+    store_id BIGINT NULL,
+    quantity INT NOT NULL DEFAULT 100,
+    used_count INT NOT NULL DEFAULT 0,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    is_active BIT NOT NULL DEFAULT 1,
+    created_at DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_vouchers_stores FOREIGN KEY (store_id) REFERENCES dbo.stores(id) ON DELETE SET NULL
+);
+GO
+
+-- Bảng: Sổ địa chỉ người dùng (UserAddresses)
+CREATE TABLE dbo.user_addresses (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    recipient_name NVARCHAR(100) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    address_detail NVARCHAR(255) NOT NULL,
+    is_default BIT NOT NULL DEFAULT 0,
+    created_at DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_user_addresses_users FOREIGN KEY (user_id) REFERENCES dbo.users(id) ON DELETE CASCADE
+);
+GO
+
+-- Bảng: Đơn đặt hoa (Orders)
 CREATE TABLE dbo.orders (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -168,13 +316,20 @@ CREATE TABLE dbo.orders (
     recipient_address NVARCHAR(255) NULL,
     created_at DATETIME2 NULL,
     version BIGINT NOT NULL DEFAULT 0,
+    shipper_id BIGINT NULL,
+    voucher_id BIGINT NULL,
+    discount_amount DECIMAL(18,2) NOT NULL DEFAULT 0,
+    payment_method VARCHAR(20) NOT NULL DEFAULT 'COD',
+    payment_status VARCHAR(20) NOT NULL DEFAULT 'UNPAID',
     CONSTRAINT FK_orders_users FOREIGN KEY (user_id) REFERENCES dbo.users(id),
     CONSTRAINT FK_orders_pickup_stores FOREIGN KEY (pickup_store_id) REFERENCES dbo.stores(id),
-    CONSTRAINT FK_orders_return_stores FOREIGN KEY (return_store_id) REFERENCES dbo.stores(id)
+    CONSTRAINT FK_orders_return_stores FOREIGN KEY (return_store_id) REFERENCES dbo.stores(id),
+    CONSTRAINT FK_orders_shippers FOREIGN KEY (shipper_id) REFERENCES dbo.users(id),
+    CONSTRAINT FK_orders_vouchers FOREIGN KEY (voucher_id) REFERENCES dbo.vouchers(id)
 );
 GO
 
--- Bảng 11: Chi tiết đơn hàng hoa (OrderDetails)
+-- Bảng: Chi tiết đơn hàng hoa (OrderDetails)
 CREATE TABLE dbo.order_details (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     order_id BIGINT NOT NULL,
@@ -191,7 +346,7 @@ CREATE TABLE dbo.order_details (
 );
 GO
 
--- Bảng 12: Thanh toán (Payments)
+-- Bảng: Thanh toán (Payments)
 CREATE TABLE dbo.payments (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     order_id BIGINT NOT NULL,
@@ -203,7 +358,75 @@ CREATE TABLE dbo.payments (
 );
 GO
 
--- Bảng 13: Điều phối hoa giữa các chi nhánh (InventoryTransferRequests)
+-- Bảng: Đánh giá & bình luận sản phẩm (Reviews)
+CREATE TABLE dbo.reviews (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
+    store_id BIGINT NULL,
+    order_id BIGINT NULL,
+    content NVARCHAR(1000) NOT NULL,
+    stars INT NOT NULL CHECK (stars >= 1 AND stars <= 5),
+    image_url NVARCHAR(500) NULL,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_reviews_users FOREIGN KEY (user_id) REFERENCES dbo.users(id),
+    CONSTRAINT FK_reviews_products FOREIGN KEY (product_id) REFERENCES dbo.products(id) ON DELETE CASCADE
+);
+GO
+
+-- Bảng: Danh sách yêu thích sản phẩm (ProductWishlists)
+CREATE TABLE dbo.product_wishlists (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
+    created_at DATETIME DEFAULT GETDATE(),
+    CONSTRAINT uq_user_wishlist UNIQUE (user_id, product_id),
+    CONSTRAINT FK_wishlist_users FOREIGN KEY (user_id) REFERENCES dbo.users(id) ON DELETE CASCADE,
+    CONSTRAINT FK_wishlist_products FOREIGN KEY (product_id) REFERENCES dbo.products(id) ON DELETE CASCADE
+);
+GO
+
+-- Bảng: Sản phẩm vừa xem gần đây (RecentlyViewed)
+CREATE TABLE dbo.recently_viewed (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
+    viewed_at DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_recently_viewed_users FOREIGN KEY (user_id) REFERENCES dbo.users(id) ON DELETE CASCADE,
+    CONSTRAINT FK_recently_viewed_products FOREIGN KEY (product_id) REFERENCES dbo.products(id) ON DELETE CASCADE
+);
+GO
+
+-- Bảng: Theo dõi cửa hàng (UserFollowStore)
+CREATE TABLE dbo.user_follow_store (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    store_id BIGINT NOT NULL,
+    created_at DATETIME DEFAULT GETDATE(),
+    CONSTRAINT uq_user_follow_store UNIQUE (user_id, store_id),
+    CONSTRAINT FK_follow_users FOREIGN KEY (user_id) REFERENCES dbo.users(id) ON DELETE CASCADE,
+    CONSTRAINT FK_follow_stores FOREIGN KEY (store_id) REFERENCES dbo.stores(id) ON DELETE CASCADE
+);
+GO
+
+-- Bảng: Lịch sử biến động số dư / Giao dịch ví (Transactions)
+CREATE TABLE dbo.transactions (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    user_id BIGINT NULL,
+    store_id BIGINT NULL,
+    is_up BIT NOT NULL DEFAULT 1,
+    amount DECIMAL(18,2) NOT NULL,
+    type VARCHAR(30) DEFAULT 'ORDER_PAYMENT',
+    description NVARCHAR(500),
+    status VARCHAR(20) DEFAULT 'COMPLETED',
+    created_at DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_transactions_users FOREIGN KEY (user_id) REFERENCES dbo.users(id),
+    CONSTRAINT FK_transactions_stores FOREIGN KEY (store_id) REFERENCES dbo.stores(id)
+);
+GO
+
+-- Bảng: Điều phối hoa giữa các chi nhánh (InventoryTransferRequests)
 CREATE TABLE dbo.inventory_transfer_requests (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     from_store_id BIGINT NOT NULL,
@@ -218,7 +441,7 @@ CREATE TABLE dbo.inventory_transfer_requests (
 );
 GO
 
--- Bảng 14: Mã giảm giá & Ưu đãi hoa tươi (Promotions)
+-- Bảng: Mã khuyến mãi chung (Promotions)
 CREATE TABLE dbo.promotions (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     code VARCHAR(30) NOT NULL UNIQUE,
@@ -235,24 +458,41 @@ GO
 -- ============================================================================
 
 -- 3.1. Chuỗi chi nhánh cửa hàng hoa tươi tại TP.HCM
-INSERT INTO dbo.stores (name, address, phone, latitude, longitude, status) VALUES 
-(N'Bloom Flower - Chi Nhánh Bến Thành (Quận 1)', N'123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM', '0281111222', 10.7725, 106.6980, 1),
-(N'Bloom Flower - Chi Nhánh Phú Mỹ Hưng (Quận 7)', N'456 Nguyễn Thị Thập, Tân Hưng, Quận 7, TP.HCM', '0283333444', 10.7382, 106.7085, 1),
-(N'Bloom Flower - Chi Nhánh Làng Đại Học (TP. Thủ Đức)', N'1 Võ Văn Ngân, Linh Chiểu, TP. Thủ Đức, TP.HCM', '0285555666', 10.8505, 106.7719, 1);
+INSERT INTO dbo.stores (name, address, phone, latitude, longitude, status, is_open, rating, e_wallet) VALUES 
+(N'Chi Nhánh Bến Thành (Quận 1)', N'123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM', '0281111222', 10.7725, 106.6980, 1, 1, 4.9, 15500000),
+(N'Chi Nhánh Phú Mỹ Hưng (Quận 7)', N'456 Nguyễn Thị Thập, Tân Hưng, Quận 7, TP.HCM', '0283333444', 10.7382, 106.7085, 1, 1, 4.8, 8200000),
+(N'Chi Nhánh Làng Đại Học (TP. Thủ Đức)', N'1 Võ Văn Ngân, Linh Chiểu, TP. Thủ Đức, TP.HCM', '0285555666', 10.8505, 106.7719, 1, 1, 4.7, 4300000);
 GO
 
--- 3.2. Tài khoản mẫu (Mật khẩu: 123456)
-INSERT INTO dbo.users (username, password, full_name, email, phone, address, role, is_active, created_date, store_id) VALUES 
-('admin', '$2a$10$MMgWoixo7KjB5HrbStq9g.NkNv9zWbVpdSlBmPjrncPse25LBqh82', N'Quản Trị Viên Chuỗi Hoa Tươi', 'admin@bloomflower.vn', '0901111222', N'TP. Hồ Chí Minh', 'ADMIN', 1, CAST(GETDATE() AS DATE), NULL),
-('manager_q1', '$2a$10$MMgWoixo7KjB5HrbStq9g.NkNv9zWbVpdSlBmPjrncPse25LBqh82', N'Nguyễn Quản Lý Cửa Hàng Q1', 'manager.q1@bloomflower.vn', '0902222333', N'Quận 1, TP.HCM', 'MANAGER', 1, CAST(GETDATE() AS DATE), 1),
-('khachhang', '$2a$10$MMgWoixo7KjB5HrbStq9g.NkNv9zWbVpdSlBmPjrncPse25LBqh82', N'Lê Khách Hàng Yêu Hoa', 'khachhang@gmail.com', '0909999888', N'TP. Hồ Chí Minh', 'CUSTOMER', 1, CAST(GETDATE() AS DATE), NULL);
+-- 3.2. Cấp bậc thành viên & Cửa hàng
+INSERT INTO dbo.user_levels (name, min_point, discount) VALUES 
+(N'Thành Viên Mới', 0, 0.0),
+(N'Thành Viên Bạc', 100, 3.0),
+(N'Thành Viên Vàng', 500, 5.0),
+(N'Thành Viên Kim Cương', 1000, 10.0);
 GO
 
--- 3.3. Giỏ hàng cho khách hàng mẫu
-INSERT INTO dbo.carts (user_id) VALUES (5);
+INSERT INTO dbo.store_levels (name, min_point, discount) VALUES 
+(N'Cửa Hàng Chuẩn', 0, 0.0),
+(N'Cửa Hàng Uy Tín', 200, 2.0),
+(N'Cửa Hàng Xuất Sắc', 1000, 5.0);
 GO
 
--- 3.4. Danh mục hoa tươi
+-- 3.3. Đơn vị vận chuyển
+INSERT INTO dbo.deliveries (name, description, price, is_active) VALUES 
+(N'Giao Hỏa Tốc (2 Giờ)', N'Giao hàng nhanh bằng xe máy trong 2 giờ bảo quản hoa lạnh', 35000, 1),
+(N'Giao Tiêu Chuẩn Trong Ngày', N'Giao hoa tươi trong ngày theo khung giờ hẹn trước', 20000, 1);
+GO
+
+-- 3.4. Tài khoản mẫu (Mật khẩu: 123456)
+INSERT INTO dbo.users (username, password, full_name, email, phone, address, role, is_active, is_email_active, created_date, store_id) VALUES 
+('admin', '$2a$10$MMgWoixo7KjB5HrbStq9g.NkNv9zWbVpdSlBmPjrncPse25LBqh82', N'Quản Trị Viên Toàn Hệ Thống', 'admin@rentalshop.vn', '0901111222', N'TP. Hồ Chí Minh', 'ADMIN', 1, 1, CAST(GETDATE() AS DATE), NULL),
+('manager_q1', '$2a$10$MMgWoixo7KjB5HrbStq9g.NkNv9zWbVpdSlBmPjrncPse25LBqh82', N'Nguyễn Quản Lý Cửa Hàng Q1', 'manager.q1@rentalshop.vn', '0902222333', N'Quận 1, TP.HCM', 'MANAGER', 1, 1, CAST(GETDATE() AS DATE), 1),
+('khachhang', '$2a$10$MMgWoixo7KjB5HrbStq9g.NkNv9zWbVpdSlBmPjrncPse25LBqh82', N'Lê Khách Hàng Yêu Hoa', 'khachhang@gmail.com', '0909999888', N'TP. Hồ Chí Minh', 'CUSTOMER', 1, 1, CAST(GETDATE() AS DATE), NULL),
+('shipper_nhanh', '$2a$10$MMgWoixo7KjB5HrbStq9g.NkNv9zWbVpdSlBmPjrncPse25LBqh82', N'Trần Giao Hàng Nhanh', 'shipper@rentalshop.vn', '0907777888', N'TP. Hồ Chí Minh', 'SHIPPER', 1, 1, CAST(GETDATE() AS DATE), NULL);
+GO
+
+-- 3.5. Danh mục hoa tươi
 INSERT INTO dbo.categories (name, description) VALUES 
 (N'Hoa Bó Tươi Nghệ Thuật', N'Các mẫu bó hoa tươi tuyển chọn từ hoa hồng Ecuador, tulip Hà Lan, baby, hướng dương phong cách sang trọng'),
 (N'Giỏ & Hộp Hoa Cao Cấp', N'Giỏ hoa và hộp hoa chúc mừng sinh nhật, kỷ niệm, ngày lễ với thiết kế tinh tế'),
@@ -262,22 +502,22 @@ INSERT INTO dbo.categories (name, description) VALUES
 (N'Thuê Cổng Hoa & Khung Sự Kiện', N'Dịch vụ cho thuê khung cổng hoa cưới tiệc, chân kệ hoa mỹ thuật cho đám cưới và sự kiện');
 GO
 
--- 3.5. Danh mục sản phẩm hoa tươi & Phụ kiện sự kiện
-INSERT INTO dbo.products (name, description, import_price, price_buy, price_rent_per_day, deposit_fee, category_id, image_url) VALUES 
-(N'Bó Hoa Hồng Đỏ Ecuador Tình Nồng Cháy', N'Gồm 19 bông hồng đỏ Ecuador nhập khẩu phối hoa baby trắng Hà Lan, bọc giấy gói cao cấp phong cách Hàn Quốc.', 350000.00, 650000.00, 0.00, 0.00, 1, 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800'),
-(N'Bó Hoa Tulip Hà Lan Pastel Thanh Khiết', N'15 bông tulip Hà Lan màu hồng pastel và trắng ngọc, biểu trưng cho tình yêu chân thành và trang nhã.', 480000.00, 850000.00, 0.00, 0.00, 1, 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=800'),
-(N'Bó Hoa Hướng Dương Ánh Dương Rạng Rỡ', N'5 bông hướng dương đà lạt loại 1 phối hoa cúc tana và lá bạc nhập khẩu, mang ý nghĩa may mắn và thành công.', 220000.00, 420000.00, 0.00, 0.00, 1, 'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=800'),
-(N'Giỏ Hoa Cẩm Tú Cầu Xanh Mộng Mơ', N'Giỏ mây vintage kết hợp hoa cẩm tú cầu xanh lam, hoa hồng kem và hoa cát tường dịu dàng.', 420000.00, 750000.00, 0.00, 0.00, 2, 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=800'),
-(N'Hộp Hoa Tròn Sang Trọng Sweet Love', N'Hộp hoa mica trong suốt cao cấp phối hoa hồng phấn Juliet và baby khô cao cấp lưu giữ vẻ đẹp lâu dài.', 520000.00, 920000.00, 0.00, 0.00, 2, 'https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?w=800'),
-(N'Kệ Hoa Khai Trương Đại Cát 2 Tầng', N'Kệ hoa 2 tầng cao 1.8m phối hoa hồng môn đỏ, hướng dương và hoa đồng tiền rực rỡ mang tài lộc dồi dào.', 950000.00, 1650000.00, 0.00, 0.00, 3, 'https://images.unsplash.com/photo-1533616688419-b7a585564566?w=800'),
-(N'Kệ Hoa Khai Trương Hồng Phát Rực Rỡ', N'Thiết kế hiện đại tone màu cam vàng hoàng kim, chúc mừng đối tác kinh doanh phát đạt thịnh vượng.', 800000.00, 1350000.00, 0.00, 0.00, 3, 'https://images.unsplash.com/photo-1527061011665-3652c757a4d4?w=800'),
-(N'Bó Hoa Cưới Cầm Tay Calla Lily Tinh Khôi', N'Hoa rum Calla Lily trắng nhập khẩu kết hợp nơ lụa voan cao cấp, tôn vinh vẻ đẹp thuần khiết của cô dâu.', 650000.00, 1150000.00, 0.00, 0.00, 4, 'https://images.unsplash.com/photo-1545232979-8bf68ee9b1af?w=800'),
-(N'Chậu Lan Hồ Điệp Hoàng Gia 5 Cành Đột Biến', N'Chậu sứ Bát Tràng cao cấp cắm 5 cành lan hồ điệp tím viền trắng cánh dày, hoa bền tươi trên 1 tháng.', 1200000.00, 2100000.00, 0.00, 0.00, 5, 'https://images.unsplash.com/photo-1566838318109-a8bffb91d082?w=800'),
-(N'Khung Cổng Hoa Cưới Vòm Tròn Bohemian Luxury', N'Khung cổng hoa kim loại sơn tĩnh điện hoa văn mỹ thuật kèm hoa lụa và hoa tươi cao cấp decor trọn gói.', 5500000.00, 8500000.00, 650000.00, 2000000.00, 6, 'https://images.unsplash.com/photo-1532712938310-34cb3982ef74?w=800'),
-(N'Chân Kệ Hoa Sắt Mỹ Thuật & Bình Pha Lê Cổ Điển', N'Set 4 chân đôn cắm hoa tiệc cưới kèm bình pha lê sang trọng trang trí lối đi hoặc bàn tiệc sự kiện.', 1500000.00, 2400000.00, 150000.00, 500000.00, 6, 'https://images.unsplash.com/photo-1582794543462-0d7922e50cf5?w=800');
+-- 3.6. Danh mục sản phẩm hoa tươi & Phụ kiện sự kiện
+INSERT INTO dbo.products (name, description, import_price, price_buy, price_rent_per_day, deposit_fee, category_id, image_url, store_id, sold, rating, view_count, is_active, is_selling) VALUES 
+(N'Bó Hoa Hồng Đỏ Ecuador Tình Nồng Cháy', N'Gồm 19 bông hồng đỏ Ecuador nhập khẩu phối hoa baby trắng Hà Lan, bọc giấy gói cao cấp phong cách Hàn Quốc.', 350000.00, 650000.00, 0.00, 0.00, 1, 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800', 1, 45, 4.9, 320, 1, 1),
+(N'Bó Hoa Tulip Hà Lan Pastel Thanh Khiết', N'15 bông tulip Hà Lan màu hồng pastel và trắng ngọc, biểu trưng cho tình yêu chân thành và trang nhã.', 480000.00, 850000.00, 0.00, 0.00, 1, 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=800', 1, 38, 4.8, 280, 1, 1),
+(N'Bó Hoa Hướng Dương Ánh Dương Rạng Rỡ', N'5 bông hướng dương đà lạt loại 1 phối hoa cúc tana và lá bạc nhập khẩu, mang ý nghĩa may mắn và thành công.', 220000.00, 420000.00, 0.00, 0.00, 1, 'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=800', 2, 29, 4.7, 195, 1, 1),
+(N'Giỏ Hoa Cẩm Tú Cầu Xanh Mộng Mơ', N'Giỏ mây vintage kết hợp hoa cẩm tú cầu xanh lam, hoa hồng kem và hoa cát tường dịu dàng.', 420000.00, 750000.00, 0.00, 0.00, 2, 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=800', 2, 24, 4.9, 160, 1, 1),
+(N'Hộp Hoa Tròn Sang Trọng Tình Yêu Ngọt Ngào', N'Hộp hoa mica trong suốt cao cấp phối hoa hồng phấn Juliet và baby khô cao cấp lưu giữ vẻ đẹp lâu dài.', 520000.00, 920000.00, 0.00, 0.00, 2, 'https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?w=800', 1, 19, 4.8, 140, 1, 1),
+(N'Kệ Hoa Khai Trương Đại Cát 2 Tầng', N'Kệ hoa 2 tầng cao 1.8m phối hoa hồng môn đỏ, hướng dương và hoa đồng tiền rực rỡ mang tài lộc dồi dào.', 950000.00, 1650000.00, 0.00, 0.00, 3, 'https://images.unsplash.com/photo-1533616688419-b7a585564566?w=800', 1, 15, 5.0, 210, 1, 1),
+(N'Kệ Hoa Khai Trương Hồng Phát Rực Rỡ', N'Thiết kế hiện đại tone màu cam vàng hoàng kim, chúc mừng đối tác kinh doanh phát đạt thịnh vượng.', 800000.00, 1350000.00, 0.00, 0.00, 3, 'https://images.unsplash.com/photo-1527061011665-3652c757a4d4?w=800', 3, 12, 4.6, 115, 1, 1),
+(N'Bó Hoa Cưới Cầm Tay Calla Lily Tinh Khôi', N'Hoa rum Calla Lily trắng nhập khẩu kết hợp nơ lụa voan cao cấp, tôn vinh vẻ đẹp thuần khiết của cô dâu.', 650000.00, 1150000.00, 0.00, 0.00, 4, 'https://images.unsplash.com/photo-1545232979-8bf68ee9b1af?w=800', 1, 16, 5.0, 185, 1, 1),
+(N'Chậu Lan Hồ Điệp Hoàng Gia 5 Cành Đột Biến', N'Chậu sứ Bát Tràng cao cấp cắm 5 cành lan hồ điệp tím viền trắng cánh dày, hoa bền tươi trên 1 tháng.', 1200000.00, 2100000.00, 0.00, 0.00, 5, 'https://images.unsplash.com/photo-1566838318109-a8bffb91d082?w=800', 2, 8, 4.9, 90, 1, 1),
+(N'Khung Cổng Hoa Cưới Vòm Tròn Bohemian Luxury', N'Khung cổng hoa kim loại sơn tĩnh điện hoa văn mỹ thuật kèm hoa lụa và hoa tươi cao cấp decor trọn gói.', 5500000.00, 8500000.00, 650000.00, 2000000.00, 6, 'https://images.unsplash.com/photo-1532712938310-34cb3982ef74?w=800', 3, 5, 4.7, 75, 1, 1),
+(N'Chân Kệ Hoa Sắt Mỹ Thuật & Bình Pha Lê Cổ Điển', N'Set 4 chân đôn cắm hoa tiệc cưới kèm bình pha lê sang trọng trang trí lối đi hoặc bàn tiệc sự kiện.', 1500000.00, 2400000.00, 150000.00, 500000.00, 6, 'https://images.unsplash.com/photo-1582794543462-0d7922e50cf5?w=800', 3, 7, 4.8, 88, 1, 1);
 GO
 
--- 3.6. Tồn kho hoa tươi sẵn sàng tại 3 chi nhánh
+-- 3.7. Tồn kho hoa tươi sẵn sàng tại 3 chi nhánh
 INSERT INTO dbo.store_inventories (store_id, product_id, quantity, version) VALUES 
 -- Chi nhánh Quận 1 (Bến Thành)
 (1, 1, 20, 0), (1, 2, 15, 0), (1, 3, 25, 0), (1, 4, 12, 0), (1, 5, 10, 0), (1, 6, 8, 0), (1, 7, 10, 0), (1, 8, 6, 0), (1, 9, 8, 0), (1, 10, 3, 0), (1, 11, 6, 0),
@@ -285,4 +525,15 @@ INSERT INTO dbo.store_inventories (store_id, product_id, quantity, version) VALU
 (2, 1, 18, 0), (2, 2, 12, 0), (2, 3, 20, 0), (2, 4, 15, 0), (2, 5, 8, 0), (2, 6, 6, 0), (2, 7, 8, 0), (2, 8, 5, 0), (2, 9, 10, 0), (2, 10, 2, 0), (2, 11, 4, 0),
 -- Chi nhánh TP. Thủ Đức (Làng Đại Học)
 (3, 1, 15, 0), (3, 2, 10, 0), (3, 3, 30, 0), (3, 4, 10, 0), (3, 5, 6, 0), (3, 6, 5, 0), (3, 7, 6, 0), (3, 8, 4, 0), (3, 9, 5, 0), (3, 10, 2, 0), (3, 11, 4, 0);
+GO
+
+-- 3.8. Giỏ hàng mẫu cho tài khoản khachhang
+INSERT INTO dbo.carts (user_id) VALUES (3);
+GO
+
+-- 3.9. Mã giảm giá / Voucher mẫu
+INSERT INTO dbo.vouchers (code, name, discount_type, discount_value, min_order_value, max_discount_amount, quantity, used_count, start_date, end_date, is_active) VALUES 
+('HOATUOI20K', N'Giảm 20K cho đơn từ 200K', 'FIXED_AMOUNT', 20000, 200000, 20000, 100, 5, CAST(GETDATE() AS DATE), DATEADD(month, 3, GETDATE()), 1),
+('TRIAN10', N'Giảm 10% tri ân khách hàng', 'PERCENT', 10, 300000, 50000, 50, 2, CAST(GETDATE() AS DATE), DATEADD(month, 3, GETDATE()), 1),
+('FREESHIP', N'Miễn phí vận chuyển toàn quốc', 'FREE_SHIP', 35000, 150000, 35000, 200, 12, CAST(GETDATE() AS DATE), DATEADD(month, 3, GETDATE()), 1);
 GO

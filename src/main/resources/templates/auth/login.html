@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Đăng Nhập - Bloom Flower Chain</title>
+    <title>Đăng Nhập - Chuỗi Cửa Hàng Hoa Tươi</title>
     <!-- Google Fonts & Bootstrap 5 & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -45,7 +45,7 @@
                 <div class="card-body p-4">
                     <div class="text-center mb-4">
                         <div class="fs-1 mb-2">🌸</div>
-                        <h3 class="font-serif fw-bold text-dark mb-1">BLOOM FLOWER</h3>
+                        <h3 class="font-serif fw-bold text-dark mb-1">HOA TƯƠI SÀI GÒN</h3>
                         <p class="text-muted small">Hệ Thống Chuỗi Cửa Hàng Hoa Tươi Toàn Quốc</p>
                     </div>
 
@@ -54,17 +54,17 @@
 
                     <form th:action="@{/perform_login}" method="post">
                         <div class="mb-3">
-                            <label class="form-label small fw-semibold text-secondary">Email / Số điện thoại / Tên đăng nhập</label>
+                            <label class="form-label small fw-semibold text-secondary">Email / Tên đăng nhập</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-person"></i></span>
-                                <input type="text" id="usernameInput" name="username" class="form-control border-start-0 ps-0" required autofocus placeholder="Nhập email, số điện thoại hoặc tên đăng nhập">
+                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
+                                <input type="text" id="usernameInput" name="username" class="form-control border-start-0 ps-0" required autofocus placeholder="Nhập email của bạn (ví dụ: khachhang@gmail.com)">
                             </div>
                         </div>
 
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <label class="form-label small fw-semibold text-secondary mb-0">Mật khẩu</label>
-                                <a th:href="@{/forgot-password}" id="forgotPasswordLink" onclick="goToForgotPassword(event)" class="text-danger small text-decoration-none fw-semibold">Forgot password? Send email</a>
+                                <a th:href="@{/forgot-password}" id="forgotPasswordLink" onclick="goToForgotPassword(event)" class="text-danger small text-decoration-none fw-semibold"><i class="bi bi-key me-1"></i>Forgot password? Send email</a>
                             </div>
                             <div class="input-group">
                                 <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-lock"></i></span>
@@ -72,8 +72,8 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-danger w-100 py-3 fw-bold rounded-pill shadow-sm mb-3">
-                            🌸 Sign In (Đăng Nhập)
+                        <button type="submit" id="btnSignInSubmit" class="btn btn-danger w-100 py-3 fw-bold rounded-pill shadow-sm mb-3">
+                            🌸 Đăng Nhập
                         </button>
                     </form>
 
@@ -82,28 +82,33 @@
                         <div class="fw-bold mb-1">🎉 Thay đổi mật khẩu thành công!</div>
                         <div>Vui lòng nhập mật khẩu mới để đăng nhập, hoặc quay lại trang chủ.</div>
                         <div class="mt-2 d-flex gap-2">
-                            <a th:href="@{/login}" class="btn btn-sm btn-outline-success">Back to Login</a>
+                            <a th:href="@{/login}" class="btn btn-sm btn-success fw-semibold">Back to Login</a>
                             <a th:href="@{/}" class="btn btn-sm btn-light border">Quay lại trang chủ</a>
                         </div>
+                    </div>
+
+                    <!-- Bước 3: Chọn chức năng Đăng ký tài khoản -->
+                    <div class="text-center text-muted small p-3 bg-light rounded-3 border mb-3">
+                        <span>Chưa có tài khoản?</span>
+                        <a th:href="@{/register}" id="btnGoToSignUp" class="btn btn-outline-danger btn-sm rounded-pill px-3 ms-2 fw-bold">
+                            <i class="bi bi-person-plus-fill me-1"></i> Đăng ký tài khoản
+                        </a>
                     </div>
 
                     <!-- Tài khoản mẫu để test nhanh -->
                     <div class="p-3 bg-light rounded-3 border mb-3">
                         <div class="text-muted small fw-semibold mb-2">⚡ Chọn nhanh tài khoản demo (Pass: 123456):</div>
                         <div class="d-flex flex-wrap gap-2">
-                            <span class="badge bg-dark demo-pill p-2" onclick="fillCreds('admin', '123456')">👑 Admin (Quản Trị Sàn)</span>
-                            <span class="badge bg-primary demo-pill p-2" onclick="fillCreds('manager_q1', '123456')">🏢 Manager (Quản Lý Q1)</span>
-                            <span class="badge bg-success demo-pill p-2" onclick="fillCreds('vendor_flower', '123456')">🏪 Vendor (Chủ Shop Hoa)</span>
-                            <span class="badge bg-warning text-dark demo-pill p-2" onclick="fillCreds('shipper_nhanh', '123456')">🛵 Shipper (Giao Hàng)</span>
-                            <span class="badge bg-danger demo-pill p-2" onclick="fillCreds('khachhang', '123456')">🛍️ Khách Hàng (User)</span>
+                            <span class="badge bg-dark demo-pill p-2" onclick="fillCreds('admin', '123456')">👑 Quản Trị Viên</span>
+                            <span class="badge bg-primary demo-pill p-2" onclick="fillCreds('manager_q1', '123456')">🏢 Quản Lý Chi Nhánh Q1</span>
+                            <span class="badge bg-success demo-pill p-2" onclick="fillCreds('vendor_flower', '123456')">🏪 Chủ Cửa Hàng Hoa</span>
+                            <span class="badge bg-warning text-dark demo-pill p-2" onclick="fillCreds('shipper_nhanh', '123456')">🛵 Nhân Viên Giao Hàng</span>
+                            <span class="badge bg-danger demo-pill p-2" onclick="fillCreds('khachhang', '123456')">🛍️ Khách Hàng</span>
                         </div>
                     </div>
 
                     <div class="text-center text-muted small">
-                        Chưa có tài khoản? <a th:href="@{/register}" class="text-danger fw-semibold text-decoration-none">Sign up (Đăng ký ngay)</a>
-                        <div class="mt-2">
-                            <a th:href="@{/}" class="text-secondary text-decoration-none">← Quay lại trang chủ hoa tươi</a>
-                        </div>
+                        <a th:href="@{/}" class="text-secondary text-decoration-none">← Quay lại trang chủ hoa tươi</a>
                     </div>
                 </div>
             </div>
@@ -120,8 +125,17 @@
     function goToForgotPassword(e) {
         e.preventDefault();
         const userInput = document.getElementById('usernameInput')?.value.trim();
-        if (userInput && userInput.includes('@')) {
-            window.location.href = '/forgot-password?email=' + encodeURIComponent(userInput);
+        if (userInput) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/forgot-password';
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'email';
+            input.value = userInput;
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
         } else {
             window.location.href = '/forgot-password';
         }

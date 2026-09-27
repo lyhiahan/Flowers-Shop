@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Đăng Ký Tài Khoản (Sign Up) - Bloom Flower Chain</title>
+    <title>Đăng Ký Tài Khoản - Chuỗi Cửa Hàng Hoa Tươi</title>
     <!-- Google Fonts & Bootstrap 5 & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -37,8 +37,8 @@
                 <div class="card-body p-4">
                     <div class="text-center mb-4">
                         <div class="fs-1 mb-2">🌸</div>
-                        <h3 class="font-serif fw-bold text-dark mb-1">BLOOM FLOWER</h3>
-                        <p class="text-muted small">Đăng Ký Tài Khoản Khách Hàng (Sign Up)</p>
+                        <h3 class="font-serif fw-bold text-dark mb-1">HOA TƯƠI SÀI GÒN</h3>
+                        <p class="text-muted small">Đăng Ký Tài Khoản Khách Hàng</p>
                     </div>
 
                     <!-- Thông báo lỗi (Exception Flow: 8b, 8b1) -->
@@ -110,14 +110,14 @@
                             </div>
                         </div>
 
-                        <!-- Bước 5: Bấm nút Sign up -->
+                        <!-- Bước 5: Bấm nút Sign up (Đăng ký tài khoản) -->
                         <button type="button" id="btnSignUp" class="btn btn-danger w-100 py-3 fw-bold rounded-pill shadow-sm mb-3">
-                            🌸 Sign Up (Đăng Ký)
+                            🌸 Đăng ký tài khoản
                         </button>
                     </form>
 
                     <div class="text-center text-muted small">
-                        Đã có tài khoản? <a th:href="@{/login}" class="text-danger fw-semibold text-decoration-none">Sign in (Đăng nhập ngay)</a>
+                        Đã có tài khoản? <a th:href="@{/login}" class="text-danger fw-semibold text-decoration-none">Đăng nhập ngay</a>
                         <div class="mt-2">
                             <a th:href="@{/}" class="text-secondary text-decoration-none">← Quay lại trang chủ hoa tươi</a>
                         </div>
@@ -128,13 +128,13 @@
     </div>
 </div>
 
-<!-- Bước 6: Hộp thoại xác nhận thông tin đăng ký (Confirm Modal) -->
+<!-- Bước 6: Hiển thị thông báo xác nhận thông tin đăng ký (Confirm Modal) -->
 <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 border-0 shadow">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title font-serif fw-bold text-dark" id="confirmModalLabel">
-                    🌸 Xác Nhận Đăng Ký Tài Khoản
+                    🌸 Thông Báo Xác Nhận Đăng Ký Tài Khoản
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -164,13 +164,13 @@
                 </div>
             </div>
             <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
-                <!-- Bước 7a: Nút Cancel (Hủy thao tác) -->
+                <!-- Nút màu trắng (bên trái): Hủy -->
                 <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancel">
-                    Cancel (Hủy)
+                    Hủy
                 </button>
-                <!-- Bước 7: Nút Confirm (Xác nhận gửi đăng ký) -->
+                <!-- Nút màu đỏ (bên phải): Xác nhận -->
                 <button type="button" class="btn btn-danger rounded-pill px-4 fw-semibold" id="btnConfirm">
-                    Confirm (Xác Nhận)
+                    Xác nhận
                 </button>
             </div>
         </div>

@@ -48,7 +48,7 @@ public class SecurityConfig {
                 .requestMatchers("/manager", "/manager/**", "/vendor", "/vendor/**").hasAnyRole("ADMIN", "MANAGER", "VENDOR")
                 .requestMatchers("/shipper", "/shipper/**").hasRole("SHIPPER")
                 .requestMatchers("/customer/**", "/cart", "/cart/**", "/checkout", "/checkout/**").hasRole("CUSTOMER")
-                .requestMatchers("/", "/products/**", "/product/**", "/stores/**", "/users/**", "/login", "/register", "/verify-otp", "/resend-otp", "/forgot-password", "/reset-password", "/api/public/**", "/ws/**", "/css/**", "/js/**", "/images/**", "/error", "/favicon.ico", "/webjars/**").permitAll()
+                .requestMatchers("/", "/products/**", "/product/**", "/stores/**", "/users/**", "/login", "/register", "/verify-otp", "/resend-otp", "/forgot-password", "/reset-password", "/api/public/**", "/ws/**", "/css/**", "/js/**", "/images/**", "/upload/**", "/error", "/favicon.ico", "/webjars/**").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -60,7 +60,7 @@ public class SecurityConfig {
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout=true")
+                .logoutSuccessUrl("/?logout=true")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()
