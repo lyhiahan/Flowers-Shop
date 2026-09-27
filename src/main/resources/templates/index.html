@@ -231,13 +231,20 @@
                 <!-- Thanh Tìm Kiếm & Hàng Danh Mục Chọn Nhanh (do Admin tạo) -->
                 <div class="col-lg-7 col-md-7 col-12">
                     <!-- Form Tìm kiếm -->
-                    <form th:action="@{/#product-catalog}" method="get" class="w-100">
+                    <form th:action="@{/#product-catalog}" method="get" class="w-100" id="globalSearchForm">
                         <div class="header-search-box d-flex align-items-center">
+                            <!-- Chức năng chọn tìm kiếm theo Người Dùng / Cửa Hàng / Sản Phẩm (Use case UC_007 Step 2) -->
+                            <select id="searchScopeSelect" class="form-select border-0 bg-transparent text-danger fw-bold pe-2 ps-2 shadow-none" style="width: auto; font-size: 0.88rem; cursor: pointer;">
+                                <option value="products" selected>🌸 Mẫu hoa</option>
+                                <option value="stores">🏬 Cửa hàng</option>
+                                <option value="users">👥 Người dùng</option>
+                            </select>
+                            <div class="vr my-2 text-secondary opacity-25"></div>
                             <input type="text" name="keyword" th:value="${keyword}" 
                                    class="form-control border-0 shadow-none ps-3 text-dark" 
-                                   placeholder="Bạn đang tìm hoa gì? (hoa hồng, giỏ hoa, phụ kiện hoa, lan hồ điệp, kệ khai trương...)"
+                                   placeholder="Nhập tên hoa, cửa hàng hoặc người dùng cần tìm..."
                                    style="font-size: 0.95rem;">
-                            <button class="btn header-search-btn d-flex align-items-center gap-1 flex-shrink-0" type="submit">
+                            <button class="btn header-search-btn d-flex align-items-center gap-1 flex-shrink-0" type="submit" id="btnHeaderSearch">
                                 <i class="bi bi-search"></i>
                                 <span class="d-none d-sm-inline">Tìm Kiếm</span>
                             </button>
@@ -751,5 +758,21 @@
             </div>
         </div>
     </div>
+
+    <!-- Script điều hướng tìm kiếm thông minh theo Phạm vi (Hoa / Cửa Hàng / Người Dùng) -->
+    <script>
+        document.getElementById('globalSearchForm')?.addEventListener('submit', function(e) {
+            const scope = document.getElementById('searchScopeSelect')?.value;
+            const kwInput = this.querySelector('input[name="keyword"]');
+            const kw = kwInput ? kwInput.value.trim() : '';
+            if (scope === 'users') {
+                e.preventDefault();
+                window.location.href = '/users' + (kw ? '?keyword=' + encodeURIComponent(kw) : '');
+            } else if (scope === 'stores') {
+                e.preventDefault();
+                window.location.href = '/stores' + (kw ? '?keyword=' + encodeURIComponent(kw) : '');
+            }
+        });
+    </script>
 </body>
 </html>
