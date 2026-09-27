@@ -71,21 +71,21 @@
                 <a class="nav-link rounded-pill px-4 fw-semibold" id="tabCollection"
                    th:classappend="${currentTab == 'collection' or currentTab == null} ? 'active bg-danger text-white' : 'text-secondary'" 
                    th:href="@{/stores/{id}(id=${store.id}, tab='collection')}">
-                    🌸 Collection
+                    🌸 Bộ sưu tập
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link rounded-pill px-4 fw-semibold" id="tabReview"
                    th:classappend="${currentTab == 'review'} ? 'active bg-danger text-white' : 'text-secondary'" 
                    th:href="@{/stores/{id}(id=${store.id}, tab='review')}">
-                    ⭐ Review & Rating
+                    ⭐ Đánh giá & Xếp hạng
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link rounded-pill px-4 fw-semibold" id="tabAbout"
                    th:classappend="${currentTab == 'about'} ? 'active bg-danger text-white' : 'text-secondary'" 
                    th:href="@{/stores/{id}(id=${store.id}, tab='about')}">
-                    ℹ️ About
+                    ℹ️ Giới thiệu
                 </a>
             </li>
         </ul>

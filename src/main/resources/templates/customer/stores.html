@@ -97,8 +97,8 @@
                 <ul class="pagination pagination-sm mb-0">
                     <!-- Nút Trang Trước (Previous) -->
                     <li class="page-item" th:classappend="${currentPage <= 1} ? 'disabled' : ''">
-                        <a class="page-link rounded-start-pill" id="btnPrevPage" th:href="@{/stores(page=${currentPage - 1}, keyword=${keyword})}" title="Previous">
-                            ‹ Previous
+                        <a class="page-link rounded-start-pill" id="btnPrevPage" th:href="@{/stores(page=${currentPage - 1}, keyword=${keyword})}" title="Trang trước">
+                            ‹ Trước
                         </a>
                     </li>
 
@@ -114,8 +114,8 @@
 
                     <!-- Nút Trang Sau (Next) -->
                     <li class="page-item" th:classappend="${currentPage >= totalPages} ? 'disabled' : ''">
-                        <a class="page-link rounded-end-pill" id="btnNextPage" th:href="@{/stores(page=${currentPage + 1}, keyword=${keyword})}" title="Next">
-                            Next ›
+                        <a class="page-link rounded-end-pill" id="btnNextPage" th:href="@{/stores(page=${currentPage + 1}, keyword=${keyword})}" title="Trang sau">
+                            Sau ›
                         </a>
                     </li>
                 </ul>
