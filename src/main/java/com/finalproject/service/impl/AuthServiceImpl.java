@@ -224,10 +224,22 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalArgumentException("Mật khẩu mới phải có tối thiểu 6 ký tự!");
         }
 
-        OtpVerification otp = otpRepository
-                .findTopByUserIdAndCodeAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
-                        user.getId(), otpCode != null ? otpCode.trim() : "", OtpType.RESET_PASSWORD)
-                .orElseThrow(() -> new IllegalArgumentException("Mã OTP hoặc liên kết xác thực không hợp lệ!"));
+        OtpVerification otp = null;
+        if (otpCode != null && !otpCode.trim().isEmpty()) {
+            otp = otpRepository
+                    .findTopByUserIdAndCodeAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
+                            user.getId(), otpCode.trim(), OtpType.RESET_PASSWORD)
+                    .orElse(null);
+        } else {
+            otp = otpRepository
+                    .findTopByUserIdAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
+                            user.getId(), OtpType.RESET_PASSWORD)
+                    .orElse(null);
+        }
+
+        if (otp == null) {
+            throw new IllegalArgumentException("Mã xác thực hoặc liên kết không hợp lệ!");
+        }
 
         if (otp.getExpiredAt().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Mã OTP hoặc liên kết đã hết hạn (quá 5 phút)! Vui lòng yêu cầu lại.");

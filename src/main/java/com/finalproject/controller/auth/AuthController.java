@@ -121,6 +121,25 @@ public class AuthController {
         if (sent != null && !model.containsAttribute("emailSent")) {
             model.addAttribute("emailSent", true);
         }
+
+        String lookupEmail = (String) model.getAttribute("email");
+        if (lookupEmail == null || lookupEmail.isEmpty()) {
+            lookupEmail = email;
+        }
+        if (lookupEmail != null && !lookupEmail.trim().isEmpty() && !model.containsAttribute("otpCode")) {
+            final String finalEmail = lookupEmail.trim();
+            userRepository.findByEmail(finalEmail)
+                    .or(() -> userRepository.findByUsername(finalEmail))
+                    .ifPresent(user -> {
+                        otpRepository.findTopByUserIdAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
+                                        user.getId(), OtpType.RESET_PASSWORD)
+                                .ifPresent(otp -> {
+                                    if (!otp.getExpiredAt().isBefore(LocalDateTime.now())) {
+                                        model.addAttribute("otpCode", otp.getCode());
+                                    }
+                                });
+                    });
+        }
         return "auth/forgot-password";
     }
 
@@ -147,7 +166,22 @@ public class AuthController {
                                         @RequestParam(value = "otpCode", required = false) String otpCode,
                                         Model model) {
         model.addAttribute("email", email);
-        model.addAttribute("otpCode", otpCode);
+        if (otpCode != null && !otpCode.trim().isEmpty()) {
+            model.addAttribute("otpCode", otpCode.trim());
+        } else if (email != null && !email.trim().isEmpty()) {
+            final String finalEmail = email.trim();
+            userRepository.findByEmail(finalEmail)
+                    .or(() -> userRepository.findByUsername(finalEmail))
+                    .ifPresent(user -> {
+                        otpRepository.findTopByUserIdAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
+                                        user.getId(), OtpType.RESET_PASSWORD)
+                                .ifPresent(otp -> {
+                                    if (!otp.getExpiredAt().isBefore(LocalDateTime.now())) {
+                                        model.addAttribute("otpCode", otp.getCode());
+                                    }
+                                });
+                    });
+        }
         return "auth/reset-password";
     }
 
