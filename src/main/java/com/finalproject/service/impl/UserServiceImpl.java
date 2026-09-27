@@ -65,19 +65,37 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Người dùng không tồn tại"));
 
+        if (recipientName == null || recipientName.trim().isEmpty() ||
+            phone == null || phone.trim().isEmpty() ||
+            addressDetail == null || addressDetail.trim().isEmpty()) {
+            throw new IllegalArgumentException("Thông báo thêm thất bại: Vui lòng điền đầy đủ các thông tin địa chỉ!");
+        }
+
+        if (!phone.trim().matches("^[0-9]{9,11}$")) {
+            throw new IllegalArgumentException("Thông báo thêm thất bại: Số điện thoại không hợp lệ (phải gồm 9-11 chữ số)!");
+        }
+
+        List<UserAddress> existing = userAddressRepository.findByUserIdOrderByIsDefaultDescCreatedAtDesc(userId);
+        boolean duplicate = existing.stream().anyMatch(a ->
+                a.getAddressDetail().trim().equalsIgnoreCase(addressDetail.trim()) &&
+                a.getRecipientName().trim().equalsIgnoreCase(recipientName.trim())
+        );
+        if (duplicate) {
+            throw new IllegalArgumentException("Thông báo thêm thất bại: Địa chỉ này đã tồn tại trong sổ địa chỉ của bạn!");
+        }
+
         if (Boolean.TRUE.equals(isDefault)) {
             clearDefaultAddress(userId);
         } else {
             // Nếu là địa chỉ đầu tiên thì tự set làm mặc định
-            List<UserAddress> existing = userAddressRepository.findByUserIdOrderByIsDefaultDescCreatedAtDesc(userId);
             if (existing.isEmpty()) isDefault = true;
         }
 
         UserAddress address = UserAddress.builder()
                 .user(user)
-                .recipientName(recipientName)
-                .phone(phone)
-                .addressDetail(addressDetail)
+                .recipientName(recipientName.trim())
+                .phone(phone.trim())
+                .addressDetail(addressDetail.trim())
                 .isDefault(isDefault != null && isDefault)
                 .build();
 

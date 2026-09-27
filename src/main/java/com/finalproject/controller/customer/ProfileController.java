@@ -86,7 +86,7 @@ public class ProfileController {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         try {
             userService.addAddress(user.getId(), recipientName, phone, addressDetail, isDefault);
-            ra.addFlashAttribute("successMessage", "Thêm địa chỉ nhận hàng thành công!");
+            ra.addFlashAttribute("successMessage", "Thêm địa chỉ mới thành công!");
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
