@@ -601,6 +601,20 @@
             confirmModal.show();
         }
 
+        // Chuẩn hóa địa chỉ: bỏ dấu tiếng Việt, bỏ dấu câu (phẩy, chấm, gạch...), chữ thường, gom khoảng trắng
+        function normalizeAddress(str) {
+            if (!str) return '';
+            return str
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '') // Bỏ dấu tiếng Việt (Số -> So, Võ -> Vo...)
+                .replace(/đ/g, 'd')
+                .replace(/Đ/g, 'd')
+                .toLowerCase()
+                .replace(/[,.\-\/#]/g, ' ')      // Thay dấu phẩy, chấm, gạch ngang... bằng dấu cách
+                .replace(/\s+/g, ' ')            // Gom khoảng trắng thừa
+                .trim();
+        }
+
         // 10. Bấm nút Confirm -> Kiểm tra ngoại lệ (11d) hoặc Gửi form thành công (11)
         function confirmSubmitAddress() {
             const recipient = document.getElementById('addRecipientName')?.value.trim();
@@ -613,20 +627,21 @@
                 return;
             }
 
-            // 11d. Kiểm tra định dạng số điện thoại (phải gồm 9-11 chữ số)
-            const phoneRegex = /^[0-9]{9,11}$/;
+            // 11d. Kiểm tra định dạng số điện thoại (phải đúng 10 chữ số, không được thiếu hay thừa)
+            const phoneRegex = /^[0-9]{10}$/;
             if (!phoneRegex.test(phone)) {
-                showAddressExceptionError('Thông báo thêm thất bại: Số điện thoại không hợp lệ (phải gồm 9-11 chữ số)!');
+                showAddressExceptionError('Thông báo thêm thất bại: Số điện thoại không hợp lệ (phải đúng 10 chữ số, không được thiếu hay thừa)!');
                 return;
             }
 
-            // 11d. Kiểm tra địa chỉ đã tồn tại
+            // 11d. Kiểm tra địa chỉ đã tồn tại (dùng hàm chuẩn hóa chuỗi để nhận diện cùng 1 địa chỉ dù viết hoa/thường hay có dấu phẩy)
+            const normNewDetail = normalizeAddress(detail);
             const addressItems = document.querySelectorAll('.address-item');
             let isDuplicate = false;
             addressItems.forEach(item => {
-                const existingRecipient = (item.getAttribute('data-recipient') || '').trim().toLowerCase();
-                const existingDetail = (item.getAttribute('data-detail') || '').trim().toLowerCase();
-                if (existingRecipient === recipient.toLowerCase() && existingDetail === detail.toLowerCase()) {
+                const existingDetail = item.getAttribute('data-detail') || '';
+                const normExistingDetail = normalizeAddress(existingDetail);
+                if (normExistingDetail === normNewDetail) {
                     isDuplicate = true;
                 }
             });
