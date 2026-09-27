@@ -98,15 +98,12 @@
                 <!-- Tab 1: Cập nhật thông tin (UC_009) -->
                 <div class="tab-pane fade show active" id="tab-info">
                     <div class="card profile-card bg-white p-4">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <div class="d-flex align-items-center gap-2">
-                                <h5 class="fw-bold mb-0 font-serif">Chỉnh Sửa Thông Tin Cá Nhân</h5>
-                                <!-- Nút hình cây bút ở phần thông tin cá nhân (UC_009 Step 4b) -->
-                                <button type="button" class="btn btn-outline-danger btn-sm rounded-circle" id="btnEditProfileInfo" title="Nút hình cây bút: Chỉnh sửa thông tin cá nhân" onclick="handleFocusEditProfile()">
-                                    <i class="bi bi-pencil-fill"></i>
-                                </button>
-                            </div>
-                            <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill"><i class="bi bi-pencil me-1"></i> Bấm nút cây bút để chỉnh sửa</span>
+                        <div class="d-flex align-items-center gap-2 mb-4">
+                            <h5 class="fw-bold mb-0 font-serif">Chỉnh Sửa Thông Tin Cá Nhân</h5>
+                            <!-- Nút hình cây bút ở phần thông tin cá nhân (UC_009 Step 4b) -->
+                            <button type="button" class="btn btn-outline-danger btn-sm rounded-circle shadow-sm" id="btnEditProfileInfo" title="Chọn nút hình cây bút để chỉnh sửa thông tin cá nhân" onclick="toggleEditProfile()">
+                                <i class="bi bi-pencil-fill"></i>
+                            </button>
                         </div>
 
                         <form id="profileForm" th:action="@{/customer/profile/update}" method="post" enctype="multipart/form-data">
@@ -118,16 +115,16 @@
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold small">First name (Họ và tên đệm)</label>
-                                    <input type="text" id="inputFirstName" class="form-control" placeholder="Nguyễn Văn" oninput="syncFullName()">
+                                    <input type="text" id="inputFirstName" class="form-control" placeholder="Nguyễn Văn" oninput="syncFullName()" disabled>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold small">Last name (Tên)</label>
-                                    <input type="text" id="inputLastName" class="form-control" placeholder="Khách Hàng" oninput="syncFullName()">
+                                    <input type="text" id="inputLastName" class="form-control" placeholder="Khách Hàng" oninput="syncFullName()" disabled>
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-semibold small">Họ và tên đầy đủ (*)</label>
-                                <input type="text" name="fullName" id="inputFullName" class="form-control" th:value="${user.fullName}" required>
+                                <input type="text" name="fullName" id="inputFullName" class="form-control" th:value="${user.fullName}" required disabled>
                             </div>
                             <div class="row mb-3">
                                 <div class="col-md-6">
@@ -136,21 +133,21 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold small">Số điện thoại (Phone)</label>
-                                    <input type="text" name="phone" id="inputPhone" class="form-control" th:value="${user.phone}" placeholder="0901234567">
+                                    <input type="text" name="phone" id="inputPhone" class="form-control" th:value="${user.phone}" placeholder="0901234567" disabled>
                                 </div>
                             </div>
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold small">CMND / CCCD (ID Card)</label>
-                                    <input type="text" id="inputIdCard" class="form-control" placeholder="07920100xxxx">
+                                    <input type="text" id="inputIdCard" class="form-control" placeholder="07920100xxxx" disabled>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold small">Địa chỉ liên hệ chính</label>
-                                    <input type="text" name="address" id="inputAddress" class="form-control" th:value="${user.address}" placeholder="Số nhà, tên đường, phường/xã...">
+                                    <input type="text" name="address" id="inputAddress" class="form-control" th:value="${user.address}" placeholder="Số nhà, tên đường, phường/xã..." disabled>
                                 </div>
                             </div>
                             <!-- Nút Save (UC_009 Step 5b1) -->
-                            <button type="button" class="btn btn-flower px-4 py-2 rounded-pill fw-bold shadow-sm" id="btnSaveProfile" onclick="handleSaveProfile()">
+                            <button type="button" class="btn btn-flower px-4 py-2 rounded-pill fw-bold shadow-sm" id="btnSaveProfile" onclick="handleSaveProfile()" disabled>
                                 <i class="bi bi-save me-1"></i> Save
                             </button>
                         </form>
@@ -312,7 +309,7 @@
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancelProfile">
                         Cancel (Hủy)
                     </button>
-                    <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" id="btnConfirmProfile" onclick="document.getElementById('profileForm').submit();">
+                    <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" id="btnConfirmProfile" onclick="submitProfileForm();">
                         Confirm (Xác Nhận)
                     </button>
                 </div>
@@ -436,13 +433,42 @@
             reader.readAsDataURL(file);
         }
 
-        // Bấm nút hình cây bút để chỉnh sửa thông tin (UC_009 Step 4b)
-        function handleFocusEditProfile() {
-            const inputFirst = document.getElementById('inputFirstName');
-            if (inputFirst) {
-                inputFirst.focus();
-                inputFirst.select();
+        // Bấm nút hình cây bút để bật/tắt chế độ chỉnh sửa thông tin cá nhân (UC_009 Step 4b)
+        function toggleEditProfile() {
+            const fields = ['inputFirstName', 'inputLastName', 'inputFullName', 'inputPhone', 'inputIdCard', 'inputAddress'];
+            const isCurrentlyDisabled = document.getElementById('inputFirstName')?.disabled ?? true;
+            
+            fields.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.disabled = !isCurrentlyDisabled;
+            });
+            
+            const btnSave = document.getElementById('btnSaveProfile');
+            if (btnSave) btnSave.disabled = !isCurrentlyDisabled;
+            
+            const btnEdit = document.getElementById('btnEditProfileInfo');
+            if (btnEdit) {
+                if (isCurrentlyDisabled) {
+                    btnEdit.classList.remove('btn-outline-danger');
+                    btnEdit.classList.add('btn-danger', 'text-white');
+                    btnEdit.title = 'Đang bật chế độ chỉnh sửa - Bấm lại để khóa';
+                    document.getElementById('inputFirstName')?.focus();
+                } else {
+                    btnEdit.classList.remove('btn-danger', 'text-white');
+                    btnEdit.classList.add('btn-outline-danger');
+                    btnEdit.title = 'Chọn nút hình cây bút để chỉnh sửa thông tin cá nhân';
+                }
             }
+        }
+
+        // Bấm Confirm trong Modal để gửi form (UC_009 Step 6b)
+        function submitProfileForm() {
+            const fields = ['inputFirstName', 'inputLastName', 'inputFullName', 'inputPhone', 'inputIdCard', 'inputAddress'];
+            fields.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.disabled = false;
+            });
+            document.getElementById('profileForm').submit();
         }
 
         // Đồng bộ họ + tên vào fullName
