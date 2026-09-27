@@ -1,6 +1,9 @@
 package com.finalproject.controller.auth;
 
 import com.finalproject.dto.request.RegisterRequest;
+import com.finalproject.enums.OtpType;
+import com.finalproject.repository.OtpVerificationRepository;
+import com.finalproject.repository.UserRepository;
 import com.finalproject.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,11 +13,15 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDateTime;
+
 @Controller
 @RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
+    private final UserRepository userRepository;
+    private final OtpVerificationRepository otpRepository;
 
     @GetMapping("/login")
     public String showLoginForm(@RequestParam(value = "error", required = false) String error,
@@ -47,19 +54,19 @@ public class AuthController {
                                  RedirectAttributes redirectAttributes,
                                  Model model) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("errorMessage", "Đăng ký thất bại: Thông tin tài khoản không hợp lệ, vui lòng kiểm tra lại!");
+            model.addAttribute("errorMessage", "Thông báo đăng ký thất bại: Thông tin tài khoản không hợp lệ, vui lòng kiểm tra lại các trường thông tin!");
             return "auth/register";
         }
 
         try {
             authService.registerCustomer(request);
-            redirectAttributes.addFlashAttribute("successMessage", "Đăng ký thành công! Vui lòng nhập mã OTP đã được gửi đến email của bạn để kích hoạt tài khoản.");
+            redirectAttributes.addFlashAttribute("successMessage", "Thông báo đăng ký thành công! Vui lòng nhập mã OTP đã gửi đến email của bạn để kích hoạt tài khoản.");
             return "redirect:/verify-otp?email=" + request.getEmail();
         } catch (IllegalArgumentException ex) {
-            model.addAttribute("errorMessage", ex.getMessage());
+            model.addAttribute("errorMessage", "Thông báo đăng ký thất bại: " + ex.getMessage());
             return "auth/register";
         } catch (Exception ex) {
-            model.addAttribute("errorMessage", "Đã xảy ra lỗi khi đăng ký: " + ex.getMessage());
+            model.addAttribute("errorMessage", "Thông báo đăng ký thất bại: Đã xảy ra lỗi khi đăng ký (" + ex.getMessage() + ")");
             return "auth/register";
         }
     }
@@ -105,9 +112,14 @@ public class AuthController {
     }
 
     @GetMapping("/forgot-password")
-    public String showForgotPasswordForm(@RequestParam(value = "email", required = false) String email, Model model) {
-        if (email != null && !email.trim().isEmpty()) {
+    public String showForgotPasswordForm(@RequestParam(value = "email", required = false) String email,
+                                         @RequestParam(value = "sent", required = false) String sent,
+                                         Model model) {
+        if (email != null && !email.trim().isEmpty() && !model.containsAttribute("email")) {
             model.addAttribute("email", email.trim());
+        }
+        if (sent != null && !model.containsAttribute("emailSent")) {
+            model.addAttribute("emailSent", true);
         }
         return "auth/forgot-password";
     }
@@ -117,11 +129,15 @@ public class AuthController {
                                        RedirectAttributes redirectAttributes,
                                        Model model) {
         try {
-            authService.forgotPassword(email);
-            redirectAttributes.addFlashAttribute("successMessage", "Hệ thống đã gửi email yêu cầu tạo mật khẩu mới về email của bạn! Vui lòng kiểm tra email.");
-            return "redirect:/reset-password?email=" + email;
+            String otpCode = authService.forgotPassword(email);
+            redirectAttributes.addFlashAttribute("emailSent", true);
+            redirectAttributes.addFlashAttribute("email", email.trim());
+            redirectAttributes.addFlashAttribute("otpCode", otpCode);
+            redirectAttributes.addFlashAttribute("successMessage", "Hệ thống đã xác thực email thành công! Đã gửi email yêu cầu tạo mật khẩu mới về email người dùng.");
+            return "redirect:/forgot-password?sent=true&email=" + java.net.URLEncoder.encode(email.trim(), java.nio.charset.StandardCharsets.UTF_8);
         } catch (Exception ex) {
-            model.addAttribute("errorMessage", ex.getMessage());
+            model.addAttribute("email", email);
+            model.addAttribute("errorMessage", ex.getMessage() + " (Mật khẩu mới không được tạo)");
             return "auth/forgot-password";
         }
     }
@@ -137,17 +153,25 @@ public class AuthController {
 
     @PostMapping("/reset-password")
     public String handleResetPassword(@RequestParam("email") String email,
-                                      @RequestParam("otpCode") String otpCode,
+                                      @RequestParam(value = "otpCode", required = false) String otpCode,
                                       @RequestParam("newPassword") String newPassword,
-                                      RedirectAttributes redirectAttributes,
+                                      @RequestParam(value = "confirmPassword", required = false) String confirmPassword,
                                       Model model) {
+        model.addAttribute("email", email);
+        model.addAttribute("otpCode", otpCode);
+
+        if (confirmPassword != null && !confirmPassword.trim().isEmpty() && !newPassword.equals(confirmPassword)) {
+            model.addAttribute("errorMessage", "Mật khẩu xác nhận không khớp với mật khẩu mới!");
+            return "auth/reset-password";
+        }
+
         try {
             authService.resetPassword(email, otpCode, newPassword);
-            redirectAttributes.addFlashAttribute("successMessage", "Thay đổi mật khẩu thành công! Bạn có thể chọn Back to Login để đăng nhập hoặc quay lại trang chủ.");
-            return "redirect:/login?resetSuccess=true";
+            model.addAttribute("isSuccess", true);
+            model.addAttribute("successMessage", "Thay đổi thành công! Mật khẩu mới đã được cập nhật vào hệ thống.");
+            return "auth/reset-password";
         } catch (Exception ex) {
-            model.addAttribute("email", email);
-            model.addAttribute("errorMessage", ex.getMessage());
+            model.addAttribute("errorMessage", ex.getMessage() + " (Mật khẩu mới không được tạo)");
             return "auth/reset-password";
         }
     }

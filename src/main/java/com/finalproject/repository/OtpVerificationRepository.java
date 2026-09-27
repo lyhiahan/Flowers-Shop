@@ -10,6 +10,10 @@ import java.util.Optional;
 
 @Repository
 public interface OtpVerificationRepository extends JpaRepository<OtpVerification, Long> {
+    // Tìm mã OTP mới nhất chưa sử dụng của user theo loại
+    Optional<OtpVerification> findTopByUserIdAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
+            Long userId, OtpType type);
+
     // Tìm mã OTP mới nhất chưa sử dụng của user
     Optional<OtpVerification> findTopByUserIdAndCodeAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
             Long userId, String code, OtpType type);

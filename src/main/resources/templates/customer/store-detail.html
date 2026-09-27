@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${store.name + ' - Chi Tiết Cửa Hàng'}">Chi Tiết Cửa Hàng - Bloom Flower</title>
+    <title th:text="${store.name + ' - Chi Tiết Cửa Hàng'}">Chi Tiết Cửa Hàng</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -17,7 +17,7 @@
 <body>
     <nav class="navbar navbar-expand-lg bg-white border-bottom py-3 sticky-top">
         <div class="container">
-            <a class="navbar-brand font-serif fw-bold text-danger fs-4" th:href="@{/}">🌸 BLOOM FLOWER</a>
+            <a class="navbar-brand font-serif fw-bold text-danger fs-4" th:href="@{/}">🌸 HOA TƯƠI SÀI GÒN</a>
             <div class="d-flex align-items-center gap-3">
                 <a th:href="@{/}" class="btn btn-light btn-sm"><i class="bi bi-house me-1"></i> Trang chủ</a>
                 <a th:href="@{/stores}" class="btn btn-outline-danger btn-sm active"><i class="bi bi-shop me-1"></i> Cửa hàng</a>
@@ -26,7 +26,7 @@
                     <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/customer/profile}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-person me-1"></i> Hồ sơ</a>
                 </div>
                 <div sec:authorize="!isAuthenticated()">
-                    <a th:href="@{/login}" class="btn btn-danger btn-sm rounded-pill px-3">Đăng nhập</a>
+                    <a th:href="@{/login}" class="btn btn-danger btn-sm rounded-pill px-3"><i class="bi bi-box-arrow-in-right me-1"></i> Sign in</a>
                 </div>
             </div>
         </div>
@@ -65,38 +65,155 @@
             </div>
         </div>
 
-        <!-- Danh sách hoa tại cửa hàng này -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h4 class="font-serif fw-bold mb-1">💐 Mẫu Hoa Tại Chi Nhánh</h4>
-                <p class="text-muted small mb-0">Các mẫu hoa tươi hiện có sẵn tại cửa hàng này</p>
+        <!-- Thanh Điều Hướng Của Cửa Hàng (Store Navigation Bar) -->
+        <ul class="nav nav-pills gap-2 mb-4 p-2 bg-white rounded-pill shadow-sm border" id="storeNav">
+            <li class="nav-item">
+                <a class="nav-link rounded-pill px-4 fw-semibold" id="tabCollection"
+                   th:classappend="${currentTab == 'collection' or currentTab == null} ? 'active bg-danger text-white' : 'text-secondary'" 
+                   th:href="@{/stores/{id}(id=${store.id}, tab='collection')}">
+                    🌸 Collection
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link rounded-pill px-4 fw-semibold" id="tabReview"
+                   th:classappend="${currentTab == 'review'} ? 'active bg-danger text-white' : 'text-secondary'" 
+                   th:href="@{/stores/{id}(id=${store.id}, tab='review')}">
+                    ⭐ Review & Rating
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link rounded-pill px-4 fw-semibold" id="tabAbout"
+                   th:classappend="${currentTab == 'about'} ? 'active bg-danger text-white' : 'text-secondary'" 
+                   th:href="@{/stores/{id}(id=${store.id}, tab='about')}">
+                    ℹ️ About
+                </a>
+            </li>
+        </ul>
+
+        <!-- TAB 1: COLLECTION (BỘ SƯU TẬP & TÌM KIẾM SẢN PHẨM TRONG SHOP) -->
+        <div th:if="${currentTab == 'collection' or currentTab == null}">
+            <!-- Thanh tìm kiếm sản phẩm trong cửa hàng (Alternative 8c) -->
+            <div class="row align-items-center mb-4 g-3">
+                <div class="col-md-6">
+                    <h4 class="font-serif fw-bold mb-1">💐 Mẫu Hoa Tại Chi Nhánh</h4>
+                    <p class="text-muted small mb-0">Các mẫu hoa tươi hiện có sẵn tại cửa hàng này</p>
+                </div>
+                <div class="col-md-6">
+                    <form th:action="@{/stores/{id}(id=${store.id})}" method="get" class="d-flex gap-2">
+                        <input type="hidden" name="tab" value="collection">
+                        <input type="text" id="storeProductSearchInput" name="keyword" th:value="${keyword}" class="form-control rounded-pill" placeholder="Tìm sản phẩm trong cửa hàng...">
+                        <button type="submit" id="btnSearchStoreProduct" class="btn btn-danger rounded-pill px-4 flex-shrink-0">
+                            <i class="bi bi-search me-1"></i> Tìm
+                        </button>
+                        <a th:if="${keyword != null and !keyword.isEmpty()}" th:href="@{/stores/{id}(id=${store.id}, tab='collection')}" class="btn btn-outline-secondary rounded-pill px-3 flex-shrink-0">Xóa lọc</a>
+                    </form>
+                </div>
             </div>
-            <span class="badge bg-light text-dark border px-3 py-2 rounded-pill" th:text="${#lists.size(products)} + ' mẫu hoa'"></span>
-        </div>
 
-        <div th:if="${#lists.isEmpty(products)}" class="text-center py-5 bg-white rounded-4 border p-5">
-            <div class="fs-1 text-secondary opacity-50 mb-3">🌸</div>
-            <h5>Chưa có sản phẩm nào tại chi nhánh này</h5>
-            <p class="text-muted small">Vui lòng quay lại sau hoặc tham quan các chi nhánh khác.</p>
-        </div>
+            <div th:if="${#lists.isEmpty(products)}" class="text-center py-5 bg-white rounded-4 border p-5">
+                <div class="fs-1 text-secondary opacity-50 mb-3">🌸</div>
+                <h5>Chưa có sản phẩm nào phù hợp tại chi nhánh này</h5>
+                <p class="text-muted small">Hãy thử tìm kiếm với từ khóa hoa khác.</p>
+                <a th:href="@{/stores/{id}(id=${store.id}, tab='collection')}" class="btn btn-outline-secondary rounded-pill px-4 py-2 mt-2">Xem tất cả mẫu hoa của shop</a>
+            </div>
 
-        <div th:if="${!#lists.isEmpty(products)}" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-            <div class="col" th:each="p : ${products}">
-                <div class="card h-100 product-card bg-white overflow-hidden">
-                    <img th:src="${p.imageUrl != null and !p.imageUrl.isEmpty() ? p.imageUrl : 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=400'}"
-                         class="card-img-top" style="height: 220px; object-fit: cover;" alt="Hoa tươi">
-                    <div class="card-body d-flex flex-column p-4">
-                        <span class="badge bg-danger-subtle text-danger align-self-start rounded-pill mb-2" th:text="${p.category != null ? p.category.name : 'Hoa tươi'}"></span>
-                        <h6 class="card-title fw-bold text-dark font-serif" th:text="${p.name}"></h6>
-                        <p class="card-text text-muted small flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" th:text="${p.description}"></p>
-                        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                            <div>
-                                <span class="text-muted small d-block">Giá bán:</span>
-                                <strong class="text-danger fs-5 fw-bold" th:text="${#numbers.formatDecimal(p.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+            <div th:if="${!#lists.isEmpty(products)}" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                <div class="col" th:each="p : ${products}">
+                    <div class="card h-100 product-card bg-white overflow-hidden shadow-sm">
+                        <img th:src="${p.imageUrl != null and !p.imageUrl.isEmpty() ? p.imageUrl : 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=400'}"
+                             class="card-img-top" style="height: 220px; object-fit: cover;" alt="Hoa tươi">
+                        <div class="card-body d-flex flex-column p-4">
+                            <span class="badge bg-danger-subtle text-danger align-self-start rounded-pill mb-2" th:text="${p.category != null ? p.category.name : 'Hoa tươi'}"></span>
+                            <h6 class="card-title fw-bold text-dark font-serif" th:text="${p.name}"></h6>
+                            <p class="card-text text-muted small flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" th:text="${p.description}"></p>
+                            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                                <div>
+                                    <span class="text-muted small d-block">Giá bán:</span>
+                                    <strong class="text-danger fs-5 fw-bold" th:text="${#numbers.formatDecimal(p.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                                </div>
+                                <a th:href="@{/products/{id}(id=${p.id})}" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                    Xem Chi Tiết
+                                </a>
                             </div>
-                            <a th:href="@{/products/{id}(id=${p.id})}" class="btn btn-outline-danger btn-sm rounded-pill px-3">
-                                Xem Chi Tiết
-                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: REVIEW & RATING (ĐÁNH GIÁ & NHẬN XÉT CỬA HÀNG) -->
+        <div th:if="${currentTab == 'review'}">
+            <div class="card bg-white rounded-4 border p-4 shadow-sm mb-4">
+                <div class="row align-items-center text-center text-md-start">
+                    <div class="col-md-3 border-end">
+                        <div class="display-4 fw-bold text-warning mb-1" th:text="${store.rating != null ? store.rating : '5.0'}">5.0</div>
+                        <div class="text-warning fs-5 mb-2">★★★★★</div>
+                        <div class="text-muted small">Điểm đánh giá chi nhánh</div>
+                    </div>
+                    <div class="col-md-9 ps-md-4">
+                        <h5 class="fw-bold mb-1">Đánh Giá & Nhận Xét Từ Khách Hàng</h5>
+                        <p class="text-muted small mb-0">Các phản hồi thực tế từ khách hàng đã đặt hoa tại chi nhánh này.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danh sách nhận xét -->
+            <div th:if="${#lists.isEmpty(reviews)}" class="text-center py-5 bg-white rounded-4 border p-5">
+                <div class="fs-1 text-secondary opacity-50 mb-2">📝</div>
+                <h6>Chưa có đánh giá nào cho cửa hàng này</h6>
+                <p class="text-muted small mb-0">Đánh giá sẽ hiển thị tại đây khi khách hàng hoàn thành đơn mua hoa.</p>
+            </div>
+
+            <div th:if="${!#lists.isEmpty(reviews)}" class="d-flex flex-column gap-3">
+                <div class="card border rounded-4 p-3 bg-white shadow-sm" th:each="rev : ${reviews}">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-person-circle fs-4 text-secondary"></i>
+                            <div>
+                                <strong class="small" th:text="${rev.user != null ? rev.user.fullName : 'Khách hàng'}"></strong>
+                                <div class="text-muted" style="font-size: 0.75rem;" th:text="${#temporals.format(rev.createdAt, 'dd/MM/yyyy HH:mm')}"></div>
+                            </div>
+                        </div>
+                        <span class="text-warning fw-bold small">
+                            <span th:text="${'★'.repeat(rev.stars)}"></span>
+                        </span>
+                    </div>
+                    <p class="small text-dark mb-0" th:text="${rev.content}"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: ABOUT (THÔNG TIN CỬA HÀNG) -->
+        <div th:if="${currentTab == 'about'}">
+            <div class="card bg-white rounded-4 border p-4 p-md-5 shadow-sm">
+                <h4 class="font-serif fw-bold mb-3"><i class="bi bi-info-circle text-danger me-2"></i>Giới Thiệu Chi Nhánh</h4>
+                <p class="text-secondary mb-4 leading-relaxed" th:text="${store.bio != null ? store.bio : 'Chào mừng bạn đến với chi nhánh cửa hàng hoa tươi của chúng tôi. Chúng tôi cam kết mang lại những bó hoa tươi thắm, nghệ thuật và dịch vụ chuyên nghiệp nhất.'}"></p>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border h-100">
+                            <h6 class="fw-bold mb-2"><i class="bi bi-geo-alt-fill text-danger me-2"></i>Địa Chỉ Chi Nhánh</h6>
+                            <p class="text-muted small mb-0" th:text="${store.address}"></p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border h-100">
+                            <h6 class="fw-bold mb-2"><i class="bi bi-telephone-fill text-primary me-2"></i>Hotline Hỗ Trợ</h6>
+                            <p class="text-muted small mb-0" th:text="${store.phone != null ? store.phone : '028 1111 222'}"></p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border h-100">
+                            <h6 class="fw-bold mb-2"><i class="bi bi-clock-fill text-warning me-2"></i>Thời Gian Hoạt Động</h6>
+                            <p class="text-muted small mb-0">Mở cửa từ 07:00 - 21:00 các ngày trong tuần</p>
+                            <span th:if="${store.isOpen != null and store.isOpen}" class="badge bg-success-subtle text-success rounded-pill mt-2">Đang mở cửa</span>
+                            <span th:if="${store.isOpen == null or !store.isOpen}" class="badge bg-secondary-subtle text-secondary rounded-pill mt-2">Tạm đóng</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border h-100">
+                            <h6 class="fw-bold mb-2"><i class="bi bi-shield-check text-success me-2"></i>Cam Kết Chất Lượng</h6>
+                            <p class="text-muted small mb-0">100% hoa tươi loại 1 nhập mới mỗi ngày, giao hoa nhanh trong 2 giờ bảo quản hoa lạnh.</p>
                         </div>
                     </div>
                 </div>

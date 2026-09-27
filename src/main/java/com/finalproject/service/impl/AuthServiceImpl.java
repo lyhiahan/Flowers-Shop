@@ -1,5 +1,6 @@
 package com.finalproject.service.impl;
 
+import com.finalproject.dto.PendingRegistration;
 import com.finalproject.dto.request.RegisterRequest;
 import com.finalproject.entity.Cart;
 import com.finalproject.entity.OtpVerification;
@@ -19,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -30,83 +33,149 @@ public class AuthServiceImpl implements AuthService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
 
+    // Lưu tạm thông tin đăng ký chờ xác thực OTP trong bộ nhớ, CHƯA LƯU VÀO DATABASE để tránh tài khoản rác
+    private final Map<String, PendingRegistration> pendingRegistrations = new ConcurrentHashMap<>();
+
     @Override
     @Transactional
     public void registerCustomer(RegisterRequest request) {
-        // 1. Kiểm tra trùng username, email hoặc số điện thoại
+        // 1. Kiểm tra trùng username, email hoặc số điện thoại trong Database (Exception Flow: 8b)
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new IllegalArgumentException("Thông tin không hợp lệ: Tên đăng nhập đã tồn tại trong hệ thống!");
+            throw new IllegalArgumentException("Thông tin tài khoản không hợp lệ, tên đăng nhập đã tồn tại!");
         }
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Thông tin không hợp lệ: Email đăng ký đã tồn tại trong hệ thống!");
+            throw new IllegalArgumentException("Thông tin tài khoản không hợp lệ, email đăng ký đã tồn tại!");
         }
         if (request.getPhone() != null && !request.getPhone().trim().isEmpty()
                 && userRepository.existsByPhone(request.getPhone().trim())) {
-            throw new IllegalArgumentException("Thông tin không hợp lệ: Số điện thoại đăng ký đã tồn tại trong hệ thống!");
+            throw new IllegalArgumentException("Thông tin tài khoản không hợp lệ, số điện thoại đăng ký đã tồn tại!");
         }
 
-        // 2. Tạo User ở trạng thái chưa kích hoạt (isActive = false)
-        User user = User.builder()
-                .username(request.getUsername())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .fullName(request.getFullName())
-                .email(request.getEmail())
-                .phone(request.getPhone())
-                .address(request.getAddress())
-                .role(Role.CUSTOMER)
-                .isActive(false)
-                .createdDate(LocalDate.now())
+        // 2. Tạo mã OTP và lưu tạm vào bộ nhớ (CHƯA LƯU VÀO DATABASE)
+        String code = OtpUtil.generateOtp();
+        LocalDateTime now = LocalDateTime.now();
+        PendingRegistration pending = PendingRegistration.builder()
+                .request(request)
+                .otpCode(code)
+                .createdAt(now)
+                .expiredAt(now.plusMinutes(5))
+                .resendCount(0)
                 .build();
-        userRepository.save(user);
 
-        // 3. Khởi tạo giỏ hàng riêng cho khách
-        Cart cart = Cart.builder()
-                .user(user)
-                .build();
-        cartRepository.save(cart);
+        pendingRegistrations.put(request.getEmail().toLowerCase().trim(), pending);
 
-        // 4. Tạo và gửi mã OTP kích hoạt qua email
-        createAndSendOtp(user, OtpType.ACTIVATE_ACCOUNT);
+        // 3. Gửi mã OTP xác thực qua email (và in ra console)
+        emailService.sendOtpEmail(request.getEmail(), code);
     }
 
     @Override
     @Transactional
     public boolean verifyOtp(String email, String otpCode) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với email: " + email));
+        String key = email.toLowerCase().trim();
+        PendingRegistration pending = pendingRegistrations.get(key);
 
-        OtpVerification otp = otpRepository
-                .findTopByUserIdAndCodeAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
-                        user.getId(), otpCode, OtpType.ACTIVATE_ACCOUNT)
-                .orElse(null);
+        if (pending != null) {
+            // Kiểm tra mã OTP và thời hạn hiệu lực (5 phút)
+            if (pending.getExpiredAt().isBefore(LocalDateTime.now())) {
+                pendingRegistrations.remove(key);
+                return false;
+            }
+            if (!pending.getOtpCode().equals(otpCode)) {
+                return false;
+            }
 
-        // Kiểm tra OTP có tồn tại và còn hạn (120s) hay không
-        if (otp == null || otp.getExpiredAt().isBefore(LocalDateTime.now())) {
-            return false;
+            // KHI VÀ CHỈ KHI NGƯỜI DÙNG NHẬP ĐÚNG OTP -> BÂY GIỜ MỚI CHÍNH THỨC TẠO VÀ LƯU VÀO DATABASE
+            RegisterRequest req = pending.getRequest();
+
+            if (userRepository.existsByUsername(req.getUsername()) || userRepository.existsByEmail(req.getEmail())) {
+                pendingRegistrations.remove(key);
+                throw new IllegalArgumentException("Tài khoản hoặc email này đã tồn tại trong hệ thống!");
+            }
+
+            User user = User.builder()
+                    .username(req.getUsername())
+                    .password(passwordEncoder.encode(req.getPassword()))
+                    .fullName(req.getFullName())
+                    .email(req.getEmail())
+                    .phone(req.getPhone())
+                    .address(req.getAddress())
+                    .role(Role.CUSTOMER)
+                    .isActive(true)
+                    .createdDate(LocalDate.now())
+                    .build();
+            userRepository.save(user);
+
+            // Khởi tạo giỏ hàng cho tài khoản vừa được kích hoạt
+            Cart cart = Cart.builder()
+                    .user(user)
+                    .build();
+            cartRepository.save(cart);
+
+            // Lưu bản ghi xác thực OTP vào database
+            OtpVerification otp = OtpVerification.builder()
+                    .user(user)
+                    .code(otpCode)
+                    .type(OtpType.ACTIVATE_ACCOUNT)
+                    .createdAt(pending.getCreatedAt())
+                    .expiredAt(pending.getExpiredAt())
+                    .isUsed(true)
+                    .build();
+            otpRepository.save(otp);
+
+            // Xóa khỏi danh sách chờ sau khi đăng ký thành công
+            pendingRegistrations.remove(key);
+            return true;
         }
 
-        // Đánh dấu mã đã sử dụng
-        otp.setIsUsed(true);
-        otpRepository.save(otp);
+        // Hỗ trợ trường hợp tài khoản đã tồn tại ở DB nhưng chưa kích hoạt
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user != null) {
+            OtpVerification otp = otpRepository
+                    .findTopByUserIdAndCodeAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
+                            user.getId(), otpCode, OtpType.ACTIVATE_ACCOUNT)
+                    .orElse(null);
 
-        // Kích hoạt tài khoản
-        user.setIsActive(true);
-        userRepository.save(user);
+            if (otp == null || otp.getExpiredAt().isBefore(LocalDateTime.now())) {
+                return false;
+            }
 
-        return true;
+            otp.setIsUsed(true);
+            otpRepository.save(otp);
+
+            user.setIsActive(true);
+            userRepository.save(user);
+            return true;
+        }
+
+        return false;
     }
 
     @Override
     @Transactional
     public void resendOtp(String email) {
+        String key = email.toLowerCase().trim();
+        PendingRegistration pending = pendingRegistrations.get(key);
+
+        if (pending != null) {
+            if (pending.getResendCount() >= 3) {
+                throw new IllegalStateException("Bạn đã yêu cầu gửi mã quá 3 lần. Vui lòng đăng ký lại.");
+            }
+            String newCode = OtpUtil.generateOtp();
+            pending.setOtpCode(newCode);
+            pending.setExpiredAt(LocalDateTime.now().plusMinutes(5));
+            pending.setResendCount(pending.getResendCount() + 1);
+
+            emailService.sendOtpEmail(email, newCode);
+            return;
+        }
+
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản với email: " + email));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy thông tin đăng ký chờ kích hoạt cho email: " + email));
 
         if (Boolean.TRUE.equals(user.getIsActive())) {
             throw new IllegalStateException("Tài khoản này đã được kích hoạt trước đó!");
         }
 
-        // Giới hạn chống spam: tối đa 3 lần trong vòng 10 phút
         LocalDateTime tenMinutesAgo = LocalDateTime.now().minusMinutes(10);
         long recentRequests = otpRepository.countByUserIdAndCreatedAtAfter(user.getId(), tenMinutesAgo);
         if (recentRequests >= 3) {
@@ -118,22 +187,26 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void forgotPassword(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản với email: " + email));
+    public String forgotPassword(String email) {
+        String query = email != null ? email.trim() : "";
+        User user = userRepository.findByEmail(query)
+                .or(() -> userRepository.findByUsername(query))
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản với email hoặc tên đăng nhập: " + query));
 
-        createAndSendOtp(user, OtpType.RESET_PASSWORD);
+        return createAndSendOtp(user, OtpType.RESET_PASSWORD);
     }
 
     @Override
     @Transactional(readOnly = true)
     public boolean verifyForgotPasswordOtp(String email, String otpCode) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với email: " + email));
+        String query = email != null ? email.trim() : "";
+        User user = userRepository.findByEmail(query)
+                .or(() -> userRepository.findByUsername(query))
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản với email: " + query));
 
         OtpVerification otp = otpRepository
                 .findTopByUserIdAndCodeAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
-                        user.getId(), otpCode, OtpType.RESET_PASSWORD)
+                        user.getId(), otpCode != null ? otpCode.trim() : "", OtpType.RESET_PASSWORD)
                 .orElse(null);
 
         return otp != null && !otp.getExpiredAt().isBefore(LocalDateTime.now());
@@ -142,38 +215,45 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void resetPassword(String email, String otpCode, String newPassword) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản với email: " + email));
+        String query = email != null ? email.trim() : "";
+        User user = userRepository.findByEmail(query)
+                .or(() -> userRepository.findByUsername(query))
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản với email: " + query));
+
+        if (newPassword == null || newPassword.trim().length() < 6) {
+            throw new IllegalArgumentException("Mật khẩu mới phải có tối thiểu 6 ký tự!");
+        }
 
         OtpVerification otp = otpRepository
                 .findTopByUserIdAndCodeAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
-                        user.getId(), otpCode, OtpType.RESET_PASSWORD)
-                .orElseThrow(() -> new IllegalArgumentException("Mã OTP không hợp lệ!"));
+                        user.getId(), otpCode != null ? otpCode.trim() : "", OtpType.RESET_PASSWORD)
+                .orElseThrow(() -> new IllegalArgumentException("Mã OTP hoặc liên kết xác thực không hợp lệ!"));
 
         if (otp.getExpiredAt().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Mã OTP đã hết hạn! Vui lòng yêu cầu mã mới.");
+            throw new IllegalArgumentException("Mã OTP hoặc liên kết đã hết hạn (quá 5 phút)! Vui lòng yêu cầu lại.");
         }
 
         otp.setIsUsed(true);
         otpRepository.save(otp);
 
-        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setPassword(passwordEncoder.encode(newPassword.trim()));
         userRepository.save(user);
     }
 
-    private void createAndSendOtp(User user, OtpType type) {
+    private String createAndSendOtp(User user, OtpType type) {
         String code = OtpUtil.generateOtp();
 
         OtpVerification otp = OtpVerification.builder()
                 .user(user)
                 .code(code)
                 .type(type)
-                .expiredAt(LocalDateTime.now().plusSeconds(120))
+                .expiredAt(LocalDateTime.now().plusMinutes(5))
                 .createdAt(LocalDateTime.now())
                 .isUsed(false)
                 .build();
         otpRepository.save(otp);
 
         emailService.sendOtpEmail(user.getEmail(), code);
+        return code;
     }
 }
