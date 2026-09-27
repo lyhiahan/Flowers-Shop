@@ -30,13 +30,34 @@
     </div>
 </nav>
 
-<div class="container py-5">
+<div class="container py-4">
+    <!-- Ảnh bìa và Nút Edit Cover Photo (UC_009 Steps 4a, 5a, 6a) -->
+    <div class="position-relative rounded-4 overflow-hidden mb-4 shadow-sm" style="height: 220px; background-color: #f1f5f9;">
+        <img id="coverPreviewImg" 
+             th:src="${user.cover != null and !#strings.isEmpty(user.cover) ? user.cover : 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=1200'}" 
+             alt="Cover Photo" class="w-100 h-100" style="object-fit: cover;">
+        <div class="position-absolute bottom-0 end-0 p-3">
+            <button type="button" class="btn btn-light btn-sm rounded-pill shadow fw-semibold px-3 py-2" id="btnEditCover" onclick="document.getElementById('coverFileInput').click();">
+                <i class="bi bi-camera me-1 text-danger"></i> Edit Cover Photo
+            </button>
+        </div>
+    </div>
+
     <div class="row g-4">
         <!-- Sidebar hồ sơ -->
         <div class="col-lg-4">
             <div class="card profile-card bg-white p-4 text-center">
-                <img th:src="${user.avatarUrl != null ? user.avatarUrl : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200'}"
-                     class="rounded-circle border border-3 border-danger p-1 mx-auto mb-3" width="120" height="120" style="object-fit: cover;">
+                <!-- Avatar với nút icon camera (UC_009 Steps 4, 5, 6) -->
+                <div class="position-relative d-inline-block mx-auto mb-3">
+                    <img id="avatarPreviewImg" th:src="${user.avatarUrl != null and !#strings.isEmpty(user.avatarUrl) ? user.avatarUrl : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200'}"
+                         class="rounded-circle border border-3 border-danger p-1" width="130" height="130" style="object-fit: cover;">
+                    <button type="button" class="btn btn-danger btn-sm rounded-circle position-absolute bottom-0 end-0 shadow" 
+                            style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center;"
+                            title="Chọn hình camera trên ảnh đại diện" id="btnEditAvatar" onclick="document.getElementById('avatarFileInput').click();">
+                        <i class="bi bi-camera-fill fs-6"></i>
+                    </button>
+                </div>
+
                 <h5 class="font-serif fw-bold mb-1" th:text="${user.fullName}"></h5>
                 <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-1 mb-3" th:text="${user.role}"></span>
 
@@ -74,34 +95,64 @@
             </ul>
 
             <div class="tab-content">
-                <!-- Tab 1: Cập nhật thông tin -->
+                <!-- Tab 1: Cập nhật thông tin (UC_009) -->
                 <div class="tab-pane fade show active" id="tab-info">
                     <div class="card profile-card bg-white p-4">
-                        <h5 class="fw-bold mb-4 font-serif">Chỉnh Sửa Thông Tin Cá Nhân</h5>
-                        <form th:action="@{/customer/profile/update}" method="post" enctype="multipart/form-data">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <h5 class="fw-bold mb-0 font-serif">Chỉnh Sửa Thông Tin Cá Nhân</h5>
+                                <!-- Nút hình cây bút ở phần thông tin cá nhân (UC_009 Step 4b) -->
+                                <button type="button" class="btn btn-outline-danger btn-sm rounded-circle" id="btnEditProfileInfo" title="Nút hình cây bút: Chỉnh sửa thông tin cá nhân" onclick="handleFocusEditProfile()">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </button>
+                            </div>
+                            <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill"><i class="bi bi-pencil me-1"></i> Bấm nút cây bút để chỉnh sửa</span>
+                        </div>
+
+                        <form id="profileForm" th:action="@{/customer/profile/update}" method="post" enctype="multipart/form-data">
+                            <!-- Hidden inputs for avatar and cover files (triggered by Camera and Edit Cover Photo buttons) -->
+                            <input type="file" name="avatarFile" id="avatarFileInput" class="d-none" accept="image/*" onchange="handleFileSelected(this, 'avatar')">
+                            <input type="file" name="coverFile" id="coverFileInput" class="d-none" accept="image/*" onchange="handleFileSelected(this, 'cover')">
+
+                            <!-- Tùy chỉnh thông tin cá nhân: email, phone, firstname, lastname, id card (UC_009 Step 5b) -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">First name (Họ và tên đệm)</label>
+                                    <input type="text" id="inputFirstName" class="form-control" placeholder="Nguyễn Văn" oninput="syncFullName()">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Last name (Tên)</label>
+                                    <input type="text" id="inputLastName" class="form-control" placeholder="Khách Hàng" oninput="syncFullName()">
+                                </div>
+                            </div>
                             <div class="mb-3">
-                                <label class="form-label fw-semibold small">Họ và tên (*)</label>
-                                <input type="text" name="fullName" class="form-control" th:value="${user.fullName}" required>
+                                <label class="form-label fw-semibold small">Họ và tên đầy đủ (*)</label>
+                                <input type="text" name="fullName" id="inputFullName" class="form-control" th:value="${user.fullName}" required>
                             </div>
                             <div class="row mb-3">
-                                <div class="col-md-4">
-                                    <label class="form-label fw-semibold small">Số điện thoại</label>
-                                    <input type="text" name="phone" class="form-control" th:value="${user.phone}">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Email (*)</label>
+                                    <input type="email" id="inputEmail" class="form-control bg-light" th:value="${user.email}" readonly title="Email tài khoản">
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label fw-semibold small">Thay đổi ảnh đại diện</label>
-                                    <input type="file" name="avatarFile" class="form-control" accept="image/*">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label fw-semibold small">Thay đổi ảnh bìa</label>
-                                    <input type="file" name="coverFile" class="form-control" accept="image/*">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Số điện thoại (Phone)</label>
+                                    <input type="text" name="phone" id="inputPhone" class="form-control" th:value="${user.phone}" placeholder="0901234567">
                                 </div>
                             </div>
-                            <div class="mb-4">
-                                <label class="form-label fw-semibold small">Địa chỉ liên hệ chính</label>
-                                <input type="text" name="address" class="form-control" th:value="${user.address}" placeholder="Số nhà, tên đường, phường/xã...">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">CMND / CCCD (ID Card)</label>
+                                    <input type="text" id="inputIdCard" class="form-control" placeholder="07920100xxxx">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Địa chỉ liên hệ chính</label>
+                                    <input type="text" name="address" id="inputAddress" class="form-control" th:value="${user.address}" placeholder="Số nhà, tên đường, phường/xã...">
+                                </div>
                             </div>
-                            <button type="submit" class="btn btn-flower px-4 py-2 rounded-pill fw-bold">💾 Lưu Cập Nhật</button>
+                            <!-- Nút Save (UC_009 Step 5b1) -->
+                            <button type="button" class="btn btn-flower px-4 py-2 rounded-pill fw-bold shadow-sm" id="btnSaveProfile" onclick="handleSaveProfile()">
+                                <i class="bi bi-save me-1"></i> Save
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -244,27 +295,51 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Modal Xác Nhận Đăng Xuất (Sign Out Modal) -->
-    <div class="modal fade" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">
+    <!-- Modal Xác Nhận Lưu Thông Tin Cá Nhân (UC_009 Steps 5b1, 5b2, 5b3, 5c3, 6b, 6c) -->
+    <div class="modal fade" id="confirmProfileModal" tabindex="-1" aria-labelledby="confirmProfileModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
             <div class="modal-content rounded-4 border-0 shadow">
                 <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title font-serif fw-bold text-dark" id="signOutModalLabel">
-                        🌸 Xác Nhận Đăng Xuất (Sign Out)
+                    <h5 class="modal-title font-serif fw-bold text-dark" id="confirmProfileModalLabel">
+                        🌸 Xác Nhận Cập Nhật
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body py-3 text-secondary">
-                    Bạn có chắc chắn muốn đăng xuất khỏi hệ thống Bloom Flower?
+                    Bạn có chắc chắn muốn lưu thông tin tài khoản đã chỉnh sửa?
                 </div>
                 <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancelSignOut">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancelProfile">
                         Cancel (Hủy)
                     </button>
-                    <a th:href="@{/logout}" class="btn btn-danger rounded-pill px-4 fw-semibold" id="btnConfirmSignOut">
+                    <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" id="btnConfirmProfile" onclick="document.getElementById('profileForm').submit();">
                         Confirm (Xác Nhận)
-                    </a>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Xác Nhận Cập Nhật Ảnh Đại Diện / Ảnh Bìa (UC_009 Steps 4, 5, 6, 4a, 5a, 6a) -->
+    <div class="modal fade" id="confirmImageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title font-serif fw-bold text-dark" id="confirmImageModalTitle">
+                        📷 Xác Nhận Cập Nhật Ảnh
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-3 text-secondary" id="confirmImageModalBody">
+                    Bạn có muốn cập nhật ảnh mới này cho tài khoản không?
+                </div>
+                <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancelImage">
+                        Cancel (Hủy)
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" id="btnConfirmImage" onclick="document.getElementById('profileForm').submit();">
+                        Confirm (Xác Nhận)
+                    </button>
                 </div>
             </div>
         </div>
@@ -295,8 +370,103 @@
         </div>
     </div>
 
+    <!-- Modal Xác Nhận Đăng Xuất (Sign Out Modal) -->
+    <div class="modal fade" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title font-serif fw-bold text-dark" id="signOutModalLabel">
+                        🌸 Xác Nhận Đăng Xuất (Sign Out)
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-3 text-secondary">
+                    Bạn có chắc chắn muốn đăng xuất khỏi hệ thống Bloom Flower?
+                </div>
+                <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancelSignOut">
+                        Cancel (Hủy)
+                    </button>
+                    <a th:href="@{/logout}" class="btn btn-danger rounded-pill px-4 fw-semibold" id="btnConfirmSignOut">
+                        Confirm (Xác Nhận)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Xử lý chọn ảnh đại diện / ảnh bìa & Validation hợp lệ (UC_009 Steps 4, 5, 6, 4a, 5a, 6a, 6d, 6d1)
+        function handleFileSelected(input, type) {
+            if (!input.files || input.files.length === 0) return;
+            const file = input.files[0];
+            
+            // Kiểm tra định dạng hợp lệ (chỉ chấp nhận hình ảnh)
+            const validExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+            const fileName = file.name.toLowerCase();
+            const fileExt = fileName.substring(fileName.lastIndexOf('.') + 1);
+            const isValidFormat = validExtensions.includes(fileExt) && file.type.startsWith('image/');
+            const isSizeValid = file.size <= 10 * 1024 * 1024; // Tối đa 10MB
+            
+            if (!isValidFormat || !isSizeValid) {
+                // Exception 6d. Hình ảnh không hợp lệ -> 6d1. Thông báo cập nhật thất bại
+                input.value = '';
+                alert('Thông báo cập nhật thất bại: Hình ảnh không hợp lệ! Vui lòng chọn tệp hình ảnh (.jpg, .jpeg, .png, .webp) có dung lượng dưới 10MB.');
+                return;
+            }
+            
+            // Hiển thị preview ảnh ngay lập tức
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (type === 'avatar') {
+                    const avatarImg = document.getElementById('avatarPreviewImg');
+                    if (avatarImg) avatarImg.src = e.target.result;
+                    document.getElementById('confirmImageModalTitle').textContent = '📷 Xác Nhận Cập Nhật Ảnh Đại Diện';
+                    document.getElementById('confirmImageModalBody').textContent = 'Bạn có chắc chắn muốn cập nhật ảnh đại diện mới này cho tài khoản không?';
+                } else if (type === 'cover') {
+                    const coverImg = document.getElementById('coverPreviewImg');
+                    if (coverImg) coverImg.src = e.target.result;
+                    document.getElementById('confirmImageModalTitle').textContent = '🖼️ Xác Nhận Cập Nhật Ảnh Bìa';
+                    document.getElementById('confirmImageModalBody').textContent = 'Bạn có chắc chắn muốn cập nhật ảnh bìa mới này cho tài khoản không?';
+                }
+                const imgModal = new bootstrap.Modal(document.getElementById('confirmImageModal'));
+                imgModal.show();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Bấm nút hình cây bút để chỉnh sửa thông tin (UC_009 Step 4b)
+        function handleFocusEditProfile() {
+            const inputFirst = document.getElementById('inputFirstName');
+            if (inputFirst) {
+                inputFirst.focus();
+                inputFirst.select();
+            }
+        }
+
+        // Đồng bộ họ + tên vào fullName
+        function syncFullName() {
+            const first = document.getElementById('inputFirstName')?.value || '';
+            const last = document.getElementById('inputLastName')?.value || '';
+            const full = (first + ' ' + last).trim();
+            if (full.length > 0) {
+                document.getElementById('inputFullName').value = full;
+            }
+        }
+
+        // Bấm nút Save (UC_009 Steps 5b1, 5b2)
+        function handleSaveProfile() {
+            const fullName = document.getElementById('inputFullName')?.value;
+            if (!fullName || fullName.trim().length === 0) {
+                alert('Vui lòng nhập họ và tên!');
+                return;
+            }
+            const modal = new bootstrap.Modal(document.getElementById('confirmProfileModal'));
+            modal.show();
+        }
+
+        // Xử lý đổi mật khẩu (UC_008)
         function handleSavePassword() {
             const oldP = document.getElementById('inputOldPassword')?.value;
             const newP = document.getElementById('inputNewPassword')?.value;
@@ -312,8 +482,26 @@
             modal.show();
         }
 
-        // Tự động chuyển đến tab Đổi mật khẩu nếu vừa có thông báo đổi mật khẩu
+        // Khởi tạo trang khi tải xong
         document.addEventListener('DOMContentLoaded', function() {
+            // Tách First name và Last name từ fullName hiện tại
+            const currentFullName = document.getElementById('inputFullName')?.value || '';
+            if (currentFullName) {
+                const parts = currentFullName.trim().split(' ');
+                if (parts.length > 1) {
+                    const last = parts.pop();
+                    const first = parts.join(' ');
+                    const fElem = document.getElementById('inputFirstName');
+                    const lElem = document.getElementById('inputLastName');
+                    if (fElem) fElem.value = first;
+                    if (lElem) lElem.value = last;
+                } else {
+                    const fElem = document.getElementById('inputFirstName');
+                    if (fElem) fElem.value = currentFullName;
+                }
+            }
+
+            // Tự động chuyển đến tab Đổi mật khẩu nếu vừa có thông báo đổi mật khẩu
             const successMsg = document.querySelector('.alert-success');
             const errorMsg = document.querySelector('.alert-danger');
             if ((successMsg && successMsg.textContent.includes('mật khẩu')) || 
