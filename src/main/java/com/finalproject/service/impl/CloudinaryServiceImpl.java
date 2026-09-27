@@ -41,26 +41,34 @@ public class CloudinaryServiceImpl implements CloudinaryService {
             log.warn("Cloudinary upload failed: {}, fallback to local storage", ex.getMessage());
         }
 
-        // Fallback: Lưu file cục bộ vào thư mục tĩnh static/images/
+        // Fallback: Lưu file cục bộ vào thư mục upload/avatar/ theo chuẩn WebMvcConfig của dự án
         String extension = ".jpg";
         String origName = file.getOriginalFilename();
         if (origName != null && origName.contains(".")) {
             extension = origName.substring(origName.lastIndexOf("."));
         }
-        String fileName = "upload_" + UUID.randomUUID().toString().substring(0, 8) + extension;
+        String fileName = "avatar_" + UUID.randomUUID().toString().substring(0, 8) + extension;
 
-        Path targetDir = Paths.get("target/classes/static/images");
-        if (!Files.exists(targetDir)) {
-            Files.createDirectories(targetDir);
+        // 1. Lưu vào thư mục upload/avatar ở gốc dự án (WebMvcConfig phục vụ từ file:upload/)
+        Path rootUploadDir = Paths.get("upload/avatar");
+        if (!Files.exists(rootUploadDir)) {
+            Files.createDirectories(rootUploadDir);
         }
-        Files.copy(file.getInputStream(), targetDir.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(file.getInputStream(), rootUploadDir.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
 
-        Path srcDir = Paths.get("src/main/resources/static/images");
-        if (!Files.exists(srcDir)) {
-            Files.createDirectories(srcDir);
+        // 2. Lưu đồng thời vào static/upload/avatar để đồng bộ mã nguồn và target
+        Path staticUploadDir = Paths.get("src/main/resources/static/upload/avatar");
+        if (!Files.exists(staticUploadDir)) {
+            Files.createDirectories(staticUploadDir);
         }
-        Files.copy(targetDir.resolve(fileName), srcDir.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(rootUploadDir.resolve(fileName), staticUploadDir.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
 
-        return "/images/" + fileName;
+        Path targetUploadDir = Paths.get("target/classes/static/upload/avatar");
+        if (!Files.exists(targetUploadDir)) {
+            Files.createDirectories(targetUploadDir);
+        }
+        Files.copy(rootUploadDir.resolve(fileName), targetUploadDir.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
+
+        return "/upload/avatar/" + fileName;
     }
 }
