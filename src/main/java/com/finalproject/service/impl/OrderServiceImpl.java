@@ -364,6 +364,11 @@ public class OrderServiceImpl implements OrderService {
             throw new IllegalStateException("Chỉ có thể hủy đơn khi đang ở trạng thái Chờ xác nhận (PENDING)!");
         }
 
+        // UC_011: Đơn hàng chỉ có thể hủy trong vòng 1 tiếng sau khi đặt
+        if (order.getCreatedAt() != null && java.time.Duration.between(order.getCreatedAt(), java.time.LocalDateTime.now()).toHours() >= 1) {
+            throw new IllegalStateException("Đơn hàng đã được đặt quá 1 tiếng, không thể hủy!");
+        }
+
         // Hoàn lại số lượng tồn kho cho chi nhánh
         for (OrderDetail detail : order.getOrderDetails()) {
             StoreInventory inventory = storeInventoryRepository

@@ -108,6 +108,10 @@
                     </div>
 
                     <div class="mt-4 border-top pt-3 d-grid gap-2">
+                        <!-- Purchase history (UC_011 Step 4) -->
+                        <a th:href="@{/customer/orders}" class="btn btn-light text-start fw-semibold" id="sidebarPurchaseHistory">
+                            <i class="bi bi-clock-history text-danger me-2"></i> Purchase history (Lịch sử đơn hàng)
+                        </a>
                         <button type="button" class="btn btn-light text-start fw-semibold" id="sidebarYourAddress"
                             onclick="switchToAddressTab();">
                             <i class="bi bi-geo-alt text-danger me-2"></i> Your address (Sổ địa chỉ)
