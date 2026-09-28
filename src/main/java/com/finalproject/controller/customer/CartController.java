@@ -25,6 +25,16 @@ public class CartController {
     public String showCart(Principal principal, Model model) {
         Cart cart = cartService.getCartByUsername(principal.getName());
         model.addAttribute("cart", cart);
+
+        // Nhóm các sản phẩm theo chi nhánh/cửa hàng (UC_012 Step 8)
+        java.util.Map<com.finalproject.entity.Store, java.util.List<com.finalproject.entity.CartItem>> itemsByStore = new java.util.LinkedHashMap<>();
+        if (cart != null && cart.getItems() != null) {
+            for (com.finalproject.entity.CartItem item : cart.getItems()) {
+                com.finalproject.entity.Store store = item.getStore();
+                itemsByStore.computeIfAbsent(store, k -> new java.util.ArrayList<>()).add(item);
+            }
+        }
+        model.addAttribute("itemsByStore", itemsByStore);
         model.addAttribute("paymentMethods", PaymentMethod.values());
         return "customer/cart";
     }
@@ -32,6 +42,7 @@ public class CartController {
     @PostMapping("/add")
     public String handleAddToCart(Principal principal,
                                   @ModelAttribute AddToCartRequest request,
+                                  jakarta.servlet.http.HttpServletRequest httpRequest,
                                   RedirectAttributes redirectAttributes) {
         try {
             cartService.addToCart(principal.getName(), request);
@@ -39,6 +50,10 @@ public class CartController {
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
             return "redirect:/";
+        }
+        String referer = httpRequest.getHeader("Referer");
+        if (referer != null && !referer.isEmpty() && !referer.contains("/cart")) {
+            return "redirect:" + referer;
         }
         return "redirect:/cart";
     }
@@ -57,9 +72,16 @@ public class CartController {
         return "redirect:/cart";
     }
 
-    @PostMapping("/remove/{id}")
-    public String handleRemoveCartItem(Principal principal, @PathVariable("id") Long id) {
-        cartService.removeCartItem(principal.getName(), id);
+    @RequestMapping(value = "/remove/{id}", method = {RequestMethod.POST, RequestMethod.GET})
+    public String handleRemoveCartItem(Principal principal,
+                                       @PathVariable("id") Long id,
+                                       RedirectAttributes redirectAttributes) {
+        try {
+            cartService.removeCartItem(principal.getName(), id);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã xóa sản phẩm khỏi giỏ hàng thành công!");
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Xóa sản phẩm thất bại: " + ex.getMessage());
+        }
         return "redirect:/cart";
     }
 

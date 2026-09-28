@@ -162,25 +162,67 @@
                     <div class="fs-2 fw-bold text-danger font-serif" th:text="${#numbers.formatDecimal(product.priceBuy, 0, 'COMMA', 0, 'POINT') + ' đ'}"></div>
                 </div>
 
-                <!-- Form thêm giỏ hàng -->
-                <form th:action="@{/cart/add}" method="post" class="mb-4">
+                <!-- Form thêm giỏ hàng (UC_012) -->
+                <form id="addToCartForm" th:action="@{/cart/add}" method="post" class="mb-4">
                     <input type="hidden" name="productId" th:value="${product.id}">
                     <input type="hidden" name="storeId" th:value="${product.store != null ? product.store.id : 1}">
                     <input type="hidden" name="orderType" value="BUY">
 
+                    <!-- Chọn các style của sản phẩm (hoặc để mặc định) (UC_012 Step 2) -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-dark">
+                            <i class="bi bi-palette text-danger me-1"></i> Phong cách thiết kế (Style):
+                        </label>
+                        <select name="style" id="selectProductStyle" class="form-select rounded-3">
+                            <option value="Mặc định" selected>Tiêu chuẩn (Mặc định)</option>
+                            <option value="Bó tròn phong cách Hàn Quốc">Bó tròn phong cách Hàn Quốc</option>
+                            <option value="Hộp hoa sang trọng kèm nơ lụa">Hộp hoa sang trọng kèm nơ lụa</option>
+                            <option value="Lẵng hoa nghệ thuật phong cách Pháp">Lẵng hoa nghệ thuật phong cách Pháp</option>
+                        </select>
+                    </div>
+
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold">Số lượng bó/lẵng</label>
-                            <input type="number" name="quantity" value="1" min="1" max="99" class="form-control">
+                            <input type="number" name="quantity" value="1" min="1" max="99" class="form-control rounded-3">
                         </div>
                     </div>
 
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-flower py-3 fw-bold rounded-pill shadow-sm">
-                            <i class="bi bi-cart-plus me-2"></i> Thêm Vào Giỏ Hàng
+                        <!-- Chọn nút hình giỏ hàng và dấu cộng (UC_012 Step 3) -->
+                        <button type="button" class="btn btn-flower py-3 fw-bold rounded-pill shadow-sm"
+                                data-bs-toggle="modal" data-bs-target="#confirmAddToCartModal" id="btnAddToCart">
+                            <i class="bi bi-cart-plus me-2 fs-5"></i> Thêm Vào Giỏ Hàng
                         </button>
                     </div>
                 </form>
+
+                <!-- Modal Xác Nhận Thêm Vào Giỏ Hàng (UC_012 Steps 4, 5, 5a) -->
+                <div class="modal fade" id="confirmAddToCartModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+                        <div class="modal-content rounded-4 border-0 shadow">
+                            <div class="modal-header border-0 pb-0">
+                                <h5 class="modal-title font-serif fw-bold text-danger">
+                                    <i class="bi bi-cart-plus me-2"></i> Xác Nhận Thêm Giỏ Hàng
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body py-3 text-secondary">
+                                Bạn có chắc chắn muốn thêm mẫu hoa <strong class="text-dark" th:text="${product.name}"></strong> này vào giỏ hàng không?
+                            </div>
+                            <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
+                                <!-- 5a. Bấm nút Cancel -> 6a. Hủy thao tác -->
+                                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancelAddToCart">
+                                    Cancel
+                                </button>
+                                <!-- 5. Bấm nút Confirm -> 6. Thông báo thêm thành công, giỏ hàng được cập nhật -->
+                                <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" id="btnConfirmAddToCart" onclick="document.getElementById('addToCartForm').submit();">
+                                    Confirm
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Nút yêu thích / theo dõi mẫu hoa -->
                 <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/customer/wishlist/toggle/{productId}(productId=${product.id})}" method="post" class="mb-4">
