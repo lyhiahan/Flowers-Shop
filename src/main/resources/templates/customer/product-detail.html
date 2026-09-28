@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title th:text="${product.name + ' - Chuỗi Cửa Hàng Hoa Tươi'}">Chi Tiết Sản Phẩm</title>
@@ -201,6 +201,18 @@
 
     <!-- Mục Đánh giá & Phản hồi (Reviews - Tối thiểu 50 ký tự theo yêu cầu rubric đề cương) -->
     <div id="review-section" class="card detail-card bg-white p-4 p-md-5 mb-5">
+        <!-- Thông báo kết quả gửi đánh giá -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-4 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show rounded-4 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h4 class="font-serif fw-bold mb-1">⭐ Đánh Giá & Nhận Xét Của Khách Hàng</h4>
@@ -208,10 +220,38 @@
             </div>
         </div>
 
-        <!-- Form gửi đánh giá -->
-        <div class="p-4 bg-light rounded-4 border mb-4">
-            <h6 class="fw-bold mb-3 font-serif">Viết Đánh Giá Sản Phẩm (Bình luận tối thiểu 50 ký tự)</h6>
-            <form th:action="@{/products/{id}/review(id=${product.id})}" method="post" onsubmit="return validateReviewLength();">
+        <!-- TRƯỜNG HỢP 1: Chưa đăng nhập -->
+        <div sec:authorize="!isAuthenticated()" class="p-4 bg-light rounded-4 border mb-4 text-center">
+            <div class="fs-2 mb-2">🌸</div>
+            <h6 class="fw-bold font-serif mb-2">Đánh Giá Sản Phẩm</h6>
+            <p class="text-muted small mb-3">
+                Chức năng đánh giá chỉ dành cho khách hàng <strong>đã đặt hàng và nhận được hàng rồi</strong>.<br>
+                Vui lòng đăng nhập bằng tài khoản mua hàng để thực hiện đánh giá.
+            </p>
+            <a th:href="@{/login}" class="btn btn-outline-danger btn-sm rounded-pill px-4 fw-semibold">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Đăng Nhập
+            </a>
+        </div>
+
+        <!-- TRƯỜNG HỢP 2: Đã đăng nhập nhưng CHƯA đặt mua hoặc CHƯA nhận được hàng -->
+        <div sec:authorize="isAuthenticated()" th:if="${canReview != true}" class="p-4 bg-light rounded-4 border mb-4 text-center">
+            <div class="fs-2 mb-2">📦</div>
+            <h6 class="fw-bold font-serif text-dark mb-2">Chưa Thể Đánh Giá Mẫu Hoa Này</h6>
+            <p class="text-muted small mb-0" style="max-width: 600px; margin: 0 auto;">
+                Chức năng đánh giá sản phẩm chỉ được thực hiện <strong>khi và chỉ khi khách hàng đã đặt hàng và nhận được hàng thành công</strong> (Đơn hàng ở trạng thái Đã Giao hoặc Hoàn Tất).
+            </p>
+        </div>
+
+        <!-- TRƯỜNG HỢP 3: Đã đăng nhập VÀ ĐÃ ĐẶT HÀNG + NHẬN ĐƯỢC HÀNG THÀNH CÔNG -->
+        <div sec:authorize="isAuthenticated()" th:if="${canReview == true}" class="p-4 bg-white border border-success-subtle rounded-4 shadow-sm mb-4">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill small fw-semibold">
+                    <i class="bi bi-patch-check-fill me-1"></i> Đã Mua & Nhận Hàng Thành Công
+                </span>
+                <h6 class="fw-bold mb-0 font-serif">Viết Đánh Giá Sản Phẩm (Bình luận tối thiểu 50 ký tự)</h6>
+            </div>
+            <form th:action="@{/product/{id}/review(id=${product.id})}" method="post" onsubmit="return validateReviewLength();">
+                <input type="hidden" name="orderId" th:value="${eligibleOrderId}">
                 <div class="row g-3 mb-3">
                     <div class="col-md-3">
                         <label class="form-label small fw-semibold">Chấm sao (*)</label>

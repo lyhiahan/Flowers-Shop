@@ -7,4 +7,6 @@ public interface ReviewService {
     Review addReview(Long userId, Long productId, Long orderId, int rating, String content, String imageUrl);
     List<Review> getReviewsByProduct(Long productId);
     boolean hasReviewed(Long userId, Long productId, Long orderId);
+    boolean canReview(Long userId, Long productId);
+    Long getEligibleOrderId(Long userId, Long productId);
 }

@@ -50,4 +50,9 @@ public class Review {
     public void preUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    @Transient
+    public Integer getStars() {
+        return rating != null ? rating : 5;
+    }
 }

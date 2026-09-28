@@ -18,10 +18,16 @@ public class ReviewServiceImpl implements ReviewService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
+    private final OrderDetailRepository orderDetailRepository;
 
     @Override
     @Transactional
     public Review addReview(Long userId, Long productId, Long orderId, int rating, String content, String imageUrl) {
+        // 0. BẮT BUỘC: Khách hàng chỉ được đánh giá khi và chỉ khi đã đặt hàng và nhận được hàng rồi
+        if (!canReview(userId, productId)) {
+            throw new IllegalStateException("Chức năng đánh giá sản phẩm chỉ được thực hiện khi và chỉ khi khách hàng đã đặt hàng và nhận được hàng thành công!");
+        }
+
         // 1. Kiểm tra validation text tối thiểu 50 ký tự theo yêu cầu đề cương
         if (content == null || content.trim().length() < 50) {
             throw new IllegalArgumentException("Bình luận đánh giá sản phẩm bắt buộc phải có tối thiểu 50 ký tự!");
@@ -37,11 +43,15 @@ public class ReviewServiceImpl implements ReviewService {
                 .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại"));
 
         Order order = null;
+        if (orderId == null) {
+            orderId = getEligibleOrderId(userId, productId);
+        }
+
         if (orderId != null) {
             order = orderRepository.findById(orderId).orElse(null);
             if (order != null) {
                 // Kiểm tra đơn hàng đã giao thành công chưa
-                if (order.getStatus() != OrderStatus.DELIVERED && order.getStatus() != OrderStatus.COMPLETED) {
+                if (order.getStatus() != OrderStatus.DELIVERED && order.getStatus() != OrderStatus.COMPLETED && order.getStatus() != OrderStatus.RETURNED) {
                     throw new IllegalStateException("Bạn chỉ có thể đánh giá sản phẩm sau khi đơn hàng đã được giao thành công!");
                 }
             }
@@ -77,5 +87,18 @@ public class ReviewServiceImpl implements ReviewService {
     public boolean hasReviewed(Long userId, Long productId, Long orderId) {
         if (userId == null || productId == null || orderId == null) return false;
         return reviewRepository.existsByUserIdAndProductIdAndOrderId(userId, productId, orderId);
+    }
+
+    @Override
+    public boolean canReview(Long userId, Long productId) {
+        if (userId == null || productId == null) return false;
+        return orderDetailRepository.hasPurchasedAndReceived(userId, productId);
+    }
+
+    @Override
+    public Long getEligibleOrderId(Long userId, Long productId) {
+        if (userId == null || productId == null) return null;
+        List<Long> orderIds = orderDetailRepository.findReceivedOrderIdsByProduct(userId, productId);
+        return (orderIds != null && !orderIds.isEmpty()) ? orderIds.get(0) : null;
     }
 }

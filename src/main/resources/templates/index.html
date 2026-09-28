@@ -129,6 +129,21 @@
             box-shadow: 0 4px 15px -3px rgba(225, 29, 72, 0.05);
         }
 
+        .filter-chevron {
+            transition: transform 0.25s ease-in-out;
+            font-size: 0.8rem;
+        }
+
+        #btnAllFilters[aria-expanded="true"] .filter-chevron {
+            transform: rotate(180deg);
+        }
+
+        #btnAllFilters[aria-expanded="true"] {
+            background-color: #e11d48;
+            color: #ffffff;
+            border-color: #e11d48;
+        }
+
         .category-pill {
             display: inline-block;
             padding: 7px 16px;
@@ -155,28 +170,105 @@
             box-shadow: 0 4px 10px rgba(225, 29, 72, 0.25);
         }
 
-        .page-link {
+        /* ==========================================================================
+           PHÂN TRANG TỐI GIẢN (ĐỒNG BỘ GIAO DIỆN HOA TƯƠI THEO MẪU YÊU CẦU)
+           ========================================================================== */
+        .custom-pagination-container {
+            padding: 1.5rem 0 0.5rem 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .custom-pagination {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            gap: 18px;
+        }
+
+        .custom-pagination .page-item {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .custom-pagination .page-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 32px;
+            padding: 0 4px;
+            color: #64748b;
+            font-size: 15px;
+            font-weight: 500;
+            text-decoration: none;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            transition: all 0.15s ease-in-out;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .custom-pagination .page-link:hover:not(.disabled):not(.page-ellipsis) {
             color: #e11d48;
-            border-color: #fed7aa;
-            padding: 8px 14px;
-        }
-
-        .page-link:hover {
-            color: #be123c;
             background-color: #fff1f2;
-            border-color: #fca5a5;
         }
 
-        .page-item.active .page-link {
-            background-color: #e11d48;
-            border-color: #e11d48;
-            color: #ffffff;
-            font-weight: bold;
+        /* Nút trang hiện tại: Khối màu hồng đỏ hoa tươi bo góc nhẹ, chữ trắng nổi bật */
+        .custom-pagination .page-item.active .page-link {
+            background-color: #e11d48 !important;
+            color: #ffffff !important;
+            font-weight: 600;
+            border-radius: 4px;
+            box-shadow: 0 2px 6px rgba(225, 29, 72, 0.25);
         }
 
-        .page-item.disabled .page-link {
-            color: #9ca3af;
-            border-color: #e5e7eb;
+        /* Nút bị vô hiệu hóa (disabled) */
+        .custom-pagination .page-item.disabled .page-link,
+        .custom-pagination .page-item.disabled .page-nav-arrow {
+            color: #cbd5e1 !important;
+            cursor: not-allowed;
+            pointer-events: none;
+            background: transparent !important;
+            opacity: 0.5;
+        }
+
+        /* Mũi tên điều hướng < và > */
+        .custom-pagination .page-nav-arrow {
+            color: #94a3b8;
+            font-size: 15px;
+            font-weight: 400;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            transition: color 0.15s ease;
+        }
+
+        .custom-pagination .page-nav-arrow:hover:not(.disabled) {
+            color: #e11d48;
+            background: transparent;
+        }
+
+        /* Dấu ba chấm ... */
+        .custom-pagination .page-ellipsis {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-size: 15px;
+            letter-spacing: 2px;
+            user-select: none;
+            min-width: 20px;
         }
     </style>
 </head>
@@ -475,16 +567,25 @@
                 </a>
             </div>
 
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <button class="btn btn-sm btn-outline-danger rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#allFiltersCollapse" aria-expanded="true" id="btnAllFilters">
-                    <i class="bi bi-sliders me-1"></i> Tất cả bộ lọc
+            <div class="d-flex justify-content-between align-items-center mb-0">
+                <button class="btn btn-outline-danger btn-sm rounded-pill px-3 py-2 fw-semibold shadow-sm d-inline-flex align-items-center gap-2" 
+                        type="button" 
+                        data-bs-toggle="collapse" 
+                        data-bs-target="#allFiltersCollapse" 
+                        th:aria-expanded="${(minPrice != null) or (maxPrice != null) or (minRating != null)} ? 'true' : 'false'" 
+                        id="btnAllFilters">
+                    <i class="bi bi-sliders"></i>
+                    <span>All filters (Tất cả bộ lọc)</span>
+                    <i class="bi bi-chevron-down filter-chevron ms-1"></i>
                 </button>
                 <div class="text-muted small">
-                    Tìm thấy <strong class="text-danger" th:text="${totalItems}"></strong> mẫu hoa
+                    Tìm thấy <strong class="text-danger" th:text="${totalItems}">0</strong> mẫu hoa
                 </div>
             </div>
 
-            <div class="collapse show" id="allFiltersCollapse">
+            <!-- Mặc định ẩn bộ lọc, chỉ hiển thị khi người dùng bấm nút All filters -->
+            <div class="collapse pt-3" id="allFiltersCollapse"
+                 th:classappend="${(minPrice != null) or (maxPrice != null) or (minRating != null)} ? 'show' : ''">
                 <!-- Form Tìm kiếm & Sắp xếp & Lọc -->
                 <form id="filterForm" th:action="@{/products#product-catalog}" method="get">
                 <input type="hidden" name="categoryId" th:value="${categoryId}">
@@ -684,54 +785,100 @@
             </div>
         </div>
 
-        <!-- BẢNG ĐIỀU HƯỚNG PHÂN TRANG (PAGINATION) -->
-        <div th:if="${totalPages > 1}" class="d-flex justify-content-between align-items-center mt-5 flex-wrap gap-3">
-            <div class="text-muted small">
-                Hiển thị trang <strong class="text-danger" th:text="${currentPage}"></strong> / <strong th:text="${totalPages}"></strong> 
-                (Tổng cộng <span th:text="${totalItems}"></span> mẫu hoa)
-            </div>
-
+        <!-- BẢNG ĐIỀU HƯỚNG PHÂN TRANG (PAGINATION) - THEO MẪU TỐI GIẢN: < 1 2 3 4 5 ... > -->
+        <div th:if="${totalPages > 1}" class="custom-pagination-container">
             <nav aria-label="Product Pagination">
-                <ul class="pagination pagination-sm mb-0">
-                    <!-- Nút Trang Đầu -->
+                <ul class="custom-pagination">
+                    <!-- Nút Trang Trước (<) -->
                     <li class="page-item" th:classappend="${currentPage <= 1} ? 'disabled' : ''">
-                        <a class="page-link rounded-start-pill" th:href="@{/products#product-catalog(page=1, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}" title="Trang đầu">
-                            « Đầu
+                        <a class="page-link page-nav-arrow" id="btnPrevPage" 
+                           th:href="@{/products#product-catalog(page=${currentPage - 1}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}" 
+                           title="Trang trước" aria-label="Previous">
+                            <i class="bi bi-chevron-left"></i>
                         </a>
                     </li>
 
-                    <!-- Nút Trang Trước (Previous) -->
-                    <li class="page-item" th:classappend="${currentPage <= 1} ? 'disabled' : ''">
-                        <a class="page-link" id="btnPrevPage" th:href="@{/products#product-catalog(page=${currentPage - 1}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}" title="Trang trước">
-                            ‹ Trước
-                        </a>
-                    </li>
+                    <!-- Trường hợp 1: Tổng số trang <= 5: Hiển thị đầy đủ tất cả các trang -->
+                    <th:block th:if="${totalPages <= 5}">
+                        <li th:each="i : ${#numbers.sequence(1, totalPages)}" 
+                            class="page-item" 
+                            th:classappend="${i == currentPage} ? 'active' : ''">
+                            <a class="page-link" 
+                               th:href="@{/products#product-catalog(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}" 
+                               th:text="${i}">1</a>
+                        </li>
+                    </th:block>
 
-                    <!-- Các số trang -->
-                    <li th:each="i : ${#numbers.sequence(1, totalPages)}" 
-                        class="page-item" 
-                        th:classappend="${i == currentPage} ? 'active' : ''">
-                        <a class="page-link" 
-                           th:href="@{/products#product-catalog(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}" 
-                           th:text="${i}">
-                        </a>
-                    </li>
+                    <!-- Trường hợp 2: Tổng số trang > 5 (Khớp chuẩn mẫu: [1] 2 3 4 5 ... >) -->
+                    <th:block th:if="${totalPages > 5}">
+                        <!-- Khi ở các trang đầu (currentPage <= 4): Hiển thị 1 2 3 4 5 ... -->
+                        <th:block th:if="${currentPage <= 4}">
+                            <li th:each="i : ${#numbers.sequence(1, 5)}" 
+                                class="page-item" 
+                                th:classappend="${i == currentPage} ? 'active' : ''">
+                                <a class="page-link" 
+                                   th:href="@{/products#product-catalog(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}" 
+                                   th:text="${i}">1</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link page-ellipsis" 
+                                   th:href="@{/products#product-catalog(page=6, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}" 
+                                   title="Xem thêm các trang tiếp theo">...</a>
+                            </li>
+                        </th:block>
 
-                    <!-- Nút Trang Sau (Next) -->
+                        <!-- Khi ở các trang cuối (currentPage >= totalPages - 3): Hiển thị ... (totalPages-4)..totalPages -->
+                        <th:block th:if="${currentPage >= totalPages - 3}">
+                            <li class="page-item">
+                                <a class="page-link page-ellipsis" 
+                                   th:href="@{/products#product-catalog(page=${totalPages - 5}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}" 
+                                   title="Xem các trang trước">...</a>
+                            </li>
+                            <li th:each="i : ${#numbers.sequence(totalPages - 4, totalPages)}" 
+                                class="page-item" 
+                                th:classappend="${i == currentPage} ? 'active' : ''">
+                                <a class="page-link" 
+                                   th:href="@{/products#product-catalog(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}" 
+                                   th:text="${i}">1</a>
+                            </li>
+                        </th:block>
+
+                        <!-- Khi ở các trang ở giữa: ... (currentPage-2)..currentPage..(currentPage+2) ... -->
+                        <th:block th:if="${currentPage > 4 and currentPage < totalPages - 3}">
+                            <li class="page-item">
+                                <a class="page-link page-ellipsis" 
+                                   th:href="@{/products#product-catalog(page=${currentPage - 3}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}">...</a>
+                            </li>
+                            <li th:each="i : ${#numbers.sequence(currentPage - 2, currentPage + 2)}" 
+                                class="page-item" 
+                                th:classappend="${i == currentPage} ? 'active' : ''">
+                                <a class="page-link" 
+                                   th:href="@{/products#product-catalog(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}" 
+                                   th:text="${i}">1</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link page-ellipsis" 
+                                   th:href="@{/products#product-catalog(page=${currentPage + 3}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}">...</a>
+                            </li>
+                        </th:block>
+                    </th:block>
+
+                    <!-- Nút Trang Sau (>) -->
                     <li class="page-item" th:classappend="${currentPage >= totalPages} ? 'disabled' : ''">
-                        <a class="page-link" id="btnNextPage" th:href="@{/products#product-catalog(page=${currentPage + 1}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}" title="Trang sau">
-                            Sau ›
-                        </a>
-                    </li>
-
-                    <!-- Nút Trang Cuối -->
-                    <li class="page-item" th:classappend="${currentPage >= totalPages} ? 'disabled' : ''">
-                        <a class="page-link rounded-end-pill" th:href="@{/products#product-catalog(page=${totalPages}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}" title="Trang cuối">
-                            Cuối »
+                        <a class="page-link page-nav-arrow" id="btnNextPage" 
+                           th:href="@{/products#product-catalog(page=${currentPage + 1}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}" 
+                           title="Trang sau" aria-label="Next">
+                            <i class="bi bi-chevron-right"></i>
                         </a>
                     </li>
                 </ul>
             </nav>
+
+            <!-- Dòng chú thích số trang nhỏ gọn -->
+            <div class="text-muted small" style="font-size: 0.8rem;">
+                Hiển thị trang <strong class="text-danger" th:text="${currentPage}">1</strong> / <strong th:text="${totalPages}">1</strong> 
+                (Tổng cộng <span th:text="${totalItems}">0</span> mẫu hoa)
+            </div>
         </div>
 
     </div>

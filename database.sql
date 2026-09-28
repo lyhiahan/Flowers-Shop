@@ -15,6 +15,14 @@ GO
 -- ============================================================================
 -- 1. XÓA CÁC BẢNG NẾU ĐÃ TỒN TẠI (THEO THỨ TỰ RÀNG BUỘC KHÓA NGOẠI)
 -- ============================================================================
+DECLARE @sqlDropFk NVARCHAR(MAX) = N'';
+SELECT @sqlDropFk += N'ALTER TABLE ' + QUOTENAME(s.name) + N'.' + QUOTENAME(t.name) + N' DROP CONSTRAINT ' + QUOTENAME(f.name) + N';' + CHAR(13)
+FROM sys.foreign_keys f
+INNER JOIN sys.tables t ON f.parent_object_id = t.object_id
+INNER JOIN sys.schemas s ON t.schema_id = s.schema_id;
+IF LEN(@sqlDropFk) > 0 EXEC sp_executesql @sqlDropFk;
+GO
+
 IF OBJECT_ID('dbo.transactions', 'U') IS NOT NULL DROP TABLE dbo.transactions;
 IF OBJECT_ID('dbo.user_follow_store', 'U') IS NOT NULL DROP TABLE dbo.user_follow_store;
 IF OBJECT_ID('dbo.recently_viewed', 'U') IS NOT NULL DROP TABLE dbo.recently_viewed;
@@ -163,11 +171,13 @@ CREATE TABLE dbo.deliveries (
 );
 GO
 
--- Bảng: Danh mục hoa tươi (Categories)
+-- Bảng: Danh mục hoa tươi (Categories) - Hỗ trợ phân cấp cha/con
 CREATE TABLE dbo.categories (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     name NVARCHAR(100) NOT NULL UNIQUE,
-    description NVARCHAR(MAX) NULL
+    description NVARCHAR(MAX) NULL,
+    parent_id BIGINT NULL,
+    CONSTRAINT FK_categories_parent FOREIGN KEY (parent_id) REFERENCES dbo.categories(id)
 );
 GO
 
@@ -212,6 +222,7 @@ CREATE TABLE dbo.products (
     is_selling BIT NOT NULL DEFAULT 1,
     promotional_price DECIMAL(18,2) NULL,
     image_url NVARCHAR(500) NULL,
+    created_at DATETIME DEFAULT GETDATE(),
     CONSTRAINT FK_products_categories FOREIGN KEY (category_id) REFERENCES dbo.categories(id) ON DELETE CASCADE,
     CONSTRAINT FK_products_stores FOREIGN KEY (store_id) REFERENCES dbo.stores(id) ON DELETE SET NULL
 );
@@ -222,6 +233,7 @@ CREATE TABLE dbo.product_images (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     image_url VARCHAR(255) NOT NULL,
     product_id BIGINT NOT NULL,
+    is_main BIT NOT NULL DEFAULT 0,
     CONSTRAINT FK_product_images_products FOREIGN KEY (product_id) REFERENCES dbo.products(id) ON DELETE CASCADE
 );
 GO
@@ -366,7 +378,7 @@ CREATE TABLE dbo.reviews (
     store_id BIGINT NULL,
     order_id BIGINT NULL,
     content NVARCHAR(1000) NOT NULL,
-    stars INT NOT NULL CHECK (stars >= 1 AND stars <= 5),
+    rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
     image_url NVARCHAR(500) NULL,
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE(),
@@ -492,29 +504,48 @@ INSERT INTO dbo.users (username, password, full_name, email, phone, address, rol
 ('shipper_nhanh', '$2a$10$MMgWoixo7KjB5HrbStq9g.NkNv9zWbVpdSlBmPjrncPse25LBqh82', N'Trần Giao Hàng Nhanh', 'shipper@rentalshop.vn', '0907777888', N'TP. Hồ Chí Minh', 'SHIPPER', 1, 1, CAST(GETDATE() AS DATE), NULL);
 GO
 
--- 3.5. Danh mục hoa tươi
-INSERT INTO dbo.categories (name, description) VALUES 
-(N'Hoa Bó Tươi Nghệ Thuật', N'Các mẫu bó hoa tươi tuyển chọn từ hoa hồng Ecuador, tulip Hà Lan, baby, hướng dương phong cách sang trọng'),
-(N'Giỏ & Hộp Hoa Cao Cấp', N'Giỏ hoa và hộp hoa chúc mừng sinh nhật, kỷ niệm, ngày lễ với thiết kế tinh tế'),
-(N'Kệ Hoa Khai Trương Hồng Phát', N'Kệ hoa 2 tầng, lẵng hoa chúc mừng khai trương tài lộc, sự kiện trang trọng'),
-(N'Hoa Cưới & Cầm Tay Cô Dâu', N'Bộ sưu tập hoa cưới tinh khôi, hoa cầm tay cô dâu và hoa cài áo chú rể'),
-(N'Lan Hồ Điệp Hoàng Gia', N'Chậu lan hồ điệp tuyển chọn thượng hạng với vẻ đẹp sang trọng, quý phái'),
-(N'Thuê Cổng Hoa & Khung Sự Kiện', N'Dịch vụ cho thuê khung cổng hoa cưới tiệc, chân kệ hoa mỹ thuật cho đám cưới và sự kiện');
+-- 3.5. Danh mục hoa tươi (phân cấp: 3 danh mục gốc + danh mục con)
+-- Danh mục gốc (parent_id = NULL)
+INSERT INTO dbo.categories (name, description, parent_id) VALUES
+(N'Hoa Tươi Sự Kiện & Chúc Mừng',   N'Bộ sưu tập hoa chúc mừng, sự kiện, khai trương và sinh nhật', NULL),
+(N'Hoa Tình Yêu & Hoa Chậu',          N'Hoa hồng lãng mạn, hoa cưới và lan hồ điệp cao cấp', NULL),
+(N'Hoa Trang Trí & Không Gian Sống', N'Hoa tươi trang trí nội thất, văn phòng và không gian sống', NULL);
 GO
 
--- 3.6. Danh mục sản phẩm hoa tươi & Phụ kiện sự kiện
-INSERT INTO dbo.products (name, description, import_price, price_buy, price_rent_per_day, deposit_fee, category_id, image_url, store_id, sold, rating, view_count, is_active, is_selling) VALUES 
-(N'Bó Hoa Hồng Đỏ Ecuador Tình Nồng Cháy', N'Gồm 19 bông hồng đỏ Ecuador nhập khẩu phối hoa baby trắng Hà Lan, bọc giấy gói cao cấp phong cách Hàn Quốc.', 350000.00, 650000.00, 0.00, 0.00, 1, 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800', 1, 45, 4.9, 320, 1, 1),
-(N'Bó Hoa Tulip Hà Lan Pastel Thanh Khiết', N'15 bông tulip Hà Lan màu hồng pastel và trắng ngọc, biểu trưng cho tình yêu chân thành và trang nhã.', 480000.00, 850000.00, 0.00, 0.00, 1, 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=800', 1, 38, 4.8, 280, 1, 1),
-(N'Bó Hoa Hướng Dương Ánh Dương Rạng Rỡ', N'5 bông hướng dương đà lạt loại 1 phối hoa cúc tana và lá bạc nhập khẩu, mang ý nghĩa may mắn và thành công.', 220000.00, 420000.00, 0.00, 0.00, 1, 'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=800', 2, 29, 4.7, 195, 1, 1),
-(N'Giỏ Hoa Cẩm Tú Cầu Xanh Mộng Mơ', N'Giỏ mây vintage kết hợp hoa cẩm tú cầu xanh lam, hoa hồng kem và hoa cát tường dịu dàng.', 420000.00, 750000.00, 0.00, 0.00, 2, 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=800', 2, 24, 4.9, 160, 1, 1),
-(N'Hộp Hoa Tròn Sang Trọng Tình Yêu Ngọt Ngào', N'Hộp hoa mica trong suốt cao cấp phối hoa hồng phấn Juliet và baby khô cao cấp lưu giữ vẻ đẹp lâu dài.', 520000.00, 920000.00, 0.00, 0.00, 2, 'https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?w=800', 1, 19, 4.8, 140, 1, 1),
-(N'Kệ Hoa Khai Trương Đại Cát 2 Tầng', N'Kệ hoa 2 tầng cao 1.8m phối hoa hồng môn đỏ, hướng dương và hoa đồng tiền rực rỡ mang tài lộc dồi dào.', 950000.00, 1650000.00, 0.00, 0.00, 3, 'https://images.unsplash.com/photo-1533616688419-b7a585564566?w=800', 1, 15, 5.0, 210, 1, 1),
-(N'Kệ Hoa Khai Trương Hồng Phát Rực Rỡ', N'Thiết kế hiện đại tone màu cam vàng hoàng kim, chúc mừng đối tác kinh doanh phát đạt thịnh vượng.', 800000.00, 1350000.00, 0.00, 0.00, 3, 'https://images.unsplash.com/photo-1527061011665-3652c757a4d4?w=800', 3, 12, 4.6, 115, 1, 1),
-(N'Bó Hoa Cưới Cầm Tay Calla Lily Tinh Khôi', N'Hoa rum Calla Lily trắng nhập khẩu kết hợp nơ lụa voan cao cấp, tôn vinh vẻ đẹp thuần khiết của cô dâu.', 650000.00, 1150000.00, 0.00, 0.00, 4, 'https://images.unsplash.com/photo-1545232979-8bf68ee9b1af?w=800', 1, 16, 5.0, 185, 1, 1),
-(N'Chậu Lan Hồ Điệp Hoàng Gia 5 Cành Đột Biến', N'Chậu sứ Bát Tràng cao cấp cắm 5 cành lan hồ điệp tím viền trắng cánh dày, hoa bền tươi trên 1 tháng.', 1200000.00, 2100000.00, 0.00, 0.00, 5, 'https://images.unsplash.com/photo-1566838318109-a8bffb91d082?w=800', 2, 8, 4.9, 90, 1, 1),
-(N'Khung Cổng Hoa Cưới Vòm Tròn Bohemian Luxury', N'Khung cổng hoa kim loại sơn tĩnh điện hoa văn mỹ thuật kèm hoa lụa và hoa tươi cao cấp decor trọn gói.', 5500000.00, 8500000.00, 650000.00, 2000000.00, 6, 'https://images.unsplash.com/photo-1532712938310-34cb3982ef74?w=800', 3, 5, 4.7, 75, 1, 1),
-(N'Chân Kệ Hoa Sắt Mỹ Thuật & Bình Pha Lê Cổ Điển', N'Set 4 chân đôn cắm hoa tiệc cưới kèm bình pha lê sang trọng trang trí lối đi hoặc bàn tiệc sự kiện.', 1500000.00, 2400000.00, 150000.00, 500000.00, 6, 'https://images.unsplash.com/photo-1582794543462-0d7922e50cf5?w=800', 3, 7, 4.8, 88, 1, 1);
+-- Danh mục con của id 1 (Hoa Tươi Sự Kiện & Chúc Mừng)
+DECLARE @id1 BIGINT = (SELECT id FROM categories WHERE name = N'Hoa Tươi Sự Kiện & Chúc Mừng');
+DECLARE @id2 BIGINT = (SELECT id FROM categories WHERE name = N'Hoa Tình Yêu & Hoa Chậu');
+DECLARE @id3 BIGINT = (SELECT id FROM categories WHERE name = N'Hoa Trang Trí & Không Gian Sống');
+INSERT INTO dbo.categories (name, description, parent_id) VALUES
+(N'Hoa Sinh Nhật',          N'Bó hoa và giỏ hoa tươi chúc mừng sinh nhật',            @id1),
+(N'Hoa Khai Trương',        N'Lẵng hoa chúc mừng khai trương cửa hàng, công ty',      @id1),
+(N'Hoa Tốt Nghiệp',        N'Hoa chúc mừng tốt nghiệp và thành đạt',                  @id1),
+(N'Hoa Hồng Tình Yêu',     N'Hoa hồng đỏ, hồng phấn cho Valentine và kỷ niệm',       @id2),
+(N'Lan Hồ Điệp Cao Cấp',   N'Lan hồ điệp sang trọng dành làm quà tặng cao cấp',      @id2),
+(N'Hoa Để Bàn & Nội Thất', N'Hoa cắm bình trang trí bàn làm việc và nội thất',        @id3),
+(N'Hoa Văn Phòng',         N'Hoa tươi trang trí văn phòng, hành lang và sảnh',        @id3);
+GO
+
+-- 3.6. Sản phẩm hoa tươi (category_id trỏ về danh mục con)
+-- category 4=Hoa Sinh Nhật, 5=Hoa Khai Trương, 7=Hoa Hồng Tình Yêu, 8=Lan Hồ Điệp, 9=Hoa Để Bàn, 10=Hoa Văn Phòng
+DECLARE @catSinhNhat   BIGINT = (SELECT id FROM categories WHERE name = N'Hoa Sinh Nhật');
+DECLARE @catKhaiTruong BIGINT = (SELECT id FROM categories WHERE name = N'Hoa Khai Trương');
+DECLARE @catHoaHong    BIGINT = (SELECT id FROM categories WHERE name = N'Hoa Hồng Tình Yêu');
+DECLARE @catLan        BIGINT = (SELECT id FROM categories WHERE name = N'Lan Hồ Điệp Cao Cấp');
+DECLARE @catDeBan      BIGINT = (SELECT id FROM categories WHERE name = N'Hoa Để Bàn & Nội Thất');
+DECLARE @catVanPhong   BIGINT = (SELECT id FROM categories WHERE name = N'Hoa Văn Phòng');
+INSERT INTO dbo.products (name, description, import_price, price_buy, price_rent_per_day, deposit_fee, category_id, image_url, store_id, sold, rating, view_count, is_active, is_selling) VALUES
+(N'Bó Hoa Hồng Đỏ Ecuador Tình Nồng Cháy',   N'Gồm 19 bông hồng đỏ Ecuador nhập khẩu phối hoa baby trắng Hà Lan, bọc giấy gói cao cấp phong cách Hàn Quốc.',  350000.00, 650000.00,  0.00, 0.00, @catSinhNhat,   'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800', 1, 45, 4.9, 320, 1, 1),
+(N'Bó Hoa Tulip Hà Lan Pastel Thanh Khiết',   N'15 bông tulip Hà Lan màu hồng pastel và trắng ngọc, biểu trưng cho tình yêu chân thành và trang nhã.',            480000.00, 850000.00,  0.00, 0.00, @catSinhNhat,   'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=800', 1, 38, 4.8, 280, 1, 1),
+(N'Bó Hoa Hướng Dương Ánh Dương Rạng Rỡ',    N'5 bông hướng dương đà lạt loại 1 phối hoa cúc tana và lá bạc nhập khẩu, mang ý nghĩa may mắn và thành công.',   220000.00, 420000.00,  0.00, 0.00, @catSinhNhat,   'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=800', 2, 29, 4.7, 195, 1, 1),
+(N'Giỏ Hoa Cẩm Tú Cầu Xanh Mộng Mơ',        N'Giỏ mây vintage kết hợp hoa cẩm tú cầu xanh lam, hoa hồng kem và hoa cát tường dịu dàng.',                         420000.00, 750000.00,  0.00, 0.00, @catSinhNhat,   'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=800', 2, 24, 4.9, 160, 1, 1),
+(N'Hộp Hoa Tròn Sang Trọng Tình Yêu Ngọt Ngào', N'Hộp hoa mica trong suốt cao cấp phối hoa hồng phấn Juliet và baby khô cao cấp lưu giữ vẻ đẹp lâu dài.',         520000.00, 920000.00,  0.00, 0.00, @catHoaHong,    'https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?w=800', 1, 19, 4.8, 140, 1, 1),
+(N'Kệ Hoa Khai Trương Đại Cát 2 Tầng',       N'Kệ hoa 2 tầng cao 1.8m phối hoa hồng môn đỏ, hướng dương và hoa đồng tiền rực rỡ mang tài lộc dồi dào.',         950000.00, 1650000.00, 0.00, 0.00, @catKhaiTruong, 'https://images.unsplash.com/photo-1533616688419-b7a585564566?w=800', 1, 15, 5.0, 210, 1, 1),
+(N'Kệ Hoa Khai Trương Hồng Phát Rực Rỡ',     N'Thiết kế hiện đại tone màu cam vàng hoàng kim, chúc mừng đối tác kinh doanh phát đạt thịnh vượng.',               800000.00, 1350000.00, 0.00, 0.00, @catKhaiTruong, 'https://images.unsplash.com/photo-1527061011665-3652c757a4d4?w=800', 3, 12, 4.6, 115, 1, 1),
+(N'Bó Hoa Cưới Cầm Tay Calla Lily Tinh Khôi', N'Hoa rum Calla Lily trắng nhập khẩu kết hợp nơ lụa voan cao cấp, tôn vinh vẻ đẹp thuần khiết của cô dâu.',         650000.00, 1150000.00, 0.00, 0.00, @catHoaHong,    'https://images.unsplash.com/photo-1545232979-8bf68ee9b1af?w=800', 1, 16, 5.0, 185, 1, 1),
+(N'Chậu Lan Hồ Điệp Hoàng Gia 5 Cành',       N'Chậu sứ Bát Tràng cao cấp cắm 5 cành lan hồ điệp tím viền trắng cánh dày, hoa bền tươi trên 1 tháng.',           1200000.00, 2100000.00, 0.00, 0.00, @catLan,        'https://images.unsplash.com/photo-1566838318109-a8bffb91d082?w=800', 2,  8, 4.9,  90, 1, 1),
+(N'Lọ Hoa Để Bàn Hoa Hồng Nhung Đỏ',        N'Bình thủy tinh cắm hoa hồng nhung đỏ và hoa limonium tím nhỏ xinh, trang trí bàn làm việc sang trọng.',            180000.00, 320000.00,  0.00, 0.00, @catDeBan,      'https://images.unsplash.com/photo-1582794543462-0d7922e50cf5?w=800', 3,  7, 4.8,  88, 1, 1),
+(N'Chậu Hoa Văn Phòng Bình An Xanh Mướt',    N'Chậu hoa tươi hỗn hợp xanh mướt trang trí văn phòng, hành lang, mang lại không khí trong lành và thanh thản.',  280000.00, 490000.00,  0.00, 0.00, @catVanPhong,   'https://images.unsplash.com/photo-1532712938310-34cb3982ef74?w=800', 3,  5, 4.7,  75, 1, 1);
 GO
 
 -- 3.7. Tồn kho hoa tươi sẵn sàng tại 3 chi nhánh
@@ -537,3 +568,17 @@ INSERT INTO dbo.vouchers (code, name, discount_type, discount_value, min_order_v
 ('TRIAN10', N'Giảm 10% tri ân khách hàng', 'PERCENT', 10, 300000, 50000, 50, 2, CAST(GETDATE() AS DATE), DATEADD(month, 3, GETDATE()), 1),
 ('FREESHIP', N'Miễn phí vận chuyển toàn quốc', 'FREE_SHIP', 35000, 150000, 35000, 200, 12, CAST(GETDATE() AS DATE), DATEADD(month, 3, GETDATE()), 1);
 GO
+
+-- 3.10. Đơn hàng mẫu đã giao thành công và đánh giá sản phẩm mẫu cho tài khoản khachhang
+INSERT INTO dbo.orders (user_id, pickup_store_id, order_type, status, total_amount, recipient_name, recipient_phone, recipient_address, created_at, payment_method, payment_status)
+VALUES (3, 1, 'BUY', 'DELIVERED', 650000.00, N'Gia Hân Khách Hàng', '0912345678', N'123 Lê Lợi, P. Bến Nghé, Quận 1, TP.HCM', SYSDATETIME(), 'COD', 'PAID');
+
+DECLARE @sampleOrderId BIGINT = SCOPE_IDENTITY();
+
+INSERT INTO dbo.order_details (order_id, product_id, quantity, unit_price, order_type)
+VALUES (@sampleOrderId, 1, 1, 650000.00, 'BUY');
+
+INSERT INTO dbo.reviews (user_id, product_id, store_id, order_id, content, rating, created_at)
+VALUES (3, 1, 1, @sampleOrderId, N'Hoa hồng đỏ Ecuador nhận được rất tươi, cánh hoa nở to đều và thơm dịu. Đóng gói cẩn thận có thiệp viết tay rất chỉn chu. Shipper giao hoa đúng giờ hẹn, phục vụ rất nhiệt tình!', 5, GETDATE());
+GO
+

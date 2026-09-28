@@ -37,6 +37,8 @@ public class ProductDetailController {
 
         // Ghi nhận sản phẩm đã xem nếu đã đăng nhập
         boolean isLiked = false;
+        boolean canReview = false;
+        Long eligibleOrderId = null;
         if (principal != null) {
             userRepository.findByUsername(principal.getName()).ifPresent(u -> {
                 productService.recordRecentlyViewed(u.getId(), id);
@@ -44,6 +46,8 @@ public class ProductDetailController {
             User u = userRepository.findByUsername(principal.getName()).orElse(null);
             if (u != null) {
                 isLiked = productService.isWishlisted(u.getId(), id);
+                canReview = reviewService.canReview(u.getId(), id);
+                eligibleOrderId = reviewService.getEligibleOrderId(u.getId(), id);
                 try {
                     model.addAttribute("cartItemCount", cartService.getCartItemCount(principal.getName()));
                 } catch (Exception ignored) {}
@@ -62,6 +66,8 @@ public class ProductDetailController {
         model.addAttribute("images", images);
         model.addAttribute("reviews", reviewService.getReviewsByProduct(id));
         model.addAttribute("isLiked", isLiked);
+        model.addAttribute("canReview", canReview);
+        model.addAttribute("eligibleOrderId", eligibleOrderId);
         model.addAttribute("relatedProducts", productRepository.findByCategoryId(product.getCategory().getId()).stream().limit(4).toList());
 
         return "customer/product-detail";
@@ -81,10 +87,16 @@ public class ProductDetailController {
 
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
 
+        // Kiểm tra quyền đánh giá: chỉ khách hàng đã đặt hàng và nhận được hàng rồi mới được đánh giá
+        if (!reviewService.canReview(user.getId(), id)) {
+            ra.addFlashAttribute("errorMessage", "Chức năng đánh giá sản phẩm chỉ được thực hiện khi và chỉ khi khách hàng đã đặt hàng và nhận được hàng thành công!");
+            return "redirect:/product/" + id + "#review-section";
+        }
+
         // Kiểm tra độ dài bình luận tối thiểu 50 ký tự theo yêu cầu đề cương
         if (content == null || content.trim().length() < 50) {
             ra.addFlashAttribute("errorMessage", "Bình luận đánh giá sản phẩm bắt buộc phải có tối thiểu 50 ký tự! (Hiện tại: " + (content != null ? content.trim().length() : 0) + " ký tự)");
-            return "redirect:/products/" + id + "#review-section";
+            return "redirect:/product/" + id + "#review-section";
         }
 
         try {
@@ -94,6 +106,6 @@ public class ProductDetailController {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
 
-        return "redirect:/products/" + id + "#review-section";
+        return "redirect:/product/" + id + "#review-section";
     }
 }
