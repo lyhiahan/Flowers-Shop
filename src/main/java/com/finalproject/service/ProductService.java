@@ -27,10 +27,11 @@ public interface ProductService {
     // Sản phẩm của cửa hàng
     List<Product> getProductsByStore(Long storeId);
 
-    // Wishlist (Sản phẩm yêu thích)
+    // Wishlist / Follow (Sản phẩm yêu thích / Theo dõi)
     boolean toggleWishlist(Long userId, Long productId);
     boolean isWishlisted(Long userId, Long productId);
     List<Product> getWishlist(Long userId);
+    long getFollowerCount(Long productId);
 
     // Sản phẩm đã xem gần đây
     void recordRecentlyViewed(Long userId, Long productId);

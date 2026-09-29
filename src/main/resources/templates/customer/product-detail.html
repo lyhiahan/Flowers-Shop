@@ -41,19 +41,32 @@
 <nav class="navbar navbar-expand-lg bg-white border-bottom py-3 sticky-top">
     <div class="container">
         <a class="navbar-brand font-serif fw-bold text-danger fs-4" th:href="@{/}">🌸 HOA TƯƠI SÀI GÒN</a>
-        <div class="d-flex align-items-center gap-3">
-            <a th:href="@{/customer/profile/wishlist}" class="btn btn-outline-danger btn-sm"><i class="bi bi-heart me-1"></i> Yêu thích</a>
+        <div class="d-flex align-items-center gap-2">
+            <!-- UC_015 Step 4: Chức năng Following trên thanh điều hướng -->
+            <a th:href="@{/customer/following}" class="btn btn-outline-danger btn-sm rounded-pill px-3" id="navFollowingLink">
+                <i class="bi bi-bookmark-heart-fill me-1"></i> Following
+            </a>
             <a th:href="@{/cart}" class="btn btn-danger btn-sm position-relative rounded-pill px-3">
                 <i class="bi bi-cart3 me-1"></i> Giỏ hàng
                 <span th:if="${cartItemCount != null and cartItemCount > 0}" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark" th:text="${cartItemCount}"></span>
             </a>
-            <a th:href="@{/customer/profile}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-person me-1"></i> Hồ sơ</a>
-            <a th:href="@{/}" class="btn btn-light btn-sm"><i class="bi bi-house me-1"></i> Trang chủ</a>
+            <a th:href="@{/customer/profile}" class="btn btn-outline-secondary btn-sm rounded-pill px-3"><i class="bi bi-person me-1"></i> Hồ sơ</a>
+            <a th:href="@{/}" class="btn btn-light btn-sm rounded-pill px-3"><i class="bi bi-house me-1"></i> Trang chủ</a>
         </div>
     </div>
 </nav>
 
 <div class="container py-5">
+    <!-- Thông báo kết quả theo dõi / hủy theo dõi (UC_015 Post-conditions) -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-4 mb-4 shadow-sm border-0" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i><span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show rounded-4 mb-4 shadow-sm border-0" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb small">
@@ -127,18 +140,23 @@
             <div class="col-lg-6">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-1" th:text="${product.category != null ? product.category.name : 'Hoa cao cấp'}"></span>
-                    <!-- Nút Wishlist -->
-                    <form th:action="@{/customer/profile/wishlist/toggle/{id}(id=${product.id})}" method="post">
-                        <button type="submit" class="btn btn-sm rounded-circle p-2"
-                                th:classappend="${isLiked} ? 'btn-danger' : 'btn-outline-danger'">
-                            <i class="bi" th:classappend="${isLiked} ? 'bi-heart-fill' : 'bi-heart'"></i>
+                    <!-- UC_015 Step 2 & 3: Chọn nút Follow (hoặc nút Following) -->
+                    <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/customer/following/toggle/{productId}(productId=${product.id})}" method="post" class="m-0">
+                        <button type="submit" id="btnFollowProductTop"
+                                class="btn btn-sm rounded-pill px-3 fw-bold shadow-sm d-flex align-items-center gap-1"
+                                th:classappend="${isFollowed or isLiked} ? 'btn-danger' : 'btn-outline-danger'">
+                            <i class="bi" th:classappend="${isFollowed or isLiked} ? 'bi-check-circle-fill' : 'bi-plus-circle'"></i>
+                            <span th:text="${isFollowed or isLiked} ? 'Following' : 'Follow'">Follow</span>
                         </button>
                     </form>
+                    <a sec:authorize="!hasRole('CUSTOMER')" th:href="@{/login}" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold">
+                        <i class="bi bi-plus-circle me-1"></i> Follow
+                    </a>
                 </div>
 
                 <h2 class="font-serif fw-bold text-dark mb-2" th:text="${product.name}"></h2>
 
-                <div class="d-flex align-items-center gap-3 mb-3 small">
+                <div class="d-flex align-items-center gap-3 mb-3 small flex-wrap">
                     <div class="text-warning">
                         <i class="bi bi-star-fill"></i>
                         <span class="fw-bold text-dark" th:text="${product.rating}">5.0</span>
@@ -147,6 +165,11 @@
                     <span class="text-muted">Đã bán: <strong class="text-dark" th:text="${product.sold != null ? product.sold : 0}"></strong></span>
                     <span class="text-muted">|</span>
                     <span class="text-muted">Lượt xem: <strong class="text-dark" th:text="${product.viewCount != null ? product.viewCount : 1}"></strong></span>
+                    <span class="text-muted">|</span>
+                    <!-- UC_015 Post-condition: Số người theo dõi của sản phẩm được cập nhật -->
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2 py-1">
+                        <i class="bi bi-people-fill me-1"></i><span id="followerCount" class="fw-bold" th:text="${followerCount != null ? followerCount : 0}">0</span> người theo dõi
+                    </span>
                 </div>
 
                 <!-- Chi nhánh bán -->
@@ -224,13 +247,20 @@
                     </div>
                 </div>
 
-                <!-- Nút yêu thích / theo dõi mẫu hoa -->
-                <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/customer/wishlist/toggle/{productId}(productId=${product.id})}" method="post" class="mb-4">
-                    <button type="submit" class="btn btn-outline-danger w-100 rounded-pill py-2">
-                        <i class="bi me-1" th:classappend="${isLiked} ? 'bi-heart-fill' : 'bi-heart'"></i>
-                        <span th:text="${isLiked} ? 'Đã Lưu Vào Danh Sách Yêu Thích' : 'Thêm Vào Yêu Thích'"></span>
-                    </button>
-                </form>
+                <!-- UC_015 Step 2 & 3: Chọn nút Follow (hoặc nút Following). Đổi thành Following hoặc ngược lại -->
+                <div class="mb-4">
+                    <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/customer/following/toggle/{productId}(productId=${product.id})}" method="post" class="m-0">
+                        <button type="submit" id="btnFollowProduct"
+                                class="btn w-100 rounded-pill py-2 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2"
+                                th:classappend="${isFollowed or isLiked} ? 'btn-danger' : 'btn-outline-danger'">
+                            <i class="bi" th:classappend="${isFollowed or isLiked} ? 'bi-check-circle-fill' : 'bi-plus-circle'"></i>
+                            <span th:text="${isFollowed or isLiked} ? 'Following (Đang theo dõi)' : 'Follow (Theo dõi)'">Follow</span>
+                        </button>
+                    </form>
+                    <a sec:authorize="!hasRole('CUSTOMER')" th:href="@{/login}" class="btn btn-outline-danger w-100 rounded-pill py-2 fw-bold d-flex align-items-center justify-content-center gap-2">
+                        <i class="bi bi-plus-circle"></i> Follow (Đăng nhập để theo dõi)
+                    </a>
+                </div>
 
                 <!-- Mô tả -->
                 <div class="border-top pt-3">

@@ -62,6 +62,8 @@ public class ProductDetailController {
         model.addAttribute("images", images);
         model.addAttribute("reviews", reviewService.getReviewsByProduct(id));
         model.addAttribute("isLiked", isLiked);
+        model.addAttribute("isFollowed", isLiked);
+        model.addAttribute("followerCount", productService.getFollowerCount(id));
         model.addAttribute("relatedProducts", productRepository.findByCategoryId(product.getCategory().getId()).stream().limit(4).toList());
 
         return "customer/product-detail";

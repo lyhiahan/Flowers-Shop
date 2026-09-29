@@ -293,7 +293,16 @@
                 </div>
 
                 <!-- Giỏ Hàng & Menu Người Dùng -->
-                <div class="col-lg-2 col-md-2 col-12 d-flex align-items-center justify-content-end gap-3">
+                <div class="col-lg-2 col-md-2 col-12 d-flex align-items-center justify-content-end gap-2">
+                    <!-- UC_015 Step 4: Chức năng Following trên thanh điều hướng -->
+                    <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/customer/following}"
+                        class="text-white text-decoration-none d-flex align-items-center gap-1 p-2 fw-semibold" 
+                        id="navFollowingHeader" 
+                        title="Following - Bộ Sưu Tầm Theo Dõi">
+                        <i class="bi bi-bookmark-heart fs-4"></i>
+                        <span class="d-none d-xl-inline small">Following</span>
+                    </a>
+
                     <!-- Giỏ hàng Shopee Style -->
                     <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/cart}"
                         class="text-white text-decoration-none position-relative p-2" title="Giỏ hoa của bạn">
@@ -316,6 +325,9 @@
                             <li sec:authorize="hasRole('CUSTOMER')"><a class="dropdown-item py-2"
                                     th:href="@{/customer/orders}"><i class="bi bi-bag-check text-primary me-2"></i> Đơn
                                     Đặt Hoa Của Tôi</a></li>
+                            <li sec:authorize="hasRole('CUSTOMER')"><a class="dropdown-item py-2"
+                                    th:href="@{/customer/following}"><i class="bi bi-bookmark-heart-fill text-danger me-2"></i>
+                                    Following (Bộ Sưu Tầm Theo Dõi)</a></li>
                             <li sec:authorize="hasRole('CUSTOMER')"><a class="dropdown-item py-2"
                                     th:href="@{/customer/wishlist}"><i class="bi bi-heart-fill text-danger me-2"></i>
                                     Mẫu Hoa Yêu Thích</a></li>
@@ -404,6 +416,15 @@
                                 <i class="bi bi-bag-check-fill me-1"></i> Đã bán: <span th:text="${fp.sold}"></span>
                             </span>
                         </div>
+                        <!-- UC_015 Alternative 1a: Nút Follow/Following ở một thẻ sản phẩm (product card) bất kỳ -->
+                        <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/customer/following/toggle/{productId}(productId=${fp.id})}" method="post" class="position-absolute top-0 end-0 m-2 z-1">
+                            <button type="submit" class="btn btn-sm rounded-circle shadow-sm p-1 d-flex align-items-center justify-content-center border-0"
+                                    style="width: 32px; height: 32px;"
+                                    th:classappend="${followedProductIds != null and followedProductIds.contains(fp.id)} ? 'btn-danger text-white' : 'btn-light text-danger'"
+                                    th:title="${followedProductIds != null and followedProductIds.contains(fp.id)} ? 'Following (Đang theo dõi)' : 'Follow (Theo dõi)'">
+                                <i class="bi" th:classappend="${followedProductIds != null and followedProductIds.contains(fp.id)} ? 'bi-heart-fill' : 'bi-heart'"></i>
+                            </button>
+                        </form>
                         <!-- Hình ảnh hoa -->
                         <a th:href="@{/product/{id}(id=${fp.id})}">
                             <img th:src="${fp.imageUrl != null ? fp.imageUrl : 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=600'}"
@@ -681,11 +702,15 @@
                             class="position-absolute top-0 start-0 m-2 badge bg-danger shadow-sm rounded-pill px-2 py-1 small">
                             Đã bán: <span th:text="${p.sold}"></span>
                         </span>
-                        <a th:href="@{/product/{id}(id=${p.id})}"
-                            class="position-absolute top-0 end-0 m-2 btn btn-light btn-sm rounded-circle shadow-sm"
-                            title="Xem chi tiết & Đánh giá">
-                            <i class="bi bi-eye text-danger"></i>
-                        </a>
+                        <!-- UC_015 Alternative 1a: Nút Follow/Following ở một thẻ sản phẩm (product card) bất kỳ -->
+                        <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/customer/following/toggle/{productId}(productId=${p.id})}" method="post" class="position-absolute top-0 end-0 m-2 z-1">
+                            <button type="submit" class="btn btn-sm rounded-circle shadow-sm p-1 d-flex align-items-center justify-content-center border-0"
+                                    style="width: 34px; height: 34px;"
+                                    th:classappend="${followedProductIds != null and followedProductIds.contains(p.id)} ? 'btn-danger text-white' : 'btn-light text-danger'"
+                                    th:title="${followedProductIds != null and followedProductIds.contains(p.id)} ? 'Following (Đang theo dõi)' : 'Follow (Theo dõi)'">
+                                <i class="bi" th:classappend="${followedProductIds != null and followedProductIds.contains(p.id)} ? 'bi-heart-fill' : 'bi-heart'"></i>
+                            </button>
+                        </form>
                     </div>
 
                     <div class="card-body p-3 d-flex flex-column">

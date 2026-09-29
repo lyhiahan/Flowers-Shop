@@ -142,14 +142,32 @@ public class ProfileController {
         return "customer/wishlist";
     }
 
-    @PostMapping({"/wishlist/toggle/{productId}", "/profile/wishlist/toggle/{productId}"})
+    // UC_015 Main Flow 4, 5, 6, 7: Chuyển đến trang Following & hiển thị bộ sưu tầm các sản phẩm đang theo dõi
+    @GetMapping({"/following", "/profile/following"})
+    public String viewFollowingPage(Principal principal,
+                                    @RequestParam(value = "tab", defaultValue = "products") String tab,
+                                    Model model) {
+        if (principal == null) return "redirect:/login";
+        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
+        var followedProducts = productService.getWishlist(user.getId());
+        var followedStores = followStoreRepository.findByUserIdOrderByCreatedAtDesc(user.getId())
+                .stream().map(com.finalproject.entity.UserFollowStore::getStore).toList();
+        model.addAttribute("followedProducts", followedProducts);
+        model.addAttribute("followedStores", followedStores);
+        model.addAttribute("activeTab", tab != null ? tab : "products");
+        return "customer/following";
+    }
+
+    // UC_015 Step 2 & 3: Chọn nút Follow/Following -> Theo dõi hoặc hủy theo dõi
+    @PostMapping({"/wishlist/toggle/{productId}", "/profile/wishlist/toggle/{productId}", "/following/toggle/{productId}", "/following/product/{productId}", "/products/{productId}/follow"})
     public String toggleWishlist(Principal principal, @PathVariable("productId") Long productId,
                                  @RequestHeader(value = "Referer", required = false) String referer,
                                  RedirectAttributes ra) {
+        if (principal == null) return "redirect:/login";
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         boolean liked = productService.toggleWishlist(user.getId(), productId);
-        ra.addFlashAttribute("successMessage", liked ? "Đã thêm vào danh sách yêu thích ❤️" : "Đã bỏ khỏi danh sách yêu thích");
-        return referer != null ? "redirect:" + referer : "redirect:/customer/wishlist";
+        ra.addFlashAttribute("successMessage", liked ? "Đã theo dõi sản phẩm thành công! (Following)" : "Đã hủy theo dõi sản phẩm (Unfollow)!");
+        return referer != null ? "redirect:" + referer : "redirect:/customer/following";
     }
 
     @GetMapping({"/recently-viewed", "/profile/recently-viewed"})
