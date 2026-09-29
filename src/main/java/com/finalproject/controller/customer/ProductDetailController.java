@@ -84,16 +84,22 @@ public class ProductDetailController {
         // Kiểm tra độ dài bình luận tối thiểu 50 ký tự theo yêu cầu đề cương
         if (content == null || content.trim().length() < 50) {
             ra.addFlashAttribute("errorMessage", "Bình luận đánh giá sản phẩm bắt buộc phải có tối thiểu 50 ký tự! (Hiện tại: " + (content != null ? content.trim().length() : 0) + " ký tự)");
+            if (orderId != null) {
+                return "redirect:/customer/orders/detail/" + orderId;
+            }
             return "redirect:/products/" + id + "#review-section";
         }
 
         try {
             reviewService.addReview(user.getId(), id, orderId, rating, content, imageUrl);
-            ra.addFlashAttribute("successMessage", "Cảm ơn bạn đã gửi đánh giá cho sản phẩm!");
+            ra.addFlashAttribute("successMessage", "Đánh giá, phản hồi thành công! Cảm ơn bạn đã đóng góp ý kiến.");
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
 
+        if (orderId != null) {
+            return "redirect:/customer/orders/detail/" + orderId;
+        }
         return "redirect:/products/" + id + "#review-section";
     }
 }

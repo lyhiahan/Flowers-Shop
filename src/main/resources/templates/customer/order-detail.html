@@ -30,6 +30,28 @@
             border-radius: 12px;
             padding: 12px 16px;
         }
+        .star-rating {
+            direction: rtl;
+            display: inline-flex;
+        }
+        .star-rating input[type="radio"] {
+            display: none;
+        }
+        .star-rating label {
+            color: #d1d5db;
+            font-size: 2rem;
+            padding: 0 4px;
+            cursor: pointer;
+            transition: color 0.15s ease, transform 0.15s ease;
+        }
+        .star-rating label:hover,
+        .star-rating label:hover ~ label,
+        .star-rating input[type="radio"]:checked ~ label {
+            color: #f59e0b;
+        }
+        .star-rating label:hover {
+            transform: scale(1.15);
+        }
     </style>
 </head>
 <body>
@@ -56,6 +78,16 @@
     </nav>
 
     <div class="container py-4" style="max-width: 900px;">
+        <!-- Thông báo kết quả phản hồi, đánh giá (UC_014 Post-conditions) -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-4 mb-4 shadow-sm border-0" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i><span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show rounded-4 mb-4 shadow-sm border-0" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
         <!-- UC_011 Main Flow 9: Chọn Back to Purchase History để quay lại trang lịch sử mua hàng -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <a th:href="@{/customer/orders}" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm" id="btnBackToPurchaseHistory">
@@ -141,6 +173,8 @@
                                 <th th:if="${order.orderType.name() == 'RENT'}">Thời gian thuê</th>
                                 <th th:if="${order.orderType.name() == 'RENT'}" class="text-end">Tiền cọc</th>
                                 <th class="text-end">Thành tiền</th>
+                                <!-- Cột Đánh giá cho đơn hàng thành công (UC_014 Step 4) -->
+                                <th th:if="${order.status.name() == 'COMPLETED' or order.status.name() == 'DELIVERED'}" class="text-center">Đánh giá</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -154,12 +188,30 @@
                                 <td th:if="${order.orderType.name() == 'RENT'}" th:text="${d.rentStartDate} + ' → ' + ${d.rentEndDate}"></td>
                                 <td th:if="${order.orderType.name() == 'RENT'}" class="text-end text-warning" th:text="${#numbers.formatDecimal(d.depositFee, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
                                 <td class="text-end fw-bold text-danger" th:text="${#numbers.formatDecimal(d.subtotal, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                                
+                                <!-- UC_014 Main Flow 4: Chọn nút Review & rate của sản phẩm muốn phản hồi, đánh giá -->
+                                <td th:if="${order.status.name() == 'COMPLETED' or order.status.name() == 'DELIVERED'}" class="text-center">
+                                    <!-- Đã đánh giá -->
+                                    <span th:if="${reviewedProductIds != null and reviewedProductIds.contains(d.product.id)}" 
+                                          class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Đã đánh giá
+                                    </span>
+                                    <!-- Chưa đánh giá -> Nút Review & rate -->
+                                    <button th:unless="${reviewedProductIds != null and reviewedProductIds.contains(d.product.id)}" 
+                                            type="button" 
+                                            class="btn btn-warning btn-sm rounded-pill px-3 shadow-sm text-dark fw-bold"
+                                            data-bs-toggle="modal" 
+                                            th:data-bs-target="'#reviewModal_' + ${d.product.id}">
+                                        ⭐ Review & rate
+                                    </button>
+                                </td>
                             </tr>
                         </tbody>
                         <tfoot class="border-top">
                             <tr>
                                 <td th:colspan="${order.orderType.name() == 'RENT' ? 5 : 3}" class="text-end fw-semibold">Tổng tiền:</td>
                                 <td class="text-end fw-bold fs-5 text-danger" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                                <td th:if="${order.status.name() == 'COMPLETED' or order.status.name() == 'DELIVERED'}"></td>
                             </tr>
                         </tfoot>
                     </table>
@@ -211,8 +263,197 @@
                 </div>
             </div>
         </div>
+
+        <!-- Modals Phản Hồi & Xác Nhận cho từng sản phẩm (UC_014) -->
+        <th:block th:if="${order.status.name() == 'COMPLETED' or order.status.name() == 'DELIVERED'}">
+            <th:block th:each="d : ${order.orderDetails}">
+                <!-- Modal Form Phản Hồi (UC_014 Step 5 - 8) -->
+                <div class="modal fade" th:id="'reviewModal_' + ${d.product.id}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
+                        <div class="modal-content rounded-4 border-0 shadow">
+                            <div class="modal-header border-bottom pb-3">
+                                <h5 class="modal-title font-serif fw-bold text-dark">
+                                    <i class="bi bi-star-fill text-warning me-2"></i>Phản Hồi & Đánh Giá Sản Phẩm
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            
+                            <form th:id="'reviewForm_' + ${d.product.id}" 
+                                  th:action="@{'/products/' + ${d.product.id} + '/review'}" 
+                                  method="post">
+                                <input type="hidden" name="orderId" th:value="${order.id}">
+                                <input type="hidden" name="rating" th:id="'ratingInput_' + ${d.product.id}" value="5">
+                                
+                                <div class="modal-body py-4">
+                                    <!-- Thông tin sản phẩm -->
+                                    <div class="p-3 bg-light rounded-3 mb-4 border d-flex align-items-center gap-3">
+                                        <img th:if="${d.product.imageUrl != null}" th:src="${d.product.imageUrl}" class="rounded-3 shadow-sm" style="width: 55px; height: 55px; object-fit: cover;">
+                                        <div>
+                                            <div class="fw-bold text-dark fs-6" th:text="${d.product.name}"></div>
+                                            <small class="text-muted" th:if="${d.product.category != null}" th:text="${d.product.category.name}"></small>
+                                        </div>
+                                    </div>
+
+                                    <!-- UC_014 Step 6: Chọn số sao (rate) -->
+                                    <div class="mb-4 text-center">
+                                        <label class="form-label fw-bold small text-muted text-uppercase d-block mb-2">
+                                            1. Chọn số sao đánh giá (Rate)
+                                        </label>
+                                        <div class="star-rating d-inline-flex flex-row-reverse justify-content-center">
+                                            <input type="radio" th:id="'star5_' + ${d.product.id}" th:name="'star_group_' + ${d.product.id}" value="5" checked th:onchange="'updateSelectedRating(' + ${d.product.id} + ', 5)'">
+                                            <label th:for="'star5_' + ${d.product.id}" class="bi bi-star-fill" title="5 sao - Tuyệt vời"></label>
+
+                                            <input type="radio" th:id="'star4_' + ${d.product.id}" th:name="'star_group_' + ${d.product.id}" value="4" th:onchange="'updateSelectedRating(' + ${d.product.id} + ', 4)'">
+                                            <label th:for="'star4_' + ${d.product.id}" class="bi bi-star-fill" title="4 sao - Rất tốt"></label>
+
+                                            <input type="radio" th:id="'star3_' + ${d.product.id}" th:name="'star_group_' + ${d.product.id}" value="3" th:onchange="'updateSelectedRating(' + ${d.product.id} + ', 3)'">
+                                            <label th:for="'star3_' + ${d.product.id}" class="bi bi-star-fill" title="3 sao - Bình thường"></label>
+
+                                            <input type="radio" th:id="'star2_' + ${d.product.id}" th:name="'star_group_' + ${d.product.id}" value="2" th:onchange="'updateSelectedRating(' + ${d.product.id} + ', 2)'">
+                                            <label th:for="'star2_' + ${d.product.id}" class="bi bi-star-fill" title="2 sao - Chưa ưng ý"></label>
+
+                                            <input type="radio" th:id="'star1_' + ${d.product.id}" th:name="'star_group_' + ${d.product.id}" value="1" th:onchange="'updateSelectedRating(' + ${d.product.id} + ', 1)'">
+                                            <label th:for="'star1_' + ${d.product.id}" class="bi bi-star-fill" title="1 sao - Tệ"></label>
+                                        </div>
+                                        <div th:id="'ratingText_' + ${d.product.id}" class="small text-warning fw-bold mt-2">
+                                            ⭐⭐⭐⭐⭐ 5/5 sao (Tuyệt vời)
+                                        </div>
+                                    </div>
+
+                                    <!-- UC_014 Step 7: Viết nội dung phản hồi, đánh giá (review) -->
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <label class="form-label fw-bold small text-muted text-uppercase mb-0">
+                                                2. Viết nội dung phản hồi, đánh giá (Review) <span class="text-danger">*</span>
+                                            </label>
+                                            <span th:id="'charCount_' + ${d.product.id}" class="text-danger small fw-semibold">0/50 ký tự</span>
+                                        </div>
+                                        <textarea class="form-control rounded-3" 
+                                                  rows="4" 
+                                                  name="content"
+                                                  th:id="'content_' + ${d.product.id}"
+                                                  placeholder="Chia sẻ trải nghiệm chi tiết của bạn về chất lượng hoa, độ tươi, cách cắm và thời gian giao hàng... (tối thiểu 50 ký tự)"
+                                                  th:oninput="'handleReviewInput(' + ${d.product.id} + ')'"
+                                                  required></textarea>
+                                        <div class="form-text small text-muted mt-2">
+                                            <i class="bi bi-info-circle me-1"></i>Hệ thống yêu cầu đánh giá tối thiểu 50 ký tự để đảm bảo phản hồi có giá trị cho cộng đồng.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer border-top pt-3 d-flex justify-content-end gap-2">
+                                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+                                    <!-- UC_014 Step 8: Bấm nút Submit -->
+                                    <button type="button" 
+                                            class="btn btn-warning rounded-pill px-4 fw-bold text-dark shadow-sm"
+                                            th:id="'btnSubmitReview_' + ${d.product.id}"
+                                            th:onclick="'submitReviewStep(' + ${d.product.id} + ')'">
+                                        Submit
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- UC_014 Step 9: Hiển thị thông báo yêu cầu xác nhận -->
+                <div class="modal fade" th:id="'confirmReviewModal_' + ${d.product.id}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+                        <div class="modal-content rounded-4 border-0 shadow">
+                            <div class="modal-header border-0 pb-0">
+                                <h5 class="modal-title font-serif fw-bold text-dark">
+                                    <i class="bi bi-question-circle-fill text-warning me-2"></i> Xác Nhận Đánh Giá
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body py-3 text-secondary">
+                                Bạn có chắc chắn muốn gửi phản hồi và đánh giá cho sản phẩm <strong class="text-dark" th:text="${d.product.name}"></strong> không?
+                            </div>
+                            <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
+                                <!-- UC_014 Alternative 10a. Bấm nút Cancel -> 11a. Hủy thao tác -->
+                                <button type="button" class="btn btn-light rounded-pill px-4" 
+                                        th:onclick="'cancelConfirmReview(' + ${d.product.id} + ')'">
+                                    Cancel
+                                </button>
+                                <!-- UC_014 Main Flow 10. Bấm nút Confirm -> 11. Đánh giá, phản hồi thành công -->
+                                <button type="button" class="btn btn-warning rounded-pill px-4 fw-bold text-dark shadow-sm"
+                                        th:onclick="'confirmAndSubmitReview(' + ${d.product.id} + ')'">
+                                    Confirm
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </th:block>
+        </th:block>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function handleReviewInput(productId) {
+            const textarea = document.getElementById('content_' + productId);
+            const counter = document.getElementById('charCount_' + productId);
+            const len = textarea.value.trim().length;
+            if (len >= 50) {
+                counter.className = 'text-success small fw-bold';
+                counter.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>' + len + '/50 ký tự (Đạt yêu cầu)';
+            } else {
+                counter.className = 'text-danger small fw-semibold';
+                counter.innerHTML = len + '/50 ký tự (Cần thêm ' + (50 - len) + ' ký tự nữa)';
+            }
+        }
+
+        function updateSelectedRating(productId, starValue) {
+            document.getElementById('ratingInput_' + productId).value = starValue;
+            const texts = {
+                1: '⭐ 1/5 sao (Rất tệ)',
+                2: '⭐⭐ 2/5 sao (Chưa ưng ý)',
+                3: '⭐⭐⭐ 3/5 sao (Bình thường)',
+                4: '⭐⭐⭐⭐ 4/5 sao (Rất tốt)',
+                5: '⭐⭐⭐⭐⭐ 5/5 sao (Tuyệt vời)'
+            };
+            document.getElementById('ratingText_' + productId).innerText = texts[starValue] || (starValue + ' sao');
+        }
+
+        // UC_014 Main Flow Step 8: Bấm nút Submit -> Hiển thị thông báo yêu cầu xác nhận (Step 9)
+        function submitReviewStep(productId) {
+            const textarea = document.getElementById('content_' + productId);
+            const len = textarea.value.trim().length;
+            if (len < 50) {
+                alert('Vui lòng nhập tối thiểu 50 ký tự cho nội dung đánh giá trước khi gửi! (Hiện tại: ' + len + ' ký tự)');
+                textarea.focus();
+                return;
+            }
+
+            // Đóng Modal Form Đánh Giá (Step 5-8)
+            const reviewModalEl = document.getElementById('reviewModal_' + productId);
+            const reviewModal = bootstrap.Modal.getInstance(reviewModalEl) || new bootstrap.Modal(reviewModalEl);
+            reviewModal.hide();
+
+            // Mở Modal Xác Nhận (Step 9)
+            const confirmModalEl = document.getElementById('confirmReviewModal_' + productId);
+            const confirmModal = new bootstrap.Modal(confirmModalEl);
+            confirmModal.show();
+        }
+
+        // UC_014 Alternative Flow 10a: Bấm nút Cancel -> 11a: Hủy thao tác
+        function cancelConfirmReview(productId) {
+            const confirmModalEl = document.getElementById('confirmReviewModal_' + productId);
+            const confirmModal = bootstrap.Modal.getInstance(confirmModalEl);
+            if (confirmModal) {
+                confirmModal.hide();
+            }
+            // Mở lại modal form đánh giá để người dùng tiếp tục chỉnh sửa nếu muốn
+            const reviewModalEl = document.getElementById('reviewModal_' + productId);
+            const reviewModal = new bootstrap.Modal(reviewModalEl);
+            reviewModal.show();
+        }
+
+        // UC_014 Main Flow Step 10: Bấm nút Confirm -> Gửi form (Step 11 Thành công)
+        function confirmAndSubmitReview(productId) {
+            const form = document.getElementById('reviewForm_' + productId);
+            form.submit();
+        }
+    </script>
 </body>
 </html>

@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head>
     <meta charset="UTF-8">
     <title>Giỏ Hàng Hoa Tươi - Chuỗi Cửa Hàng Hoa Tươi</title>
     <!-- Google Fonts & Bootstrap 5 & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
@@ -14,20 +17,36 @@
             --flower-soft-pink: #fff1f2;
             --flower-gold: #b45309;
         }
+
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #fcf8f8;
             color: #1f2937;
         }
+
         .font-serif {
             font-family: 'Playfair Display', Georgia, serif;
         }
-        .qty-btn { width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; }
-        .qty-input { width: 48px; text-align: center; }
+
+        .qty-btn {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qty-input {
+            width: 48px;
+            text-align: center;
+        }
+
         .flower-card {
             border: 1px solid #ffe4e6;
             border-radius: 16px;
         }
+
         .greeting-badge {
             background-color: #fff7ed;
             border: 1px dashed #fdba74;
@@ -38,16 +57,19 @@
         }
     </style>
 </head>
+
 <body>
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg sticky-top shadow-sm" style="background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(8px); border-bottom: 1px solid #ffe4e6;">
+    <nav class="navbar navbar-expand-lg sticky-top shadow-sm"
+        style="background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(8px); border-bottom: 1px solid #ffe4e6;">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/}">
                 <span class="fs-4">🌸</span>
                 <div>
                     <span class="font-serif fw-bold text-dark fs-5 tracking-wide">HOA TƯƠI SÀI GÒN</span>
-                    <span class="badge ms-1 text-uppercase" style="background-color: #fff1f2; color: #e11d48; font-size: 0.65rem;">Hệ Thống Hoa</span>
+                    <span class="badge ms-1 text-uppercase"
+                        style="background-color: #fff1f2; color: #e11d48; font-size: 0.65rem;">Hệ Thống Hoa</span>
                 </div>
             </a>
             <div class="d-flex align-items-center gap-2">
@@ -56,7 +78,8 @@
                 </div>
                 <a th:href="@{/cart}" class="btn btn-sm btn-danger position-relative rounded-pill px-3">
                     <i class="bi bi-bag-heart-fill me-1"></i> Giỏ Hàng
-                    <span th:if="${cartItemCount != null and cartItemCount > 0}" class="badge bg-white text-danger rounded-pill ms-1" th:text="${cartItemCount}"></span>
+                    <span th:if="${cartItemCount != null and cartItemCount > 0}"
+                        class="badge bg-white text-danger rounded-pill ms-1" th:text="${cartItemCount}"></span>
                 </a>
                 <a th:href="@{/customer/orders}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
                     <i class="bi bi-clock-history me-1"></i> Đơn Hoa Của Tôi
@@ -76,27 +99,32 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h3 class="font-serif fw-bold mb-1 text-dark">🛒 Giỏ Hàng Hoa Tươi & Phụ Kiện</h3>
-                <p class="text-muted small mb-0">Xem lại các bó hoa, giỏ hoa, lời chúc thiệp đã chọn và tiến hành đặt hàng</p>
+                <p class="text-muted small mb-0">Xem lại các bó hoa, giỏ hoa, lời chúc thiệp đã chọn và tiến hành đặt
+                    hàng</p>
             </div>
             <a th:href="@{/}" class="btn btn-outline-danger btn-sm rounded-pill px-3">
                 <i class="bi bi-arrow-left me-1"></i> Tiếp tục chọn hoa
             </a>
         </div>
 
-        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small rounded-3" role="alert">
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small rounded-3"
+            role="alert">
             <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${successMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show py-2 small rounded-3" role="alert">
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show py-2 small rounded-3"
+            role="alert">
             <i class="bi bi-exclamation-triangle-fill me-1"></i> <span th:text="${errorMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
         <!-- Khi giỏ hàng trống -->
-        <div th:if="${cart == null or #lists.isEmpty(cart.items)}" class="card flower-card shadow-sm text-center p-5 my-4 bg-white">
+        <div th:if="${cart == null or #lists.isEmpty(cart.items)}"
+            class="card flower-card shadow-sm text-center p-5 my-4 bg-white">
             <div class="mb-3 fs-1">🌸</div>
             <h4 class="font-serif text-dark fw-bold">Giỏ hoa của bạn đang trống</h4>
-            <p class="text-muted small">Hãy dạo quanh các bộ sưu tập hoa tươi nghệ thuật và chọn mẫu hoa ưng ý nhất nhé!</p>
+            <p class="text-muted small">Hãy dạo quanh các bộ sưu tập hoa tươi nghệ thuật và chọn mẫu hoa ưng ý nhất nhé!
+            </p>
             <div>
                 <a th:href="@{/}" class="btn btn-danger rounded-pill px-4 mt-2">Dạo Cửa Hàng Hoa Ngay</a>
             </div>
@@ -104,186 +132,212 @@
 
         <!-- Khi giỏ hàng có sản phẩm -->
         <div th:if="${cart != null and not #lists.isEmpty(cart.items)}" class="row g-4">
-            
+
             <!-- Danh sách hoa & phụ kiện -->
             <div class="col-lg-8">
                 <div class="card flower-card shadow-sm bg-white overflow-hidden">
-                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                    <div
+                        class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
                         <div class="form-check mb-0">
-                            <input class="form-check-input" type="checkbox" id="selectAll" checked onchange="toggleSelectAll(this)">
+                            <input class="form-check-input" type="checkbox" id="selectAll" checked
+                                onchange="toggleSelectAll(this)">
                             <label class="form-check-label fw-bold text-dark" for="selectAll">
                                 Chọn tất cả (<span th:text="${#lists.size(cart.items)}"></span> mẫu)
                             </label>
                         </div>
-                        <span class="small text-muted"><i class="bi bi-shield-check text-success me-1"></i>Đảm bảo hoa tươi 100% trong ngày</span>
+                        <span class="small text-muted"><i class="bi bi-shield-check text-success me-1"></i>Đảm bảo hoa
+                            tươi 100% trong ngày</span>
                     </div>
 
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light small text-muted">
-                            <tr>
-                                <th style="width: 40px;"></th>
-                                <th>Mẫu Hoa</th>
-                                <th>Loại & Thời gian</th>
-                                <th>Đơn giá</th>
-                                <th style="width: 110px;">Số lượng</th>
-                                <th>Thành tiền</th>
-                                <th style="width: 50px;"></th>
-                            </tr>
+                                <tr>
+                                    <th style="width: 40px;"></th>
+                                    <th>Mẫu Hoa</th>
+                                    <th>Loại & Thời gian</th>
+                                    <th>Đơn giá</th>
+                                    <th style="width: 110px;">Số lượng</th>
+                                    <th>Thành tiền</th>
+                                    <th style="width: 50px;"></th>
+                                </tr>
                             </thead>
                             <!-- Hiển thị khi có itemsByStore -->
                             <tbody th:if="${itemsByStore != null and not #maps.isEmpty(itemsByStore)}">
-                            <th:block th:each="entry : ${itemsByStore}">
-                                <!-- Tiêu đề nhóm theo cửa hàng (UC_012 Step 8) -->
-                                <tr class="table-light border-top border-bottom">
-                                    <td colspan="7" class="py-2 px-3 bg-light">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <i class="bi bi-shop text-danger fs-5"></i>
-                                            <strong class="text-dark" th:text="${entry.key != null ? entry.key.name : 'Chi nhánh trung tâm'}">Chi nhánh</strong>
-                                            <small class="text-muted" th:if="${entry.key != null and entry.key.address != null}" th:text="'(' + ${entry.key.address} + ')'"></small>
-                                            <span class="badge bg-danger-subtle text-danger rounded-pill ms-auto" th:text="${#lists.size(entry.value)} + ' món hoa'"></span>
-                                        </div>
-                                    </td>
-                                </tr>
-                                
-                                <!-- Danh sách sản phẩm của cửa hàng -->
-                                <tr th:each="item : ${entry.value}" 
-                                    th:id="'row_' + ${item.id}"
-                                    th:data-item-id="${item.id}"
-                                    th:data-subtotal="${item.orderType.name() == 'BUY' ? item.buyAmount : item.rentAmount}"
-                                    th:data-deposit="${item.depositAmount}"
-                                    th:data-total="${item.totalAmount}">
-                                    
-                                    <!-- Checkbox chọn thanh toán -->
-                                    <td>
-                                        <input type="checkbox" 
-                                               class="form-check-input item-check" 
-                                               th:value="${item.id}" 
-                                               checked 
-                                               onchange="updateSummary()">
-                                    </td>
-
-                                    <!-- Mẫu Hoa & Lời chúc -->
-                                    <td>
-                                        <div class="d-flex align-items-start gap-2">
-                                            <div class="rounded-3 p-2 bg-light border text-center" style="width: 46px; height: 46px;">
-                                                <span class="fs-4">💐</span>
+                                <th:block th:each="entry : ${itemsByStore}">
+                                    <!-- Tiêu đề nhóm theo cửa hàng (UC_012 Step 8) -->
+                                    <tr class="table-light border-top border-bottom">
+                                        <td colspan="7" class="py-2 px-3 bg-light">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="bi bi-shop text-danger fs-5"></i>
+                                                <strong class="text-dark"
+                                                    th:text="${entry.key != null ? entry.key.name : 'Chi nhánh trung tâm'}">Chi
+                                                    nhánh</strong>
+                                                <small class="text-muted"
+                                                    th:if="${entry.key != null and entry.key.address != null}"
+                                                    th:text="'(' + ${entry.key.address} + ')'"></small>
+                                                <span class="badge bg-danger-subtle text-danger rounded-pill ms-auto"
+                                                    th:text="${#lists.size(entry.value)} + ' món hoa'"></span>
                                             </div>
-                                            <div>
-                                                <div class="fw-bold text-dark" th:text="${item.product.name}"></div>
-                                                <!-- Hiển thị ngày giao nếu có -->
-                                                <div th:if="${item.deliveryDate != null}" class="small text-danger mt-1">
-                                                    <i class="bi bi-calendar-event me-1"></i>Ngày giao hoa: <strong th:text="${item.deliveryDate}"></strong>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Danh sách sản phẩm của cửa hàng -->
+                                    <tr th:each="item : ${entry.value}" th:id="'row_' + ${item.id}"
+                                        th:data-item-id="${item.id}"
+                                        th:data-quantity="${item.quantity}"
+                                        th:data-subtotal="${item.orderType.name() == 'BUY' ? item.buyAmount : item.rentAmount}"
+                                        th:data-deposit="${item.depositAmount}" th:data-total="${item.totalAmount}">
+
+                                        <!-- Checkbox chọn thanh toán -->
+                                        <td>
+                                            <input type="checkbox" class="form-check-input item-check"
+                                                th:value="${item.id}" checked onchange="updateSummary()">
+                                        </td>
+
+                                        <!-- Mẫu Hoa & Lời chúc -->
+                                        <td>
+                                            <div class="d-flex align-items-start gap-2">
+                                                <div class="rounded-3 p-2 bg-light border text-center"
+                                                    style="width: 46px; height: 46px;">
+                                                    <span class="fs-4">💐</span>
                                                 </div>
-                                                <!-- Hiển thị thiệp chúc mừng nếu có -->
-                                                <div th:if="${item.greetingMessage != null and !item.greetingMessage.isEmpty()}" class="greeting-badge mt-2">
-                                                    <i class="bi bi-envelope-paper-heart-fill me-1 text-danger"></i>
-                                                    <span th:text="${item.greetingMessage}"></span>
+                                                <div>
+                                                    <div class="fw-bold text-dark" th:text="${item.product.name}"></div>
+                                                    <!-- Hiển thị ngày giao nếu có -->
+                                                    <div th:if="${item.deliveryDate != null}"
+                                                        class="small text-danger mt-1">
+                                                        <i class="bi bi-calendar-event me-1"></i>Ngày giao hoa: <strong
+                                                            th:text="${item.deliveryDate}"></strong>
+                                                    </div>
+                                                    <!-- Hiển thị thiệp chúc mừng nếu có -->
+                                                    <div th:if="${item.greetingMessage != null and !item.greetingMessage.isEmpty()}"
+                                                        class="greeting-badge mt-2">
+                                                        <i class="bi bi-envelope-paper-heart-fill me-1 text-danger"></i>
+                                                        <span th:text="${item.greetingMessage}"></span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </td>
+                                        </td>
 
-                                    <!-- Loại & Thời gian -->
-                                    <td>
-                                        <div class="mb-1">
-                                            <span th:if="${item.orderType.name() == 'BUY'}" class="badge bg-danger">Hoa Tươi / Mua</span>
-                                            <span th:if="${item.orderType.name() == 'RENT'}" class="badge bg-warning text-dark">Thuê Sự Kiện</span>
-                                        </div>
-                                        <div th:if="${item.orderType.name() == 'RENT'}" class="small text-secondary">
-                                            ⏱️ <span class="badge bg-info text-dark" th:text="${item.rentalDays} + ' ngày'"></span><br/>
-                                            <span class="text-muted" style="font-size: 0.8rem;" th:text="${item.rentStartDate} + ' → ' + ${item.rentEndDate}"></span>
-                                        </div>
-                                        <div th:if="${item.orderType.name() == 'BUY'}" class="small text-muted">—</div>
-                                    </td>
-
-                                    <!-- Đơn giá 1 ngày / giá mua -->
-                                    <td>
-                                        <div th:if="${item.orderType.name() == 'RENT'}">
-                                            <strong class="text-success small d-block" th:text="${#numbers.formatDecimal(item.dailyRate, 0, 'COMMA', 0, 'POINT')} + ' đ/ngày'"></strong>
-                                            <span class="text-muted small" style="font-size: 0.8rem;" th:text="'Cọc: ' + ${#numbers.formatDecimal(item.product.depositFee, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
-                                        </div>
-                                        <div th:if="${item.orderType.name() == 'BUY'}">
-                                            <strong class="text-danger small" th:text="${#numbers.formatDecimal(item.product.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
-                                        </div>
-                                    </td>
-
-                                    <!-- Chọn nút dropdown để thay đổi số lượng (UC_012 Step 9) -->
-                                    <td>
-                                        <form th:action="@{'/cart/update-quantity/' + ${item.id}}" method="post">
-                                            <select name="quantity" class="form-select form-select-sm fw-semibold shadow-sm text-center" 
-                                                    style="width: 75px;" onchange="this.form.submit()" title="Thay đổi số lượng">
-                                                <option th:each="q : ${#numbers.sequence(1, 20)}" 
-                                                        th:value="${q}" 
-                                                        th:text="${q}" 
-                                                        th:selected="${q == item.quantity}">1</option>
-                                            </select>
-                                        </form>
-                                    </td>
-
-                                    <!-- Chi phí ước tính -->
-                                    <td>
-                                        <div th:if="${item.orderType.name() == 'BUY'}">
-                                            <strong class="text-danger" th:text="${#numbers.formatDecimal(item.buyAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
-                                        </div>
-                                        <div th:if="${item.orderType.name() == 'RENT'}">
-                                            <strong class="text-dark" th:text="${#numbers.formatDecimal(item.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
-                                            <div class="text-muted small" style="font-size: 0.75rem;">
-                                                (Thuê: <span th:text="${#numbers.formatDecimal(item.rentAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span> + Cọc: <span th:text="${#numbers.formatDecimal(item.depositAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>)
+                                        <!-- Loại & Thời gian -->
+                                        <td>
+                                            <div class="mb-1">
+                                                <span th:if="${item.orderType.name() == 'BUY'}"
+                                                    class="badge bg-danger">Hoa Tươi / Mua</span>
+                                                <span th:if="${item.orderType.name() == 'RENT'}"
+                                                    class="badge bg-warning text-dark">Thuê Sự Kiện</span>
                                             </div>
-                                        </div>
-                                    </td>
+                                            <div th:if="${item.orderType.name() == 'RENT'}"
+                                                class="small text-secondary">
+                                                ⏱️ <span class="badge bg-info text-dark"
+                                                    th:text="${item.rentalDays} + ' ngày'"></span><br />
+                                                <span class="text-muted" style="font-size: 0.8rem;"
+                                                    th:text="${item.rentStartDate} + ' → ' + ${item.rentEndDate}"></span>
+                                            </div>
+                                            <div th:if="${item.orderType.name() == 'BUY'}" class="small text-muted">—
+                                            </div>
+                                        </td>
 
-                                    <!-- Nút hình thùng rác để xóa sản phẩm khỏi giỏ hàng (UC_012 Step 10) -->
-                                    <td>
-                                        <form th:action="@{'/cart/remove/' + ${item.id}}" method="post">
-                                            <button type="submit" class="btn btn-outline-danger btn-sm border-0" title="Xóa khỏi giỏ hàng" onclick="return confirm('Bạn muốn xóa mẫu hoa này khỏi giỏ?')">
-                                                <i class="bi bi-trash3 fs-5"></i>
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            </th:block>
+                                        <!-- Đơn giá 1 ngày / giá mua -->
+                                        <td>
+                                            <div th:if="${item.orderType.name() == 'RENT'}">
+                                                <strong class="text-success small d-block"
+                                                    th:text="${#numbers.formatDecimal(item.dailyRate, 0, 'COMMA', 0, 'POINT')} + ' đ/ngày'"></strong>
+                                                <span class="text-muted small" style="font-size: 0.8rem;"
+                                                    th:text="'Cọc: ' + ${#numbers.formatDecimal(item.product.depositFee, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                                            </div>
+                                            <div th:if="${item.orderType.name() == 'BUY'}">
+                                                <strong class="text-danger small"
+                                                    th:text="${#numbers.formatDecimal(item.product.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                                            </div>
+                                        </td>
+
+                                        <!-- Chọn nút dropdown để thay đổi số lượng (UC_012 Step 9) -->
+                                        <td>
+                                            <form th:action="@{'/cart/update-quantity/' + ${item.id}}" method="post">
+                                                <select name="quantity"
+                                                    class="form-select form-select-sm fw-semibold shadow-sm text-center"
+                                                    style="width: 75px;" onchange="this.form.submit()"
+                                                    title="Thay đổi số lượng">
+                                                    <option th:each="q : ${#numbers.sequence(1, 20)}" th:value="${q}"
+                                                        th:text="${q}" th:selected="${q == item.quantity}">1</option>
+                                                </select>
+                                            </form>
+                                        </td>
+
+                                        <!-- Chi phí ước tính -->
+                                        <td>
+                                            <div th:if="${item.orderType.name() == 'BUY'}">
+                                                <strong class="text-danger"
+                                                    th:text="${#numbers.formatDecimal(item.buyAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                                            </div>
+                                            <div th:if="${item.orderType.name() == 'RENT'}">
+                                                <strong class="text-dark"
+                                                    th:text="${#numbers.formatDecimal(item.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                                                <div class="text-muted small" style="font-size: 0.75rem;">
+                                                    (Thuê: <span
+                                                        th:text="${#numbers.formatDecimal(item.rentAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                                                    + Cọc: <span
+                                                        th:text="${#numbers.formatDecimal(item.depositAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>)
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <!-- Nút hình thùng rác để xóa sản phẩm khỏi giỏ hàng (UC_012 Step 10) -->
+                                        <td>
+                                            <form th:action="@{'/cart/remove/' + ${item.id}}" method="post">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm border-0"
+                                                    title="Xóa khỏi giỏ hàng"
+                                                    onclick="return confirm('Bạn muốn xóa mẫu hoa này khỏi giỏ?')">
+                                                    <i class="bi bi-trash3 fs-5"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                </th:block>
                             </tbody>
 
                             <!-- Fallback hiển thị từ cart.items nếu itemsByStore chưa nạp -->
                             <tbody th:if="${itemsByStore == null or #maps.isEmpty(itemsByStore)}">
-                                <tr th:each="item : ${cart.items}" 
-                                    th:id="'row_' + ${item.id}"
+                                <tr th:each="item : ${cart.items}" th:id="'row_' + ${item.id}"
                                     th:data-item-id="${item.id}"
+                                    th:data-quantity="${item.quantity}"
                                     th:data-subtotal="${item.orderType.name() == 'BUY' ? item.buyAmount : item.rentAmount}"
-                                    th:data-deposit="${item.depositAmount}"
-                                    th:data-total="${item.totalAmount}">
-                                    
+                                    th:data-deposit="${item.depositAmount}" th:data-total="${item.totalAmount}">
+
                                     <!-- Checkbox chọn thanh toán -->
                                     <td>
-                                        <input type="checkbox" 
-                                               class="form-check-input item-check" 
-                                               th:value="${item.id}" 
-                                               checked 
-                                               onchange="updateSummary()">
+                                        <input type="checkbox" class="form-check-input item-check" th:value="${item.id}"
+                                            checked onchange="updateSummary()">
                                     </td>
 
                                     <!-- Mẫu Hoa & Nhóm Chi nhánh -->
                                     <td>
                                         <div class="d-flex align-items-start gap-2">
-                                            <div class="rounded-3 p-2 bg-light border text-center" style="width: 46px; height: 46px;">
+                                            <div class="rounded-3 p-2 bg-light border text-center"
+                                                style="width: 46px; height: 46px;">
                                                 <span class="fs-4">💐</span>
                                             </div>
                                             <div>
                                                 <div class="fw-bold text-dark" th:text="${item.product.name}"></div>
                                                 <!-- Nhóm theo cửa hàng (UC_012 Step 8) -->
                                                 <div class="small mt-1">
-                                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
-                                                        <i class="bi bi-shop me-1"></i><span th:text="${item.store != null ? item.store.name : 'Chi nhánh trung tâm'}"></span>
+                                                    <span
+                                                        class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                                        <i class="bi bi-shop me-1"></i><span
+                                                            th:text="${item.store != null ? item.store.name : 'Chi nhánh trung tâm'}"></span>
                                                     </span>
                                                 </div>
                                                 <!-- Hiển thị ngày giao nếu có -->
-                                                <div th:if="${item.deliveryDate != null}" class="small text-danger mt-1">
-                                                    <i class="bi bi-calendar-event me-1"></i>Ngày giao hoa: <strong th:text="${item.deliveryDate}"></strong>
+                                                <div th:if="${item.deliveryDate != null}"
+                                                    class="small text-danger mt-1">
+                                                    <i class="bi bi-calendar-event me-1"></i>Ngày giao hoa: <strong
+                                                        th:text="${item.deliveryDate}"></strong>
                                                 </div>
                                                 <!-- Hiển thị thiệp chúc mừng nếu có -->
-                                                <div th:if="${item.greetingMessage != null and !item.greetingMessage.isEmpty()}" class="greeting-badge mt-2">
+                                                <div th:if="${item.greetingMessage != null and !item.greetingMessage.isEmpty()}"
+                                                    class="greeting-badge mt-2">
                                                     <i class="bi bi-envelope-paper-heart-fill me-1 text-danger"></i>
                                                     <span th:text="${item.greetingMessage}"></span>
                                                 </div>
@@ -294,12 +348,16 @@
                                     <!-- Loại & Thời gian -->
                                     <td>
                                         <div class="mb-1">
-                                            <span th:if="${item.orderType.name() == 'BUY'}" class="badge bg-danger">Hoa Tươi / Mua</span>
-                                            <span th:if="${item.orderType.name() == 'RENT'}" class="badge bg-warning text-dark">Thuê Sự Kiện</span>
+                                            <span th:if="${item.orderType.name() == 'BUY'}" class="badge bg-danger">Hoa
+                                                Tươi / Mua</span>
+                                            <span th:if="${item.orderType.name() == 'RENT'}"
+                                                class="badge bg-warning text-dark">Thuê Sự Kiện</span>
                                         </div>
                                         <div th:if="${item.orderType.name() == 'RENT'}" class="small text-secondary">
-                                            ⏱️ <span class="badge bg-info text-dark" th:text="${item.rentalDays} + ' ngày'"></span><br/>
-                                            <span class="text-muted" style="font-size: 0.8rem;" th:text="${item.rentStartDate} + ' → ' + ${item.rentEndDate}"></span>
+                                            ⏱️ <span class="badge bg-info text-dark"
+                                                th:text="${item.rentalDays} + ' ngày'"></span><br />
+                                            <span class="text-muted" style="font-size: 0.8rem;"
+                                                th:text="${item.rentStartDate} + ' → ' + ${item.rentEndDate}"></span>
                                         </div>
                                         <div th:if="${item.orderType.name() == 'BUY'}" class="small text-muted">—</div>
                                     </td>
@@ -307,23 +365,26 @@
                                     <!-- Đơn giá 1 ngày / giá mua -->
                                     <td>
                                         <div th:if="${item.orderType.name() == 'RENT'}">
-                                            <strong class="text-success small d-block" th:text="${#numbers.formatDecimal(item.dailyRate, 0, 'COMMA', 0, 'POINT')} + ' đ/ngày'"></strong>
-                                            <span class="text-muted small" style="font-size: 0.8rem;" th:text="'Cọc: ' + ${#numbers.formatDecimal(item.product.depositFee, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                                            <strong class="text-success small d-block"
+                                                th:text="${#numbers.formatDecimal(item.dailyRate, 0, 'COMMA', 0, 'POINT')} + ' đ/ngày'"></strong>
+                                            <span class="text-muted small" style="font-size: 0.8rem;"
+                                                th:text="'Cọc: ' + ${#numbers.formatDecimal(item.product.depositFee, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
                                         </div>
                                         <div th:if="${item.orderType.name() == 'BUY'}">
-                                            <strong class="text-danger small" th:text="${#numbers.formatDecimal(item.product.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                                            <strong class="text-danger small"
+                                                th:text="${#numbers.formatDecimal(item.product.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
                                         </div>
                                     </td>
 
                                     <!-- Chọn nút dropdown để thay đổi số lượng (UC_012 Step 9) -->
                                     <td>
                                         <form th:action="@{'/cart/update-quantity/' + ${item.id}}" method="post">
-                                            <select name="quantity" class="form-select form-select-sm fw-semibold shadow-sm text-center" 
-                                                    style="width: 75px;" onchange="this.form.submit()" title="Thay đổi số lượng">
-                                                <option th:each="q : ${#numbers.sequence(1, 20)}" 
-                                                        th:value="${q}" 
-                                                        th:text="${q}" 
-                                                        th:selected="${q == item.quantity}">1</option>
+                                            <select name="quantity"
+                                                class="form-select form-select-sm fw-semibold shadow-sm text-center"
+                                                style="width: 75px;" onchange="this.form.submit()"
+                                                title="Thay đổi số lượng">
+                                                <option th:each="q : ${#numbers.sequence(1, 20)}" th:value="${q}"
+                                                    th:text="${q}" th:selected="${q == item.quantity}">1</option>
                                             </select>
                                         </form>
                                     </td>
@@ -331,12 +392,17 @@
                                     <!-- Chi phí ước tính -->
                                     <td>
                                         <div th:if="${item.orderType.name() == 'BUY'}">
-                                            <strong class="text-danger" th:text="${#numbers.formatDecimal(item.buyAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                                            <strong class="text-danger"
+                                                th:text="${#numbers.formatDecimal(item.buyAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
                                         </div>
                                         <div th:if="${item.orderType.name() == 'RENT'}">
-                                            <strong class="text-dark" th:text="${#numbers.formatDecimal(item.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                                            <strong class="text-dark"
+                                                th:text="${#numbers.formatDecimal(item.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
                                             <div class="text-muted small" style="font-size: 0.75rem;">
-                                                (Thuê: <span th:text="${#numbers.formatDecimal(item.rentAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span> + Cọc: <span th:text="${#numbers.formatDecimal(item.depositAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>)
+                                                (Thuê: <span
+                                                    th:text="${#numbers.formatDecimal(item.rentAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                                                + Cọc: <span
+                                                    th:text="${#numbers.formatDecimal(item.depositAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>)
                                             </div>
                                         </div>
                                     </td>
@@ -344,7 +410,9 @@
                                     <!-- Nút hình thùng rác để xóa sản phẩm khỏi giỏ hàng (UC_012 Step 10) -->
                                     <td>
                                         <form th:action="@{'/cart/remove/' + ${item.id}}" method="post">
-                                            <button type="submit" class="btn btn-outline-danger btn-sm border-0" title="Xóa khỏi giỏ hàng" onclick="return confirm('Bạn muốn xóa mẫu hoa này khỏi giỏ?')">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm border-0"
+                                                title="Xóa khỏi giỏ hàng"
+                                                onclick="return confirm('Bạn muốn xóa mẫu hoa này khỏi giỏ?')">
                                                 <i class="bi bi-trash3 fs-5"></i>
                                             </button>
                                         </form>
@@ -361,7 +429,7 @@
                 <div class="card flower-card shadow-sm bg-white sticky-top" style="top: 90px;">
                     <div class="card-body p-4">
                         <h5 class="font-serif fw-bold mb-3 border-bottom pb-2 text-dark">Tóm Tắt Đơn Đặt Hoa</h5>
-                        
+
                         <div class="d-flex justify-content-between mb-2 small text-muted">
                             <span>Mẫu hoa được chọn:</span>
                             <strong><span id="selectedCount">0</span> mục</strong>
@@ -389,8 +457,9 @@
                             <!-- Các selectedItemIds hidden inputs sẽ được script chèn tự động -->
                             <div id="hiddenItemIdsContainer"></div>
 
-                            <button type="submit" id="checkoutBtn" class="btn btn-danger w-100 py-3 fw-bold rounded-pill shadow-sm">
-                                💳 Tiến Hành Đặt Hoa
+                            <button type="submit" id="checkoutBtn"
+                                class="btn btn-danger w-100 py-3 fw-bold rounded-pill shadow-sm">
+                                💳 Tiến Hành Đặt Hàng
                             </button>
                         </form>
 
@@ -424,7 +493,7 @@
 
         function toggleSelectAll(master) {
             var checkboxes = document.querySelectorAll('.item-check');
-            checkboxes.forEach(function(cb) {
+            checkboxes.forEach(function (cb) {
                 cb.checked = master.checked;
             });
             updateSummary();
@@ -442,16 +511,19 @@
 
             container.innerHTML = '';
             var count = 0;
+            var totalQty = 0;
             var subtotal = 0;
             var deposit = 0;
             var grandTotal = 0;
             var allChecked = true;
 
-            checkboxes.forEach(function(cb) {
+            checkboxes.forEach(function (cb) {
                 if (cb.checked) {
                     count++;
                     var row = document.getElementById('row_' + cb.value);
                     if (row) {
+                        var qty = parseInt(row.getAttribute('data-quantity')) || 1;
+                        totalQty += qty;
                         subtotal += parseFloat(row.getAttribute('data-subtotal')) || 0;
                         deposit += parseFloat(row.getAttribute('data-deposit')) || 0;
                         grandTotal += parseFloat(row.getAttribute('data-total')) || 0;
@@ -471,7 +543,7 @@
                 selectAll.checked = (checkboxes.length > 0 && allChecked);
             }
 
-            document.getElementById('selectedCount').innerText = count;
+            document.getElementById('selectedCount').innerText = count + ' mẫu (' + totalQty + ' bó)';
             document.getElementById('selectedSubtotal').innerText = formatVnd(subtotal);
             document.getElementById('selectedDeposit').innerText = formatVnd(deposit);
             document.getElementById('selectedGrandTotal').innerText = formatVnd(grandTotal);
@@ -482,14 +554,15 @@
                 checkoutBtn.className = 'btn btn-secondary w-100 py-3 fw-bold rounded-pill';
             } else {
                 checkoutBtn.disabled = false;
-                checkoutBtn.innerHTML = '💳 Tiến Hành Đặt Hoa (' + count + ')';
+                checkoutBtn.innerHTML = '💳 Tiến Hành Đặt Hàng (' + totalQty + ' bó)';
                 checkoutBtn.className = 'btn btn-danger w-100 py-3 fw-bold rounded-pill shadow-sm';
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             updateSummary();
         });
     </script>
 </body>
+
 </html>

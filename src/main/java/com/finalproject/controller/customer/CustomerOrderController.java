@@ -15,6 +15,7 @@ import java.security.Principal;
 public class CustomerOrderController {
 
     private final OrderService orderService;
+    private final com.finalproject.repository.ReviewRepository reviewRepository;
 
     // UC_011 Main Flow 5 & 6: Hiển thị danh sách tất cả đơn và phân trang
     @GetMapping
@@ -51,6 +52,7 @@ public class CustomerOrderController {
     }
 
     // UC_011 Main Flow 7 & 8: Xem chi tiết đơn hàng
+    // UC_014 Main Flow 3: Hiển thị trang chi tiết đơn hàng tương ứng
     @GetMapping({"/detail/{id}", "/{id}"})
     public String viewOrderDetail(Principal principal,
                                   @PathVariable("id") Long id,
@@ -60,6 +62,14 @@ public class CustomerOrderController {
             return "redirect:/customer/orders";
         }
         model.addAttribute("order", order);
+
+        // Lấy danh sách sản phẩm đã được đánh giá trong đơn hàng này
+        java.util.List<com.finalproject.entity.Review> reviews = reviewRepository.findByOrderId(id);
+        java.util.Set<Long> reviewedProductIds = reviews.stream()
+                .map(r -> r.getProduct().getId())
+                .collect(java.util.stream.Collectors.toSet());
+        model.addAttribute("reviewedProductIds", reviewedProductIds);
+
         return "customer/order-detail";
     }
 

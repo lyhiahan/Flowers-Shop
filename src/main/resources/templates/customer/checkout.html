@@ -202,6 +202,27 @@
                         </div>
                         <div class="card-body p-4">
                             <div class="row g-3">
+                                <!-- Bước 8: Chọn đơn vị giao hàng -->
+                                <div class="col-12" id="deliveryUnitSection">
+                                    <label class="form-label small fw-semibold text-secondary"><i class="bi bi-box-seam me-1"></i>Đơn vị giao hàng (*)</label>
+                                    <select name="deliveryUnitId" id="deliveryUnitSelect" class="form-select rounded-3" onchange="updateCheckoutTotal()">
+                                        <!-- Khi đã nạp deliveries từ CSDL -->
+                                        <th:block th:if="${deliveries != null and !#lists.isEmpty(deliveries)}">
+                                            <option th:each="d : ${deliveries}" 
+                                                    th:value="${d.id}" 
+                                                    th:data-price="${d.price}"
+                                                    th:text="${d.name + ' (' + #numbers.formatDecimal(d.price, 0, 'COMMA', 0, 'POINT') + ' đ) - ' + (d.description != null ? d.description : 'Bảo đảm hoa tươi')}">
+                                            </option>
+                                        </th:block>
+                                        <!-- Dự phòng nếu server đang chạy nền chưa reload controller -->
+                                        <th:block th:if="${deliveries == null or #lists.isEmpty(deliveries)}">
+                                            <option value="1" data-price="25000">Giao Hàng Tiêu Chuẩn Trong Ngày (25.000 đ) - Giao tận nơi trong vòng 4-6 giờ, đóng gói hoa cẩn thận có giữ ẩm</option>
+                                            <option value="2" data-price="45000">GrabExpress Hỏa Tốc (2H) (45.000 đ) - Giao nhanh trong 2 giờ bảo quản hoa tươi trong lồng kính xe máy</option>
+                                            <option value="3" data-price="50000">Ahamove Siêu Tốc Hoa Tươi (50.000 đ) - Tài xế chuyên giao hoa tươi, cam kết không dập nát</option>
+                                        </th:block>
+                                    </select>
+                                </div>
+
                                 <!-- Chọn hình thức nhận hàng (Bước 9: Chọn phương thức giao hàng) -->
                                 <div class="col-12">
                                     <label class="form-label small fw-semibold text-secondary"><i class="bi bi-truck me-1"></i>Phương thức giao hàng (*)</label>
@@ -295,6 +316,12 @@
                                 <strong class="text-warning" th:text="${#numbers.formatDecimal(totalDeposit, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
                             </div>
 
+                            <!-- Dòng phí giao hàng -->
+                            <div class="d-flex justify-content-between mb-2" id="shippingFeeRow">
+                                <span class="text-muted">Phí giao hàng:</span>
+                                <strong id="displayShippingFee" class="text-primary">25,000 đ</strong>
+                            </div>
+
                             <!-- Nhập và chọn mã giảm giá Voucher -->
                             <div class="my-3 p-3 bg-light rounded-3 border">
                                 <label class="form-label fw-bold small text-dark mb-1">🎟️ Mã Khuyến Mãi / Voucher</label>
@@ -319,7 +346,9 @@
 
                             <div class="d-flex justify-content-between align-items-center mb-4">
                                 <span class="fw-bold fs-6">TỔNG CỘNG:</span>
-                                <span class="fs-3 fw-bold text-danger" th:text="${#numbers.formatDecimal(grandTotal, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                                <span id="displayGrandTotal" class="fs-3 fw-bold text-danger" 
+                                      th:data-base-total="${grandTotal}"
+                                      th:text="${#numbers.formatDecimal(grandTotal, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
                             </div>
 
                             <!-- Chọn Phương thức thanh toán -->
@@ -391,20 +420,60 @@
             const pickupSection = document.getElementById('pickupStoreSection');
             const deliverySection = document.getElementById('deliveryAddressSection');
             const savedAddressSection = document.getElementById('savedAddressSection');
+            const deliveryUnitSection = document.getElementById('deliveryUnitSection');
             const addressInput = document.getElementById('recipientAddressInput');
 
             if (isPickup) {
                 pickupSection.classList.remove('d-none');
                 deliverySection.classList.add('d-none');
                 if (savedAddressSection) savedAddressSection.classList.add('d-none');
+                if (deliveryUnitSection) deliveryUnitSection.classList.add('d-none');
                 addressInput.removeAttribute('required');
             } else {
                 pickupSection.classList.add('d-none');
                 deliverySection.classList.remove('d-none');
                 if (savedAddressSection) savedAddressSection.classList.remove('d-none');
+                if (deliveryUnitSection) deliveryUnitSection.classList.remove('d-none');
                 addressInput.setAttribute('required', 'required');
             }
+            updateCheckoutTotal();
         }
+
+        function updateCheckoutTotal() {
+            const isPickupElem = document.getElementById('methodPickup');
+            const isPickup = isPickupElem ? isPickupElem.checked : false;
+            const deliverySelect = document.getElementById('deliveryUnitSelect');
+            const shippingFeeRow = document.getElementById('shippingFeeRow');
+            const displayShippingFee = document.getElementById('displayShippingFee');
+            const displayGrandTotal = document.getElementById('displayGrandTotal');
+
+            if (!displayGrandTotal) return;
+
+            const baseTotal = parseFloat(displayGrandTotal.getAttribute('data-base-total')) || 0;
+            let shippingFee = 0;
+
+            if (isPickup) {
+                if (shippingFeeRow) shippingFeeRow.style.setProperty('display', 'none', 'important');
+                shippingFee = 0;
+            } else {
+                if (shippingFeeRow) shippingFeeRow.style.removeProperty('display');
+                if (deliverySelect && deliverySelect.selectedOptions && deliverySelect.selectedOptions.length > 0) {
+                    shippingFee = parseFloat(deliverySelect.selectedOptions[0].getAttribute('data-price')) || 25000;
+                } else {
+                    shippingFee = 25000;
+                }
+                if (displayShippingFee) {
+                    displayShippingFee.innerText = new Intl.NumberFormat('vi-VN').format(shippingFee) + ' đ';
+                }
+            }
+
+            const finalTotal = baseTotal + shippingFee;
+            displayGrandTotal.innerText = new Intl.NumberFormat('vi-VN').format(finalTotal) + ' đ';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCheckoutTotal();
+        });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
