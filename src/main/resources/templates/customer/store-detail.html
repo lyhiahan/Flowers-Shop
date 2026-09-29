@@ -192,10 +192,15 @@
                             </div>
                         </div>
                         <span class="text-warning fw-bold small">
-                            <span th:text="${'★'.repeat(rev.stars)}"></span>
+                            <span th:each="i : ${#numbers.sequence(1, 5)}"
+                                  th:text="${i <= (rev.rating != null ? rev.rating : 5) ? '★' : '☆'}"></span>
+                            <span class="text-muted small ms-1" th:text="'(' + (rev.rating != null ? rev.rating : 5) + '/5)'"></span>
                         </span>
                     </div>
                     <p class="small text-dark mb-0" th:text="${rev.content}"></p>
+                    <div th:if="${rev.imageUrl != null and !rev.imageUrl.isEmpty()}" class="mt-2">
+                        <img th:src="${rev.imageUrl}" class="rounded-3 border shadow-sm" style="max-height: 120px; object-fit: cover;" alt="Review photo">
+                    </div>
                 </div>
             </div>
         </div>
