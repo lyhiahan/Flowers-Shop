@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -43,7 +43,7 @@
             <li><a th:href="@{/}" class="nav-link text-info" target="_blank"><i class="bi bi-arrow-up-right-square"></i><span>Xem Website Khách</span></a></li>
         </ul>
         <hr class="border-secondary my-2">
-        <a th:href="@{/logout}" class="btn btn-outline-danger btn-sm w-100"><i class="bi bi-box-arrow-right me-1"></i> Đăng Xuất</a>
+        <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit"   class="btn btn-outline-danger btn-sm w-100"><i class="bi bi-box-arrow-right me-1"></i> Đăng Xuất</button></form>
     </aside>
 
     <!-- Main Content -->

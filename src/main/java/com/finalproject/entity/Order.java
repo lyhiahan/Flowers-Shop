@@ -62,6 +62,10 @@ public class Order {
     @Builder.Default
     private String paymentStatus = "UNPAID"; // UNPAID, PAID
 
+    @Column(name = "shipping_method", length = 20)
+    @Builder.Default
+    private String shippingMethod = "DELIVERY";
+
     // Thông tin giao hoa & thiệp chúc mừng
     private java.time.LocalDate deliveryDate;
     @Column(length = 500)

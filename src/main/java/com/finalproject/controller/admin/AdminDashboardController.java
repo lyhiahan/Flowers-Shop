@@ -50,13 +50,7 @@ public class AdminDashboardController {
 
         List<Order> recentOrders = orderRepository.findTop10ByOrderByCreatedAtDesc();
 
-        BigDecimal totalRevenue = BigDecimal.ZERO;
-        List<Order> allOrders = orderRepository.findAll();
-        for (Order o : allOrders) {
-            if (o.getStatus() != OrderStatus.CANCELLED && o.getTotalAmount() != null) {
-                totalRevenue = totalRevenue.add(o.getTotalAmount());
-            }
-        }
+        BigDecimal totalRevenue = analyticsService.getStoreRevenueStats(null).getTotalBuyRevenue();
 
         // Biểu đồ đa thời gian theo đề cương
         var revenueChart = analyticsService.getRevenueChart(timeframe, null);

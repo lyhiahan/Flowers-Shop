@@ -23,7 +23,9 @@ import java.util.List;
 public class ManagerOrderController {
 
     private final OrderService orderService;
+    private final com.finalproject.service.OrderWorkflowService workflow;
     private final UserRepository userRepository;
+    private final com.finalproject.service.StoreAccessService storeAccess;
     private final StoreRepository storeRepository;
 
     @GetMapping
@@ -31,7 +33,7 @@ public class ManagerOrderController {
                              @RequestParam(value = "status", required = false) String statusStr,
                              Model model) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
-        Long storeId = user.getStore() != null ? user.getStore().getId() : 1L;
+        Long storeId = storeAccess.assignedStore().getId();
 
         List<Order> orders = orderService.getOrdersByStore(storeId);
         if (statusStr != null && !statusStr.trim().isEmpty() && !"ALL".equalsIgnoreCase(statusStr)) {
@@ -41,7 +43,8 @@ public class ManagerOrderController {
             } catch (Exception ignored) {}
         }
 
-        List<User> shippers = userRepository.findByRole(Role.SHIPPER);
+        List<User> shippers = userRepository.findByRole(Role.SHIPPER).stream()
+                .filter(s -> Boolean.TRUE.equals(s.getIsActive()) && s.getStore() != null && storeId.equals(s.getStore().getId())).toList();
 
         model.addAttribute("orders", orders);
         model.addAttribute("currentStatus", statusStr != null ? statusStr : "ALL");
@@ -58,6 +61,17 @@ public class ManagerOrderController {
             orderService.updateOrderStatus(id, status);
             ra.addFlashAttribute("successMessage", "Cập nhật trạng thái đơn #" + id + " thành [" + status + "] thành công!");
         } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/manager/orders";
+    }
+
+    @PostMapping("/confirm-payment/{id}")
+    public String confirmPayment(@PathVariable("id") Long id, RedirectAttributes ra) {
+        try {
+            workflow.confirmPayment(id);
+            ra.addFlashAttribute("successMessage", "Đã xác nhận nhận thanh toán cho đơn #" + id);
+        } catch (RuntimeException ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
         return "redirect:/manager/orders";

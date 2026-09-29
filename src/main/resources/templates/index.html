@@ -949,9 +949,9 @@
                         Hủy
                     </button>
                     <!-- 4. Bấm nút Confirm -> 5. Đăng xuất thành công, hiển thị giao diện dành cho Khách (Guest) -->
-                    <a th:href="@{/logout}" class="btn btn-danger rounded-pill px-4 fw-semibold text-white text-decoration-none" id="btnConfirm" data-testid="btnConfirm">
+                    <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit"   class="btn btn-danger rounded-pill px-4 fw-semibold text-white text-decoration-none" id="btnConfirm" data-testid="btnConfirm">
                         Xác nhận
-                    </a>
+                    </button></form>
                 </div>
             </div>
         </div>

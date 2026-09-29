@@ -64,9 +64,9 @@
                 <a th:href="@{/}" class="btn btn-sm btn-outline-dark rounded-pill px-3">
                     <i class="bi bi-shop me-1"></i> Cửa Hàng
                 </a>
-                <a th:href="@{/logout}" class="btn btn-sm btn-outline-danger rounded-pill px-2" title="Đăng xuất">
+                <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit"   class="btn btn-sm btn-outline-danger rounded-pill px-2" title="Đăng xuất">
                     <i class="bi bi-box-arrow-right"></i>
-                </a>
+                </button></form>
             </div>
         </div>
     </nav>
@@ -192,7 +192,7 @@
                                         <span class="text-muted small" style="font-size: 0.8rem;" th:text="'Cọc: ' + ${#numbers.formatDecimal(item.product.depositFee, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
                                     </div>
                                     <div th:if="${item.orderType.name() == 'BUY'}">
-                                        <strong class="text-danger small" th:text="${#numbers.formatDecimal(item.product.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                                        <strong class="text-danger small" th:text="${#numbers.formatDecimal(item.product.sellingPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
                                     </div>
                                 </td>
 

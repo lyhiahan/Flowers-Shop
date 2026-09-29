@@ -11,7 +11,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class GlobalExceptionHandler {
 
     // 1. Xử lý xung đột khi 2 người cùng thao tác trên 1 bản ghi có @Version
-    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    @ExceptionHandler({ObjectOptimisticLockingFailureException.class, jakarta.persistence.OptimisticLockException.class})
     public String handleOptimisticLockingFailure(RedirectAttributes redirectAttributes) {
         redirectAttributes.addFlashAttribute("errorMessage", 
             "Sản phẩm hoặc đơn hàng vừa được cập nhật bởi một thao tác khác. Vui lòng thử lại!");
@@ -20,6 +20,7 @@ public class GlobalExceptionHandler {
 
     // 2. Xử lý lỗi không tìm thấy tài nguyên
     @ExceptionHandler(ResourceNotFoundException.class)
+    @org.springframework.web.bind.annotation.ResponseStatus(org.springframework.http.HttpStatus.NOT_FOUND)
     public String handleResourceNotFound(ResourceNotFoundException ex, Model model) {
         model.addAttribute("errorMessage", ex.getMessage());
         return "common/error";
@@ -27,6 +28,7 @@ public class GlobalExceptionHandler {
 
     // 3. Xử lý lỗi truy cập trái phép (IDOR / Sai Role)
     @ExceptionHandler(AccessDeniedException.class)
+    @org.springframework.web.bind.annotation.ResponseStatus(org.springframework.http.HttpStatus.FORBIDDEN)
     public String handleAccessDenied(AccessDeniedException ex, Model model) {
         model.addAttribute("errorMessage", "Bạn không có quyền truy cập hoặc thao tác trên tài nguyên này!");
         return "common/error";
@@ -34,6 +36,7 @@ public class GlobalExceptionHandler {
 
     // 4. Bắt các lỗi Runtime chung
     @ExceptionHandler(Exception.class)
+    @org.springframework.web.bind.annotation.ResponseStatus(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
     public String handleGeneralException(Exception ex, Model model) {
         ex.printStackTrace();
         model.addAttribute("errorMessage", "Đã xảy ra lỗi: " + ex.getMessage());

@@ -31,27 +31,20 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public int getCartItemCount(String username) {
-        try {
-            Cart cart = getCartByUsername(username);
-            if (cart == null || cart.getItems() == null) {
-                return 0;
-            }
-            return cart.getItems().stream()
-                    .mapToInt(item -> item.getQuantity() != null ? item.getQuantity() : 1)
-                    .sum();
-        } catch (Exception ex) {
-            return 0;
-        }
+        return Math.toIntExact(cartItemRepository.countUnitsByUsername(username));
     }
-
     @Override
     @Transactional
     public void addToCart(String username, AddToCartRequest request) {
-        Cart cart = getCartByUsername(username);
+        Cart cart = getCartForUpdate(username);
 
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("Sản phẩm không tồn tại"));
 
+        if (request.getOrderType() != com.finalproject.enums.OrderType.BUY) throw new IllegalArgumentException("Hệ thống chỉ hỗ trợ mua hoa.");
+        if (!Boolean.TRUE.equals(product.getIsActive()) || !Boolean.TRUE.equals(product.getIsSelling())) throw new IllegalStateException("Sản phẩm đã ngừng bán.");
+        if (request.getQuantity() == null || request.getQuantity() <= 0 || request.getQuantity() > 10000) throw new IllegalArgumentException("Số lượng không hợp lệ.");
+        if (request.getDeliveryDate() != null && request.getDeliveryDate().isBefore(java.time.LocalDate.now())) throw new IllegalArgumentException("Ngày nhận hàng không được ở quá khứ.");
         Long storeId = request.getStoreId() != null ? request.getStoreId() : (product.getStore() != null ? product.getStore().getId() : 1L);
         Store store = storeRepository.findById(storeId)
                 .orElseGet(() -> storeRepository.findAll().stream().findFirst().orElseThrow(() -> new ResourceNotFoundException("Chi nhánh không tồn tại")));
@@ -117,13 +110,14 @@ public class CartServiceImpl implements CartService {
                     .greetingMessage(finalGreeting)
                     .build();
             cartItemRepository.save(cartItem);
+            cart.getItems().add(cartItem);
         }
     }
 
     @Override
     @Transactional
     public void updateQuantity(String username, Long cartItemId, Integer quantity) {
-        Cart cart = getCartByUsername(username);
+        Cart cart = getCartForUpdate(username);
         CartItem item = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new ResourceNotFoundException("Mục giỏ hàng không tồn tại"));
 
@@ -132,8 +126,10 @@ public class CartServiceImpl implements CartService {
         }
 
         if (quantity == null || quantity <= 0) {
+            cart.getItems().remove(item);
             cartItemRepository.delete(item);
         } else {
+            if (quantity > 10000) throw new IllegalArgumentException("Số lượng không hợp lệ.");
             item.setQuantity(quantity);
             cartItemRepository.save(item);
         }
@@ -142,11 +138,13 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public void removeCartItem(String username, Long cartItemId) {
-        Cart cart = getCartByUsername(username);
+        Cart cart = getCartForUpdate(username);
         CartItem item = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new ResourceNotFoundException("Mục giỏ hàng không tồn tại"));
 
+        if (!item.getCart().getId().equals(cart.getId())) throw new org.springframework.security.access.AccessDeniedException("Không được sửa giỏ hàng người khác.");
         if (item.getCart().getId().equals(cart.getId())) {
+            cart.getItems().remove(item);
             cartItemRepository.delete(item);
         }
     }
@@ -154,7 +152,13 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public void clearCart(String username) {
-        Cart cart = getCartByUsername(username);
-        cartItemRepository.deleteByCartId(cart.getId());
+        Cart cart = getCartForUpdate(username);
+        cart.getItems().clear();
+    }
+    private Cart getCartForUpdate(String username) {
+        User user = userRepository.findByUsername(username).orElseThrow();
+        Cart cart = cartRepository.findLockedByUserId(user.getId())
+                .orElseGet(() -> cartRepository.save(Cart.builder().user(user).items(new ArrayList<>()).build()));
+        return cart;
     }
 }

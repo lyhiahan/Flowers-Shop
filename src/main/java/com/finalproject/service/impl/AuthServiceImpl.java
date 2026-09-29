@@ -193,7 +193,12 @@ public class AuthServiceImpl implements AuthService {
                 .or(() -> userRepository.findByUsername(query))
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản với email hoặc tên đăng nhập: " + query));
 
-        return createAndSendOtp(user, OtpType.RESET_PASSWORD);
+        userRepository.findLockedById(user.getId()).orElseThrow();
+        if (otpRepository.countByUserIdAndCreatedAtAfter(user.getId(), LocalDateTime.now().minusMinutes(10)) >= 3) {
+            throw new IllegalStateException("Vui lòng chờ 10 phút trước khi yêu cầu thêm mã OTP.");
+        }
+        createAndSendOtp(user, OtpType.RESET_PASSWORD);
+        return "";
     }
 
     @Override
@@ -213,7 +218,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @Transactional
+    @Transactional(noRollbackFor = IllegalArgumentException.class)
     public void resetPassword(String email, String otpCode, String newPassword) {
         String query = email != null ? email.trim() : "";
         User user = userRepository.findByEmail(query)
@@ -224,31 +229,24 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalArgumentException("Mật khẩu mới phải có tối thiểu 6 ký tự!");
         }
 
-        OtpVerification otp = null;
-        if (otpCode != null && !otpCode.trim().isEmpty()) {
-            otp = otpRepository
-                    .findTopByUserIdAndCodeAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
-                            user.getId(), otpCode.trim(), OtpType.RESET_PASSWORD)
-                    .orElse(null);
-        } else {
-            otp = otpRepository
-                    .findTopByUserIdAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
-                            user.getId(), OtpType.RESET_PASSWORD)
-                    .orElse(null);
+        if (otpCode == null || !otpCode.trim().matches("[0-9]{6}")) {
+            throw new IllegalArgumentException("Vui lòng nhập mã OTP đã gửi đến email của bạn!");
         }
-
-        if (otp == null) {
-            throw new IllegalArgumentException("Mã xác thực hoặc liên kết không hợp lệ!");
+        userRepository.findLockedById(user.getId()).orElseThrow();
+        OtpVerification otp = otpRepository.findTopByUserIdAndTypeOrderByExpiredAtDesc(user.getId(), OtpType.RESET_PASSWORD)
+                .orElseThrow(() -> new IllegalArgumentException("Mã xác thực không hợp lệ."));
+        if (Boolean.TRUE.equals(otp.getIsUsed()) || otp.getExpiredAt().isBefore(LocalDateTime.now()) || otp.getFailedAttempts() >= 5) {
+            throw new IllegalArgumentException("Mã OTP đã hết hạn, đã sử dụng hoặc bị khóa. Vui lòng yêu cầu mã mới.");
         }
-
-        if (otp.getExpiredAt().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Mã OTP hoặc liên kết đã hết hạn (quá 5 phút)! Vui lòng yêu cầu lại.");
+        if (!otp.getCode().equals(otpCode.trim())) {
+            otp.setFailedAttempts(otp.getFailedAttempts() + 1);
+            otpRepository.save(otp);
+            throw new IllegalArgumentException("Mã OTP không hợp lệ.");
         }
-
         otp.setIsUsed(true);
         otpRepository.save(otp);
 
-        user.setPassword(passwordEncoder.encode(newPassword.trim()));
+        user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
 

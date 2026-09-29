@@ -172,11 +172,11 @@ public class ProductServiceImpl implements ProductService {
                 .description(form.getDescription())
                 .importPrice(form.getImportPrice())
                 .priceBuy(form.getPriceBuy())
-                .priceRentPerDay(form.getPriceRentPerDay())
-                .depositFee(form.getDepositFee())
+                .priceRentPerDay(java.math.BigDecimal.ZERO)
+                .depositFee(java.math.BigDecimal.ZERO)
                 .isActive(true)
                 .isSelling(true)
-                .sold(15) // Mặc định tạo có số lượng để hiển thị trang chủ Guest
+                .sold(0)
                 .rating(5.0)
                 .build();
         Product savedProduct = productRepository.save(product);
@@ -208,7 +208,7 @@ public class ProductServiceImpl implements ProductService {
             StoreInventory inventory = StoreInventory.builder()
                     .store(store)
                     .product(savedProduct)
-                    .quantity(50)
+                    .quantity(form.getInitialStock())
                     .build();
             storeInventoryRepository.save(inventory);
         }

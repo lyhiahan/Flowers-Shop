@@ -20,6 +20,7 @@ public class ManagerStoreController {
 
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
+    private final com.finalproject.service.StoreAccessService storeAccess;
 
     @GetMapping
     public String listStores(Principal principal, Model model) {
@@ -29,9 +30,7 @@ public class ManagerStoreController {
         if (user.getStore() != null) {
             allStores.add(user.getStore());
         }
-        if (allStores.isEmpty()) {
-            allStores.addAll(storeRepository.findAll());
-        }
+
         model.addAttribute("stores", new java.util.ArrayList<>(allStores));
         model.addAttribute("currentUser", user);
         return "manager/stores";
@@ -48,6 +47,12 @@ public class ManagerStoreController {
                               @ModelAttribute("store") Store store,
                               RedirectAttributes ra) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
+        store.setId(null);
+        store.setCreatedAt(java.time.LocalDateTime.now());
+        store.setEWallet(java.math.BigDecimal.ZERO);
+        store.setCommission(null);
+        store.setStoreLevel(null);
+        store.setPoint(0);
         store.setOwner(user);
         store.setStatus(true);
         store.setIsOpen(true);
@@ -67,6 +72,7 @@ public class ManagerStoreController {
     @GetMapping("/edit/{id}")
     public String showEditStoreForm(@PathVariable("id") Long id, Model model) {
         Store store = storeRepository.findById(id).orElseThrow();
+        storeAccess.requireManager(store);
         model.addAttribute("store", store);
         return "manager/store-info";
     }
@@ -76,6 +82,7 @@ public class ManagerStoreController {
                               @ModelAttribute("store") Store formStore,
                               RedirectAttributes ra) {
         Store store = storeRepository.findById(id).orElseThrow();
+        storeAccess.requireManager(store);
         store.setName(formStore.getName());
         store.setPhone(formStore.getPhone());
         store.setAddress(formStore.getAddress());

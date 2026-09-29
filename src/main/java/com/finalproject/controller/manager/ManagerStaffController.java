@@ -21,13 +21,14 @@ import java.util.List;
 public class ManagerStaffController {
 
     private final UserRepository userRepository;
+    private final com.finalproject.service.StoreAccessService storeAccess;
     private final StoreRepository storeRepository;
     private final PasswordEncoder passwordEncoder;
 
     @GetMapping
     public String listStaff(Principal principal, Model model) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
-        Store store = user.getStore() != null ? user.getStore() : storeRepository.findById(1L).orElse(null);
+        Store store = storeAccess.assignedStore();
 
         List<User> staffList = store != null ? userRepository.findByStoreId(store.getId()) : List.of();
 
@@ -46,17 +47,19 @@ public class ManagerStaffController {
                            @RequestParam(value = "role", defaultValue = "STAFF") String roleStr,
                            RedirectAttributes ra) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
-        Store store = user.getStore() != null ? user.getStore() : storeRepository.findById(1L).orElseThrow();
+        Store store = storeAccess.assignedStore();
 
         // Kiểm tra xem username đã tồn tại chưa
         var existingOpt = userRepository.findByUsername(username.trim());
         if (existingOpt.isPresent()) {
             User existing = existingOpt.get();
+            if (existing.getRole() != Role.STAFF && existing.getRole() != Role.SHIPPER) throw new org.springframework.security.access.AccessDeniedException("Chỉ được phân công tài khoản nhân viên hoặc shipper.");
+            if (existing.getStore() != null) storeAccess.requireManager(existing.getStore());
             existing.setStore(store);
             userRepository.save(existing);
             ra.addFlashAttribute("successMessage", "Đã thêm nhân viên [" + existing.getFullName() + "] vào chi nhánh thành công!");
         } else {
-            Role role = "SHIPPER".equalsIgnoreCase(roleStr) ? Role.SHIPPER : Role.MANAGER;
+            Role role = "SHIPPER".equalsIgnoreCase(roleStr) ? Role.SHIPPER : Role.STAFF;
 
             User newStaff = User.builder()
                     .username(username.trim())
@@ -67,6 +70,7 @@ public class ManagerStaffController {
                     .role(role)
                     .store(store)
                     .isEmailActive(true)
+                    .isActive(true)
                     .build();
 
             userRepository.save(newStaff);
@@ -79,6 +83,8 @@ public class ManagerStaffController {
     @PostMapping("/remove/{id}")
     public String removeStaff(@PathVariable("id") Long id, RedirectAttributes ra) {
         User staff = userRepository.findById(id).orElseThrow();
+        storeAccess.requireManager(staff.getStore());
+        if (staff.getRole() != Role.STAFF && staff.getRole() != Role.SHIPPER) throw new org.springframework.security.access.AccessDeniedException("Không thể xóa quản lý qua chức năng nhân viên.");
         staff.setStore(null);
         userRepository.save(staff);
         ra.addFlashAttribute("successMessage", "Đã xóa nhân viên khỏi chi nhánh thành công!");

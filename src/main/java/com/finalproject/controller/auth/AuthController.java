@@ -122,24 +122,6 @@ public class AuthController {
             model.addAttribute("emailSent", true);
         }
 
-        String lookupEmail = (String) model.getAttribute("email");
-        if (lookupEmail == null || lookupEmail.isEmpty()) {
-            lookupEmail = email;
-        }
-        if (lookupEmail != null && !lookupEmail.trim().isEmpty() && !model.containsAttribute("otpCode")) {
-            final String finalEmail = lookupEmail.trim();
-            userRepository.findByEmail(finalEmail)
-                    .or(() -> userRepository.findByUsername(finalEmail))
-                    .ifPresent(user -> {
-                        otpRepository.findTopByUserIdAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
-                                        user.getId(), OtpType.RESET_PASSWORD)
-                                .ifPresent(otp -> {
-                                    if (!otp.getExpiredAt().isBefore(LocalDateTime.now())) {
-                                        model.addAttribute("otpCode", otp.getCode());
-                                    }
-                                });
-                    });
-        }
         return "auth/forgot-password";
     }
 
@@ -148,10 +130,9 @@ public class AuthController {
                                        RedirectAttributes redirectAttributes,
                                        Model model) {
         try {
-            String otpCode = authService.forgotPassword(email);
+            authService.forgotPassword(email);
             redirectAttributes.addFlashAttribute("emailSent", true);
             redirectAttributes.addFlashAttribute("email", email.trim());
-            redirectAttributes.addFlashAttribute("otpCode", otpCode);
             redirectAttributes.addFlashAttribute("successMessage", "Hệ thống đã xác thực email thành công! Đã gửi email yêu cầu tạo mật khẩu mới về email người dùng.");
             return "redirect:/forgot-password?sent=true&email=" + java.net.URLEncoder.encode(email.trim(), java.nio.charset.StandardCharsets.UTF_8);
         } catch (Exception ex) {
@@ -168,19 +149,6 @@ public class AuthController {
         model.addAttribute("email", email);
         if (otpCode != null && !otpCode.trim().isEmpty()) {
             model.addAttribute("otpCode", otpCode.trim());
-        } else if (email != null && !email.trim().isEmpty()) {
-            final String finalEmail = email.trim();
-            userRepository.findByEmail(finalEmail)
-                    .or(() -> userRepository.findByUsername(finalEmail))
-                    .ifPresent(user -> {
-                        otpRepository.findTopByUserIdAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
-                                        user.getId(), OtpType.RESET_PASSWORD)
-                                .ifPresent(otp -> {
-                                    if (!otp.getExpiredAt().isBefore(LocalDateTime.now())) {
-                                        model.addAttribute("otpCode", otp.getCode());
-                                    }
-                                });
-                    });
         }
         return "auth/reset-password";
     }
@@ -194,7 +162,7 @@ public class AuthController {
         model.addAttribute("email", email);
         model.addAttribute("otpCode", otpCode);
 
-        if (confirmPassword != null && !confirmPassword.trim().isEmpty() && !newPassword.equals(confirmPassword)) {
+        if (!newPassword.equals(confirmPassword)) {
             model.addAttribute("errorMessage", "Mật khẩu xác nhận không khớp với mật khẩu mới!");
             return "auth/reset-password";
         }

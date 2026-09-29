@@ -19,6 +19,7 @@ public class VoucherServiceImpl implements VoucherService {
     private final VoucherRepository voucherRepository;
 
     @Override
+    @Transactional
     public Voucher findByCode(String code) {
         if (code == null || code.trim().isEmpty()) return null;
         return voucherRepository.findByCodeAndIsActiveTrue(code.trim().toUpperCase())
@@ -33,6 +34,15 @@ public class VoucherServiceImpl implements VoucherService {
     @Override
     public BigDecimal calculateDiscount(Voucher voucher, BigDecimal orderAmount, BigDecimal shippingFee) {
         if (voucher == null) return BigDecimal.ZERO;
+        LocalDate today = LocalDate.now();
+        if (!Boolean.TRUE.equals(voucher.getIsActive()) || voucher.getStartDate() == null || voucher.getEndDate() == null
+                || today.isBefore(voucher.getStartDate()) || today.isAfter(voucher.getEndDate())
+                || voucher.getUsedCount() >= voucher.getQuantity()) {
+            throw new IllegalArgumentException("Mã giảm giá đã hết hạn hoặc hết lượt sử dụng.");
+        }
+        if (voucher.getDiscountValue() == null || voucher.getDiscountValue().signum() < 0) {
+            throw new IllegalArgumentException("Giá trị giảm giá không hợp lệ.");
+        }
         if (voucher.getMinOrderValue() != null && orderAmount.compareTo(voucher.getMinOrderValue()) < 0) {
             throw new IllegalArgumentException("Đơn hàng chưa đạt giá trị tối thiểu " + voucher.getMinOrderValue() + "đ để áp dụng mã!");
         }
@@ -46,7 +56,8 @@ public class VoucherServiceImpl implements VoucherService {
             }
         } else if ("PERCENT".equalsIgnoreCase(voucher.getDiscountType())) {
             // Giảm theo % giá trị đơn
-            BigDecimal percent = voucher.getDiscountValue().divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            if (voucher.getDiscountValue().compareTo(BigDecimal.valueOf(100)) > 0) throw new IllegalArgumentException("Tỷ lệ giảm không được vượt quá 100%.");
+            BigDecimal percent = voucher.getDiscountValue().movePointLeft(2);
             discount = orderAmount.multiply(percent);
             if (voucher.getMaxDiscountAmount() != null && discount.compareTo(voucher.getMaxDiscountAmount()) > 0) {
                 discount = voucher.getMaxDiscountAmount();
@@ -59,12 +70,23 @@ public class VoucherServiceImpl implements VoucherService {
             }
         }
 
-        return discount;
+        return discount.max(BigDecimal.ZERO).min(orderAmount.add(shippingFee != null ? shippingFee : BigDecimal.ZERO))
+                .setScale(2, RoundingMode.HALF_UP);
     }
 
     @Override
     @Transactional
     public Voucher createVoucher(Voucher voucher) {
+        if (voucher.getCode() == null || voucher.getCode().isBlank() || voucher.getName() == null || voucher.getName().isBlank()
+                || voucher.getStartDate() == null || voucher.getEndDate() == null || voucher.getEndDate().isBefore(voucher.getStartDate())
+                || voucher.getQuantity() == null || voucher.getQuantity() < 1 || voucher.getUsedCount() == null || voucher.getUsedCount() < 0
+                || voucher.getDiscountValue() == null || voucher.getDiscountValue().signum() < 0
+                || (voucher.getMinOrderValue() != null && voucher.getMinOrderValue().signum() < 0)
+                || (voucher.getMaxDiscountAmount() != null && voucher.getMaxDiscountAmount().signum() < 0)
+                || !java.util.Set.of("PERCENT", "FIXED_AMOUNT", "FREE_SHIP").contains(voucher.getDiscountType())
+                || ("PERCENT".equals(voucher.getDiscountType()) && voucher.getDiscountValue().compareTo(BigDecimal.valueOf(100)) > 0)) {
+            throw new IllegalArgumentException("Thông tin mã giảm giá không hợp lệ.");
+        }
         if (voucher.getCode() != null) {
             voucher.setCode(voucher.getCode().trim().toUpperCase());
         }
@@ -74,7 +96,9 @@ public class VoucherServiceImpl implements VoucherService {
     @Override
     @Transactional
     public void deleteVoucher(Long id) {
-        voucherRepository.deleteById(id);
+        Voucher voucher = voucherRepository.findById(id).orElseThrow();
+        voucher.setIsActive(false);
+        voucherRepository.save(voucher);
     }
 
     @Override

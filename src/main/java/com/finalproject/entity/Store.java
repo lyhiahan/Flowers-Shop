@@ -11,6 +11,9 @@ public class Store {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Version
+    private Long version;
+
     @Column(nullable = false, length = 150)
     private String name;
 
@@ -63,4 +66,11 @@ public class Store {
 
     private Double latitude;
     private Double longitude;
+
+    private java.time.LocalDateTime createdAt;
+
+    @PrePersist
+    public void prePersist() {
+        if (createdAt == null) createdAt = java.time.LocalDateTime.now();
+    }
 }

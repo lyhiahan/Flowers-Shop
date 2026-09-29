@@ -257,9 +257,9 @@
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancel" data-testid="btnCancel">
                         Cancel
                     </button>
-                    <a th:href="@{/logout}" class="btn btn-danger rounded-pill px-4 fw-semibold text-white text-decoration-none" id="btnConfirm" data-testid="btnConfirm">
+                    <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit"   class="btn btn-danger rounded-pill px-4 fw-semibold text-white text-decoration-none" id="btnConfirm" data-testid="btnConfirm">
                         Confirm
-                    </a>
+                    </button></form>
                 </div>
             </div>
         </div>

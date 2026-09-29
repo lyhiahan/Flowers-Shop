@@ -24,7 +24,7 @@
             <div class="d-flex align-items-center gap-3">
                 <span class="text-white-50 small">Tài xế: <strong class="text-white" th:text="${shipper.fullName}"></strong></span>
                 <a th:href="@{/}" class="btn btn-outline-light btn-sm rounded-pill px-3">Trang Chủ</a>
-                <a th:href="@{/logout}" class="btn btn-outline-danger btn-sm rounded-pill px-3">Đăng Xuất</a>
+                <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit"   class="btn btn-outline-danger btn-sm rounded-pill px-3">Đăng Xuất</button></form>
             </div>
         </div>
     </nav>
@@ -147,9 +147,12 @@
                         <div>
                             <small class="text-muted d-block">Tiền thu hộ (COD):</small>
                             <strong th:if="${o.paymentMethod == 'COD'}" class="text-danger fs-5 fw-bold" th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
-                            <span th:if="${o.paymentMethod != 'COD'}" class="badge bg-success-subtle text-success">Đã Thanh Toán Online</span>
+                            <span th:if="${o.paymentMethod != 'COD' and o.paymentStatus == 'PAID'}" class="badge bg-success-subtle text-success">Đã thanh toán</span><span th:if="${o.paymentMethod != 'COD' and o.paymentStatus != 'PAID'}" class="badge bg-warning text-dark">Chưa xác nhận thanh toán</span>
                         </div>
                         <div>
+                            <form th:if="${o.status.name() == 'PICKED_UP'}" th:action="@{/shipper/orders/update-status/{id}(id=${o.id})}" method="post">
+                                <input type="hidden" name="status" value="DELIVERING"><button class="btn btn-primary btn-sm">Bắt đầu giao hàng</button>
+                            </form>
                             <!-- Nút chuyển sang DELIVERED -->
                             <form th:if="${o.status.name() == 'DELIVERING'}" th:action="@{'/shipper/orders/update-status/' + ${o.id}}" method="post">
                                 <input type="hidden" name="status" value="DELIVERED">

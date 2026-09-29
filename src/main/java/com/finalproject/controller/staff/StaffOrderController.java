@@ -16,11 +16,12 @@ import java.security.Principal;
 import java.util.List;
 
 @Controller
-@RequestMapping({"/manager/orders", "/staff/orders"})
+@RequestMapping("/staff/orders")
 @RequiredArgsConstructor
 public class StaffOrderController {
 
     private final StaffService staffService;
+    private final com.finalproject.service.OrderWorkflowService workflow;
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
 
@@ -57,30 +58,10 @@ public class StaffOrderController {
         return "redirect:/staff/orders";
     }
 
-    @PostMapping("/return/{id}")
-    public String returnOrder(Principal principal,
-                              @PathVariable("id") Long id,
-                              @RequestParam("returnStoreId") Long returnStoreId,
-                              @RequestParam(value = "waiveFine", defaultValue = "false") boolean waiveFine,
-                              @RequestParam(value = "damageFee", defaultValue = "0") BigDecimal damageFee,
-                              RedirectAttributes ra) {
-        try {
-            staffService.processReturn(principal.getName(), id, returnStoreId, waiveFine, damageFee);
-            ra.addFlashAttribute("successMessage", "Nhận trả đồ và hoàn tất tất toán cho đơn #" + id + " thành công!");
-        } catch (Exception ex) {
-            ra.addFlashAttribute("errorMessage", ex.getMessage());
-        }
-        return "redirect:/staff/orders";
-    }
-
-    @PostMapping("/convert-to-buy/{id}")
-    public String convertToBuy(Principal principal, @PathVariable("id") Long id, RedirectAttributes ra) {
-        try {
-            staffService.convertRentToBuy(principal.getName(), id);
-            ra.addFlashAttribute("successMessage", "Khách đã chuyển sang Mua Đứt thành công cho đơn #" + id);
-        } catch (Exception ex) {
-            ra.addFlashAttribute("errorMessage", ex.getMessage());
-        }
+    @PostMapping("/prepare/{id}")
+    public String prepare(@PathVariable("id") Long id, RedirectAttributes ra) {
+        try { workflow.transition(id, com.finalproject.enums.OrderStatus.PREPARING); }
+        catch (RuntimeException ex) { ra.addFlashAttribute("errorMessage", ex.getMessage()); }
         return "redirect:/staff/orders";
     }
 }

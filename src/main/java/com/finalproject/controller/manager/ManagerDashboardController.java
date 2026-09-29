@@ -20,6 +20,7 @@ public class ManagerDashboardController {
 
     private final AnalyticsService analyticsService;
     private final UserRepository userRepository;
+    private final com.finalproject.service.StoreAccessService storeAccess;
 
     @GetMapping("/dashboard")
     public String showManagerDashboard(Principal principal, Model model) {

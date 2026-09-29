@@ -23,13 +23,15 @@ import java.util.List;
 public class ManagerVoucherController {
 
     private final VoucherService voucherService;
+    private final com.finalproject.repository.VoucherRepository voucherRepository;
     private final UserRepository userRepository;
+    private final com.finalproject.service.StoreAccessService storeAccess;
     private final StoreRepository storeRepository;
 
     @GetMapping
     public String listVouchers(Principal principal, Model model) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
-        Long storeId = user.getStore() != null ? user.getStore().getId() : 1L;
+        Long storeId = storeAccess.assignedStore().getId();
 
         List<Voucher> vouchers = voucherService.getVouchersByStore(storeId);
         model.addAttribute("vouchers", vouchers);
@@ -49,7 +51,7 @@ public class ManagerVoucherController {
                                 @RequestParam("endDate") String endDate,
                                 RedirectAttributes ra) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
-        Store store = user.getStore() != null ? user.getStore() : storeRepository.findById(1L).orElse(null);
+        Store store = storeAccess.assignedStore();
 
         Voucher voucher = Voucher.builder()
                 .code(code.trim().toUpperCase())
@@ -72,6 +74,7 @@ public class ManagerVoucherController {
 
     @PostMapping("/delete/{id}")
     public String deleteVoucher(@PathVariable("id") Long id, RedirectAttributes ra) {
+        storeAccess.requireManager(voucherRepository.findById(id).orElseThrow().getStore());
         voucherService.deleteVoucher(id);
         ra.addFlashAttribute("successMessage", "Đã xóa mã khuyến mãi!");
         return "redirect:/manager/vouchers";

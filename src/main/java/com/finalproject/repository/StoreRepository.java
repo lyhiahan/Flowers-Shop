@@ -9,6 +9,9 @@ import java.util.Optional;
 
 @Repository
 public interface StoreRepository extends JpaRepository<Store, Long> {
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("select s from Store s where s.id = :id")
+    Optional<Store> findLockedById(@org.springframework.data.repository.query.Param("id") Long id);
     List<Store> findByStatusTrue();
     org.springframework.data.domain.Page<Store> findByStatusTrue(org.springframework.data.domain.Pageable pageable);
     List<Store> findByOwnerId(Long ownerId);

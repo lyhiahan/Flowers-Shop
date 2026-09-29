@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -128,9 +128,9 @@
 
         <hr class="border-secondary my-3">
         <div class="px-2">
-            <a th:href="@{/logout}" class="btn btn-outline-danger btn-sm w-100 d-flex align-items-center justify-content-center gap-2">
+            <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit"   class="btn btn-outline-danger btn-sm w-100 d-flex align-items-center justify-content-center gap-2">
                 <i class="bi bi-box-arrow-right"></i> Đăng Xuất
-            </a>
+            </button></form>
         </div>
     </aside>
 

@@ -18,6 +18,7 @@ import java.util.Map;
 public class ShipperServiceImpl implements ShipperService {
 
     private final OrderRepository orderRepository;
+    private final com.finalproject.service.OrderWorkflowService workflow;
 
     @Override
     public List<Order> getAssignedOrders(Long shipperId) {
@@ -32,19 +33,7 @@ public class ShipperServiceImpl implements ShipperService {
     @Override
     @Transactional
     public Order updateDeliveryStatus(Long orderId, Long shipperId, OrderStatus newStatus) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng ID: " + orderId));
-
-        if (order.getShipper() == null || !order.getShipper().getId().equals(shipperId)) {
-            throw new IllegalArgumentException("Đơn hàng này không thuộc phân công của bạn!");
-        }
-
-        order.setStatus(newStatus);
-        if (newStatus == OrderStatus.DELIVERED) {
-            order.setPaymentStatus("PAID");
-        }
-
-        return orderRepository.save(order);
+        return workflow.transition(orderId, newStatus);
     }
 
     @Override

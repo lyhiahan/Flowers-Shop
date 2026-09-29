@@ -20,6 +20,7 @@ public class ManagerAnalyticsController {
 
     private final AnalyticsService analyticsService;
     private final UserRepository userRepository;
+    private final com.finalproject.service.StoreAccessService storeAccess;
 
     @GetMapping
     public String showAnalytics(@RequestParam(value = "timeframe", defaultValue = "day") String timeframe,
@@ -27,7 +28,7 @@ public class ManagerAnalyticsController {
                                 Principal principal,
                                 Model model) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
-        Long storeId = user.getStore() != null ? user.getStore().getId() : 1L;
+        Long storeId = storeAccess.assignedStore().getId();
 
         ChartSeriesDto revenueChart;
         if ("product".equalsIgnoreCase(type)) {

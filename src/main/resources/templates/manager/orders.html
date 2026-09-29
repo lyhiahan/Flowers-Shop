@@ -139,10 +139,19 @@
                                     <span th:if="${o.status.name() == 'DELIVERING'}" class="badge bg-warning text-dark badge-status">Đang Giao</span>
                                     <span th:if="${o.status.name() == 'DELIVERED'}" class="badge bg-success badge-status">Đã Giao Tới</span>
                                     <span th:if="${o.status.name() == 'COMPLETED'}" class="badge bg-success badge-status">Hoàn Thành</span>
-                                    <span th:if="${o.status.name() == 'CANCELLED'}" class="badge bg-dark badge-status">Đã Hủy</span>
+                                    <span th:if="${o.status.name() == 'REFUND_REQUESTED'}" class="badge bg-warning text-dark">Chờ hoàn tiền</span><span th:if="${o.status.name() == 'REFUNDED'}" class="badge bg-secondary">Đã hoàn tiền</span><span th:if="${o.status.name() == 'CANCELLED'}" class="badge bg-dark badge-status">Đã Hủy</span>
                                 </td>
                                 <td class="text-end pe-3">
                                     <div class="btn-group btn-group-sm">
+                                        <form th:if="${o.paymentMethod == 'BANK_TRANSFER' and o.paymentStatus == 'UNPAID' and o.status.name() != 'CANCELLED'}" th:action="@{/manager/orders/confirm-payment/{id}(id=${o.id})}" method="post" class="d-inline" onsubmit="return confirm('Bạn đã kiểm tra và nhận đủ tiền chuyển khoản?');">
+                                            <button class="btn btn-outline-success btn-sm">Xác nhận đã nhận tiền</button>
+                                        </form>
+                                        <form th:if="${o.status.name() == 'REFUND_REQUESTED'}" th:action="@{/manager/orders/update-status/{id}(id=${o.id})}" method="post" class="d-inline" onsubmit="return confirm('Bạn đã hoàn tiền thực tế cho khách hàng?');">
+                                            <input type="hidden" name="status" value="REFUNDED"><button class="btn btn-outline-danger btn-sm">Xác nhận đã hoàn tiền</button>
+                                        </form>
+                                        <form th:if="${o.status.name() == 'PREPARING' and o.shippingMethod == 'PICKUP'}" th:action="@{/manager/orders/update-status/{id}(id=${o.id})}" method="post" class="d-inline">
+                                            <input type="hidden" name="status" value="COMPLETED"><button class="btn btn-success btn-sm">Đã giao hoa tại quầy và nhận tiền</button>
+                                        </form>
                                         <!-- Tiếp nhận đơn -->
                                         <form th:if="${o.status.name() == 'PENDING'}" th:action="@{'/manager/orders/update-status/' + ${o.id}}" method="post" class="d-inline">
                                             <input type="hidden" name="status" value="CONFIRMED">
@@ -156,7 +165,7 @@
                                         </form>
 
                                         <!-- Điều phối Shipper -->
-                                        <button th:if="${o.status.name() == 'PREPARING'}" class="btn btn-warning btn-sm"
+                                        <button th:if="${o.status.name() == 'PREPARING' and o.shippingMethod != 'PICKUP'}" class="btn btn-warning btn-sm"
                                                 data-bs-toggle="modal" th:data-bs-target="'#assignModal_' + ${o.id}">
                                             Giao Shipper
                                         </button>
@@ -220,9 +229,9 @@
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancel" data-testid="btnCancel">
                         Cancel
                     </button>
-                    <a th:href="@{/logout}" class="btn btn-danger rounded-pill px-4 fw-semibold text-white text-decoration-none" id="btnConfirm" data-testid="btnConfirm">
+                    <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit"   class="btn btn-danger rounded-pill px-4 fw-semibold text-white text-decoration-none" id="btnConfirm" data-testid="btnConfirm">
                         Confirm
-                    </a>
+                    </button></form>
                 </div>
             </div>
         </div>

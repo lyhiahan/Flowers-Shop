@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -123,6 +123,10 @@
                                          </button>
                                     </form>
 
+                                    <form th:action="@{/manager/products/stock/{id}(id=${p.id})}" method="post" class="d-flex gap-1 mt-2">
+                                        <label class="small">Tồn kho <input type="number" name="quantity" min="0" max="1000000" th:value="${stock[p.id]}" class="form-control form-control-sm" required></label>
+                                        <button class="btn btn-sm btn-outline-secondary">Lưu tồn kho</button>
+                                    </form>
                                     <!-- Modal Sửa Mẫu Hoa -->
                                     <div class="modal fade text-start" th:id="'editProductModal_' + ${p.id}" tabindex="-1">
                                         <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -213,9 +217,9 @@
                             <input type="number" name="promotionalPrice" class="form-control" placeholder="VD: 490000">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small fw-semibold">Số lượng đã bán ban đầu:</label>
-                            <input type="number" name="sold" class="form-control" value="15" min="0">
-                            <small class="text-muted">Gợi ý: Nhập &ge; 10 để xuất hiện tại trang chủ mục Khách vãng lai</small>
+                            <label class="form-label small fw-semibold">Tồn kho ban đầu tại chi nhánh:</label>
+                            <input type="number" name="initialStock" class="form-control" value="0" min="0" max="1000000">
+                            <small class="text-muted">Nhập số lượng thực tế có thể bán.</small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold">Link ảnh mẫu hoa (URL):</label>
@@ -254,9 +258,9 @@
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancelSignOut">
                         Hủy Bỏ
                     </button>
-                    <a th:href="@{/logout}" class="btn btn-danger rounded-pill px-4 fw-semibold" id="btnConfirmSignOut">
+                    <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit"   class="btn btn-danger rounded-pill px-4 fw-semibold" id="btnConfirmSignOut">
                         Xác Nhận Đăng Xuất
-                    </a>
+                    </button></form>
                 </div>
             </div>
         </div>

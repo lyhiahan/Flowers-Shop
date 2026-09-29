@@ -159,7 +159,7 @@
 
                 <!-- Giá bán -->
                 <div class="mb-4">
-                    <div class="fs-2 fw-bold text-danger font-serif" th:text="${#numbers.formatDecimal(product.priceBuy, 0, 'COMMA', 0, 'POINT') + ' đ'}"></div>
+                    <div class="fs-2 fw-bold text-danger font-serif" th:text="${#numbers.formatDecimal(product.sellingPrice, 0, 'COMMA', 0, 'POINT') + ' đ'}"></div>
                 </div>
 
                 <!-- Form thêm giỏ hàng -->

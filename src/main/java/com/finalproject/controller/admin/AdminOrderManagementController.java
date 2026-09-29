@@ -17,6 +17,7 @@ import java.util.List;
 public class AdminOrderManagementController {
 
     private final OrderService orderService;
+    private final com.finalproject.service.OrderWorkflowService workflow;
 
     @GetMapping
     public String listAllOrders(@RequestParam(value = "status", required = false) String statusStr,
@@ -32,7 +33,9 @@ public class AdminOrderManagementController {
 
         model.addAttribute("orders", orders);
         model.addAttribute("currentStatus", statusStr != null ? statusStr : "ALL");
-        model.addAttribute("orderStatuses", OrderStatus.values());
+        model.addAttribute("orderStatuses", java.util.List.of(OrderStatus.PENDING, OrderStatus.CONFIRMED, OrderStatus.PREPARING,
+                OrderStatus.PICKED_UP, OrderStatus.DELIVERING, OrderStatus.DELIVERED, OrderStatus.COMPLETED,
+                OrderStatus.CANCELLED, OrderStatus.REFUND_REQUESTED, OrderStatus.REFUNDED));
         return "admin/orders-manage";
     }
 
@@ -44,6 +47,17 @@ public class AdminOrderManagementController {
             orderService.updateOrderStatus(id, status);
             ra.addFlashAttribute("successMessage", "Cập nhật trạng thái đơn #" + id + " thành [" + status + "] thành công!");
         } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/admin/orders-manage";
+    }
+
+    @PostMapping("/confirm-payment/{id}")
+    public String confirmPayment(@PathVariable("id") Long id, RedirectAttributes ra) {
+        try {
+            workflow.confirmPayment(id);
+            ra.addFlashAttribute("successMessage", "Đã xác nhận thanh toán đơn #" + id);
+        } catch (RuntimeException ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
         return "redirect:/admin/orders-manage";

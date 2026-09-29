@@ -69,7 +69,7 @@ public class CartItem {
 
     public java.math.BigDecimal getBuyAmount() {
         if (orderType == OrderType.BUY && product != null && product.getPriceBuy() != null) {
-            return product.getPriceBuy().multiply(java.math.BigDecimal.valueOf(quantity != null ? quantity : 1));
+            return product.getSellingPrice().multiply(java.math.BigDecimal.valueOf(quantity != null ? quantity : 1));
         }
         return java.math.BigDecimal.ZERO;
     }

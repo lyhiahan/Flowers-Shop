@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "app.rental.enabled", havingValue = "true")
 @RequiredArgsConstructor
 @Slf4j
 public class OverdueOrderScheduler {

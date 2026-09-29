@@ -25,40 +25,47 @@ import java.util.List;
 public class ManagerProductController {
 
     private final ProductRepository productRepository;
+    private final com.finalproject.repository.StoreInventoryRepository inventories;
+    private final com.finalproject.service.InventoryService inventoryService;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final com.finalproject.service.StoreAccessService storeAccess;
     private final StoreRepository storeRepository;
 
     @GetMapping
     public String listProducts(Principal principal, Model model) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
-        Long storeId = user.getStore() != null ? user.getStore().getId() : 1L;
+        Long storeId = storeAccess.assignedStore().getId();
 
         List<Product> products = productRepository.findByStoreIdOrderByCreatedAtDesc(storeId);
-        if (products.isEmpty()) {
-            products = productRepository.findAll();
-        }
+
 
         model.addAttribute("products", products);
+        java.util.Map<Long, Integer> stock = new java.util.HashMap<>();
+        for (Product product : products) stock.put(product.getId(), inventories.findByStoreIdAndProductId(storeId, product.getId())
+                .map(com.finalproject.entity.StoreInventory::getQuantity).orElse(0));
+        model.addAttribute("stock", stock);
         model.addAttribute("categories", categoryRepository.findAll());
         model.addAttribute("store", user.getStore());
         return "manager/products";
     }
 
     @PostMapping("/add")
+    @org.springframework.transaction.annotation.Transactional
     public String addProduct(Principal principal,
                              @RequestParam("name") String name,
                              @RequestParam("categoryId") Long categoryId,
                              @RequestParam("priceBuy") BigDecimal priceBuy,
                              @RequestParam(value = "promotionalPrice", required = false) BigDecimal promotionalPrice,
-                             @RequestParam(value = "sold", defaultValue = "0") int sold,
+                             @RequestParam(value = "initialStock", defaultValue = "0") int initialStock,
                              @RequestParam(value = "imageUrl", required = false) String imageUrl,
                              @RequestParam(value = "description", required = false) String description,
                              RedirectAttributes ra) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
-        Store store = user.getStore() != null ? user.getStore() : storeRepository.findById(1L).orElse(null);
+        Store store = storeAccess.assignedStore();
         Category category = categoryRepository.findById(categoryId).orElseThrow();
 
+        validatePrice(priceBuy, promotionalPrice);
         Product product = Product.builder()
                 .name(name)
                 .category(category)
@@ -68,7 +75,7 @@ public class ManagerProductController {
                 .priceRentPerDay(priceBuy.multiply(BigDecimal.valueOf(0.1)))
                 .depositFee(priceBuy.multiply(BigDecimal.valueOf(0.3)))
                 .promotionalPrice(promotionalPrice != null ? promotionalPrice : priceBuy)
-                .sold(sold)
+                .sold(0)
                 .rating(5.0)
                 .imageUrl(imageUrl != null && !imageUrl.trim().isEmpty() ? imageUrl.trim() : "https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=600")
                 .description(description)
@@ -77,6 +84,7 @@ public class ManagerProductController {
                 .build();
 
         productRepository.save(product);
+        inventoryService.setStock(product.getId(), initialStock);
         ra.addFlashAttribute("successMessage", "Thêm mẫu hoa [" + name + "] thành công!");
         return "redirect:/manager/products";
     }
@@ -91,7 +99,9 @@ public class ManagerProductController {
                                 @RequestParam(value = "description", required = false) String description,
                                 RedirectAttributes ra) {
         Product p = productRepository.findById(id).orElseThrow();
+        storeAccess.requireManager(p.getStore());
         Category cat = categoryRepository.findById(categoryId).orElseThrow();
+        validatePrice(priceBuy, promotionalPrice);
         p.setName(name);
         p.setCategory(cat);
         p.setPriceBuy(priceBuy);
@@ -108,9 +118,22 @@ public class ManagerProductController {
     @PostMapping("/toggle-selling/{id}")
     public String toggleSelling(@PathVariable("id") Long id, RedirectAttributes ra) {
         Product p = productRepository.findById(id).orElseThrow();
+        storeAccess.requireManager(p.getStore());
         p.setIsSelling(!p.getIsSelling());
         productRepository.save(p);
         ra.addFlashAttribute("successMessage", "Đã cập nhật trạng thái mở bán sản phẩm!");
         return "redirect:/manager/products";
+    }
+    @PostMapping("/stock/{id}")
+    public String updateStock(@PathVariable("id") Long id, @RequestParam("quantity") int quantity, RedirectAttributes ra) {
+        inventoryService.setStock(id, quantity);
+        ra.addFlashAttribute("successMessage", "Đã cập nhật tồn kho thực tế.");
+        return "redirect:/manager/products";
+    }
+
+    private void validatePrice(BigDecimal price, BigDecimal promotion) {
+        if (price == null || price.signum() < 0 || (promotion != null && (promotion.signum() < 0 || promotion.compareTo(price) > 0))) {
+            throw new IllegalArgumentException("Giá bán phải không âm; giá khuyến mãi không vượt quá giá bán.");
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -36,7 +36,7 @@
                 <a th:href="@{/manager/stores}" class="active"><i class="bi bi-shop"></i> Thông Tin Chi Nhánh</a>
                 <hr class="border-secondary my-2">
                 <a th:href="@{/}"><i class="bi bi-house-door"></i> Xem Website Khách</a>
-                <a th:href="@{/logout}" class="text-danger"><i class="bi bi-box-arrow-right"></i> Đăng Xuất</a>
+                <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit"   class="text-danger"><i class="bi bi-box-arrow-right"></i> Đăng Xuất</button></form>
             </nav>
         </div>
 

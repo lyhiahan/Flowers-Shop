@@ -154,7 +154,7 @@
                                             <span class="text-muted d-block small" style="font-size: 0.75rem;">/ 1 ngày</span>
                                         </div>
                                         <div th:if="${item.orderType.name() == 'BUY'}">
-                                            <strong class="text-danger" th:text="${#numbers.formatDecimal(item.product.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                                            <strong class="text-danger" th:text="${#numbers.formatDecimal(item.product.sellingPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
                                         </div>
                                     </td>
 
@@ -339,23 +339,23 @@
                                         <label class="form-check-label fw-bold text-dark" for="pay_bank">
                                             🏦 Chuyển khoản ngân hàng (VietQR)
                                         </label>
-                                        <div class="text-muted small ps-4" style="font-size: 0.78rem;">Quét mã QR thanh toán nhanh qua app ngân hàng</div>
+                                        <div class="text-muted small ps-4" style="font-size: 0.78rem;">Liên hệ cửa hàng để nhận thông tin chuyển khoản; đơn chỉ được ghi nhận đã trả tiền sau khi cửa hàng xác nhận.</div>
                                     </div>
 
                                     <div class="form-check p-3 border rounded-3 payment-option bg-white">
-                                        <input class="form-check-input ms-0 me-2" type="radio" name="paymentMethod" id="pay_vnpay" value="VNPAY">
+                                        <input class="form-check-input ms-0 me-2" type="radio" name="paymentMethod" id="pay_vnpay" value="VNPAY" disabled>
                                         <label class="form-check-label fw-bold text-dark" for="pay_vnpay">
                                             💳 Cổng VNPAY / ATM / Visa
                                         </label>
-                                        <div class="text-muted small ps-4" style="font-size: 0.78rem;">Thẻ nội địa và quốc tế bảo mật qua VNPAY</div>
+                                        <div class="text-muted small ps-4" style="font-size: 0.78rem;">Chưa hỗ trợ thanh toán qua VNPAY</div>
                                     </div>
 
                                     <div class="form-check p-3 border rounded-3 payment-option bg-white">
-                                        <input class="form-check-input ms-0 me-2" type="radio" name="paymentMethod" id="pay_momo" value="MOMO">
+                                        <input class="form-check-input ms-0 me-2" type="radio" name="paymentMethod" id="pay_momo" value="MOMO" disabled>
                                         <label class="form-check-label fw-bold text-dark" for="pay_momo">
                                             📱 Ví điện tử MoMo
                                         </label>
-                                        <div class="text-muted small ps-4" style="font-size: 0.78rem;">Thanh toán siêu tốc qua ứng dụng MoMo</div>
+                                        <div class="text-muted small ps-4" style="font-size: 0.78rem;">Chưa hỗ trợ thanh toán qua MoMo</div>
                                     </div>
                                 </div>
                             </div>

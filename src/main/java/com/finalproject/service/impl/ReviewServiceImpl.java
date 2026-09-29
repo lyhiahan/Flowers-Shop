@@ -57,6 +57,13 @@ public class ReviewServiceImpl implements ReviewService {
             }
         }
 
+        if (order == null || !order.getUser().getId().equals(userId)
+                || order.getOrderDetails().stream().noneMatch(d -> d.getProduct().getId().equals(productId))) {
+            throw new org.springframework.security.access.AccessDeniedException("Đơn đánh giá phải thuộc bạn và chứa sản phẩm này.");
+        }
+        if (reviewRepository.existsByUserIdAndProductIdAndOrderId(userId, productId, order.getId())) {
+            throw new IllegalStateException("Bạn đã đánh giá sản phẩm trong đơn này.");
+        }
         Review review = Review.builder()
                 .user(user)
                 .product(product)

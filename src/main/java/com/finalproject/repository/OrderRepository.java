@@ -12,6 +12,9 @@ import java.util.List;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select o from Order o where o.id = :id")
+    java.util.Optional<Order> findLockedById(@Param("id") Long id);
     List<Order> findByUserIdOrderByCreatedAtDesc(Long userId);
     List<Order> findByPickupStoreIdOrderByCreatedAtDesc(Long storeId);
     List<Order> findByPickupStoreIdAndStatus(Long storeId, OrderStatus status);

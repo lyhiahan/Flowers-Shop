@@ -36,13 +36,13 @@ public class ProductForm {
     @DecimalMin(value = "0.0", inclusive = false, message = "Giá bán đứt phải là số dương lớn hơn 0. Vui lòng nhập lại.")
     private BigDecimal priceBuy;
 
-    @NotNull(message = "Giá thuê theo ngày không được để trống")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Giá thuê theo ngày phải lớn hơn 0. Vui lòng nhập lại.")
-    private BigDecimal priceRentPerDay;
+    private BigDecimal priceRentPerDay = BigDecimal.ZERO;
 
-    @NotNull(message = "Tiền cọc bắt buộc không được để trống")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Tiền cọc bắt buộc phải lớn hơn 0 (Khuyến nghị: Bằng 50% - 100% giá bán đứt).")
-    private BigDecimal depositFee;
+    private BigDecimal depositFee = BigDecimal.ZERO;
+
+    @jakarta.validation.constraints.Min(0)
+    @jakarta.validation.constraints.Max(1000000)
+    private int initialStock = 0;
 
     // Danh sách ảnh tải lên Cloudinary
     private List<MultipartFile> imageFiles;

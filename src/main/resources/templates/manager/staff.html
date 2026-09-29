@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -92,7 +92,7 @@
                                 <td class="text-muted" th:text="'@' + ${s.username}"></td>
                                 <td>
                                     <span th:if="${s.role.name() == 'SHIPPER'}" class="badge bg-info-subtle text-info-emphasis rounded-pill">Giao hàng</span>
-                                    <span th:if="${s.role.name() == 'MANAGER' or s.role.name() == 'VENDOR'}" class="badge bg-success-subtle text-success rounded-pill">Quản lý / Đối tác</span>
+                                    <span th:if="${s.role.name() == 'STAFF'}" class="badge bg-info text-dark">Nhân viên</span><span th:if="${s.role.name() == 'MANAGER' or s.role.name() == 'VENDOR'}" class="badge bg-success-subtle text-success rounded-pill">Quản lý / Đối tác</span>
                                 </td>
                                 <td class="small" th:text="${s.phone != null ? s.phone : 'Chưa cập nhật'}"></td>
                                 <td class="small text-muted" th:text="${s.email}"></td>
@@ -139,7 +139,7 @@
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold">Vai trò:</label>
                             <select name="role" class="form-select">
-                                <option value="MANAGER">Quản lý / Đối tác chi nhánh</option>
+                                <option value="STAFF">Nhân viên cửa hàng</option>
                                 <option value="SHIPPER">Nhân viên giao hàng</option>
                             </select>
                         </div>
@@ -180,9 +180,9 @@
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancelSignOut">
                         Hủy Bỏ
                     </button>
-                    <a th:href="@{/logout}" class="btn btn-danger rounded-pill px-4 fw-semibold" id="btnConfirmSignOut">
+                    <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit"   class="btn btn-danger rounded-pill px-4 fw-semibold" id="btnConfirmSignOut">
                         Xác Nhận Đăng Xuất
-                    </a>
+                    </button></form>
                 </div>
             </div>
         </div>

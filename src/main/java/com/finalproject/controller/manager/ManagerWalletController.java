@@ -22,13 +22,15 @@ import java.util.List;
 public class ManagerWalletController {
 
     private final UserRepository userRepository;
+    private final com.finalproject.service.WalletService walletService;
+    private final com.finalproject.service.StoreAccessService storeAccess;
     private final StoreRepository storeRepository;
     private final TransactionRepository transactionRepository;
 
     @GetMapping
     public String viewWallet(Principal principal, Model model) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
-        Store store = user.getStore() != null ? user.getStore() : storeRepository.findById(1L).orElse(null);
+        Store store = storeAccess.assignedStore();
 
         List<Transaction> transactions = store != null ?
                 transactionRepository.findByStoreIdOrderByCreatedAtDesc(store.getId()) :
@@ -46,35 +48,12 @@ public class ManagerWalletController {
                                     @RequestParam("accountNumber") String accountNumber,
                                     @RequestParam("accountHolder") String accountHolder,
                                     RedirectAttributes ra) {
-        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
-        Store store = user.getStore() != null ? user.getStore() : storeRepository.findById(1L).orElseThrow();
-
-        if (amount == null || amount.compareTo(BigDecimal.valueOf(50000)) < 0) {
-            ra.addFlashAttribute("errorMessage", "Số tiền rút tối thiểu là 50.000 VNĐ!");
-            return "redirect:/manager/wallet";
+        try {
+            walletService.requestWithdrawal(amount, bankName, accountNumber, accountHolder);
+            ra.addFlashAttribute("successMessage", "Đã giữ số tiền yêu cầu và gửi lệnh rút cho quản trị viên xử lý.");
+        } catch (RuntimeException ex) {
+            ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
-
-        if (store.getEWallet() == null || store.getEWallet().compareTo(amount) < 0) {
-            ra.addFlashAttribute("errorMessage", "Số dư ví không đủ để thực hiện lệnh rút!");
-            return "redirect:/manager/wallet";
-        }
-
-        // Trừ tiền trong ví
-        store.setEWallet(store.getEWallet().subtract(amount));
-        storeRepository.save(store);
-
-        // Ghi nhật ký giao dịch
-        Transaction tx = Transaction.builder()
-                .store(store)
-                .amount(amount)
-                .isUp(false)
-                .type("WITHDRAWAL")
-                .description("Rút tiền về ngân hàng " + bankName + " - STK: " + accountNumber + " (" + accountHolder + ")")
-                .status("COMPLETED")
-                .build();
-        transactionRepository.save(tx);
-
-        ra.addFlashAttribute("successMessage", "Lệnh rút tiền " + amount + "đ thành công!");
         return "redirect:/manager/wallet";
     }
 }

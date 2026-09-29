@@ -58,9 +58,9 @@
                 <a th:href="@{/}" class="btn btn-sm btn-outline-dark rounded-pill px-3">
                     <i class="bi bi-shop me-1"></i> Cửa Hàng
                 </a>
-                <a th:href="@{/logout}" class="btn btn-sm btn-outline-danger rounded-pill px-2" title="Đăng xuất">
+                <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit"   class="btn btn-sm btn-outline-danger rounded-pill px-2" title="Đăng xuất">
                     <i class="bi bi-box-arrow-right"></i>
-                </a>
+                </button></form>
             </div>
         </div>
     </nav>
@@ -130,7 +130,7 @@
                         <span th:if="${o.status.name() == 'RETURNED'}" class="badge bg-success px-3 py-2 rounded-pill">
                             📦 Đã Trả Khung (Hoàn Cọc)
                         </span>
-                        <span th:if="${o.status.name() == 'CANCELLED'}" class="badge bg-dark px-3 py-2 rounded-pill">
+                        <span th:if="${o.status.name() == 'REFUND_REQUESTED'}" class="badge bg-warning text-dark">Chờ hoàn tiền</span><span th:if="${o.status.name() == 'REFUNDED'}" class="badge bg-secondary">Đã hoàn tiền</span><span th:if="${o.status.name() == 'CANCELLED'}" class="badge bg-dark px-3 py-2 rounded-pill">
                             ❌ Đã Hủy
                         </span>
                     </div>

@@ -21,6 +21,10 @@ public class Transaction {
     @JoinColumn(name = "store_id")
     private Store store;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private Order order;
+
     @Column(name = "is_up", nullable = false)
     @Builder.Default
     private Boolean isUp = true; // true: cộng tiền (nạp/thu nhập), false: trừ tiền (rút tiền/chi phí)

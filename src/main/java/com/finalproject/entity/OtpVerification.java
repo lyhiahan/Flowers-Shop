@@ -31,4 +31,8 @@ public class OtpVerification {
 
     @Builder.Default
     private Boolean isUsed = false;
+
+    @Builder.Default
+    @Column(name = "failed_attempts", nullable = false)
+    private Integer failedAttempts = 0;
 }
