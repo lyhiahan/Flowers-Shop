@@ -184,8 +184,10 @@
 
                         <div class="d-flex gap-2 mt-auto pt-2 border-top">
                             <a th:href="@{/stores/{id}(id=${s.id})}" class="btn btn-outline-danger btn-sm rounded-pill flex-fill">Tham Quan Shop</a>
-                            <form th:action="@{/customer/profile/store/follow/{id}(id=${s.id})}" method="post" class="m-0">
-                                <button type="submit" class="btn btn-outline-secondary btn-sm rounded-pill">Bỏ theo dõi</button>
+                            <form th:action="@{/stores/{id}/follow(id=${s.id})}" method="post" class="m-0">
+                                <button type="submit" class="btn btn-danger btn-sm rounded-pill px-3 fw-bold shadow-sm" title="Bấm để hủy theo dõi cửa hàng">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Following
+                                </button>
                             </form>
                         </div>
                     </div>

@@ -46,16 +46,21 @@
                         <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill" th:if="${store.rating != null}">
                             ⭐ <span th:text="${store.rating}">5.0</span>
                         </span>
+                        <!-- Post-conditions UC_015: Cập nhật số người theo dõi của cửa hàng -->
+                        <span class="badge bg-danger-subtle text-danger rounded-pill">
+                            <i class="bi bi-people-fill me-1"></i><span id="storeFollowerCount" th:text="${followerCount != null ? followerCount : 0}">0</span> người theo dõi
+                        </span>
                     </div>
                     <p class="text-muted mb-1"><i class="bi bi-geo-alt-fill text-danger me-1"></i> <span th:text="${store.address}"></span></p>
                     <p class="text-muted mb-2"><i class="bi bi-telephone-fill text-primary me-1"></i> Hotline: <span th:text="${store.phone != null ? store.phone : 'Chưa cập nhật'}"></span></p>
                     <p class="text-secondary small mb-0" th:text="${store.bio != null ? store.bio : 'Chào mừng bạn đến với chi nhánh cửa hàng hoa tươi của chúng tôi.'}"></p>
                 </div>
                 <div class="d-flex flex-column gap-2">
-                    <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/customer/store/follow/{id}(id=${store.id})}" method="post">
-                        <button type="submit" class="btn btn-sm rounded-pill px-3 w-100" th:classappend="${isFollowed} ? 'btn-secondary' : 'btn-danger'">
-                            <i class="bi me-1" th:classappend="${isFollowed} ? 'bi-check-lg' : 'bi-plus-lg'"></i>
-                            <span th:text="${isFollowed} ? 'Đang theo dõi' : 'Theo dõi cửa hàng'"></span>
+                    <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/stores/{id}/follow(id=${store.id})}" method="post">
+                        <button type="submit" id="btnToggleFollowStoreHeader" class="btn btn-sm rounded-pill px-4 py-2 w-100 fw-bold shadow-sm"
+                                th:classappend="${isFollowed} ? 'btn-danger' : 'btn-outline-danger'">
+                            <i class="bi me-1" th:classappend="${isFollowed} ? 'bi-check-circle-fill' : 'bi-plus-circle'"></i>
+                            <span th:text="${isFollowed} ? 'Following' : 'Follow'"></span>
                         </button>
                     </form>
                     <a th:href="@{/stores}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
@@ -65,30 +70,42 @@
             </div>
         </div>
 
-        <!-- Thanh Điều Hướng Của Cửa Hàng (Store Navigation Bar) -->
-        <ul class="nav nav-pills gap-2 mb-4 p-2 bg-white rounded-pill shadow-sm border" id="storeNav">
-            <li class="nav-item">
-                <a class="nav-link rounded-pill px-4 fw-semibold" id="tabCollection"
-                   th:classappend="${currentTab == 'collection' or currentTab == null} ? 'active bg-danger text-white' : 'text-secondary'" 
-                   th:href="@{/stores/{id}(id=${store.id}, tab='collection')}">
-                    🌸 Collection
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link rounded-pill px-4 fw-semibold" id="tabReview"
-                   th:classappend="${currentTab == 'review'} ? 'active bg-danger text-white' : 'text-secondary'" 
-                   th:href="@{/stores/{id}(id=${store.id}, tab='review')}">
-                    ⭐ Review & Rating
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link rounded-pill px-4 fw-semibold" id="tabAbout"
-                   th:classappend="${currentTab == 'about'} ? 'active bg-danger text-white' : 'text-secondary'" 
-                   th:href="@{/stores/{id}(id=${store.id}, tab='about')}">
-                    ℹ️ About
-                </a>
-            </li>
-        </ul>
+        <!-- UC_015 Step 2: Thanh Điều Hướng Của Cửa Hàng (Store Navigation Bar) có nút Follow / Following -->
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+            <ul class="nav nav-pills gap-2 p-2 bg-white rounded-pill shadow-sm border mb-0" id="storeNav">
+                <li class="nav-item">
+                    <a class="nav-link rounded-pill px-4 fw-semibold" id="tabCollection"
+                       th:classappend="${currentTab == 'collection' or currentTab == null} ? 'active bg-danger text-white' : 'text-secondary'" 
+                       th:href="@{/stores/{id}(id=${store.id}, tab='collection')}">
+                        🌸 Collection
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link rounded-pill px-4 fw-semibold" id="tabReview"
+                       th:classappend="${currentTab == 'review'} ? 'active bg-danger text-white' : 'text-secondary'" 
+                       th:href="@{/stores/{id}(id=${store.id}, tab='review')}">
+                        ⭐ Review & Rating
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link rounded-pill px-4 fw-semibold" id="tabAbout"
+                       th:classappend="${currentTab == 'about'} ? 'active bg-danger text-white' : 'text-secondary'" 
+                       th:href="@{/stores/{id}(id=${store.id}, tab='about')}">
+                        ℹ️ About
+                    </a>
+                </li>
+            </ul>
+
+            <!-- UC_015 Step 2 & 3: Chọn nút Follow (hoặc nút Following) trên thanh điều hướng của cửa hàng -->
+            <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/stores/{id}/follow(id=${store.id})}" method="post" class="m-0">
+                <button type="submit" id="btnToggleFollowStoreNav" class="btn rounded-pill px-4 py-2 fw-bold shadow-sm d-flex align-items-center gap-2"
+                        th:classappend="${isFollowed} ? 'btn-danger' : 'btn-outline-danger'"
+                        title="Bấm để theo dõi hoặc hủy theo dõi cửa hàng">
+                    <i class="bi" th:classappend="${isFollowed} ? 'bi-check-circle-fill' : 'bi-plus-circle'"></i>
+                    <span th:text="${isFollowed} ? 'Following' : 'Follow'"></span>
+                </button>
+            </form>
+        </div>
 
         <!-- TAB 1: COLLECTION (BỘ SƯU TẬP & TÌM KIẾM SẢN PHẨM TRONG SHOP) -->
         <div th:if="${currentTab == 'collection' or currentTab == null}">
