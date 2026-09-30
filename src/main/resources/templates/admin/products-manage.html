@@ -240,7 +240,8 @@
                     <table class="table table-admin-products align-middle mb-0">
                         <thead style="background-color: #E5EEE8 !important;">
                         <tr style="background-color: #E5EEE8 !important;">
-                            <th class="ps-4 fw-bold" style="white-space: nowrap !important; min-width: 280px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Sản phẩm</th>
+                            <th class="ps-4 fw-bold" style="white-space: nowrap !important; width: 80px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Mã</th>
+                            <th class="fw-bold" style="white-space: nowrap !important; min-width: 260px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Sản phẩm</th>
                             <th class="fw-bold" style="white-space: nowrap !important; min-width: 170px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Chi nhánh</th>
                             <th class="fw-bold" style="white-space: nowrap !important; min-width: 110px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Kiểu dáng</th>
                             <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 130px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Giá bán</th>
@@ -251,14 +252,19 @@
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(products)}">
-                            <td colspan="7" class="text-center py-5 text-muted" style="font-size: 15.5px;">
+                            <td colspan="8" class="text-center py-5 text-muted" style="font-size: 15.5px;">
                                 <i class="bi bi-flower1 fs-1 d-block mb-2 text-secondary opacity-50"></i>
                                 Không tìm thấy sản phẩm hoa nào phù hợp.
                             </td>
                         </tr>
                         <tr th:each="p : ${products}">
-                            <!-- 1. Sản phẩm: Ảnh 64x64px có fallback, tên Nunito 17px đậm 700, mã ID nhỏ -->
-                            <td class="ps-4">
+                            <!-- 1. Mã sản phẩm -->
+                            <td class="ps-4" style="white-space: nowrap;">
+                                <span class="badge" style="background-color: #F0F6F2; color: #20382E; font-weight: 700; font-size: 13.5px; border: 1px solid #D1E5DA; padding: 5px 9px; border-radius: 6px;" th:text="'#' + ${p.id}">#1</span>
+                            </td>
+
+                            <!-- 2. Sản phẩm: Ảnh 64x64px có fallback, tên Nunito 17px đậm 700 -->
+                            <td>
                                 <div class="d-flex align-items-center gap-3">
                                     <img th:src="${p.imageUrl != null and !p.imageUrl.isEmpty() ? p.imageUrl : 'https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=300'}"
                                          onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=300';"
@@ -267,9 +273,6 @@
                                     <div>
                                         <div class="fw-bold" style="font-size: 17px; font-weight: 700; color: #20382E; line-height: 1.35;" th:text="${p.name}">
                                             Bó Hoa Hồng Đỏ Ecuador Tình Nồng Cháy
-                                        </div>
-                                        <div style="font-size: 14px; color: #66736B; margin-top: 3px;">
-                                            Mã: #<span th:text="${p.id}">1</span>
                                         </div>
                                     </div>
                                 </div>
