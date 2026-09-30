@@ -1,69 +1,636 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <meta charset="UTF-8">
-    <title>Sản Phẩm Đã Xem - Chuỗi Cửa Hàng Hoa Tươi</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-page); color: var(--text-main); }
-        .font-serif { font-family: 'Playfair Display', Georgia, serif; }
-        .product-card { border-radius: 16px; border: 1px solid var(--border-soft); background: var(--surface-card); transition: transform 0.2s; }
-        .product-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08); }
-    </style>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Mẫu Hoa Bạn Vừa Xem Gần Đây - HOA TƯƠI SÀI GÒN</title>
+
+  <!-- Google Fonts: Nunito & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,700;1,800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <style>
+    @layer base {
+      html, body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Nunito', sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      body { overscroll-behavior: none; }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
+      * {
+        font-family: 'Nunito', sans-serif;
+      }
+      .material-symbols-outlined {
+        font-family: 'Material Symbols Outlined' !important;
+        font-weight: normal;
+        font-style: normal;
+        display: inline-block;
+        line-height: 1;
+        text-transform: none;
+        letter-spacing: normal;
+        word-wrap: normal;
+        white-space: nowrap;
+        direction: ltr;
+      }
+    }
+    ::-webkit-scrollbar { display: none; }
+  </style>
+
+  <!-- Tailwind CSS CDN matching ui/DESIGN.md & code.html -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "botanic-bg": "#FAF6F0",
+            "botanic-subtle": "#F7EFE9",
+            "botanic-border": "#EBDED4",
+            "botanic-card": "#FFFFFF",
+            "botanic-card-soft": "#FFF7F2",
+            "botanic-dark": "#222222",
+            "botanic-muted": "#666666",
+            "botanic-green": "#264E43",
+            "botanic-green-dark": "#1E433A",
+            "botanic-green-light": "#E9F2EE",
+            "botanic-rose": "#C84357",
+            "botanic-rose-dark": "#B83A4B",
+            "botanic-rose-soft": "#FDF0F2",
+            "botanic-tag-border": "#F3D5DB"
+          },
+          fontFamily: {
+            sans: ["Nunito", "sans-serif"],
+            nunito: ["Nunito", "sans-serif"]
+          },
+          boxShadow: {
+            "soft": "0 2px 10px rgba(0,0,0,0.04)",
+            "card": "0 4px 16px -2px rgba(38,78,67,0.06), 0 2px 6px -1px rgba(200,67,87,0.03)",
+            "hover": "0 14px 28px -4px rgba(38,78,67,0.12), 0 6px 12px -2px rgba(200,67,87,0.06)"
+          }
+        }
+      }
+    };
+  </script>
 </head>
-<body>
-<nav class="navbar navbar-expand-lg bg-white border-bottom py-3 sticky-top">
-    <div class="container">
-        <a class="navbar-brand font-serif fw-bold fs-4" style="color: var(--brand-green);" th:href="@{/}">🌸 HOA TƯƠI SÀI GÒN</a>
-        <div class="d-flex align-items-center gap-3">
-            <a th:href="@{/customer/profile}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-person me-1"></i> Hồ sơ</a>
-            <a th:href="@{/cart}" class="btn btn-outline-danger btn-sm"><i class="bi bi-cart me-1"></i> Giỏ hàng</a>
-            <a th:href="@{/}" class="btn btn-light btn-sm"><i class="bi bi-house me-1"></i> Trang chủ</a>
+
+<body class="bg-[#FAF6F0] font-sans text-botanic-dark antialiased selection:bg-botanic-rose-soft selection:text-botanic-rose">
+
+  <!-- 1. THANH TIỆN ÍCH TRÊN CÙNG (Top Utility Bar) -->
+  <div class="bg-[#F7EFE9] border-b border-[#EBDED4] text-[13px] text-[#555555] py-2 px-4 sm:px-8">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2 font-bold text-[#444]">
+        <span class="text-botanic-rose">🌸</span>
+        <span>Chuỗi Cửa Hàng Hoa Tươi &amp; Điện Hoa Sài Gòn</span>
+      </div>
+      <div class="flex items-center flex-wrap gap-4 sm:gap-6 text-xs sm:text-[13px] font-medium">
+        <span class="flex items-center gap-1.5 font-bold text-botanic-dark">
+          <span class="text-botanic-rose">📞</span> Hotline: 028 1111 222
+        </span>
+        <span class="hidden md:inline-flex items-center gap-1.5 text-botanic-green font-bold">
+          <span class="material-symbols-outlined text-[15px]">schedule</span> Giao nhanh 60–90 phút
+        </span>
+        <a class="flex items-center gap-1 hover:text-botanic-green transition-colors" th:href="@{/following}">
+          <span class="material-symbols-outlined text-[15px]">bookmark</span>Following
+        </a>
+        <a class="flex items-center gap-1 hover:text-botanic-green transition-colors" th:href="@{/stores}">
+          <span class="material-symbols-outlined text-[16px]">storefront</span>Hệ thống cửa hàng
+        </a>
+        <a class="flex items-center gap-1 hover:text-botanic-green transition-colors" th:href="@{/customer/profile}">
+          <span class="material-symbols-outlined text-[16px]">person</span>Hồ sơ
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. THANH ĐIỀU HƯỚNG CHÍNH (Main Header) -->
+  <header class="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-[#EBDED4]/80 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4 lg:gap-8">
+      
+      <!-- Logo -->
+      <a class="flex items-center gap-2.5 shrink-0 group" th:href="@{/}">
+        <div class="w-10 h-10 rounded-full bg-botanic-subtle flex items-center justify-center text-botanic-rose text-2xl shadow-xs group-hover:scale-105 transition-transform">
+          🌸
         </div>
-    </div>
-</nav>
-
-<div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h3 class="font-serif fw-bold mb-1">🕒 Mẫu Hoa Bạn Vừa Xem Gần Đây</h3>
-            <p class="text-muted small mb-0">Lịch sử các sản phẩm bạn đã bấm xem chi tiết</p>
+        <div class="flex flex-col">
+          <span class="font-extrabold text-lg sm:text-xl tracking-wide text-botanic-dark group-hover:text-botanic-green transition-colors">HOA TƯƠI SÀI GÒN</span>
+          <span class="text-[10px] uppercase tracking-[0.2em] text-[#888] font-bold -mt-0.5">Atelier Floral Botanique</span>
         </div>
-        <a th:href="@{/}" class="btn btn-outline-secondary rounded-pill btn-sm">Tiếp tục khám phá</a>
+      </a>
+
+      <!-- Ô tìm kiếm Pill-shape -->
+      <div class="flex-1 max-w-xl hidden md:block">
+        <form th:action="@{/}" method="get" class="flex items-center bg-white border border-[#DDD] hover:border-botanic-green/60 focus-within:border-botanic-green focus-within:ring-2 focus-within:ring-botanic-green/10 rounded-full p-1 pl-4 transition-all shadow-xs">
+          <div class="flex items-center gap-1 text-xs font-bold text-[#444] pr-3 border-r border-[#E5E5E5] shrink-0">
+            <span class="text-botanic-rose text-sm">🌸</span> Mẫu hoa
+          </div>
+          <input name="keyword" class="w-full bg-transparent px-3 py-1.5 text-xs sm:text-[13.5px] font-medium text-botanic-dark placeholder-[#888] border-none focus:ring-0 focus:outline-none" 
+                 placeholder="Tìm hoa hồng, mẫu đơn, hướng dương..." type="text">
+          <button class="bg-[#264E43] hover:bg-[#1E433A] text-white text-xs font-bold px-4 py-2 rounded-full flex items-center gap-1 transition-colors shrink-0 shadow-xs" type="submit">
+            <span class="material-symbols-outlined text-[15px]">search</span>Tìm
+          </button>
+        </form>
+      </div>
+
+      <!-- Cụm nút tiện ích bên phải -->
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+        <!-- Wishlist -->
+        <a class="w-9 h-9 rounded-full border border-[#EBE3DC] flex items-center justify-center text-[#555] hover:text-botanic-rose hover:border-botanic-rose transition-colors" 
+           th:href="@{/customer/wishlist}" title="Hoa yêu thích">
+          <span class="material-symbols-outlined text-[19px]">favorite_border</span>
+        </a>
+
+        <!-- Following -->
+        <a class="w-9 h-9 rounded-full border border-[#EBE3DC] flex items-center justify-center text-[#555] hover:text-botanic-green hover:border-botanic-green transition-colors" 
+           th:href="@{/following}" title="Following">
+          <span class="material-symbols-outlined text-[19px]">bookmark_border</span>
+        </a>
+
+        <!-- Giỏ hàng -->
+        <a class="relative w-9 h-9 rounded-full border border-[#EBE3DC] flex items-center justify-center text-[#555] hover:text-botanic-green hover:border-botanic-green transition-colors" 
+           th:href="@{/cart}" title="Giỏ hàng">
+          <span class="material-symbols-outlined text-[19px]">shopping_bag</span>
+          <span class="absolute -top-1 -right-1 bg-botanic-rose text-white text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shadow-xs"
+                th:text="${cartItemCount != null ? cartItemCount : 0}">0</span>
+        </a>
+
+        <!-- Tài khoản dropdown -->
+        <div class="flex items-center gap-2 pl-2 border-l border-[#EBDED4]">
+          <a th:href="@{/customer/profile}" class="flex items-center gap-1.5 py-1.5 px-3 rounded-full hover:bg-botanic-subtle text-xs sm:text-[13px] font-bold text-[#333] transition-colors">
+            <span class="material-symbols-outlined text-[19px] text-botanic-green">account_circle</span>
+            <span class="hidden sm:inline" sec:authentication="name">Tài khoản</span>
+          </a>
+        </div>
+      </div>
     </div>
 
-    <div th:if="${#lists.isEmpty(recentProducts)}" class="text-center py-5 bg-white rounded-4 border p-5">
-        <div class="fs-1 text-secondary opacity-50 mb-3">🌿</div>
-        <h5>Bạn chưa xem mẫu hoa nào gần đây</h5>
-        <p class="text-muted small">Hãy ghé thăm trang chủ để khám phá hàng chục mẫu hoa tuyệt đẹp.</p>
-        <a th:href="@{/}" class="btn btn-danger rounded-pill px-4 py-2 mt-2">Xem Ngay</a>
+    <!-- Sub-menu Category Navigation -->
+    <div class="border-t border-[#F0E6DE] bg-[#FAF6F0]">
+      <div class="max-w-7xl mx-auto px-4 sm:px-8 flex items-center gap-6 sm:gap-8 overflow-x-auto text-[13.5px] py-2.5 font-bold">
+        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/}">Tất cả mẫu hoa</a>
+        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/(categoryId=1)}">🌸 Bó Hoa</a>
+        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/(categoryId=2)}">🧺 Giỏ / Lẵng Hoa</a>
+        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/(categoryId=3)}">🎉 Hoa Khai Trương</a>
+        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/(categoryId=4)}">💍 Hoa Cưới</a>
+        <span class="text-[#D8CBC2] hidden sm:inline">|</span>
+        <a class="text-botanic-green font-extrabold whitespace-nowrap inline-flex items-center gap-1 border-b-2 border-botanic-green pb-0.5" th:href="@{/customer/profile/recently-viewed}">
+          <span class="material-symbols-outlined text-[16px]">history</span>Đã xem gần đây
+        </a>
+      </div>
     </div>
+  </header>
 
-    <div th:if="${!#lists.isEmpty(recentProducts)}" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
-        <div class="col" th:each="p : ${recentProducts}">
-            <div class="card h-100 product-card bg-white p-2">
-                <a th:href="@{/products/{id}(id=${p.id})}">
-                    <img th:src="${p.imageUrl != null ? p.imageUrl : 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=600'}"
-                         class="card-img-top rounded-3" height="220" style="object-fit: cover;" alt="Flower">
-                </a>
-                <div class="card-body p-3">
-                    <div class="d-flex justify-content-between align-items-start mb-1">
-                        <span class="badge bg-danger-subtle text-danger rounded-pill small" th:text="${p.category != null ? p.category.name : 'Hoa tươi'}"></span>
-                        <div class="text-warning small"><i class="bi bi-star-fill"></i> <span th:text="${p.rating}">5.0</span></div>
-                    </div>
-                    <h6 class="card-title fw-bold mb-2">
-                        <a th:href="@{/products/{id}(id=${p.id})}" class="text-dark text-decoration-none text-truncate d-block" th:text="${p.name}"></a>
-                    </h6>
-                    <div class="text-danger fw-bold fs-6 mb-3" th:text="${#numbers.formatDecimal(p.priceBuy, 0, 'COMMA', 0, 'POINT') + ' đ'}"></div>
+  <main class="w-full bg-[#FAF6F0] min-h-screen py-6 sm:py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8">
 
-                    <a th:href="@{/products/{id}(id=${p.id})}" class="btn btn-danger btn-sm rounded-pill w-100">Xem Chi Tiết</a>
-                </div>
+      <!-- Breadcrumbs -->
+      <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs font-semibold text-[#777] mb-5">
+        <a class="hover:text-botanic-green transition-colors flex items-center gap-1" th:href="@{/}">
+          <span class="material-symbols-outlined text-[16px]">home</span>Trang chủ
+        </a>
+        <span class="material-symbols-outlined text-[14px] text-[#BBB]">chevron_right</span>
+        <a class="hover:text-botanic-green transition-colors" th:href="@{/customer/profile}">Tài khoản</a>
+        <span class="material-symbols-outlined text-[14px] text-[#BBB]">chevron_right</span>
+        <span class="text-botanic-rose font-bold">Mẫu hoa đã xem gần đây</span>
+      </nav>
+
+      <!-- 3. BANNER TIÊU ĐỀ TRANG "MẪU HOA BẠN VỪA XEM GẦN ĐÂY" -->
+      <div class="relative overflow-hidden rounded-2xl bg-[#FFF7F2] border border-[#EEDFD5] p-6 sm:p-8 lg:p-9 mb-8 shadow-xs">
+        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div class="max-w-2xl">
+            <div class="flex flex-wrap items-center gap-2.5 mb-2.5">
+              <h1 class="font-extrabold text-2xl sm:text-3xl text-botanic-dark flex items-center gap-2">
+                <span>🕒</span> Mẫu Hoa Bạn Vừa Xem Gần Đây
+              </h1>
+              <span id="recentCountBadge" class="px-3.5 py-1 rounded-full bg-white border border-[#E8D6CB] text-botanic-rose font-bold text-xs shadow-xs"
+                    th:text="${recentProducts != null ? #lists.size(recentProducts) + ' mẫu hoa đã xem gần nhất' : '0 mẫu hoa'}">
+                0 mẫu hoa đã xem
+              </span>
             </div>
+            <p class="text-[14px] text-botanic-muted leading-relaxed font-medium">
+              Lịch sử các sản phẩm bạn đã bấm xem chi tiết. Dễ dàng so sánh giá, kiểu dáng và chọn ngay mẫu hoa ưng ý nhất cho người bạn thương.
+            </p>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="flex flex-wrap items-center gap-3 shrink-0">
+            <a th:href="@{/}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#264E43] hover:bg-[#1E433A] text-white text-xs sm:text-sm font-bold transition-all shadow-sm">
+              <span>Tiếp tục khám phá 🌸</span>
+            </a>
+            <button id="clearHistoryBtn" type="button" 
+                    class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white hover:bg-[#FAF0E8] border border-[#E5D7CD] text-[#555] hover:text-botanic-rose text-xs sm:text-sm font-bold transition-all shadow-xs">
+              <span class="material-symbols-outlined text-[17px]">delete_sweep</span>
+              <span>Xóa lịch sử đã xem</span>
+            </button>
+          </div>
         </div>
+      </div>
+
+      <!-- 4. BỘ LỌC VÀ TÌM KIẾM NHANH (Filter & Toolbar) -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-3.5 sm:p-4 rounded-xl bg-white border border-[#EBDED4] mb-8 shadow-xs">
+        <!-- Filter Chips -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0" id="filterContainer">
+          <button class="filter-chip active-filter px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#264E43] text-white shadow-xs whitespace-nowrap" 
+                  data-filter="all" onclick="filterCategory('all', this)">
+            Tất cả (<span th:text="${recentProducts != null ? #lists.size(recentProducts) : 0}">0</span>)
+          </button>
+          <button class="filter-chip px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#FAF6F0] text-[#555] hover:bg-[#F2E7DC] hover:text-botanic-dark whitespace-nowrap" 
+                  data-filter="hoa-bo" onclick="filterCategory('hoa-bo', this)">
+            🌸 Bó Hoa
+          </button>
+          <button class="filter-chip px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#FAF6F0] text-[#555] hover:bg-[#F2E7DC] hover:text-botanic-dark whitespace-nowrap" 
+                  data-filter="hoa-gio" onclick="filterCategory('hoa-gio', this)">
+            🧺 Giỏ / Lẵng Hoa
+          </button>
+          <button class="filter-chip px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#FAF6F0] text-[#555] hover:bg-[#F2E7DC] hover:text-botanic-dark whitespace-nowrap" 
+                  data-filter="khai-truong" onclick="filterCategory('khai-truong', this)">
+            🎉 Hoa Khai Trương
+          </button>
+          <button class="filter-chip px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#FAF6F0] text-[#555] hover:bg-[#F2E7DC] hover:text-botanic-dark whitespace-nowrap" 
+                  data-filter="hoa-cuoi" onclick="filterCategory('hoa-cuoi', this)">
+            💍 Hoa Cưới
+          </button>
+        </div>
+
+        <!-- Sort & Metadata -->
+        <div class="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+          <span class="hidden sm:inline-flex items-center gap-1 text-xs font-semibold text-[#777]">
+            <span class="material-symbols-outlined text-[15px] text-[#999]">history_toggle_off</span>Lưu trong 30 ngày qua
+          </span>
+          <div class="relative inline-block">
+            <select id="sortSelect" onchange="sortRecentProducts(this.value)"
+                    class="appearance-none pl-3.5 pr-8 py-1.5 rounded-full bg-[#FAF6F0] border border-[#E2D4C8] text-xs font-bold text-botanic-dark cursor-pointer hover:border-botanic-green transition-colors focus:outline-none">
+              <option value="default">Sắp xếp: Mới xem gần nhất</option>
+              <option value="price-asc">Giá: Từ thấp đến cao</option>
+              <option value="price-desc">Giá: Từ cao đến thấp</option>
+              <option value="rating">Được đánh giá cao nhất</option>
+            </select>
+            <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#777] text-[16px]">arrow_drop_down</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. LƯỚI SẢN PHẨM ĐÃ XEM (Product Grid 4 Cột) -->
+      <div th:if="${!#lists.isEmpty(recentProducts)}" 
+           class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10" id="productGrid">
+        
+        <div th:each="p : ${recentProducts}" 
+             class="product-item group flex flex-col rounded-2xl bg-white border border-[#EFE8E1] overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-card shadow-xs"
+             th:data-id="${p.id}"
+             th:data-price="${p.priceBuy != null ? p.priceBuy : (p.sellingPrice != null ? p.sellingPrice : 0)}"
+             th:data-rating="${p.rating != null ? p.rating : 5.0}"
+             th:data-category="${p.name.contains('Giỏ') or p.name.contains('Lẵng') ? 'hoa-gio' : (p.name.contains('Khai Trương') or p.name.contains('Kệ') ? 'khai-truong' : (p.name.contains('Cưới') or p.name.contains('Cầm Tay') ? 'hoa-cuoi' : 'hoa-bo'))}">
+          
+          <!-- Image Thumbnail & Badges -->
+          <div class="relative aspect-[4/5] overflow-hidden bg-[#F7EFE9]">
+            <a th:href="@{/products/{id}(id=${p.id})}" class="block w-full h-full">
+              <img th:src="${p.imageUrl != null ? p.imageUrl : 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=600'}"
+                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                   th:alt="${p.name}"
+                   onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800&amp;q=80';">
+            </a>
+
+            <!-- Category & Express Badges -->
+            <div class="absolute top-3 left-3 flex flex-col gap-1.5 items-start">
+              <span class="px-2.5 py-0.5 rounded-full bg-botanic-rose text-white text-[11px] font-bold shadow-xs"
+                    th:text="${p.category != null ? p.category.name : 'Hoa tươi'}">Hoa tươi</span>
+              <span class="px-2.5 py-0.5 rounded-full bg-[#E9F2EE] text-botanic-green text-[10px] font-bold flex items-center gap-1 border border-[#CCE2D8]">
+                <span class="material-symbols-outlined text-[12px]">bolt</span>Giao 60-90p
+              </span>
+            </div>
+
+            <!-- Quick Follow / Wishlist Button -->
+            <form sec:authorize="hasRole('CUSTOMER')" 
+                  th:action="@{/customer/following/toggle/{productId}(productId=${p.id})}" 
+                  method="post"
+                  class="absolute top-3 right-3 m-0"
+                  onsubmit="toggleRecentlyViewedFollowAjax(event, this)">
+              <button type="submit" 
+                      class="w-8 h-8 rounded-full bg-white/90 backdrop-blur-xs text-[#555] hover:text-botanic-rose flex items-center justify-center transition-colors shadow-xs cursor-pointer" 
+                      title="Theo dõi mẫu hoa này">
+                <span class="material-symbols-outlined text-[18px]">favorite_border</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Body Card Content -->
+          <div class="p-4 flex-1 flex flex-col justify-between">
+            <div>
+              <!-- Rating & Status line -->
+              <div class="flex items-center justify-between text-xs text-[#777] mb-1.5 font-medium">
+                <span class="flex items-center gap-1 text-[#e5a01d] font-bold">
+                  <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                  <span th:text="${p.rating != null ? p.rating : '5.0'}">5.0</span>
+                  <span class="text-[#888] font-normal" th:text="'(' + ${p.sold != null ? p.sold : 12} + ')'"></span>
+                </span>
+                <span class="text-botanic-green font-bold flex items-center gap-0.5">
+                  <span class="material-symbols-outlined text-[13px]">verified</span>Tuyển chọn
+                </span>
+              </div>
+
+              <!-- Product Name -->
+              <h3 class="text-[15.5px] leading-snug font-bold text-botanic-dark line-clamp-2 group-hover:text-botanic-rose transition-colors mb-2">
+                <a th:href="@{/products/{id}(id=${p.id})}" th:text="${p.name}">Tên Mẫu Hoa Tươi</a>
+              </h3>
+
+              <!-- Price -->
+              <div class="flex items-baseline gap-2 mb-3.5">
+                <span class="text-lg font-extrabold text-botanic-rose"
+                      th:text="${#numbers.formatDecimal(p.priceBuy != null ? p.priceBuy : (p.sellingPrice != null ? p.sellingPrice : 0), 0, 'COMMA', 0, 'POINT')} + ' đ'">850.000 đ</span>
+                <span th:if="${p.promotionalPrice != null and p.priceBuy != null and p.promotionalPrice < p.priceBuy}"
+                      class="text-xs text-[#999] line-through font-semibold"
+                      th:text="${#numbers.formatDecimal(p.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'">950.000 đ</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons Row -->
+            <div class="flex items-center gap-2 pt-2 border-t border-[#F0E6DE]">
+              <a th:href="@{/products/{id}(id=${p.id})}" 
+                 class="flex-1 py-2 px-3 rounded-full bg-[#264E43] hover:bg-[#1E433A] text-white text-xs font-bold text-center transition-colors shadow-xs">
+                Xem Chi Tiết
+              </a>
+              
+              <!-- Quick Add to Cart Form -->
+              <form th:action="@{/cart/add}" method="post" class="m-0">
+                <input type="hidden" name="productId" th:value="${p.id}">
+                <input type="hidden" name="quantity" value="1">
+                <button type="submit" 
+                        class="w-9 h-9 rounded-full bg-[#FAF6F0] hover:bg-[#F2E8DF] text-botanic-rose flex items-center justify-center transition-colors border border-[#EBDED4] cursor-pointer" 
+                        title="Thêm vào giỏ hàng">
+                  <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. KHỐI TRẠNG THÁI RỖNG (Empty State) -->
+      <div id="emptyRecentState" th:classappend="${#lists.isEmpty(recentProducts)} ? '' : 'hidden'" class="mb-12">
+        <div class="border-2 border-dashed border-[#DFCEC3] rounded-2xl bg-[#FFFBF8] p-8 sm:p-12 text-center transition-all">
+          <div class="w-16 h-16 mx-auto rounded-full bg-[#E9F2EE] flex items-center justify-center text-2xl text-botanic-green mb-4 shadow-xs">
+            🌿
+          </div>
+          <h3 class="text-xl sm:text-2xl font-bold text-botanic-dark mb-2">Bạn chưa xem mẫu hoa nào gần đây</h3>
+          <p class="text-sm font-medium text-botanic-muted max-w-md mx-auto mb-5 leading-relaxed">
+            Hãy ghé thăm trang chủ để khám phá hàng chục mẫu hoa tuyệt đẹp được tuyển chọn và thiết kế thủ công tinh tế mỗi ngày.
+          </p>
+          <a th:href="@{/}" class="inline-flex items-center gap-2 px-7 py-2.5 rounded-full bg-[#264E43] hover:bg-[#1E433A] text-white text-sm font-bold transition-all shadow-sm">
+            <span class="material-symbols-outlined text-[17px]">local_florist</span>
+            <span>Khám Phá Ngay</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- 7. CAM KẾT CHẤT LƯỢNG HOA TƯƠI (Quality Commitments) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 pb-8">
+        <div class="p-4 rounded-xl bg-white border border-[#EBDED4] flex items-center gap-3.5 shadow-xs">
+          <div class="w-11 h-11 rounded-full bg-botanic-subtle text-botanic-rose flex items-center justify-center text-xl shrink-0">🌸</div>
+          <div>
+            <div class="font-bold text-[14px] text-botanic-dark">100% Hoa Tươi Mới</div>
+            <p class="text-xs text-[#777] font-medium mt-0.5">Nhập mới mỗi sáng từ Đà Lạt &amp; Hà Lan</p>
+          </div>
+        </div>
+        <div class="p-4 rounded-xl bg-white border border-[#EBDED4] flex items-center gap-3.5 shadow-xs">
+          <div class="w-11 h-11 rounded-full bg-[#E9F2EE] text-botanic-green flex items-center justify-center text-xl shrink-0">🚀</div>
+          <div>
+            <div class="font-bold text-[14px] text-botanic-dark">Giao Hỏa Tốc 60–90 Phút</div>
+            <p class="text-xs text-[#777] font-medium mt-0.5">Đóng gói giữ ẩm, gửi ảnh trước khi giao</p>
+          </div>
+        </div>
+        <div class="p-4 rounded-xl bg-white border border-[#EBDED4] flex items-center gap-3.5 shadow-xs">
+          <div class="w-11 h-11 rounded-full bg-botanic-subtle text-botanic-rose flex items-center justify-center text-xl shrink-0">✉️</div>
+          <div>
+            <div class="font-bold text-[14px] text-botanic-dark">Miễn Phí Thiệp &amp; Banner</div>
+            <p class="text-xs text-[#777] font-medium mt-0.5">In thông điệp chúc mừng theo yêu cầu</p>
+          </div>
+        </div>
+      </div>
+
     </div>
-</div>
+  </main>
+
+  <!-- FOOTER: Đồng bộ hệ thống nhận diện -->
+  <footer class="w-full bg-[#FAF6F0] border-t border-[#EBDED4] text-botanic-dark pt-10 pb-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-10 pb-10 border-b border-[#EBDED4]">
+      
+      <!-- Col 1: Brand & Stores List -->
+      <div class="md:col-span-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-botanic-rose text-2xl">🌸</span>
+          <span class="font-bold text-xl text-botanic-dark tracking-wide">HOA TƯƠI SÀI GÒN</span>
+        </div>
+        <p class="text-xs sm:text-[13px] text-[#666] leading-relaxed mb-6 font-medium">
+          Hệ thống điện hoa cao cấp và thiết kế hoa nghệ thuật phong cách Pháp hiện đại. Trao gửi cảm xúc ngọt ngào, tinh tế qua từng đóa hoa tuyển chọn với cam kết tươi mới cùng dịch vụ giao hỏa tốc 60–90 phút toàn Sài Gòn.
+        </p>
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-bold text-[#444] flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[17px] text-botanic-green">store</span>Hệ Thống Chi Nhánh Cửa Hàng
+          </span>
+          <a class="text-xs text-botanic-rose font-bold hover:underline" th:href="@{/stores}">Xem tất cả →</a>
+        </div>
+        <div class="space-y-2.5 mb-4">
+          <!-- Chi nhánh 1 -->
+          <div class="p-3 rounded-xl bg-white border border-[#EBE1D8] text-xs flex items-center justify-between gap-3 shadow-2xs">
+            <div>
+              <div class="flex items-center gap-1.5 font-bold text-[#333] mb-0.5">
+                <span>🌸</span>Chi Nhánh Bến Thành (Quận 1)
+              </div>
+              <p class="text-[#777] text-[11px] font-medium">123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM</p>
+            </div>
+            <span class="px-2 py-1 rounded bg-[#E9F2EE] text-botanic-green font-bold text-[11px] shrink-0">028 1111 222</span>
+          </div>
+          <!-- Chi nhánh 2 -->
+          <div class="p-3 rounded-xl bg-white border border-[#EBE1D8] text-xs flex items-center justify-between gap-3 shadow-2xs">
+            <div>
+              <div class="flex items-center gap-1.5 font-bold text-[#333] mb-0.5">
+                <span>🌸</span>Chi Nhánh Phú Mỹ Hưng (Quận 7)
+              </div>
+              <p class="text-[#777] text-[11px] font-medium">456 Nguyễn Thị Thập, Tân Hưng, Quận 7, TP.HCM</p>
+            </div>
+            <span class="px-2 py-1 rounded bg-[#E9F2EE] text-botanic-green font-bold text-[11px] shrink-0">028 3333 444</span>
+          </div>
+        </div>
+        <p class="text-xs text-[#888] flex items-center gap-1.5 font-medium">
+          <span class="material-symbols-outlined text-[15px] text-botanic-rose">schedule</span>Mở cửa: 07:00 - 22:00 (Mỗi ngày, kể cả ngày lễ Tết)
+        </p>
+      </div>
+
+      <!-- Col 2: Khám Phá Hoa Tươi -->
+      <div class="md:col-span-2 md:col-start-7">
+        <h4 class="font-bold text-sm text-botanic-dark mb-4 tracking-wide">Khám Phá Hoa Tươi</h4>
+        <ul class="space-y-2.5 text-xs text-[#666] font-medium">
+          <li><a class="hover:text-botanic-rose transition-colors" th:href="@{/}">Hoa Bán Chạy Nhất</a></li>
+          <li><a class="hover:text-botanic-rose transition-colors" th:href="@{/}">Bộ Sưu Tập Mới Về</a></li>
+          <li><a class="hover:text-botanic-rose transition-colors" th:href="@{/}">Hoa Được Đánh Giá Cao</a></li>
+          <li><a class="hover:text-botanic-rose transition-colors" th:href="@{/stores}">Hệ Thống Chi Nhánh</a></li>
+        </ul>
+      </div>
+
+      <!-- Col 3: Chăm Sóc Khách Hàng -->
+      <div class="md:col-span-2">
+        <h4 class="font-bold text-sm text-botanic-dark mb-4 tracking-wide">Chăm Sóc Khách Hàng</h4>
+        <ul class="space-y-2.5 text-xs text-[#666] font-medium">
+          <li><a class="hover:text-botanic-rose transition-colors" href="#">Chính Sách Giao Hoa 60-90 Phút</a></li>
+          <li><a class="hover:text-botanic-rose transition-colors" href="#">Bảo Hành Độ Tươi 100%</a></li>
+          <li><a class="hover:text-botanic-rose transition-colors" href="#">In Thiệp &amp; Banner Miễn Phí</a></li>
+          <li><a class="hover:text-botanic-rose transition-colors" href="#">Hotline Đặt Gấp: 028 1111 222</a></li>
+        </ul>
+      </div>
+
+      <!-- Col 4: Liên Kết Tiện Ích -->
+      <div class="md:col-span-2">
+        <h4 class="font-bold text-sm text-botanic-dark mb-4 tracking-wide">Liên Kết Tiện Ích</h4>
+        <ul class="space-y-2.5 text-xs text-[#666] font-medium">
+          <li><a class="hover:text-botanic-rose transition-colors" th:href="@{/}">Trang Chủ</a></li>
+          <li><a class="hover:text-botanic-rose transition-colors" th:href="@{/following}">Bộ Sưu Tập Following</a></li>
+          <li><a class="hover:text-botanic-rose transition-colors" th:href="@{/customer/orders}">Lịch Sử Mua Hàng</a></li>
+          <li><a class="hover:text-botanic-rose transition-colors" th:href="@{/customer/wishlist}">Hoa Yêu Thích</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Bottom Copyright Bar -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 pt-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#888] font-medium">
+      <div>© 2026 HOA TƯƠI SÀI GÒN - Bản quyền thuộc về Chuỗi Cửa Hàng Hoa Tươi &amp; Điện Hoa Sài Gòn</div>
+      <div class="flex items-center gap-1 text-[#666] font-bold">
+        <span class="text-botanic-rose">🌸</span>100% Hoa Tươi Tuyển Chọn
+      </div>
+    </div>
+  </footer>
+
+  <!-- Floating Toast Notification -->
+  <div id="recentToast" 
+       class="fixed top-6 right-6 z-50 transform -translate-y-4 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2.5 px-5 py-3 rounded-full bg-[#264E43] text-white shadow-2xl text-xs sm:text-sm font-bold border border-white/20">
+    <span class="material-symbols-outlined text-[18px] text-[#97F5CC]">check_circle</span>
+    <span id="recentToastMsg">Thao tác thành công</span>
+  </div>
+
+  <script>
+    let toastTimeout = null;
+    function showToast(message) {
+      const toast = document.getElementById('recentToast');
+      const toastMsg = document.getElementById('recentToastMsg');
+      if (!toast || !toastMsg) return;
+      toastMsg.textContent = message;
+      toast.classList.remove('-translate-y-4', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('-translate-y-4', 'opacity-0', 'pointer-events-none');
+      }, 2500);
+    }
+
+    // Filter category
+    function filterCategory(category, btn) {
+      const chips = document.querySelectorAll('.filter-chip');
+      chips.forEach(c => {
+        c.classList.remove('bg-[#264E43]', 'text-white', 'shadow-xs', 'active-filter');
+        c.classList.add('bg-[#FAF6F0]', 'text-[#555]');
+      });
+      btn.classList.add('bg-[#264E43]', 'text-white', 'shadow-xs', 'active-filter');
+      btn.classList.remove('bg-[#FAF6F0]', 'text-[#555]');
+
+      const products = document.querySelectorAll('.product-item');
+      let visibleCount = 0;
+      products.forEach(p => {
+        const cat = p.getAttribute('data-category');
+        if (category === 'all' || cat === category) {
+          p.style.display = 'flex';
+          visibleCount++;
+        } else {
+          p.style.display = 'none';
+        }
+      });
+    }
+
+    // Sort products
+    function sortRecentProducts(sortType) {
+      const grid = document.getElementById('productGrid');
+      if (!grid) return;
+      const products = Array.from(grid.querySelectorAll('.product-item'));
+
+      products.sort((a, b) => {
+        const priceA = parseFloat(a.getAttribute('data-price') || '0');
+        const priceB = parseFloat(b.getAttribute('data-price') || '0');
+        const ratingA = parseFloat(a.getAttribute('data-rating') || '0');
+        const ratingB = parseFloat(b.getAttribute('data-rating') || '0');
+
+        if (sortType === 'price-asc') return priceA - priceB;
+        if (sortType === 'price-desc') return priceB - priceA;
+        if (sortType === 'rating') return ratingB - ratingA;
+        return 0;
+      });
+
+      products.forEach(p => grid.appendChild(p));
+    }
+
+    // Clear history action
+    document.getElementById('clearHistoryBtn')?.addEventListener('click', function() {
+      if (confirm('Bạn có chắc chắn muốn xóa toàn bộ danh sách hoa đã xem gần đây không?')) {
+        const grid = document.getElementById('productGrid');
+        const emptyState = document.getElementById('emptyRecentState');
+        const countBadge = document.getElementById('recentCountBadge');
+
+        if (grid) {
+          grid.style.opacity = '0';
+          grid.style.transform = 'scale(0.95)';
+          grid.style.transition = 'all 0.3s ease';
+          setTimeout(() => {
+            grid.remove();
+            if (emptyState) emptyState.classList.remove('hidden');
+            if (countBadge) countBadge.textContent = '0 mẫu hoa';
+            showToast('Đã xóa lịch sử xem gần đây thành công!');
+          }, 300);
+        }
+      }
+    });
+
+    // Quick follow toggle
+    function toggleRecentlyViewedFollowAjax(event, formEl) {
+      if (event) event.preventDefault();
+      const btn = formEl.querySelector('button');
+      const icon = btn ? btn.querySelector('span') : null;
+      const url = formEl.getAttribute('action');
+      const csrfInput = formEl.querySelector('input[name="_csrf"]');
+      const csrfToken = csrfInput ? csrfInput.value : '';
+
+      const headers = { 'X-Requested-With': 'XMLHttpRequest' };
+      if (csrfToken) headers['X-CSRF-TOKEN'] = csrfToken;
+
+      fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: new FormData(formEl)
+      })
+      .then(res => res.json())
+      .then(data => {
+        showToast(data.message || (data.liked ? 'Đã theo dõi sản phẩm!' : 'Đã hủy theo dõi sản phẩm!'));
+        if (icon) {
+          if (data.liked) {
+            icon.textContent = 'favorite';
+            icon.style.fontVariationSettings = "'FILL' 1";
+            btn.classList.add('text-botanic-rose');
+          } else {
+            icon.textContent = 'favorite_border';
+            icon.style.fontVariationSettings = "'FILL' 0";
+            btn.classList.remove('text-botanic-rose');
+          }
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        formEl.submit();
+      });
+    }
+  </script>
 </body>
 </html>

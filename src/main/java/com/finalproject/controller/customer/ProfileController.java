@@ -24,6 +24,7 @@ public class ProfileController {
     private final com.finalproject.service.ProductService productService;
     private final com.finalproject.repository.UserFollowStoreRepository followStoreRepository;
     private final com.finalproject.repository.StoreRepository storeRepository;
+    private final com.finalproject.service.CartService cartService;
 
     @GetMapping({"", "/profile"})
     public String viewProfile(Principal principal, Model model) {
@@ -194,6 +195,9 @@ public class ProfileController {
     public String viewRecentlyViewed(Principal principal, Model model) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         model.addAttribute("recentProducts", productService.getRecentlyViewed(user.getId()));
+        try {
+            model.addAttribute("cartItemCount", cartService.getCartItemCount(principal.getName()));
+        } catch (Exception ignored) {}
         return "customer/recently-viewed";
     }
 
