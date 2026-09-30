@@ -162,13 +162,31 @@ public class ProfileController {
 
     // UC_015 Step 2 & 3: Chọn nút Follow/Following -> Theo dõi hoặc hủy theo dõi
     @PostMapping({"/wishlist/toggle/{productId}", "/profile/wishlist/toggle/{productId}", "/following/toggle/{productId}", "/following/product/{productId}", "/products/{productId}/follow"})
-    public String toggleWishlist(Principal principal, @PathVariable("productId") Long productId,
+    public Object toggleWishlist(Principal principal, @PathVariable("productId") Long productId,
                                  @RequestHeader(value = "Referer", required = false) String referer,
+                                 @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
                                  RedirectAttributes ra) {
-        if (principal == null) return "redirect:/login";
+        if (principal == null) {
+            if ("XMLHttpRequest".equalsIgnoreCase(requestedWith)) {
+                return org.springframework.http.ResponseEntity.status(401).body(java.util.Map.of("success", false, "message", "Vui lòng đăng nhập để lưu sản phẩm!"));
+            }
+            return "redirect:/login";
+        }
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         boolean liked = productService.toggleWishlist(user.getId(), productId);
-        ra.addFlashAttribute("successMessage", liked ? "Đã theo dõi sản phẩm thành công! (Following)" : "Đã hủy theo dõi sản phẩm (Unfollow)!");
+        String message = liked ? "Đã theo dõi sản phẩm thành công!" : "Đã hủy theo dõi sản phẩm!";
+
+        if ("XMLHttpRequest".equalsIgnoreCase(requestedWith)) {
+            int remainingCount = productService.getWishlist(user.getId()).size();
+            return org.springframework.http.ResponseEntity.ok(java.util.Map.of(
+                    "success", true,
+                    "liked", liked,
+                    "remainingCount", remainingCount,
+                    "message", message
+            ));
+        }
+
+        ra.addFlashAttribute("successMessage", message);
         return referer != null ? "redirect:" + referer : "redirect:/customer/following";
     }
 

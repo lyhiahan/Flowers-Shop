@@ -272,9 +272,8 @@
                 <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
                 Bộ Sưu Tập Cá Nhân
               </span>
-              <span class="inline-flex items-center px-3 py-1 rounded-full bg-[#E9F3EE] text-[12px] font-bold text-[#1E453E]"
-                    th:text="${wishlist != null ? #lists.size(wishlist) + ' mẫu hoa đã lưu' : '0 mẫu hoa đã lưu'}">
-                0 mẫu hoa đã lưu
+              <span id="wishlistCountBadge" class="inline-flex items-center px-3 py-1 rounded-full bg-[#E9F3EE] text-[12px] font-bold text-[#1E453E]">
+                <span id="wishlistCountNumber" th:text="${wishlist != null ? #lists.size(wishlist) : 0}">0</span>&nbsp;mẫu hoa đã lưu
               </span>
             </div>
             <h1 class="font-extrabold text-[26px] md:text-[30px] text-[#2D2424] tracking-tight mb-1.5 flex items-center gap-2">
@@ -299,7 +298,7 @@
     <!-- ==============================================
          FILTER & QUICK SEARCH TOOLBAR
          ============================================== -->
-    <div th:if="${not #lists.isEmpty(wishlist)}" class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-space-lg bg-surface-container-lowest p-3 rounded-2xl border border-[#EAE1DC] shadow-xs">
+    <div th:if="${not #lists.isEmpty(wishlist)}" id="filterToolbar" class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-space-lg bg-surface-container-lowest p-3 rounded-2xl border border-[#EAE1DC] shadow-xs">
       
       <!-- Category Filter Chips (client-side instant filter) -->
       <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none" id="filterChipsContainer">
@@ -338,7 +337,9 @@
     <!-- ==============================================
          EMPTY STATE (KHI DANH SÁCH YÊU THÍCH TRỐNG)
          ============================================== -->
-    <div th:if="${#lists.isEmpty(wishlist)}" class="bg-surface-container-lowest rounded-2xl shadow-xs border border-[#EAE1DC] text-center p-12 my-6">
+    <div id="emptyWishlistState"
+         class="bg-surface-container-lowest rounded-2xl shadow-xs border border-[#EAE1DC] text-center p-12 my-6"
+         th:classappend="${#lists.isEmpty(wishlist)} ? '' : 'hidden'">
       <div class="w-16 h-16 rounded-full bg-[#FCECEE] text-secondary flex items-center justify-center mx-auto mb-4 text-3xl">
         💔
       </div>
@@ -380,7 +381,10 @@
             </div>
 
             <!-- Floating Heart Action Button (Toggle / Remove) -->
-            <form th:action="@{/customer/profile/wishlist/toggle/{id}(id=${p.id})}" method="post" class="absolute top-2.5 right-2.5">
+            <form th:action="@{/customer/profile/wishlist/toggle/{id}(id=${p.id})}" method="post"
+                  th:data-product-id="${p.id}"
+                  onsubmit="toggleWishlistAjax(event, this);"
+                  class="absolute top-2.5 right-2.5">
               <button type="submit"
                       class="w-8 h-8 rounded-full bg-white/95 backdrop-blur-xs flex items-center justify-center text-secondary shadow-sm hover:scale-110 active:scale-95 transition-all border border-[#C93B50]/20 cursor-pointer"
                       title="Bỏ yêu thích">
@@ -397,7 +401,7 @@
                 <span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">star</span>
                 <span th:text="${p.rating != null ? p.rating : '5.0'}">5.0</span>
               </div>
-              <span th:if="${p.sold != null and p.sold > 0}" class="text-[11.5px] text-[#7E726D]" th:text="'Đã bán ' + ${p.sold}">Đã bán 12</span>
+              <span th:if="${p.sold != null and p.sold > 0}" class="text-[11.5px] text-[#7E726D]">Đã bán <span th:text="${p.sold}">12</span></span>
               <span th:if="${p.sold == null or p.sold == 0}" class="text-[11.5px] text-[#264E43] font-semibold flex items-center gap-0.5">
                 <span class="text-[11px]">✨</span> Tuyển chọn
               </span>
@@ -411,16 +415,10 @@
             <!-- Price tiering -->
             <div class="flex flex-wrap items-baseline gap-1.5 mb-2">
               <span class="font-extrabold text-[16px] sm:text-[17px] text-secondary"
-                    th:text="${#numbers.formatDecimal(p.getSellingPrice(), 0, 'COMMA', 0, 'POINT')} + ' đ'">850.000 đ</span>
-              <span th:if="${p.promotionalPrice != null and p.promotionalPrice < p.priceBuy}"
+                    th:text="${#numbers.formatDecimal(p.promotionalPrice != null and p.priceBuy != null and p.promotionalPrice < p.priceBuy ? p.promotionalPrice : (p.priceBuy != null ? p.priceBuy : 0), 0, 'COMMA', 0, 'POINT')} + ' đ'">850.000 đ</span>
+              <span th:if="${p.promotionalPrice != null and p.priceBuy != null and p.promotionalPrice < p.priceBuy}"
                     class="text-[12px] line-through text-[#9A8D87]"
                     th:text="${#numbers.formatDecimal(p.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'">950.000 đ</span>
-            </div>
-
-            <!-- Rental price if applicable -->
-            <div th:if="${p.priceRentPerDay != null and p.priceRentPerDay > 0}" class="text-[11.5px] text-[#264E43] font-bold flex items-center gap-1 mb-1">
-              <span class="text-[12px]">🎪</span>
-              <span>Thuê: <strong th:text="${#numbers.formatDecimal(p.priceRentPerDay, 0, 'COMMA', 0, 'POINT')} + ' đ/ngày'"></strong></span>
             </div>
 
             <!-- Express delivery guarantee note -->
@@ -454,7 +452,10 @@
           </form>
 
           <!-- Form Xóa Khỏi Wishlist -->
-          <form th:action="@{/customer/profile/wishlist/toggle/{id}(id=${p.id})}" method="post" class="inline">
+          <form th:action="@{/customer/profile/wishlist/toggle/{id}(id=${p.id})}" method="post"
+                th:data-product-id="${p.id}"
+                onsubmit="toggleWishlistAjax(event, this);"
+                class="inline">
             <button type="submit"
                     class="w-9 h-9 rounded-full bg-[#FAF7F5] border border-[#E2D7D1] text-[#7E726D] hover:text-[#BA1A1A] hover:bg-[#FFDAD6]/50 flex items-center justify-center transition-colors cursor-pointer"
                     title="Xóa khỏi yêu thích">
@@ -503,6 +504,12 @@
           </p>
         </div>
       </div>
+    </div>
+
+    <!-- Floating Toast Notification (Không giật trang, không cuộn lên đầu) -->
+    <div id="wishlistToast" class="fixed top-24 right-4 sm:right-8 z-50 transform transition-all duration-300 -translate-y-4 opacity-0 pointer-events-none flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-[#1E453E] text-white shadow-xl border border-white/20">
+      <span class="material-symbols-outlined text-[20px] text-[#A7F3D0]">check_circle</span>
+      <span id="wishlistToastMessage" class="text-[13.5px] font-bold">Đã hủy theo dõi sản phẩm!</span>
     </div>
 
   </main>
@@ -566,7 +573,7 @@
                   <span class="text-secondary text-[14px]">🌸</span>
                   <span th:text="${s.name}">Tên Chi Nhánh</span>
                 </a>
-                <span class="text-[11px] text-[#264E43] font-bold px-2 py-0.5 rounded-full bg-[#E9F3EE]" th:text="'Hotline: ' + ${s.phone != null ? s.phone : '0281111222'}">Hotline: 0281111222</span>
+                <span class="text-[11px] text-[#264E43] font-bold px-2 py-0.5 rounded-full bg-[#E9F3EE]">Hotline: <span th:text="${s.phone != null ? s.phone : '0281111222'}">0281111222</span></span>
               </div>
               <p class="text-[12px] text-[#6E6464] flex items-start gap-1 mt-1">
                 <span class="material-symbols-outlined text-[15px] text-[#7E726D] shrink-0 mt-0.5">location_on</span>
@@ -686,7 +693,7 @@
   </footer>
 
   <!-- ==============================================
-       SCRIPTS: MODALS, FILTERS & LIVE SEARCH
+       SCRIPTS: MODALS, FILTERS, AJAX & LIVE SEARCH
        ============================================== -->
   <script>
     // Modal controls
@@ -714,7 +721,6 @@
 
     // Client-side Category Filter
     function filterCategory(categoryKey, btn) {
-      // Update active chip style
       document.querySelectorAll('.category-filter-chip').forEach(c => {
         c.classList.remove('bg-[#1E453E]', 'text-white', 'shadow-2xs');
         c.classList.add('text-[#6E6464]');
@@ -724,8 +730,8 @@
 
       const items = document.querySelectorAll('.wishlist-item');
       items.forEach(item => {
-        const cat = item.getAttribute('data-category') || '';
-        const name = item.getAttribute('data-name') || '';
+        const cat = (item.getAttribute('data-category') || '').toLowerCase();
+        const name = (item.getAttribute('data-name') || '').toLowerCase();
 
         const isSinhNhat = cat.includes('sinh nhật') || name.includes('sinh nhật') || cat.includes('sinh nhat') || name.includes('sinh nhat');
         const isTinhYeu = cat.includes('tình yêu') || name.includes('tình yêu') || cat.includes('tinh yeu') || name.includes('tinh yeu') || cat.includes('yêu') || name.includes('yêu') || cat.includes('hồng') || name.includes('hồng') || cat.includes('valentine') || name.includes('valentine') || cat.includes('cưới') || name.includes('cưới');
@@ -780,6 +786,70 @@
         });
       }
     });
+
+    // Floating Toast Notification
+    let toastTimeout = null;
+    function showToast(msg) {
+      const toast = document.getElementById('wishlistToast');
+      const toastMsg = document.getElementById('wishlistToastMessage');
+      if (!toast || !toastMsg) return;
+      toastMsg.textContent = msg;
+      toast.classList.remove('-translate-y-4', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('-translate-y-4', 'opacity-0', 'pointer-events-none');
+      }, 2500);
+    }
+
+    // AJAX Toggle Wishlist without page reload or scrolling to top
+    function toggleWishlistAjax(event, formEl) {
+      if (event) event.preventDefault();
+      const productId = formEl.getAttribute('data-product-id');
+      const card = formEl.closest('.wishlist-item');
+      const url = formEl.getAttribute('action') || ('/customer/profile/wishlist/toggle/' + productId);
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        showToast(data.message || 'Đã hủy theo dõi sản phẩm!');
+        
+        if (card) {
+          card.style.transition = 'all 0.35s ease';
+          card.style.opacity = '0';
+          card.style.transform = 'scale(0.85)';
+          setTimeout(() => {
+            card.remove();
+            
+            const remaining = document.querySelectorAll('.wishlist-item').length;
+            const countBadge = document.getElementById('wishlistCountBadge');
+            if (countBadge) {
+              countBadge.textContent = remaining + ' mẫu hoa đã lưu';
+            }
+            
+            if (remaining === 0) {
+              const grid = document.getElementById('wishlistGrid');
+              const emptyState = document.getElementById('emptyWishlistState');
+              const filterBar = document.getElementById('filterToolbar');
+              if (grid) grid.style.display = 'none';
+              if (filterBar) filterBar.style.display = 'none';
+              if (emptyState) emptyState.classList.remove('hidden');
+            }
+          }, 350);
+        }
+      })
+      .catch(err => {
+        console.error('Lỗi toggle wishlist:', err);
+        formEl.submit();
+      });
+    }
   </script>
 
 </body>

@@ -606,7 +606,7 @@
                     <!-- 7. THAO TÁC PHỤ: Nút Theo dõi & Yêu thích (đặt tinh tế phía dưới) -->
                     <div class="action-sub-row d-flex align-items-center gap-2 flex-wrap">
                         <!-- Follow / Following button (UC_015) -->
-                        <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/customer/following/toggle/{productId}(productId=${product.id})}" method="post" class="d-inline m-0">
+                        <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/customer/following/toggle/{productId}(productId=${product.id})}" method="post" class="d-inline m-0" onsubmit="toggleDetailFollowAjax(event, this)">
                             <button type="submit" id="btnFollowProductTop"
                                     class="btn btn-sm rounded-pill px-3 py-1 border d-inline-flex align-items-center gap-2 shadow-sm"
                                     style="font-size: 14.5px;"
@@ -622,7 +622,7 @@
                         </a>
 
                         <!-- Nút Yêu thích -->
-                        <form th:action="@{/customer/profile/wishlist/toggle/{id}(id=${product.id})}" method="post" class="d-inline m-0">
+                        <form th:action="@{/customer/profile/wishlist/toggle/{id}(id=${product.id})}" method="post" class="d-inline m-0" onsubmit="toggleDetailWishlistAjax(event, this)">
                             <button type="submit" class="btn btn-sm rounded-pill px-3 py-1 border d-inline-flex align-items-center gap-2"
                                     style="font-size: 14.5px; border-color: var(--flower-border) !important; color: var(--flower-text-main); background: #ffffff;">
                                 <i class="bi" th:classappend="${isLiked} ? 'bi-heart-fill text-danger' : 'bi-heart'"></i>
@@ -948,5 +948,89 @@
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Floating Toast Notification (Không giật trang, không cuộn lên đầu) -->
+    <div id="detailActionToast" style="position: fixed; top: 90px; right: 24px; z-index: 9999; display: none; background: #264E43; color: #ffffff; padding: 12px 22px; border-radius: 50px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); font-weight: bold; font-size: 14px; align-items: center; gap: 8px;">
+        <i class="bi bi-check-circle-fill" style="color: #a7f3d0; font-size: 18px;"></i>
+        <span id="detailActionToastMsg">Thông báo</span>
+    </div>
+
+    <script>
+        let detailToastTimer = null;
+        function showDetailToast(msg) {
+            const toast = document.getElementById('detailActionToast');
+            const toastMsg = document.getElementById('detailActionToastMsg');
+            if (!toast || !toastMsg) return;
+            toastMsg.textContent = msg;
+            toast.style.display = 'inline-flex';
+            
+            if (detailToastTimer) clearTimeout(detailToastTimer);
+            detailToastTimer = setTimeout(() => {
+                toast.style.display = 'none';
+            }, 2500);
+        }
+
+        function toggleDetailFollowAjax(event, formEl) {
+            if (event) event.preventDefault();
+            const btn = formEl.querySelector('button');
+            const url = formEl.getAttribute('action');
+
+            fetch(url, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                showDetailToast(data.message);
+                if (btn) {
+                    const icon = btn.querySelector('i');
+                    const textSpan = btn.querySelector('span');
+                    if (data.liked) {
+                        btn.className = 'btn btn-sm rounded-pill px-3 py-1 border d-inline-flex align-items-center gap-2 shadow-sm btn-danger text-white border-danger';
+                        if (icon) icon.className = 'bi bi-check-circle-fill';
+                        if (textSpan) textSpan.textContent = 'Đang theo dõi';
+                    } else {
+                        btn.className = 'btn btn-sm rounded-pill px-3 py-1 border d-inline-flex align-items-center gap-2 shadow-sm btn-outline-danger';
+                        if (icon) icon.className = 'bi bi-plus-circle';
+                        if (textSpan) textSpan.textContent = 'Theo dõi';
+                    }
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                formEl.submit();
+            });
+        }
+
+        function toggleDetailWishlistAjax(event, formEl) {
+            if (event) event.preventDefault();
+            const btn = formEl.querySelector('button');
+            const url = formEl.getAttribute('action');
+
+            fetch(url, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                showDetailToast(data.message);
+                if (btn) {
+                    const icon = btn.querySelector('i');
+                    const textSpan = btn.querySelector('span');
+                    if (data.liked) {
+                        if (icon) icon.className = 'bi bi-heart-fill text-danger';
+                        if (textSpan) textSpan.textContent = 'Đã lưu yêu thích';
+                    } else {
+                        if (icon) icon.className = 'bi bi-heart';
+                        if (textSpan) textSpan.textContent = 'Lưu vào yêu thích';
+                    }
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                formEl.submit();
+            });
+        }
+    </script>
 </body>
 </html>

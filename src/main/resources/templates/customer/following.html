@@ -148,7 +148,7 @@
                                 Xem Mẫu Hoa
                             </a>
                             <!-- Nút Following (Bấm để hủy theo dõi) -->
-                            <form th:action="@{/customer/following/toggle/{productId}(productId=${p.id})}" method="post" class="m-0">
+                            <form th:action="@{/customer/following/toggle/{productId}(productId=${p.id})}" method="post" class="m-0" th:data-product-id="${p.id}" onsubmit="toggleFollowingProductAjax(event, this);">
                                 <button type="submit" class="btn btn-danger btn-sm rounded-pill px-3 fw-bold shadow-sm" title="Bấm để hủy theo dõi">
                                     <i class="bi bi-check-circle-fill me-1"></i> Following
                                 </button>
@@ -184,7 +184,7 @@
 
                         <div class="d-flex gap-2 mt-auto pt-2 border-top">
                             <a th:href="@{/stores/{id}(id=${s.id})}" class="btn btn-outline-danger btn-sm rounded-pill flex-fill">Tham Quan Shop</a>
-                            <form th:action="@{/stores/{id}/follow(id=${s.id})}" method="post" class="m-0">
+                            <form th:action="@{/stores/{id}/follow(id=${s.id})}" method="post" class="m-0" th:data-store-id="${s.id}" onsubmit="toggleFollowingStoreAjax(event, this);">
                                 <button type="submit" class="btn btn-danger btn-sm rounded-pill px-3 fw-bold shadow-sm" title="Bấm để hủy theo dõi cửa hàng">
                                     <i class="bi bi-check-circle-fill me-1"></i> Following
                                 </button>
@@ -197,5 +197,82 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Floating Toast Notification (Không giật trang, không cuộn lên đầu) -->
+    <div id="followingToast" style="position: fixed; top: 80px; right: 24px; z-index: 9999; display: none; background: #264E43; color: #ffffff; padding: 12px 20px; border-radius: 50px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); font-weight: bold; font-size: 14px; align-items: center; gap: 8px;">
+        <i class="bi bi-check-circle-fill" style="color: #a7f3d0; font-size: 18px;"></i>
+        <span id="followingToastMsg">Đã hủy theo dõi thành công!</span>
+    </div>
+
+    <script>
+        let followingToastTimer = null;
+        function showFollowingToast(msg) {
+            const toast = document.getElementById('followingToast');
+            const toastMsg = document.getElementById('followingToastMsg');
+            if (!toast || !toastMsg) return;
+            toastMsg.textContent = msg;
+            toast.style.display = 'inline-flex';
+            toast.style.opacity = '1';
+            
+            if (followingToastTimer) clearTimeout(followingToastTimer);
+            followingToastTimer = setTimeout(() => {
+                toast.style.display = 'none';
+            }, 2500);
+        }
+
+        function toggleFollowingProductAjax(event, productId, formEl) {
+            if (event) event.preventDefault();
+            const col = formEl.closest('.col');
+            const url = formEl.getAttribute('action') || ('/customer/following/toggle/' + productId);
+
+            fetch(url, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                showFollowingToast(data.message || 'Đã hủy theo dõi sản phẩm!');
+                if (col) {
+                    col.style.transition = 'all 0.35s ease';
+                    col.style.opacity = '0';
+                    col.style.transform = 'scale(0.85)';
+                    setTimeout(() => {
+                        col.remove();
+                    }, 350);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                formEl.submit();
+            });
+        }
+
+        function toggleFollowingStoreAjax(event, storeId, formEl) {
+            if (event) event.preventDefault();
+            const col = formEl.closest('.col');
+            const url = formEl.getAttribute('action') || ('/stores/' + storeId + '/follow');
+
+            fetch(url, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                showFollowingToast(data.message || 'Đã hủy theo dõi cửa hàng thành công!');
+                if (col) {
+                    col.style.transition = 'all 0.35s ease';
+                    col.style.opacity = '0';
+                    col.style.transform = 'scale(0.85)';
+                    setTimeout(() => {
+                        col.remove();
+                    }, 350);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                formEl.submit();
+            });
+        }
+    </script>
 </body>
 </html>
