@@ -8,6 +8,7 @@ public interface VoucherService {
     Voucher findByCode(String code);
     List<Voucher> getAvailableVouchers(Long storeId);
     BigDecimal calculateDiscount(Voucher voucher, BigDecimal orderAmount, BigDecimal shippingFee);
+    BigDecimal calculateDiscount(Voucher voucher, BigDecimal orderAmount, BigDecimal shippingFee, BigDecimal minAllowedAmount);
     Voucher createVoucher(Voucher voucher);
     void deleteVoucher(Long id);
     List<Voucher> getVouchersByStore(Long storeId);

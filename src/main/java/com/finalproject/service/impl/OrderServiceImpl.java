@@ -120,6 +120,7 @@ public class OrderServiceImpl implements OrderService {
             throw new IllegalStateException("Chi nhánh hiện không nhận đơn.");
         }
         BigDecimal totalAmount = BigDecimal.ZERO;
+        BigDecimal totalImportPrice = BigDecimal.ZERO;
         List<OrderDetail> orderDetails = new ArrayList<>();
 
         CartItem firstItem = items.get(0);
@@ -167,6 +168,12 @@ public class OrderServiceImpl implements OrderService {
             BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
             totalAmount = totalAmount.add(lineTotal);
 
+            BigDecimal itemImportPrice = product.getImportPrice();
+            if (itemImportPrice == null) {
+                itemImportPrice = (product.getPriceBuy() != null) ? product.getPriceBuy().multiply(BigDecimal.valueOf(0.6)) : BigDecimal.ZERO;
+            }
+            totalImportPrice = totalImportPrice.add(itemImportPrice.multiply(BigDecimal.valueOf(item.getQuantity())));
+
             OrderDetail detail = OrderDetail.builder()
                     .order(order)
                     .product(product)
@@ -178,7 +185,7 @@ public class OrderServiceImpl implements OrderService {
             orderDetails.add(detail);
         }
 
-        // Áp dụng voucher nếu có
+        // Áp dụng voucher nếu có (Đảm bảo giá sau giảm không bao giờ thấp hơn tổng giá nhập)
         BigDecimal discount = BigDecimal.ZERO;
         if (voucherCode != null && !voucherCode.trim().isEmpty()) {
             Voucher v = voucherService.findByCode(voucherCode.trim());
@@ -186,13 +193,13 @@ public class OrderServiceImpl implements OrderService {
             if (v.getStore() != null && !v.getStore().getId().equals(assignedStore.getId())) {
                 throw new IllegalArgumentException("Mã giảm giá không áp dụng cho chi nhánh này.");
             }
-            discount = voucherService.calculateDiscount(v, totalAmount, BigDecimal.ZERO);
+            discount = voucherService.calculateDiscount(v, totalAmount, BigDecimal.ZERO, totalImportPrice);
             order.setVoucher(v);
             order.setDiscountAmount(discount);
             v.setUsedCount(v.getUsedCount() + 1);
             voucherService.createVoucher(v);
         }
-        BigDecimal finalAmount = totalAmount.subtract(discount).max(BigDecimal.ZERO);
+        BigDecimal finalAmount = totalAmount.subtract(discount).max(totalImportPrice).max(BigDecimal.ZERO);
         order.setTotalAmount(finalAmount);
         order.setTotalDeposit(BigDecimal.ZERO);
         order.setPaymentMethod(paymentMethod != null ? paymentMethod.name() : "COD");

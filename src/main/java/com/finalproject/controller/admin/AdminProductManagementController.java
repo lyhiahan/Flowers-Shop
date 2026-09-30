@@ -58,6 +58,10 @@ public class AdminProductManagementController {
                 p.setIsActive(true);
                 modified = true;
             }
+            if (p.getImportPrice() == null && p.getPriceBuy() != null) {
+                p.setImportPrice(p.getPriceBuy().multiply(new BigDecimal("0.6")).setScale(0, java.math.RoundingMode.HALF_UP));
+                modified = true;
+            }
             if (p.getIsSelling() == null) {
                 p.setIsSelling(true);
                 modified = true;

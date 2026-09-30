@@ -33,6 +33,11 @@ public class VoucherServiceImpl implements VoucherService {
 
     @Override
     public BigDecimal calculateDiscount(Voucher voucher, BigDecimal orderAmount, BigDecimal shippingFee) {
+        return calculateDiscount(voucher, orderAmount, shippingFee, null);
+    }
+
+    @Override
+    public BigDecimal calculateDiscount(Voucher voucher, BigDecimal orderAmount, BigDecimal shippingFee, BigDecimal minAllowedAmount) {
         if (voucher == null) return BigDecimal.ZERO;
         LocalDate today = LocalDate.now();
         if (!Boolean.TRUE.equals(voucher.getIsActive()) || voucher.getStartDate() == null || voucher.getEndDate() == null
@@ -67,6 +72,14 @@ public class VoucherServiceImpl implements VoucherService {
             discount = voucher.getDiscountValue();
             if (discount.compareTo(orderAmount) > 0) {
                 discount = orderAmount;
+            }
+        }
+
+        // Ràng buộc bảo toàn: Đảm bảo khi áp mã giảm giá thì đơn hàng không bị giảm thấp hơn giá nhập gốc
+        if (minAllowedAmount != null && minAllowedAmount.compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal maxAllowedDiscount = orderAmount.subtract(minAllowedAmount).max(BigDecimal.ZERO);
+            if (discount.compareTo(maxAllowedDiscount) > 0) {
+                discount = maxAllowedDiscount;
             }
         }
 

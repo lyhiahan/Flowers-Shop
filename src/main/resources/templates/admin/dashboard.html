@@ -607,42 +607,6 @@
                 </div>
             </div>
 
-            <!-- 3. HÀNG SẢN PHẨM TIÊU BIỂU (PRODUCTS OVERVIEW) -->
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-0">
-                    <div>
-                        <h6 class="fw-bold mb-0 text-dark">📦 Danh Mục Sản Phẩm Đang Kinh Doanh</h6>
-                        <small class="text-muted">Kiểm soát giá nhập và giá bán hoa tươi</small>
-                    </div>
-                    <div>
-                        <a th:href="@{/admin/products}" class="btn btn-outline-primary btn-sm fw-semibold">
-                            Xem Toàn Bộ Sản Phẩm →
-                        </a>
-                    </div>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-custom table-hover align-middle mb-0">
-                        <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Tên Sản Phẩm</th>
-                            <th>Danh Mục</th>
-                            <th>Giá Nhập Gốc</th>
-                            <th>Giá Bán</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="p : ${products}">
-                            <td class="text-muted" th:text="'#' + ${p.id}"></td>
-                            <td class="fw-bold text-dark" th:text="${p.name}"></td>
-                            <td><span class="badge bg-secondary" th:text="${p.category.name}"></span></td>
-                            <td class="text-muted" th:text="${#numbers.formatDecimal(p.importPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
-                            <td class="text-primary fw-bold" th:text="${#numbers.formatDecimal(p.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
         </main>
     </div>
 </div>

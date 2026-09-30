@@ -244,6 +244,7 @@
                             <th class="fw-bold" style="white-space: nowrap !important; min-width: 260px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Sản phẩm</th>
                             <th class="fw-bold" style="white-space: nowrap !important; min-width: 170px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Chi nhánh</th>
                             <th class="fw-bold" style="white-space: nowrap !important; min-width: 110px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Kiểu dáng</th>
+                            <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 130px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Giá nhập</th>
                             <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 130px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Giá bán</th>
                             <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 90px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Đã bán</th>
                             <th class="fw-bold" style="white-space: nowrap !important; min-width: 160px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Trạng thái</th>
@@ -252,7 +253,7 @@
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(products)}">
-                            <td colspan="8" class="text-center py-5 text-muted" style="font-size: 15.5px;">
+                            <td colspan="9" class="text-center py-5 text-muted" style="font-size: 15.5px;">
                                 <i class="bi bi-flower1 fs-1 d-block mb-2 text-secondary opacity-50"></i>
                                 Không tìm thấy sản phẩm hoa nào phù hợp.
                             </td>
@@ -272,7 +273,7 @@
                                          alt="Ảnh hoa">
                                     <div>
                                         <div class="fw-bold" style="font-size: 17px; font-weight: 700; color: #20382E; line-height: 1.35;" th:text="${p.name}">
-                                            Bó Hoa Hồng Đỏ Ecuador Tình Nồng Cháy
+                                             Bó Hoa Hồng Đỏ Ecuador Tình Nồng Cháy
                                         </div>
                                     </div>
                                 </div>
@@ -298,7 +299,15 @@
                                 </div>
                             </td>
 
-                            <!-- 4. Giá bán: Căn phải, không xuống dòng, Nunito 18px đậm 800 hồng trầm #A64060 -->
+                            <!-- 4. Giá nhập: Căn phải, không xuống dòng, Nunito 16px đậm 700 màu trầm #526058 -->
+                            <td class="text-end" style="white-space: nowrap;">
+                                <span style="font-size: 16px; font-weight: 700; color: #526058; white-space: nowrap;"
+                                      th:text="${p.importPrice != null ? #numbers.formatDecimal(p.importPrice, 0, 'COMMA', 0, 'POINT') + ' ₫' : (p.priceBuy != null ? #numbers.formatDecimal(p.priceBuy.multiply(T(java.math.BigDecimal).valueOf(0.6)), 0, 'COMMA', 0, 'POINT') + ' ₫' : 'Chưa cập nhật')}">
+                                    350.000 ₫
+                                </span>
+                            </td>
+
+                            <!-- 5. Giá bán: Căn phải, không xuống dòng, Nunito 18px đậm 800 hồng trầm #A64060 -->
                             <td class="text-end" style="white-space: nowrap;">
                                 <span style="font-size: 18px; font-weight: 800; color: #A64060; white-space: nowrap;"
                                       th:text="${p.priceBuy != null ? #numbers.formatDecimal(p.priceBuy, 0, 'COMMA', 0, 'POINT') + ' ₫' : 'Chưa cập nhật'}">
