@@ -1,24 +1,45 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <title>Hồ Sơ Của Tôi - HOA TƯƠI SÀI GÒN</title>
-  
+
   <!-- Google Fonts: Playfair Display, Be Vietnam Pro & Material Symbols -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600&display=swap"
+    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet">
+
   <style>
     @layer base {
-      html, body { margin: 0; padding: 0; }
-      body { overscroll-behavior: none; }
-      main > :first-child { margin-top: 0 !important; }
-      main > :last-child { margin-bottom: 0 !important; }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        overscroll-behavior: none;
+      }
+
+      main> :first-child {
+        margin-top: 0 !important;
+      }
+
+      main> :last-child {
+        margin-bottom: 0 !important;
+      }
     }
-    ::-webkit-scrollbar { display: none; }
+
+    ::-webkit-scrollbar {
+      display: none;
+    }
   </style>
 
   <!-- Tailwind CSS CDN with tailored editorial flower shop config matching ui/code.html & ui/DESIGN.md -->
@@ -109,7 +130,8 @@
   <header class="fixed top-0 left-0 right-0 z-50 bg-white border-b border-[#EAE1DC] shadow-xs">
     <!-- Top utility bar -->
     <div class="bg-[#F5ECE7] border-b border-[#EAE1DC]/70">
-      <div class="max-w-7xl mx-auto px-4 md:px-margin-desktop h-9 flex items-center justify-between font-body-sm text-[12px] text-[#5C4A42]">
+      <div
+        class="max-w-7xl mx-auto px-4 md:px-margin-desktop h-9 flex items-center justify-between font-body-sm text-[12px] text-[#5C4A42]">
         <div class="flex items-center gap-space-sm">
           <span class="flex items-center gap-1.5">
             <span class="material-symbols-outlined text-[15px] text-[#7E726D]">storefront</span>
@@ -143,7 +165,8 @@
         <div class="flex items-center shrink-0">
           <a class="flex items-center gap-2.5 group" th:href="@{/}">
             <span class="text-2xl text-secondary">🌸</span>
-            <span class="font-headline-sm text-[22px] tracking-wide text-[#2D2424] font-semibold group-hover:text-primary transition-colors">
+            <span
+              class="font-headline-sm text-[22px] tracking-wide text-[#2D2424] font-semibold group-hover:text-primary transition-colors">
               HOA TƯƠI SÀI GÒN
             </span>
           </a>
@@ -151,13 +174,17 @@
 
         <!-- Search Input -->
         <form th:action="@{/search}" method="get" class="hidden md:flex items-center flex-1 max-w-xl mx-4">
-          <div class="w-full flex items-center bg-white border border-[#E2D7D1] rounded-full pl-3 pr-1 py-1 shadow-xs focus-within:border-primary transition-all">
+          <div
+            class="w-full flex items-center bg-white border border-[#E2D7D1] rounded-full pl-3 pr-1 py-1 shadow-xs focus-within:border-primary transition-all">
             <span class="flex items-center gap-1 text-[13px] text-[#2D2424] font-medium pr-3 border-r border-[#E2D7D1]">
               <span class="text-secondary text-[14px]">🌸</span>
               <span>Mẫu hoa</span>
             </span>
-            <input name="keyword" class="flex-1 bg-transparent px-3 text-[13px] text-on-surface placeholder:text-[#9A8D87] focus:outline-none" placeholder="Tìm hoa hồng, cửa hàng hoặc người dùng..." type="text">
-            <button type="submit" class="px-5 py-2 rounded-full bg-[#1E453E] hover:bg-[#163630] text-white text-[13px] font-medium flex items-center gap-1 shadow-xs transition-colors">
+            <input name="keyword"
+              class="flex-1 bg-transparent px-3 text-[13px] text-on-surface placeholder:text-[#9A8D87] focus:outline-none"
+              placeholder="Tìm hoa hồng, cửa hàng hoặc người dùng..." type="text">
+            <button type="submit"
+              class="px-5 py-2 rounded-full bg-[#1E453E] hover:bg-[#163630] text-white text-[13px] font-medium flex items-center gap-1 shadow-xs transition-colors">
               <span class="material-symbols-outlined text-[16px]">search</span>
               <span>Tìm</span>
             </button>
@@ -166,18 +193,23 @@
 
         <!-- Right Actions -->
         <div class="flex items-center gap-3 shrink-0">
-          <a class="p-2 text-[#5C4A42] hover:text-primary transition-colors rounded-full hover:bg-surface-container" th:href="@{/customer/profile/wishlist}" title="Hoa yêu thích">
+          <a class="p-2 text-[#5C4A42] hover:text-primary transition-colors rounded-full hover:bg-surface-container"
+            th:href="@{/customer/profile/wishlist}" title="Hoa yêu thích">
             <span class="material-symbols-outlined text-[22px]">favorite_border</span>
           </a>
-          <a class="p-2 text-[#5C4A42] hover:text-primary transition-colors rounded-full hover:bg-surface-container relative" th:href="@{/cart}" title="Giỏ hoa">
+          <a class="p-2 text-[#5C4A42] hover:text-primary transition-colors rounded-full hover:bg-surface-container relative"
+            th:href="@{/cart}" title="Giỏ hoa">
             <span class="material-symbols-outlined text-[22px]">shopping_cart</span>
           </a>
-          <a class="p-2 text-[#5C4A42] hover:text-primary transition-colors rounded-full hover:bg-surface-container" th:href="@{/following}" title="Đang theo dõi">
+          <a class="p-2 text-[#5C4A42] hover:text-primary transition-colors rounded-full hover:bg-surface-container"
+            th:href="@{/following}" title="Đang theo dõi">
             <span class="material-symbols-outlined text-[22px]">bookmark_border</span>
           </a>
-          
+
           <!-- Nút Đăng Xuất mở Modal -->
-          <button type="button" onclick="openModal('signOutModal')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#E2D7D1] text-[13px] text-[#5C4A42] hover:bg-[#F5ECE7] hover:text-secondary transition-colors" title="Đăng xuất">
+          <button type="button" onclick="openModal('signOutModal')"
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#E2D7D1] text-[13px] text-[#5C4A42] hover:bg-[#F5ECE7] hover:text-secondary transition-colors"
+            title="Đăng xuất">
             <span class="material-symbols-outlined text-[18px]">logout</span>
             <span class="hidden sm:inline">Đăng xuất</span>
           </button>
@@ -192,17 +224,20 @@
   <main class="pt-[124px] pb-space-xl max-w-7xl mx-auto px-4 md:px-margin-desktop">
 
     <!-- Flash message toasts / alerts -->
-    <div th:if="${successMessage}" class="mb-4 p-4 rounded-xl bg-[#E9F3EE] border border-[#264E43]/20 flex items-center gap-3 shadow-xs">
+    <div th:if="${successMessage}"
+      class="mb-4 p-4 rounded-xl bg-[#E9F3EE] border border-[#264E43]/20 flex items-center gap-3 shadow-xs">
       <span class="material-symbols-outlined text-[22px] text-[#1E453E]">check_circle</span>
       <span class="font-body-md text-body-md text-[#1E453E] font-medium" th:text="${successMessage}"></span>
     </div>
-    <div th:if="${errorMessage}" class="mb-4 p-4 rounded-xl bg-[#FFDAD6] border border-[#BA1A1A]/20 flex items-center gap-3 shadow-xs">
+    <div th:if="${errorMessage}"
+      class="mb-4 p-4 rounded-xl bg-[#FFDAD6] border border-[#BA1A1A]/20 flex items-center gap-3 shadow-xs">
       <span class="material-symbols-outlined text-[22px] text-[#BA1A1A]">error</span>
       <span class="font-body-md text-body-md text-[#BA1A1A] font-medium" th:text="${errorMessage}"></span>
     </div>
 
     <!-- Top breadcrumb banner -->
-    <div class="py-space-md flex flex-wrap items-center justify-between gap-space-sm border-b border-[#EAE1DC] mb-space-lg">
+    <div
+      class="py-space-md flex flex-wrap items-center justify-between gap-space-sm border-b border-[#EAE1DC] mb-space-lg">
       <div class="flex items-center gap-space-xs font-body-sm text-body-sm text-on-surface-variant">
         <a class="hover:text-primary flex items-center gap-0.5" th:href="@{/}">
           <span class="material-symbols-outlined text-[16px]">home</span>Trang chủ
@@ -213,7 +248,8 @@
         <span class="text-secondary font-medium font-body-sm">Hồ sơ &amp; Cài đặt</span>
       </div>
       <div class="flex items-center gap-2">
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF7F5] border border-[#E2D7D1] text-[13px] text-[#5C4A42]">
+        <span
+          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF7F5] border border-[#E2D7D1] text-[13px] text-[#5C4A42]">
           <span class="material-symbols-outlined text-[16px] text-secondary">verified_user</span>
           Tài khoản khách hàng
         </span>
@@ -229,28 +265,30 @@
            LEFT COLUMN: PROFILE IDENTITY & QUICK LINKS
            ============================================== -->
       <aside class="lg:col-span-4 flex flex-col gap-space-md">
-        
+
         <!-- Profile Identity Card with Cover Photo -->
         <div class="bg-surface-container-lowest rounded-xl shadow-xs border border-[#EAE1DC] overflow-hidden">
-          
+
           <!-- a. Cover Photo Area (UC_009 Steps 4a, 5a, 6a) -->
           <div class="relative h-36 bg-[#EFE7E2] overflow-hidden group">
             <img id="coverPreviewImg"
-                 th:src="${user.cover != null and !#strings.isEmpty(user.cover) ? user.cover : 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=1200'}"
-                 alt="Cover Photo" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+              th:src="${user.cover != null and !#strings.isEmpty(user.cover) ? user.cover : 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=1200'}"
+              alt="Cover Photo"
+              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
             <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
-            
+
             <!-- Edit Cover Photo Button -->
             <button type="button"
-                    class="absolute bottom-2 right-2 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-md text-[12px] font-medium text-on-surface hover:bg-white shadow-xs flex items-center gap-1.5 transition-all cursor-pointer border border-[#EAE1DC]"
-                    onclick="triggerCoverUpload()" title="Chạm để đổi ảnh bìa hoa">
+              class="absolute bottom-2 right-2 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-md text-[12px] font-medium text-on-surface hover:bg-white shadow-xs flex items-center gap-1.5 transition-all cursor-pointer border border-[#EAE1DC]"
+              onclick="triggerCoverUpload()" title="Chạm để đổi ảnh bìa hoa">
               <span class="material-symbols-outlined text-[15px] text-secondary">photo_camera</span>
               <span>Edit Cover Photo</span>
             </button>
-            
+
             <!-- Loyalty Status Badge -->
             <div class="absolute top-2 left-2">
-              <span class="px-2.5 py-0.5 rounded-full bg-[#1E453E]/90 text-white font-label-sm text-label-sm backdrop-blur-xs flex items-center gap-1 shadow-xs">
+              <span
+                class="px-2.5 py-0.5 rounded-full bg-[#1E453E]/90 text-white font-label-sm text-label-sm backdrop-blur-xs flex items-center gap-1 shadow-xs">
                 <span class="material-symbols-outlined text-[13px] text-[#B6F1DE]">local_florist</span>
                 Khách Thân Thiết
               </span>
@@ -259,58 +297,65 @@
 
           <!-- b. Avatar & Basic Info -->
           <div class="px-space-lg pb-space-lg pt-0 text-center relative">
-            
+
             <!-- Circular Avatar overlapping cover (UC_009 Steps 4, 5, 6) -->
             <div class="relative inline-block -mt-14 mb-space-sm">
               <div class="w-24 h-24 rounded-full ring-4 ring-white shadow-md overflow-hidden bg-[#FAF7F5] mx-auto">
                 <img id="avatarPreviewImg"
-                     th:src="${user.avatarUrl != null and !#strings.isEmpty(user.avatarUrl) ? user.avatarUrl : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200'}"
-                     alt="Avatar" class="w-full h-full object-cover">
+                  th:src="${user.avatarUrl != null and !#strings.isEmpty(user.avatarUrl) ? user.avatarUrl : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200'}"
+                  alt="Avatar" class="w-full h-full object-cover">
               </div>
               <button type="button"
-                      class="absolute bottom-0 right-1 w-8 h-8 rounded-full bg-[#1E453E] text-white flex items-center justify-center shadow-md hover:bg-[#163630] transition-all cursor-pointer ring-2 ring-white"
-                      onclick="triggerAvatarUpload()" title="Đổi ảnh đại diện">
+                class="absolute bottom-0 right-1 w-8 h-8 rounded-full bg-[#1E453E] text-white flex items-center justify-center shadow-md hover:bg-[#163630] transition-all cursor-pointer ring-2 ring-white"
+                onclick="triggerAvatarUpload()" title="Đổi ảnh đại diện">
                 <span class="material-symbols-outlined text-[16px]">photo_camera</span>
               </button>
             </div>
 
             <!-- Full Name & Role Badge -->
-            <h2 class="font-headline-sm text-headline-sm text-on-surface tracking-tight" th:text="${user.fullName}">Tên Người Dùng</h2>
+            <h2 class="font-headline-sm text-headline-sm text-on-surface tracking-tight" th:text="${user.fullName}">Tên
+              Người Dùng</h2>
             <div class="mt-1 flex items-center justify-center gap-space-xs">
-              <span class="px-2.5 py-0.5 rounded-full bg-[#F5ECE7] text-[#264E43] font-label-sm text-label-sm uppercase tracking-wider font-semibold border border-[#E2D7D1]"
-                    th:text="${user.role}">ROLE_CUSTOMER</span>
-              <span class="inline-flex items-center gap-0.5 text-[#264E43] font-label-sm text-label-sm bg-[#E9F3EE] px-2 py-0.5 rounded-full">
+              <span
+                class="px-2.5 py-0.5 rounded-full bg-[#F5ECE7] text-[#264E43] font-label-sm text-label-sm uppercase tracking-wider font-semibold border border-[#E2D7D1]"
+                th:text="${user.role}">ROLE_CUSTOMER</span>
+              <span
+                class="inline-flex items-center gap-0.5 text-[#264E43] font-label-sm text-label-sm bg-[#E9F3EE] px-2 py-0.5 rounded-full">
                 <span class="material-symbols-outlined text-[13px]">verified</span>
                 Đã chứng thực
               </span>
             </div>
-            
+
             <p class="font-body-sm text-body-sm text-on-surface-variant mt-2 italic max-w-xs mx-auto">
               "Hoa là bản tình ca êm dịu nhất mà thiên nhiên tặng cho cuộc sống."
             </p>
 
             <!-- User Metadata List -->
-            <div class="w-full mt-space-md pt-space-md border border-[#EAE1DC] space-y-2.5 bg-[#FAF7F5] p-space-md rounded-xl text-left">
+            <div
+              class="w-full mt-space-md pt-space-md border border-[#EAE1DC] space-y-2.5 bg-[#FAF7F5] p-space-md rounded-xl text-left">
               <div class="flex items-center justify-between text-body-sm font-body-sm">
                 <span class="text-on-surface-variant flex items-center gap-space-xs">
                   <span class="material-symbols-outlined text-[16px] text-[#264E43]">account_circle</span>
                   Tài khoản:
                 </span>
-                <span class="font-semibold text-on-surface font-title-sm text-title-sm" th:text="${user.username}">username</span>
+                <span class="font-semibold text-on-surface font-title-sm text-title-sm"
+                  th:text="${user.username}">username</span>
               </div>
               <div class="flex items-center justify-between text-body-sm font-body-sm">
                 <span class="text-on-surface-variant flex items-center gap-space-xs">
                   <span class="material-symbols-outlined text-[16px] text-secondary">mail</span>
                   Email:
                 </span>
-                <span class="font-medium text-on-surface truncate max-w-[170px]" th:text="${user.email}" th:title="${user.email}">user@email.com</span>
+                <span class="font-medium text-on-surface truncate max-w-[170px]" th:text="${user.email}"
+                  th:title="${user.email}">user@email.com</span>
               </div>
               <div class="flex items-center justify-between text-body-sm font-body-sm">
                 <span class="text-on-surface-variant flex items-center gap-space-xs">
                   <span class="material-symbols-outlined text-[16px] text-[#264E43]">phone_iphone</span>
                   Số điện thoại:
                 </span>
-                <span class="font-medium text-on-surface" th:text="${user.phone != null ? user.phone : 'Chưa cập nhật'}">0901234567</span>
+                <span class="font-medium text-on-surface"
+                  th:text="${user.phone != null ? user.phone : 'Chưa cập nhật'}">0901234567</span>
               </div>
               <div class="flex items-center justify-between text-body-sm font-body-sm">
                 <span class="text-on-surface-variant flex items-center gap-space-xs">
@@ -329,56 +374,75 @@
           <div class="px-space-sm py-1 font-label-sm text-label-sm uppercase tracking-wider text-outline">
             Danh mục tài khoản
           </div>
-          
+
           <!-- Sổ địa chỉ -->
-          <button type="button" class="w-full flex items-center justify-between px-space-md py-2.5 rounded-lg text-left text-on-surface hover:bg-[#F5ECE7] transition-colors group cursor-pointer" onclick="switchTab('tabAddresses')">
+          <button type="button"
+            class="w-full flex items-center justify-between px-space-md py-2.5 rounded-lg text-left text-on-surface hover:bg-[#F5ECE7] transition-colors group cursor-pointer"
+            onclick="switchTab('tabAddresses')">
             <span class="flex items-center gap-space-sm font-title-sm text-title-sm text-[#264E43] font-semibold">
               <span class="material-symbols-outlined text-[20px] text-[#264E43]">pin_drop</span>
               Sổ địa chỉ nhận hàng
             </span>
             <span class="px-2 py-0.5 rounded-full bg-[#E9F3EE] text-[#264E43] font-label-sm text-label-sm font-medium"
-                  th:text="${#lists.size(addresses)} + ' địa chỉ'">0 địa chỉ</span>
+              th:text="${#lists.size(addresses)} + ' địa chỉ'">0 địa chỉ</span>
           </button>
 
           <!-- Lịch sử đơn hoa (UC_011) -->
-          <a class="w-full flex items-center justify-between px-space-md py-2.5 rounded-lg text-left text-on-surface hover:bg-[#F5ECE7] transition-colors group" th:href="@{/customer/orders}">
-            <span class="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface-variant group-hover:text-primary">
-              <span class="material-symbols-outlined text-[20px] text-outline group-hover:text-primary">receipt_long</span>
+          <a class="w-full flex items-center justify-between px-space-md py-2.5 rounded-lg text-left text-on-surface hover:bg-[#F5ECE7] transition-colors group"
+            th:href="@{/customer/orders}">
+            <span
+              class="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface-variant group-hover:text-primary">
+              <span
+                class="material-symbols-outlined text-[20px] text-outline group-hover:text-primary">receipt_long</span>
               Lịch sử đơn hoa (UC_011)
             </span>
-            <span class="material-symbols-outlined text-[18px] text-outline group-hover:text-primary">chevron_right</span>
+            <span
+              class="material-symbols-outlined text-[18px] text-outline group-hover:text-primary">chevron_right</span>
           </a>
 
           <!-- Bộ sưu tập yêu thích -->
-          <a class="w-full flex items-center justify-between px-space-md py-2.5 rounded-lg text-left text-on-surface hover:bg-[#F5ECE7] transition-colors group" th:href="@{/customer/profile/wishlist}">
-            <span class="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface-variant group-hover:text-primary">
+          <a class="w-full flex items-center justify-between px-space-md py-2.5 rounded-lg text-left text-on-surface hover:bg-[#F5ECE7] transition-colors group"
+            th:href="@{/customer/profile/wishlist}">
+            <span
+              class="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface-variant group-hover:text-primary">
               <span class="material-symbols-outlined text-[20px] text-outline group-hover:text-primary">favorite</span>
               Bộ sưu tập yêu thích
             </span>
-            <span class="material-symbols-outlined text-[18px] text-outline group-hover:text-primary">chevron_right</span>
+            <span
+              class="material-symbols-outlined text-[18px] text-outline group-hover:text-primary">chevron_right</span>
           </a>
 
           <!-- Hoa đã xem gần đây -->
-          <a class="w-full flex items-center justify-between px-space-md py-2.5 rounded-lg text-left text-on-surface hover:bg-[#F5ECE7] transition-colors group" th:href="@{/customer/profile/recently-viewed}">
-            <span class="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface-variant group-hover:text-primary">
-              <span class="material-symbols-outlined text-[20px] text-outline group-hover:text-primary">visibility</span>
+          <a class="w-full flex items-center justify-between px-space-md py-2.5 rounded-lg text-left text-on-surface hover:bg-[#F5ECE7] transition-colors group"
+            th:href="@{/customer/profile/recently-viewed}">
+            <span
+              class="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface-variant group-hover:text-primary">
+              <span
+                class="material-symbols-outlined text-[20px] text-outline group-hover:text-primary">visibility</span>
               Hoa đã xem gần đây
             </span>
-            <span class="material-symbols-outlined text-[18px] text-outline group-hover:text-primary">chevron_right</span>
+            <span
+              class="material-symbols-outlined text-[18px] text-outline group-hover:text-primary">chevron_right</span>
           </a>
 
           <!-- Nghệ nhân / Cửa hàng đang theo dõi -->
-          <a class="w-full flex items-center justify-between px-space-md py-2.5 rounded-lg text-left text-on-surface hover:bg-[#F5ECE7] transition-colors group" th:href="@{/customer/profile/followed-stores}">
-            <span class="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface-variant group-hover:text-primary">
-              <span class="material-symbols-outlined text-[20px] text-outline group-hover:text-primary">storefront</span>
+          <a class="w-full flex items-center justify-between px-space-md py-2.5 rounded-lg text-left text-on-surface hover:bg-[#F5ECE7] transition-colors group"
+            th:href="@{/customer/profile/followed-stores}">
+            <span
+              class="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface-variant group-hover:text-primary">
+              <span
+                class="material-symbols-outlined text-[20px] text-outline group-hover:text-primary">storefront</span>
               Cửa hàng đang theo dõi
             </span>
-            <span class="material-symbols-outlined text-[18px] text-outline group-hover:text-primary">chevron_right</span>
+            <span
+              class="material-symbols-outlined text-[18px] text-outline group-hover:text-primary">chevron_right</span>
           </a>
 
           <!-- Đăng xuất tài khoản -->
           <div class="pt-2 border-t border-[#EAE1DC]/60">
-            <button type="button" class="w-full flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-left text-secondary hover:bg-secondary-container/40 transition-colors cursor-pointer" onclick="openModal('signOutModal')">
+            <button type="button"
+              class="w-full flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-left text-secondary hover:bg-secondary-container/40 transition-colors cursor-pointer"
+              onclick="openModal('signOutModal')">
               <span class="material-symbols-outlined text-[20px]">logout</span>
               <span class="font-title-sm text-title-sm">Đăng xuất tài khoản</span>
             </button>
@@ -390,7 +454,8 @@
           <span class="text-3xl">🌸</span>
           <div class="text-body-sm">
             <p class="font-title-sm text-title-sm text-[#264E43]">Hotline Hỗ Trợ Đặt Hoa</p>
-            <p class="text-on-surface-variant text-[13px]">Cần tư vấn chọn hoa tặng gấp? Gọi ngay <strong class="text-secondary">028 1111 222</strong> (07:00 - 22:00).</p>
+            <p class="text-on-surface-variant text-[13px]">Gọi ngay <strong class="text-secondary">028 1111 222</strong>
+              (07:00 - 22:00).</p>
           </div>
         </div>
 
@@ -402,24 +467,25 @@
       <section class="lg:col-span-8 flex flex-col gap-space-md">
 
         <!-- Navigation Tabs Bar -->
-        <div class="bg-surface-container-lowest rounded-xl shadow-xs border border-[#EAE1DC] p-1.5 flex items-center gap-1 overflow-x-auto">
+        <div
+          class="bg-surface-container-lowest rounded-xl shadow-xs border border-[#EAE1DC] p-1.5 flex items-center gap-1 overflow-x-auto">
           <button type="button"
-                  class="tab-btn flex-1 min-w-[170px] flex items-center justify-center gap-space-xs px-space-md py-2.5 rounded-lg font-title-sm text-title-sm transition-all bg-[#1E453E] text-white font-semibold shadow-xs cursor-pointer"
-                  id="btnTabProfile" onclick="switchTab('tabProfile')">
+            class="tab-btn flex-1 min-w-[170px] flex items-center justify-center gap-space-xs px-space-md py-2.5 rounded-lg font-title-sm text-title-sm transition-all bg-[#1E453E] text-white font-semibold shadow-xs cursor-pointer"
+            id="btnTabProfile" onclick="switchTab('tabProfile')">
             <span class="material-symbols-outlined text-[18px]">person</span>
             <span>Hồ Sơ Của Tôi</span>
           </button>
-          
+
           <button type="button"
-                  class="tab-btn flex-1 min-w-[170px] flex items-center justify-center gap-space-xs px-space-md py-2.5 rounded-lg font-title-sm text-title-sm transition-all text-on-surface-variant hover:bg-[#F5ECE7] cursor-pointer"
-                  id="btnTabAddresses" onclick="switchTab('tabAddresses')">
+            class="tab-btn flex-1 min-w-[170px] flex items-center justify-center gap-space-xs px-space-md py-2.5 rounded-lg font-title-sm text-title-sm transition-all text-on-surface-variant hover:bg-[#F5ECE7] cursor-pointer"
+            id="btnTabAddresses" onclick="switchTab('tabAddresses')">
             <span class="material-symbols-outlined text-[18px]">location_on</span>
             <span>Địa Chỉ Của Tôi</span>
           </button>
-          
+
           <button type="button"
-                  class="tab-btn flex-1 min-w-[170px] flex items-center justify-center gap-space-xs px-space-md py-2.5 rounded-lg font-title-sm text-title-sm transition-all text-on-surface-variant hover:bg-[#F5ECE7] cursor-pointer"
-                  id="btnTabPassword" onclick="switchTab('tabPassword')">
+            class="tab-btn flex-1 min-w-[170px] flex items-center justify-center gap-space-xs px-space-md py-2.5 rounded-lg font-title-sm text-title-sm transition-all text-on-surface-variant hover:bg-[#F5ECE7] cursor-pointer"
+            id="btnTabPassword" onclick="switchTab('tabPassword')">
             <span class="material-symbols-outlined text-[18px]">lock_reset</span>
             <span>Đổi Mật Khẩu</span>
           </button>
@@ -428,26 +494,31 @@
         <!-- ==========================================
              TAB 1: THÔNG TIN HỒ SƠ (UC_009)
              ========================================== -->
-        <div class="tab-content bg-surface-container-lowest rounded-xl shadow-xs border border-[#EAE1DC] p-space-lg lg:p-space-xl" id="tabProfile">
-          
+        <div
+          class="tab-content bg-surface-container-lowest rounded-xl shadow-xs border border-[#EAE1DC] p-space-lg lg:p-space-xl"
+          id="tabProfile">
+
           <!-- Tab Header -->
           <div class="flex items-center justify-between pb-space-md mb-space-lg border-b border-[#F0E8E3]">
             <div>
               <h3 class="font-headline-sm text-headline-sm text-on-surface">Hồ Sơ Của Tôi</h3>
-              <p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Quản lý thông tin hồ sơ để bảo mật tài khoản và đặt hoa nhanh chóng</p>
+              <p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Quản lý thông tin hồ sơ để bảo mật tài
+                khoản và đặt hoa nhanh chóng</p>
             </div>
-            
+
             <!-- Nút chỉnh sửa hình cây bút (UC_009 Step 4b) -->
             <button type="button"
-                    class="px-4 py-2 rounded-full border border-[#E2D7D1] hover:border-primary text-primary hover:bg-[#E9F3EE] font-label-md text-label-md flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
-                    id="btnToggleEdit" onclick="toggleEditProfileMode()">
+              class="px-4 py-2 rounded-full border border-[#E2D7D1] hover:border-primary text-primary hover:bg-[#E9F3EE] font-label-md text-label-md flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              id="btnToggleEdit" onclick="toggleEditProfileMode()">
               <span class="material-symbols-outlined text-[18px]" id="btnEditIcon">edit</span>
               <span id="btnEditText">Chỉnh sửa hồ sơ</span>
             </button>
           </div>
 
           <!-- Edit status indicator banner -->
-          <div class="p-space-md rounded-xl bg-[#FAF7F5] border border-[#EAE1DC] mb-space-lg flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant transition-colors" id="profileModeBanner">
+          <div
+            class="p-space-md rounded-xl bg-[#FAF7F5] border border-[#EAE1DC] mb-space-lg flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant transition-colors"
+            id="profileModeBanner">
             <span class="flex items-center gap-space-xs">
               <span class="material-symbols-outlined text-[18px] text-[#264E43]">verified_user</span>
               <span>Đang ở chế độ xem an toàn. Bấm <strong>"Chỉnh sửa hồ sơ"</strong> để cập nhật thông tin.</span>
@@ -456,22 +527,26 @@
           </div>
 
           <!-- Profile Form (UC_009) -->
-          <form th:action="@{/customer/profile/update}" method="post" enctype="multipart/form-data" id="profileForm" class="space-y-space-md">
-            
+          <form th:action="@{/customer/profile/update}" method="post" enctype="multipart/form-data" id="profileForm"
+            class="space-y-space-md">
+
             <!-- Hidden inputs for avatar and cover uploads -->
-            <input type="file" id="coverFileInput" name="coverFile" accept="image/*" class="hidden" onchange="previewCoverImage(this)">
-            <input type="file" id="avatarFileInput" name="avatarFile" accept="image/*" class="hidden" onchange="previewAvatarImage(this)">
+            <input type="file" id="coverFileInput" name="coverFile" accept="image/*" class="hidden"
+              onchange="previewCoverImage(this)">
+            <input type="file" id="avatarFileInput" name="avatarFile" accept="image/*" class="hidden"
+              onchange="previewAvatarImage(this)">
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
-              
+
               <!-- Full name -->
               <div>
                 <label class="block font-label-md text-label-md text-on-surface mb-1.5">
                   Họ và tên <span class="text-secondary">*</span>
                 </label>
                 <div class="relative">
-                  <input class="profile-input w-full px-space-md py-2.5 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#264E43]/30 disabled:opacity-85 transition-all"
-                         disabled name="fullName" id="inpFullName" type="text" th:value="${user.fullName}" required>
+                  <input
+                    class="profile-input w-full px-space-md py-2.5 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#264E43]/30 disabled:opacity-85 transition-all"
+                    disabled name="fullName" id="inpFullName" type="text" th:value="${user.fullName}" required>
                   <span class="material-symbols-outlined absolute right-3 top-3 text-[18px] text-outline">badge</span>
                 </div>
               </div>
@@ -485,9 +560,11 @@
                   </span>
                 </label>
                 <div class="relative">
-                  <input class="w-full px-space-md py-2.5 rounded-lg bg-[#F5ECE7]/60 border border-[#E2D7D1] text-on-surface-variant font-body-md text-body-md cursor-not-allowed"
-                         disabled readonly type="text" th:value="${user.username}">
-                  <span class="material-symbols-outlined absolute right-3 top-3 text-[18px] text-outline">alternate_email</span>
+                  <input
+                    class="w-full px-space-md py-2.5 rounded-lg bg-[#F5ECE7]/60 border border-[#E2D7D1] text-on-surface-variant font-body-md text-body-md cursor-not-allowed"
+                    disabled readonly type="text" th:value="${user.username}">
+                  <span
+                    class="material-symbols-outlined absolute right-3 top-3 text-[18px] text-outline">alternate_email</span>
                 </div>
               </div>
 
@@ -500,9 +577,11 @@
                   </span>
                 </label>
                 <div class="relative">
-                  <input class="w-full px-space-md py-2.5 rounded-lg bg-[#F5ECE7]/60 border border-[#E2D7D1] text-on-surface-variant font-body-md text-body-md cursor-not-allowed"
-                         disabled readonly type="email" th:value="${user.email}">
-                  <span class="material-symbols-outlined absolute right-3 top-3 text-[18px] text-[#264E43]">mark_email_read</span>
+                  <input
+                    class="w-full px-space-md py-2.5 rounded-lg bg-[#F5ECE7]/60 border border-[#E2D7D1] text-on-surface-variant font-body-md text-body-md cursor-not-allowed"
+                    disabled readonly type="email" th:value="${user.email}">
+                  <span
+                    class="material-symbols-outlined absolute right-3 top-3 text-[18px] text-[#264E43]">mark_email_read</span>
                 </div>
               </div>
 
@@ -512,9 +591,12 @@
                   Số điện thoại liên lạc <span class="text-secondary">* (10 số)</span>
                 </label>
                 <div class="relative">
-                  <input class="profile-input w-full px-space-md py-2.5 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#264E43]/30 disabled:opacity-85 transition-all"
-                         disabled name="phone" id="inpPhone" type="tel" pattern="[0-9]{10}" maxlength="10" th:value="${user.phone}" placeholder="VD: 0901234567">
-                  <span class="material-symbols-outlined absolute right-3 top-3 text-[18px] text-outline">smartphone</span>
+                  <input
+                    class="profile-input w-full px-space-md py-2.5 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#264E43]/30 disabled:opacity-85 transition-all"
+                    disabled name="phone" id="inpPhone" type="tel" pattern="[0-9]{10}" maxlength="10"
+                    th:value="${user.phone}" placeholder="VD: 0901234567">
+                  <span
+                    class="material-symbols-outlined absolute right-3 top-3 text-[18px] text-outline">smartphone</span>
                 </div>
               </div>
 
@@ -524,29 +606,43 @@
             <div class="pt-2">
               <label class="block font-label-md text-label-md text-on-surface mb-1.5">Địa chỉ giao hoa mặc định</label>
               <div class="relative">
-                <input class="profile-input w-full px-space-md py-2.5 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#264E43]/30 disabled:opacity-85 transition-all"
-                       disabled name="address" id="inpAddress" type="text" th:value="${user.address}" placeholder="VD: Số nhà, tên đường, phường/quận...">
+                <input
+                  class="profile-input w-full px-space-md py-2.5 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#264E43]/30 disabled:opacity-85 transition-all"
+                  disabled name="address" id="inpAddress" type="text" th:value="${user.address}"
+                  placeholder="VD: Số nhà, tên đường, phường/quận...">
                 <span class="material-symbols-outlined absolute right-3 top-3 text-[18px] text-outline">home_pin</span>
               </div>
             </div>
 
             <!-- Occasion notes / preferences -->
             <div class="pt-2">
-              <label class="block font-label-md text-label-md text-on-surface mb-1.5">Sở thích hoa tươi &amp; Phong cách yêu thích</label>
+              <label class="block font-label-md text-label-md text-on-surface mb-1.5">Sở thích hoa tươi &amp; Phong cách
+                yêu thích</label>
               <div class="flex flex-wrap gap-2">
-                <span class="px-space-md py-1 rounded-full bg-[#F5ECE7] text-[#264E43] border border-[#E2D7D1] font-label-sm text-label-sm font-medium">Hoa hồng Pháp</span>
-                <span class="px-space-md py-1 rounded-full bg-[#F5ECE7] text-[#264E43] border border-[#E2D7D1] font-label-sm text-label-sm font-medium">Mẫu đơn Pastel</span>
-                <span class="px-space-md py-1 rounded-full bg-[#F5ECE7] text-[#264E43] border border-[#E2D7D1] font-label-sm text-label-sm font-medium">Bó giấy mộc Vintage</span>
-                <span class="px-space-md py-1 rounded-full bg-[#F5ECE7] text-[#264E43] border border-[#E2D7D1] font-label-sm text-label-sm font-medium">Thiệp viết tay nắn nót</span>
+                <span
+                  class="px-space-md py-1 rounded-full bg-[#F5ECE7] text-[#264E43] border border-[#E2D7D1] font-label-sm text-label-sm font-medium">Hoa
+                  hồng Pháp</span>
+                <span
+                  class="px-space-md py-1 rounded-full bg-[#F5ECE7] text-[#264E43] border border-[#E2D7D1] font-label-sm text-label-sm font-medium">Mẫu
+                  đơn Pastel</span>
+                <span
+                  class="px-space-md py-1 rounded-full bg-[#F5ECE7] text-[#264E43] border border-[#E2D7D1] font-label-sm text-label-sm font-medium">Bó
+                  giấy mộc Vintage</span>
+                <span
+                  class="px-space-md py-1 rounded-full bg-[#F5ECE7] text-[#264E43] border border-[#E2D7D1] font-label-sm text-label-sm font-medium">Thiệp
+                  viết tay nắn nót</span>
               </div>
             </div>
 
             <!-- Action buttons container (visible on edit) -->
             <div class="hidden pt-space-md flex items-center justify-end gap-space-md" id="profileActionButtons">
-              <button type="button" class="px-space-lg py-2.5 rounded-full bg-[#F5ECE7] text-on-surface font-label-lg text-label-lg hover:bg-[#EFE7E2] transition-colors border border-[#E2D7D1] cursor-pointer" onclick="cancelEditProfile()">
+              <button type="button"
+                class="px-space-lg py-2.5 rounded-full bg-[#F5ECE7] text-on-surface font-label-lg text-label-lg hover:bg-[#EFE7E2] transition-colors border border-[#E2D7D1] cursor-pointer"
+                onclick="cancelEditProfile()">
                 Hủy bỏ
               </button>
-              <button type="submit" class="px-space-xl py-2.5 rounded-full bg-[#1E453E] text-white font-label-lg text-label-lg shadow-sm hover:bg-[#163630] transition-all flex items-center gap-space-xs cursor-pointer">
+              <button type="submit"
+                class="px-space-xl py-2.5 rounded-full bg-[#1E453E] text-white font-label-lg text-label-lg shadow-sm hover:bg-[#163630] transition-all flex items-center gap-space-xs cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">check</span>
                 Lưu Thay Đổi
               </button>
@@ -559,56 +655,71 @@
         <!-- ==========================================
              TAB 2: SỔ ĐỊA CHỈ NHẬN HÀNG (UC_010)
              ========================================== -->
-        <div class="tab-content hidden bg-surface-container-lowest rounded-xl shadow-xs border border-[#EAE1DC] p-space-lg lg:p-space-xl" id="tabAddresses">
-          
+        <div
+          class="tab-content hidden bg-surface-container-lowest rounded-xl shadow-xs border border-[#EAE1DC] p-space-lg lg:p-space-xl"
+          id="tabAddresses">
+
           <!-- Header and Add Button -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-md mb-space-lg border-b border-[#F0E8E3]">
+          <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-md mb-space-lg border-b border-[#F0E8E3]">
             <div>
               <h3 class="font-headline-sm text-headline-sm text-on-surface">Địa Chỉ Của Tôi</h3>
-              <p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Quản lý danh sách điểm nhận hoa hỏa tốc 60–90 phút tại Sài Gòn</p>
+              <p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Quản lý danh sách điểm nhận hoa hỏa
+                tốc 60–90 phút tại Sài Gòn</p>
             </div>
-            
-            <button type="button" class="inline-flex items-center gap-space-xs px-space-lg py-2.5 rounded-full bg-[#1E453E] text-white font-label-md text-label-md shadow-xs hover:bg-[#163630] transition-all cursor-pointer" onclick="openModal('modalAddAddress')">
+
+            <button type="button"
+              class="inline-flex items-center gap-space-xs px-space-lg py-2.5 rounded-full bg-[#1E453E] text-white font-label-md text-label-md shadow-xs hover:bg-[#163630] transition-all cursor-pointer"
+              onclick="openModal('modalAddAddress')">
               <span class="material-symbols-outlined text-[18px]">add_location_alt</span>
               <span>+ Thêm Địa Chỉ Mới</span>
             </button>
           </div>
 
           <!-- Express Delivery Guarantee Notice -->
-          <div class="mb-space-lg p-space-md rounded-xl bg-[#FAF7F5] border border-[#EAE1DC] flex items-center gap-space-md">
+          <div
+            class="mb-space-lg p-space-md rounded-xl bg-[#FAF7F5] border border-[#EAE1DC] flex items-center gap-space-md">
             <span class="material-symbols-outlined text-[28px] text-[#264E43] shrink-0">local_shipping</span>
             <div class="text-body-sm font-body-sm">
-              <p class="font-title-sm text-title-sm text-[#264E43]">Cam kết giao hoa 60–90 phút chính xác từng con phố TP.HCM</p>
-              <p class="text-on-surface-variant">Florist sẽ đóng hộp bảo quản cuống hoa kèm nước dưỡng và chụp ảnh thành phẩm gửi quý khách trước khi shipper xuất phát.</p>
+              <p class="font-title-sm text-title-sm text-[#264E43]">Cam kết giao hoa 60–90 phút chính xác từng con phố
+                TP.HCM</p>
+              <p class="text-on-surface-variant">Florist sẽ đóng hộp bảo quản cuống hoa kèm nước dưỡng và chụp ảnh thành
+                phẩm gửi quý khách trước khi shipper xuất phát.</p>
             </div>
           </div>
 
           <!-- Empty address state -->
-          <div th:if="${#lists.isEmpty(addresses)}" class="text-center py-10 bg-[#FAF7F5] rounded-xl border border-dashed border-[#E2D7D1]">
+          <div th:if="${#lists.isEmpty(addresses)}"
+            class="text-center py-10 bg-[#FAF7F5] rounded-xl border border-dashed border-[#E2D7D1]">
             <span class="material-symbols-outlined text-[48px] text-[#7E726D] mb-2">location_off</span>
             <p class="font-title-sm text-title-sm text-on-surface">Bạn chưa có địa chỉ nhận hoa nào</p>
-            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Thêm địa chỉ giao hàng để tiến hành thanh toán và nhận hoa nhanh chóng.</p>
-            <button type="button" class="mt-4 px-5 py-2 rounded-full bg-[#1E453E] text-white text-[13px] font-medium shadow-xs" onclick="openModal('modalAddAddress')">
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Thêm địa chỉ giao hàng để tiến hành thanh
+              toán và nhận hoa nhanh chóng.</p>
+            <button type="button"
+              class="mt-4 px-5 py-2 rounded-full bg-[#1E453E] text-white text-[13px] font-medium shadow-xs"
+              onclick="openModal('modalAddAddress')">
               + Thêm địa chỉ đầu tiên
             </button>
           </div>
 
           <!-- Address Cards Stack -->
           <div th:if="${!#lists.isEmpty(addresses)}" class="space-y-space-md">
-            
+
             <div th:each="addr : ${addresses}"
-                 class="p-space-lg rounded-xl bg-surface-container-lowest border border-[#EAE1DC] hover:border-[#E2D7D1] transition-all relative group shadow-xs">
+              class="p-space-lg rounded-xl bg-surface-container-lowest border border-[#EAE1DC] hover:border-[#E2D7D1] transition-all relative group shadow-xs">
               <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-space-md">
-                
+
                 <div class="space-y-1.5 flex-1">
                   <div class="flex flex-wrap items-center gap-space-sm">
-                    <span class="font-title-md text-title-md text-on-surface" th:text="${addr.recipientName}">Tên người nhận</span>
+                    <span class="font-title-md text-title-md text-on-surface" th:text="${addr.recipientName}">Tên người
+                      nhận</span>
                     <span class="text-outline-variant">|</span>
-                    <span class="font-body-md text-body-md text-on-surface-variant" th:text="${addr.phone}">0901234567</span>
-                    
+                    <span class="font-body-md text-body-md text-on-surface-variant"
+                      th:text="${addr.phone}">0901234567</span>
+
                     <!-- Huy hiệu Mặc Định -->
                     <span th:if="${addr.isDefault}"
-                          class="px-2.5 py-0.5 rounded-full bg-[#E9F3EE] text-[#264E43] font-label-sm text-label-sm font-semibold border border-[#264E43]/20 flex items-center gap-1">
+                      class="px-2.5 py-0.5 rounded-full bg-[#E9F3EE] text-[#264E43] font-label-sm text-label-sm font-semibold border border-[#264E43]/20 flex items-center gap-1">
                       <span class="material-symbols-outlined text-[13px]">check_circle</span> Mặc Định
                     </span>
                   </div>
@@ -621,10 +732,12 @@
 
                 <!-- Actions: Thiết lập mặc định, Sửa, Xóa -->
                 <div class="flex sm:flex-col items-end gap-2 shrink-0">
-                  
+
                   <!-- Nút Thiết lập mặc định (nếu chưa phải mặc định) -->
-                  <form th:if="${!addr.isDefault}" th:action="@{/customer/profile/address/set-default/{id}(id=${addr.id})}" method="post">
-                    <button type="submit" class="font-label-sm text-label-sm text-[#264E43] hover:underline px-space-sm py-1 rounded hover:bg-[#E9F3EE] cursor-pointer">
+                  <form th:if="${!addr.isDefault}"
+                    th:action="@{/customer/profile/address/set-default/{id}(id=${addr.id})}" method="post">
+                    <button type="submit"
+                      class="font-label-sm text-label-sm text-[#264E43] hover:underline px-space-sm py-1 rounded hover:bg-[#E9F3EE] cursor-pointer">
                       Thiết lập mặc định
                     </button>
                   </form>
@@ -632,15 +745,17 @@
                   <div class="flex items-center gap-2">
                     <!-- Nút Sửa -->
                     <button type="button"
-                            class="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant hover:text-primary px-space-sm py-1 rounded hover:bg-[#F5ECE7] cursor-pointer"
-                            th:onclick="'openEditAddressModal(' + ${addr.id} + ', '' + ${#strings.escapeJavaScript(addr.recipientName)} + '', '' + ${#strings.escapeJavaScript(addr.phone)} + '', '' + ${#strings.escapeJavaScript(addr.addressDetail)} + '', ' + ${addr.isDefault} + ')'">
+                      class="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant hover:text-primary px-space-sm py-1 rounded hover:bg-[#F5ECE7] cursor-pointer"
+                      th:onclick="'openEditAddressModal(' + ${addr.id} + ', '' + ${#strings.escapeJavaScript(addr.recipientName)} + '', '' + ${#strings.escapeJavaScript(addr.phone)} + '', '' + ${#strings.escapeJavaScript(addr.addressDetail)} + '', ' + ${addr.isDefault} + ')'">
                       <span class="material-symbols-outlined text-[16px]">edit</span>
                       <span>Sửa</span>
                     </button>
 
                     <!-- Nút Xóa -->
-                    <form th:action="@{/customer/profile/address/delete/{id}(id=${addr.id})}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa địa chỉ này?');">
-                      <button type="submit" class="inline-flex items-center gap-1 font-label-sm text-label-sm text-secondary hover:underline px-space-sm py-1 rounded hover:bg-[#FCECEE] cursor-pointer">
+                    <form th:action="@{/customer/profile/address/delete/{id}(id=${addr.id})}" method="post"
+                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa địa chỉ này?');">
+                      <button type="submit"
+                        class="inline-flex items-center gap-1 font-label-sm text-label-sm text-secondary hover:underline px-space-sm py-1 rounded hover:bg-[#FCECEE] cursor-pointer">
                         <span class="material-symbols-outlined text-[16px]">delete</span>
                         <span>Xóa</span>
                       </button>
@@ -659,26 +774,32 @@
         <!-- ==========================================
              TAB 3: ĐỔI MẬT KHẨU (UC_008)
              ========================================== -->
-        <div class="tab-content hidden bg-surface-container-lowest rounded-xl shadow-xs border border-[#EAE1DC] p-space-lg lg:p-space-xl" id="tabPassword">
-          
+        <div
+          class="tab-content hidden bg-surface-container-lowest rounded-xl shadow-xs border border-[#EAE1DC] p-space-lg lg:p-space-xl"
+          id="tabPassword">
+
           <!-- Tab Header -->
           <div class="pb-space-md mb-space-lg border-b border-[#F0E8E3]">
             <h3 class="font-headline-sm text-headline-sm text-on-surface">Đổi Mật Khẩu Bảo Mật</h3>
-            <p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Để bảo vệ thông tin cá nhân và đơn hàng hoa, vui lòng không chia sẻ mật khẩu cho người khác</p>
+            <p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Để bảo vệ thông tin cá nhân và đơn hàng
+              hoa, vui lòng không chia sẻ mật khẩu cho người khác</p>
           </div>
 
           <!-- Password change form -->
-          <form th:action="@{/customer/profile/change-password}" method="post" class="max-w-xl space-y-space-md" onsubmit="return validatePasswordChange(event)">
-            
+          <form th:action="@{/customer/profile/change-password}" method="post" class="max-w-xl space-y-space-md"
+            onsubmit="return validatePasswordChange(event)">
+
             <!-- Current password -->
             <div>
               <label class="block font-label-md text-label-md text-on-surface mb-1.5">
                 Mật khẩu hiện tại <span class="text-secondary">*</span>
               </label>
               <div class="relative">
-                <input class="w-full px-space-md py-2.5 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#264E43]/30"
-                       id="currentPass" name="oldPassword" placeholder="Nhập mật khẩu đang dùng" required type="password">
-                <button type="button" class="absolute right-3 top-2.5 text-outline hover:text-on-surface cursor-pointer" onclick="togglePasswordVisibility('currentPass', this)">
+                <input
+                  class="w-full px-space-md py-2.5 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#264E43]/30"
+                  id="currentPass" name="oldPassword" placeholder="Nhập mật khẩu đang dùng" required type="password">
+                <button type="button" class="absolute right-3 top-2.5 text-outline hover:text-on-surface cursor-pointer"
+                  onclick="togglePasswordVisibility('currentPass', this)">
                   <span class="material-symbols-outlined text-[20px]">visibility</span>
                 </button>
               </div>
@@ -690,20 +811,25 @@
                 Mật khẩu mới <span class="text-secondary">*</span>
               </label>
               <div class="relative">
-                <input class="w-full px-space-md py-2.5 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#264E43]/30"
-                       id="newPass" name="newPassword" oninput="checkPasswordStrength(this.value)" placeholder="Ít nhất 6 ký tự, gồm chữ và số" required type="password">
-                <button type="button" class="absolute right-3 top-2.5 text-outline hover:text-on-surface cursor-pointer" onclick="togglePasswordVisibility('newPass', this)">
+                <input
+                  class="w-full px-space-md py-2.5 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#264E43]/30"
+                  id="newPass" name="newPassword" oninput="checkPasswordStrength(this.value)"
+                  placeholder="Ít nhất 6 ký tự, gồm chữ và số" required type="password">
+                <button type="button" class="absolute right-3 top-2.5 text-outline hover:text-on-surface cursor-pointer"
+                  onclick="togglePasswordVisibility('newPass', this)">
                   <span class="material-symbols-outlined text-[20px]">visibility</span>
                 </button>
               </div>
-              
+
               <!-- Strength meter bar -->
               <div class="mt-2 space-y-1">
                 <div class="w-full h-1.5 bg-[#EFE7E2] rounded-full overflow-hidden">
-                  <div class="h-full bg-outline-variant w-1/4 transition-all duration-300" id="passwordStrengthBar"></div>
+                  <div class="h-full bg-outline-variant w-1/4 transition-all duration-300" id="passwordStrengthBar">
+                  </div>
                 </div>
                 <div class="flex items-center justify-between text-body-sm font-body-sm text-outline">
-                  <span>Độ mạnh: <strong class="text-on-surface-variant font-medium" id="strengthLabel">Trống</strong></span>
+                  <span>Độ mạnh: <strong class="text-on-surface-variant font-medium"
+                      id="strengthLabel">Trống</strong></span>
                   <span>Tối thiểu 6 ký tự</span>
                 </div>
               </div>
@@ -715,16 +841,19 @@
                 Xác nhận mật khẩu mới <span class="text-secondary">*</span>
               </label>
               <div class="relative">
-                <input class="w-full px-space-md py-2.5 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#264E43]/30"
-                       id="confirmPass" placeholder="Nhập lại mật khẩu mới" required type="password">
-                <button type="button" class="absolute right-3 top-2.5 text-outline hover:text-on-surface cursor-pointer" onclick="togglePasswordVisibility('confirmPass', this)">
+                <input
+                  class="w-full px-space-md py-2.5 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#264E43]/30"
+                  id="confirmPass" placeholder="Nhập lại mật khẩu mới" required type="password">
+                <button type="button" class="absolute right-3 top-2.5 text-outline hover:text-on-surface cursor-pointer"
+                  onclick="togglePasswordVisibility('confirmPass', this)">
                   <span class="material-symbols-outlined text-[20px]">visibility</span>
                 </button>
               </div>
             </div>
 
             <!-- Notice box -->
-            <div class="p-space-md rounded-xl bg-[#FAF7F5] border border-[#EAE1DC] text-body-sm font-body-sm text-on-surface-variant space-y-1">
+            <div
+              class="p-space-md rounded-xl bg-[#FAF7F5] border border-[#EAE1DC] text-body-sm font-body-sm text-on-surface-variant space-y-1">
               <p class="font-semibold text-on-surface flex items-center gap-1">
                 <span class="material-symbols-outlined text-[#264E43] text-[16px]">info</span>
                 Tiêu chuẩn bảo mật:
@@ -737,7 +866,8 @@
 
             <!-- Submit button -->
             <div class="pt-space-sm">
-              <button type="submit" class="px-space-xl py-2.5 rounded-full bg-[#1E453E] text-white font-label-lg text-label-lg shadow-sm hover:bg-[#163630] transition-all flex items-center gap-space-xs cursor-pointer">
+              <button type="submit"
+                class="px-space-xl py-2.5 rounded-full bg-[#1E453E] text-white font-label-lg text-label-lg shadow-sm hover:bg-[#163630] transition-all flex items-center gap-space-xs cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">key</span>
                 Cập Nhật Mật Khẩu
               </button>
@@ -758,14 +888,17 @@
        ============================================== -->
 
   <!-- 1. Modal: Thêm Địa Chỉ Mới (UC_010 Steps 6, 7, 8) -->
-  <div class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" id="modalAddAddress">
-    <div class="bg-surface-container-lowest rounded-xl max-w-lg w-full p-space-lg shadow-2xl relative border border-[#EAE1DC]">
+  <div class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+    id="modalAddAddress">
+    <div
+      class="bg-surface-container-lowest rounded-xl max-w-lg w-full p-space-lg shadow-2xl relative border border-[#EAE1DC]">
       <div class="flex items-center justify-between pb-space-sm border-b border-[#F0E8E3] mb-space-md">
         <h4 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
           <span class="material-symbols-outlined text-[#264E43]">add_location_alt</span>
           Thêm Địa Chỉ Nhận Mới
         </h4>
-        <button type="button" class="text-outline hover:text-on-surface cursor-pointer" onclick="closeModal('modalAddAddress')">
+        <button type="button" class="text-outline hover:text-on-surface cursor-pointer"
+          onclick="closeModal('modalAddAddress')">
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
@@ -776,15 +909,17 @@
             <label class="block font-label-sm text-label-sm text-on-surface mb-1">
               Tên người nhận <span class="text-secondary">*</span>
             </label>
-            <input name="recipientName" class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none"
-                   placeholder="VD: Nguyễn Văn A" required type="text">
+            <input name="recipientName"
+              class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none"
+              placeholder="VD: Nguyễn Văn A" required type="text">
           </div>
           <div>
             <label class="block font-label-sm text-label-sm text-on-surface mb-1">
               Số điện thoại <span class="text-secondary">* (10 số)</span>
             </label>
-            <input name="phone" pattern="[0-9]{10}" maxlength="10" class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none"
-                   placeholder="VD: 0901234567" required type="tel">
+            <input name="phone" pattern="[0-9]{10}" maxlength="10"
+              class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none"
+              placeholder="VD: 0901234567" required type="tel">
           </div>
         </div>
 
@@ -792,8 +927,9 @@
           <label class="block font-label-sm text-label-sm text-on-surface mb-1">
             Địa chỉ chi tiết (Số nhà, tên đường, phường, quận...) <span class="text-secondary">*</span>
           </label>
-          <input name="addressDetail" class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none"
-                 placeholder="VD: 128 Nguyễn Đình Chiểu, Phường Đa Kao, Quận 1..." required type="text">
+          <input name="addressDetail"
+            class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none"
+            placeholder="VD: 128 Nguyễn Đình Chiểu, Phường Đa Kao, Quận 1..." required type="text">
         </div>
 
         <div class="pt-2 flex items-center justify-between">
@@ -804,10 +940,13 @@
         </div>
 
         <div class="pt-space-md flex items-center justify-end gap-space-md">
-          <button type="button" class="px-space-lg py-2 rounded-full bg-[#F5ECE7] text-on-surface font-label-md text-label-md border border-[#E2D7D1] cursor-pointer" onclick="closeModal('modalAddAddress')">
+          <button type="button"
+            class="px-space-lg py-2 rounded-full bg-[#F5ECE7] text-on-surface font-label-md text-label-md border border-[#E2D7D1] cursor-pointer"
+            onclick="closeModal('modalAddAddress')">
             Trở lại
           </button>
-          <button type="submit" class="px-space-xl py-2 rounded-full bg-[#1E453E] text-white font-label-md text-label-md shadow-xs hover:bg-[#163630] transition-all cursor-pointer">
+          <button type="submit"
+            class="px-space-xl py-2 rounded-full bg-[#1E453E] text-white font-label-md text-label-md shadow-xs hover:bg-[#163630] transition-all cursor-pointer">
             Hoàn Thành
           </button>
         </div>
@@ -816,14 +955,17 @@
   </div>
 
   <!-- 2. Modal: Chỉnh Sửa Địa Chỉ (UC_010 Step 6a) -->
-  <div class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" id="modalEditAddress">
-    <div class="bg-surface-container-lowest rounded-xl max-w-lg w-full p-space-lg shadow-2xl relative border border-[#EAE1DC]">
+  <div class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+    id="modalEditAddress">
+    <div
+      class="bg-surface-container-lowest rounded-xl max-w-lg w-full p-space-lg shadow-2xl relative border border-[#EAE1DC]">
       <div class="flex items-center justify-between pb-space-sm border-b border-[#F0E8E3] mb-space-md">
         <h4 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
           <span class="material-symbols-outlined text-[#264E43]">edit_location_alt</span>
           Cập Nhật Địa Chỉ Nhận
         </h4>
-        <button type="button" class="text-outline hover:text-on-surface cursor-pointer" onclick="closeModal('modalEditAddress')">
+        <button type="button" class="text-outline hover:text-on-surface cursor-pointer"
+          onclick="closeModal('modalEditAddress')">
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
@@ -834,13 +976,17 @@
             <label class="block font-label-sm text-label-sm text-on-surface mb-1">
               Tên người nhận <span class="text-secondary">*</span>
             </label>
-            <input id="editRecipientName" name="recipientName" class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none" required type="text">
+            <input id="editRecipientName" name="recipientName"
+              class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none"
+              required type="text">
           </div>
           <div>
             <label class="block font-label-sm text-label-sm text-on-surface mb-1">
               Số điện thoại <span class="text-secondary">* (10 số)</span>
             </label>
-            <input id="editPhone" name="phone" pattern="[0-9]{10}" maxlength="10" class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none" required type="tel">
+            <input id="editPhone" name="phone" pattern="[0-9]{10}" maxlength="10"
+              class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none"
+              required type="tel">
           </div>
         </div>
 
@@ -848,21 +994,27 @@
           <label class="block font-label-sm text-label-sm text-on-surface mb-1">
             Địa chỉ chi tiết <span class="text-secondary">*</span>
           </label>
-          <input id="editAddressDetail" name="addressDetail" class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none" required type="text">
+          <input id="editAddressDetail" name="addressDetail"
+            class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none"
+            required type="text">
         </div>
 
         <div class="pt-2 flex items-center justify-between">
           <label class="flex items-center gap-space-xs cursor-pointer text-body-sm font-body-sm text-on-surface">
-            <input id="editIsDefault" name="isDefault" value="true" class="w-4 h-4 rounded text-primary accent-[#1E453E]" type="checkbox">
+            <input id="editIsDefault" name="isDefault" value="true"
+              class="w-4 h-4 rounded text-primary accent-[#1E453E]" type="checkbox">
             <span>Đặt làm địa chỉ nhận hoa mặc định</span>
           </label>
         </div>
 
         <div class="pt-space-md flex items-center justify-end gap-space-md">
-          <button type="button" class="px-space-lg py-2 rounded-full bg-[#F5ECE7] text-on-surface font-label-md text-label-md border border-[#E2D7D1] cursor-pointer" onclick="closeModal('modalEditAddress')">
+          <button type="button"
+            class="px-space-lg py-2 rounded-full bg-[#F5ECE7] text-on-surface font-label-md text-label-md border border-[#E2D7D1] cursor-pointer"
+            onclick="closeModal('modalEditAddress')">
             Hủy bỏ
           </button>
-          <button type="submit" class="px-space-xl py-2 rounded-full bg-[#1E453E] text-white font-label-md text-label-md shadow-xs hover:bg-[#163630] transition-all cursor-pointer">
+          <button type="submit"
+            class="px-space-xl py-2 rounded-full bg-[#1E453E] text-white font-label-md text-label-md shadow-xs hover:bg-[#163630] transition-all cursor-pointer">
             Lưu Cập Nhật
           </button>
         </div>
@@ -871,21 +1023,28 @@
   </div>
 
   <!-- 3. Modal: Xác Nhận Đăng Xuất (#signOutModal) -->
-  <div class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" id="signOutModal">
-    <div class="bg-surface-container-lowest rounded-xl max-w-sm w-full p-space-lg shadow-2xl text-center border border-[#EAE1DC]">
-      <div class="w-12 h-12 rounded-full bg-[#FCECEE] text-secondary flex items-center justify-center mx-auto mb-space-sm">
+  <div class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+    id="signOutModal">
+    <div
+      class="bg-surface-container-lowest rounded-xl max-w-sm w-full p-space-lg shadow-2xl text-center border border-[#EAE1DC]">
+      <div
+        class="w-12 h-12 rounded-full bg-[#FCECEE] text-secondary flex items-center justify-center mx-auto mb-space-sm">
         <span class="material-symbols-outlined text-[26px]">logout</span>
       </div>
       <h4 class="font-headline-sm text-headline-sm text-on-surface">Đăng Xuất Tài Khoản?</h4>
       <p class="font-body-sm text-body-sm text-on-surface-variant mt-2">
-        Bạn có chắc chắn muốn rời khỏi phiên đăng nhập của <strong th:text="${user.fullName}">Tài khoản</strong>? Giỏ hoa và các địa chỉ đã lưu sẽ vẫn được giữ an toàn.
+        Bạn có chắc chắn muốn rời khỏi phiên đăng nhập của <strong th:text="${user.fullName}">Tài khoản</strong>? Giỏ
+        hoa và các địa chỉ đã lưu sẽ vẫn được giữ an toàn.
       </p>
-      
+
       <form th:action="@{/logout}" method="post" class="mt-space-lg grid grid-cols-2 gap-space-sm">
-        <button type="button" class="py-2.5 rounded-full bg-[#F5ECE7] text-on-surface font-label-md text-label-md hover:bg-[#EFE7E2] transition-colors border border-[#E2D7D1] cursor-pointer" onclick="closeModal('signOutModal')">
+        <button type="button"
+          class="py-2.5 rounded-full bg-[#F5ECE7] text-on-surface font-label-md text-label-md hover:bg-[#EFE7E2] transition-colors border border-[#E2D7D1] cursor-pointer"
+          onclick="closeModal('signOutModal')">
           Ở lại
         </button>
-        <button type="submit" class="py-2.5 rounded-full bg-secondary text-white font-label-md text-label-md shadow-xs hover:bg-[#b02f43] transition-all cursor-pointer">
+        <button type="submit"
+          class="py-2.5 rounded-full bg-secondary text-white font-label-md text-label-md shadow-xs hover:bg-[#b02f43] transition-all cursor-pointer">
           Xác nhận
         </button>
       </form>
@@ -896,21 +1055,94 @@
        FOOTER (matching ui/code.html)
        ============================================== -->
   <footer class="w-full bg-[#FAF7F5] border-t border-[#EAE1DC] text-on-surface mt-space-xl pt-space-xl pb-space-lg">
-    <div class="max-w-7xl mx-auto px-4 md:px-margin-desktop grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-space-lg mb-space-xl">
+    <div
+      class="max-w-7xl mx-auto px-4 md:px-margin-desktop grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-space-lg mb-space-xl">
       <div class="lg:col-span-2 space-y-space-md pr-space-lg">
         <div class="flex items-center gap-2">
           <span class="text-2xl text-secondary">🌸</span>
           <span class="font-headline-sm text-headline-sm text-[#2D2424] font-semibold">HOA TƯƠI SÀI GÒN</span>
         </div>
         <p class="font-body-md text-body-md text-on-surface-variant">
-          Hệ thống điện hoa cao cấp và thiết kế hoa nghệ thuật phong cách Pháp hiện đại. Trao gửi cảm xúc ngọt ngào, tinh tế qua từng đóa hoa tuyển chọn với cam kết tươi mới cùng dịch vụ giao hỏa tốc 60–90 phút toàn Sài Gòn.
+          Hệ thống điện hoa cao cấp và thiết kế hoa nghệ thuật phong cách Pháp hiện đại. Trao gửi cảm xúc ngọt ngào,
+          tinh tế qua từng đóa hoa tuyển chọn với cam kết tươi mới cùng dịch vụ giao hỏa tốc 60–90 phút toàn Sài Gòn.
         </p>
-        <div class="space-y-space-xs font-body-sm text-body-sm text-on-surface-variant">
-          <p class="flex items-start gap-space-xs">
-            <span class="material-symbols-outlined text-[#264E43] text-[18px]">storefront</span>
-            <span>Cửa hàng Flagship: 128 Nguyễn Đình Chiểu, Phường Đa Kao, Quận 1, TP. HCM</span>
-          </p>
-          <p class="flex items-center gap-space-xs">
+        <div class="space-y-2.5 font-body-sm text-body-sm text-on-surface-variant">
+          <div class="flex items-center justify-between pb-1 border-b border-[#EAE1DC]">
+            <span class="font-title-sm text-title-sm text-[#264E43] flex items-center gap-1.5 font-semibold">
+              <span class="material-symbols-outlined text-[18px]">storefront</span>
+              Hệ Thống Chi Nhánh Cửa Hàng
+            </span>
+            <a th:href="@{/stores}" class="text-[12px] text-secondary hover:underline flex items-center gap-0.5">
+              Xem tất cả <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+            </a>
+          </div>
+
+          <!-- Danh sách chi nhánh từ CSDL nếu có -->
+          <div th:if="${stores != null and !#lists.isEmpty(stores)}" class="space-y-2">
+            <div th:each="s : ${stores}" class="p-2 rounded-lg bg-[#FAF7F5] border border-[#EAE1DC]/80 hover:border-[#264E43]/40 transition-colors">
+              <div class="flex items-center justify-between">
+                <a th:href="@{/stores/{id}(id=${s.id})}" class="font-medium text-[#2D2424] hover:text-[#264E43] flex items-center gap-1">
+                  <span class="text-secondary text-[14px]">🌸</span>
+                  <span th:text="${s.name}" class="font-semibold">Tên Chi Nhánh</span>
+                </a>
+                <span class="text-[11px] text-[#264E43] font-medium px-2 py-0.5 rounded-full bg-[#E9F3EE]" th:text="'Hotline: ' + ${s.phone != null ? s.phone : '028 1111 222'}">Hotline: 028 1111 222</span>
+              </div>
+              <p class="text-[12px] text-[#6E6464] flex items-start gap-1 mt-1">
+                <span class="material-symbols-outlined text-[15px] text-[#7E726D] shrink-0 mt-0.5">location_on</span>
+                <span th:text="${s.address}">Địa chỉ chi nhánh</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Danh sách chi nhánh cố định chuẩn hệ thống (fallback) -->
+          <div th:if="${stores == null or #lists.isEmpty(stores)}" class="space-y-2">
+            <!-- Chi nhánh 1 -->
+            <div class="p-2 rounded-lg bg-[#FAF7F5] border border-[#EAE1DC]/80">
+              <div class="flex items-center justify-between">
+                <span class="font-semibold text-[#2D2424] flex items-center gap-1">
+                  <span class="text-secondary text-[14px]">🌸</span>
+                  Chi Nhánh Bến Thành (Quận 1)
+                </span>
+                <span class="text-[11px] text-[#264E43] font-medium px-2 py-0.5 rounded-full bg-[#E9F3EE]">Hotline: 028 1111 222</span>
+              </div>
+              <p class="text-[12px] text-[#6E6464] flex items-start gap-1 mt-1">
+                <span class="material-symbols-outlined text-[15px] text-[#7E726D] shrink-0 mt-0.5">location_on</span>
+                <span>123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM</span>
+              </p>
+            </div>
+
+            <!-- Chi nhánh 2 -->
+            <div class="p-2 rounded-lg bg-[#FAF7F5] border border-[#EAE1DC]/80">
+              <div class="flex items-center justify-between">
+                <span class="font-semibold text-[#2D2424] flex items-center gap-1">
+                  <span class="text-secondary text-[14px]">🌸</span>
+                  Chi Nhánh Phú Mỹ Hưng (Quận 7)
+                </span>
+                <span class="text-[11px] text-[#264E43] font-medium px-2 py-0.5 rounded-full bg-[#E9F3EE]">Hotline: 028 3333 444</span>
+              </div>
+              <p class="text-[12px] text-[#6E6464] flex items-start gap-1 mt-1">
+                <span class="material-symbols-outlined text-[15px] text-[#7E726D] shrink-0 mt-0.5">location_on</span>
+                <span>456 Nguyễn Thị Thập, Tân Hưng, Quận 7, TP.HCM</span>
+              </p>
+            </div>
+
+            <!-- Chi nhánh 3 -->
+            <div class="p-2 rounded-lg bg-[#FAF7F5] border border-[#EAE1DC]/80">
+              <div class="flex items-center justify-between">
+                <span class="font-semibold text-[#2D2424] flex items-center gap-1">
+                  <span class="text-secondary text-[14px]">🌸</span>
+                  Chi Nhánh Làng Đại Học (TP. Thủ Đức)
+                </span>
+                <span class="text-[11px] text-[#264E43] font-medium px-2 py-0.5 rounded-full bg-[#E9F3EE]">Hotline: 028 5555 666</span>
+              </div>
+              <p class="text-[12px] text-[#6E6464] flex items-start gap-1 mt-1">
+                <span class="material-symbols-outlined text-[15px] text-[#7E726D] shrink-0 mt-0.5">location_on</span>
+                <span>1 Võ Văn Ngân, Linh Chiểu, Thủ Đức, TP.HCM</span>
+              </p>
+            </div>
+          </div>
+
+          <p class="flex items-center gap-space-xs pt-1">
             <span class="material-symbols-outlined text-secondary text-[18px]">schedule</span>
             <span>Mở cửa: 07:00 - 22:00 (Mỗi ngày, kể cả ngày lễ Tết)</span>
           </p>
@@ -920,9 +1152,11 @@
       <div class="space-y-space-sm">
         <span class="font-title-md text-title-md text-on-surface block">Khám Phá Hoa Tươi</span>
         <ul class="space-y-space-xs font-body-sm text-body-sm text-on-surface-variant">
-          <li><a class="hover:text-primary transition-colors" th:href="@{/(tab='bestseller')}">Hoa Bán Chạy Nhất</a></li>
+          <li><a class="hover:text-primary transition-colors" th:href="@{/(tab='bestseller')}">Hoa Bán Chạy Nhất</a>
+          </li>
           <li><a class="hover:text-primary transition-colors" th:href="@{/(tab='newest')}">Bộ Sưu Tập Mới Về</a></li>
-          <li><a class="hover:text-primary transition-colors" th:href="@{/(tab='toprated')}">Hoa Được Đánh Giá Cao</a></li>
+          <li><a class="hover:text-primary transition-colors" th:href="@{/(tab='toprated')}">Hoa Được Đánh Giá Cao</a>
+          </li>
           <li><a class="hover:text-primary transition-colors" th:href="@{/stores}">Hệ Thống Chi Nhánh</a></li>
         </ul>
       </div>
@@ -943,12 +1177,14 @@
           <li><a class="hover:text-primary transition-colors" th:href="@{/}">Trang Chủ</a></li>
           <li><a class="hover:text-primary transition-colors" th:href="@{/following}">Bộ Sưu Tập Đang Theo Dõi</a></li>
           <li><a class="hover:text-primary transition-colors" th:href="@{/customer/orders}">Lịch Sử Mua Hàng</a></li>
-          <li><a class="hover:text-primary transition-colors" th:href="@{/customer/profile/wishlist}">Hoa Yêu Thích</a></li>
+          <li><a class="hover:text-primary transition-colors" th:href="@{/customer/profile/wishlist}">Hoa Yêu Thích</a>
+          </li>
         </ul>
       </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 md:px-margin-desktop pt-space-lg flex flex-col md:flex-row items-center justify-between gap-space-md font-body-sm text-body-sm text-on-surface-variant border-t border-[#EAE1DC]">
+    <div
+      class="max-w-7xl mx-auto px-4 md:px-margin-desktop pt-space-lg flex flex-col md:flex-row items-center justify-between gap-space-md font-body-sm text-body-sm text-on-surface-variant border-t border-[#EAE1DC]">
       <p>© 2026 HOA TƯƠI SÀI GÒN. All rights reserved.</p>
       <div class="flex items-center gap-space-md">
         <span class="flex items-center gap-space-xs">
@@ -1060,7 +1296,7 @@
     function previewAvatarImage(input) {
       if (input.files && input.files[0]) {
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
           document.getElementById('avatarPreviewImg').src = e.target.result;
         };
         reader.readAsDataURL(input.files[0]);
@@ -1072,7 +1308,7 @@
     function previewCoverImage(input) {
       if (input.files && input.files[0]) {
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
           document.getElementById('coverPreviewImg').src = e.target.result;
         };
         reader.readAsDataURL(input.files[0]);
@@ -1154,7 +1390,7 @@
     }
 
     // Auto tab selection based on URL hash or query param
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       const urlParams = new URLSearchParams(window.location.search);
       const tabParam = urlParams.get('tab');
       if (tabParam === 'addresses' || window.location.hash === '#tabAddresses') {
@@ -1166,4 +1402,5 @@
   </script>
 
 </body>
+
 </html>

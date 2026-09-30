@@ -31,6 +31,7 @@ public class ProfileController {
                 .orElseThrow(() -> new AccessDeniedException("Người dùng không tồn tại"));
         model.addAttribute("user", user);
         model.addAttribute("addresses", userService.getUserAddresses(user.getId()));
+        model.addAttribute("stores", storeRepository.findByStatusTrue());
         return "customer/profile";
     }
 
