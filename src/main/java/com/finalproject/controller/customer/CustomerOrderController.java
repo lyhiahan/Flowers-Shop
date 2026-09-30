@@ -16,6 +16,7 @@ public class CustomerOrderController {
 
     private final OrderService orderService;
     private final com.finalproject.repository.ReviewRepository reviewRepository;
+    private final com.finalproject.repository.StoreRepository storeRepository;
 
     // UC_011 Main Flow 5 & 6: Hiển thị danh sách tất cả đơn và phân trang
     @GetMapping
@@ -24,6 +25,7 @@ public class CustomerOrderController {
                                      @RequestParam(value = "page", defaultValue = "0") int page,
                                      @RequestParam(value = "size", defaultValue = "5") int size,
                                      Model model) {
+        model.addAttribute("stores", storeRepository.findByStatusTrue());
         com.finalproject.enums.OrderStatus status = null;
         if (statusStr != null && !statusStr.trim().isEmpty() && !"ALL".equalsIgnoreCase(statusStr)) {
             try {
