@@ -35,11 +35,15 @@
             --alert-red-border: #FECACA;
         }
 
-        body, button, input, select, textarea {
+        body {
             font-family: 'Nunito', sans-serif !important;
             background-color: var(--bg-page);
             color: var(--text-main);
             min-height: 100vh;
+        }
+
+        button, input, select, textarea {
+            font-family: 'Nunito', sans-serif !important;
         }
 
         /* Sidebar Styling */
@@ -324,19 +328,17 @@
 </head>
 <body>
 
-<div class="container-fluid p-0">
-    <div class="row g-0">
+<div class="container-fluid">
+    <div class="row">
         <!-- Sidebar Navigation -->
-        <div class="col-lg-2 col-md-3 sidebar p-3 d-flex flex-column justify-content-between">
+        <div class="col-md-2 p-3 sidebar">
             <div>
                 <!-- Brand / Logo -->
-                <div class="d-flex align-items-center gap-3 px-2 py-3 mb-3 border-bottom border-secondary border-opacity-25">
-                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center;">
-                        <img th:src="@{/images/flower-logo.png}" alt="Logo" style="width: 32px; height: 32px; object-fit: contain;">
-                    </div>
+                <div class="d-flex align-items-center gap-2 mb-4 px-2">
+                    <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img me-1" style="width: 32px; height: 32px; object-fit: contain;">
                     <div>
                         <h6 class="fw-bold text-white mb-0" style="letter-spacing: 0.5px; font-size: 16px;">TIỆM HOA TƯƠI</h6>
-                        <small style="color: #9DB7AA; font-size: 13px;">Quản Lý Chi Nhánh</small>
+                        <small style="color: #9DB7AA; font-size: 13px;" th:text="${store != null ? store.name : 'Quản Lý Chi Nhánh'}">Quản Lý Chi Nhánh</small>
                     </div>
                 </div>
 
@@ -366,26 +368,19 @@
                     <a th:href="@{/manager/stores}">
                         <i class="bi bi-shop"></i> Thông Tin Chi Nhánh
                     </a>
-                </nav>
-            </div>
-
-            <!-- Footer Sidebar Actions -->
-            <div class="pt-3 border-top border-secondary border-opacity-25 mt-4">
-                <nav class="d-flex flex-column gap-1">
+                    <hr class="border-secondary my-2">
                     <a th:href="@{/}" target="_blank">
-                        <i class="bi bi-box-arrow-up-right"></i> Xem Website Khách
+                        <i class="bi bi-house-door"></i> Xem Website Khách
                     </a>
-                    <form th:action="@{/logout}" method="post" class="m-0">
-                        <button type="submit" class="btn text-start w-100 p-2 text-danger border-0 d-flex align-items-center gap-2" style="font-size: 15px; font-weight: 600; background: none;">
-                            <i class="bi bi-box-arrow-right"></i> Đăng Xuất
-                        </button>
-                    </form>
+                    <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#signOutModal" class="text-danger">
+                        <i class="bi bi-box-arrow-right"></i> Đăng Xuất
+                    </a>
                 </nav>
             </div>
         </div>
 
         <!-- Main Dashboard Content -->
-        <div class="col-lg-10 col-md-9 p-4 p-xl-5" style="overflow-y: auto; max-height: 100vh;">
+        <div class="col-md-10 p-4">
             
             <!-- 1. Header: Thu gọn đầu trang & Bộ lọc thời gian (40-44px) -->
             <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 pb-3 mb-4 border-bottom" style="border-color: var(--border-soft) !important;">
@@ -976,5 +971,33 @@
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Modal Xác Nhận Đăng Xuất (Sign Out Modal) -->
+<div class="modal fade" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark" id="signOutModalLabel" style="font-size: 18px;">
+                    🌸 Xác Nhận Đăng Xuất
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3 text-secondary" style="font-size: 15px;">
+                Bạn có chắc chắn muốn đăng xuất khỏi tài khoản quản lý chi nhánh?
+            </div>
+            <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancel">
+                    Hủy
+                </button>
+                <form th:action="@{/logout}" method="post" class="d-inline m-0">
+                    <button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold text-white" id="btnConfirm">
+                        Đăng Xuất
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
