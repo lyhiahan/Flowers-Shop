@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -47,19 +47,20 @@
 
         <!-- Main Content -->
         <div class="col-md-10 p-4">
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <!-- 1. Header: Rút gọn tiêu đề chuẩn hóa -->
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                 <div>
-                    <h3 class="font-serif fw-bold mb-1">💰 Ví Doanh Thu & Yêu Cầu Rút Tiền</h3>
-                    <p class="text-muted small mb-0">Tiền hàng bán hoa tươi được tự động cộng vào ví sau khi giao đơn thành công</p>
+                    <h1 class="admin-page-title mb-0" style="font-size: 28px !important; font-weight: 800; color: #20382E;">Ví cửa hàng & Rút tiền</h1>
+                    <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Doanh thu bán hoa tươi tự động cộng vào ví sau khi đơn hoàn tất.</p>
                 </div>
             </div>
 
             <!-- Flash alerts -->
-            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small" role="alert">
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small" role="alert" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA; border-radius: 10px;">
                 <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${successMessage}"></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show py-2 small" role="alert">
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show py-2 small" role="alert" style="border-radius: 10px;">
                 <i class="bi bi-exclamation-triangle-fill me-1"></i> <span th:text="${errorMessage}"></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
@@ -67,28 +68,29 @@
             <!-- Wallet Overview Card -->
             <div class="row g-4 mb-4">
                 <div class="col-md-6">
-                    <div class="wallet-card p-4 shadow-sm">
+                    <div class="wallet-card p-4 shadow-sm" style="background: linear-gradient(135deg, #20382E 0%, #162820 100%); border-radius: 16px;">
                         <div class="d-flex justify-content-between align-items-start mb-3">
                             <div>
-                                <small class="text-white-50 text-uppercase fw-semibold">Số Dư Khả Dụng Trong Ví</small>
-                                <h2 class="display-6 fw-bold mb-0 text-white mt-1"
-                                    th:text="${store != null and store.eWallet != null ? #numbers.formatDecimal(store.eWallet, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">
+                                <small class="text-white-50 text-uppercase fw-semibold" style="letter-spacing: 0.5px;">Số dư khả dụng</small>
+                                <h2 class="display-6 fw-bold mb-0 text-white mt-1" style="font-family: var(--font-sans);"
+                                    th:text="${store != null and store.eWallet != null ? #numbers.formatDecimal(store.eWallet, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">
                                 </h2>
                             </div>
                             <span class="fs-1">💳</span>
                         </div>
-                        <p class="small text-white-50 mb-3">Cửa hàng: <strong class="text-white" th:text="${store != null ? store.name : 'Chi nhánh'}"></strong></p>
-                        <button class="btn btn-light text-success fw-bold rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#withdrawModal">
-                            <i class="bi bi-arrow-up-right-circle me-1"></i> Tạo Lệnh Rút Tiền Về Ngân Hàng
+                        <p class="small text-white-50 mb-3">Chi nhánh: <strong class="text-white" th:text="${store != null ? store.name : 'Chi nhánh'}"></strong></p>
+                        <button class="btn btn-light fw-bold rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#withdrawModal"
+                                style="color: #20382E; height: 42px;">
+                            <i class="bi bi-arrow-up-right-circle me-1"></i> Tạo lệnh rút tiền về ngân hàng
                         </button>
                     </div>
                 </div>
 
                 <div class="col-md-6">
-                    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 d-flex flex-column justify-content-center">
-                        <h6 class="text-muted mb-2">Quy Định Rút Tiền Cửa Hàng Hoa</h6>
-                        <ul class="small text-secondary ps-3 mb-0">
-                            <li>Số tiền rút tối thiểu mỗi lần là <strong>50.000 VNĐ</strong>.</li>
+                    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 d-flex flex-column justify-content-center" style="border: 1px solid #E2E7E2 !important; border-radius: 16px;">
+                        <h6 class="fw-bold mb-2" style="color: #20382E;">Quy định rút tiền chi nhánh hoa</h6>
+                        <ul class="small ps-3 mb-0" style="color: #66736B; line-height: 1.7;">
+                            <li>Số tiền rút tối thiểu mỗi lần là <strong>50.000 ₫</strong>.</li>
                             <li>Hệ thống chuỗi không thu phí rút tiền của chi nhánh / đối tác.</li>
                             <li>Tiền về tài khoản ngân hàng liên kết trong vòng 5 - 15 phút 24/7.</li>
                         </ul>
@@ -97,42 +99,45 @@
             </div>
 
             <!-- Transaction History -->
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
-                <div class="card-header bg-white py-3 border-bottom">
-                    <h5 class="font-serif fw-bold mb-0">📜 Lịch Sử Giao Dịch & Biến Động Số Dư</h5>
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
+                <div class="card-header py-3 border-bottom" style="background-color: #FAFCFA;">
+                    <h5 class="fw-bold mb-0" style="font-size: 17px; color: #20382E;">Lịch sử giao dịch & Biến động số dư</h5>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light small text-secondary">
-                            <tr>
-                                <th class="ps-3">Thời Gian</th>
-                                <th>Loại Giao Dịch</th>
-                                <th>Số Tiền</th>
-                                <th>Nội Dung Chi Tiết</th>
-                                <th class="text-end pe-3">Trạng Thái</th>
+                        <table class="table table-manager-wallet align-middle mb-0">
+                            <thead style="background-color: #E5EEE8 !important;">
+                            <tr style="background-color: #E5EEE8 !important;">
+                                <th class="ps-4 fw-bold" style="white-space: nowrap !important; min-width: 160px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Thời gian</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 170px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Loại giao dịch</th>
+                                <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 140px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Số tiền</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 220px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Nội dung</th>
+                                <th class="text-end pe-4 fw-bold" style="white-space: nowrap !important; min-width: 130px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Trạng thái</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr th:if="${#lists.isEmpty(transactions)}">
-                                <td colspan="5" class="text-center py-5 text-muted">
+                                <td colspan="5" class="text-center py-5 text-muted" style="font-size: 15.5px;">
                                     Chưa có giao dịch rút tiền hoặc cộng tiền nào.
                                 </td>
                             </tr>
                             <tr th:each="tx : ${transactions}">
-                                <td class="ps-3 small text-muted" th:text="${#temporals.format(tx.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
-                                <td>
-                                    <span th:if="${tx.type == 'WITHDRAWAL'}" class="badge bg-danger-subtle text-danger">Rút Tiền Về TK</span>
-                                    <span th:if="${tx.type == 'ORDER_PAYOUT'}" class="badge bg-success-subtle text-success">Cộng Tiền Đơn Hàng</span>
-                                    <span th:if="${tx.type != 'WITHDRAWAL' and tx.type != 'ORDER_PAYOUT'}" class="badge bg-info-subtle text-info" th:text="${tx.type}"></span>
+                                <td class="ps-4" style="white-space: nowrap; font-size: 14.5px; color: #24332C;" th:text="${#temporals.format(tx.createdAt, 'dd/MM/yyyy HH:mm')}">01/10/2026 10:00</td>
+                                <td style="white-space: nowrap;">
+                                    <span th:if="${tx.type == 'WITHDRAWAL'}" class="badge" style="background-color: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; padding: 4px 10px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;">RÚT TIỀN VỀ TK</span>
+                                    <span th:if="${tx.type == 'ORDER_PAYOUT'}" class="badge" style="background-color: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0; padding: 4px 10px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;">CỘNG TIỀN ĐƠN HÀNG</span>
+                                    <span th:if="${tx.type != 'WITHDRAWAL' and tx.type != 'ORDER_PAYOUT'}" class="badge" style="background-color: #E0F2FE; color: #0369A1; border: 1px solid #BAE6FD; padding: 4px 10px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;" th:text="${tx.type}">GIAO DỊCH</span>
                                 </td>
-                                <td>
-                                    <strong th:classappend="${tx.isUp} ? 'text-success' : 'text-danger'"
-                                            th:text="(${tx.isUp} ? '+' : '-') + ${#numbers.formatDecimal(tx.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                                <td class="text-end" style="white-space: nowrap;">
+                                    <span style="font-size: 16.5px; font-weight: 800; white-space: nowrap;"
+                                          th:styleappend="${tx.isUp} ? 'color: #15803D;' : 'color: #A64060;'"
+                                          th:text="(${tx.isUp} ? '+' : '-') + ${#numbers.formatDecimal(tx.amount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">+500.000 ₫</span>
                                 </td>
-                                <td class="small" th:text="${tx.description}"></td>
-                                <td class="text-end pe-3">
-                                    <span class="badge bg-success rounded-pill px-2 py-1" th:text="${tx.status}"></span>
+                                <td style="font-size: 14.5px; color: #4A5B53;" th:text="${tx.description}">Nội dung giao dịch</td>
+                                <td class="text-end pe-4" style="white-space: nowrap;">
+                                    <span class="status-pill-active" style="white-space: nowrap;">
+                                        <i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i><span th:text="${tx.status}">THÀNH CÔNG</span>
+                                    </span>
                                 </td>
                             </tr>
                             </tbody>

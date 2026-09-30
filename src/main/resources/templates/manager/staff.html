@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -46,64 +46,90 @@
 
         <!-- Main Content -->
         <div class="col-md-10 p-4">
-            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <!-- 1. Header: Rút gọn tiêu đề chuẩn hóa -->
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                 <div>
-                    <h3 class="font-serif fw-bold mb-1">👥 Quản Lý Nhân Viên & Đối Tác Chi Nhánh</h3>
-                    <p class="text-muted small mb-0">Xem danh sách, thêm và xóa nhân viên phục vụ tại cửa hàng</p>
+                    <div class="d-flex align-items-center gap-3">
+                        <h1 class="admin-page-title mb-0" style="font-size: 28px !important; font-weight: 800; color: #20382E;">Quản lý nhân viên</h1>
+                        <span class="badge rounded-pill" style="background-color: #E5EEE8; color: #20382E; border: 1px solid #D1E5DA; font-size: 14.5px; font-weight: 700; padding: 6px 14px;">
+                            <span th:text="${#lists.size(staffList)}">0</span> nhân sự
+                        </span>
+                    </div>
+                    <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Danh sách và phân quyền nhân viên phục vụ, cắm hoa và giao hàng tại chi nhánh.</p>
                 </div>
-                <button class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addStaffModal">
-                    <i class="bi bi-person-plus-fill me-1"></i> Thêm Nhân Viên Mới
+                <button class="btn btn-primary d-inline-flex align-items-center gap-2 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#addStaffModal"
+                        style="font-size: 15.5px; height: 44px; padding: 0 20px; border-radius: 10px; background-color: #20382E !important; border-color: #20382E !important;">
+                    <i class="bi bi-plus-lg"></i> Thêm nhân viên
                 </button>
             </div>
 
             <!-- Flash alerts -->
-            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small" role="alert">
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small" role="alert" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA; border-radius: 10px;">
                 <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${successMessage}"></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show py-2 small" role="alert">
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show py-2 small" role="alert" style="border-radius: 10px;">
                 <i class="bi bi-exclamation-triangle-fill me-1"></i> <span th:text="${errorMessage}"></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
 
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+            <!-- Staff Table: thead #E5EEE8, chữ đậm 800, nowrap -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light small text-secondary">
-                            <tr>
-                                <th class="ps-4">Họ & Tên</th>
-                                <th>Tên Đăng Nhập</th>
-                                <th>Vai Trò</th>
-                                <th>Số Điện Thoại</th>
-                                <th>Email</th>
-                                <th class="text-end pe-4">Hành Động</th>
+                        <table class="table table-manager-staff align-middle mb-0">
+                            <thead style="background-color: #E5EEE8 !important;">
+                            <tr style="background-color: #E5EEE8 !important;">
+                                <th class="ps-4 fw-bold" style="white-space: nowrap !important; width: 80px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Mã</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 220px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Nhân viên</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 150px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Vai trò</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 150px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Số điện thoại</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 180px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Email</th>
+                                <th class="text-end pe-4 fw-bold" style="white-space: nowrap !important; min-width: 160px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Thao tác</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr th:if="${#lists.isEmpty(staffList)}">
-                                <td colspan="6" class="text-center py-5 text-muted">Chi nhánh chưa có nhân viên nào. Bấm nút phía trên để thêm.</td>
+                                <td colspan="6" class="text-center py-5 text-muted" style="font-size: 15.5px;">Chi nhánh chưa có nhân viên nào. Bấm nút phía trên để thêm.</td>
                             </tr>
                             <tr th:each="s : ${staffList}">
-                                <td class="ps-4">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div class="rounded-circle bg-light border text-center d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                                            <span class="fs-6">👤</span>
-                                        </div>
-                                        <strong class="text-dark" th:text="${s.fullName}"></strong>
-                                    </div>
+                                <!-- 1. Mã -->
+                                <td class="ps-4" style="white-space: nowrap;">
+                                    <span class="badge" style="background-color: #F0F6F2; color: #20382E; font-weight: 700; font-size: 13.5px; border: 1px solid #D1E5DA; padding: 5px 9px; border-radius: 6px;" th:text="'#' + ${s.id}">#1</span>
                                 </td>
-                                <td class="text-muted" th:text="'@' + ${s.username}"></td>
+
+                                <!-- 2. Họ & Tên -->
                                 <td>
-                                    <span th:if="${s.role.name() == 'SHIPPER'}" class="badge bg-info-subtle text-info-emphasis rounded-pill">Giao hàng</span>
-                                    <span th:if="${s.role.name() == 'STAFF'}" class="badge bg-info text-dark">Nhân viên</span><span th:if="${s.role.name() == 'MANAGER' or s.role.name() == 'VENDOR'}" class="badge bg-success-subtle text-success rounded-pill">Quản lý / Đối tác</span>
+                                    <div class="fw-bold" style="font-size: 16.5px; font-weight: 700; color: #20382E;" th:text="${s.fullName}">Nguyễn Văn A</div>
+                                    <div style="font-size: 13.5px; color: #66736B; margin-top: 2px;" th:text="'@' + ${s.username}">@user</div>
                                 </td>
-                                <td class="small" th:text="${s.phone != null ? s.phone : 'Chưa cập nhật'}"></td>
-                                <td class="small text-muted" th:text="${s.email}"></td>
-                                <td class="text-end pe-4">
-                                    <form th:action="@{'/manager/staff/remove/' + ${s.id}}" method="post" class="d-inline">
-                                        <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="return confirm('Bạn có chắc muốn xóa nhân viên này khỏi chi nhánh?')">
-                                            <i class="bi bi-person-x"></i> Xóa Khỏi Shop
+
+                                <!-- 3. Vai trò: nhãn in hoa 1 dòng -->
+                                <td style="white-space: nowrap;">
+                                    <span th:if="${s.role.name() == 'SHIPPER'}" class="badge" style="background-color: #E0F2FE; color: #0369A1; border: 1px solid #BAE6FD; height: 28px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; padding: 0 12px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;">
+                                        <i class="bi bi-bicycle me-1"></i>GIAO HÀNG
+                                    </span>
+                                    <span th:if="${s.role.name() == 'STAFF'}" class="badge" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA; height: 28px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; padding: 0 12px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;">
+                                        <i class="bi bi-person-badge me-1"></i>NHÂN VIÊN
+                                    </span>
+                                    <span th:if="${s.role.name() == 'MANAGER' or s.role.name() == 'VENDOR'}" class="badge" style="background-color: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; height: 28px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; padding: 0 12px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;">
+                                        <i class="bi bi-shop me-1"></i>QUẢN LÝ
+                                    </span>
+                                </td>
+
+                                <!-- 4. Số điện thoại -->
+                                <td style="font-size: 15px; color: #24332C;" th:text="${s.phone != null ? s.phone : 'Chưa cập nhật'}">0901234567</td>
+
+                                <!-- 5. Email -->
+                                <td style="font-size: 15px; color: #66736B;" th:text="${s.email}">email@domain.com</td>
+
+                                <!-- 6. Thao tác -->
+                                <td class="text-end pe-4" style="white-space: nowrap;">
+                                    <form th:action="@{'/manager/staff/remove/' + ${s.id}}" method="post" class="d-inline m-0">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1"
+                                                style="height: 32px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px;"
+                                                onclick="return confirm('Bạn có chắc muốn xóa nhân viên này khỏi chi nhánh?')">
+                                            <i class="bi bi-person-x"></i> Xóa khỏi shop
                                         </button>
                                     </form>
                                 </td>

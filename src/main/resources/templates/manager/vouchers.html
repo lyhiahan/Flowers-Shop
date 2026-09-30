@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -46,71 +46,95 @@
 
         <!-- Main Content -->
         <div class="col-md-10 p-4">
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <!-- 1. Header: Rút gọn tiêu đề chuẩn hóa -->
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                 <div>
-                    <h3 class="font-serif fw-bold mb-1">🎟️ Khuyến Mãi & Voucher Cửa Hàng</h3>
-                    <p class="text-muted small mb-0">Tạo mã giảm giá theo % hoặc giảm trực tiếp cho khách hàng của chi nhánh</p>
+                    <div class="d-flex align-items-center gap-3">
+                        <h1 class="admin-page-title mb-0" style="font-size: 28px !important; font-weight: 800; color: #20382E;">Khuyến mãi cửa hàng</h1>
+                        <span class="badge rounded-pill" style="background-color: #E5EEE8; color: #20382E; border: 1px solid #D1E5DA; font-size: 14.5px; font-weight: 700; padding: 6px 14px;">
+                            <span th:text="${#lists.size(vouchers)}">0</span> mã
+                        </span>
+                    </div>
+                    <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Tạo và quản lý các mã giảm giá áp dụng riêng cho khách hàng của chi nhánh.</p>
                 </div>
-                <button class="btn btn-primary rounded-pill px-3 fw-semibold" data-bs-toggle="modal" data-bs-target="#addVoucherModal">
-                    <i class="bi bi-plus-circle me-1"></i> Tạo Mã Khuyến Mãi Mới
+                <button class="btn btn-primary d-inline-flex align-items-center gap-2 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#addVoucherModal"
+                        style="font-size: 15.5px; height: 44px; padding: 0 20px; border-radius: 10px; background-color: #20382E !important; border-color: #20382E !important;">
+                    <i class="bi bi-plus-lg"></i> Tạo khuyến mãi
                 </button>
             </div>
 
             <!-- Flash alerts -->
-            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small" role="alert">
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small" role="alert" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA; border-radius: 10px;">
                 <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${successMessage}"></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show py-2 small" role="alert">
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show py-2 small" role="alert" style="border-radius: 10px;">
                 <i class="bi bi-exclamation-triangle-fill me-1"></i> <span th:text="${errorMessage}"></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
 
-            <!-- Voucher Table -->
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+            <!-- Voucher Table: thead #E5EEE8, chữ đậm 800, nowrap -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light small text-secondary">
-                            <tr>
-                                <th class="ps-3">Mã Voucher</th>
-                                <th>Tên Chương Trình</th>
-                                <th>Loại & Mức Giảm</th>
-                                <th>Đơn Tối Thiểu</th>
-                                <th>Đã Dùng / Số Lượng</th>
-                                <th>Thời Gian Hiệu Lực</th>
-                                <th class="text-end pe-3">Hành Động</th>
+                        <table class="table table-manager-vouchers align-middle mb-0">
+                            <thead style="background-color: #E5EEE8 !important;">
+                            <tr style="background-color: #E5EEE8 !important;">
+                                <th class="ps-4 fw-bold" style="white-space: nowrap !important; min-width: 140px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Mã voucher</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 200px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Tên chương trình</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 150px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Mức giảm</th>
+                                <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 130px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Đơn tối thiểu</th>
+                                <th class="text-center fw-bold" style="white-space: nowrap !important; min-width: 120px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Đã dùng</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 170px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Hiệu lực</th>
+                                <th class="text-end pe-4 fw-bold" style="white-space: nowrap !important; min-width: 120px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Thao tác</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr th:if="${#lists.isEmpty(vouchers)}">
-                                <td colspan="7" class="text-center py-5 text-muted">
+                                <td colspan="7" class="text-center py-5 text-muted" style="font-size: 15.5px;">
                                     Chưa có mã giảm giá nào. Hãy tạo mã khuyến mãi để kích thích khách mua hoa!
                                 </td>
                             </tr>
                             <tr th:each="v : ${vouchers}">
-                                <td class="ps-3">
-                                    <span class="badge bg-danger-subtle text-danger fs-6 fw-bold border border-danger-subtle" th:text="${v.code}"></span>
+                                <!-- 1. Mã voucher -->
+                                <td class="ps-4" style="white-space: nowrap;">
+                                    <span class="badge" style="background-color: #F0F6F2; color: #20382E; font-weight: 800; font-size: 14px; border: 1px solid #D1E5DA; padding: 6px 10px; border-radius: 6px; letter-spacing: 0.5px;" th:text="${v.code}">SUMMER20</span>
                                 </td>
+
+                                <!-- 2. Tên chương trình -->
                                 <td>
-                                    <strong class="text-dark" th:text="${v.name}"></strong>
+                                    <div class="fw-bold" style="font-size: 16px; font-weight: 700; color: #20382E;" th:text="${v.name}">Khuyến mãi hè</div>
                                 </td>
-                                <td>
-                                    <span th:if="${v.discountType == 'PERCENT'}" class="text-danger fw-bold" th:text="'Giảm ' + ${v.discountValue} + '%'"></span>
-                                    <span th:if="${v.discountType == 'FIXED_AMOUNT'}" class="text-danger fw-bold"
-                                          th:text="'Giảm ' + ${#numbers.formatDecimal(v.discountValue, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
-                                    <span th:if="${v.discountType == 'FREE_SHIP'}" class="badge bg-success-subtle text-success fw-bold">Miễn Phí Vận Chuyển</span>
+
+                                <!-- 3. Mức giảm -->
+                                <td style="white-space: nowrap;">
+                                    <span th:if="${v.discountType == 'PERCENT'}" style="font-size: 16px; font-weight: 800; color: #A64060;" th:text="'Giảm ' + ${v.discountValue} + '%'">Giảm 10%</span>
+                                    <span th:if="${v.discountType == 'FIXED_AMOUNT'}" style="font-size: 16px; font-weight: 800; color: #A64060;"
+                                          th:text="'Giảm ' + ${#numbers.formatDecimal(v.discountValue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">Giảm 50.000 ₫</span>
+                                    <span th:if="${v.discountType == 'FREE_SHIP'}" class="badge" style="background-color: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0; font-weight: 700; font-size: 12px; padding: 4px 10px; border-radius: 9999px;">MIỄN PHÍ VẬN CHUYỂN</span>
                                 </td>
-                                <td>
-                                    <span class="small text-muted" th:text="${v.minOrderValue != null ? #numbers.formatDecimal(v.minOrderValue, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}"></span>
+
+                                <!-- 4. Đơn tối thiểu -->
+                                <td class="text-end" style="white-space: nowrap; font-size: 15px; color: #24332C;">
+                                    <span th:text="${v.minOrderValue != null ? #numbers.formatDecimal(v.minOrderValue, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">0 ₫</span>
                                 </td>
-                                <td>
-                                    <span class="badge bg-light text-dark border" th:text="${v.usedCount} + ' / ' + ${v.quantity}"></span>
+
+                                <!-- 5. Đã dùng / Tổng -->
+                                <td class="text-center" style="white-space: nowrap; font-size: 14.5px; font-weight: 600; color: #20382E;">
+                                    <span th:text="${v.usedCount} + ' / ' + ${v.quantity}">0 / 100</span>
                                 </td>
-                                <td class="small text-muted" th:text="${v.startDate} + ' → ' + ${v.endDate}"></td>
-                                <td class="text-end pe-3">
-                                    <form th:action="@{'/manager/vouchers/delete/' + ${v.id}}" method="post" class="d-inline">
-                                        <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Bạn có chắc muốn xóa mã giảm giá này?')">
+
+                                <!-- 6. Hiệu lực -->
+                                <td style="white-space: nowrap; font-size: 14px; color: #66736B;">
+                                    <i class="bi bi-calendar3 me-1"></i><span th:text="${v.startDate} + ' → ' + ${v.endDate}"></span>
+                                </td>
+
+                                <!-- 7. Thao tác -->
+                                <td class="text-end pe-4" style="white-space: nowrap;">
+                                    <form th:action="@{'/manager/vouchers/delete/' + ${v.id}}" method="post" class="d-inline m-0">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1"
+                                                style="height: 32px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px;"
+                                                onclick="return confirm('Bạn có chắc muốn xóa mã giảm giá này?')">
                                             <i class="bi bi-trash"></i> Xóa
                                         </button>
                                     </form>

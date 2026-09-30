@@ -570,8 +570,14 @@ body.admin-body {
 .table-admin-products thead tr th,
 .table-admin-orders thead tr th,
 .table-admin-deliveries thead tr th,
+.table-manager-products thead tr th,
+.table-manager-orders thead tr th,
+.table-manager-staff thead tr th,
+.table-manager-vouchers thead tr th,
+.table-manager-wallet thead tr th,
 .admin-body table thead th,
-.main-wrapper table thead th {
+.main-wrapper table thead th,
+.manager-content table thead th {
     background-color: #E5EEE8 !important;
     color: #20382E !important;
     font-size: 15.5px !important;
@@ -586,7 +592,13 @@ body.admin-body {
 .table-admin-stores tbody tr td,
 .table-admin-products tbody tr td,
 .table-admin-orders tbody tr td,
-.table-admin-deliveries tbody tr td {
+.table-admin-deliveries tbody tr td,
+.table-manager-products tbody tr td,
+.table-manager-orders tbody tr td,
+.table-manager-staff tbody tr td,
+.table-manager-vouchers tbody tr td,
+.table-manager-wallet tbody tr td,
+.manager-content table tbody td {
     border-bottom: 1px solid #E2E7E2 !important;
     padding: 16px 20px !important;
     vertical-align: middle !important;
@@ -596,7 +608,13 @@ body.admin-body {
 .table-admin-stores tbody tr:hover,
 .table-admin-products tbody tr:hover,
 .table-admin-orders tbody tr:hover,
-.table-admin-deliveries tbody tr:hover {
+.table-admin-deliveries tbody tr:hover,
+.table-manager-products tbody tr:hover,
+.table-manager-orders tbody tr:hover,
+.table-manager-staff tbody tr:hover,
+.table-manager-vouchers tbody tr:hover,
+.table-manager-wallet tbody tr:hover,
+.manager-content table tbody tr:hover {
     background-color: #F0F6F2 !important;
 }
 
