@@ -194,22 +194,29 @@
         </div>
 
         <!-- Search Input -->
-        <form id="globalSearchForm" th:action="@{/products#product-catalog}" method="get" class="hidden md:flex items-center flex-1 max-w-xl mx-4">
-          <div class="w-full flex items-center bg-white border border-[#E2D7D1] rounded-full pl-3 pr-1 py-1 shadow-xs focus-within:border-primary transition-all">
+        <form id="globalSearchForm" th:action="@{/products#product-catalog}" method="get"
+          class="hidden md:flex items-center flex-1 max-w-xl mx-4">
+          <div
+            class="w-full flex items-center bg-white border border-[#E2D7D1] rounded-full pl-3 pr-1 py-1 shadow-xs focus-within:border-primary transition-all">
             <!-- Khối chọn phạm vi tìm kiếm (khoảng cách gọn gàng, tự điều chỉnh) -->
             <div class="relative flex items-center border-r border-[#E2D7D1] pr-1">
               <select id="searchScopeSelect"
-                      class="bg-transparent text-[13px] text-[#2D2424] font-bold pl-1 pr-4 py-0.5 focus:outline-none cursor-pointer appearance-none transition-all"
-                      onchange="this.style.width = this.value === 'users' ? '112px' : '96px'"
-                      style="width: 96px;">
+                class="bg-transparent text-[13px] text-[#2D2424] font-bold pl-1 pr-4 py-0.5 focus:outline-none cursor-pointer appearance-none transition-all"
+                onchange="this.style.width = this.value === 'users' ? '115px' : (this.value === 'stores' ? '98px' : '96px')"
+                style="width: 96px;">
                 <option value="products" selected>🌸 Mẫu hoa</option>
                 <option value="stores">🏬 Cửa hàng</option>
                 <option value="users">👥 Người dùng</option>
               </select>
-              <span class="material-symbols-outlined text-[16px] text-[#5C4A42] pointer-events-none absolute right-1">expand_more</span>
+              <span
+                class="material-symbols-outlined text-[16px] text-[#5C4A42] pointer-events-none absolute right-1">expand_more</span>
             </div>
-            <input name="keyword" class="flex-1 bg-transparent px-3 text-[13px] text-on-surface placeholder:text-[#9A8D87] focus:outline-none" placeholder="Tìm hoa hồng, cửa hàng hoặc người dùng..." type="text">
-            <button type="submit" class="px-5 py-2 rounded-full bg-[#1E453E] hover:bg-[#163630] text-white text-[13px] font-medium flex items-center gap-1 shadow-xs transition-colors cursor-pointer" id="btnHeaderSearch" title="Tìm kiếm">
+            <input name="keyword"
+              class="flex-1 bg-transparent px-3 text-[13px] text-on-surface placeholder:text-[#9A8D87] focus:outline-none"
+              placeholder="Tìm hoa hồng, cửa hàng hoặc người dùng..." type="text">
+            <button type="submit"
+              class="px-5 py-2 rounded-full bg-[#1E453E] hover:bg-[#163630] text-white text-[13px] font-medium flex items-center gap-1 shadow-xs transition-colors cursor-pointer"
+              id="btnHeaderSearch" title="Tìm kiếm">
               <span class="material-symbols-outlined text-[16px]">search</span>
               <span>Tìm</span>
             </button>
@@ -1420,7 +1427,7 @@
       openModal('modalEditAddress');
     }
 
-        // Script điều hướng tìm kiếm thông minh theo Phạm vi (Hoa / Cửa Hàng / Người Dùng)
+    // Script điều hướng tìm kiếm thông minh theo Phạm vi (Hoa / Cửa Hàng / Người Dùng)
     document.getElementById('globalSearchForm')?.addEventListener('submit', function (e) {
       const scope = document.getElementById('searchScopeSelect')?.value;
       const kwInput = this.querySelector('input[name="keyword"]');
@@ -1436,6 +1443,10 @@
 
     // Auto tab selection based on URL hash or query param
     document.addEventListener('DOMContentLoaded', function () {
+      const scopeSel = document.getElementById('searchScopeSelect');
+      if (scopeSel) {
+        scopeSel.style.width = scopeSel.value === 'users' ? '120px' : (scopeSel.value === 'stores' ? '110px' : '96px');
+      }
       const urlParams = new URLSearchParams(window.location.search);
       const tabParam = urlParams.get('tab');
       if (tabParam === 'addresses' || window.location.hash === '#tabAddresses') {
