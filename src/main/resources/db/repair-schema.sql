@@ -30,3 +30,10 @@ EXEC('UPDATE dbo.products SET image_url = ''https://images.unsplash.com/photo-15
 EXEC('UPDATE dbo.products SET image_url = ''https://images.unsplash.com/photo-1508610048659-a06b669e3321?w=800'' WHERE name LIKE N''%Cẩm Tú Cầu%''');
 EXEC('UPDATE dbo.products SET image_url = ''https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=800'' WHERE name LIKE N''%Hộp Hoa%''');
 
+-- Đảm bảo dữ liệu hoa cẩm tú cầu và các dòng sản phẩm không bị NULL giá bán, danh mục hoặc trạng thái
+EXEC('UPDATE dbo.products SET price_buy = 750000.00 WHERE (price_buy IS NULL OR price_buy = 0) AND name LIKE N''%Cẩm Tú Cầu%''');
+EXEC('UPDATE dbo.products SET sold = 24 WHERE sold IS NULL AND name LIKE N''%Cẩm Tú Cầu%''');
+EXEC('UPDATE dbo.products SET is_active = 1 WHERE is_active IS NULL');
+EXEC('UPDATE dbo.products SET is_selling = 1 WHERE is_selling IS NULL');
+EXEC('UPDATE p SET p.category_id = (SELECT TOP 1 c.id FROM dbo.categories c WHERE c.name LIKE N''%Sinh Nhật%'' OR c.name LIKE N''%Hoa%'') FROM dbo.products p WHERE p.category_id IS NULL');
+

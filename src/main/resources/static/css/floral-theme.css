@@ -560,9 +560,10 @@ body.admin-body {
     box-shadow: none !important;
 }
 
-/* Kiểu dáng riêng cho bảng người dùng & bảng quản trị chi nhánh */
+/* Kiểu dáng riêng cho bảng người dùng, bảng quản trị chi nhánh & bảng quản trị sản phẩm */
 .table-admin-users thead tr th,
-.table-admin-stores thead tr th {
+.table-admin-stores thead tr th,
+.table-admin-products thead tr th {
     background-color: #E5EEE8 !important;
     color: #20382E !important;
     font-size: 15.5px !important;
@@ -572,14 +573,16 @@ body.admin-body {
 }
 
 .table-admin-users tbody tr td,
-.table-admin-stores tbody tr td {
+.table-admin-stores tbody tr td,
+.table-admin-products tbody tr td {
     border-bottom: 1px solid #E2E7E2 !important;
     padding: 16px 20px !important;
     vertical-align: middle !important;
 }
 
 .table-admin-users tbody tr:hover,
-.table-admin-stores tbody tr:hover {
+.table-admin-stores tbody tr:hover,
+.table-admin-products tbody tr:hover {
     background-color: #F0F6F2 !important;
 }
 
