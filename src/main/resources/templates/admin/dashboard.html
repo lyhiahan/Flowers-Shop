@@ -425,6 +425,9 @@
                         <button type="button" class="btn-chart-toggle" id="revLineBtn" onclick="toggleChartType('revenue', 'line')">
                             <i class="bi bi-graph-up me-1"></i>Đường
                         </button>
+                        <button type="button" class="btn-chart-toggle" id="revPieBtn" onclick="toggleChartType('revenue', 'doughnut')">
+                            <i class="bi bi-pie-chart me-1"></i>Tròn
+                        </button>
                     </div>
                 </div>
                 <div style="height: 290px; position: relative;">
@@ -446,6 +449,9 @@
                                 <button type="button" class="btn-chart-toggle" id="userBarBtn" onclick="toggleChartType('users', 'bar')">
                                     <i class="bi bi-bar-chart-line me-1"></i>Cột
                                 </button>
+                                <button type="button" class="btn-chart-toggle" id="userPieBtn" onclick="toggleChartType('users', 'doughnut')">
+                                    <i class="bi bi-pie-chart me-1"></i>Tròn
+                                </button>
                             </div>
                         </div>
                         <div style="height: 240px; position: relative;">
@@ -462,6 +468,9 @@
                             <div class="chart-toggle-group">
                                 <button type="button" class="btn-chart-toggle active" id="storeBarBtn" onclick="toggleChartType('stores', 'bar')">
                                     <i class="bi bi-bar-chart-line me-1"></i>Cột
+                                </button>
+                                <button type="button" class="btn-chart-toggle" id="storeLineBtn" onclick="toggleChartType('stores', 'line')">
+                                    <i class="bi bi-graph-up me-1"></i>Đường
                                 </button>
                                 <button type="button" class="btn-chart-toggle" id="storeDoughnutBtn" onclick="toggleChartType('stores', 'doughnut')">
                                     <i class="bi bi-pie-chart me-1"></i>Tròn
@@ -722,53 +731,92 @@
     });
 
     function toggleChartType(chartName, type) {
+        var palette = ['#20382E', '#355447', '#4E7262', '#82A694', '#A64060', '#C26581', '#E89EB1'];
         if (chartName === 'revenue') {
             document.getElementById('revBarBtn').classList.toggle('active', type === 'bar');
             document.getElementById('revLineBtn').classList.toggle('active', type === 'line');
+            document.getElementById('revPieBtn').classList.toggle('active', type === 'doughnut');
             revChart.config.type = type;
-            if (type === 'line') {
+            if (type === 'doughnut') {
+                revChart.config.data.datasets[0].backgroundColor = palette;
+                revChart.config.data.datasets[0].borderColor = '#ffffff';
+                revChart.config.data.datasets[0].borderWidth = 2;
+                revChart.config.data.datasets[0].borderRadius = 0;
+                revChart.options.plugins.legend.display = true;
+                revChart.options.scales = {};
+            } else if (type === 'line') {
                 revChart.config.data.datasets[0].fill = true;
                 revChart.config.data.datasets[0].backgroundColor = 'rgba(166, 64, 96, 0.15)';
+                revChart.config.data.datasets[0].borderColor = '#A64060';
+                revChart.config.data.datasets[0].borderWidth = 2;
+                revChart.options.plugins.legend.display = false;
+                revChart.options.scales = { y: { beginAtZero: true, ticks: { callback: function(val) { return val.toLocaleString() + ' đ'; } } } };
             } else {
                 revChart.config.data.datasets[0].fill = false;
                 revChart.config.data.datasets[0].backgroundColor = 'rgba(166, 64, 96, 0.8)';
+                revChart.config.data.datasets[0].borderColor = '#A64060';
+                revChart.config.data.datasets[0].borderWidth = 2;
+                revChart.config.data.datasets[0].borderRadius = 8;
+                revChart.options.plugins.legend.display = false;
+                revChart.options.scales = { y: { beginAtZero: true, ticks: { callback: function(val) { return val.toLocaleString() + ' đ'; } } } };
             }
             revChart.update();
         } else if (chartName === 'users') {
             document.getElementById('userLineBtn').classList.toggle('active', type === 'line');
             document.getElementById('userBarBtn').classList.toggle('active', type === 'bar');
+            document.getElementById('userPieBtn').classList.toggle('active', type === 'doughnut');
             userChart.config.type = type;
-            if (type === 'bar') {
+            if (type === 'doughnut') {
+                userChart.config.data.datasets[0].backgroundColor = palette;
+                userChart.config.data.datasets[0].borderColor = '#ffffff';
+                userChart.config.data.datasets[0].borderWidth = 2;
+                userChart.config.data.datasets[0].borderRadius = 0;
+                userChart.options.plugins.legend.display = true;
+                userChart.options.scales = {};
+            } else if (type === 'bar') {
                 userChart.config.data.datasets[0].fill = false;
                 userChart.config.data.datasets[0].backgroundColor = 'rgba(53, 84, 71, 0.75)';
+                userChart.config.data.datasets[0].borderColor = '#355447';
+                userChart.config.data.datasets[0].borderWidth = 2;
+                userChart.config.data.datasets[0].borderRadius = 6;
+                userChart.options.plugins.legend.display = false;
+                userChart.options.scales = { y: { beginAtZero: true, ticks: { precision: 0 } } };
             } else {
                 userChart.config.data.datasets[0].fill = true;
                 userChart.config.data.datasets[0].backgroundColor = 'rgba(53, 84, 71, 0.15)';
+                userChart.config.data.datasets[0].borderColor = '#355447';
+                userChart.config.data.datasets[0].borderWidth = 2;
+                userChart.options.plugins.legend.display = false;
+                userChart.options.scales = { y: { beginAtZero: true, ticks: { precision: 0 } } };
             }
             userChart.update();
         } else if (chartName === 'stores') {
             document.getElementById('storeBarBtn').classList.toggle('active', type === 'bar');
+            document.getElementById('storeLineBtn').classList.toggle('active', type === 'line');
             document.getElementById('storeDoughnutBtn').classList.toggle('active', type === 'doughnut');
             storeChart.config.type = type;
             if (type === 'doughnut') {
-                storeChart.config.data.datasets[0].backgroundColor = ['#20382E', '#355447', '#4E7262', '#82A694', '#A64060', '#C26581', '#E89EB1'];
+                storeChart.config.data.datasets[0].backgroundColor = palette;
                 storeChart.config.data.datasets[0].borderColor = '#ffffff';
                 storeChart.config.data.datasets[0].borderWidth = 2;
                 storeChart.config.data.datasets[0].borderRadius = 0;
                 storeChart.options.plugins.legend.display = true;
                 storeChart.options.scales = {};
+            } else if (type === 'line') {
+                storeChart.config.data.datasets[0].fill = true;
+                storeChart.config.data.datasets[0].backgroundColor = 'rgba(53, 84, 71, 0.15)';
+                storeChart.config.data.datasets[0].borderColor = '#20382E';
+                storeChart.config.data.datasets[0].borderWidth = 2;
+                storeChart.options.plugins.legend.display = false;
+                storeChart.options.scales = { y: { beginAtZero: true, ticks: { precision: 0 } } };
             } else {
+                storeChart.config.data.datasets[0].fill = false;
                 storeChart.config.data.datasets[0].backgroundColor = 'rgba(53, 84, 71, 0.75)';
                 storeChart.config.data.datasets[0].borderColor = '#20382E';
                 storeChart.config.data.datasets[0].borderWidth = 2;
                 storeChart.config.data.datasets[0].borderRadius = 6;
                 storeChart.options.plugins.legend.display = false;
-                storeChart.options.scales = {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { precision: 0 }
-                    }
-                };
+                storeChart.options.scales = { y: { beginAtZero: true, ticks: { precision: 0 } } };
             }
             storeChart.update();
         }
