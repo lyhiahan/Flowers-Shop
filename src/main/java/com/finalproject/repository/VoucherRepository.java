@@ -14,6 +14,12 @@ public interface VoucherRepository extends JpaRepository<Voucher, Long> {
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     Optional<Voucher> findByCodeAndIsActiveTrue(String code);
 
+    Optional<Voucher> findByCode(String code);
+
+    boolean existsByCode(String code);
+
+    boolean existsByCodeAndIdNot(String code, Long id);
+
     @Query("SELECT v FROM Voucher v WHERE v.isActive = true AND v.startDate <= :today AND v.endDate >= :today AND (v.store.id = :storeId OR v.store IS NULL) AND v.usedCount < v.quantity")
     List<Voucher> findAvailableVouchers(Long storeId, LocalDate today);
 

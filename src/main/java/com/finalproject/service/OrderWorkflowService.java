@@ -101,17 +101,26 @@ public class OrderWorkflowService {
         Store store = stores.findLockedById(order.getPickupStore().getId()).orElseThrow();
         entityManager.refresh(store, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
         if (!transactions.findAllByOrderIdAndType(order.getId(), "ORDER_PAYMENT").isEmpty()) return;
-        BigDecimal rate = store.getCommission() == null ? BigDecimal.TEN : store.getCommission().getCost();
-        if (rate == null || rate.signum() < 0 || rate.compareTo(BigDecimal.valueOf(100)) > 0) {
-            throw new IllegalStateException("Tỷ lệ hoa hồng phải nằm trong khoảng 0 đến 100%.");
-        }
-        BigDecimal income = order.getTotalAmount().multiply(BigDecimal.ONE.subtract(rate.movePointLeft(2)))
-                .setScale(2, RoundingMode.HALF_UP);
+
+        // Chuỗi chi nhánh nội bộ: Doanh thu đơn hàng ghi nhận 100% cho chi nhánh
+        BigDecimal income = order.getTotalAmount().setScale(2, RoundingMode.HALF_UP);
         store.setEWallet(store.getEWallet().add(income));
+
+        // Tích lũy điểm thi đua cho chi nhánh (1 điểm = 10.000 ₫ doanh số hoàn tất)
+        int earnedPoints = order.getTotalAmount().divide(BigDecimal.valueOf(10000), 0, RoundingMode.FLOOR).intValue();
+        if (earnedPoints > 0) {
+            int currentPoint = (store.getPoint() != null) ? store.getPoint() : 0;
+            store.setPoint(currentPoint + earnedPoints);
+        }
         stores.save(store);
+
+        String levelName = (store.getStoreLevel() != null && store.getStoreLevel().getName() != null) 
+                ? store.getStoreLevel().getName() : "Tiêu chuẩn";
+        String desc = "Doanh thu đơn hàng #" + order.getId() + " (+ " + String.format("%,d", earnedPoints) + " điểm thi đua [Hạng " + levelName + "])";
+
         transactions.save(Transaction.builder().order(order).store(store).amount(income).isUp(true)
                 .type("ORDER_PAYMENT").status("COMPLETED")
-                .description("Thu nhập đơn #" + order.getId() + " sau hoa hồng " + rate + "%").build());
+                .description(desc).build());
     }
 
     @Transactional

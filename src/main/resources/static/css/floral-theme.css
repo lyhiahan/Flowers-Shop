@@ -1,14 +1,17 @@
 /* ==========================================================================
    FLORAL THEME - UNIFIED DESIGN SYSTEM & TYPOGRAPHY
-   Warm Cream (#FAF7F2), Ivory (#FFFCF8), Deep Green (#355447), Rose Pink (#A64060)
+   Soft Pastel Pink (#FFF0F3), Pure White (#FFFFFF), Deep Green (#355447), Rose Pink (#A64060)
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');
 
 :root {
-    /* Palette Tokens: Tiệm hoa ấm áp — kem, xanh lá và hồng cánh hoa */
-    --bg-page: #FAF7F2;          /* Nền toàn trang: Kem ấm */
-    --surface-card: #FFFCF8;     /* Header & Thẻ sản phẩm: Trắng ngà nhẹ nhàng */
+    /* Palette Tokens: Tiệm hoa thanh lịch — Nền hồng pastel nhẹ nhàng */
+    --bg-page: #FFF0F3;          /* Nền toàn trang: Hồng pastel nhẹ (#FFF0F3) */
+    --flower-bg: #FFF0F3;        /* Đồng bộ biến trang khách hàng */
+    --admin-bg: #FFF0F3;         /* Đồng bộ biến trang quản trị viên */
+    --manager-bg: #FFF0F3;       /* Đồng bộ biến trang quản lý */
+    --surface-card: #FFFFFF;     /* Header & Thẻ sản phẩm: Trắng tinh khôi */
     --brand-green: #355447;      /* Logo, tiêu đề, nút chính: Xanh lá đậm */
     --brand-green-hover: #284136;
     --brand-green-light: #EBF3EE;
@@ -390,7 +393,7 @@ p, .product-desc, .product-description, .product-short-specs, .accordion-body, .
    ========================================================================== */
 
 :root {
-    --admin-bg: #F6F7F4;
+    --admin-bg: #FFF0F3;
     --admin-card-bg: #FFFFFF;
     --admin-sidebar-bg: #20382E;
     --admin-sidebar-active: #355447;
@@ -812,9 +815,27 @@ body.admin-body {
 }
 
 .admin-body .main-wrapper {
-    background-color: var(--admin-bg) !important;
+    background-color: #FFF0F3 !important;
     min-height: 100vh;
 }
+
+/* ==========================================================================
+   MÀU NỀN HỒNG PASTEL NHẸ CHO TOÀN BỘ TRANG WEB & TẤT CẢ CÁC ROLE
+   (Customer, Guest, Admin, Manager, Staff, Shipper)
+   ========================================================================== */
+html,
+body,
+body.admin-body,
+body.manager-body,
+body.staff-body,
+body.shipper-body,
+body.customer-body,
+.main-wrapper,
+.admin-body .main-wrapper,
+main {
+    background-color: #FFF0F3 !important;
+}
+
 
 
 

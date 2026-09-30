@@ -46,10 +46,18 @@
                     <span>Cửa hàng</span>
                 </a>
             </li>
+            <!-- ĐẶT HAI MỤC CẠNH NHAU TRONG MENU THEO YÊU CẦU -->
+            <li>
+                <a th:href="@{/admin/store-levels}" class="nav-link">
+                    <i class="bi bi-award"></i>
+                    <span>Hạng chi nhánh</span>
+                </a>
+            </li>
+
             <li>
                 <a th:href="@{/admin/products-manage}" class="nav-link active">
-                    <i class="bi bi-check2-circle"></i>
-                    <span>Duyệt sản phẩm</span>
+                    <i class="bi bi-box-seam"></i>
+                    <span>Sản phẩm</span>
                 </a>
             </li>
             <li>
@@ -65,15 +73,15 @@
                 </a>
             </li>
             <li>
-                <a th:href="@{/admin/commissions}" class="nav-link">
-                    <i class="bi bi-percent"></i>
-                    <span>Phí hoa hồng</span>
+                <a th:href="@{/admin/styles}" class="nav-link">
+                    <i class="bi bi-sliders"></i>
+                    <span>Thuộc tính sản phẩm</span>
                 </a>
             </li>
             <li>
                 <a th:href="@{/admin/deliveries}" class="nav-link">
                     <i class="bi bi-truck"></i>
-                    <span>Vận chuyển</span>
+                    <span>Đơn vị vận chuyển</span>
                 </a>
             </li>
             <li>
@@ -88,13 +96,6 @@
                     <span>Cấp bậc khách</span>
                 </a>
             </li>
-            <li>
-                <a th:href="@{/admin/store-levels}" class="nav-link">
-                    <i class="bi bi-shield-check"></i>
-                    <span>Cấp bậc cửa hàng</span>
-                </a>
-            </li>
-
             <li>
                 <a th:href="@{/admin/transactions}" class="nav-link">
                     <i class="bi bi-journal-text"></i>
@@ -119,7 +120,7 @@
 
     <!-- Main Content -->
     <div class="main-wrapper p-4">
-        <!-- 1. Header: Rút gọn tiêu đề & nút thêm sản phẩm -->
+        <!-- 1. Header: Rút gọn tiêu đề & nút hành động -->
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
             <div>
                 <div class="d-flex align-items-center gap-3">
@@ -128,9 +129,17 @@
                         <span th:text="${#lists.size(products)}">0</span> sản phẩm
                     </span>
                 </div>
-                <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Theo dõi thông tin, giá bán và kiểm duyệt trạng thái mẫu hoa toàn hệ thống</p>
+                <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Theo dõi thông tin, giá bán và kiểm duyệt trạng thái mẫu hoa toàn hệ thống (có mặt tại tất cả chi nhánh)</p>
             </div>
-            <div>
+            <div class="d-flex gap-2">
+                <!-- Nút nạp dữ liệu 27 mẫu hoa chuẩn -->
+                <form th:action="@{/admin/products/seed-defaults}" method="post" class="d-inline m-0">
+                    <button type="submit" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 fw-semibold" 
+                            style="font-size: 15px; height: 44px; padding: 0 16px; border-radius: 10px; background-color: #FFFFFF; border-color: #D1E5DA; color: #20382E;"
+                            onclick="return confirm('Khôi phục danh mục 27 mặt hàng hoa mẫu (đủ 9 loại sản phẩm, 6 kiểu dáng) cho toàn bộ hệ thống?')">
+                        <i class="bi bi-arrow-clockwise text-success"></i> Nạp lại 27 sản phẩm mẫu
+                    </button>
+                </form>
                 <a th:href="@{/admin/products/create}" class="btn btn-primary d-inline-flex align-items-center gap-2 fw-bold shadow-sm" style="font-size: 15.5px; height: 44px; padding: 0 20px; border-radius: 10px; background-color: #20382E !important; border-color: #20382E !important;">
                     <i class="bi bi-plus-lg"></i> Thêm sản phẩm
                 </a>
@@ -143,27 +152,27 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <!-- 4. Nhóm kiểm duyệt: Tất cả · Chờ duyệt · Đã duyệt · Từ chối / Ngừng bán -->
+        <!-- 2. Nhóm kiểm duyệt: Tất cả · Chờ duyệt · Đã duyệt · Từ chối / Ngừng bán -->
         <div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
-            <a th:href="@{/admin/products-manage(tab='ALL', keyword=${keyword}, storeId=${currentStoreId}, style=${currentStyle}, status=${currentStatus})}"
+            <a th:href="@{/admin/products-manage(tab='ALL', keyword=${keyword}, style=${currentStyle}, status=${currentStatus})}"
                class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2"
                th:classappend="${currentTab == 'ALL'} ? 'btn-dark' : 'btn-outline-secondary bg-white'"
                style="font-size: 14px; font-weight: 600;">
                 Tất cả <span class="badge rounded-pill" th:classappend="${currentTab == 'ALL'} ? 'bg-light text-dark' : 'bg-secondary text-white'" th:text="${countAll}">0</span>
             </a>
-            <a th:href="@{/admin/products-manage(tab='APPROVED', keyword=${keyword}, storeId=${currentStoreId}, style=${currentStyle}, status=${currentStatus})}"
+            <a th:href="@{/admin/products-manage(tab='APPROVED', keyword=${keyword}, style=${currentStyle}, status=${currentStatus})}"
                class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2"
                th:classappend="${currentTab == 'APPROVED'} ? 'btn-success text-white' : 'btn-outline-secondary bg-white'"
                style="font-size: 14px; font-weight: 600;">
                 Đã duyệt <span class="badge rounded-pill" th:classappend="${currentTab == 'APPROVED'} ? 'bg-white text-success' : 'bg-secondary text-white'" th:text="${countApproved}">0</span>
             </a>
-            <a th:href="@{/admin/products-manage(tab='PENDING', keyword=${keyword}, storeId=${currentStoreId}, style=${currentStyle}, status=${currentStatus})}"
+            <a th:href="@{/admin/products-manage(tab='PENDING', keyword=${keyword}, style=${currentStyle}, status=${currentStatus})}"
                class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2"
                th:classappend="${currentTab == 'PENDING'} ? 'btn-warning text-dark' : 'btn-outline-secondary bg-white'"
                style="font-size: 14px; font-weight: 600;">
                 Chờ duyệt <span class="badge rounded-pill" th:classappend="${currentTab == 'PENDING'} ? 'bg-dark text-white' : 'bg-secondary text-white'" th:text="${countPending}">0</span>
             </a>
-            <a th:href="@{/admin/products-manage(tab='REJECTED', keyword=${keyword}, storeId=${currentStoreId}, style=${currentStyle}, status=${currentStatus})}"
+            <a th:href="@{/admin/products-manage(tab='REJECTED', keyword=${keyword}, style=${currentStyle}, status=${currentStatus})}"
                class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2"
                th:classappend="${currentTab == 'REJECTED'} ? 'btn-danger text-white' : 'btn-outline-secondary bg-white'"
                style="font-size: 14px; font-weight: 600;">
@@ -171,11 +180,11 @@
             </a>
         </div>
 
-        <!-- 4. Thanh lọc 44px: Tìm tên/mã… · Chi nhánh ▾ · Kiểu dáng ▾ · Trạng thái ▾ -->
+        <!-- 3. Thanh lọc 44px: Tìm tên/mã… · Kiểu dáng ▾ · Trạng thái ▾ (ĐÃ BỎ BỘ LỌC CHI NHÁNH VÌ SẢN PHẨM CÓ Ở TẤT CẢ CHI NHÁNH) -->
         <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
             <form th:action="@{/admin/products-manage}" method="get" class="row g-2 align-items-center">
                 <input type="hidden" name="tab" th:value="${currentTab}">
-                <div class="col-12 col-md-4 col-lg-4">
+                <div class="col-12 col-md-5 col-lg-5">
                     <div class="input-group" style="height: 44px;">
                         <span class="input-group-text bg-white border-end-0 text-muted" style="border-color: #E2E7E2; border-radius: 10px 0 0 10px;">
                             <i class="bi bi-search"></i>
@@ -183,18 +192,10 @@
                         <input type="text" name="keyword" th:value="${keyword}" 
                                class="form-control border-start-0" 
                                style="height: 44px; border-color: #E2E7E2; border-radius: 0 10px 10px 0; font-size: 15px;" 
-                               placeholder="Tìm tên hoặc mã sản phẩm…">
+                               placeholder="Tìm tên hoặc mã sản phẩm hoa tươi…">
                     </div>
                 </div>
-                <div class="col-12 col-sm-6 col-md-3 col-lg-2">
-                    <select name="storeId" class="form-select" style="height: 44px; border-color: #E2E7E2; border-radius: 10px; font-size: 15px; color: #20382E; font-weight: 600;">
-                        <option value="">Chi nhánh: Tất cả</option>
-                        <option th:each="st : ${stores}" th:value="${st.id}" 
-                                th:selected="${currentStoreId == st.id}"
-                                th:text="${st.name != null and st.name.toLowerCase().startsWith('chi nhánh ') ? st.name.substring(10) : st.name}">Chi nhánh</option>
-                    </select>
-                </div>
-                <div class="col-12 col-sm-6 col-md-2 col-lg-2">
+                <div class="col-12 col-sm-6 col-md-3 col-lg-3">
                     <select name="style" class="form-select" style="height: 44px; border-color: #E2E7E2; border-radius: 10px; font-size: 15px; color: #20382E; font-weight: 600;">
                         <option value="ALL" th:selected="${currentStyle == 'ALL'}">Kiểu dáng: Tất cả</option>
                         <option value="Bó hoa" th:selected="${currentStyle == 'Bó hoa'}">Bó hoa</option>
@@ -205,7 +206,7 @@
                         <option value="Bình hoa" th:selected="${currentStyle == 'Bình hoa'}">Bình hoa</option>
                     </select>
                 </div>
-                <div class="col-12 col-sm-6 col-md-3 col-lg-2">
+                <div class="col-12 col-sm-6 col-md-2 col-lg-2">
                     <select name="status" class="form-select" style="height: 44px; border-color: #E2E7E2; border-radius: 10px; font-size: 15px; color: #20382E; font-weight: 600;">
                         <option value="ALL" th:selected="${currentStatus == 'ALL'}">Trạng thái: Tất cả</option>
                         <option value="SELLING" th:selected="${currentStatus == 'SELLING'}">Đang bán</option>
@@ -228,7 +229,7 @@
             </form>
         </div>
 
-        <!-- 2 & 3. Bảng sản phẩm: Chuẩn hóa cột, ảnh 64x64px, giá căn phải #A64060, padding 16-20px -->
+        <!-- 4. Bảng sản phẩm: ĐÃ BỎ CỘT CHI NHÁNH VÌ CÓ MẶT Ở TẤT CẢ CHI NHÁNH -->
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -236,9 +237,8 @@
                         <thead style="background-color: #E5EEE8 !important;">
                         <tr style="background-color: #E5EEE8 !important;">
                             <th class="ps-4 fw-bold" style="white-space: nowrap !important; width: 80px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Mã</th>
-                            <th class="fw-bold" style="white-space: nowrap !important; min-width: 260px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Sản phẩm</th>
-                            <th class="fw-bold" style="white-space: nowrap !important; min-width: 170px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Chi nhánh</th>
-                            <th class="fw-bold" style="white-space: nowrap !important; min-width: 110px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Kiểu dáng</th>
+                            <th class="fw-bold" style="white-space: nowrap !important; min-width: 280px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Sản phẩm</th>
+                            <th class="fw-bold" style="white-space: nowrap !important; min-width: 120px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Kiểu dáng</th>
                             <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 130px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Giá nhập</th>
                             <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 130px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Giá bán</th>
                             <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 90px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Đã bán</th>
@@ -248,25 +248,27 @@
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(products)}">
-                            <td colspan="9" class="text-center py-5 text-muted" style="font-size: 15.5px;">
+                            <td colspan="8" class="text-center py-5 text-muted" style="font-size: 15.5px;">
                                 <i class="bi bi-flower1 fs-1 d-block mb-2 text-secondary opacity-50"></i>
-                                Không tìm thấy sản phẩm hoa nào phù hợp.
+                                Không tìm thấy sản phẩm hoa tươi nào phù hợp với bộ lọc.
                             </td>
                         </tr>
                         <tr th:each="p : ${products}">
                             <!-- 1. Mã sản phẩm -->
-                            <td class="ps-4" style="white-space: nowrap;">
-                                <span class="badge" style="background-color: #F0F6F2; color: #20382E; font-weight: 700; font-size: 13.5px; border: 1px solid #D1E5DA; padding: 5px 9px; border-radius: 6px;" th:text="'#' + ${p.id}">#1</span>
-                            </td>
+                            <td class="ps-4 text-muted fw-bold" style="font-size: 14.5px;" th:text="'#' + ${p.id}">#1</td>
 
-                            <!-- 2. Sản phẩm: Ảnh 64x64px có fallback, tên Nunito 17px đậm 700 -->
+                            <!-- 2. Sản phẩm: Ảnh 64x64px, Tên đậm 17px, Danh mục xám nhỏ -->
                             <td>
-                                <div class="d-flex align-items-center gap-3">
-                                    <img th:src="${p.imageUrl != null and !p.imageUrl.isEmpty() ? p.imageUrl : 'https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=300'}"
-                                         onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=300';"
-                                         style="width: 64px; height: 64px; object-fit: cover; border-radius: 8px; flex-shrink: 0; border: 1px solid #E2E7E2;" 
-                                         alt="Ảnh hoa">
+                                <div class="d-flex align-items-center gap-3 py-1">
+                                    <img th:src="${p.imageUrl != null and !p.imageUrl.isEmpty() ? p.imageUrl : 'https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=150'}"
+                                         onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=150';"
+                                         alt="Hoa" 
+                                         class="product-thumb-img shadow-sm"
+                                         style="width: 64px; height: 64px; border-radius: 8px; object-fit: cover; flex-shrink: 0; border: 1px solid #E2E7E2;">
                                     <div>
+                                        <div class="product-category-sub" style="font-size: 13.5px; color: #66736B; margin-bottom: 2px;" th:text="${p.category != null ? p.category.name : 'Hoa tươi'}">
+                                            Hoa Tình Yêu & Valentine
+                                        </div>
                                         <div class="fw-bold" style="font-size: 17px; font-weight: 700; color: #20382E; line-height: 1.35;" th:text="${p.name}">
                                              Bó Hoa Hồng Đỏ Ecuador Tình Nồng Cháy
                                         </div>
@@ -274,15 +276,7 @@
                                 </div>
                             </td>
 
-                            <!-- 2. Chi nhánh: chữ thường, không khung bao -->
-                            <td>
-                                <div style="font-size: 15px; color: #24332C; line-height: 1.4;" 
-                                     th:text="${p.store != null ? (p.store.name.toLowerCase().startsWith('chi nhánh ') ? p.store.name.substring(10) : p.store.name) : 'Toàn hệ thống'}">
-                                    Bến Thành (Quận 1)
-                                </div>
-                            </td>
-
-                            <!-- 3. Kiểu dáng: Bó hoa, Giỏ hoa, Hộp hoa, Chậu hoa, Kệ hoa, Bình hoa... (không đóng khung) -->
+                            <!-- 3. Kiểu dáng: Bó hoa, Giỏ hoa, Hộp hoa, Chậu hoa, Kệ hoa, Bình hoa... -->
                             <td>
                                 <div style="font-size: 15px; color: #24332C;" 
                                      th:text="${p.name.toLowerCase().startsWith('giỏ') ? 'Giỏ hoa' : 
@@ -310,12 +304,12 @@
                                 </span>
                             </td>
 
-                            <!-- 5. Đã bán: Căn phải, chỉ hiển thị số (không dùng chung đơn vị 'bó') -->
+                            <!-- 6. Đã bán: Căn phải, chỉ hiển thị số -->
                             <td class="text-end" style="font-size: 15.5px; font-weight: 600; color: #24332C;">
                                 <span th:text="${p.sold != null ? p.sold : 0}">45</span>
                             </td>
 
-                            <!-- 6. Trạng thái: Cùng kích thước 28px, phân biệt kiểm duyệt & trạng thái bán, viết in hoa trên 1 dòng -->
+                            <!-- 7. Trạng thái: Cùng kích thước 28px, phân biệt kiểm duyệt & trạng thái bán, viết in hoa trên 1 dòng -->
                             <td style="white-space: nowrap;">
                                 <!-- Nếu bị từ chối / khóa kiểm duyệt -->
                                 <span th:if="${p.isActive != null and !p.isActive}" class="status-pill-locked" style="white-space: nowrap;">
@@ -335,60 +329,38 @@
                                 </span>
                             </td>
 
-                            <!-- 7. Thao tác: Chi tiết chính; thao tác ngừng bán / duyệt trong menu phụ -->
+                            <!-- 8. Thao tác: Chi tiết, Cho phép và Cấm trực tiếp (không dùng menu ba chấm) -->
                             <td class="text-end pe-4" style="white-space: nowrap;">
                                 <div class="d-inline-flex align-items-center gap-2">
-                                    <!-- Nút duyệt nhanh khi ở tab Chờ duyệt -->
-                                    <form th:if="${currentTab == 'PENDING'}" th:action="@{'/admin/products-manage/toggle-active/' + ${p.id}}" method="post" class="d-inline m-0">
-                                        <button type="submit" class="btn btn-sm btn-success d-inline-flex align-items-center gap-1" style="height: 32px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px;">
-                                            <i class="bi bi-check2"></i> Duyệt
-                                        </button>
-                                    </form>
-
-                                    <!-- Thao tác chính: Chi tiết (mở modal) -->
+                                    <!-- Nút Chi tiết (mở modal) -->
                                     <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-1"
                                             data-bs-toggle="modal" th:data-bs-target="'#productDetailModal' + ${p.id}"
-                                            style="height: 32px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px; border: 1px solid #D1E5DA; background-color: #FFFFFF; color: #20382E; white-space: nowrap;">
+                                            style="height: 34px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px; border: 1px solid #D1E5DA; background-color: #FFFFFF; color: #20382E; white-space: nowrap;">
                                         <i class="bi bi-eye"></i> Chi tiết
                                     </button>
 
-                                    <!-- Thao tác phụ trong Dropdown để tránh nhiều nút đỏ lặp lại -->
-                                    <div class="dropdown d-inline">
-                                        <button class="btn btn-sm d-inline-flex align-items-center justify-content-center" 
-                                                type="button" data-bs-toggle="dropdown" aria-expanded="false"
-                                                style="height: 32px; width: 32px; padding: 0; border-radius: 8px; border: 1px solid #E2E7E2; background-color: #FFFFFF; color: #66736B;">
-                                            <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 p-1" style="min-width: 175px; border: 1px solid #E2E7E2 !important;">
-                                            <li>
-                                                <a th:href="@{'/product/' + ${p.id}}" target="_blank" class="dropdown-item py-2 small d-flex align-items-center gap-2 rounded-2">
-                                                    <i class="bi bi-box-arrow-up-right text-primary"></i> Xem trên web
-                                                </a>
-                                            </li>
-                                            <!-- Ngừng bán / Mở bán lại -->
-                                            <li>
-                                                <form th:action="@{'/admin/products-manage/toggle-selling/' + ${p.id}}" method="post" class="m-0">
-                                                    <button type="submit" class="dropdown-item py-2 small d-flex align-items-center gap-2 rounded-2"
-                                                            th:classappend="${p.isSelling == null or p.isSelling ? 'text-danger' : 'text-success'}">
-                                                        <i class="bi" th:classappend="${p.isSelling == null or p.isSelling ? 'bi-pause-circle' : 'bi-play-circle'}"></i>
-                                                        <span th:text="${p.isSelling == null or p.isSelling ? 'Tạm ngừng bán' : 'Mở bán lại'}">Tạm ngừng bán</span>
-                                                    </button>
-                                                </form>
-                                            </li>
-                                            <li><hr class="dropdown-divider my-1"></li>
-                                            <!-- Duyệt / Từ chối -->
-                                            <li>
-                                                <form th:action="@{'/admin/products-manage/toggle-active/' + ${p.id}}" method="post" class="m-0">
-                                                    <button type="submit" class="dropdown-item py-2 small d-flex align-items-center gap-2 rounded-2"
-                                                            th:classappend="${p.isActive == null or p.isActive ? 'text-danger' : 'text-success'}"
-                                                            th:onclick="'return confirm(\'Xác nhận ' + (${p.isActive == null or p.isActive} ? 'TỪ CHỐI / KHÓA' : 'PHÊ DUYỆT') + ' sản phẩm này?\')'">
-                                                        <i class="bi" th:classappend="${p.isActive == null or p.isActive ? 'bi-slash-circle' : 'bi-check2-circle'}"></i>
-                                                        <span th:text="${p.isActive == null or p.isActive ? 'Từ chối duyệt' : 'Phê duyệt sản phẩm'}">Từ chối duyệt</span>
-                                                    </button>
-                                                </form>
-                                            </li>
-                                        </ul>
-                                    </div>
+                                    <!-- NÚT CHO PHÉP (khi sản phẩm đang bị cấm HOẶC đang chờ duyệt) -->
+                                    <button th:if="${p.isActive == null or !p.isActive}" 
+                                            type="button"
+                                            class="btn btn-sm btn-success d-inline-flex align-items-center gap-1 text-white shadow-sm"
+                                            style="height: 34px; padding: 0 12px; font-size: 13.5px; font-weight: 700; border-radius: 8px; white-space: nowrap; background-color: #2E7D32; border-color: #2E7D32;"
+                                            th:data-id="${p.id}"
+                                            th:data-name="${p.name}"
+                                            onclick="openProductConfirmModal(this.getAttribute('data-id'), this.getAttribute('data-name'), 'approve')">
+                                        <i class="bi bi-patch-check"></i> Cho phép
+                                    </button>
+
+                                    <!-- NÚT CẤM (khi sản phẩm đang hoạt động HOẶC đang chờ duyệt) -->
+                                    <button th:if="${p.isActive == null or p.isActive}" 
+                                            type="button"
+                                            class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1"
+                                            style="height: 34px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px; border: 1px solid #FCA5A5; background-color: #FFF5F5; color: #DC2626; white-space: nowrap;"
+                                            onmouseover="this.style.backgroundColor='#FEE2E2'" onmouseout="this.style.backgroundColor='#FFF5F5'"
+                                            th:data-id="${p.id}"
+                                            th:data-name="${p.name}"
+                                            onclick="openProductConfirmModal(this.getAttribute('data-id'), this.getAttribute('data-name'), 'ban')">
+                                        <i class="bi bi-slash-circle"></i> Cấm
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -398,7 +370,7 @@
             </div>
         </div>
 
-        <!-- Modal Xem Chi Tiết Sản Phẩm (Hiển thị đầy đủ thông tin, giá nhập, đánh giá sao ★) -->
+        <!-- Modal Xem Chi Tiết Sản Phẩm (Sản phẩm có mặt tại tất cả chi nhánh) -->
         <div th:each="p : ${products}" class="modal fade" th:id="'productDetailModal' + ${p.id}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="border: 1px solid #E2E7E2 !important; border-radius: 14px;">
@@ -430,8 +402,10 @@
                                         <div class="fw-bold" style="color: #20382E; font-size: 15.5px;" th:text="'#' + ${p.id}">#1</div>
                                     </div>
                                     <div class="col-6">
-                                        <div class="text-muted small">Chi nhánh quản lý</div>
-                                        <div class="fw-bold" style="color: #20382E; font-size: 15.5px;" th:text="${p.store != null ? p.store.name : 'Toàn hệ thống'}">Bến Thành</div>
+                                        <div class="text-muted small">Phạm vi phân phối</div>
+                                        <div class="fw-bold" style="color: #2E7D32; font-size: 15px;">
+                                            <i class="bi bi-geo-alt-fill text-success me-1"></i>Có mặt tại tất cả chi nhánh
+                                        </div>
                                     </div>
                                     <div class="col-6">
                                         <div class="text-muted small">Dịp tặng (Danh mục)</div>
@@ -482,8 +456,109 @@
             </div>
         </div>
 
+        <!-- Modal Xác Nhận Cấp Phép / Cấm Sản Phẩm -->
+        <div class="modal fade" id="productStatusConfirmModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="border: 1px solid #E2E7E2 !important; border-radius: 14px;">
+                    <div id="productConfirmHeader" class="modal-header text-white" style="background-color: #20382E; border-bottom: none; padding: 18px 24px;">
+                        <div class="d-flex align-items-center gap-2">
+                            <i id="productConfirmIcon" class="bi bi-patch-check-fill fs-4 text-warning"></i>
+                            <h5 id="productConfirmTitle" class="modal-title fw-bold mb-0 text-white" style="font-size: 18px;">Xác nhận kiểm duyệt sản phẩm</h5>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4" style="background-color: #FBFDFB;">
+                        <div id="productAlertBox" class="p-3 rounded-3 mb-3" style="background-color: #E8F5E9; border: 1px solid #A5D6A7;">
+                            <!-- Sẽ được điền động qua JS -->
+                        </div>
+                        <div class="small text-muted mb-2 fw-semibold" id="productSubTitle">Quy định và tác động sau thao tác:</div>
+                        <div class="small text-secondary mb-3" id="productDetailText" style="line-height: 1.6;">
+                            <!-- Sẽ được điền động qua JS -->
+                        </div>
+                        <form id="productConfirmForm" method="post" action="">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <div class="d-flex justify-content-end gap-2 pt-2 border-top">
+                                <button type="button" class="btn btn-secondary px-3 py-2 rounded-3" data-bs-dismiss="modal">Hủy bỏ</button>
+                                <button type="submit" id="productSubmitBtn" class="btn px-4 py-2 fw-bold text-white shadow-sm rounded-3">
+                                    Xác nhận (Tiếp tục thực hiện)
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function openProductConfirmModal(productId, productName, actionType) {
+        const form = document.getElementById('productConfirmForm');
+        const modalHeader = document.getElementById('productConfirmHeader');
+        const modalIcon = document.getElementById('productConfirmIcon');
+        const modalTitle = document.getElementById('productConfirmTitle');
+        const alertBox = document.getElementById('productAlertBox');
+        const subTitle = document.getElementById('productSubTitle');
+        const detailText = document.getElementById('productDetailText');
+        const submitBtn = document.getElementById('productSubmitBtn');
+
+        form.action = '/admin/products-manage/toggle-active/' + productId;
+
+        if (actionType === 'approve') {
+            modalHeader.style.backgroundColor = '#20382E';
+            modalIcon.className = 'bi bi-patch-check-fill fs-4 text-warning';
+            modalTitle.innerText = 'Xác nhận CHO PHÉP / DUYỆT sản phẩm';
+
+            alertBox.style.backgroundColor = '#E8F5E9';
+            alertBox.style.color = '#1B5E20';
+            alertBox.style.border = '1px solid #A5D6A7';
+            alertBox.innerHTML = '<div class="d-flex align-items-start gap-2">' +
+                '<i class="bi bi-check-circle-fill fs-4 flex-shrink-0 text-success"></i>' +
+                '<div>' +
+                    '<div class="fw-bold fs-6">Bạn có chắc chắn muốn CHO PHÉP / CẤP PHÉP sản phẩm:</div>' +
+                    '<div class="fs-5 fw-bold text-dark mt-1">[' + productName + ']</div>' +
+                '</div>' +
+            '</div>';
+
+            subTitle.innerText = 'Quyền hạn và tác động sau khi cho phép:';
+            detailText.innerHTML = '• Mẫu hoa đủ điều kiện lưu hành và mở bán trên toàn hệ thống.<br>' +
+                                  '• Khách hàng có thể tìm kiếm, xem chi tiết và đặt hàng bình thường.<br>' +
+                                  '• Trạng thái sản phẩm sẽ chuyển sang [ĐÃ CẤP PHÉP / ĐANG HOẠT ĐỘNG].';
+
+            submitBtn.className = 'btn px-4 py-2 fw-bold text-white shadow-sm rounded-3';
+            submitBtn.style.backgroundColor = '#2E7D32';
+            submitBtn.innerHTML = '<i class="bi bi-patch-check me-1"></i> Xác nhận cho phép';
+        } else {
+            modalHeader.style.backgroundColor = '#842029';
+            modalIcon.className = 'bi bi-slash-circle-fill fs-4 text-warning';
+            modalTitle.innerText = 'Xác nhận CẤM / TỪ CHỐI sản phẩm';
+
+            alertBox.style.backgroundColor = '#FFEBEE';
+            alertBox.style.color = '#B71C1C';
+            alertBox.style.border = '1px solid #FFCDD2';
+            alertBox.innerHTML = '<div class="d-flex align-items-start gap-2">' +
+                '<i class="bi bi-exclamation-triangle-fill fs-4 flex-shrink-0 text-danger"></i>' +
+                '<div>' +
+                    '<div class="fw-bold fs-6">Bạn có chắc chắn muốn CẤM / TỪ CHỐI sản phẩm:</div>' +
+                    '<div class="fs-5 fw-bold text-dark mt-1">[' + productName + ']</div>' +
+                '</div>' +
+            '</div>';
+
+            subTitle.innerText = 'Cảnh báo tác động sau khi cấm:';
+            detailText.innerHTML = '• Sản phẩm sẽ bị <strong>ngừng lưu hành</strong> và ẩn khỏi giao diện khách hàng.<br>' +
+                                  '• Khách hàng <strong>không thể tìm kiếm hoặc đặt mua</strong> mẫu hoa này.<br>' +
+                                  '• Trạng thái sản phẩm sẽ chuyển sang [BỊ CẤM / TỪ CHỐI].';
+
+            submitBtn.className = 'btn px-4 py-2 fw-bold text-white shadow-sm rounded-3';
+            submitBtn.style.backgroundColor = '#DC2626';
+            submitBtn.innerHTML = '<i class="bi bi-slash-circle me-1"></i> Xác nhận cấm sản phẩm';
+        }
+
+        const modalEl = document.getElementById('productStatusConfirmModal');
+        const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+</script>
 </body>
 </html>

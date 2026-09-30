@@ -50,9 +50,16 @@
                 </a>
             </li>
             <li>
+                <a th:href="@{/admin/store-levels}" class="nav-link">
+                    <i class="bi bi-award"></i>
+                    <span>Hạng chi nhánh</span>
+                </a>
+            </li>
+
+            <li>
                 <a th:href="@{/admin/products-manage}" class="nav-link">
-                    <i class="bi bi-check2-circle"></i>
-                    <span>Duyệt sản phẩm</span>
+                    <i class="bi bi-box-seam"></i>
+                    <span>Sản phẩm</span>
                 </a>
             </li>
             <li>
@@ -68,15 +75,15 @@
                 </a>
             </li>
             <li>
-                <a th:href="@{/admin/commissions}" class="nav-link">
-                    <i class="bi bi-percent"></i>
-                    <span>Phí hoa hồng</span>
+                <a th:href="@{/admin/styles}" class="nav-link">
+                    <i class="bi bi-sliders"></i>
+                    <span>Thuộc tính sản phẩm</span>
                 </a>
             </li>
             <li>
                 <a th:href="@{/admin/deliveries}" class="nav-link">
                     <i class="bi bi-truck"></i>
-                    <span>Vận chuyển</span>
+                    <span>Đơn vị vận chuyển</span>
                 </a>
             </li>
             <li>
@@ -89,12 +96,6 @@
                 <a th:href="@{/admin/user-levels}" class="nav-link">
                     <i class="bi bi-award"></i>
                     <span>Cấp bậc khách</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/store-levels}" class="nav-link">
-                    <i class="bi bi-shield-check"></i>
-                    <span>Cấp bậc cửa hàng</span>
                 </a>
             </li>
 
@@ -499,11 +500,11 @@
                                 <tbody>
                                 <tr th:each="d : ${o.orderDetails}">
                                     <td class="ps-3 py-2">
-                                        <div class="fw-bold text-dark" th:text="${d.product.name}">Bó Hoa Hồng Đỏ</div>
+                                        <div class="fw-bold text-dark" th:text="${d.product != null ? d.product.name : 'Mẫu hoa'}">Bó Hoa Hồng Đỏ</div>
                                     </td>
-                                    <td class="text-center py-2" th:text="${d.quantity}">1</td>
-                                    <td class="text-end py-2" th:text="${#numbers.formatDecimal(d.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'">650.000 ₫</td>
-                                    <td class="text-end pe-3 py-2 fw-bold" style="color: #A64060;" th:text="${#numbers.formatDecimal(d.price * d.quantity, 0, 'COMMA', 0, 'POINT')} + ' ₫'">650.000 ₫</td>
+                                    <td class="text-center py-2" th:text="${d.quantity != null ? d.quantity : 1}">1</td>
+                                    <td class="text-end py-2" th:text="${d.unitPrice != null ? #numbers.formatDecimal(d.unitPrice, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">650.000 ₫</td>
+                                    <td class="text-end pe-3 py-2 fw-bold" style="color: #A64060;" th:text="${d.unitPrice != null ? #numbers.formatDecimal(d.unitPrice.doubleValue() * (d.quantity != null ? d.quantity : 1), 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">650.000 ₫</td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -516,7 +517,7 @@
                             </div>
                             <div class="text-end">
                                 <span class="small text-muted me-2">Tổng tiền đơn:</span>
-                                <span class="fw-bold" style="font-size: 20px; color: #A64060;" th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">650.000 ₫</span>
+                                <span class="fw-bold" style="font-size: 20px; color: #A64060;" th:text="${o.totalAmount != null ? #numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">650.000 ₫</span>
                             </div>
                         </div>
                     </div>

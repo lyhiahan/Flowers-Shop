@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Quản Lý Danh Mục Hoa - Quản Trị Hệ Thống Hoa Tươi</title>
+    <title>Quản Lý Loại Sản Phẩm - Quản Trị Hệ Thống Hoa Tươi</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -13,12 +13,63 @@
     <style>
         body { font-family: var(--font-sans) !important; background-color: var(--admin-bg); color: var(--admin-text-main); min-height: 100vh; }
         .main-wrapper { flex: 1; overflow-x: hidden; background-color: var(--admin-bg); }
+        .table-admin-categories th {
+            background-color: #E5EEE8 !important;
+            color: #20382E !important;
+            font-weight: 800 !important;
+            font-size: 15px !important;
+            letter-spacing: 0.5px;
+            padding: 14px 18px;
+            border-bottom: none !important;
+        }
+        .table-admin-categories td {
+            padding: 16px 18px;
+            border-bottom: 1px solid #EBF1ED;
+            vertical-align: middle;
+        }
+        .table-admin-categories tr:hover td {
+            background-color: #F8FAF8;
+        }
+        .btn-action-edit {
+            border: 1px solid #20382E;
+            background-color: #FFFFFF;
+            color: #20382E;
+            border-radius: 8px;
+            padding: 5px 14px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+        .btn-action-edit:hover {
+            background-color: #20382E;
+            color: #FFFFFF;
+        }
+        .btn-action-delete {
+            border: 1px solid #FCA5A5;
+            background-color: #FFF5F5;
+            color: #DC2626;
+            border-radius: 8px;
+            padding: 5px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+        .btn-action-delete:hover {
+            background-color: #DC2626;
+            color: #FFFFFF;
+            border-color: #DC2626;
+        }
     </style>
 </head>
 <body class="admin-body">
 <div class="d-flex">
     <!-- Sidebar -->
-        <!-- Sidebar Quản Trị Hệ Thống Chuẩn Thương Hiệu Tiệm Hoa -->
     <aside class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white">
         <a th:href="@{/admin/dashboard}" class="d-flex align-items-center gap-3 mb-4 text-white text-decoration-none px-2 pt-2">
             <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img flex-shrink-0" style="width: 40px; height: 40px; border-radius: 8px;">
@@ -48,9 +99,16 @@
                 </a>
             </li>
             <li>
+                <a th:href="@{/admin/store-levels}" class="nav-link">
+                    <i class="bi bi-award"></i>
+                    <span>Hạng chi nhánh</span>
+                </a>
+            </li>
+
+            <li>
                 <a th:href="@{/admin/products-manage}" class="nav-link">
-                    <i class="bi bi-check2-circle"></i>
-                    <span>Duyệt sản phẩm</span>
+                    <i class="bi bi-box-seam"></i>
+                    <span>Sản phẩm</span>
                 </a>
             </li>
             <li>
@@ -66,15 +124,15 @@
                 </a>
             </li>
             <li>
-                <a th:href="@{/admin/commissions}" class="nav-link">
-                    <i class="bi bi-percent"></i>
-                    <span>Phí hoa hồng</span>
+                <a th:href="@{/admin/styles}" class="nav-link">
+                    <i class="bi bi-sliders"></i>
+                    <span>Thuộc tính sản phẩm</span>
                 </a>
             </li>
             <li>
                 <a th:href="@{/admin/deliveries}" class="nav-link">
                     <i class="bi bi-truck"></i>
-                    <span>Vận chuyển</span>
+                    <span>Đơn vị vận chuyển</span>
                 </a>
             </li>
             <li>
@@ -89,13 +147,6 @@
                     <span>Cấp bậc khách</span>
                 </a>
             </li>
-            <li>
-                <a th:href="@{/admin/store-levels}" class="nav-link">
-                    <i class="bi bi-shield-check"></i>
-                    <span>Cấp bậc cửa hàng</span>
-                </a>
-            </li>
-
             <li>
                 <a th:href="@{/admin/transactions}" class="nav-link">
                     <i class="bi bi-journal-text"></i>
@@ -120,78 +171,154 @@
 
     <!-- Main Content -->
     <div class="main-wrapper p-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <!-- 1. Header: Rút gọn tiêu đề & nút hành động -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
             <div>
-                <h1 class="admin-page-title mb-1">Quản lý danh mục hoa</h1>
-                <p class="text-muted small mb-0">Thêm, sửa và quản lý các danh mục phân loại hoa tươi và phụ kiện</p>
+                <div class="d-flex align-items-center gap-3">
+                    <h1 class="admin-page-title mb-0" style="font-size: 28px !important; font-weight: 800; color: #20382E;">Quản lý loại sản phẩm</h1>
+                    <span class="badge rounded-pill" style="background-color: #E5EEE8; color: #20382E; border: 1px solid #D1E5DA; font-size: 14.5px; font-weight: 700; padding: 6px 14px;">
+                        <span th:text="${#lists.size(categories)}">0</span> loại sản phẩm
+                    </span>
+                </div>
+                <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Xem, thêm, xóa, sửa các loại sản phẩm hoa tươi phân phối trên toàn hệ thống</p>
             </div>
-            <button class="btn btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#addCatModal">
-                <i class="bi bi-plus-lg me-1"></i> Thêm Danh Mục Mới
-            </button>
+            <div class="d-flex gap-2">
+                <!-- Nút nạp lại 9 loại sản phẩm mẫu -->
+                <form th:action="@{/admin/categories/reset-defaults}" method="post" class="d-inline m-0">
+                    <button type="submit" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 fw-semibold" 
+                            style="font-size: 15px; height: 44px; padding: 0 16px; border-radius: 10px; background-color: #FFFFFF; border-color: #D1E5DA; color: #20382E;"
+                            onclick="return confirm('Khôi phục danh sách 9 loại sản phẩm hoa tươi tiêu chuẩn?')">
+                        <i class="bi bi-arrow-clockwise text-success"></i> Khôi phục 9 loại mẫu
+                    </button>
+                </form>
+                <!-- Nút Thêm loại sản phẩm mới -->
+                <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-2 fw-bold shadow-sm" 
+                        data-bs-toggle="modal" data-bs-target="#addCatModal"
+                        style="font-size: 15.5px; height: 44px; padding: 0 20px; border-radius: 10px; background-color: #20382E !important; border-color: #20382E !important;">
+                    <i class="bi bi-plus-lg"></i> Thêm loại sản phẩm
+                </button>
+            </div>
         </div>
 
         <!-- Flash alerts -->
-        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small" role="alert">
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small" role="alert" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA; border-radius: 10px;">
             <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${successMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show py-2 small" role="alert">
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show py-2 small" role="alert" style="border-radius: 10px;">
             <i class="bi bi-exclamation-triangle-fill me-1"></i> <span th:text="${errorMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        <!-- Bảng danh sách Loại Sản Phẩm: MÃ | TÊN LOẠI SẢN PHẨM | MÔ TẢ DANH MỤC | TRẠNG THÁI | THAO TÁC -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white" style="border: 1px solid #E2E7E2 !important; border-radius: 14px;">
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light small text-secondary">
+                    <table class="table table-admin-categories align-middle mb-0">
+                        <thead>
                         <tr>
-                            <th class="ps-3">ID</th>
-                            <th>Tên Danh Mục</th>
-                            <th>Mô Tả Danh Mục</th>
-                            <th class="text-end pe-3">Hành Động</th>
+                            <th class="ps-4" style="width: 80px; border-top-left-radius: 14px;">MÃ</th>
+                            <th style="min-width: 260px;">TÊN LOẠI SẢN PHẨM</th>
+                            <th style="min-width: 320px;">MÔ TẢ DANH MỤC</th>
+                            <th class="text-center" style="min-width: 170px;">TRẠNG THÁI</th>
+                            <th class="text-end pe-4" style="min-width: 180px; border-top-right-radius: 14px;">THAO TÁC</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(categories)}">
-                            <td colspan="4" class="text-center py-5 text-muted">Chưa có danh mục nào.</td>
+                            <td colspan="5" class="text-center py-5 text-muted" style="font-size: 15.5px;">
+                                <i class="bi bi-tags fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                                Chưa có loại sản phẩm nào. Bấm nút phía trên để thêm mới.
+                            </td>
                         </tr>
                         <tr th:each="c : ${categories}">
-                            <td class="ps-3 text-muted" th:text="'#' + ${c.id}"></td>
-                            <td><strong class="text-dark" th:text="${c.name}"></strong></td>
-                            <td class="small text-muted" th:text="${c.description}"></td>
-                            <td class="text-end pe-3">
-                                <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 me-1" data-bs-toggle="modal" th:data-bs-target="'#editCatModal_' + ${c.id}">
-                                    <i class="bi bi-pencil"></i> Sửa
-                                </button>
-                                <form th:action="@{'/admin/categories/delete/' + ${c.id}}" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="return confirm('Bạn có chắc muốn xóa danh mục này?')">
-                                        <i class="bi bi-trash"></i> Xóa
-                                    </button>
-                                </form>
+                            <!-- 1. MÃ -->
+                            <td class="ps-4">
+                                <span class="badge bg-light text-secondary border px-2 py-1" style="font-size: 14px; font-weight: 700; border-radius: 6px;" th:text="'#' + ${c.id}">#1</span>
+                            </td>
 
-                                <!-- Modal Sửa Danh Mục -->
-                                <div class="modal fade text-start" th:id="'editCatModal_' + ${c.id}" tabindex="-1">
+                            <!-- 2. TÊN LOẠI SẢN PHẨM -->
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white flex-shrink-0 shadow-sm"
+                                         style="width: 36px; height: 36px; background-color: #20382E; font-size: 14px;">
+                                        <i class="bi bi-tag-fill"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold" style="font-size: 16.5px; font-weight: 700; color: #20382E; line-height: 1.35;" th:text="${c.name}">
+                                            Hoa Tươi Sự Kiện & Chúc Mừng
+                                        </div>
+                                        <div style="font-size: 12.5px; color: #66736B; margin-top: 2px;">Loại hoa chính thức</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- 3. MÔ TẢ DANH MỤC -->
+                            <td>
+                                <div style="font-size: 14.5px; color: #4A5550; line-height: 1.5; max-width: 450px;" 
+                                     th:text="${c.description != null and !c.description.isEmpty() ? c.description : 'Bộ sưu tập hoa tươi cao cấp phục vụ nhu cầu đa dạng của khách hàng.'}">
+                                    Bộ sưu tập hoa chúc mừng, sự kiện, khai trương và sinh nhật
+                                </div>
+                            </td>
+
+                            <!-- 4. TRẠNG THÁI -->
+                            <td class="text-center" style="white-space: nowrap;">
+                                <span class="badge rounded-pill px-3 py-2 d-inline-flex align-items-center gap-1 shadow-sm"
+                                      style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; font-size: 13px; font-weight: 700; letter-spacing: 0.3px;">
+                                    <i class="bi bi-check-circle-fill text-success"></i> ĐANG MỞ BÁN
+                                </span>
+                            </td>
+
+                            <!-- 5. THAO TÁC: ĐẦY ĐỦ CHỨC NĂNG SỬA & XÓA CÓ HỘP THOẠI XÁC NHẬN -->
+                            <td class="text-end pe-4" style="white-space: nowrap;">
+                                <div class="d-inline-flex align-items-center gap-2">
+                                    <!-- Nút Sửa: mở modal sửa -->
+                                    <button type="button" class="btn btn-action-edit" 
+                                            data-bs-toggle="modal" th:data-bs-target="'#editCatModal_' + ${c.id}"
+                                            title="Chỉnh sửa loại sản phẩm">
+                                        <i class="bi bi-pencil"></i> Sửa
+                                    </button>
+
+                                    <!-- Nút Xóa: submit form xóa có confirm -->
+                                    <form th:action="@{'/admin/categories/delete/' + ${c.id}}" method="post" class="d-inline m-0">
+                                        <button type="submit" class="btn btn-action-delete"
+                                                th:data-cat-name="${c.name}"
+                                                onclick="return confirm('Xác nhận XÓA loại sản phẩm [' + this.getAttribute('data-cat-name') + ']?')"
+                                                title="Xóa loại sản phẩm">
+                                            <i class="bi bi-trash"></i> Xóa
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <!-- Modal Chỉnh Sửa Loại Sản Phẩm -->
+                                <div class="modal fade text-start" th:id="'editCatModal_' + ${c.id}" tabindex="-1" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content">
+                                        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="border: 1px solid #E2E7E2 !important; border-radius: 16px;">
                                             <form th:action="@{'/admin/categories/update/' + ${c.id}}" method="post">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title font-serif">Chỉnh sửa danh mục</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="mb-3">
-                                                        <label class="form-label small fw-semibold">Tên danh mục hoa:</label>
-                                                        <input type="text" name="name" class="form-control" th:value="${c.name}" required>
+                                                <div class="modal-header text-white" style="background-color: #20382E; padding: 18px 24px; border-bottom: none;">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <i class="bi bi-pencil-square fs-5"></i>
+                                                        <h5 class="modal-title fw-bold mb-0 text-white" style="font-size: 18px;">Chỉnh sửa loại sản phẩm</h5>
                                                     </div>
+                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body p-4" style="background-color: #FBFDFB;">
                                                     <div class="mb-3">
-                                                        <label class="form-label small fw-semibold">Mô tả ngắn:</label>
-                                                        <textarea name="description" rows="3" class="form-control" th:text="${c.description}"></textarea>
+                                                        <label class="form-label fw-bold" style="color: #20382E; font-size: 14.5px;">Tên loại sản phẩm hoa (*):</label>
+                                                        <input type="text" name="name" class="form-control" th:value="${c.name}" 
+                                                               style="height: 44px; border-radius: 10px; border-color: #E2E7E2; font-size: 15px;" required>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <label class="form-label fw-bold" style="color: #20382E; font-size: 14.5px;">Mô tả danh mục:</label>
+                                                        <textarea name="description" rows="3" class="form-control" th:text="${c.description}" 
+                                                                  style="border-radius: 10px; border-color: #E2E7E2; font-size: 14.5px;"></textarea>
                                                     </div>
                                                 </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
-                                                    <button type="submit" class="btn btn-primary btn-sm">Lưu Thay Đổi</button>
+                                                <div class="modal-footer bg-white border-top-0 d-flex justify-content-end gap-2 p-3">
+                                                    <button type="button" class="btn btn-outline-secondary px-3 py-2 fw-semibold" data-bs-dismiss="modal" style="border-radius: 8px;">Hủy bỏ</button>
+                                                    <button type="submit" class="btn px-4 py-2 fw-bold text-white shadow-sm" style="border-radius: 8px; background-color: #20382E;">
+                                                        <i class="bi bi-check2-circle me-1"></i> Lưu thay đổi
+                                                    </button>
                                                 </div>
                                             </form>
                                         </div>
@@ -207,28 +334,35 @@
     </div>
 </div>
 
-<!-- Modal Thêm Danh Mục -->
-<div class="modal fade" id="addCatModal" tabindex="-1">
+<!-- Modal Thêm Loại Sản Phẩm Mới -->
+<div class="modal fade" id="addCatModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="border: 1px solid #E2E7E2 !important; border-radius: 16px;">
             <form th:action="@{/admin/categories/add}" method="post">
-                <div class="modal-header">
-                    <h5 class="modal-title font-serif">Thêm danh mục hoa</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Tên danh mục hoa:</label>
-                        <input type="text" name="name" class="form-control" placeholder="VD: Hoa Khai Trương Hồng Phát" required>
+                <div class="modal-header text-white" style="background-color: #20382E; padding: 18px 24px; border-bottom: none;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-plus-circle fs-5"></i>
+                        <h5 class="modal-title fw-bold mb-0 text-white" style="font-size: 18px;">Thêm loại sản phẩm hoa tươi</h5>
                     </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4" style="background-color: #FBFDFB;">
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold">Mô tả ngắn:</label>
-                        <textarea name="description" rows="3" class="form-control" placeholder="Mô tả về loại hoa trong danh mục..."></textarea>
+                        <label class="form-label fw-bold" style="color: #20382E; font-size: 14.5px;">Tên loại sản phẩm (*):</label>
+                        <input type="text" name="name" class="form-control" placeholder="VD: Hoa Cưới Cầm Tay Cô Dâu" 
+                               style="height: 44px; border-radius: 10px; border-color: #E2E7E2; font-size: 15px;" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold" style="color: #20382E; font-size: 14.5px;">Mô tả chi tiết:</label>
+                        <textarea name="description" rows="3" class="form-control" placeholder="Mô tả ý nghĩa, dịp tặng và phong cách cắm hoa của danh mục này..." 
+                                  style="border-radius: 10px; border-color: #E2E7E2; font-size: 14.5px;"></textarea>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-primary btn-sm">Thêm Danh Mục</button>
+                <div class="modal-footer bg-white border-top-0 d-flex justify-content-end gap-2 p-3">
+                    <button type="button" class="btn btn-outline-secondary px-3 py-2 fw-semibold" data-bs-dismiss="modal" style="border-radius: 8px;">Hủy bỏ</button>
+                    <button type="submit" class="btn px-4 py-2 fw-bold text-white shadow-sm" style="border-radius: 8px; background-color: #20382E;">
+                        <i class="bi bi-plus-lg me-1"></i> Thêm loại sản phẩm
+                    </button>
                 </div>
             </form>
         </div>

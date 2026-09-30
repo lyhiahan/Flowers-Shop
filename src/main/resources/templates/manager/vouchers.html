@@ -129,15 +129,49 @@
                                     <i class="bi bi-calendar3 me-1"></i><span th:text="${v.startDate} + ' → ' + ${v.endDate}"></span>
                                 </td>
 
-                                <!-- 7. Thao tác -->
+                                <!-- 7. Trạng thái -->
+                                <td class="text-center" style="white-space: nowrap;">
+                                    <span th:if="${v.isActive != null and v.isActive}" 
+                                          class="badge rounded-pill px-3 py-1" 
+                                          style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; font-size: 12px; font-weight: 700;">
+                                        Đang bật
+                                    </span>
+                                    <span th:if="${v.isActive == null or !v.isActive}" 
+                                          class="badge rounded-pill px-3 py-1" 
+                                          style="background-color: #F1F5F2; color: #708076; border: 1px solid #D5DDD7; font-size: 12px; font-weight: 700;">
+                                        Đã tắt
+                                    </span>
+                                </td>
+
+                                <!-- 8. Thao tác -->
                                 <td class="text-end pe-4" style="white-space: nowrap;">
-                                    <form th:action="@{'/manager/vouchers/delete/' + ${v.id}}" method="post" class="d-inline m-0">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1"
-                                                style="height: 32px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px;"
-                                                onclick="return confirm('Bạn có chắc muốn xóa mã giảm giá này?')">
-                                            <i class="bi bi-trash"></i> Xóa
+                                    <div class="d-inline-flex align-items-center gap-2">
+                                        <!-- Nút Bật / Tắt trạng thái -->
+                                        <a th:href="@{'/manager/vouchers/toggle/' + ${v.id}}"
+                                           class="btn btn-sm d-inline-flex align-items-center gap-1 shadow-sm"
+                                           th:classappend="${v.isActive != null and v.isActive} ? 'btn-outline-warning text-dark' : 'btn-outline-success'"
+                                           th:title="${v.isActive != null and v.isActive} ? 'Tạm tắt mã' : 'Bật kích hoạt'"
+                                           style="border-radius: 8px; font-size: 13px; font-weight: 600; padding: 4px 10px;">
+                                            <i th:class="${v.isActive != null and v.isActive} ? 'bi bi-pause-circle text-warning' : 'bi bi-play-circle text-success'"></i>
+                                            <span th:text="${v.isActive != null and v.isActive} ? 'Tắt mã' : 'Bật mã'">Tắt/Bật</span>
+                                        </a>
+
+                                        <!-- Nút Sửa -->
+                                        <button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1 shadow-sm"
+                                                data-bs-toggle="modal" th:data-bs-target="'#editVoucherModal' + ${v.id}"
+                                                style="border-radius: 8px; font-size: 13px; font-weight: 600; padding: 4px 10px;">
+                                            <i class="bi bi-pencil"></i> Sửa
                                         </button>
-                                    </form>
+
+                                        <!-- Nút Xóa -->
+                                        <a th:href="@{'/manager/vouchers/delete/' + ${v.id}}"
+                                           class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1 shadow-sm"
+                                           th:data-code="${v.code}"
+                                           onclick="return confirm('Bạn có chắc chắn muốn xóa mã voucher [' + this.getAttribute('data-code') + ']?');"
+                                           style="border-radius: 8px; font-size: 13px; font-weight: 600; padding: 4px 10px;">
+                                            <i class="bi bi-trash"></i> Xóa
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                             </tbody>
@@ -149,62 +183,202 @@
     </div>
 </div>
 
-<!-- Modal Tạo Voucher -->
-<div class="modal fade" id="addVoucherModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form th:action="@{/manager/vouchers/add}" method="post">
-                <div class="modal-header">
-                    <h5 class="modal-title font-serif">🎟️ Tạo Mã Khuyến Mãi Mới</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<!-- Modal Tạo Voucher Mới Cho Chi Nhánh -->
+<div class="modal fade" id="addVoucherModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form th:action="@{/manager/vouchers/add}" method="post" id="addVoucherForm" onsubmit="return validateVoucherForm('add');">
+                <div class="modal-header border-bottom px-4 pt-4 pb-3" style="background-color: #F8FAF9; border-color: #E2E7E2 !important;">
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark mb-1" style="font-size: 19px;">
+                            🎟️ Tạo Mã Khuyến Mãi Chi Nhánh Mới
+                        </h5>
+                        <p class="text-muted small mb-0">Mã ưu đãi áp dụng riêng cho khách mua hoa tại cửa hàng của bạn</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Mã code (Viết liền in hoa):</label>
-                        <input type="text" name="code" class="form-control text-uppercase" placeholder="VD: CHAOHE2026" required>
+                <div class="modal-body p-4">
+                    <div id="addFormErrorBox" class="alert alert-danger py-2 px-3 mb-3 d-none" style="font-size: 13.5px; border-radius: 8px;">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i> <span id="addFormErrorMsg"></span>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Tên chương trình:</label>
-                        <input type="text" name="name" class="form-control" placeholder="VD: Ưu Đãi Giảm Giá Hoa Tươi Mùa Hè" required>
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label small fw-semibold">Loại giảm giá:</label>
-                            <select name="discountType" class="form-select" required>
-                                <option value="PERCENT">Giảm Theo %</option>
-                                <option value="FIXED_AMOUNT">Giảm Số Tiền Cố Định</option>
-                                <option value="FREE_SHIP">Miễn Phí Vận Chuyển</option>
+
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold text-dark small mb-1">Mã khuyến mãi <span class="text-danger">*</span></label>
+                            <input type="text" name="code" id="add_code" class="form-control text-uppercase fw-bold" 
+                                   placeholder="VD: SHOP2026, FLOWERSHOP" required minlength="3" maxlength="30"
+                                   pattern="^[A-Za-z0-9_-]{3,30}$"
+                                   oninput="this.value = this.value.toUpperCase().replace(/\s+/g, '');"
+                                   style="border-radius: 8px;">
+                            <div class="form-text small" style="font-size: 12px;">3-30 ký tự, không dấu cách.</div>
+                        </div>
+
+                        <div class="col-md-7">
+                            <label class="form-label fw-bold text-dark small mb-1">Tên chương trình ưu đãi <span class="text-danger">*</span></label>
+                            <input type="text" name="name" id="add_name" class="form-control" 
+                                   placeholder="VD: Tri Ân Khách Quen - Giảm 10% Bó Hoa Tươi" required minlength="3" maxlength="150"
+                                   style="border-radius: 8px;">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-dark small mb-1">Loại hình giảm giá <span class="text-danger">*</span></label>
+                            <select name="discountType" id="add_discountType" class="form-select fw-semibold" 
+                                    onchange="handleDiscountTypeChange('add')" required style="border-radius: 8px;">
+                                <option value="PERCENT">Giảm theo tỷ lệ %</option>
+                                <option value="FIXED_AMOUNT">Giảm số tiền cố định (₫)</option>
+                                <option value="FREE_SHIP">Miễn phí vận chuyển (Freeship)</option>
                             </select>
                         </div>
-                        <div class="col-6">
-                            <label class="form-label small fw-semibold">Giá trị giảm:</label>
-                            <input type="number" name="discountValue" class="form-control" placeholder="10 (%) hoặc 50000 (đ)" required>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-dark small mb-1">
+                                Mức giảm <span class="text-danger">*</span> 
+                                <span id="add_discountValueLabel" class="text-primary small">(%)</span>
+                            </label>
+                            <input type="number" name="discountValue" id="add_discountValue" class="form-control fw-bold" 
+                                   placeholder="VD: 10" required min="1" max="100" step="1" style="border-radius: 8px;">
+                            <div id="add_discountValueHint" class="form-text small" style="font-size: 12px;">Từ 1% đến 100%.</div>
                         </div>
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label small fw-semibold">Đơn tối thiểu (VNĐ):</label>
-                            <input type="number" name="minOrderValue" class="form-control" value="200000">
+
+                        <div class="col-md-4" id="add_maxDiscountAmountGroup">
+                            <label class="form-label fw-bold text-dark small mb-1">Mức giảm tối đa <span class="text-muted fw-normal">(Tùy chọn)</span></label>
+                            <input type="number" name="maxDiscountAmount" id="add_maxDiscountAmount" class="form-control" 
+                                   placeholder="VD: 50000 (₫)" min="0" step="1000" style="border-radius: 8px;">
                         </div>
-                        <div class="col-6">
-                            <label class="form-label small fw-semibold">Số lượng phát hành:</label>
-                            <input type="number" name="quantity" class="form-control" value="100">
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark small mb-1">Đơn tối thiểu (₫) <span class="text-danger">*</span></label>
+                            <input type="number" name="minOrderValue" id="add_minOrderValue" class="form-control" 
+                                   value="0" min="0" step="1000" required style="border-radius: 8px;">
                         </div>
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label small fw-semibold">Ngày bắt đầu:</label>
-                            <input type="date" name="startDate" class="form-control" required>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark small mb-1">Số lượng phát hành <span class="text-danger">*</span></label>
+                            <input type="number" name="quantity" id="add_quantity" class="form-control" 
+                                   value="100" min="1" step="1" required style="border-radius: 8px;">
                         </div>
-                        <div class="col-6">
-                            <label class="form-label small fw-semibold">Ngày kết thúc:</label>
-                            <input type="date" name="endDate" class="form-control" required>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark small mb-1">Ngày bắt đầu <span class="text-danger">*</span></label>
+                            <input type="date" name="startDate" id="add_startDate" class="form-control" 
+                                   required onchange="syncDateConstraints('add')" style="border-radius: 8px;">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark small mb-1">Ngày kết thúc <span class="text-danger">*</span></label>
+                            <input type="date" name="endDate" id="add_endDate" class="form-control" 
+                                   required style="border-radius: 8px;">
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-primary btn-sm">Tạo Khuyến Mãi</button>
+                <div class="modal-footer border-top px-4 py-3" style="background-color: #F8FAF9; border-color: #E2E7E2 !important;">
+                    <button type="button" class="btn btn-outline-secondary px-3" data-bs-dismiss="modal" style="border-radius: 8px;">Hủy</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold" style="background-color: #20382E; border-color: #20382E; border-radius: 8px;">
+                        <i class="bi bi-check2-circle me-1"></i> Tạo Khuyến Mãi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Sửa Voucher Cho Từng Mục Trong Danh Sách -->
+<div th:each="v : ${vouchers}" class="modal fade" th:id="'editVoucherModal' + ${v.id}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form th:action="@{'/manager/vouchers/update/' + ${v.id}}" method="post" 
+                  th:id="'editVoucherForm' + ${v.id}" 
+                  th:onsubmit="'return validateVoucherForm(\'edit_' + ${v.id} + '\');'">
+                <div class="modal-header border-bottom px-4 pt-4 pb-3" style="background-color: #F8FAF9; border-color: #E2E7E2 !important;">
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark mb-1" style="font-size: 19px;">
+                            ✏️ Cập Nhật Mã Khuyến Mãi: <span class="badge" style="background-color: #F0F6F2; color: #20382E; border: 1px solid #D1E5DA;" th:text="${v.code}">CODE</span>
+                        </h5>
+                        <p class="text-muted small mb-0">Chỉnh sửa thông số ưu đãi và thời hạn áp dụng</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div th:id="'editFormErrorBox_' + ${v.id}" class="alert alert-danger py-2 px-3 mb-3 d-none" style="font-size: 13.5px; border-radius: 8px;">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i> <span th:id="'editFormErrorMsg_' + ${v.id}"></span>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold text-dark small mb-1">Tên chương trình ưu đãi <span class="text-danger">*</span></label>
+                            <input type="text" name="name" th:id="'edit_' + ${v.id} + '_name'" class="form-control" 
+                                   th:value="${v.name}" required minlength="3" maxlength="150" style="border-radius: 8px;">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-dark small mb-1">Trạng thái hoạt động</label>
+                            <select name="isActive" class="form-select fw-semibold" style="border-radius: 8px;">
+                                <option value="true" th:selected="${v.isActive != null and v.isActive}">🟢 Đang bật</option>
+                                <option value="false" th:selected="${v.isActive == null or !v.isActive}">⚪ Đã tắt</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-dark small mb-1">Loại hình giảm giá <span class="text-danger">*</span></label>
+                            <select name="discountType" th:id="'edit_' + ${v.id} + '_discountType'" class="form-select fw-semibold" 
+                                    th:onchange="'handleDiscountTypeChange(\'edit_' + ${v.id} + '\')'" required style="border-radius: 8px;">
+                                <option value="PERCENT" th:selected="${v.discountType == 'PERCENT'}">Giảm theo tỷ lệ %</option>
+                                <option value="FIXED_AMOUNT" th:selected="${v.discountType == 'FIXED_AMOUNT'}">Giảm số tiền cố định (₫)</option>
+                                <option value="FREE_SHIP" th:selected="${v.discountType == 'FREE_SHIP'}">Miễn phí vận chuyển (Freeship)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-dark small mb-1">
+                                Mức giảm <span class="text-danger">*</span> 
+                                <span th:id="'edit_' + ${v.id} + '_discountValueLabel'" class="text-primary small"
+                                      th:text="${v.discountType == 'PERCENT' ? '(%)' : '(₫)'}">(%)</span>
+                            </label>
+                            <input type="number" name="discountValue" th:id="'edit_' + ${v.id} + '_discountValue'" class="form-control fw-bold" 
+                                   th:value="${v.discountValue}" required min="1" step="1" style="border-radius: 8px;">
+                        </div>
+
+                        <div class="col-md-4" th:id="'edit_' + ${v.id} + '_maxDiscountAmountGroup'"
+                             th:style="${v.discountType == 'PERCENT' ? 'display: block;' : 'display: none;'}">
+                            <label class="form-label fw-bold text-dark small mb-1">Mức giảm tối đa <span class="text-muted fw-normal">(Tùy chọn)</span></label>
+                            <input type="number" name="maxDiscountAmount" th:id="'edit_' + ${v.id} + '_maxDiscountAmount'" class="form-control" 
+                                   th:value="${v.maxDiscountAmount}" min="0" step="1000" style="border-radius: 8px;">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark small mb-1">Đơn tối thiểu (₫) <span class="text-danger">*</span></label>
+                            <input type="number" name="minOrderValue" th:id="'edit_' + ${v.id} + '_minOrderValue'" class="form-control" 
+                                   th:value="${v.minOrderValue != null ? v.minOrderValue : 0}" min="0" step="1000" required style="border-radius: 8px;">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark small mb-1">
+                                Số lượng phát hành <span class="text-danger">*</span>
+                                <span class="text-muted small" th:text="'(Đã dùng: ' + ${v.usedCount} + ')'"></span>
+                            </label>
+                            <input type="number" name="quantity" th:id="'edit_' + ${v.id} + '_quantity'" class="form-control" 
+                                   th:value="${v.quantity}" th:min="${v.usedCount}" step="1" required style="border-radius: 8px;">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark small mb-1">Ngày bắt đầu <span class="text-danger">*</span></label>
+                            <input type="date" name="startDate" th:id="'edit_' + ${v.id} + '_startDate'" class="form-control" 
+                                   th:value="${v.startDate}" required
+                                   th:onchange="'syncDateConstraints(\'edit_' + ${v.id} + '\')'" style="border-radius: 8px;">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark small mb-1">Ngày kết thúc <span class="text-danger">*</span></label>
+                            <input type="date" name="endDate" th:id="'edit_' + ${v.id} + '_endDate'" class="form-control" 
+                                   th:value="${v.endDate}" required style="border-radius: 8px;">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top px-4 py-3" style="background-color: #F8FAF9; border-color: #E2E7E2 !important;">
+                    <button type="button" class="btn btn-outline-secondary px-3" data-bs-dismiss="modal" style="border-radius: 8px;">Hủy</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold" style="background-color: #20382E; border-color: #20382E; border-radius: 8px;">
+                        <i class="bi bi-save me-1"></i> Lưu Thay Đổi
+                    </button>
                 </div>
             </form>
         </div>
@@ -212,5 +386,168 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const today = new Date().toISOString().split('T')[0];
+        const addStart = document.getElementById('add_startDate');
+        const addEnd = document.getElementById('add_endDate');
+        if (addStart && !addStart.value) {
+            addStart.value = today;
+            addStart.min = today;
+        }
+        if (addEnd && !addEnd.value) {
+            const nextMonth = new Date();
+            nextMonth.setDate(nextMonth.getDate() + 30);
+            addEnd.value = nextMonth.toISOString().split('T')[0];
+            addEnd.min = today;
+        }
+    });
+
+    function syncDateConstraints(prefix) {
+        const startInput = document.getElementById(prefix + '_startDate');
+        const endInput = document.getElementById(prefix + '_endDate');
+        if (startInput && endInput && startInput.value) {
+            endInput.min = startInput.value;
+            if (endInput.value && endInput.value < startInput.value) {
+                endInput.value = startInput.value;
+            }
+        }
+    }
+
+    function handleDiscountTypeChange(prefix) {
+        const typeSelect = document.getElementById(prefix + '_discountType');
+        const valInput = document.getElementById(prefix + '_discountValue');
+        const label = document.getElementById(prefix + '_discountValueLabel');
+        const hint = document.getElementById(prefix + '_discountValueHint');
+        const maxGroup = document.getElementById(prefix + '_maxDiscountAmountGroup');
+
+        if (!typeSelect || !valInput) return;
+        const val = typeSelect.value;
+
+        if (val === 'PERCENT') {
+            if (label) { label.textContent = '(%)'; label.className = 'text-primary small'; }
+            valInput.placeholder = 'VD: 10 (%)';
+            valInput.min = '1';
+            valInput.max = '100';
+            valInput.step = '1';
+            if (hint) hint.textContent = 'Từ 1% đến 100%.';
+            if (maxGroup) maxGroup.style.display = 'block';
+        } else if (val === 'FIXED_AMOUNT') {
+            if (label) { label.textContent = '(₫)'; label.className = 'text-danger small'; }
+            valInput.placeholder = 'VD: 50000 (₫)';
+            valInput.min = '1000';
+            valInput.removeAttribute('max');
+            valInput.step = '1000';
+            if (hint) hint.textContent = 'Tối thiểu 1.000 ₫.';
+            if (maxGroup) {
+                maxGroup.style.display = 'none';
+                const maxInput = document.getElementById(prefix + '_maxDiscountAmount');
+                if (maxInput) maxInput.value = '';
+            }
+        } else if (val === 'FREE_SHIP') {
+            if (label) { label.textContent = '(₫)'; label.className = 'text-success small'; }
+            if (!valInput.value || Number(valInput.value) <= 100) valInput.value = '30000';
+            valInput.placeholder = '30000 (₫)';
+            valInput.min = '1000';
+            valInput.removeAttribute('max');
+            valInput.step = '1000';
+            if (hint) hint.textContent = 'Hỗ trợ phí vận chuyển tối đa.';
+            if (maxGroup) {
+                maxGroup.style.display = 'none';
+                const maxInput = document.getElementById(prefix + '_maxDiscountAmount');
+                if (maxInput) maxInput.value = '';
+            }
+        }
+    }
+
+    function validateVoucherForm(prefix) {
+        let errBox, errMsg;
+        if (prefix === 'add') {
+            errBox = document.getElementById('addFormErrorBox');
+            errMsg = document.getElementById('addFormErrorMsg');
+        } else {
+            const id = prefix.replace('edit_', '');
+            errBox = document.getElementById('editFormErrorBox_' + id);
+            errMsg = document.getElementById('editFormErrorMsg_' + id);
+        }
+
+        const showError = function(msg, targetInputId) {
+            if (errBox && errMsg) {
+                errMsg.textContent = msg;
+                errBox.classList.remove('d-none');
+            } else {
+                alert(msg);
+            }
+            if (targetInputId) {
+                const el = document.getElementById(targetInputId);
+                if (el) el.focus();
+            }
+            return false;
+        };
+
+        if (errBox) errBox.classList.add('d-none');
+
+        if (prefix === 'add') {
+            const codeInput = document.getElementById('add_code');
+            const code = codeInput ? codeInput.value.trim().toUpperCase() : '';
+            if (!code || code.length < 3 || code.length > 30) {
+                return showError('Mã khuyến mãi phải từ 3 đến 30 ký tự!', 'add_code');
+            }
+            if (!/^[A-Z0-9_-]+$/.test(code)) {
+                return showError('Mã khuyến mãi chỉ được chứa chữ cái in hoa, chữ số, gạch (-) hoặc (_), không chứa khoảng trắng!', 'add_code');
+            }
+        }
+
+        const nameInput = document.getElementById(prefix + '_name');
+        const name = nameInput ? nameInput.value.trim() : '';
+        if (!name || name.length < 3 || name.length > 150) {
+            return showError('Tên chương trình ưu đãi phải từ 3 đến 150 ký tự!', prefix + '_name');
+        }
+
+        const typeSelect = document.getElementById(prefix + '_discountType');
+        const valInput = document.getElementById(prefix + '_discountValue');
+        const discountType = typeSelect ? typeSelect.value : 'PERCENT';
+        const discountValue = valInput ? Number(valInput.value) : 0;
+
+        if (discountType === 'PERCENT') {
+            if (isNaN(discountValue) || discountValue <= 0 || discountValue > 100) {
+                return showError('Tỷ lệ giảm giá phần trăm phải từ 1% đến 100%!', prefix + '_discountValue');
+            }
+        } else if (discountType === 'FIXED_AMOUNT') {
+            if (isNaN(discountValue) || discountValue < 1000) {
+                return showError('Số tiền giảm cố định phải từ 1.000 ₫ trở lên!', prefix + '_discountValue');
+            }
+            const minOrderInput = document.getElementById(prefix + '_minOrderValue');
+            const minOrderValue = minOrderInput ? Number(minOrderInput.value) : 0;
+            if (minOrderValue > 0 && discountValue >= minOrderValue) {
+                return showError('Số tiền giảm cố định không được lớn hơn hoặc bằng giá trị đơn hàng tối thiểu!', prefix + '_discountValue');
+            }
+        }
+
+        const minOrderInput = document.getElementById(prefix + '_minOrderValue');
+        if (minOrderInput && Number(minOrderInput.value) < 0) {
+            return showError('Giá trị đơn hàng tối thiểu không được là số âm!', prefix + '_minOrderValue');
+        }
+
+        const qtyInput = document.getElementById(prefix + '_quantity');
+        if (qtyInput && Number(qtyInput.value) < 1) {
+            return showError('Số lượng mã phát hành phải từ 1 lượt trở lên!', prefix + '_quantity');
+        }
+
+        const startInput = document.getElementById(prefix + '_startDate');
+        const endInput = document.getElementById(prefix + '_endDate');
+        if (startInput && endInput) {
+            if (!startInput.value || !endInput.value) {
+                return showError('Vui lòng chọn ngày bắt đầu và kết thúc!');
+            }
+            if (startInput.value > endInput.value) {
+                return showError('Ngày kết thúc phải sau hoặc cùng ngày với ngày bắt đầu!', prefix + '_endDate');
+            }
+        }
+
+        return true;
+    }
+</script>
 </body>
 </html>

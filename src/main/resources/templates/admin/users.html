@@ -48,9 +48,16 @@
                 </a>
             </li>
             <li>
+                <a th:href="@{/admin/store-levels}" class="nav-link">
+                    <i class="bi bi-award"></i>
+                    <span>Hạng chi nhánh</span>
+                </a>
+            </li>
+
+            <li>
                 <a th:href="@{/admin/products-manage}" class="nav-link">
-                    <i class="bi bi-check2-circle"></i>
-                    <span>Duyệt sản phẩm</span>
+                    <i class="bi bi-box-seam"></i>
+                    <span>Sản phẩm</span>
                 </a>
             </li>
             <li>
@@ -66,15 +73,15 @@
                 </a>
             </li>
             <li>
-                <a th:href="@{/admin/commissions}" class="nav-link">
-                    <i class="bi bi-percent"></i>
-                    <span>Phí hoa hồng</span>
+                <a th:href="@{/admin/styles}" class="nav-link">
+                    <i class="bi bi-sliders"></i>
+                    <span>Thuộc tính sản phẩm</span>
                 </a>
             </li>
             <li>
                 <a th:href="@{/admin/deliveries}" class="nav-link">
                     <i class="bi bi-truck"></i>
-                    <span>Vận chuyển</span>
+                    <span>Đơn vị vận chuyển</span>
                 </a>
             </li>
             <li>
@@ -87,12 +94,6 @@
                 <a th:href="@{/admin/user-levels}" class="nav-link">
                     <i class="bi bi-award"></i>
                     <span>Cấp bậc khách</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/store-levels}" class="nav-link">
-                    <i class="bi bi-shield-check"></i>
-                    <span>Cấp bậc cửa hàng</span>
                 </a>
             </li>
 
@@ -120,7 +121,7 @@
 
     <!-- Main Content -->
     <div class="main-wrapper p-4">
-        <!-- 1. Header: Tiêu đề rõ ràng + Số lượng kết quả + Nút thêm người dùng -->
+        <!-- 1. Header: Tiêu đề rõ ràng + Số lượng kết quả -->
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
             <div>
                 <div class="d-flex align-items-center gap-3">
@@ -130,11 +131,6 @@
                     </span>
                 </div>
                 <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Quản lý tài khoản và quyền truy cập</p>
-            </div>
-            <div>
-                <a th:href="@{/register}" target="_blank" class="btn btn-primary d-inline-flex align-items-center gap-2 fw-bold shadow-sm" style="font-size: 15.5px; height: 44px; padding: 0 20px; border-radius: 10px; background-color: #20382E !important; border-color: #20382E !important;">
-                    <i class="bi bi-person-plus"></i> Thêm người dùng
-                </a>
             </div>
         </div>
 
@@ -220,11 +216,12 @@
                                 </span>
                             </td>
                             <td>
-                                <span th:if="${u.role.name() == 'ADMIN'}" class="role-badge role-badge-admin">Quản trị viên</span>
-                                <span th:if="${u.role.name() == 'MANAGER'}" class="role-badge role-badge-manager">Quản lý</span>
-                                <span th:if="${u.role.name() == 'CUSTOMER'}" class="role-badge role-badge-customer">Khách hàng</span>
-                                <span th:if="${u.role.name() == 'SHIPPER'}" class="role-badge role-badge-shipper">Giao hàng</span>
-                                <span th:if="${u.role.name() == 'VENDOR'}" class="role-badge role-badge-vendor">Người bán</span>
+                                <span th:if="${u.role != null and u.role.name() == 'ADMIN'}" class="role-badge role-badge-admin">Quản trị viên</span>
+                                <span th:if="${u.role != null and u.role.name() == 'MANAGER'}" class="role-badge role-badge-manager">Quản lý</span>
+                                <span th:if="${u.role != null and u.role.name() == 'CUSTOMER'}" class="role-badge role-badge-customer">Khách hàng</span>
+                                <span th:if="${u.role != null and u.role.name() == 'SHIPPER'}" class="role-badge role-badge-shipper">Giao hàng</span>
+                                <span th:if="${u.role != null and u.role.name() == 'VENDOR'}" class="role-badge role-badge-vendor">Người bán</span>
+                                <span th:if="${u.role == null}" class="badge bg-secondary">Khách hàng</span>
                             </td>
                             <td>
                                 <span style="font-size: 16px; font-weight: 700; color: #20382E;"
@@ -240,16 +237,18 @@
                             </td>
                             <td class="text-end pe-3">
                                 <!-- Nút Khóa / Mở khóa tinh gọn hoặc hiển thị — nếu là Admin -->
-                                <form th:if="${u.role.name() != 'ADMIN' and u.username != 'admin'}" th:action="@{'/admin/users/toggle-active/' + ${u.id}}" method="post" class="d-inline">
+                                <form th:if="${(u.role == null or u.role.name() != 'ADMIN') and u.username != 'admin'}" th:action="@{'/admin/users/toggle-active/' + ${u.id}}" method="post" class="d-inline">
                                     <button type="submit" 
                                             class="btn-action-subtle"
                                             th:classappend="${u.isActive == null or u.isActive} ? '' : 'btn-action-unlock'"
-                                            th:onclick="'return confirm(\'Bạn có chắc muốn ' + (${u.isActive == null or u.isActive} ? 'KHÓA' : 'MỞ KHÓA') + ' tài khoản ' + ${u.username} + '?\')'">
+                                            th:data-action="${u.isActive == null or u.isActive ? 'KHÓA' : 'MỞ KHÓA'}"
+                                            th:data-user="${u.username}"
+                                            onclick="return confirm('Bạn có chắc muốn ' + this.getAttribute('data-action') + ' tài khoản [' + this.getAttribute('data-user') + ']?')">
                                         <i class="bi" th:classappend="${u.isActive == null or u.isActive} ? 'bi-lock' : 'bi-unlock'"></i>
                                         <span th:text="${u.isActive == null or u.isActive} ? 'Khóa' : 'Mở khóa'"></span>
                                     </button>
                                 </form>
-                                <span th:if="${u.role.name() == 'ADMIN' or u.username == 'admin'}" class="text-muted pe-3" style="font-size: 16px;">—</span>
+                                <span th:if="${(u.role != null and u.role.name() == 'ADMIN') or u.username == 'admin'}" class="text-muted pe-3" style="font-size: 16px;">—</span>
                             </td>
                         </tr>
                         </tbody>

@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Controller
-@RequestMapping("/admin/orders-manage")
+@RequestMapping({"/admin/orders", "/admin/orders-manage"})
 @RequiredArgsConstructor
 public class AdminOrderManagementController {
 

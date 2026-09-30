@@ -37,3 +37,23 @@ EXEC('UPDATE dbo.products SET is_active = 1 WHERE is_active IS NULL');
 EXEC('UPDATE dbo.products SET is_selling = 1 WHERE is_selling IS NULL');
 EXEC('UPDATE p SET p.category_id = (SELECT TOP 1 c.id FROM dbo.categories c WHERE c.name LIKE N''%Sinh Nhật%'' OR c.name LIKE N''%Hoa%'') FROM dbo.products p WHERE p.category_id IS NULL');
 
+
+-- Đảm bảo đủ 9 loại sản phẩm chuẩn trong hệ thống
+IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE name = N''Hoa Sinh Nhật'')
+    INSERT INTO dbo.categories (name, description) VALUES (N''Hoa Sinh Nhật'', N''Các mẫu bó hoa, lẵng hoa chúc mừng sinh nhật ngọt ngào, ý nghĩa'');
+IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE name = N''Hoa Khai Trương'')
+    INSERT INTO dbo.categories (name, description) VALUES (N''Hoa Khai Trương'', N''Kệ hoa, lẵng hoa khai trương sang trọng phát tài phát lộc'');
+IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE name = N''Hoa Tình Yêu & Valentine'')
+    INSERT INTO dbo.categories (name, description) VALUES (N''Hoa Tình Yêu & Valentine'', N''Bó hoa hồng đỏ Ecuador, hoa baby trắng lãng mạn tỏ tình'');
+IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE name = N''Lan Hồ Điệp Sang Trọng'')
+    INSERT INTO dbo.categories (name, description) VALUES (N''Lan Hồ Điệp Sang Trọng'', N''Chậu hoa lan hồ điệp cao cấp trưng Tết, biếu sếp, mừng tân gia'');
+IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE name = N''Hoa Cưới Cầm Tay Cô Dâu'')
+    INSERT INTO dbo.categories (name, description) VALUES (N''Hoa Cưới Cầm Tay Cô Dâu'', N''Bó hoa cưới tinh tế tôn vinh vẻ đẹp cô dâu trong ngày trọng đại'');
+IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE name = N''Hoa Chúc Mừng & Tốt Nghiệp'')
+    INSERT INTO dbo.categories (name, description) VALUES (N''Hoa Chúc Mừng & Tốt Nghiệp'', N''Thiết kế tươi sáng, gửi gắm lời chúc may mắn thành công'');
+IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE name = N''Hoa Chia Buồn & Kính Viếng'')
+    INSERT INTO dbo.categories (name, description) VALUES (N''Hoa Chia Buồn & Kính Viếng'', N''Kệ hoa trang trọng, thành kính phân ưu cùng gia quyến'');
+IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE name = N''Bình Hoa Nghệ Thuật Để Bàn'')
+    INSERT INTO dbo.categories (name, description) VALUES (N''Bình Hoa Nghệ Thuật Để Bàn'', N''Bình gốm, bình thủy tinh cắm hoa tươi trang trí phòng khách và văn phòng'');
+IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE name = N''Hộp Hoa & Giỏ Hoa Quà Tặng'')
+    INSERT INTO dbo.categories (name, description) VALUES (N''Hộp Hoa & Giỏ Hoa Quà Tặng'', N''Hộp hoa mica, hộp tròn cao cấp và giỏ hoa tươi thiết kế độc đáo'');

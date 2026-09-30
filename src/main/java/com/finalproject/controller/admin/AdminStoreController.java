@@ -16,6 +16,8 @@ import java.util.List;
 public class AdminStoreController {
 
     private final StoreRepository storeRepository;
+    private final com.finalproject.repository.StoreLevelRepository storeLevelRepository;
+    private final com.finalproject.repository.CommissionRepository commissionRepository;
 
     @GetMapping
     public String listStores(@RequestParam(value = "keyword", required = false) String keyword,
@@ -64,7 +66,29 @@ public class AdminStoreController {
         model.addAttribute("countAll", countAll);
         model.addAttribute("countApproved", countApproved);
         model.addAttribute("countBanned", countBanned);
+        model.addAttribute("storeLevels", storeLevelRepository.findByIsDeletedFalseOrderByMinPointAsc());
+        model.addAttribute("commissions", commissionRepository.findByIsDeletedFalse());
         return "admin/stores";
+    }
+
+    /**
+     * Cập nhật Cấp bậc và Chính sách hoa hồng cho Chi nhánh
+     */
+    @PostMapping("/update-level/{id}")
+    public String updateStoreLevel(@PathVariable("id") Long id,
+                                   @RequestParam(value = "storeLevelId", required = false) Long storeLevelId,
+                                   @RequestParam(value = "commissionId", required = false) Long commissionId,
+                                   RedirectAttributes ra) {
+        Store store = storeRepository.findById(id).orElseThrow();
+        if (storeLevelId != null) {
+            store.setStoreLevel(storeLevelRepository.findById(storeLevelId).orElse(null));
+        }
+        if (commissionId != null) {
+            store.setCommission(commissionRepository.findById(commissionId).orElse(null));
+        }
+        storeRepository.save(store);
+        ra.addFlashAttribute("successMessage", "Đã cập nhật cấp bậc và chính sách hoa hồng cho chi nhánh [" + store.getName() + "] thành công!");
+        return "redirect:/admin/stores";
     }
 
     /**

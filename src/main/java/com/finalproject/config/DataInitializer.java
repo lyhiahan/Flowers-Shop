@@ -3,6 +3,7 @@ package com.finalproject.config;
 import com.finalproject.entity.*;
 import com.finalproject.enums.Role;
 import com.finalproject.repository.*;
+import com.finalproject.service.ProductSeederService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,8 +26,12 @@ public class DataInitializer implements CommandLineRunner {
     private final DeliveryRepository deliveryRepository;
     private final UserAddressRepository userAddressRepository;
     private final UserLevelRepository userLevelRepository;
+    private final StoreLevelRepository storeLevelRepository;
+    private final CommissionRepository commissionRepository;
+    private final StyleRepository styleRepository;
     private final ReviewRepository reviewRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ProductSeederService productSeederService;
 
     @Override
     public void run(String... args) throws Exception {
@@ -234,6 +239,58 @@ public class DataInitializer implements CommandLineRunner {
             userLevelRepository.save(UserLevel.builder().name("VIP Kim Cương").minPoint(1000).discount(new BigDecimal("10")).build());
         }
 
+        // Cấp bậc chi nhánh (Store Levels)
+        if (storeLevelRepository.count() == 0) {
+            storeLevelRepository.save(StoreLevel.builder().name("Chi Nhánh Tiêu Chuẩn").minPoint(0).discount(BigDecimal.ZERO).build());
+            storeLevelRepository.save(StoreLevel.builder().name("Chi Nhánh Bạc").minPoint(500).discount(new BigDecimal("5")).build());
+            storeLevelRepository.save(StoreLevel.builder().name("Chi Nhánh Vàng").minPoint(1500).discount(new BigDecimal("10")).build());
+            storeLevelRepository.save(StoreLevel.builder().name("Đối Tác Kim Cương").minPoint(3000).discount(new BigDecimal("15")).build());
+        }
+
+        // Chính sách hoa hồng sàn (Commissions)
+        if (commissionRepository.count() == 0) {
+            commissionRepository.save(Commission.builder().name("Gói Cơ Bản (Standard)").cost(new BigDecimal("10")).description("Tỷ lệ chiết khấu sàn 10% áp dụng cho chi nhánh mới gia nhập").isDeleted(false).build());
+            commissionRepository.save(Commission.builder().name("Gói Đối Tác Thân Thiết").cost(new BigDecimal("8")).description("Tỷ lệ chiết khấu ưu đãi 8% cho cửa hàng có trên 100 đơn/tháng").isDeleted(false).build());
+            commissionRepository.save(Commission.builder().name("Gói Đối Tác Chiến Lược").cost(new BigDecimal("5")).description("Tỷ lệ chiết khấu đặc biệt 5% cho chuỗi phân phối hoa tươi lớn").isDeleted(false).build());
+        }
+
+        // Nhóm thuộc tính sản phẩm (Styles)
+        if (styleRepository.count() == 0) {
+            styleRepository.save(Style.builder().name("Tone Màu Hoa (Pastel, Đỏ Nhung, Vàng Nắng...)").isDeleted(false).build());
+            styleRepository.save(Style.builder().name("Kiểu Dáng Cắm (Bó Hoa, Giỏ Hoa, Hộp Hoa, Bình Hoa)").isDeleted(false).build());
+            styleRepository.save(Style.builder().name("Phong Cách Thiết Kế (Hàn Quốc, Vintage, Hiện Đại)").isDeleted(false).build());
+            styleRepository.save(Style.builder().name("Kích Cỡ Bó Hoa (Size S Nhỏ, Size M Tiêu Chuẩn, Size VIP Khổng Lồ)").isDeleted(false).build());
+        }
+
+        // Gán cấp bậc và gói hoa hồng cho các cửa hàng nếu chưa có
+        java.util.List<StoreLevel> allSLs = storeLevelRepository.findAll();
+        java.util.List<Commission> allComms = commissionRepository.findAll();
+        if (!allSLs.isEmpty() && !allComms.isEmpty()) {
+            for (Store s : storeRepository.findAll()) {
+                boolean changed = false;
+                if (s.getStoreLevel() == null) {
+                    s.setStoreLevel(allSLs.get(0));
+                    changed = true;
+                }
+                if (s.getCommission() == null) {
+                    s.setCommission(allComms.get(0));
+                    changed = true;
+                }
+                if (changed) storeRepository.save(s);
+            }
+        }
+
+        // Gán cấp bậc thành viên cho người dùng nếu chưa có
+        java.util.List<UserLevel> allULs = userLevelRepository.findAll();
+        if (!allULs.isEmpty()) {
+            for (User u : userRepository.findAll()) {
+                if (u.getUserLevel() == null) {
+                    u.setUserLevel(allULs.get(0));
+                    userRepository.save(u);
+                }
+            }
+        }
+
         // 6. Danh mục hoa tươi
         Category catSinhNhat = categoryRepository.findByName("Hoa Sinh Nhật")
                 .orElseGet(() -> categoryRepository.save(Category.builder()
@@ -413,6 +470,8 @@ public class DataInitializer implements CommandLineRunner {
                         .build());
             }
         }
+
+        productSeederService.seedMissingProductsForStores();
 
         // 8. Tự động chuẩn hóa toàn bộ tên sản phẩm và sửa ảnh sản phẩm chính xác theo loài hoa
         productRepository.findAll().forEach(p -> {

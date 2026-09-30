@@ -48,9 +48,16 @@
                 </a>
             </li>
             <li>
+                <a th:href="@{/admin/store-levels}" class="nav-link">
+                    <i class="bi bi-award"></i>
+                    <span>Hạng chi nhánh</span>
+                </a>
+            </li>
+
+            <li>
                 <a th:href="@{/admin/products-manage}" class="nav-link">
-                    <i class="bi bi-check2-circle"></i>
-                    <span>Duyệt sản phẩm</span>
+                    <i class="bi bi-box-seam"></i>
+                    <span>Sản phẩm</span>
                 </a>
             </li>
             <li>
@@ -66,15 +73,15 @@
                 </a>
             </li>
             <li>
-                <a th:href="@{/admin/commissions}" class="nav-link">
-                    <i class="bi bi-percent"></i>
-                    <span>Phí hoa hồng</span>
+                <a th:href="@{/admin/styles}" class="nav-link">
+                    <i class="bi bi-sliders"></i>
+                    <span>Thuộc tính sản phẩm</span>
                 </a>
             </li>
             <li>
                 <a th:href="@{/admin/deliveries}" class="nav-link">
                     <i class="bi bi-truck"></i>
-                    <span>Vận chuyển</span>
+                    <span>Đơn vị vận chuyển</span>
                 </a>
             </li>
             <li>
@@ -87,12 +94,6 @@
                 <a th:href="@{/admin/user-levels}" class="nav-link">
                     <i class="bi bi-award"></i>
                     <span>Cấp bậc khách</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/store-levels}" class="nav-link">
-                    <i class="bi bi-shield-check"></i>
-                    <span>Cấp bậc cửa hàng</span>
                 </a>
             </li>
 
@@ -120,57 +121,186 @@
 
     <!-- Main Content -->
     <div class="main-wrapper p-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <!-- 1. Header trang & Thống kê tổng quan -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
             <div>
-                <h1 class="admin-page-title mb-1">🎟️ Khuyến Mãi & Voucher Toàn Sàn</h1>
-                <p class="text-muted small mb-0">Quản lý mã giảm giá, voucher miễn phí ship do Admin toàn quyền phát hành áp dụng cho mọi chi nhánh</p>
+                <h1 class="h3 fw-bold mb-1" style="color: #20382E; font-size: 26px;">
+                    🎟️ Khuyến Mãi & Voucher Toàn Sàn
+                </h1>
+                <div class="text-muted" style="font-size: 14.5px;">
+                    Quản lý các chương trình ưu đãi, mã giảm giá áp dụng toàn hệ thống chuỗi cửa hàng
+                    <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2 ms-1" 
+                          th:text="${#lists.size(vouchers)} + ' mã'">0 mã</span>
+                </div>
             </div>
-            <button class="btn btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#addVoucherModal">
-                <i class="bi bi-plus-lg me-1"></i> Tạo Mã Khuyến Mãi Sàn
+            <button class="btn btn-primary d-inline-flex align-items-center gap-2 px-4 py-2" 
+                    data-bs-toggle="modal" data-bs-target="#addVoucherModal"
+                    style="background-color: #20382E; border-color: #20382E; border-radius: 9999px; font-weight: 700; font-size: 15px;">
+                <i class="bi bi-plus-lg"></i> Tạo Mã Khuyến Mãi
             </button>
         </div>
 
-        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small" role="alert">
-            <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${successMessage}"></span>
+        <!-- 2. Thông báo Flash (Success / Error) -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 px-3 mb-3 border-0 shadow-sm" 
+             style="background-color: #E8F5E9; color: #2E7D32; border-left: 4px solid #2E7D32 !important; border-radius: 10px;" role="alert">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-check-circle-fill fs-5"></i>
+                <span class="fw-semibold" th:text="${successMessage}"></span>
+            </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show py-2 px-3 mb-3 border-0 shadow-sm" 
+             style="background-color: #FFEBEE; color: #C62828; border-left: 4px solid #C62828 !important; border-radius: 10px;" role="alert">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                <span class="fw-semibold" th:text="${errorMessage}"></span>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- 3. Bảng danh sách Khuyến mãi -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white" style="border: 1px solid #E2E7E2 !important; border-radius: 14px;">
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light small text-secondary">
-                        <tr>
-                            <th class="ps-3">Mã Code</th>
-                            <th>Tên Chương Trình</th>
-                            <th>Mức Giảm</th>
-                            <th>Đơn Tối Thiểu</th>
-                            <th>Đã Dùng / Phát Hành</th>
-                            <th>Thời Gian Áp Dụng</th>
+                        <thead style="background-color: #E5EEE8 !important;">
+                        <tr style="background-color: #E5EEE8 !important; color: #20382E; font-size: 14.5px; font-weight: 800;">
+                            <th class="ps-4 py-3" style="width: 150px; background-color: #E5EEE8;">Mã Voucher</th>
+                            <th class="py-3" style="min-width: 220px; background-color: #E5EEE8;">Chương Trình</th>
+                            <th class="py-3" style="min-width: 160px; background-color: #E5EEE8;">Mức Giảm</th>
+                            <th class="py-3" style="min-width: 140px; background-color: #E5EEE8;">Đơn Tối Thiểu</th>
+                            <th class="py-3 text-center" style="min-width: 130px; background-color: #E5EEE8;">Đã Dùng / Tổng</th>
+                            <th class="py-3" style="min-width: 180px; background-color: #E5EEE8;">Thời Gian Áp Dụng</th>
+                            <th class="py-3 text-center" style="min-width: 130px; background-color: #E5EEE8;">Trạng Thái</th>
+                            <th class="pe-4 py-3 text-end" style="min-width: 220px; background-color: #E5EEE8;">Thao Tác</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(vouchers)}">
-                            <td colspan="6" class="text-center py-5 text-muted">Chưa có mã khuyến mãi sàn nào.</td>
+                            <td colspan="8" class="text-center py-5 text-muted" style="font-size: 15px;">
+                                <i class="bi bi-ticket-perforated fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                                Chưa có mã khuyến mãi sàn nào. Nhấn nút <strong>"Tạo Mã Khuyến Mãi"</strong> để thêm mới.
+                            </td>
                         </tr>
-                        <tr th:each="v : ${vouchers}">
-                            <td class="ps-3">
-                                <span class="badge bg-danger-subtle text-danger fs-6 fw-bold border border-danger-subtle" th:text="${v.code}"></span>
+                        <tr th:each="v : ${vouchers}" style="border-bottom: 1px solid #F0F4F1;">
+                            <!-- 1. Mã Voucher -->
+                            <td class="ps-4 py-3">
+                                <span class="badge px-3 py-2 fs-6 fw-bold shadow-sm" 
+                                      style="background-color: #FFF0F5; color: #A64060; border: 1px dashed #E5989B; border-radius: 8px; letter-spacing: 0.5px;"
+                                      th:text="${v.code}">CODE</span>
                             </td>
-                            <td><strong class="text-dark" th:text="${v.name}"></strong></td>
-                            <td>
-                                <span th:if="${v.discountType == 'PERCENT'}" class="text-danger fw-bold" th:text="'Giảm ' + ${v.discountValue} + '%'"></span>
-                                <span th:if="${v.discountType == 'FIXED_AMOUNT'}" class="text-danger fw-bold"
-                                      th:text="'Giảm ' + ${#numbers.formatDecimal(v.discountValue, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
-                                <span th:if="${v.discountType == 'FREE_SHIP'}" class="badge bg-success-subtle text-success fw-bold">Miễn Phí Ship</span>
+
+                            <!-- 2. Chương Trình -->
+                            <td class="py-3">
+                                <div class="fw-bold text-dark" style="font-size: 15px;" th:text="${v.name}">Tên chương trình</div>
+                                <div class="small text-muted mt-1">
+                                    <span th:if="${v.discountType == 'PERCENT'}" class="badge bg-light text-secondary border">Giảm theo %</span>
+                                    <span th:if="${v.discountType == 'FIXED_AMOUNT'}" class="badge bg-light text-secondary border">Giảm tiền mặt</span>
+                                    <span th:if="${v.discountType == 'FREE_SHIP'}" class="badge bg-light text-secondary border">Freeship sàn</span>
+                                    <span th:if="${v.maxDiscountAmount != null and v.maxDiscountAmount > 0}" 
+                                          class="text-muted ms-1 small" 
+                                          th:text="'(Tối đa: ' + ${#numbers.formatDecimal(v.maxDiscountAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫)'"></span>
+                                </div>
                             </td>
-                            <td>
-                                <span class="small text-muted" th:text="${v.minOrderValue != null ? #numbers.formatDecimal(v.minOrderValue, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}"></span>
+
+                            <!-- 3. Mức Giảm -->
+                            <td class="py-3">
+                                <span th:if="${v.discountType == 'PERCENT'}" class="fw-bold" style="color: #A64060; font-size: 16px;" 
+                                      th:text="'Giảm ' + ${v.discountValue} + '%'">Giảm 10%</span>
+                                <span th:if="${v.discountType == 'FIXED_AMOUNT'}" class="fw-bold" style="color: #A64060; font-size: 16px;"
+                                      th:text="'Giảm ' + ${#numbers.formatDecimal(v.discountValue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">Giảm 50.000 ₫</span>
+                                <span th:if="${v.discountType == 'FREE_SHIP'}" class="badge" 
+                                      style="background-color: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0; font-weight: 700; font-size: 13px; padding: 5px 10px; border-radius: 8px;">
+                                    <i class="bi bi-truck me-1"></i> Miễn Phí Vận Chuyển
+                                </span>
                             </td>
-                            <td>
-                                <span class="badge bg-light text-dark border" th:text="${v.usedCount} + ' / ' + ${v.quantity}"></span>
+
+                            <!-- 4. Đơn Tối Thiểu -->
+                            <td class="py-3">
+                                <div class="fw-semibold text-dark" style="font-size: 14.5px;"
+                                     th:text="${v.minOrderValue != null and v.minOrderValue > 0 ? #numbers.formatDecimal(v.minOrderValue, 0, 'COMMA', 0, 'POINT') + ' ₫' : 'Không giới hạn'}">200.000 ₫</div>
+                                <div class="small text-muted" th:if="${v.minOrderValue != null and v.minOrderValue > 0}">Áp dụng mọi chi nhánh</div>
                             </td>
-                            <td class="small text-muted" th:text="${v.startDate} + ' → ' + ${v.endDate}"></td>
+
+                            <!-- 5. Đã Dùng / Tổng -->
+                            <td class="py-3 text-center">
+                                <div class="fw-bold text-dark" style="font-size: 14.5px;">
+                                    <span th:text="${v.usedCount}">0</span> / <span th:text="${v.quantity}">100</span>
+                                </div>
+                                <div class="progress mt-1 mx-auto" style="height: 6px; width: 80px; background-color: #E9ECEF; border-radius: 9999px;">
+                                    <div class="progress-bar" role="progressbar" 
+                                         th:with="pct=${v.quantity > 0 ? (v.usedCount * 100.0 / v.quantity) : 0}"
+                                         th:style="'width: ' + ${pct} + '%; background-color: ' + (${pct >= 90 ? '#DC3545' : '#20382E'})" 
+                                         th:aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </td>
+
+                            <!-- 6. Thời Gian Áp Dụng -->
+                            <td class="py-3">
+                                <div style="font-size: 13.5px; color: #2E3832;">
+                                    <i class="bi bi-calendar3 me-1 text-muted"></i>
+                                    <span th:text="${#temporals.format(v.startDate, 'dd/MM/yyyy')}">01/01/2026</span>
+                                    <span class="text-muted mx-1">→</span>
+                                    <span th:text="${#temporals.format(v.endDate, 'dd/MM/yyyy')}">31/12/2026</span>
+                                </div>
+                                <div class="mt-1" th:with="today=${T(java.time.LocalDate).now()}">
+                                    <span th:if="${v.endDate.isBefore(today)}" class="badge bg-danger-subtle text-danger" style="font-size: 11px;">Đã hết hạn</span>
+                                    <span th:if="${v.startDate.isAfter(today)}" class="badge bg-info-subtle text-info-emphasis" style="font-size: 11px;">Sắp diễn ra</span>
+                                    <span th:if="${!v.endDate.isBefore(today) and !v.startDate.isAfter(today)}" class="badge bg-success-subtle text-success" style="font-size: 11px;">Đang diễn ra</span>
+                                </div>
+                            </td>
+
+                            <!-- 7. Trạng Thái (Bấm để bật/tắt nhanh) -->
+                            <td class="py-3 text-center">
+                                <a th:href="@{'/admin/vouchers/toggle/' + ${v.id}}" 
+                                   class="text-decoration-none"
+                                   th:title="${v.isActive != null and v.isActive} ? 'Nhấn để tạm tắt mã khuyến mãi này' : 'Nhấn để kích hoạt mã này'">
+                                    <span th:if="${v.isActive != null and v.isActive}" 
+                                          class="badge rounded-pill px-3 py-1.5 d-inline-flex align-items-center gap-1 shadow-sm" 
+                                          style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; font-size: 13px; font-weight: 700; cursor: pointer;">
+                                        <i class="bi bi-check-circle-fill"></i> Đang bật
+                                    </span>
+                                    <span th:if="${v.isActive == null or !v.isActive}" 
+                                          class="badge rounded-pill px-3 py-1.5 d-inline-flex align-items-center gap-1 shadow-sm" 
+                                          style="background-color: #F1F5F2; color: #708076; border: 1px solid #D5DDD7; font-size: 13px; font-weight: 700; cursor: pointer;">
+                                        <i class="bi bi-pause-circle"></i> Đã tắt
+                                    </span>
+                                </a>
+                            </td>
+
+                            <!-- 8. Thao Tác (Bật/Tắt · Sửa · Xóa trực tiếp) -->
+                            <td class="pe-4 py-3 text-end" style="white-space: nowrap;">
+                                <div class="d-inline-flex align-items-center gap-2">
+                                    <!-- Nút Bật / Tắt trạng thái -->
+                                    <a th:href="@{'/admin/vouchers/toggle/' + ${v.id}}"
+                                       class="btn btn-sm d-inline-flex align-items-center gap-1 shadow-sm"
+                                       th:classappend="${v.isActive != null and v.isActive} ? 'btn-outline-warning text-dark' : 'btn-outline-success'"
+                                       th:title="${v.isActive != null and v.isActive} ? 'Tạm tắt mã' : 'Bật kích hoạt'"
+                                       style="border-radius: 8px; font-size: 13px; font-weight: 600; padding: 4px 10px;">
+                                        <i th:class="${v.isActive != null and v.isActive} ? 'bi bi-pause-circle text-warning' : 'bi bi-play-circle text-success'"></i>
+                                        <span th:text="${v.isActive != null and v.isActive} ? 'Tắt mã' : 'Bật mã'">Tắt/Bật</span>
+                                    </a>
+
+                                    <!-- Nút Sửa -->
+                                    <button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1 shadow-sm"
+                                            data-bs-toggle="modal" th:data-bs-target="'#editVoucherModal' + ${v.id}"
+                                            style="border-radius: 8px; font-size: 13px; font-weight: 600; padding: 4px 10px;"
+                                            title="Chỉnh sửa mã khuyến mãi">
+                                        <i class="bi bi-pencil"></i> Sửa
+                                    </button>
+
+                                    <!-- Nút Xóa -->
+                                    <a th:href="@{'/admin/vouchers/delete/' + ${v.id}}"
+                                       class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1 shadow-sm"
+                                       th:data-code="${v.code}"
+                                       onclick="return confirm('Bạn có chắc chắn muốn xóa mã voucher [' + this.getAttribute('data-code') + ']?\n(Nếu mã đã từng được sử dụng trong đơn hàng, hệ thống sẽ tự động tắt trạng thái để bảo toàn lịch sử giao dịch).');"
+                                       style="border-radius: 8px; font-size: 13px; font-weight: 600; padding: 4px 10px;"
+                                       title="Xóa mã khuyến mãi">
+                                        <i class="bi bi-trash"></i> Xóa
+                                    </a>
+                                </div>
+                            </td>
                         </tr>
                         </tbody>
                     </table>
@@ -180,62 +310,270 @@
     </div>
 </div>
 
-<!-- Modal Tạo Voucher Sàn -->
-<div class="modal fade" id="addVoucherModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form th:action="@{/admin/vouchers/add}" method="post">
-                <div class="modal-header">
-                    <h5 class="modal-title font-serif">🎟️ Tạo Mã Khuyến Mãi Sàn Mới</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<!-- ========================================== -->
+<!-- MODAL TẠO MÃ KHUYẾN MÃI MỚI (CÓ RÀNG BUỘC) -->
+<!-- ========================================== -->
+<div class="modal fade" id="addVoucherModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form th:action="@{/admin/vouchers/add}" method="post" id="addVoucherForm" onsubmit="return validateVoucherForm('add');">
+                <div class="modal-header border-bottom px-4 pt-4 pb-3" style="background-color: #F8FAF9; border-color: #E2E7E2 !important;">
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark mb-1" style="font-size: 19px;">
+                            🎟️ Tạo Mã Khuyến Mãi Toàn Sàn Mới
+                        </h5>
+                        <p class="text-muted small mb-0">Mã giảm giá được áp dụng cho đơn hàng tại tất cả chi nhánh</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Mã code:</label>
-                        <input type="text" name="code" class="form-control text-uppercase" placeholder="VD: BLOOM2026" required>
+                <div class="modal-body p-4">
+                    <!-- Khu vực cảnh báo lỗi nếu có ràng buộc vi phạm -->
+                    <div id="addFormErrorBox" class="alert alert-danger py-2 px-3 mb-3 d-none" style="font-size: 13.5px; border-radius: 8px;">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i> <span id="addFormErrorMsg"></span>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Tên chương trình:</label>
-                        <input type="text" name="name" class="form-control" placeholder="VD: Khuyến Mãi Khai Xuân Toàn Hệ Thống" required>
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label small fw-semibold">Loại giảm:</label>
-                            <select name="discountType" class="form-select" required>
-                                <option value="PERCENT">Giảm Theo %</option>
-                                <option value="FIXED_AMOUNT">Giảm Tiền Cố Định</option>
-                                <option value="FREE_SHIP">Miễn Phí Ship</option>
+
+                    <div class="row g-3">
+                        <!-- 1. Mã Code & Tên Chương Trình -->
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold text-dark small mb-1">
+                                Mã khuyến mãi <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="code" id="add_code" class="form-control text-uppercase fw-bold" 
+                                   placeholder="VD: BLOOM2026, FREESHIP" 
+                                   required minlength="3" maxlength="30"
+                                   pattern="^[A-Za-z0-9_-]{3,30}$"
+                                   oninput="this.value = this.value.toUpperCase().replace(/\s+/g, '');"
+                                   style="border-radius: 8px; letter-spacing: 0.5px;">
+                            <div class="form-text small" style="font-size: 12px;">Từ 3-30 ký tự, không dấu, không khoảng trắng.</div>
+                        </div>
+
+                        <div class="col-md-7">
+                            <label class="form-label fw-bold text-dark small mb-1">
+                                Tên chương trình ưu đãi <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="name" id="add_name" class="form-control" 
+                                   placeholder="VD: Khai Xuân Rực Rỡ - Giảm 15% Đơn Đầu Năm" 
+                                   required minlength="3" maxlength="150"
+                                   style="border-radius: 8px;">
+                            <div class="form-text small" style="font-size: 12px;">Hiển thị trên giao diện thanh toán của khách.</div>
+                        </div>
+
+                        <!-- 2. Loại giảm giá, Giá trị giảm & Giảm tối đa -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-dark small mb-1">
+                                Loại hình giảm giá <span class="text-danger">*</span>
+                            </label>
+                            <select name="discountType" id="add_discountType" class="form-select fw-semibold" 
+                                    onchange="handleDiscountTypeChange('add')" required style="border-radius: 8px;">
+                                <option value="PERCENT">Giảm theo tỷ lệ %</option>
+                                <option value="FIXED_AMOUNT">Giảm số tiền cố định (₫)</option>
+                                <option value="FREE_SHIP">Miễn phí vận chuyển (Freeship)</option>
                             </select>
                         </div>
-                        <div class="col-6">
-                            <label class="form-label small fw-semibold">Giá trị giảm:</label>
-                            <input type="number" name="discountValue" class="form-control" placeholder="10 (%) hoặc 50000 (đ)" required>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-dark small mb-1">
+                                Mức giảm <span class="text-danger">*</span> 
+                                <span id="add_discountValueLabel" class="text-primary small">(%)</span>
+                            </label>
+                            <input type="number" name="discountValue" id="add_discountValue" class="form-control fw-bold" 
+                                   placeholder="VD: 15" required min="1" max="100" step="1"
+                                   style="border-radius: 8px;">
+                            <div id="add_discountValueHint" class="form-text small" style="font-size: 12px;">Nhập từ 1% đến 100%.</div>
                         </div>
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label small fw-semibold">Đơn tối thiểu:</label>
-                            <input type="number" name="minOrderValue" class="form-control" value="200000">
+
+                        <div class="col-md-4" id="add_maxDiscountAmountGroup">
+                            <label class="form-label fw-bold text-dark small mb-1">
+                                Mức giảm tối đa <span class="text-muted fw-normal">(Tùy chọn)</span>
+                            </label>
+                            <input type="number" name="maxDiscountAmount" id="add_maxDiscountAmount" class="form-control" 
+                                   placeholder="VD: 100000 (₫)" min="0" step="1000"
+                                   style="border-radius: 8px;">
+                            <div class="form-text small" style="font-size: 12px;">Giới hạn trần giảm giá khi giảm %.</div>
                         </div>
-                        <div class="col-6">
-                            <label class="form-label small fw-semibold">Số lượng phát hành:</label>
-                            <input type="number" name="quantity" class="form-control" value="200">
+
+                        <!-- 3. Đơn tối thiểu & Số lượng phát hành -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark small mb-1">
+                                Giá trị đơn hàng tối thiểu (₫) <span class="text-danger">*</span>
+                            </label>
+                            <input type="number" name="minOrderValue" id="add_minOrderValue" class="form-control" 
+                                   value="0" min="0" step="1000" required
+                                   style="border-radius: 8px;">
+                            <div class="form-text small" style="font-size: 12px;">Nhập 0 nếu không giới hạn giá trị đơn.</div>
                         </div>
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label small fw-semibold">Ngày bắt đầu:</label>
-                            <input type="date" name="startDate" class="form-control" required>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark small mb-1">
+                                Số lượng mã phát hành <span class="text-danger">*</span>
+                            </label>
+                            <input type="number" name="quantity" id="add_quantity" class="form-control" 
+                                   value="100" min="1" step="1" required
+                                   style="border-radius: 8px;">
+                            <div class="form-text small" style="font-size: 12px;">Tổng số lượt khách hàng có thể áp dụng.</div>
                         </div>
-                        <div class="col-6">
-                            <label class="form-label small fw-semibold">Ngày kết thúc:</label>
-                            <input type="date" name="endDate" class="form-control" required>
+
+                        <!-- 4. Thời gian áp dụng -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark small mb-1">
+                                Ngày bắt đầu hiệu lực <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" name="startDate" id="add_startDate" class="form-control" 
+                                   required onchange="syncDateConstraints('add')"
+                                   style="border-radius: 8px;">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark small mb-1">
+                                Ngày kết thúc hiệu lực <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" name="endDate" id="add_endDate" class="form-control" 
+                                   required style="border-radius: 8px;">
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-primary btn-sm">Phát Hành Voucher</button>
+                <div class="modal-footer border-top px-4 py-3" style="background-color: #F8FAF9; border-color: #E2E7E2 !important;">
+                    <button type="button" class="btn btn-outline-secondary px-3" data-bs-dismiss="modal" style="border-radius: 8px;">Hủy bỏ</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold" style="background-color: #20382E; border-color: #20382E; border-radius: 8px;">
+                        <i class="bi bi-check2-circle me-1"></i> Phát Hành Mã Khuyến Mãi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL SỬA MÃ KHUYẾN MÃI (CHO TỪNG VOUCHER) -->
+<!-- ========================================== -->
+<div th:each="v : ${vouchers}" class="modal fade" th:id="'editVoucherModal' + ${v.id}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form th:action="@{'/admin/vouchers/update/' + ${v.id}}" method="post" 
+                  th:id="'editVoucherForm' + ${v.id}" 
+                  th:onsubmit="'return validateVoucherForm(\'edit_' + ${v.id} + '\');'">
+                <div class="modal-header border-bottom px-4 pt-4 pb-3" style="background-color: #F8FAF9; border-color: #E2E7E2 !important;">
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark mb-1" style="font-size: 19px;">
+                            ✏️ Cập Nhật Mã Khuyến Mãi: <span class="badge bg-danger-subtle text-danger" th:text="${v.code}">CODE</span>
+                        </h5>
+                        <p class="text-muted small mb-0">Chỉnh sửa thông số chương trình, hạn dùng và trạng thái áp dụng</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Khu vực cảnh báo lỗi modal sửa -->
+                    <div th:id="'editFormErrorBox_' + ${v.id}" class="alert alert-danger py-2 px-3 mb-3 d-none" style="font-size: 13.5px; border-radius: 8px;">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i> <span th:id="'editFormErrorMsg_' + ${v.id}"></span>
+                    </div>
+
+                    <div class="row g-3">
+                        <!-- Tên chương trình -->
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold text-dark small mb-1">
+                                Tên chương trình ưu đãi <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="name" th:id="'edit_' + ${v.id} + '_name'" class="form-control" 
+                                   th:value="${v.name}" required minlength="3" maxlength="150"
+                                   style="border-radius: 8px;">
+                        </div>
+
+                        <!-- Trạng thái bật/tắt -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-dark small mb-1">Trạng thái hoạt động</label>
+                            <select name="isActive" class="form-select fw-semibold" style="border-radius: 8px;">
+                                <option value="true" th:selected="${v.isActive != null and v.isActive}">🟢 Đang bật (Cho phép dùng)</option>
+                                <option value="false" th:selected="${v.isActive == null or !v.isActive}">⚪ Đã tắt (Tạm dừng)</option>
+                            </select>
+                        </div>
+
+                        <!-- Loại giảm & Mức giảm -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-dark small mb-1">
+                                Loại hình giảm giá <span class="text-danger">*</span>
+                            </label>
+                            <select name="discountType" th:id="'edit_' + ${v.id} + '_discountType'" class="form-select fw-semibold" 
+                                    th:onchange="'handleDiscountTypeChange(\'edit_' + ${v.id} + '\')'" required style="border-radius: 8px;">
+                                <option value="PERCENT" th:selected="${v.discountType == 'PERCENT'}">Giảm theo tỷ lệ %</option>
+                                <option value="FIXED_AMOUNT" th:selected="${v.discountType == 'FIXED_AMOUNT'}">Giảm số tiền cố định (₫)</option>
+                                <option value="FREE_SHIP" th:selected="${v.discountType == 'FREE_SHIP'}">Miễn phí vận chuyển (Freeship)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-dark small mb-1">
+                                Mức giảm <span class="text-danger">*</span> 
+                                <span th:id="'edit_' + ${v.id} + '_discountValueLabel'" class="text-primary small"
+                                      th:text="${v.discountType == 'PERCENT' ? '(%)' : '(₫)'}">(%)</span>
+                            </label>
+                            <input type="number" name="discountValue" th:id="'edit_' + ${v.id} + '_discountValue'" class="form-control fw-bold" 
+                                   th:value="${v.discountValue}" required min="1" step="1"
+                                   style="border-radius: 8px;">
+                            <div th:id="'edit_' + ${v.id} + '_discountValueHint'" class="form-text small" style="font-size: 12px;">
+                                <span th:if="${v.discountType == 'PERCENT'}">Nhập từ 1% đến 100%.</span>
+                                <span th:if="${v.discountType != 'PERCENT'}">Tối thiểu từ 1.000 ₫ trở lên.</span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4" th:id="'edit_' + ${v.id} + '_maxDiscountAmountGroup'"
+                             th:style="${v.discountType == 'PERCENT' ? 'display: block;' : 'display: none;'}">
+                            <label class="form-label fw-bold text-dark small mb-1">
+                                Mức giảm tối đa <span class="text-muted fw-normal">(Tùy chọn)</span>
+                            </label>
+                            <input type="number" name="maxDiscountAmount" th:id="'edit_' + ${v.id} + '_maxDiscountAmount'" class="form-control" 
+                                   th:value="${v.maxDiscountAmount}" min="0" step="1000"
+                                   style="border-radius: 8px;">
+                            <div class="form-text small" style="font-size: 12px;">Trần giảm tối đa khi áp dụng %.</div>
+                        </div>
+
+                        <!-- Đơn tối thiểu & Số lượng phát hành -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark small mb-1">
+                                Giá trị đơn tối thiểu (₫) <span class="text-danger">*</span>
+                            </label>
+                            <input type="number" name="minOrderValue" th:id="'edit_' + ${v.id} + '_minOrderValue'" class="form-control" 
+                                   th:value="${v.minOrderValue != null ? v.minOrderValue : 0}" min="0" step="1000" required
+                                   style="border-radius: 8px;">
+                            <div class="form-text small" style="font-size: 12px;">Nhập 0 nếu không giới hạn đơn.</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark small mb-1">
+                                Số lượng phát hành <span class="text-danger">*</span>
+                                <span class="text-muted small" th:text="'(Đã dùng: ' + ${v.usedCount} + ')'"></span>
+                            </label>
+                            <input type="number" name="quantity" th:id="'edit_' + ${v.id} + '_quantity'" class="form-control" 
+                                   th:value="${v.quantity}" th:min="${v.usedCount}" step="1" required
+                                   style="border-radius: 8px;">
+                            <div class="form-text small" style="font-size: 12px;">Không được nhỏ hơn số lượt đã dùng ([[${v.usedCount}]]).</div>
+                        </div>
+
+                        <!-- Thời gian áp dụng -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark small mb-1">
+                                Ngày bắt đầu <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" name="startDate" th:id="'edit_' + ${v.id} + '_startDate'" class="form-control" 
+                                   th:value="${v.startDate}" required
+                                   th:onchange="'syncDateConstraints(\'edit_' + ${v.id} + '\')'"
+                                   style="border-radius: 8px;">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark small mb-1">
+                                Ngày kết thúc <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" name="endDate" th:id="'edit_' + ${v.id} + '_endDate'" class="form-control" 
+                                   th:value="${v.endDate}" required
+                                   style="border-radius: 8px;">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top px-4 py-3" style="background-color: #F8FAF9; border-color: #E2E7E2 !important;">
+                    <button type="button" class="btn btn-outline-secondary px-3" data-bs-dismiss="modal" style="border-radius: 8px;">Hủy bỏ</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold" style="background-color: #20382E; border-color: #20382E; border-radius: 8px;">
+                        <i class="bi bi-save me-1"></i> Lưu Thay Đổi
+                    </button>
                 </div>
             </form>
         </div>
@@ -243,5 +581,193 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- JAVASCRIPT XỬ LÝ RÀNG BUỘC ĐIỀU KIỆN KHI THÊM / SỬA KHUYẾN MÃI -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Thiết lập ngày mặc định khi mở modal thêm mới (Hôm nay -> 30 ngày sau)
+        const today = new Date().toISOString().split('T')[0];
+        const addStart = document.getElementById('add_startDate');
+        const addEnd = document.getElementById('add_endDate');
+        if (addStart && !addStart.value) {
+            addStart.value = today;
+            addStart.min = today;
+        }
+        if (addEnd && !addEnd.value) {
+            const nextMonth = new Date();
+            nextMonth.setDate(nextMonth.getDate() + 30);
+            addEnd.value = nextMonth.toISOString().split('T')[0];
+            addEnd.min = today;
+        }
+    });
+
+    /**
+     * Đồng bộ ràng buộc ngày: EndDate không được nhỏ hơn StartDate
+     */
+    function syncDateConstraints(prefix) {
+        const startInput = document.getElementById(prefix + '_startDate');
+        const endInput = document.getElementById(prefix + '_endDate');
+        if (startInput && endInput && startInput.value) {
+            endInput.min = startInput.value;
+            if (endInput.value && endInput.value < startInput.value) {
+                endInput.value = startInput.value;
+            }
+        }
+    }
+
+    /**
+     * Thay đổi giao diện và ràng buộc theo Loại hình giảm giá (PERCENT / FIXED_AMOUNT / FREE_SHIP)
+     */
+    function handleDiscountTypeChange(prefix) {
+        const typeSelect = document.getElementById(prefix + '_discountType');
+        const valInput = document.getElementById(prefix + '_discountValue');
+        const label = document.getElementById(prefix + '_discountValueLabel');
+        const hint = document.getElementById(prefix + '_discountValueHint');
+        const maxGroup = document.getElementById(prefix + '_maxDiscountAmountGroup');
+
+        if (!typeSelect || !valInput) return;
+        const val = typeSelect.value;
+
+        if (val === 'PERCENT') {
+            label.textContent = '(%)';
+            label.className = 'text-primary small';
+            valInput.placeholder = 'VD: 15 (%)';
+            valInput.min = '1';
+            valInput.max = '100';
+            valInput.step = '1';
+            if (hint) hint.textContent = 'Tỷ lệ giảm từ 1% đến 100%.';
+            if (maxGroup) maxGroup.style.display = 'block';
+        } else if (val === 'FIXED_AMOUNT') {
+            label.textContent = '(₫)';
+            label.className = 'text-danger small';
+            valInput.placeholder = 'VD: 50000 (₫)';
+            valInput.min = '1000';
+            valInput.removeAttribute('max');
+            valInput.step = '1000';
+            if (hint) hint.textContent = 'Số tiền giảm cố định (tối thiểu 1.000 ₫).';
+            if (maxGroup) {
+                maxGroup.style.display = 'none';
+                const maxInput = document.getElementById(prefix + '_maxDiscountAmount');
+                if (maxInput) maxInput.value = '';
+            }
+        } else if (val === 'FREE_SHIP') {
+            label.textContent = '(₫)';
+            label.className = 'text-success small';
+            if (!valInput.value || Number(valInput.value) <= 100) {
+                valInput.value = '30000'; // Phí vận chuyển tiêu chuẩn
+            }
+            valInput.placeholder = '30000 (₫)';
+            valInput.min = '1000';
+            valInput.removeAttribute('max');
+            valInput.step = '1000';
+            if (hint) hint.textContent = 'Mức hỗ trợ phí vận chuyển tối đa (mặc định 30.000 ₫).';
+            if (maxGroup) {
+                maxGroup.style.display = 'none';
+                const maxInput = document.getElementById(prefix + '_maxDiscountAmount');
+                if (maxInput) maxInput.value = '';
+            }
+        }
+    }
+
+    /**
+     * Kiểm tra toàn diện các ràng buộc nghiệp vụ trước khi Submit form
+     */
+    function validateVoucherForm(prefix) {
+        let errBox, errMsg;
+        if (prefix === 'add') {
+            errBox = document.getElementById('addFormErrorBox');
+            errMsg = document.getElementById('addFormErrorMsg');
+        } else {
+            const id = prefix.replace('edit_', '');
+            errBox = document.getElementById('editFormErrorBox_' + id);
+            errMsg = document.getElementById('editFormErrorMsg_' + id);
+        }
+
+        const showError = function(msg, targetInputId) {
+            if (errBox && errMsg) {
+                errMsg.textContent = msg;
+                errBox.classList.remove('d-none');
+            } else {
+                alert(msg);
+            }
+            if (targetInputId) {
+                const el = document.getElementById(targetInputId);
+                if (el) el.focus();
+            }
+            return false;
+        };
+
+        if (errBox) errBox.classList.add('d-none');
+
+        // 1. Kiểm tra Mã khuyến mãi (chỉ kiểm tra khi Thêm mới)
+        if (prefix === 'add') {
+            const codeInput = document.getElementById('add_code');
+            const code = codeInput ? codeInput.value.trim().toUpperCase() : '';
+            if (!code || code.length < 3 || code.length > 30) {
+                return showError('Mã khuyến mãi phải từ 3 đến 30 ký tự!', 'add_code');
+            }
+            if (!/^[A-Z0-9_-]+$/.test(code)) {
+                return showError('Mã khuyến mãi chỉ được chứa chữ cái in hoa, chữ số, gạch ngang (-) hoặc gạch dưới (_), không chứa khoảng trắng!', 'add_code');
+            }
+        }
+
+        // 2. Kiểm tra Tên chương trình
+        const nameInput = document.getElementById(prefix + '_name');
+        const name = nameInput ? nameInput.value.trim() : '';
+        if (!name || name.length < 3 || name.length > 150) {
+            return showError('Tên chương trình ưu đãi phải từ 3 đến 150 ký tự!', prefix + '_name');
+        }
+
+        // 3. Kiểm tra Loại & Mức giảm
+        const typeSelect = document.getElementById(prefix + '_discountType');
+        const valInput = document.getElementById(prefix + '_discountValue');
+        const discountType = typeSelect ? typeSelect.value : 'PERCENT';
+        const discountValue = valInput ? Number(valInput.value) : 0;
+
+        if (discountType === 'PERCENT') {
+            if (isNaN(discountValue) || discountValue <= 0 || discountValue > 100) {
+                return showError('Tỷ lệ giảm giá phần trăm phải lớn hơn 0% và không vượt quá 100%!', prefix + '_discountValue');
+            }
+        } else if (discountType === 'FIXED_AMOUNT') {
+            if (isNaN(discountValue) || discountValue < 1000) {
+                return showError('Số tiền giảm cố định phải từ 1.000 ₫ trở lên!', prefix + '_discountValue');
+            }
+            const minOrderInput = document.getElementById(prefix + '_minOrderValue');
+            const minOrderValue = minOrderInput ? Number(minOrderInput.value) : 0;
+            if (minOrderValue > 0 && discountValue >= minOrderValue) {
+                return showError('Số tiền giảm cố định (' + discountValue.toLocaleString('vi-VN') + ' ₫) không được lớn hơn hoặc bằng giá trị đơn hàng tối thiểu (' + minOrderValue.toLocaleString('vi-VN') + ' ₫)!', prefix + '_discountValue');
+            }
+        } else if (discountType === 'FREE_SHIP') {
+            if (isNaN(discountValue) || discountValue <= 0) {
+                if (valInput) valInput.value = '30000';
+            }
+        }
+
+        // 4. Kiểm tra Đơn tối thiểu & Số lượng
+        const minOrderInput = document.getElementById(prefix + '_minOrderValue');
+        if (minOrderInput && Number(minOrderInput.value) < 0) {
+            return showError('Giá trị đơn hàng tối thiểu không được là số âm!', prefix + '_minOrderValue');
+        }
+
+        const qtyInput = document.getElementById(prefix + '_quantity');
+        if (qtyInput && Number(qtyInput.value) < 1) {
+            return showError('Số lượng mã phát hành phải từ 1 lượt trở lên!', prefix + '_quantity');
+        }
+
+        // 5. Kiểm tra Ngày áp dụng
+        const startInput = document.getElementById(prefix + '_startDate');
+        const endInput = document.getElementById(prefix + '_endDate');
+        if (startInput && endInput) {
+            if (!startInput.value || !endInput.value) {
+                return showError('Vui lòng chọn đầy đủ ngày bắt đầu và ngày kết thúc hiệu lực!');
+            }
+            if (startInput.value > endInput.value) {
+                return showError('Ngày kết thúc hiệu lực (' + endInput.value + ') phải sau hoặc cùng ngày với ngày bắt đầu (' + startInput.value + ')!', prefix + '_endDate');
+            }
+        }
+
+        return true;
+    }
+</script>
 </body>
 </html>
