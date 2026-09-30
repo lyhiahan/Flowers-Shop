@@ -140,6 +140,7 @@ public class ProfileController {
     public String viewWishlist(Principal principal, Model model) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         model.addAttribute("wishlist", productService.getWishlist(user.getId()));
+        model.addAttribute("stores", storeRepository.findByStatusTrue());
         return "customer/wishlist";
     }
 
