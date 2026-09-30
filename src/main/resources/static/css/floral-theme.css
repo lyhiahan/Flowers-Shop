@@ -563,13 +563,16 @@ body.admin-body {
 /* Kiểu dáng riêng cho bảng người dùng, bảng quản trị chi nhánh & bảng quản trị sản phẩm */
 .table-admin-users thead tr th,
 .table-admin-stores thead tr th,
-.table-admin-products thead tr th {
+.table-admin-products thead tr th,
+.admin-body table thead th,
+.main-wrapper table thead th {
     background-color: #E5EEE8 !important;
     color: #20382E !important;
     font-size: 15.5px !important;
-    font-weight: 700 !important;
-    border-bottom: 1px solid #D1E5DA !important;
+    font-weight: 800 !important;
+    border-bottom: 2px solid #D1E5DA !important;
     padding: 16px 20px !important;
+    letter-spacing: 0.02em !important;
 }
 
 .table-admin-users tbody tr td,
@@ -760,12 +763,12 @@ body.admin-body {
 /* 11. Bảng dữ liệu quản trị (Admin Table Styles) */
 .admin-body table thead th, .main-wrapper table thead th {
     font-family: var(--font-sans) !important;
-    font-size: 15px !important;
-    font-weight: 600 !important;
-    color: var(--admin-text-sub) !important;
-    background-color: #F8F9F8 !important;
-    border-bottom: 1px solid var(--admin-border) !important;
-    padding: 12px 14px !important;
+    font-size: 15.5px !important;
+    font-weight: 800 !important;
+    color: #20382E !important;
+    background-color: #E5EEE8 !important;
+    border-bottom: 2px solid #D1E5DA !important;
+    padding: 16px 20px !important;
 }
 
 .admin-body table tbody td, .main-wrapper table tbody td {
