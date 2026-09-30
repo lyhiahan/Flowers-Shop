@@ -533,24 +533,44 @@
 
                 <!-- Cột phải: Danh sách chi nhánh & Cơ cấu người dùng -->
                 <div class="col-lg-4">
-                    <!-- Chi nhánh -->
-                    <div class="card border-0 shadow-sm rounded-4 mb-4">
-                        <div class="card-header bg-white py-3 border-0">
-                            <h2 class="admin-section-title mb-0">🏬 Hệ Thống Chi Nhánh</h2>
-                            <small class="text-muted">Các điểm phân phối và kho điều phối</small>
+                    <!-- Chi nhánh (Chỉ hiển thị khi bấm nút Hiện chi nhánh) -->
+                    <div class="card border-0 shadow-sm rounded-4 mb-4" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
+                        <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                            <div>
+                                <h2 class="admin-section-title mb-0" style="font-size: 20px !important;">🏬 Hệ thống chi nhánh</h2>
+                                <small class="text-muted"><span th:text="${#lists.size(stores)}">0</span> điểm phân phối & điều phối</small>
+                            </div>
+                            <button class="btn btn-sm btn-outline-forest rounded-pill px-3 d-inline-flex align-items-center gap-1"
+                                    type="button" 
+                                    data-bs-toggle="collapse" 
+                                    data-bs-target="#storesCollapse" 
+                                    aria-expanded="false" 
+                                    aria-controls="storesCollapse"
+                                    id="btnToggleStores"
+                                    style="font-size: 13.5px; font-weight: 600;">
+                                <i class="bi bi-chevron-down" id="iconToggleStores"></i>
+                                <span id="textToggleStores">Hiện chi nhánh</span>
+                            </button>
                         </div>
-                        <div class="card-body p-3">
-                            <div th:each="s : ${stores}" class="p-3 mb-2 rounded-3 border bg-light">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <strong class="text-dark" th:text="${s.name}"></strong>
-                                    <span th:if="${s.status}" class="badge bg-success">Hoạt động</span>
-                                    <span th:if="${!s.status}" class="badge bg-danger">Tạm ngưng</span>
+                        <div class="collapse" id="storesCollapse">
+                            <div class="card-body p-3 pt-0">
+                                <div th:each="s : ${stores}" class="p-3 mb-2 rounded-3 border bg-light" style="border-color: #E2E7E2 !important; border-radius: 10px;">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="text-dark" th:text="${s.name}"></strong>
+                                        <span th:if="${s.status}" class="badge bg-success">Hoạt động</span>
+                                        <span th:if="${!s.status}" class="badge bg-danger">Tạm ngưng</span>
+                                    </div>
+                                    <div class="text-muted small mb-1">
+                                        <i class="bi bi-geo-alt text-danger me-1"></i> <span th:text="${s.address}"></span>
+                                    </div>
+                                    <div class="text-muted small">
+                                        <i class="bi bi-telephone me-1" style="color: #355447;"></i> <span th:text="${s.phone}"></span>
+                                    </div>
                                 </div>
-                                <div class="text-muted small mb-1">
-                                    <i class="bi bi-geo-alt-fill text-danger me-1"></i> <span th:text="${s.address}"></span>
-                                </div>
-                                <div class="text-muted small">
-                                    <i class="bi bi-telephone-fill text-primary me-1"></i> <span th:text="${s.phone}"></span>
+                                <div class="text-center pt-2">
+                                    <a th:href="@{/admin/stores}" class="btn btn-sm btn-link text-decoration-none fw-semibold" style="color: #355447; font-size: 14px;">
+                                        Quản lý chi tiết chi nhánh →
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -788,6 +808,23 @@
             }
             storeChart.update();
         }
+    }
+
+    // Toggle hiển thị chi nhánh
+    var storesCollapseEl = document.getElementById('storesCollapse');
+    if (storesCollapseEl) {
+        storesCollapseEl.addEventListener('show.bs.collapse', function () {
+            var textEl = document.getElementById('textToggleStores');
+            var iconEl = document.getElementById('iconToggleStores');
+            if (textEl) textEl.textContent = 'Thu gọn';
+            if (iconEl) iconEl.className = 'bi bi-chevron-up';
+        });
+        storesCollapseEl.addEventListener('hide.bs.collapse', function () {
+            var textEl = document.getElementById('textToggleStores');
+            var iconEl = document.getElementById('iconToggleStores');
+            if (textEl) textEl.textContent = 'Hiện chi nhánh';
+            if (iconEl) iconEl.className = 'bi bi-chevron-down';
+        });
     }
     /*]]>*/
 </script>
