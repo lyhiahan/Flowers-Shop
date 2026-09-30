@@ -308,23 +308,23 @@
                                 <span th:text="${p.sold != null ? p.sold : 0}">45</span>
                             </td>
 
-                            <!-- 6. Trạng thái: Cùng kích thước 28px, phân biệt kiểm duyệt & trạng thái bán -->
-                            <td>
+                            <!-- 6. Trạng thái: Cùng kích thước 28px, phân biệt kiểm duyệt & trạng thái bán, viết in hoa trên 1 dòng -->
+                            <td style="white-space: nowrap;">
                                 <!-- Nếu bị từ chối / khóa kiểm duyệt -->
-                                <span th:if="${p.isActive != null and !p.isActive}" class="status-pill-locked">
-                                    <i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i>Từ chối
+                                <span th:if="${p.isActive != null and !p.isActive}" class="status-pill-locked" style="white-space: nowrap;">
+                                    <i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i>TỪ CHỐI
                                 </span>
                                 <!-- Nếu đang chờ duyệt -->
-                                <span th:if="${p.isActive == null}" class="badge" style="background-color: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; height: 28px; line-height: 1; display: inline-flex; align-items: center; padding: 0 12px; border-radius: 9999px; font-weight: 600; font-size: 13.5px;">
-                                    <i class="bi bi-clock me-1"></i>Chờ duyệt
+                                <span th:if="${p.isActive == null}" class="badge" style="background-color: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; height: 28px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; padding: 0 12px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap; text-transform: uppercase;">
+                                    <i class="bi bi-clock me-1"></i>CHỜ DUYỆT
                                 </span>
                                 <!-- Nếu đã duyệt và đang mở bán -->
-                                <span th:if="${p.isActive != null and p.isActive and (p.isSelling == null or p.isSelling)}" class="status-pill-active">
-                                    <i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i>Đang bán
+                                <span th:if="${p.isActive != null and p.isActive and (p.isSelling == null or p.isSelling)}" class="status-pill-active" style="white-space: nowrap;">
+                                    <i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i>ĐANG HOẠT ĐỘNG
                                 </span>
                                 <!-- Nếu đã duyệt nhưng tạm ngừng bán -->
-                                <span th:if="${p.isActive != null and p.isActive and p.isSelling != null and !p.isSelling}" class="badge" style="background-color: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; height: 28px; line-height: 1; display: inline-flex; align-items: center; padding: 0 12px; border-radius: 9999px; font-weight: 600; font-size: 13.5px;">
-                                    <i class="bi bi-pause-circle me-1"></i>Ngừng bán
+                                <span th:if="${p.isActive != null and p.isActive and p.isSelling != null and !p.isSelling}" class="badge" style="background-color: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; height: 28px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; padding: 0 12px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap; text-transform: uppercase;">
+                                    <i class="bi bi-pause-circle me-1"></i>TẠM NGỪNG
                                 </span>
                             </td>
 

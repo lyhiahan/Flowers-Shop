@@ -235,12 +235,12 @@
                                 <span style="font-size: 16px; font-weight: 700; color: #20382E;"
                                       th:text="${u.eWallet != null ? #numbers.formatDecimal(u.eWallet, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">0 đ</span>
                             </td>
-                            <td>
-                                <span th:if="${u.isActive == null or u.isActive}" class="status-pill-active">
-                                    <span style="color: #2E684D; font-size: 10px;">●</span> Hoạt động
+                            <td style="white-space: nowrap;">
+                                <span th:if="${u.isActive == null or u.isActive}" class="status-pill-active" style="white-space: nowrap;">
+                                    <i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i>ĐANG HOẠT ĐỘNG
                                 </span>
-                                <span th:if="${u.isActive != null and !u.isActive}" class="status-pill-locked">
-                                    <span style="color: #B83232; font-size: 10px;">●</span> Đã khóa
+                                <span th:if="${u.isActive != null and !u.isActive}" class="status-pill-locked" style="white-space: nowrap;">
+                                    <i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i>ĐÃ KHÓA
                                 </span>
                             </td>
                             <td class="text-end pe-3">

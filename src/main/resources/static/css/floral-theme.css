@@ -629,33 +629,35 @@ body.admin-body {
     border: 1px solid #FDE68A !important;
 }
 
-/* Nhãn trạng thái (Status Pills) */
+/* Nhãn trạng thái chuẩn (Status Pills) */
+.status-pill-active,
+.status-pill-locked {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    height: 28px !important;
+    padding: 0 14px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    border-radius: 9999px !important;
+    white-space: nowrap !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    line-height: 1 !important;
+    flex-shrink: 0 !important;
+}
+
 .status-pill-active {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    height: 28px;
-    padding: 0 12px;
-    font-size: 13.5px;
-    font-weight: 600;
-    border-radius: 9999px;
-    background-color: #E5EEE8;
-    color: #20382E;
-    border: 1px solid #D1E5DA;
+    background-color: #E5EEE8 !important;
+    color: #20382E !important;
+    border: 1px solid #D1E5DA !important;
 }
 
 .status-pill-locked {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    height: 28px;
-    padding: 0 12px;
-    font-size: 13.5px;
-    font-weight: 600;
-    border-radius: 9999px;
-    background-color: #FEE2E2;
-    color: #991B1B;
-    border: 1px solid #FECACA;
+    background-color: #FEE2E2 !important;
+    color: #991B1B !important;
+    border: 1px solid #FECACA !important;
 }
 
 /* Nút hành động khóa tinh gọn */
