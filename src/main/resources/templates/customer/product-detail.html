@@ -4,9 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${product.name + ' - Hoa Tươi Sài Gòn'}">Chi tiết sản phẩm - Hoa Tươi Sài Gòn</title>
-    <!-- Bootstrap 5 & Icons -->
+    <!-- Google Font Nunito & Bootstrap 5 & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
     <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
     <style>
         :root {
@@ -14,19 +18,20 @@
             --flower-card-bg: #FFFCF8;     /* Nền nội dung: Trắng ngà */
             --flower-primary: #355447;     /* Tiêu đề và nút chính: Xanh lá */
             --flower-primary-hover: #263e34;
-            --flower-accent: #A64060;      /* Giá và điểm nhấn: Hồng trầm */
+            --flower-accent: #A64060;      /* Giá và điểm nhấn: Hồng trầm #A64060 */
             --flower-accent-bg: #F3E6E1;   /* Nền nhãn phụ: Hồng kem */
             --flower-border: #E7DED4;      /* Viền: Be */
             --flower-border-subtle: #EDE5DC;
-            --flower-text-main: #293B32;   /* Chữ nội dung: Xanh đen */
-            --flower-text-heading: #355447;
-            --flower-text-muted: #686E65;  /* Chữ phụ */
+            --flower-text-main: #293B32;   /* Chữ nội dung / tiêu đề: Xanh đậm */
+            --flower-text-heading: #293B32;
+            --flower-text-dark-gray: #475569; /* Nội dung mô tả & Nhãn: Xám đậm */
+            --flower-text-muted: #64748B;  /* Chữ phụ: Xám vừa */
             --flower-star: #E5A038;
         }
 
-        /* 1. Toàn bộ giao diện dùng Arial, nét thường, không chân, không nghiêng, không gạch chân */
+        /* 1. Toàn bộ giao diện dùng font Nunito: nét bo tròn đều, mềm mại */
         body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, p, span, a, label, strong, div {
-            font-family: Arial, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+            font-family: 'Nunito', Arial, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
             font-style: normal !important;
             text-decoration: none !important;
         }
@@ -34,9 +39,9 @@
         body {
             background-color: var(--flower-bg);
             color: var(--flower-text-main);
-            font-size: 17px;
+            font-size: 17.5px;
             font-weight: 400;
-            line-height: 1.5;
+            line-height: 1.6;
             margin: 0;
             padding: 0;
         }
@@ -173,45 +178,93 @@
             border-color: var(--flower-primary) !important;
         }
 
-        /* 3. Thứ tự và phân cấp font bên phải */
-        /* 1. Tên sản phẩm: 26–28 px, nét thường, sentence case */
+        /* 3. Thứ tự và phân cấp font bên phải chuẩn theo bảng quy định */
+        /* 1. Tên sản phẩm trên trang chi tiết: 26–28 px | 700 — đậm | Xanh đậm #293B32 */
         .product-title {
-            font-size: 28px;
-            font-weight: 400 !important;
-            color: var(--flower-text-heading);
+            font-size: 28px !important;
+            font-weight: 700 !important;
+            color: #293B32 !important;
             line-height: 1.35;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             word-wrap: break-word;
         }
 
-        /* 2. Giá: 30–32 px, nét thường, màu hồng trầm #A64060, không gạch chân */
+        /* 2. Giá trên trang chi tiết: 32–36 px | 800 — đậm rõ | Hồng trầm #A64060
+           - Đặt ngay dưới tên sản phẩm, có khoảng cách riêng trước nhóm thông tin
+           - Viết 850.000 ₫, số tiền và ký hiệu tiền nằm cùng dòng
+           - Không gạch chân, không thêm hiệu ứng bóng hoặc viền chữ */
+        .product-price-block {
+            margin-top: 10px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: baseline;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
         .product-price {
-            font-size: 31px;
+            font-size: 34px !important;
+            font-weight: 800 !important;
+            color: #A64060 !important;
+            line-height: 1.15;
+            letter-spacing: -0.3px;
+            white-space: nowrap !important;
+            text-decoration: none !important;
+            text-shadow: none !important;
+        }
+        /* Nếu có giảm giá thực tế: giá gốc nhỏ hơn, xám và gạch ngang */
+        .product-original-price {
+            font-size: 18px !important;
             font-weight: 400 !important;
-            color: var(--flower-accent);
-            line-height: 1.2;
-            letter-spacing: -0.2px;
+            color: #64748B !important;
+            text-decoration: line-through !important;
+            white-space: nowrap !important;
         }
 
-        /* Đánh giá thực tế cạnh giá: 15–16 px */
+        /* Thông tin phụ & đánh giá thực tế: 15–16 px | 400 — thường | Xám vừa #64748B */
         .rating-inline {
-            font-size: 15px;
-            color: var(--flower-text-muted);
+            font-size: 15.5px !important;
+            font-weight: 400 !important;
+            color: #64748B !important;
         }
 
-        /* 3. Thông tin chính: Loại hoa · Màu sắc · Thành phần (17–18 px, trình bày bằng dòng chữ, KHÔNG CÓ NỀN RIÊNG) */
-        .product-info-lines {
+        /* Bảng thông tin hai cột đơn giản: Cột nhãn 160–180 px, khoảng cách 12–16 px, không đóng khung */
+        .flower-info-table {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .flower-info-row {
+            display: flex;
+            align-items: flex-start;
             font-size: 17.5px;
-            line-height: 1.6;
-            color: var(--flower-text-main);
+            line-height: 1.55;
         }
-        .info-label {
-            color: var(--flower-text-muted);
-            min-width: 95px;
-            display: inline-block;
+        /* Nhãn thông tin: 16–17 px | 600 — đậm vừa | Xám đậm #475569 */
+        .flower-info-label {
+            width: 170px;
+            flex-shrink: 0;
+            color: #475569 !important;
+            font-size: 16.5px !important;
+            font-weight: 600 !important;
         }
-        .info-value {
-            color: var(--flower-text-main);
+        /* Nội dung thông tin: 17–18 px | 400 — thường | Xanh đậm #293B32 */
+        .flower-info-value {
+            flex: 1 1 auto;
+            color: #293B32 !important;
+            font-size: 17.5px !important;
+            font-weight: 400 !important;
+            word-break: break-word;
+        }
+        @media (max-width: 576px) {
+            .flower-info-row {
+                flex-direction: column;
+                gap: 2px;
+            }
+            .flower-info-label {
+                width: 100%;
+                color: #64748B !important;
+                font-size: 15.5px !important;
+            }
         }
 
         /* 5. Bộ chọn số lượng: cụm − 1 +, rộng 120–135px */
@@ -264,37 +317,45 @@
             margin: 0;
         }
 
-        /* Nút thêm vào giỏ: 16–18 px, cao 48–52 px, nền Xanh lá #355447 */
+        /* Nút mua hàng: 17–18 px | 700 — đậm | Trắng trên nền xanh #355447 */
         .btn-flower-add {
-            background-color: var(--flower-primary);
+            background-color: var(--flower-primary, #355447) !important;
             color: #ffffff !important;
-            font-size: 17.5px;
-            font-weight: 400 !important;
-            height: 48px;
-            border-radius: 9999px;
-            border: none;
-            padding: 0 28px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.2s ease;
+            font-size: 17.5px !important;
+            font-weight: 700 !important;
+            height: 50px !important;
+            border-radius: 9999px !important;
+            border: none !important;
+            padding: 0 32px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            transition: background-color 0.2s ease, transform 0.15s ease !important;
         }
         .btn-flower-add:hover:not(:disabled) {
-            background-color: var(--flower-primary-hover);
+            background-color: var(--flower-primary-hover, #263e34) !important;
+            color: #ffffff !important;
+            transform: translateY(-1px);
         }
         .btn-flower-disabled {
             background-color: #b5beb9 !important;
             color: #ffffff !important;
-            cursor: not-allowed;
+            cursor: not-allowed !important;
+            transform: none !important;
         }
 
-        /* 6. Dịch vụ: Giao hàng · Thiệp tặng (ngăn cách bằng một đường kẻ mảnh dưới nút mua) */
+        /* 6. Dịch vụ: Giao hàng · Thiệp tặng (Thông tin phụ: 15–16 px, xám vừa) */
         .service-brief {
             border-top: 1px solid var(--flower-border);
             padding-top: 20px;
-            font-size: 15.5px;
+            font-size: 15.5px !important;
+            font-weight: 400 !important;
             line-height: 1.55;
-            color: var(--flower-text-main);
+            color: #64748B !important;
+        }
+        .service-brief strong {
+            color: #293B32 !important;
+            font-weight: 600 !important;
         }
 
         /* 7. Thao tác phụ: Yêu thích (15–16 px) */
@@ -302,12 +363,20 @@
             padding-top: 14px;
         }
 
-        /* 8. Tiêu đề phần bên dưới: 22–24 px, Arial */
-        .section-below-title {
-            font-size: 23px;
-            font-weight: 400;
-            color: var(--flower-primary);
+        /* 8. Tiêu đề mục: 20–22 px | 600 — đậm vừa | Xanh đậm #293B32 */
+        .section-below-title, h2, h3, .section-title {
+            font-size: 22px !important;
+            font-weight: 600 !important;
+            color: #293B32 !important;
             margin-bottom: 20px;
+        }
+
+        /* Nội dung mô tả: 17–18 px | 400 — thường | Xám đậm #475569 */
+        .product-description, p, .accordion-body {
+            font-size: 17.5px !important;
+            font-weight: 400 !important;
+            color: #475569 !important;
+            line-height: 1.65;
         }
 
         .flower-accordion .accordion-item {
@@ -340,28 +409,13 @@
 </head>
 <body>
 
-    <!-- Thanh thông tin phụ trên cùng -->
-    <div class="top-subbar">
-        <div class="flower-detail-container d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center gap-4">
-                <span><i class="bi bi-telephone me-1" style="color: var(--flower-accent);"></i> Hotline: <strong style="color: var(--flower-text-main);">028 1111 222</strong></span>
-                <span class="d-none d-md-inline"><i class="bi bi-truck me-1" style="color: var(--flower-accent);"></i> Giao nhanh 60–90 phút tại TP.HCM & Hà Nội</span>
-            </div>
-            <div class="d-flex align-items-center gap-3">
-                <a th:href="@{/stores}"><i class="bi bi-geo-alt me-1"></i> Hệ thống chi nhánh</a>
-                <span class="text-secondary opacity-50">|</span>
-                <a th:href="@{/customer/orders}"><i class="bi bi-receipt me-1"></i> Tra cứu đơn hàng</a>
-            </div>
-        </div>
-    </div>
-
     <!-- Thanh Header chính -->
     <header class="header-main-bar sticky-top">
         <div class="flower-detail-container">
             <div class="d-flex align-items-center justify-content-between gap-3">
                 <!-- Logo -->
                 <a th:href="@{/}" class="brand-logo-text d-flex align-items-center gap-2">
-                    <span style="color: var(--flower-accent); font-size: 22px;">🌸</span>
+                    <img th:src="@{/images/flower-logo.png}" alt="Logo Hoa Tươi Sài Gòn" class="brand-logo-img">
                     <span>HOA TƯƠI SÀI GÒN</span>
                 </a>
 
@@ -502,56 +556,77 @@
                 <!-- CỘT PHẢI: THÔNG TIN (~45% CHIỀU RỘNG, THỨ TỰ CHUẨN XÁC) -->
                 <div class="product-info-col">
                     
-                    <!-- 1. TÊN SẢN PHẨM: 26–28 px, Arial, nét thường, sentence case (Đã bỏ nhãn 'Hoa sinh nhật' phía trên) -->
+                    <!-- 1. TÊN SẢN PHẨM: 26–28 px | 700 đậm | Xanh đậm #293B32 -->
                     <h1 class="product-title" th:text="${product.name}">Bó hoa tươi</h1>
 
-                    <!-- 2. GIÁ VÀ ĐÁNH GIÁ THỰC TẾ: Đặt cùng hàng, giá 30–32 px nét thường hồng trầm #A64060 -->
-                    <div class="d-flex align-items-baseline gap-3 mb-3">
+                    <!-- 2. GIÁ TRÊN TRANG CHI TIẾT: 32–36 px | 800 đậm rõ | Hồng trầm #A64060
+                         - Đặt ngay dưới tên sản phẩm, có khoảng cách riêng trước nhóm thông tin
+                         - Viết 850.000 ₫, số tiền và ký hiệu tiền nằm cùng dòng
+                         - Nếu có giảm giá thực tế: giá hiện tại lớn, hồng trầm; giá gốc nhỏ hơn, xám và gạch ngang -->
+                    <div class="product-price-block">
                         <span class="product-price" th:text="${#numbers.formatDecimal(product.sellingPrice, 0, 'COMMA', 0, 'POINT') + ' ₫'}">850.000 ₫</span>
-                        <span class="text-muted" style="font-size: 14px;">·</span>
-                        
-                        <!-- Đánh giá thực tế (bỏ hoàn toàn lượt xem) -->
-                        <span th:if="${reviews != null and !#lists.isEmpty(reviews)}" class="rating-inline d-inline-flex align-items-center gap-1">
+
+                        <span th:if="${product.promotionalPrice != null and product.promotionalPrice.compareTo(product.priceBuy) < 0}" 
+                              class="product-original-price" 
+                              th:text="${#numbers.formatDecimal(product.priceBuy, 0, 'COMMA', 0, 'POINT') + ' ₫'}">
+                            950.000 ₫
+                        </span>
+
+                        <!-- Đánh giá thực tế (nếu có) -->
+                        <span th:if="${reviews != null and !#lists.isEmpty(reviews)}" class="rating-inline d-inline-flex align-items-center gap-1 ms-2">
                             <span class="text-warning">⭐</span>
                             <strong style="color: var(--flower-text-main);" th:text="${product.rating != null ? product.rating : '5.0'}">5.0</strong>
                             <a href="#headingReviews" class="text-muted" th:text="'(' + ${#lists.size(reviews)} + ' đánh giá)'">(1 đánh giá)</a>
                         </span>
-                        <span th:if="${reviews == null or #lists.isEmpty(reviews)}" class="rating-inline text-muted">
+                        <span th:if="${reviews == null or #lists.isEmpty(reviews)}" class="rating-inline ms-2 text-muted">
                             Chưa có đánh giá
                         </span>
                     </div>
 
-                    <!-- 3. THÔNG TIN CHÍNH: Loại hoa · Màu sắc · Thành phần (17–18 px, căn trái, TRÌNH BÀY BẰNG CÁC DÒNG CHỮ, KHÔNG CẦN NỀN RIÊNG) -->
-                    <div class="product-info-lines mb-4">
-                        <!-- Dòng 1: Loại hoa (tách riêng, không dùng 'Sinh nhật' làm loại hoa, ẩn nếu thiếu) -->
-                        <div class="mb-2"
-                             th:with="flowerType=${product.name.contains('Hướng Dương') ? 'Hướng dương' : (product.name.contains('Mẫu Đơn') ? 'Hoa mẫu đơn' : (product.name.contains('Hồng') ? 'Hoa hồng' : (product.name.contains('Cẩm Tú Cầu') ? 'Hoa cẩm tú cầu' : (product.name.contains('Tulip') ? 'Hoa tulip' : (product.name.contains('Lan') or product.name.contains('Hồ Điệp') ? 'Lan hồ điệp' : (product.name.contains('Baby') ? 'Hoa baby' : (product.name.contains('Sen') ? 'Hoa sen' : (product.category != null and !product.category.name.contains('Sinh Nhật') and !product.category.name.contains('Khai Trương') ? product.category.name : null))))))))}"
-                             th:if="${flowerType != null}">
-                            <span class="info-label">Loại hoa:</span>
-                            <span class="info-value" th:text="${flowerType}">Hướng dương</span>
+                    <!-- 3. THÔNG TIN CHÍNH: Loại hoa · Kiểu dáng · Màu sắc · Thành phần · Kích thước (Bảng 2 cột đơn giản, đầy đủ 100% cho mọi sản phẩm) -->
+                    <div class="flower-info-table mb-4">
+                        <!-- Dòng 1: Loại hoa -->
+                        <div class="flower-info-row"
+                             th:with="flowerType=${product.name.contains('Hướng Dương') ? 'Hoa hướng dương' : (product.name.contains('Mẫu Đơn') ? 'Hoa mẫu đơn' : (product.name.contains('Hồng') ? 'Hoa hồng cao cấp' : (product.name.contains('Cẩm Tú Cầu') ? 'Hoa cẩm tú cầu' : (product.name.contains('Tulip') ? 'Hoa tulip Hà Lan' : (product.name.contains('Lan') or product.name.contains('Hồ Điệp') ? 'Lan hồ điệp' : (product.name.contains('Baby') ? 'Hoa baby' : (product.name.contains('Sen') ? 'Hoa sen' : (product.name.contains('Đồng Tiền') or product.name.contains('Hồng Môn') ? 'Hồng môn, đồng tiền' : (product.category != null ? product.category.name : 'Hoa tươi tự nhiên')))))))))}">
+                            <span class="flower-info-label">Loại hoa</span>
+                            <span class="flower-info-value" th:text="${flowerType}">Hoa tươi tự nhiên</span>
                         </div>
 
-                        <!-- Dòng 2: Màu sắc (Ghi ngắn gọn: Vàng, Hồng..., thống nhất nhãn Màu sắc) -->
-                        <div class="mb-2"
-                             th:with="flowerColor=${product.name.contains('Hướng Dương') or product.name.contains('Vàng') ? 'Vàng' : (product.name.contains('Đỏ') ? 'Đỏ' : (product.name.contains('Hồng') ? 'Hồng' : (product.name.contains('Trắng') ? 'Trắng' : (product.name.contains('Tím') ? 'Tím' : (product.name.contains('Cam') ? 'Cam' : (product.name.contains('Xanh') ? 'Xanh pastel' : null))))))}"
-                             th:if="${flowerColor != null}">
-                            <span class="info-label">Màu sắc:</span>
-                            <span class="info-value" th:text="${flowerColor}">Vàng</span>
+                        <!-- Dòng 2: Kiểu dáng -->
+                        <div class="flower-info-row"
+                             th:with="flowerStyle=${product.name.contains('Giỏ') ? 'Giỏ hoa để bàn' : (product.name.contains('Hộp') ? 'Hộp hoa sang trọng' : (product.name.contains('Kệ') or product.name.contains('2 Tầng') ? 'Kệ hoa khai trương 2 tầng' : (product.name.contains('Lọ') or product.name.contains('Bình') ? 'Bình hoa / Lọ hoa để bàn' : (product.name.contains('Chậu') ? 'Chậu hoa trang trí' : 'Bó hoa tươi nghệ thuật'))))}">
+                            <span class="flower-info-label">Kiểu dáng</span>
+                            <span class="flower-info-value" th:text="${flowerStyle}">Bó hoa tươi nghệ thuật</span>
                         </div>
 
-                        <!-- Dòng 3: Thành phần (Loại hoa, số lượng và phụ liệu thực tế, ẩn nếu thiếu) -->
-                        <div class="mb-0"
-                             th:with="recipe=${product.name.contains('Hướng Dương') ? '5 bông hướng dương, cúc tana, lá phụ' : (product.name.contains('Hồng') ? 'Hoa hồng Ecuador cao cấp, baby trắng, lá bạc' : (product.name.contains('Mẫu Đơn') ? '3–5 cành mẫu đơn Hà Lan, cẩm tú cầu, lá phụ nhập khẩu' : (product.name.contains('Cẩm Tú Cầu') ? 'Cẩm tú cầu Đà Lạt, hoa hồng kem, lá khuynh diệp' : (product.name.contains('Tulip') ? '10–15 cành tulip Hà Lan, giấy gói mộc, nơ lụa' : (product.name.contains('Lan') or product.name.contains('Hồ Điệp') ? 'Cành lan hồ điệp tuyển chọn, chậu gốm, rêu giữ ẩm' : (product.name.contains('Baby') ? 'Hoa baby trắng nhập khẩu, nơ lụa' : (product.name.contains('Sen') ? 'Hoa sen quan âm, đài sen, lá sen tươi' : null)))))))}"
-                             th:if="${recipe != null}">
-                            <span class="info-label">Thành phần:</span>
-                            <span class="info-value" th:text="${recipe}">5 bông hướng dương, cúc tana, lá phụ</span>
+                        <!-- Dòng 3: Màu sắc -->
+                        <div class="flower-info-row"
+                             th:with="flowerColor=${product.name.contains('Hướng Dương') or product.name.contains('Vàng') or product.name.contains('Ánh Dương') or product.name.contains('Hoàng Kim') ? 'Vàng tươi sáng' : (product.name.contains('Đỏ') ? 'Đỏ nồng nàn' : (product.name.contains('Pastel') or product.name.contains('Hồng') ? 'Hồng pastel dịu dàng' : (product.name.contains('Trắng') ? 'Trắng ngọc tinh khôi' : (product.name.contains('Tím') ? 'Tím thủy chung' : (product.name.contains('Cam') ? 'Cam ấm áp' : (product.name.contains('Xanh') ? 'Xanh tươi mát' : 'Tone màu tươi sáng hài hòa'))))))}">
+                            <span class="flower-info-label">Màu sắc</span>
+                            <span class="flower-info-value" th:text="${flowerColor}">Tone màu tươi sáng hài hòa</span>
+                        </div>
+
+                        <!-- Dòng 4: Thành phần chi tiết -->
+                        <div class="flower-info-row"
+                             th:with="recipe=${(product.description != null and !product.description.isEmpty()) ? product.description : (product.name.contains('Hướng Dương') ? '5 bông hướng dương, cúc tana, lá bạc cao cấp' : (product.name.contains('Hồng') ? 'Hoa hồng tuyển chọn, hoa baby, lá phụ trang trí' : (product.name.contains('Tulip') ? '15 cành tulip Hà Lan, giấy gói cao cấp, nơ lụa' : (product.name.contains('Cẩm Tú Cầu') ? 'Cẩm tú cầu Đà Lạt, hoa hồng kem, lá khuynh diệp' : (product.name.contains('Kệ') ? 'Hoa hồng môn đỏ, hướng dương, hoa đồng tiền, kệ sắt 2 tầng' : (product.name.contains('Chậu') ? 'Hoa lá phối cảnh chậu gốm trang trí văn phòng' : (product.name.contains('Lọ') or product.name.contains('Bình') ? 'Hoa hồng nhung và hoa phụ cắm bình thủy tinh' : 'Hoa tươi loại 1 kết hợp hoa lá phụ cao cấp')))))))}">
+                            <span class="flower-info-label">Thành phần</span>
+                            <span class="flower-info-value" th:text="${recipe}">Hoa tươi loại 1 kết hợp hoa lá phụ cao cấp</span>
+                        </div>
+
+                        <!-- Dòng 5: Kích thước tham khảo -->
+                        <div class="flower-info-row"
+                             th:with="dimensions=${product.name.contains('Kệ') or product.name.contains('2 Tầng') ? 'Cao khoảng 175–185 cm, tán rộng 75–80 cm' : (product.name.contains('Giỏ') ? 'Cao khoảng 40–45 cm, ngang khoảng 35–40 cm' : (product.name.contains('Hộp') ? 'Đường kính 25–30 cm, cao 20 cm' : (product.name.contains('Lọ') or product.name.contains('Bình') ? 'Cao khoảng 45–55 cm, rộng 30–35 cm' : (product.name.contains('Chậu') ? 'Cao khoảng 50–65 cm, rộng 35–45 cm' : 'Cao khoảng 50–55 cm, rộng khoảng 35 cm'))))}">
+                            <span class="flower-info-label">Kích thước</span>
+                            <span class="flower-info-value" th:text="${dimensions}">Cao khoảng 50–55 cm, rộng khoảng 35 cm</span>
                         </div>
                     </div>
 
                     <!-- 4. PHIÊN BẢN NẾU CÓ: Một phiên bản thì KHÔNG hiện bộ chọn kích cỡ -->
 
-                    <!-- 5. MUA HÀNG: Trên máy tính, đặt số lượng và nút thêm vào giỏ cùng một hàng -->
-                    <form th:action="@{/cart/add}" method="post" class="mb-3">
+                    <!-- 5. MUA HÀNG: Đặt số lượng và nút thêm vào giỏ cùng một hàng -->
+                    <!-- Khi đã đăng nhập với vai trò Khách hàng (CUSTOMER) -->
+                    <form sec:authorize="hasRole('CUSTOMER')" action="/cart/add" method="post" class="mb-3">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <input type="hidden" name="productId" th:value="${product.id}">
                         <input type="hidden" name="storeId" th:value="${product.store != null ? product.store.id : 1}">
                         <input type="hidden" name="orderType" value="BUY">
@@ -584,7 +659,18 @@
                         </div>
                     </form>
 
-                    <!-- 6. DỊCH VỤ: Giao hàng · Thiệp tặng (đặt dưới nút mua, ngăn bằng một đường kẻ mảnh, không đóng hộp riêng) -->
+                    <!-- Khi chưa đăng nhập (Khách vãng lai) -->
+                    <div sec:authorize="!hasRole('CUSTOMER')" class="mb-3">
+                        <div class="d-flex flex-wrap align-items-center gap-3">
+                            <div class="flex-grow-1" style="min-width: 200px;">
+                                <a th:href="@{/login}" class="btn btn-flower-add w-100 text-decoration-none">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i> Đăng nhập để đặt hoa
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. DỊCH VỤ: Giao hàng · Thiệp tặng (đặt dưới nút mua, ngăn bằng đường kẻ mảnh) -->
                     <div class="service-brief">
                         <div class="d-flex align-items-baseline gap-2 mb-2">
                             <i class="bi bi-truck text-secondary" style="font-size: 16px;"></i>
@@ -596,15 +682,25 @@
                         </div>
                     </div>
 
-                    <!-- 7. THAO TÁC PHỤ: Nút Yêu thích (đặt tinh tế phía dưới) -->
-                    <div class="action-sub-row">
-                        <form th:action="@{/customer/profile/wishlist/toggle/{id}(id=${product.id})}" method="post" class="d-inline">
+                    <!-- 7. THAO TÁC PHỤ: Nút Yêu thích -->
+                    <div class="action-sub-row pt-2">
+                        <form th:if="${#authorization.expression('isAuthenticated()')}" 
+                              action="/customer/profile/wishlist/toggle" 
+                              th:action="@{/customer/profile/wishlist/toggle/{id}(id=${product.id})}" 
+                              method="post" class="d-inline">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <button type="submit" class="btn btn-sm rounded-pill px-3 py-1 border d-inline-flex align-items-center gap-2"
                                     style="font-size: 14.5px; border-color: var(--flower-border) !important; color: var(--flower-text-main); background: #ffffff;">
                                 <i class="bi" th:classappend="${isLiked} ? 'bi-heart-fill text-danger' : 'bi-heart'"></i>
                                 <span th:text="${isLiked} ? 'Đã lưu yêu thích' : 'Lưu vào yêu thích'">Lưu vào yêu thích</span>
                             </button>
                         </form>
+                        <a th:unless="${#authorization.expression('isAuthenticated()')}" th:href="@{/login}" 
+                           class="btn btn-sm rounded-pill px-3 py-1 border d-inline-flex align-items-center gap-2"
+                           style="font-size: 14.5px; border-color: var(--flower-border) !important; color: var(--flower-text-main); background: #ffffff;">
+                            <i class="bi bi-heart"></i>
+                            <span>Lưu vào yêu thích</span>
+                        </a>
                     </div>
 
                 </div>
@@ -617,7 +713,7 @@
             
             <div class="accordion flower-accordion" id="flowerDetailAccordion">
                 
-                <!-- MỤC 1: CHI TIẾT SẢN PHẨM (Kiểu dáng, dịp tặng, kích thước, ý nghĩa) -->
+                <!-- MỤC 1: CHI TIẾT SẢN PHẨM (Bảng 2 cột đơn giản: Kiểu dáng, Dịp tặng, Kích thước, Ý nghĩa, Mô tả) -->
                 <div class="accordion-item">
                     <h3 class="accordion-header" id="headingDetail">
                         <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetail" aria-expanded="true" aria-controls="collapseDetail">
@@ -627,36 +723,76 @@
                     </h3>
                     <div id="collapseDetail" class="accordion-collapse collapse show" aria-labelledby="headingDetail" data-bs-parent="#flowerDetailAccordion">
                         <div class="accordion-body">
-                            <div class="row g-3 mb-4">
-                                <!-- Kiểu dáng -->
-                                <div class="col-md-4">
-                                    <div class="p-3 rounded-2" style="background-color: var(--flower-bg); border: 1px solid var(--flower-border);">
-                                        <span class="text-muted d-block small mb-1">Kiểu dáng</span>
-                                        <strong style="color: var(--flower-text-main);" th:text="${product.name.contains('Giỏ') ? 'Giỏ hoa' : (product.name.contains('Hộp') ? 'Hộp hoa' : (product.name.contains('Kệ') or product.name.contains('Lẵng') ? 'Kệ hoa / Lẵng hoa' : (product.name.contains('Bình') or product.name.contains('Chậu') ? 'Chậu hoa / Bình hoa' : 'Bó hoa')))}">Bó hoa</strong>
-                                    </div>
+                            <div class="flower-info-table">
+                                <!-- 1. Kiểu dáng -->
+                                <div class="flower-info-row"
+                                     th:with="isBasket=${product.name.contains('Giỏ')},
+                                              isBox=${product.name.contains('Hộp')},
+                                              isStand=${product.name.contains('Kệ') or product.name.contains('2 Tầng')},
+                                              isVase=${product.name.contains('Lọ') or product.name.contains('Bình')},
+                                              isPot=${product.name.contains('Chậu')}">
+                                    <span class="flower-info-label">Kiểu dáng</span>
+                                    <span class="flower-info-value" th:if="${isBasket}">Giỏ hoa để bàn</span>
+                                    <span class="flower-info-value" th:if="${!isBasket and isBox}">Hộp hoa sang trọng</span>
+                                    <span class="flower-info-value" th:if="${!isBasket and !isBox and isStand}">Kệ hoa khai trương 2 tầng</span>
+                                    <span class="flower-info-value" th:if="${!isBasket and !isBox and !isStand and isVase}">Bình hoa / Lọ hoa để bàn</span>
+                                    <span class="flower-info-value" th:if="${!isBasket and !isBox and !isStand and !isVase and isPot}">Chậu hoa trang trí</span>
+                                    <span class="flower-info-value" th:if="${!isBasket and !isBox and !isStand and !isVase and !isPot}">Bó hoa tươi nghệ thuật</span>
                                 </div>
-                                <!-- Dịp tặng -->
-                                <div class="col-md-4">
-                                    <div class="p-3 rounded-2" style="background-color: var(--flower-bg); border: 1px solid var(--flower-border);">
-                                        <span class="text-muted d-block small mb-1">Dịp tặng phù hợp</span>
-                                        <strong style="color: var(--flower-text-main);" th:text="${product.name.contains('Hướng Dương') ? 'Sinh nhật, Chúc mừng, Tốt nghiệp' : (product.name.contains('Hồng') ? 'Sinh nhật, Lễ tình nhân, Kỷ niệm' : (product.name.contains('Mẫu Đơn') or product.name.contains('Cẩm Tú Cầu') ? 'Kỷ niệm, Chúc mừng, Tri ân' : (product.name.contains('Lan') or product.name.contains('Hồ Điệp') or product.name.contains('Khai Trương') ? 'Khai trương, Tân gia, Khánh thành' : 'Sinh nhật, Chúc mừng, Kỷ niệm')))}">Sinh nhật, Chúc mừng</strong>
-                                    </div>
-                                </div>
-                                <!-- Kích thước tham khảo thực tế (không làm bộ chọn nếu khách không thể đổi) -->
-                                <div class="col-md-4">
-                                    <div class="p-3 rounded-2" style="background-color: var(--flower-bg); border: 1px solid var(--flower-border);">
-                                        <span class="text-muted d-block small mb-1">Kích thước tham khảo</span>
-                                        <strong style="color: var(--flower-text-main);" th:text="${product.name.contains('Giỏ') ? 'Cao khoảng 40–45 cm, ngang khoảng 35–40 cm' : (product.name.contains('Hộp') ? 'Đường kính khoảng 25–30 cm, cao 20 cm' : (product.name.contains('Kệ') ? 'Cao khoảng 160–175 cm, rộng khoảng 70–80 cm' : (product.name.contains('Bình') or product.name.contains('Chậu') ? 'Cao khoảng 60–70 cm, rộng khoảng 40–50 cm' : 'Cao khoảng 50 cm, rộng khoảng 35 cm')))}">Cao khoảng 50 cm, rộng khoảng 35 cm</strong>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <!-- Ý nghĩa -->
-                            <div class="pt-1">
-                                <h4 class="mb-2" style="font-size: 18px; font-weight: 600; color: var(--flower-primary);">Ý nghĩa mẫu hoa</h4>
-                                <p class="mb-0" style="font-size: 17.5px; line-height: 1.6; color: var(--flower-text-main);" th:text="${product.name.contains('Hướng Dương') ? 'Hoa hướng dương luôn hướng về ánh mặt trời, tượng trưng cho niềm tin kiên định, sự lạc quan và lời chúc tương lai tươi sáng.' : (product.name.contains('Hồng') ? 'Hoa hồng là biểu tượng vượt thời gian của tình yêu chân thành, nét đẹp kiêu sa và sự trân trọng trọn vẹn dành cho người nhận.' : (product.name.contains('Mẫu Đơn') ? 'Hoa mẫu đơn đại diện cho sự vương giả, thanh cao, cuộc sống phú quý viên mãn và hạnh phúc tràn đầy.' : (product.name.contains('Cẩm Tú Cầu') ? 'Cẩm tú cầu mang thông điệp về sự thấu hiểu sâu sắc, lòng biết ơn chân thành và tình cảm bền chặt theo năm tháng.' : (product.name.contains('Tulip') ? 'Hoa tulip mang vẻ đẹp thuần khiết, thanh lịch và lời nguyện ước bình an, may mắn.' : (product.name.contains('Lan') or product.name.contains('Hồ Điệp') ? 'Lan hồ điệp kiêu sa mang vượng khí tài lộc, sự thịnh vượng và thành công bền vững.' : (product.description != null ? product.description : 'Thiết kế hoa tươi độc quyền từ những đóa hoa tuyển chọn loại 1, mang thông điệp yêu thương, thanh nhã và thắm trọn khoảnh khắc.'))))))}">
-                                    Ý nghĩa mẫu hoa tươi
-                                </p>
+                                <!-- 2. Dịp tặng -->
+                                <div class="flower-info-row"
+                                     th:with="isOpening=${product.name.contains('Khai Trương') or product.name.contains('Đại Cát') or product.name.contains('Hồng Phát')},
+                                              isBirthday=${product.name.contains('Sinh Nhật')},
+                                              isLove=${product.name.contains('Tình Nồng') or product.name.contains('Tình Yêu')},
+                                              isOffice=${product.name.contains('Văn Phòng') or product.name.contains('Để Bàn')}">
+                                    <span class="flower-info-label">Dịp tặng</span>
+                                    <span class="flower-info-value" th:if="${isOpening}">Khai trương, Tân gia, Khánh thành, Kỷ niệm thành lập</span>
+                                    <span class="flower-info-value" th:if="${!isOpening and isBirthday}">Sinh nhật, Chúc mừng, Lễ kỷ niệm</span>
+                                    <span class="flower-info-value" th:if="${!isOpening and !isBirthday and isLove}">Lễ tình nhân, Kỷ niệm ngày yêu, Cầu hôn lãng mạn</span>
+                                    <span class="flower-info-value" th:if="${!isOpening and !isBirthday and !isLove and isOffice}">Trang trí không gian văn phòng, Bàn làm việc, Quà tặng đối tác</span>
+                                    <span class="flower-info-value" th:if="${!isOpening and !isBirthday and !isLove and !isOffice}">Sinh nhật, Chúc mừng, Kỷ niệm, Tri ân</span>
+                                </div>
+
+                                <!-- 3. Kích thước tham khảo -->
+                                <div class="flower-info-row"
+                                     th:with="isStand=${product.name.contains('Kệ') or product.name.contains('2 Tầng')},
+                                              isBasket=${product.name.contains('Giỏ')},
+                                              isBox=${product.name.contains('Hộp')},
+                                              isVase=${product.name.contains('Lọ') or product.name.contains('Bình')},
+                                              isPot=${product.name.contains('Chậu')}">
+                                    <span class="flower-info-label">Kích thước tham khảo</span>
+                                    <span class="flower-info-value" th:if="${isStand}">Cao khoảng 175–185 cm, tán rộng 75–80 cm</span>
+                                    <span class="flower-info-value" th:if="${!isStand and isBasket}">Cao khoảng 40–45 cm, ngang khoảng 35–40 cm</span>
+                                    <span class="flower-info-value" th:if="${!isStand and !isBasket and isBox}">Đường kính 25–30 cm, cao 20 cm</span>
+                                    <span class="flower-info-value" th:if="${!isStand and !isBasket and !isBox and isVase}">Cao khoảng 45–55 cm, rộng 30–35 cm</span>
+                                    <span class="flower-info-value" th:if="${!isStand and !isBasket and !isBox and !isVase and isPot}">Cao khoảng 50–65 cm, rộng 35–45 cm</span>
+                                    <span class="flower-info-value" th:if="${!isStand and !isBasket and !isBox and !isVase and !isPot}">Cao khoảng 50–55 cm, rộng khoảng 35 cm</span>
+                                </div>
+
+                                <!-- 4. Ý nghĩa hoa -->
+                                <div class="flower-info-row"
+                                     th:with="isRose=${product.name.contains('Hồng')},
+                                              isSun=${product.name.contains('Hướng Dương')},
+                                              isTulip=${product.name.contains('Tulip')},
+                                              isOrchid=${product.name.contains('Lan') or product.name.contains('Hồ Điệp')},
+                                              isOpening=${product.name.contains('Khai Trương') or product.name.contains('Đại Cát') or product.name.contains('Hồng Phát')},
+                                              isOffice=${product.name.contains('Văn Phòng') or product.name.contains('Bình An')}">
+                                    <span class="flower-info-label">Ý nghĩa</span>
+                                    <span class="flower-info-value" th:if="${isSun}">Hoa hướng dương luôn hướng về ánh mặt trời, tượng trưng cho niềm tin kiên định, sự lạc quan và tương lai rực rỡ.</span>
+                                    <span class="flower-info-value" th:if="${!isSun and isRose}">Hoa hồng là biểu tượng vượt thời gian của tình yêu chân thành, nét đẹp kiêu sa và sự trân trọng trọn vẹn dành cho người nhận.</span>
+                                    <span class="flower-info-value" th:if="${!isSun and !isRose and isTulip}">Hoa tulip mang vẻ đẹp thuần khiết, thanh lịch và lời nguyện ước bình an, may mắn.</span>
+                                    <span class="flower-info-value" th:if="${!isSun and !isRose and !isTulip and isOrchid}">Lan hồ điệp kiêu sa mang vượng khí tài lộc, sự thịnh vượng và thành công bền vững.</span>
+                                    <span class="flower-info-value" th:if="${!isSun and !isRose and !isTulip and !isOrchid and isOpening}">Kệ hoa mang ý nghĩa hồng phát, kinh doanh đại cát, thu hút tài lộc dồi dào và thuận buồm xuôi gió.</span>
+                                    <span class="flower-info-value" th:if="${!isSun and !isRose and !isTulip and !isOrchid and !isOpening and isOffice}">Mang nguồn năng lượng xanh tươi mới, thanh lọc không gian, tạo cảm giác thư thái và hanh thông trong công việc.</span>
+                                    <span class="flower-info-value" th:if="${!isSun and !isRose and !isTulip and !isOrchid and !isOpening and !isOffice}">Thiết kế hoa tươi độc quyền từ những đóa hoa tuyển chọn loại 1, mang thông điệp yêu thương, thanh nhã và thắm trọn khoảnh khắc.</span>
+                                </div>
+
+                                <!-- 5. Giới thiệu chi tiết từ nghệ nhân tiệm hoa -->
+                                <div class="flower-info-row" th:if="${product.description != null and !product.description.isEmpty()}">
+                                    <span class="flower-info-label">Mô tả sản phẩm</span>
+                                    <span class="flower-info-value" th:text="${product.description}">Mô tả chi tiết sản phẩm</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -816,7 +952,7 @@
     <!-- Footer -->
     <footer class="border-top py-4 mt-5" style="background-color: #ffffff; border-color: var(--flower-border) !important;">
         <div class="flower-detail-container text-center text-muted" style="font-size: 15px;">
-            <p class="mb-1" style="color: var(--flower-primary);">🌸 HOA TƯƠI SÀI GÒN - Hệ thống cửa hàng hoa tươi cao cấp toàn quốc</p>
+            <p class="mb-1 d-inline-flex align-items-center justify-content-center gap-2" style="color: var(--flower-primary);"><img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img-sm"> HOA TƯƠI SÀI GÒN - Hệ thống cửa hàng hoa tươi cao cấp toàn quốc</p>
             <p class="mb-0">Hotline hỗ trợ & đặt hoa: <strong style="color: var(--flower-accent);">028 1111 222</strong> · Giờ làm việc: 07:00 - 21:00 hàng ngày</p>
         </div>
     </footer>
