@@ -1,829 +1,1169 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <meta charset="UTF-8">
-    <title>Hồ Sơ Cá Nhân - Chuỗi Cửa Hàng Hoa Tươi</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--flower-bg, #FAF7F2); color: var(--flower-text-main, #293B32); }
-        .font-serif { font-family: 'Playfair Display', Georgia, serif; }
-        .profile-card { border-radius: 16px; border: 1px solid var(--flower-border, #E7DED4); background: #ffffff; box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05); }
-        .btn-flower { background-color: var(--flower-primary, #355447); color: white; border: none; }
-        .btn-flower:hover { background-color: var(--flower-primary-hover, #284136); color: white; }
-    </style>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Hồ Sơ Của Tôi - HOA TƯƠI SÀI GÒN</title>
+  
+  <!-- Google Fonts: Playfair Display, Be Vietnam Pro & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  
+  <style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
+    }
+    ::-webkit-scrollbar { display: none; }
+  </style>
+
+  <!-- Tailwind CSS CDN with tailored editorial flower shop config matching ui/code.html & ui/DESIGN.md -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#264E43",
+            "primary-container": "#264E43",
+            "on-primary": "#ffffff",
+            "secondary": "#C93B50",
+            "secondary-container": "#FCECEE",
+            "on-secondary": "#ffffff",
+            "tertiary": "#C93B50",
+            "background": "#FAF7F5",
+            "surface": "#FAF7F5",
+            "on-surface": "#2D2424",
+            "surface-variant": "#EFE7E2",
+            "on-surface-variant": "#6E6464",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#FCFAF8",
+            "surface-container": "#F9F4F0",
+            "surface-container-high": "#F5ECE7",
+            "surface-container-highest": "#EFE7E2",
+            "outline": "#7E726D",
+            "outline-variant": "#E2D7D1",
+            "error": "#BA1A1A",
+            "error-container": "#FFDAD6"
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          spacing: {
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "space-xl": "2.5rem",
+            "margin": "1rem",
+            "margin-tablet": "2rem",
+            "margin-desktop": "3rem"
+          },
+          fontFamily: {
+            "headline-lg": ["Playfair Display", "serif"],
+            "headline-md": ["Playfair Display", "serif"],
+            "headline-sm": ["Playfair Display", "serif"],
+            "title-lg": ["Be Vietnam Pro", "sans-serif"],
+            "title-md": ["Be Vietnam Pro", "sans-serif"],
+            "title-sm": ["Be Vietnam Pro", "sans-serif"],
+            "body-lg": ["Be Vietnam Pro", "sans-serif"],
+            "body-md": ["Be Vietnam Pro", "sans-serif"],
+            "body-sm": ["Be Vietnam Pro", "sans-serif"],
+            "label-lg": ["Be Vietnam Pro", "sans-serif"],
+            "label-md": ["Be Vietnam Pro", "sans-serif"],
+            "label-sm": ["Be Vietnam Pro", "sans-serif"]
+          },
+          fontSize: {
+            "headline-lg": ["36px", { lineHeight: "44px", fontWeight: "600" }],
+            "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+            "headline-sm": ["20px", { lineHeight: "28px", fontWeight: "500" }],
+            "title-lg": ["18px", { lineHeight: "26px", fontWeight: "600" }],
+            "title-md": ["16px", { lineHeight: "24px", fontWeight: "600" }],
+            "title-sm": ["14px", { lineHeight: "20px", fontWeight: "600" }],
+            "body-lg": ["16px", { lineHeight: "26px", fontWeight: "400" }],
+            "body-md": ["14px", { lineHeight: "22px", fontWeight: "400" }],
+            "body-sm": ["12px", { lineHeight: "18px", fontWeight: "400" }],
+            "label-lg": ["14px", { lineHeight: "20px", fontWeight: "600" }],
+            "label-md": ["13px", { lineHeight: "18px", fontWeight: "600" }],
+            "label-sm": ["11px", { lineHeight: "16px", fontWeight: "500" }]
+          }
+        }
+      }
+    };
+  </script>
 </head>
 
-<body>
-    <nav class="navbar navbar-expand-lg bg-white border-bottom py-3 sticky-top">
-        <div class="container">
-            <a class="navbar-brand font-serif fw-bold fs-4" style="color: var(--flower-primary, #355447);" th:href="@{/}">🌸 HOA TƯƠI SÀI GÒN</a>
-            <div class="d-flex align-items-center gap-2">
-                <a th:href="@{/following}" class="btn btn-outline-danger btn-sm"><i class="bi bi-heart me-1"></i> Đang theo dõi</a>
-                <a th:href="@{/customer/orders}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-seam me-1"></i> Đơn hàng</a>
-                <a th:href="@{/customer/profile/wishlist}" class="btn btn-outline-danger btn-sm"><i class="bi bi-heart me-1"></i> Yêu thích</a>
-                <a th:href="@{/customer/profile/recently-viewed}" class="btn btn-outline-info btn-sm"><i class="bi bi-clock-history me-1"></i> Đã xem</a>
-                <a th:href="@{/}" class="btn btn-light btn-sm"><i class="bi bi-house me-1"></i> Trang chủ</a>
-                <button type="button" class="btn btn-outline-danger btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#signOutModal">
-                    <i class="bi bi-box-arrow-right me-1"></i> Đăng Xuất
-                </button>
-            </div>
-        </div>
-    </nav>
+<body class="bg-background font-body-md text-on-surface antialiased">
 
-    <div class="container py-4">
-        <!-- Ảnh bìa và Nút Edit Cover Photo (UC_009 Steps 4a, 5a, 6a) -->
-        <div class="position-relative rounded-4 overflow-hidden mb-4 shadow-sm"
-            style="height: 220px; background-color: #f1f5f9;">
+  <!-- ==============================================
+       HEADER & NAVIGATION BAR (matching ui/code.html)
+       ============================================== -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-white border-b border-[#EAE1DC] shadow-xs">
+    <!-- Top utility bar -->
+    <div class="bg-[#F5ECE7] border-b border-[#EAE1DC]/70">
+      <div class="max-w-7xl mx-auto px-4 md:px-margin-desktop h-9 flex items-center justify-between font-body-sm text-[12px] text-[#5C4A42]">
+        <div class="flex items-center gap-space-sm">
+          <span class="flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[15px] text-[#7E726D]">storefront</span>
+            Chuỗi Cửa Hàng Hoa Tươi &amp; Điện Hoa Sài Gòn
+          </span>
+        </div>
+        <div class="flex items-center gap-4 sm:gap-6">
+          <a class="hover:text-primary flex items-center gap-1" href="tel:0281111222">
+            <span class="material-symbols-outlined text-[15px]">call</span>028 1111 222
+          </a>
+          <span class="hidden md:flex items-center gap-1">
+            <span class="material-symbols-outlined text-[15px]">schedule</span>Giao nhanh 60–90 phút
+          </span>
+          <a class="hidden sm:flex items-center gap-1 hover:text-primary" th:href="@{/following}">
+            <span class="material-symbols-outlined text-[15px]">bookmark</span>Following
+          </a>
+          <a class="hidden lg:flex items-center gap-1 hover:text-primary" th:href="@{/stores}">
+            <span class="material-symbols-outlined text-[15px]">store</span>Hệ thống cửa hàng
+          </a>
+          <a class="flex items-center gap-1 hover:text-primary" th:href="@{/users}">
+            <span class="material-symbols-outlined text-[15px]">group</span>Người dùng
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main navigation bar -->
+    <div class="bg-white">
+      <div class="h-20 max-w-7xl mx-auto px-4 md:px-margin-desktop flex items-center justify-between gap-space-md">
+        <!-- Brand Logo -->
+        <div class="flex items-center shrink-0">
+          <a class="flex items-center gap-2.5 group" th:href="@{/}">
+            <span class="text-2xl text-secondary">🌸</span>
+            <span class="font-headline-sm text-[22px] tracking-wide text-[#2D2424] font-semibold group-hover:text-primary transition-colors">
+              HOA TƯƠI SÀI GÒN
+            </span>
+          </a>
+        </div>
+
+        <!-- Search Input -->
+        <form th:action="@{/search}" method="get" class="hidden md:flex items-center flex-1 max-w-xl mx-4">
+          <div class="w-full flex items-center bg-white border border-[#E2D7D1] rounded-full pl-3 pr-1 py-1 shadow-xs focus-within:border-primary transition-all">
+            <span class="flex items-center gap-1 text-[13px] text-[#2D2424] font-medium pr-3 border-r border-[#E2D7D1]">
+              <span class="text-secondary text-[14px]">🌸</span>
+              <span>Mẫu hoa</span>
+            </span>
+            <input name="keyword" class="flex-1 bg-transparent px-3 text-[13px] text-on-surface placeholder:text-[#9A8D87] focus:outline-none" placeholder="Tìm hoa hồng, cửa hàng hoặc người dùng..." type="text">
+            <button type="submit" class="px-5 py-2 rounded-full bg-[#1E453E] hover:bg-[#163630] text-white text-[13px] font-medium flex items-center gap-1 shadow-xs transition-colors">
+              <span class="material-symbols-outlined text-[16px]">search</span>
+              <span>Tìm</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Right Actions -->
+        <div class="flex items-center gap-3 shrink-0">
+          <a class="p-2 text-[#5C4A42] hover:text-primary transition-colors rounded-full hover:bg-surface-container" th:href="@{/customer/profile/wishlist}" title="Hoa yêu thích">
+            <span class="material-symbols-outlined text-[22px]">favorite_border</span>
+          </a>
+          <a class="p-2 text-[#5C4A42] hover:text-primary transition-colors rounded-full hover:bg-surface-container relative" th:href="@{/cart}" title="Giỏ hoa">
+            <span class="material-symbols-outlined text-[22px]">shopping_cart</span>
+          </a>
+          <a class="p-2 text-[#5C4A42] hover:text-primary transition-colors rounded-full hover:bg-surface-container" th:href="@{/following}" title="Đang theo dõi">
+            <span class="material-symbols-outlined text-[22px]">bookmark_border</span>
+          </a>
+          
+          <!-- Nút Đăng Xuất mở Modal -->
+          <button type="button" onclick="openModal('signOutModal')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#E2D7D1] text-[13px] text-[#5C4A42] hover:bg-[#F5ECE7] hover:text-secondary transition-colors" title="Đăng xuất">
+            <span class="material-symbols-outlined text-[18px]">logout</span>
+            <span class="hidden sm:inline">Đăng xuất</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==============================================
+       MAIN LAYOUT CONTAINER
+       ============================================== -->
+  <main class="pt-[124px] pb-space-xl max-w-7xl mx-auto px-4 md:px-margin-desktop">
+
+    <!-- Flash message toasts / alerts -->
+    <div th:if="${successMessage}" class="mb-4 p-4 rounded-xl bg-[#E9F3EE] border border-[#264E43]/20 flex items-center gap-3 shadow-xs">
+      <span class="material-symbols-outlined text-[22px] text-[#1E453E]">check_circle</span>
+      <span class="font-body-md text-body-md text-[#1E453E] font-medium" th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="mb-4 p-4 rounded-xl bg-[#FFDAD6] border border-[#BA1A1A]/20 flex items-center gap-3 shadow-xs">
+      <span class="material-symbols-outlined text-[22px] text-[#BA1A1A]">error</span>
+      <span class="font-body-md text-body-md text-[#BA1A1A] font-medium" th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Top breadcrumb banner -->
+    <div class="py-space-md flex flex-wrap items-center justify-between gap-space-sm border-b border-[#EAE1DC] mb-space-lg">
+      <div class="flex items-center gap-space-xs font-body-sm text-body-sm text-on-surface-variant">
+        <a class="hover:text-primary flex items-center gap-0.5" th:href="@{/}">
+          <span class="material-symbols-outlined text-[16px]">home</span>Trang chủ
+        </a>
+        <span class="text-outline-variant">/</span>
+        <span class="text-on-surface-variant">Tài khoản khách hàng</span>
+        <span class="text-outline-variant">/</span>
+        <span class="text-secondary font-medium font-body-sm">Hồ sơ &amp; Cài đặt</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF7F5] border border-[#E2D7D1] text-[13px] text-[#5C4A42]">
+          <span class="material-symbols-outlined text-[16px] text-secondary">verified_user</span>
+          Tài khoản khách hàng
+        </span>
+      </div>
+    </div>
+
+    <!-- ==============================================
+         2-COLUMN RESPONSIVE LAYOUT (SIDEBAR 4 COLS, CONTENT 8 COLS)
+         ============================================== -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+
+      <!-- ==============================================
+           LEFT COLUMN: PROFILE IDENTITY & QUICK LINKS
+           ============================================== -->
+      <aside class="lg:col-span-4 flex flex-col gap-space-md">
+        
+        <!-- Profile Identity Card with Cover Photo -->
+        <div class="bg-surface-container-lowest rounded-xl shadow-xs border border-[#EAE1DC] overflow-hidden">
+          
+          <!-- a. Cover Photo Area (UC_009 Steps 4a, 5a, 6a) -->
+          <div class="relative h-36 bg-[#EFE7E2] overflow-hidden group">
             <img id="coverPreviewImg"
-                th:src="${user.cover != null and !#strings.isEmpty(user.cover) ? user.cover : 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=1200'}"
-                alt="Cover Photo" class="w-100 h-100" style="object-fit: cover;">
-            <div class="position-absolute bottom-0 end-0 p-3">
-                <button type="button" class="btn btn-light btn-sm rounded-pill shadow fw-semibold px-3 py-2"
-                    id="btnEditCover" onclick="document.getElementById('coverFileInput').click();">
-                    <i class="bi bi-camera me-1 text-danger"></i> Edit Cover Photo
+                 th:src="${user.cover != null and !#strings.isEmpty(user.cover) ? user.cover : 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=1200'}"
+                 alt="Cover Photo" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+            
+            <!-- Edit Cover Photo Button -->
+            <button type="button"
+                    class="absolute bottom-2 right-2 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-md text-[12px] font-medium text-on-surface hover:bg-white shadow-xs flex items-center gap-1.5 transition-all cursor-pointer border border-[#EAE1DC]"
+                    onclick="triggerCoverUpload()" title="Chạm để đổi ảnh bìa hoa">
+              <span class="material-symbols-outlined text-[15px] text-secondary">photo_camera</span>
+              <span>Edit Cover Photo</span>
+            </button>
+            
+            <!-- Loyalty Status Badge -->
+            <div class="absolute top-2 left-2">
+              <span class="px-2.5 py-0.5 rounded-full bg-[#1E453E]/90 text-white font-label-sm text-label-sm backdrop-blur-xs flex items-center gap-1 shadow-xs">
+                <span class="material-symbols-outlined text-[13px] text-[#B6F1DE]">local_florist</span>
+                Khách Thân Thiết
+              </span>
+            </div>
+          </div>
+
+          <!-- b. Avatar & Basic Info -->
+          <div class="px-space-lg pb-space-lg pt-0 text-center relative">
+            
+            <!-- Circular Avatar overlapping cover (UC_009 Steps 4, 5, 6) -->
+            <div class="relative inline-block -mt-14 mb-space-sm">
+              <div class="w-24 h-24 rounded-full ring-4 ring-white shadow-md overflow-hidden bg-[#FAF7F5] mx-auto">
+                <img id="avatarPreviewImg"
+                     th:src="${user.avatarUrl != null and !#strings.isEmpty(user.avatarUrl) ? user.avatarUrl : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200'}"
+                     alt="Avatar" class="w-full h-full object-cover">
+              </div>
+              <button type="button"
+                      class="absolute bottom-0 right-1 w-8 h-8 rounded-full bg-[#1E453E] text-white flex items-center justify-center shadow-md hover:bg-[#163630] transition-all cursor-pointer ring-2 ring-white"
+                      onclick="triggerAvatarUpload()" title="Đổi ảnh đại diện">
+                <span class="material-symbols-outlined text-[16px]">photo_camera</span>
+              </button>
+            </div>
+
+            <!-- Full Name & Role Badge -->
+            <h2 class="font-headline-sm text-headline-sm text-on-surface tracking-tight" th:text="${user.fullName}">Tên Người Dùng</h2>
+            <div class="mt-1 flex items-center justify-center gap-space-xs">
+              <span class="px-2.5 py-0.5 rounded-full bg-[#F5ECE7] text-[#264E43] font-label-sm text-label-sm uppercase tracking-wider font-semibold border border-[#E2D7D1]"
+                    th:text="${user.role}">ROLE_CUSTOMER</span>
+              <span class="inline-flex items-center gap-0.5 text-[#264E43] font-label-sm text-label-sm bg-[#E9F3EE] px-2 py-0.5 rounded-full">
+                <span class="material-symbols-outlined text-[13px]">verified</span>
+                Đã chứng thực
+              </span>
+            </div>
+            
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-2 italic max-w-xs mx-auto">
+              "Hoa là bản tình ca êm dịu nhất mà thiên nhiên tặng cho cuộc sống."
+            </p>
+
+            <!-- User Metadata List -->
+            <div class="w-full mt-space-md pt-space-md border border-[#EAE1DC] space-y-2.5 bg-[#FAF7F5] p-space-md rounded-xl text-left">
+              <div class="flex items-center justify-between text-body-sm font-body-sm">
+                <span class="text-on-surface-variant flex items-center gap-space-xs">
+                  <span class="material-symbols-outlined text-[16px] text-[#264E43]">account_circle</span>
+                  Tài khoản:
+                </span>
+                <span class="font-semibold text-on-surface font-title-sm text-title-sm" th:text="${user.username}">username</span>
+              </div>
+              <div class="flex items-center justify-between text-body-sm font-body-sm">
+                <span class="text-on-surface-variant flex items-center gap-space-xs">
+                  <span class="material-symbols-outlined text-[16px] text-secondary">mail</span>
+                  Email:
+                </span>
+                <span class="font-medium text-on-surface truncate max-w-[170px]" th:text="${user.email}" th:title="${user.email}">user@email.com</span>
+              </div>
+              <div class="flex items-center justify-between text-body-sm font-body-sm">
+                <span class="text-on-surface-variant flex items-center gap-space-xs">
+                  <span class="material-symbols-outlined text-[16px] text-[#264E43]">phone_iphone</span>
+                  Số điện thoại:
+                </span>
+                <span class="font-medium text-on-surface" th:text="${user.phone != null ? user.phone : 'Chưa cập nhật'}">0901234567</span>
+              </div>
+              <div class="flex items-center justify-between text-body-sm font-body-sm">
+                <span class="text-on-surface-variant flex items-center gap-space-xs">
+                  <span class="material-symbols-outlined text-[16px] text-outline">calendar_month</span>
+                  Gia nhập:
+                </span>
+                <span class="text-on-surface-variant" th:text="${user.createdDate}">15/10/2026</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Quick Links Navigation Card -->
+        <nav class="bg-surface-container-lowest rounded-xl shadow-xs border border-[#EAE1DC] p-space-md space-y-1">
+          <div class="px-space-sm py-1 font-label-sm text-label-sm uppercase tracking-wider text-outline">
+            Danh mục tài khoản
+          </div>
+          
+          <!-- Sổ địa chỉ -->
+          <button type="button" class="w-full flex items-center justify-between px-space-md py-2.5 rounded-lg text-left text-on-surface hover:bg-[#F5ECE7] transition-colors group cursor-pointer" onclick="switchTab('tabAddresses')">
+            <span class="flex items-center gap-space-sm font-title-sm text-title-sm text-[#264E43] font-semibold">
+              <span class="material-symbols-outlined text-[20px] text-[#264E43]">pin_drop</span>
+              Sổ địa chỉ nhận hàng
+            </span>
+            <span class="px-2 py-0.5 rounded-full bg-[#E9F3EE] text-[#264E43] font-label-sm text-label-sm font-medium"
+                  th:text="${#lists.size(addresses)} + ' địa chỉ'">0 địa chỉ</span>
+          </button>
+
+          <!-- Lịch sử đơn hoa (UC_011) -->
+          <a class="w-full flex items-center justify-between px-space-md py-2.5 rounded-lg text-left text-on-surface hover:bg-[#F5ECE7] transition-colors group" th:href="@{/customer/orders}">
+            <span class="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface-variant group-hover:text-primary">
+              <span class="material-symbols-outlined text-[20px] text-outline group-hover:text-primary">receipt_long</span>
+              Lịch sử đơn hoa (UC_011)
+            </span>
+            <span class="material-symbols-outlined text-[18px] text-outline group-hover:text-primary">chevron_right</span>
+          </a>
+
+          <!-- Bộ sưu tập yêu thích -->
+          <a class="w-full flex items-center justify-between px-space-md py-2.5 rounded-lg text-left text-on-surface hover:bg-[#F5ECE7] transition-colors group" th:href="@{/customer/profile/wishlist}">
+            <span class="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface-variant group-hover:text-primary">
+              <span class="material-symbols-outlined text-[20px] text-outline group-hover:text-primary">favorite</span>
+              Bộ sưu tập yêu thích
+            </span>
+            <span class="material-symbols-outlined text-[18px] text-outline group-hover:text-primary">chevron_right</span>
+          </a>
+
+          <!-- Hoa đã xem gần đây -->
+          <a class="w-full flex items-center justify-between px-space-md py-2.5 rounded-lg text-left text-on-surface hover:bg-[#F5ECE7] transition-colors group" th:href="@{/customer/profile/recently-viewed}">
+            <span class="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface-variant group-hover:text-primary">
+              <span class="material-symbols-outlined text-[20px] text-outline group-hover:text-primary">visibility</span>
+              Hoa đã xem gần đây
+            </span>
+            <span class="material-symbols-outlined text-[18px] text-outline group-hover:text-primary">chevron_right</span>
+          </a>
+
+          <!-- Nghệ nhân / Cửa hàng đang theo dõi -->
+          <a class="w-full flex items-center justify-between px-space-md py-2.5 rounded-lg text-left text-on-surface hover:bg-[#F5ECE7] transition-colors group" th:href="@{/customer/profile/followed-stores}">
+            <span class="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface-variant group-hover:text-primary">
+              <span class="material-symbols-outlined text-[20px] text-outline group-hover:text-primary">storefront</span>
+              Cửa hàng đang theo dõi
+            </span>
+            <span class="material-symbols-outlined text-[18px] text-outline group-hover:text-primary">chevron_right</span>
+          </a>
+
+          <!-- Đăng xuất tài khoản -->
+          <div class="pt-2 border-t border-[#EAE1DC]/60">
+            <button type="button" class="w-full flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-left text-secondary hover:bg-secondary-container/40 transition-colors cursor-pointer" onclick="openModal('signOutModal')">
+              <span class="material-symbols-outlined text-[20px]">logout</span>
+              <span class="font-title-sm text-title-sm">Đăng xuất tài khoản</span>
+            </button>
+          </div>
+        </nav>
+
+        <!-- Floral Help Concierge Widget -->
+        <div class="p-space-md rounded-xl bg-[#FAF7F5] border border-[#EAE1DC] flex items-center gap-3">
+          <span class="text-3xl">🌸</span>
+          <div class="text-body-sm">
+            <p class="font-title-sm text-title-sm text-[#264E43]">Hotline Hỗ Trợ Đặt Hoa</p>
+            <p class="text-on-surface-variant text-[13px]">Cần tư vấn chọn hoa tặng gấp? Gọi ngay <strong class="text-secondary">028 1111 222</strong> (07:00 - 22:00).</p>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- ==============================================
+           RIGHT COLUMN: TAB SYSTEM (PROFILE, ADDRESSES, PASSWORD)
+           ============================================== -->
+      <section class="lg:col-span-8 flex flex-col gap-space-md">
+
+        <!-- Navigation Tabs Bar -->
+        <div class="bg-surface-container-lowest rounded-xl shadow-xs border border-[#EAE1DC] p-1.5 flex items-center gap-1 overflow-x-auto">
+          <button type="button"
+                  class="tab-btn flex-1 min-w-[170px] flex items-center justify-center gap-space-xs px-space-md py-2.5 rounded-lg font-title-sm text-title-sm transition-all bg-[#1E453E] text-white font-semibold shadow-xs cursor-pointer"
+                  id="btnTabProfile" onclick="switchTab('tabProfile')">
+            <span class="material-symbols-outlined text-[18px]">person</span>
+            <span>Hồ Sơ Của Tôi</span>
+          </button>
+          
+          <button type="button"
+                  class="tab-btn flex-1 min-w-[170px] flex items-center justify-center gap-space-xs px-space-md py-2.5 rounded-lg font-title-sm text-title-sm transition-all text-on-surface-variant hover:bg-[#F5ECE7] cursor-pointer"
+                  id="btnTabAddresses" onclick="switchTab('tabAddresses')">
+            <span class="material-symbols-outlined text-[18px]">location_on</span>
+            <span>Địa Chỉ Của Tôi</span>
+          </button>
+          
+          <button type="button"
+                  class="tab-btn flex-1 min-w-[170px] flex items-center justify-center gap-space-xs px-space-md py-2.5 rounded-lg font-title-sm text-title-sm transition-all text-on-surface-variant hover:bg-[#F5ECE7] cursor-pointer"
+                  id="btnTabPassword" onclick="switchTab('tabPassword')">
+            <span class="material-symbols-outlined text-[18px]">lock_reset</span>
+            <span>Đổi Mật Khẩu</span>
+          </button>
+        </div>
+
+        <!-- ==========================================
+             TAB 1: THÔNG TIN HỒ SƠ (UC_009)
+             ========================================== -->
+        <div class="tab-content bg-surface-container-lowest rounded-xl shadow-xs border border-[#EAE1DC] p-space-lg lg:p-space-xl" id="tabProfile">
+          
+          <!-- Tab Header -->
+          <div class="flex items-center justify-between pb-space-md mb-space-lg border-b border-[#F0E8E3]">
+            <div>
+              <h3 class="font-headline-sm text-headline-sm text-on-surface">Hồ Sơ Của Tôi</h3>
+              <p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Quản lý thông tin hồ sơ để bảo mật tài khoản và đặt hoa nhanh chóng</p>
+            </div>
+            
+            <!-- Nút chỉnh sửa hình cây bút (UC_009 Step 4b) -->
+            <button type="button"
+                    class="px-4 py-2 rounded-full border border-[#E2D7D1] hover:border-primary text-primary hover:bg-[#E9F3EE] font-label-md text-label-md flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                    id="btnToggleEdit" onclick="toggleEditProfileMode()">
+              <span class="material-symbols-outlined text-[18px]" id="btnEditIcon">edit</span>
+              <span id="btnEditText">Chỉnh sửa hồ sơ</span>
+            </button>
+          </div>
+
+          <!-- Edit status indicator banner -->
+          <div class="p-space-md rounded-xl bg-[#FAF7F5] border border-[#EAE1DC] mb-space-lg flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant transition-colors" id="profileModeBanner">
+            <span class="flex items-center gap-space-xs">
+              <span class="material-symbols-outlined text-[18px] text-[#264E43]">verified_user</span>
+              <span>Đang ở chế độ xem an toàn. Bấm <strong>"Chỉnh sửa hồ sơ"</strong> để cập nhật thông tin.</span>
+            </span>
+            <span class="font-label-sm text-label-sm text-outline px-2 py-0.5 rounded bg-[#EFE7E2]">Chỉ đọc</span>
+          </div>
+
+          <!-- Profile Form (UC_009) -->
+          <form th:action="@{/customer/profile/update}" method="post" enctype="multipart/form-data" id="profileForm" class="space-y-space-md">
+            
+            <!-- Hidden inputs for avatar and cover uploads -->
+            <input type="file" id="coverFileInput" name="coverFile" accept="image/*" class="hidden" onchange="previewCoverImage(this)">
+            <input type="file" id="avatarFileInput" name="avatarFile" accept="image/*" class="hidden" onchange="previewAvatarImage(this)">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+              
+              <!-- Full name -->
+              <div>
+                <label class="block font-label-md text-label-md text-on-surface mb-1.5">
+                  Họ và tên <span class="text-secondary">*</span>
+                </label>
+                <div class="relative">
+                  <input class="profile-input w-full px-space-md py-2.5 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#264E43]/30 disabled:opacity-85 transition-all"
+                         disabled name="fullName" id="inpFullName" type="text" th:value="${user.fullName}" required>
+                  <span class="material-symbols-outlined absolute right-3 top-3 text-[18px] text-outline">badge</span>
+                </div>
+              </div>
+
+              <!-- Username (Immutable) -->
+              <div>
+                <label class="flex items-center justify-between font-label-md text-label-md text-on-surface mb-1.5">
+                  <span>Tên đăng nhập</span>
+                  <span class="text-outline font-label-sm text-label-sm flex items-center gap-0.5">
+                    <span class="material-symbols-outlined text-[12px]">lock</span> Cố định
+                  </span>
+                </label>
+                <div class="relative">
+                  <input class="w-full px-space-md py-2.5 rounded-lg bg-[#F5ECE7]/60 border border-[#E2D7D1] text-on-surface-variant font-body-md text-body-md cursor-not-allowed"
+                         disabled readonly type="text" th:value="${user.username}">
+                  <span class="material-symbols-outlined absolute right-3 top-3 text-[18px] text-outline">alternate_email</span>
+                </div>
+              </div>
+
+              <!-- Email (Verified Immutable) -->
+              <div>
+                <label class="flex items-center justify-between font-label-md text-label-md text-on-surface mb-1.5">
+                  <span>Địa chỉ Email</span>
+                  <span class="text-[#264E43] font-label-sm text-label-sm flex items-center gap-0.5 font-semibold">
+                    <span class="material-symbols-outlined text-[12px]">check_circle</span> Đã xác thực
+                  </span>
+                </label>
+                <div class="relative">
+                  <input class="w-full px-space-md py-2.5 rounded-lg bg-[#F5ECE7]/60 border border-[#E2D7D1] text-on-surface-variant font-body-md text-body-md cursor-not-allowed"
+                         disabled readonly type="email" th:value="${user.email}">
+                  <span class="material-symbols-outlined absolute right-3 top-3 text-[18px] text-[#264E43]">mark_email_read</span>
+                </div>
+              </div>
+
+              <!-- Phone number (10 digits validation) -->
+              <div>
+                <label class="block font-label-md text-label-md text-on-surface mb-1.5">
+                  Số điện thoại liên lạc <span class="text-secondary">* (10 số)</span>
+                </label>
+                <div class="relative">
+                  <input class="profile-input w-full px-space-md py-2.5 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#264E43]/30 disabled:opacity-85 transition-all"
+                         disabled name="phone" id="inpPhone" type="tel" pattern="[0-9]{10}" maxlength="10" th:value="${user.phone}" placeholder="VD: 0901234567">
+                  <span class="material-symbols-outlined absolute right-3 top-3 text-[18px] text-outline">smartphone</span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Default Delivery Address Text -->
+            <div class="pt-2">
+              <label class="block font-label-md text-label-md text-on-surface mb-1.5">Địa chỉ giao hoa mặc định</label>
+              <div class="relative">
+                <input class="profile-input w-full px-space-md py-2.5 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#264E43]/30 disabled:opacity-85 transition-all"
+                       disabled name="address" id="inpAddress" type="text" th:value="${user.address}" placeholder="VD: Số nhà, tên đường, phường/quận...">
+                <span class="material-symbols-outlined absolute right-3 top-3 text-[18px] text-outline">home_pin</span>
+              </div>
+            </div>
+
+            <!-- Occasion notes / preferences -->
+            <div class="pt-2">
+              <label class="block font-label-md text-label-md text-on-surface mb-1.5">Sở thích hoa tươi &amp; Phong cách yêu thích</label>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-space-md py-1 rounded-full bg-[#F5ECE7] text-[#264E43] border border-[#E2D7D1] font-label-sm text-label-sm font-medium">Hoa hồng Pháp</span>
+                <span class="px-space-md py-1 rounded-full bg-[#F5ECE7] text-[#264E43] border border-[#E2D7D1] font-label-sm text-label-sm font-medium">Mẫu đơn Pastel</span>
+                <span class="px-space-md py-1 rounded-full bg-[#F5ECE7] text-[#264E43] border border-[#E2D7D1] font-label-sm text-label-sm font-medium">Bó giấy mộc Vintage</span>
+                <span class="px-space-md py-1 rounded-full bg-[#F5ECE7] text-[#264E43] border border-[#E2D7D1] font-label-sm text-label-sm font-medium">Thiệp viết tay nắn nót</span>
+              </div>
+            </div>
+
+            <!-- Action buttons container (visible on edit) -->
+            <div class="hidden pt-space-md flex items-center justify-end gap-space-md" id="profileActionButtons">
+              <button type="button" class="px-space-lg py-2.5 rounded-full bg-[#F5ECE7] text-on-surface font-label-lg text-label-lg hover:bg-[#EFE7E2] transition-colors border border-[#E2D7D1] cursor-pointer" onclick="cancelEditProfile()">
+                Hủy bỏ
+              </button>
+              <button type="submit" class="px-space-xl py-2.5 rounded-full bg-[#1E453E] text-white font-label-lg text-label-lg shadow-sm hover:bg-[#163630] transition-all flex items-center gap-space-xs cursor-pointer">
+                <span class="material-symbols-outlined text-[18px]">check</span>
+                Lưu Thay Đổi
+              </button>
+            </div>
+
+          </form>
+
+        </div>
+
+        <!-- ==========================================
+             TAB 2: SỔ ĐỊA CHỈ NHẬN HÀNG (UC_010)
+             ========================================== -->
+        <div class="tab-content hidden bg-surface-container-lowest rounded-xl shadow-xs border border-[#EAE1DC] p-space-lg lg:p-space-xl" id="tabAddresses">
+          
+          <!-- Header and Add Button -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-md mb-space-lg border-b border-[#F0E8E3]">
+            <div>
+              <h3 class="font-headline-sm text-headline-sm text-on-surface">Địa Chỉ Của Tôi</h3>
+              <p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Quản lý danh sách điểm nhận hoa hỏa tốc 60–90 phút tại Sài Gòn</p>
+            </div>
+            
+            <button type="button" class="inline-flex items-center gap-space-xs px-space-lg py-2.5 rounded-full bg-[#1E453E] text-white font-label-md text-label-md shadow-xs hover:bg-[#163630] transition-all cursor-pointer" onclick="openModal('modalAddAddress')">
+              <span class="material-symbols-outlined text-[18px]">add_location_alt</span>
+              <span>+ Thêm Địa Chỉ Mới</span>
+            </button>
+          </div>
+
+          <!-- Express Delivery Guarantee Notice -->
+          <div class="mb-space-lg p-space-md rounded-xl bg-[#FAF7F5] border border-[#EAE1DC] flex items-center gap-space-md">
+            <span class="material-symbols-outlined text-[28px] text-[#264E43] shrink-0">local_shipping</span>
+            <div class="text-body-sm font-body-sm">
+              <p class="font-title-sm text-title-sm text-[#264E43]">Cam kết giao hoa 60–90 phút chính xác từng con phố TP.HCM</p>
+              <p class="text-on-surface-variant">Florist sẽ đóng hộp bảo quản cuống hoa kèm nước dưỡng và chụp ảnh thành phẩm gửi quý khách trước khi shipper xuất phát.</p>
+            </div>
+          </div>
+
+          <!-- Empty address state -->
+          <div th:if="${#lists.isEmpty(addresses)}" class="text-center py-10 bg-[#FAF7F5] rounded-xl border border-dashed border-[#E2D7D1]">
+            <span class="material-symbols-outlined text-[48px] text-[#7E726D] mb-2">location_off</span>
+            <p class="font-title-sm text-title-sm text-on-surface">Bạn chưa có địa chỉ nhận hoa nào</p>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Thêm địa chỉ giao hàng để tiến hành thanh toán và nhận hoa nhanh chóng.</p>
+            <button type="button" class="mt-4 px-5 py-2 rounded-full bg-[#1E453E] text-white text-[13px] font-medium shadow-xs" onclick="openModal('modalAddAddress')">
+              + Thêm địa chỉ đầu tiên
+            </button>
+          </div>
+
+          <!-- Address Cards Stack -->
+          <div th:if="${!#lists.isEmpty(addresses)}" class="space-y-space-md">
+            
+            <div th:each="addr : ${addresses}"
+                 class="p-space-lg rounded-xl bg-surface-container-lowest border border-[#EAE1DC] hover:border-[#E2D7D1] transition-all relative group shadow-xs">
+              <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-space-md">
+                
+                <div class="space-y-1.5 flex-1">
+                  <div class="flex flex-wrap items-center gap-space-sm">
+                    <span class="font-title-md text-title-md text-on-surface" th:text="${addr.recipientName}">Tên người nhận</span>
+                    <span class="text-outline-variant">|</span>
+                    <span class="font-body-md text-body-md text-on-surface-variant" th:text="${addr.phone}">0901234567</span>
+                    
+                    <!-- Huy hiệu Mặc Định -->
+                    <span th:if="${addr.isDefault}"
+                          class="px-2.5 py-0.5 rounded-full bg-[#E9F3EE] text-[#264E43] font-label-sm text-label-sm font-semibold border border-[#264E43]/20 flex items-center gap-1">
+                      <span class="material-symbols-outlined text-[13px]">check_circle</span> Mặc Định
+                    </span>
+                  </div>
+
+                  <p class="font-body-md text-body-md text-on-surface flex items-start gap-1 pt-1">
+                    <span class="material-symbols-outlined text-outline text-[18px] shrink-0 mt-0.5">location_on</span>
+                    <span th:text="${addr.addressDetail}">Địa chỉ chi tiết</span>
+                  </p>
+                </div>
+
+                <!-- Actions: Thiết lập mặc định, Sửa, Xóa -->
+                <div class="flex sm:flex-col items-end gap-2 shrink-0">
+                  
+                  <!-- Nút Thiết lập mặc định (nếu chưa phải mặc định) -->
+                  <form th:if="${!addr.isDefault}" th:action="@{/customer/profile/address/set-default/{id}(id=${addr.id})}" method="post">
+                    <button type="submit" class="font-label-sm text-label-sm text-[#264E43] hover:underline px-space-sm py-1 rounded hover:bg-[#E9F3EE] cursor-pointer">
+                      Thiết lập mặc định
+                    </button>
+                  </form>
+
+                  <div class="flex items-center gap-2">
+                    <!-- Nút Sửa -->
+                    <button type="button"
+                            class="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant hover:text-primary px-space-sm py-1 rounded hover:bg-[#F5ECE7] cursor-pointer"
+                            th:onclick="'openEditAddressModal(' + ${addr.id} + ', '' + ${#strings.escapeJavaScript(addr.recipientName)} + '', '' + ${#strings.escapeJavaScript(addr.phone)} + '', '' + ${#strings.escapeJavaScript(addr.addressDetail)} + '', ' + ${addr.isDefault} + ')'">
+                      <span class="material-symbols-outlined text-[16px]">edit</span>
+                      <span>Sửa</span>
+                    </button>
+
+                    <!-- Nút Xóa -->
+                    <form th:action="@{/customer/profile/address/delete/{id}(id=${addr.id})}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa địa chỉ này?');">
+                      <button type="submit" class="inline-flex items-center gap-1 font-label-sm text-label-sm text-secondary hover:underline px-space-sm py-1 rounded hover:bg-[#FCECEE] cursor-pointer">
+                        <span class="material-symbols-outlined text-[16px]">delete</span>
+                        <span>Xóa</span>
+                      </button>
+                    </form>
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- ==========================================
+             TAB 3: ĐỔI MẬT KHẨU (UC_008)
+             ========================================== -->
+        <div class="tab-content hidden bg-surface-container-lowest rounded-xl shadow-xs border border-[#EAE1DC] p-space-lg lg:p-space-xl" id="tabPassword">
+          
+          <!-- Tab Header -->
+          <div class="pb-space-md mb-space-lg border-b border-[#F0E8E3]">
+            <h3 class="font-headline-sm text-headline-sm text-on-surface">Đổi Mật Khẩu Bảo Mật</h3>
+            <p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Để bảo vệ thông tin cá nhân và đơn hàng hoa, vui lòng không chia sẻ mật khẩu cho người khác</p>
+          </div>
+
+          <!-- Password change form -->
+          <form th:action="@{/customer/profile/change-password}" method="post" class="max-w-xl space-y-space-md" onsubmit="return validatePasswordChange(event)">
+            
+            <!-- Current password -->
+            <div>
+              <label class="block font-label-md text-label-md text-on-surface mb-1.5">
+                Mật khẩu hiện tại <span class="text-secondary">*</span>
+              </label>
+              <div class="relative">
+                <input class="w-full px-space-md py-2.5 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#264E43]/30"
+                       id="currentPass" name="oldPassword" placeholder="Nhập mật khẩu đang dùng" required type="password">
+                <button type="button" class="absolute right-3 top-2.5 text-outline hover:text-on-surface cursor-pointer" onclick="togglePasswordVisibility('currentPass', this)">
+                  <span class="material-symbols-outlined text-[20px]">visibility</span>
                 </button>
+              </div>
             </div>
+
+            <!-- New password -->
+            <div>
+              <label class="block font-label-md text-label-md text-on-surface mb-1.5">
+                Mật khẩu mới <span class="text-secondary">*</span>
+              </label>
+              <div class="relative">
+                <input class="w-full px-space-md py-2.5 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#264E43]/30"
+                       id="newPass" name="newPassword" oninput="checkPasswordStrength(this.value)" placeholder="Ít nhất 6 ký tự, gồm chữ và số" required type="password">
+                <button type="button" class="absolute right-3 top-2.5 text-outline hover:text-on-surface cursor-pointer" onclick="togglePasswordVisibility('newPass', this)">
+                  <span class="material-symbols-outlined text-[20px]">visibility</span>
+                </button>
+              </div>
+              
+              <!-- Strength meter bar -->
+              <div class="mt-2 space-y-1">
+                <div class="w-full h-1.5 bg-[#EFE7E2] rounded-full overflow-hidden">
+                  <div class="h-full bg-outline-variant w-1/4 transition-all duration-300" id="passwordStrengthBar"></div>
+                </div>
+                <div class="flex items-center justify-between text-body-sm font-body-sm text-outline">
+                  <span>Độ mạnh: <strong class="text-on-surface-variant font-medium" id="strengthLabel">Trống</strong></span>
+                  <span>Tối thiểu 6 ký tự</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Confirm new password -->
+            <div>
+              <label class="block font-label-md text-label-md text-on-surface mb-1.5">
+                Xác nhận mật khẩu mới <span class="text-secondary">*</span>
+              </label>
+              <div class="relative">
+                <input class="w-full px-space-md py-2.5 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#264E43]/30"
+                       id="confirmPass" placeholder="Nhập lại mật khẩu mới" required type="password">
+                <button type="button" class="absolute right-3 top-2.5 text-outline hover:text-on-surface cursor-pointer" onclick="togglePasswordVisibility('confirmPass', this)">
+                  <span class="material-symbols-outlined text-[20px]">visibility</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Notice box -->
+            <div class="p-space-md rounded-xl bg-[#FAF7F5] border border-[#EAE1DC] text-body-sm font-body-sm text-on-surface-variant space-y-1">
+              <p class="font-semibold text-on-surface flex items-center gap-1">
+                <span class="material-symbols-outlined text-[#264E43] text-[16px]">info</span>
+                Tiêu chuẩn bảo mật:
+              </p>
+              <ul class="list-disc pl-5 space-y-0.5 text-outline">
+                <li>Nên chứa chữ hoa, chữ thường và chữ số để an toàn cao nhất.</li>
+                <li>Hệ thống sẽ giữ giỏ hoa và thông tin địa chỉ an toàn sau khi đổi.</li>
+              </ul>
+            </div>
+
+            <!-- Submit button -->
+            <div class="pt-space-sm">
+              <button type="submit" class="px-space-xl py-2.5 rounded-full bg-[#1E453E] text-white font-label-lg text-label-lg shadow-sm hover:bg-[#163630] transition-all flex items-center gap-space-xs cursor-pointer">
+                <span class="material-symbols-outlined text-[18px]">key</span>
+                Cập Nhật Mật Khẩu
+              </button>
+            </div>
+
+          </form>
+
         </div>
 
-        <div class="row g-4">
-            <!-- Sidebar hồ sơ -->
-            <div class="col-lg-4">
-                <div class="card profile-card bg-white p-4 text-center">
-                    <!-- Avatar với nút icon camera (UC_009 Steps 4, 5, 6) -->
-                    <div class="position-relative d-inline-block mx-auto mb-3">
-                        <img id="avatarPreviewImg"
-                            th:src="${user.avatarUrl != null and !#strings.isEmpty(user.avatarUrl) ? user.avatarUrl : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200'}"
-                            class="rounded-circle border border-3 border-danger p-1" width="130" height="130"
-                            style="object-fit: cover;">
-                        <button type="button"
-                            class="btn btn-danger btn-sm rounded-circle position-absolute bottom-0 end-0 shadow"
-                            style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center;"
-                            title="Chọn hình camera trên ảnh đại diện" id="btnEditAvatar"
-                            onclick="document.getElementById('avatarFileInput').click();">
-                            <i class="bi bi-camera-fill fs-6"></i>
-                        </button>
-                    </div>
+      </section>
 
-                    <h5 class="font-serif fw-bold mb-1" th:text="${user.fullName}"></h5>
-                    <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-1 mb-3"
-                        th:text="${user.role}"></span>
-
-                    <div class="text-start border-top pt-3 small text-muted">
-                        <p class="mb-2"><i class="bi bi-person me-2 text-danger"></i> Username: <strong
-                                class="text-dark" th:text="${user.username}"></strong></p>
-                        <p class="mb-2"><i class="bi bi-envelope me-2 text-danger"></i> Email: <span class="text-dark"
-                                th:text="${user.email}"></span></p>
-                        <p class="mb-2"><i class="bi bi-telephone me-2 text-danger"></i> Phone: <span class="text-dark"
-                                th:text="${user.phone != null ? user.phone : 'Chưa cập nhật'}"></span></p>
-                        <p class="mb-0"><i class="bi bi-calendar-check me-2 text-danger"></i> Tham gia: <span
-                                class="text-dark" th:text="${user.createdDate}"></span></p>
-                    </div>
-
-                    <div class="mt-4 border-top pt-3 d-grid gap-2">
-                        <!-- Purchase history (UC_011 Step 4) -->
-                        <a th:href="@{/customer/orders}" class="btn btn-light text-start fw-semibold" id="sidebarPurchaseHistory">
-                            <i class="bi bi-clock-history text-danger me-2"></i> Purchase history (Lịch sử đơn hàng)
-                        </a>
-                        <button type="button" class="btn btn-light text-start fw-semibold" id="sidebarYourAddress"
-                            onclick="switchToAddressTab();">
-                            <i class="bi bi-geo-alt text-danger me-2"></i> Your address (Sổ địa chỉ)
-                        </button>
-                        <a th:href="@{/customer/profile/wishlist}" class="btn btn-light text-start"><i
-                                class="bi bi-heart text-danger me-2"></i> Sản phẩm yêu thích (Wishlist)</a>
-                        <a th:href="@{/customer/profile/recently-viewed}" class="btn btn-light text-start"><i
-                                class="bi bi-eye text-primary me-2"></i> Sản phẩm đã xem gần đây</a>
-                        <a th:href="@{/customer/profile/followed-stores}" class="btn btn-light text-start"><i
-                                class="bi bi-shop text-success me-2"></i> Cửa hàng đang theo dõi</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Nội dung chính: Sửa thông tin, Đổi MK, Sổ địa chỉ -->
-            <div class="col-lg-8">
-                <div th:if="${successMessage}" class="alert alert-success rounded-3 mb-4" th:text="${successMessage}">
-                </div>
-                <div th:if="${errorMessage}" class="alert alert-danger rounded-3 mb-4" th:text="${errorMessage}"></div>
-
-                <!-- Tab điều hướng -->
-                <ul class="nav nav-pills mb-4 bg-white p-2 rounded-4 border" id="profileTab" role="tablist">
-                    <li class="nav-item flex-fill">
-                        <button class="nav-link active w-100 rounded-3" id="info-tab" data-bs-toggle="pill"
-                            data-bs-target="#tab-info">Thông Tin Cá Nhân</button>
-                    </li>
-                    <li class="nav-item flex-fill">
-                        <button class="nav-link w-100 rounded-3" id="address-tab" data-bs-toggle="pill"
-                            data-bs-target="#tab-address"><i class="bi bi-geo-alt me-1"></i>Sổ Địa Chỉ</button>
-                    </li>
-                    <li class="nav-item flex-fill">
-                        <button class="nav-link w-100 rounded-3" id="password-tab" data-bs-toggle="pill"
-                            data-bs-target="#tab-password"><i class="bi bi-key-fill text-warning me-1"></i> Đổi Mật
-                            Khẩu</button>
-                    </li>
-                </ul>
-
-                <div class="tab-content">
-                    <!-- Tab 1: Cập nhật thông tin (UC_009) -->
-                    <div class="tab-pane fade show active" id="tab-info">
-                        <div class="card profile-card bg-white p-4">
-                            <div class="d-flex align-items-center gap-2 mb-4">
-                                <h5 class="fw-bold mb-0 font-serif">Chỉnh Sửa Thông Tin Cá Nhân</h5>
-                                <!-- Nút hình cây bút ở phần thông tin cá nhân (UC_009 Step 4b) -->
-                                <button type="button" class="btn btn-outline-danger btn-sm rounded-circle shadow-sm"
-                                    id="btnEditProfileInfo" title="Chọn nút hình cây bút để chỉnh sửa thông tin cá nhân"
-                                    onclick="toggleEditProfile()">
-                                    <i class="bi bi-pencil-fill"></i>
-                                </button>
-                            </div>
-
-                            <form id="profileForm" th:action="@{/customer/profile/update}" method="post"
-                                enctype="multipart/form-data">
-                                <!-- Hidden inputs for avatar and cover files (triggered by Camera and Edit Cover Photo buttons) -->
-                                <input type="file" name="avatarFile" id="avatarFileInput" class="d-none"
-                                    accept="image/*" onchange="handleFileSelected(this, 'avatar')">
-                                <input type="file" name="coverFile" id="coverFileInput" class="d-none" accept="image/*"
-                                    onchange="handleFileSelected(this, 'cover')">
-
-                                <!-- Tùy chỉnh thông tin cá nhân: email, phone, firstname, lastname, id card (UC_009 Step 5b) -->
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold small">First name (Họ và tên đệm)</label>
-                                        <input type="text" id="inputFirstName" class="form-control"
-                                            placeholder="Nguyễn Văn" oninput="syncFullName()" disabled>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold small">Last name (Tên)</label>
-                                        <input type="text" id="inputLastName" class="form-control"
-                                            placeholder="Khách Hàng" oninput="syncFullName()" disabled>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold small">Họ và tên đầy đủ (*)</label>
-                                    <input type="text" name="fullName" id="inputFullName" class="form-control"
-                                        th:value="${user.fullName}" required disabled>
-                                </div>
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold small">Email (*)</label>
-                                        <input type="email" id="inputEmail" class="form-control bg-light"
-                                            th:value="${user.email}" readonly title="Email tài khoản">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold small">Số điện thoại (Phone)</label>
-                                        <input type="text" name="phone" id="inputPhone" class="form-control"
-                                            th:value="${user.phone}" placeholder="0901234567" disabled>
-                                    </div>
-                                </div>
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold small">CMND / CCCD (ID Card)</label>
-                                        <input type="text" id="inputIdCard" class="form-control"
-                                            placeholder="07920100xxxx" disabled>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold small">Địa chỉ liên hệ chính</label>
-                                        <input type="text" name="address" id="inputAddress" class="form-control"
-                                            th:value="${user.address}" placeholder="Số nhà, tên đường, phường/xã..."
-                                            disabled>
-                                    </div>
-                                </div>
-                                <!-- Nút Save (UC_009 Step 5b1) -->
-                                <button type="button" class="btn btn-flower px-4 py-2 rounded-pill fw-bold shadow-sm"
-                                    id="btnSaveProfile" onclick="handleSaveProfile()" disabled>
-                                    <i class="bi bi-save me-1"></i> Save
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- Tab 2: Sổ địa chỉ nhận hàng (UC_010) -->
-                    <div class="tab-pane fade" id="tab-address">
-                        <div class="card profile-card bg-white p-4">
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <h5 class="fw-bold mb-0 font-serif">Sổ Địa Chỉ Nhận Hàng (Your address)</h5>
-                                <!-- Nút New address (UC_010 Step 6) -->
-                                <button class="btn btn-sm btn-flower rounded-pill px-3 fw-semibold" id="btnNewAddress"
-                                    data-bs-toggle="modal" data-bs-target="#modalAddAddress">
-                                    <i class="bi bi-plus-lg me-1"></i> New address
-                                </button>
-                            </div>
-
-                            <div th:if="${#lists.isEmpty(addresses)}" class="text-center py-5 text-muted">
-                                <i class="bi bi-geo-alt fs-1 text-secondary opacity-50"></i>
-                                <p class="mt-2">Bạn chưa có địa chỉ nhận hàng nào. Hãy thêm một địa chỉ để nhận hoa
-                                    thuận tiện hơn!</p>
-                            </div>
-
-                            <div th:each="addr : ${addresses}"
-                                class="p-3 border rounded-3 mb-3 bg-light d-flex justify-content-between align-items-center address-item"
-                                th:data-recipient="${addr.recipientName}" th:data-detail="${addr.addressDetail}">
-                                <div>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <strong th:text="${addr.recipientName}"></strong>
-                                        <span class="text-muted small">| SĐT: <span
-                                                th:text="${addr.phone}"></span></span>
-                                        <span th:if="${addr.isDefault}" class="badge bg-danger rounded-pill">Mặc
-                                            định</span>
-                                    </div>
-                                    <div class="text-secondary small mt-1" th:text="${addr.addressDetail}"></div>
-                                </div>
-                                <div class="d-flex gap-2">
-                                    <!-- Nút hình cây bút (UC_010 Step 6a) -->
-                                    <button class="btn btn-outline-primary btn-sm rounded-circle" type="button"
-                                        data-bs-toggle="modal" th:data-bs-target="'#modalEditAddress_' + ${addr.id}"
-                                        title="Chọn nút hình cây bút ở địa chỉ muốn sửa">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <form th:if="${!addr.isDefault}"
-                                        th:action="@{/customer/profile/address/set-default/{id}(id=${addr.id})}"
-                                        method="post">
-                                        <button class="btn btn-outline-secondary btn-sm rounded-pill" type="submit">Đặt
-                                            mặc định</button>
-                                    </form>
-                                    <!-- Nút hình thùng rác (UC_010 Step 6-8b) -->
-                                    <form th:action="@{/customer/profile/address/delete/{id}(id=${addr.id})}"
-                                        method="post" onsubmit="return confirm('Bạn có chắc muốn xóa địa chỉ này?');">
-                                        <button class="btn btn-outline-danger btn-sm rounded-circle" type="submit"
-                                            title="Chọn nút hình thùng rác ở địa chỉ muốn xóa"><i
-                                                class="bi bi-trash"></i></button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tab 3: Đổi mật khẩu (UC_008) -->
-                    <div class="tab-pane fade" id="tab-password">
-                        <div class="card profile-card bg-white p-4">
-                            <div class="d-flex align-items-center gap-2 mb-4">
-                                <span class="fs-4 text-warning">🔑</span>
-                                <h5 class="fw-bold mb-0 font-serif">Đổi Mật Khẩu Tài Khoản (Account Management)</h5>
-                            </div>
-                            <form id="changePasswordForm" th:action="@{/customer/profile/change-password}"
-                                method="post">
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold small">Mật khẩu hiện tại (*)</label>
-                                    <input type="password" id="inputOldPassword" name="oldPassword" class="form-control"
-                                        required placeholder="Nhập mật khẩu đang dùng">
-                                </div>
-                                <div class="mb-4">
-                                    <label class="form-label fw-semibold small">Mật khẩu mới (tối thiểu 6 ký tự)
-                                        (*)</label>
-                                    <input type="password" id="inputNewPassword" name="newPassword" class="form-control"
-                                        required minlength="6" placeholder="Nhập mật khẩu mới">
-                                </div>
-                                <button type="button" class="btn btn-danger px-4 py-2 rounded-pill fw-bold"
-                                    id="btnSavePassword" onclick="handleSavePassword()">
-                                    <i class="bi bi-save me-1"></i> Save
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
-    <!-- Modal thêm địa chỉ mới (UC_010 Steps 6, 7, 8) -->
-    <div class="modal fade" id="modalAddAddress" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-4 border-0">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title font-serif fw-bold">New Address - Thêm Địa Chỉ Mới</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form id="addAddressForm" th:action="@{/customer/profile/address/add}" method="post"
-                    onsubmit="event.preventDefault(); handleSubmitNewAddress();">
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold">Tên người nhận (*)</label>
-                            <input type="text" id="addRecipientName" name="recipientName" class="form-control" required
-                                placeholder="Ví dụ: Nguyễn Văn A">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold">Số điện thoại (* - đúng 10 chữ số)</label>
-                            <input type="text" id="addPhone" name="phone" class="form-control" required
-                                placeholder="0901234567">
-                            <div class="form-text text-muted small">Chỉ nhập đúng 10 chữ số.
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold">Địa chỉ chi tiết (*)</label>
-                            <textarea id="addAddressDetail" name="addressDetail" class="form-control" rows="2" required
-                                placeholder="Số nhà, tên đường, Phường, Quận, Thành phố..."></textarea>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="isDefault" value="true"
-                                id="checkDefault">
-                            <label class="form-check-label small" for="checkDefault">Đặt làm địa chỉ nhận hàng mặc
-                                định</label>
-                        </div>
-                    </div>
-                    <div class="modal-footer border-0 pt-0">
-                        <button type="button" class="btn btn-light rounded-pill px-3"
-                            data-bs-dismiss="modal">Cancel</button>
-                        <!-- Bấm nút Submit (UC_010 Step 8) -->
-                        <button type="button" class="btn btn-flower rounded-pill px-4" id="btnSubmitNewAddress"
-                            onclick="handleSubmitNewAddress()">Submit</button>
-                    </div>
-                </form>
-            </div>
+  </main>
+
+  <!-- ==============================================
+       MODALS SYSTEM
+       ============================================== -->
+
+  <!-- 1. Modal: Thêm Địa Chỉ Mới (UC_010 Steps 6, 7, 8) -->
+  <div class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" id="modalAddAddress">
+    <div class="bg-surface-container-lowest rounded-xl max-w-lg w-full p-space-lg shadow-2xl relative border border-[#EAE1DC]">
+      <div class="flex items-center justify-between pb-space-sm border-b border-[#F0E8E3] mb-space-md">
+        <h4 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
+          <span class="material-symbols-outlined text-[#264E43]">add_location_alt</span>
+          Thêm Địa Chỉ Nhận Mới
+        </h4>
+        <button type="button" class="text-outline hover:text-on-surface cursor-pointer" onclick="closeModal('modalAddAddress')">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form th:action="@{/customer/profile/address/add}" method="post" class="space-y-space-md">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+          <div>
+            <label class="block font-label-sm text-label-sm text-on-surface mb-1">
+              Tên người nhận <span class="text-secondary">*</span>
+            </label>
+            <input name="recipientName" class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none"
+                   placeholder="VD: Nguyễn Văn A" required type="text">
+          </div>
+          <div>
+            <label class="block font-label-sm text-label-sm text-on-surface mb-1">
+              Số điện thoại <span class="text-secondary">* (10 số)</span>
+            </label>
+            <input name="phone" pattern="[0-9]{10}" maxlength="10" class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none"
+                   placeholder="VD: 0901234567" required type="tel">
+          </div>
         </div>
+
+        <div>
+          <label class="block font-label-sm text-label-sm text-on-surface mb-1">
+            Địa chỉ chi tiết (Số nhà, tên đường, phường, quận...) <span class="text-secondary">*</span>
+          </label>
+          <input name="addressDetail" class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none"
+                 placeholder="VD: 128 Nguyễn Đình Chiểu, Phường Đa Kao, Quận 1..." required type="text">
+        </div>
+
+        <div class="pt-2 flex items-center justify-between">
+          <label class="flex items-center gap-space-xs cursor-pointer text-body-sm font-body-sm text-on-surface">
+            <input name="isDefault" value="true" class="w-4 h-4 rounded text-primary accent-[#1E453E]" type="checkbox">
+            <span>Đặt làm địa chỉ nhận hoa mặc định</span>
+          </label>
+        </div>
+
+        <div class="pt-space-md flex items-center justify-end gap-space-md">
+          <button type="button" class="px-space-lg py-2 rounded-full bg-[#F5ECE7] text-on-surface font-label-md text-label-md border border-[#E2D7D1] cursor-pointer" onclick="closeModal('modalAddAddress')">
+            Trở lại
+          </button>
+          <button type="submit" class="px-space-xl py-2 rounded-full bg-[#1E453E] text-white font-label-md text-label-md shadow-xs hover:bg-[#163630] transition-all cursor-pointer">
+            Hoàn Thành
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Modal: Chỉnh Sửa Địa Chỉ (UC_010 Step 6a) -->
+  <div class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" id="modalEditAddress">
+    <div class="bg-surface-container-lowest rounded-xl max-w-lg w-full p-space-lg shadow-2xl relative border border-[#EAE1DC]">
+      <div class="flex items-center justify-between pb-space-sm border-b border-[#F0E8E3] mb-space-md">
+        <h4 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
+          <span class="material-symbols-outlined text-[#264E43]">edit_location_alt</span>
+          Cập Nhật Địa Chỉ Nhận
+        </h4>
+        <button type="button" class="text-outline hover:text-on-surface cursor-pointer" onclick="closeModal('modalEditAddress')">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form id="formEditAddress" method="post" class="space-y-space-md">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+          <div>
+            <label class="block font-label-sm text-label-sm text-on-surface mb-1">
+              Tên người nhận <span class="text-secondary">*</span>
+            </label>
+            <input id="editRecipientName" name="recipientName" class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none" required type="text">
+          </div>
+          <div>
+            <label class="block font-label-sm text-label-sm text-on-surface mb-1">
+              Số điện thoại <span class="text-secondary">* (10 số)</span>
+            </label>
+            <input id="editPhone" name="phone" pattern="[0-9]{10}" maxlength="10" class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none" required type="tel">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-label-sm text-label-sm text-on-surface mb-1">
+            Địa chỉ chi tiết <span class="text-secondary">*</span>
+          </label>
+          <input id="editAddressDetail" name="addressDetail" class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none" required type="text">
+        </div>
+
+        <div class="pt-2 flex items-center justify-between">
+          <label class="flex items-center gap-space-xs cursor-pointer text-body-sm font-body-sm text-on-surface">
+            <input id="editIsDefault" name="isDefault" value="true" class="w-4 h-4 rounded text-primary accent-[#1E453E]" type="checkbox">
+            <span>Đặt làm địa chỉ nhận hoa mặc định</span>
+          </label>
+        </div>
+
+        <div class="pt-space-md flex items-center justify-end gap-space-md">
+          <button type="button" class="px-space-lg py-2 rounded-full bg-[#F5ECE7] text-on-surface font-label-md text-label-md border border-[#E2D7D1] cursor-pointer" onclick="closeModal('modalEditAddress')">
+            Hủy bỏ
+          </button>
+          <button type="submit" class="px-space-xl py-2 rounded-full bg-[#1E453E] text-white font-label-md text-label-md shadow-xs hover:bg-[#163630] transition-all cursor-pointer">
+            Lưu Cập Nhật
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Modal: Xác Nhận Đăng Xuất (#signOutModal) -->
+  <div class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" id="signOutModal">
+    <div class="bg-surface-container-lowest rounded-xl max-w-sm w-full p-space-lg shadow-2xl text-center border border-[#EAE1DC]">
+      <div class="w-12 h-12 rounded-full bg-[#FCECEE] text-secondary flex items-center justify-center mx-auto mb-space-sm">
+        <span class="material-symbols-outlined text-[26px]">logout</span>
+      </div>
+      <h4 class="font-headline-sm text-headline-sm text-on-surface">Đăng Xuất Tài Khoản?</h4>
+      <p class="font-body-sm text-body-sm text-on-surface-variant mt-2">
+        Bạn có chắc chắn muốn rời khỏi phiên đăng nhập của <strong th:text="${user.fullName}">Tài khoản</strong>? Giỏ hoa và các địa chỉ đã lưu sẽ vẫn được giữ an toàn.
+      </p>
+      
+      <form th:action="@{/logout}" method="post" class="mt-space-lg grid grid-cols-2 gap-space-sm">
+        <button type="button" class="py-2.5 rounded-full bg-[#F5ECE7] text-on-surface font-label-md text-label-md hover:bg-[#EFE7E2] transition-colors border border-[#E2D7D1] cursor-pointer" onclick="closeModal('signOutModal')">
+          Ở lại
+        </button>
+        <button type="submit" class="py-2.5 rounded-full bg-secondary text-white font-label-md text-label-md shadow-xs hover:bg-[#b02f43] transition-all cursor-pointer">
+          Xác nhận
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==============================================
+       FOOTER (matching ui/code.html)
+       ============================================== -->
+  <footer class="w-full bg-[#FAF7F5] border-t border-[#EAE1DC] text-on-surface mt-space-xl pt-space-xl pb-space-lg">
+    <div class="max-w-7xl mx-auto px-4 md:px-margin-desktop grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-space-lg mb-space-xl">
+      <div class="lg:col-span-2 space-y-space-md pr-space-lg">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl text-secondary">🌸</span>
+          <span class="font-headline-sm text-headline-sm text-[#2D2424] font-semibold">HOA TƯƠI SÀI GÒN</span>
+        </div>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          Hệ thống điện hoa cao cấp và thiết kế hoa nghệ thuật phong cách Pháp hiện đại. Trao gửi cảm xúc ngọt ngào, tinh tế qua từng đóa hoa tuyển chọn với cam kết tươi mới cùng dịch vụ giao hỏa tốc 60–90 phút toàn Sài Gòn.
+        </p>
+        <div class="space-y-space-xs font-body-sm text-body-sm text-on-surface-variant">
+          <p class="flex items-start gap-space-xs">
+            <span class="material-symbols-outlined text-[#264E43] text-[18px]">storefront</span>
+            <span>Cửa hàng Flagship: 128 Nguyễn Đình Chiểu, Phường Đa Kao, Quận 1, TP. HCM</span>
+          </p>
+          <p class="flex items-center gap-space-xs">
+            <span class="material-symbols-outlined text-secondary text-[18px]">schedule</span>
+            <span>Mở cửa: 07:00 - 22:00 (Mỗi ngày, kể cả ngày lễ Tết)</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="space-y-space-sm">
+        <span class="font-title-md text-title-md text-on-surface block">Khám Phá Hoa Tươi</span>
+        <ul class="space-y-space-xs font-body-sm text-body-sm text-on-surface-variant">
+          <li><a class="hover:text-primary transition-colors" th:href="@{/(tab='bestseller')}">Hoa Bán Chạy Nhất</a></li>
+          <li><a class="hover:text-primary transition-colors" th:href="@{/(tab='newest')}">Bộ Sưu Tập Mới Về</a></li>
+          <li><a class="hover:text-primary transition-colors" th:href="@{/(tab='toprated')}">Hoa Được Đánh Giá Cao</a></li>
+          <li><a class="hover:text-primary transition-colors" th:href="@{/stores}">Hệ Thống Chi Nhánh</a></li>
+        </ul>
+      </div>
+
+      <div class="space-y-space-sm">
+        <span class="font-title-md text-title-md text-on-surface block">Chăm Sóc Khách Hàng</span>
+        <ul class="space-y-space-xs font-body-sm text-body-sm text-on-surface-variant">
+          <li><span class="text-on-surface-variant">Chính Sách Giao Hoa 60-90 Phút</span></li>
+          <li><span class="text-on-surface-variant">Bảo Hành Độ Tươi 100%</span></li>
+          <li><span class="text-on-surface-variant">In Thiệp &amp; Banner Miễn Phí</span></li>
+          <li><span class="text-on-surface-variant">Hotline Đặt Gấp: 028 1111 222</span></li>
+        </ul>
+      </div>
+
+      <div class="space-y-space-sm">
+        <span class="font-title-md text-title-md text-on-surface block">Liên Kết Tiện Ích</span>
+        <ul class="space-y-space-xs font-body-sm text-body-sm text-on-surface-variant">
+          <li><a class="hover:text-primary transition-colors" th:href="@{/}">Trang Chủ</a></li>
+          <li><a class="hover:text-primary transition-colors" th:href="@{/following}">Bộ Sưu Tập Đang Theo Dõi</a></li>
+          <li><a class="hover:text-primary transition-colors" th:href="@{/customer/orders}">Lịch Sử Mua Hàng</a></li>
+          <li><a class="hover:text-primary transition-colors" th:href="@{/customer/profile/wishlist}">Hoa Yêu Thích</a></li>
+        </ul>
+      </div>
     </div>
 
-    <!-- Modal Xác Nhận Thêm Địa Chỉ (UC_010 Steps 9, 10, 10c) -->
-    <div class="modal fade" id="confirmAddAddressModal" tabindex="-1" aria-labelledby="confirmAddAddressModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
-            <div class="modal-content rounded-4 border-0 shadow">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title font-serif fw-bold text-dark" id="confirmAddAddressModalLabel">
-                        🌸 Xác Nhận Thêm Địa Chỉ
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body py-3 text-secondary">
-                    Bạn có chắc chắn muốn thêm địa chỉ nhận hàng mới này vào tài khoản không?
-                </div>
-                <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
-                    <!-- 10c. Bấm nút Cancel -> 11c. Hủy thao tác -->
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal"
-                        id="btnCancelAddAddress">
-                        Cancel
-                    </button>
-                    <!-- 10. Bấm nút Confirm -> 11. Thêm địa chỉ mới thành công -->
-                    <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" id="btnConfirmAddAddress"
-                        onclick="confirmSubmitAddress()">
-                        Confirm
-                    </button>
-                </div>
-            </div>
-        </div>
+    <div class="max-w-7xl mx-auto px-4 md:px-margin-desktop pt-space-lg flex flex-col md:flex-row items-center justify-between gap-space-md font-body-sm text-body-sm text-on-surface-variant border-t border-[#EAE1DC]">
+      <p>© 2026 HOA TƯƠI SÀI GÒN. All rights reserved.</p>
+      <div class="flex items-center gap-space-md">
+        <span class="flex items-center gap-space-xs">
+          <span class="material-symbols-outlined text-[16px] text-secondary">local_florist</span>
+          100% Hoa Tươi Nhập Khẩu &amp; Đà Lạt
+        </span>
+      </div>
     </div>
+  </footer>
 
-    <!-- Modal sửa địa chỉ -->
-    <div th:each="addr : ${addresses}" class="modal fade" th:id="'modalEditAddress_' + ${addr.id}" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-4 border-0">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title font-serif fw-bold">Chỉnh Sửa Địa Chỉ</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form th:action="@{/customer/profile/address/update/{id}(id=${addr.id})}" method="post">
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold">Tên người nhận (*)</label>
-                            <input type="text" name="recipientName" class="form-control"
-                                th:value="${addr.recipientName}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold">Số điện thoại (* - đúng 10 chữ số)</label>
-                            <input type="text" name="phone" class="form-control" th:value="${addr.phone}" required
-                                placeholder="0901234567">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold">Địa chỉ chi tiết (*)</label>
-                            <textarea name="addressDetail" class="form-control" rows="2" th:text="${addr.addressDetail}"
-                                required></textarea>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="isDefault" value="true"
-                                th:checked="${addr.isDefault}" th:id="'editDef_' + ${addr.id}">
-                            <label class="form-check-label small" th:for="'editDef_' + ${addr.id}">Đặt làm địa chỉ nhận
-                                hàng mặc định</label>
-                        </div>
-                    </div>
-                    <div class="modal-footer border-0 pt-0">
-                        <button type="button" class="btn btn-light rounded-pill px-3"
-                            data-bs-dismiss="modal">Cancel</button>
-                        <!-- 8a. Bấm nút Save -->
-                        <button type="submit" class="btn btn-flower rounded-pill px-4">Save</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+  <!-- ==============================================
+       INTERACTIVE JAVASCRIPT LOGIC
+       ============================================== -->
+  <script>
+    // Tab Switching
+    function switchTab(tabId) {
+      const contents = document.querySelectorAll('.tab-content');
+      contents.forEach(c => c.classList.add('hidden'));
 
-    <!-- Modal Xác Nhận Lưu Thông Tin Cá Nhân (UC_009 Steps 5b1, 5b2, 5b3, 5c3, 6b, 6c) -->
-    <div class="modal fade" id="confirmProfileModal" tabindex="-1" aria-labelledby="confirmProfileModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
-            <div class="modal-content rounded-4 border-0 shadow">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title font-serif fw-bold text-dark" id="confirmProfileModalLabel">
-                        🌸 Xác Nhận Cập Nhật
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body py-3 text-secondary">
-                    Bạn có chắc chắn muốn lưu thông tin tài khoản đã chỉnh sửa?
-                </div>
-                <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal"
-                        id="btnCancelProfile">
-                        Cancel (Hủy)
-                    </button>
-                    <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" id="btnConfirmProfile"
-                        onclick="submitProfileForm();">
-                        Confirm (Xác Nhận)
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+      const buttons = document.querySelectorAll('.tab-btn');
+      buttons.forEach(b => {
+        b.classList.remove('bg-[#1E453E]', 'text-white', 'font-semibold', 'shadow-xs');
+        b.classList.add('text-on-surface-variant');
+      });
 
-    <!-- Modal Xác Nhận Cập Nhật Ảnh Đại Diện / Ảnh Bìa (UC_009 Steps 4, 5, 6, 4a, 5a, 6a) -->
-    <div class="modal fade" id="confirmImageModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
-            <div class="modal-content rounded-4 border-0 shadow">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title font-serif fw-bold text-dark" id="confirmImageModalTitle">
-                        📷 Xác Nhận Cập Nhật Ảnh
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body py-3 text-secondary" id="confirmImageModalBody">
-                    Bạn có muốn cập nhật ảnh mới này cho tài khoản không?
-                </div>
-                <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal"
-                        id="btnCancelImage">
-                        Cancel (Hủy)
-                    </button>
-                    <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" id="btnConfirmImage"
-                        onclick="document.getElementById('profileForm').submit();">
-                        Confirm (Xác Nhận)
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+      const targetContent = document.getElementById(tabId);
+      if (targetContent) {
+        targetContent.classList.remove('hidden');
+      }
 
-    <!-- Modal Xác Nhận Thay Đổi Mật Khẩu (Use case UC_008 Steps 7, 8, 8a) -->
-    <div class="modal fade" id="confirmPasswordModal" tabindex="-1" aria-labelledby="confirmPasswordModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
-            <div class="modal-content rounded-4 border-0 shadow">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title font-serif fw-bold text-dark" id="confirmPasswordModalLabel">
-                        🔑 Xác Nhận Đổi Mật Khẩu
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body py-3 text-secondary">
-                    Bạn có chắc chắn muốn cập nhật mật khẩu mới cho tài khoản không?
-                </div>
-                <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal"
-                        id="btnCancelPassword">
-                        Cancel (Hủy)
-                    </button>
-                    <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" id="btnConfirmPassword"
-                        onclick="document.getElementById('changePasswordForm').submit();">
-                        Confirm (Xác Nhận)
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+      let activeBtnId = 'btnTabProfile';
+      if (tabId === 'tabAddresses') activeBtnId = 'btnTabAddresses';
+      if (tabId === 'tabPassword') activeBtnId = 'btnTabPassword';
 
-    <!-- Modal Xác Nhận Đăng Xuất (Sign Out Modal) -->
-    <div class="modal fade" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
-            <div class="modal-content rounded-4 border-0 shadow">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title font-serif fw-bold text-dark" id="signOutModalLabel">
-                        🌸 Xác Nhận Đăng Xuất
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body py-3 text-secondary">
-                    Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?
-                </div>
-                <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancel"
-                        data-testid="btnCancel">
-                        Cancel
-                    </button>
-<<<<<<< HEAD
-                    <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit"   class="btn btn-danger rounded-pill px-4 fw-semibold text-white text-decoration-none" id="btnConfirm" data-testid="btnConfirm">
-=======
-                    <a th:href="@{/logout}"
-                        class="btn btn-danger rounded-pill px-4 fw-semibold text-white text-decoration-none"
-                        id="btnConfirm" data-testid="btnConfirm">
->>>>>>> thanh-tai
-                        Confirm
-                    </button></form>
-                </div>
-            </div>
-        </div>
-    </div>
+      const activeBtn = document.getElementById(activeBtnId);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-on-surface-variant');
+        activeBtn.classList.add('bg-[#1E453E]', 'text-white', 'font-semibold', 'shadow-xs');
+      }
+    }
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Xử lý chọn ảnh đại diện / ảnh bìa & Validation hợp lệ (UC_009 Steps 4, 5, 6, 4a, 5a, 6a, 6d, 6d1)
-        function handleFileSelected(input, type) {
-            if (!input.files || input.files.length === 0) return;
-            const file = input.files[0];
+    // Toggle Edit Profile Mode (UC_009)
+    let isEditingProfile = false;
+    function toggleEditProfileMode() {
+      isEditingProfile = !isEditingProfile;
+      const inputs = document.querySelectorAll('.profile-input');
+      const actionButtons = document.getElementById('profileActionButtons');
+      const banner = document.getElementById('profileModeBanner');
+      const btnText = document.getElementById('btnEditText');
+      const btnIcon = document.getElementById('btnEditIcon');
 
-            // Kiểm tra định dạng hợp lệ (chỉ chấp nhận hình ảnh)
-            const validExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
-            const fileName = file.name.toLowerCase();
-            const fileExt = fileName.substring(fileName.lastIndexOf('.') + 1);
-            const isValidFormat = validExtensions.includes(fileExt) && file.type.startsWith('image/');
-            const isSizeValid = file.size <= 10 * 1024 * 1024; // Tối đa 10MB
+      inputs.forEach(input => {
+        input.disabled = !isEditingProfile;
+      });
 
-            if (!isValidFormat || !isSizeValid) {
-                // Exception 6d. Hình ảnh không hợp lệ -> 6d1. Thông báo cập nhật thất bại
-                input.value = '';
-                alert('Thông báo cập nhật thất bại: Hình ảnh không hợp lệ! Vui lòng chọn tệp hình ảnh (.jpg, .jpeg, .png, .webp) có dung lượng dưới 10MB.');
-                return;
-            }
+      if (isEditingProfile) {
+        actionButtons.classList.remove('hidden');
+        banner.classList.remove('bg-[#FAF7F5]');
+        banner.classList.add('bg-[#E9F3EE]');
+        banner.innerHTML = `
+          <span class="flex items-center gap-space-xs text-[#264E43] font-semibold">
+            <span class="material-symbols-outlined text-[18px]">edit_note</span>
+            <span>Chế độ chỉnh sửa đang bật. Bạn có thể thay đổi họ tên, số điện thoại và địa chỉ.</span>
+          </span>
+          <span class="font-label-sm text-label-sm text-[#264E43] px-2 py-0.5 rounded bg-white shadow-xs">Đang sửa</span>
+        `;
+        btnText.textContent = "Khóa chỉnh sửa";
+        btnIcon.textContent = "lock";
+      } else {
+        cancelEditProfile();
+      }
+    }
 
-            // Hiển thị preview ảnh ngay lập tức
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                if (type === 'avatar') {
-                    const avatarImg = document.getElementById('avatarPreviewImg');
-                    if (avatarImg) avatarImg.src = e.target.result;
-                    document.getElementById('confirmImageModalTitle').textContent = '📷 Xác Nhận Cập Nhật Ảnh Đại Diện';
-                    document.getElementById('confirmImageModalBody').textContent = 'Bạn có chắc chắn muốn cập nhật ảnh đại diện mới này cho tài khoản không?';
-                } else if (type === 'cover') {
-                    const coverImg = document.getElementById('coverPreviewImg');
-                    if (coverImg) coverImg.src = e.target.result;
-                    document.getElementById('confirmImageModalTitle').textContent = '🖼️ Xác Nhận Cập Nhật Ảnh Bìa';
-                    document.getElementById('confirmImageModalBody').textContent = 'Bạn có chắc chắn muốn cập nhật ảnh bìa mới này cho tài khoản không?';
-                }
-                const imgModal = new bootstrap.Modal(document.getElementById('confirmImageModal'));
-                imgModal.show();
-            };
-            reader.readAsDataURL(file);
-        }
+    function cancelEditProfile() {
+      isEditingProfile = false;
+      const inputs = document.querySelectorAll('.profile-input');
+      const actionButtons = document.getElementById('profileActionButtons');
+      const banner = document.getElementById('profileModeBanner');
+      const btnText = document.getElementById('btnEditText');
+      const btnIcon = document.getElementById('btnEditIcon');
 
-        // Bấm nút hình cây bút để bật/tắt chế độ chỉnh sửa thông tin cá nhân (UC_009 Step 4b)
-        function toggleEditProfile() {
-            const fields = ['inputFirstName', 'inputLastName', 'inputFullName', 'inputPhone', 'inputIdCard', 'inputAddress'];
-            const isCurrentlyDisabled = document.getElementById('inputFirstName')?.disabled ?? true;
+      inputs.forEach(input => {
+        input.disabled = true;
+      });
 
-            fields.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.disabled = !isCurrentlyDisabled;
-            });
+      actionButtons.classList.add('hidden');
+      banner.classList.remove('bg-[#E9F3EE]');
+      banner.classList.add('bg-[#FAF7F5]');
+      banner.innerHTML = `
+        <span class="flex items-center gap-space-xs">
+          <span class="material-symbols-outlined text-[18px] text-[#264E43]">verified_user</span>
+          <span>Đang ở chế độ xem an toàn. Bấm <strong>"Chỉnh sửa hồ sơ"</strong> để cập nhật thông tin.</span>
+        </span>
+        <span class="font-label-sm text-label-sm text-outline px-2 py-0.5 rounded bg-[#EFE7E2]">Chỉ đọc</span>
+      `;
+      btnText.textContent = "Chỉnh sửa hồ sơ";
+      btnIcon.textContent = "edit";
+    }
 
-            const btnSave = document.getElementById('btnSaveProfile');
-            if (btnSave) btnSave.disabled = !isCurrentlyDisabled;
+    // Avatar & Cover Upload triggers
+    function triggerAvatarUpload() {
+      document.getElementById('avatarFileInput').click();
+    }
 
-            const btnEdit = document.getElementById('btnEditProfileInfo');
-            if (btnEdit) {
-                if (isCurrentlyDisabled) {
-                    btnEdit.classList.remove('btn-outline-danger');
-                    btnEdit.classList.add('btn-danger', 'text-white');
-                    btnEdit.title = 'Đang bật chế độ chỉnh sửa - Bấm lại để khóa';
-                    document.getElementById('inputFirstName')?.focus();
-                } else {
-                    btnEdit.classList.remove('btn-danger', 'text-white');
-                    btnEdit.classList.add('btn-outline-danger');
-                    btnEdit.title = 'Chọn nút hình cây bút để chỉnh sửa thông tin cá nhân';
-                }
-            }
-        }
+    function triggerCoverUpload() {
+      document.getElementById('coverFileInput').click();
+    }
 
-        // Bấm Confirm trong Modal để gửi form (UC_009 Step 6b)
-        function submitProfileForm() {
-            const fields = ['inputFirstName', 'inputLastName', 'inputFullName', 'inputPhone', 'inputIdCard', 'inputAddress'];
-            fields.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.disabled = false;
-            });
-            document.getElementById('profileForm').submit();
-        }
+    function previewAvatarImage(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('avatarPreviewImg').src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+        // Tự động bật chế độ lưu hồ sơ để người dùng bấm Lưu
+        if (!isEditingProfile) toggleEditProfileMode();
+      }
+    }
 
-        // Đồng bộ họ + tên vào fullName
-        function syncFullName() {
-            const first = document.getElementById('inputFirstName')?.value || '';
-            const last = document.getElementById('inputLastName')?.value || '';
-            const full = (first + ' ' + last).trim();
-            if (full.length > 0) {
-                document.getElementById('inputFullName').value = full;
-            }
-        }
+    function previewCoverImage(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('coverPreviewImg').src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+        // Tự động bật chế độ lưu hồ sơ để người dùng bấm Lưu
+        if (!isEditingProfile) toggleEditProfileMode();
+      }
+    }
 
-        // Bấm nút Save (UC_009 Steps 5b1, 5b2)
-        function handleSaveProfile() {
-            const fullName = document.getElementById('inputFullName')?.value;
-            if (!fullName || fullName.trim().length === 0) {
-                alert('Vui lòng nhập họ và tên!');
-                return;
-            }
-            const modal = new bootstrap.Modal(document.getElementById('confirmProfileModal'));
-            modal.show();
-        }
+    // Password strength check
+    function checkPasswordStrength(val) {
+      const bar = document.getElementById('passwordStrengthBar');
+      const label = document.getElementById('strengthLabel');
+      if (!val || val.length === 0) {
+        bar.style.width = '10%';
+        bar.className = 'h-full bg-outline-variant transition-all duration-300';
+        label.textContent = 'Trống';
+        label.className = 'text-on-surface-variant font-medium';
+        return;
+      }
+      if (val.length < 6) {
+        bar.style.width = '30%';
+        bar.className = 'h-full bg-secondary transition-all duration-300';
+        label.textContent = 'Yếu (dưới 6 ký tự)';
+        label.className = 'text-secondary font-medium';
+      } else if (val.length < 10) {
+        bar.style.width = '65%';
+        bar.className = 'h-full bg-[#E58C5A] transition-all duration-300';
+        label.textContent = 'Trung bình';
+        label.className = 'text-[#B86230] font-medium';
+      } else {
+        bar.style.width = '100%';
+        bar.className = 'h-full bg-[#1E453E] transition-all duration-300';
+        label.textContent = 'Mạnh & An toàn';
+        label.className = 'text-[#1E453E] font-medium';
+      }
+    }
 
-        // Xử lý đổi mật khẩu (UC_008)
-        function handleSavePassword() {
-            const oldP = document.getElementById('inputOldPassword')?.value;
-            const newP = document.getElementById('inputNewPassword')?.value;
-            if (!oldP || !newP) {
-                alert('Vui lòng nhập đầy đủ mật khẩu hiện tại và mật khẩu mới!');
-                return;
-            }
-            if (newP.length < 6) {
-                alert('Mật khẩu mới phải có tối thiểu 6 ký tự!');
-                return;
-            }
-            const modal = new bootstrap.Modal(document.getElementById('confirmPasswordModal'));
-            modal.show();
-        }
+    function togglePasswordVisibility(fieldId, btn) {
+      const input = document.getElementById(fieldId);
+      const icon = btn.querySelector('.material-symbols-outlined');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.textContent = 'visibility_off';
+      } else {
+        input.type = 'password';
+        icon.textContent = 'visibility';
+      }
+    }
 
-        // Chuyển sang tab Sổ địa chỉ (Your address - UC_010 Step 4, 5)
-        function switchToAddressTab() {
-            const addrTab = document.getElementById('address-tab');
-            if (addrTab) {
-                bootstrap.Tab.getOrCreateInstance(addrTab).show();
-            }
-        }
+    function validatePasswordChange(e) {
+      const newPass = document.getElementById('newPass').value;
+      const confirmPass = document.getElementById('confirmPass').value;
+      if (newPass !== confirmPass) {
+        alert("Mật khẩu xác nhận không khớp! Vui lòng kiểm tra lại.");
+        return false;
+      }
+      return true;
+    }
 
-        // Hiển thị thông báo thất bại khi thêm địa chỉ (UC_010 Exception 11d1)
-        function showAddressExceptionError(msg) {
-            // Ẩn tất cả thông báo thành công cũ (alert-success) đang có trên trang
-            document.querySelectorAll('.alert-success').forEach(el => {
-                el.classList.add('d-none');
-                el.style.display = 'none';
-            });
-            // Ẩn thông báo lỗi cũ nếu có
-            document.querySelectorAll('.alert-danger:not(#addressExceptionAlert)').forEach(el => {
-                el.classList.add('d-none');
-                el.style.display = 'none';
-            });
+    // Modal controls
+    function openModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) modal.classList.remove('hidden');
+    }
 
-            // Đóng modal xác nhận nếu đang mở
-            const confirmModalEl = document.getElementById('confirmAddAddressModal');
-            if (confirmModalEl) {
-                const cm = bootstrap.Modal.getInstance(confirmModalEl);
-                if (cm) cm.hide();
-            }
+    function closeModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) modal.classList.add('hidden');
+    }
 
-            // Đóng modal thêm địa chỉ nếu đang mở
-            const addModalEl = document.getElementById('modalAddAddress');
-            if (addModalEl) {
-                const am = bootstrap.Modal.getInstance(addModalEl);
-                if (am) am.hide();
-            }
+    function openEditAddressModal(id, recipientName, phone, addressDetail, isDefault) {
+      const form = document.getElementById('formEditAddress');
+      form.action = '/customer/profile/address/update/' + id;
+      document.getElementById('editRecipientName').value = recipientName;
+      document.getElementById('editPhone').value = phone;
+      document.getElementById('editAddressDetail').value = addressDetail;
+      document.getElementById('editIsDefault').checked = isDefault;
+      openModal('modalEditAddress');
+    }
 
-            // Tạo/cập nhật thông báo lỗi màu đỏ trên giao diện
-            let alertBox = document.getElementById('addressExceptionAlert');
-            if (!alertBox) {
-                alertBox = document.createElement('div');
-                alertBox.id = 'addressExceptionAlert';
-                alertBox.className = 'alert alert-danger rounded-3 mb-4 fw-semibold shadow-sm';
-                const mainCol = document.querySelector('.col-lg-8');
-                if (mainCol) mainCol.insertBefore(alertBox, mainCol.firstChild);
-            }
-            alertBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-2"></i>' + msg;
-            alertBox.classList.remove('d-none');
-            alertBox.style.display = '';
-            alertBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Auto tab selection based on URL hash or query param
+    document.addEventListener('DOMContentLoaded', function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tabParam = urlParams.get('tab');
+      if (tabParam === 'addresses' || window.location.hash === '#tabAddresses') {
+        switchTab('tabAddresses');
+      } else if (tabParam === 'password' || window.location.hash === '#tabPassword') {
+        switchTab('tabPassword');
+      }
+    });
+  </script>
 
-            // Thông báo popup cho người dùng
-            alert(msg);
-        }
-
-        // Bấm nút Submit khi thêm địa chỉ mới (UC_010 Step 8)
-        function handleSubmitNewAddress() {
-            const recipient = document.getElementById('addRecipientName')?.value.trim();
-            const phone = document.getElementById('addPhone')?.value.trim();
-            const detail = document.getElementById('addAddressDetail')?.value.trim();
-
-            if (!recipient || !phone || !detail) {
-                alert('Vui lòng điền đầy đủ các thông tin địa chỉ!');
-                return;
-            }
-
-            // Kiểm tra số điện thoại: phải đúng 10 chữ số
-            if (phone.length !== 10 || !/^[0-9]{10}$/.test(phone)) {
-                showAddressExceptionError('Thông báo thêm thất bại: Số điện thoại không hợp lệ (phải đúng 10 chữ số)');
-                document.getElementById('addPhone')?.focus();
-                return;
-            }
-
-            // Kiểm tra địa chỉ trùng lặp
-            const normNewDetail = normalizeAddress(detail);
-            const addressItems = document.querySelectorAll('.address-item');
-            let isDuplicate = false;
-            addressItems.forEach(item => {
-                const existingDetail = item.getAttribute('data-detail') || '';
-                const normExistingDetail = normalizeAddress(existingDetail);
-                if (normExistingDetail === normNewDetail) {
-                    isDuplicate = true;
-                }
-            });
-
-            if (isDuplicate) {
-                showAddressExceptionError('Thông báo thêm thất bại: Địa chỉ này đã tồn tại trong sổ địa chỉ của bạn!');
-                return;
-            }
-
-            // 9. Hiển thị thông báo yêu cầu xác nhận
-            const confirmModal = new bootstrap.Modal(document.getElementById('confirmAddAddressModal'));
-            confirmModal.show();
-        }
-
-        // Chuẩn hóa địa chỉ: bỏ dấu tiếng Việt, bỏ dấu câu (phẩy, chấm, gạch...), chữ thường, gom khoảng trắng
-        function normalizeAddress(str) {
-            if (!str) return '';
-            return str
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '') // Bỏ dấu tiếng Việt (Số -> So, Võ -> Vo...)
-                .replace(/đ/g, 'd')
-                .replace(/Đ/g, 'd')
-                .toLowerCase()
-                .replace(/[,.\-\/#]/g, ' ')      // Thay dấu phẩy, chấm, gạch ngang... bằng dấu cách
-                .replace(/\s+/g, ' ')            // Gom khoảng trắng thừa
-                .trim();
-        }
-
-        // 10. Bấm nút Confirm -> Kiểm tra ngoại lệ (11d) hoặc Gửi form thành công (11)
-        function confirmSubmitAddress() {
-            const recipient = document.getElementById('addRecipientName')?.value.trim();
-            const phone = document.getElementById('addPhone')?.value.trim();
-            const detail = document.getElementById('addAddressDetail')?.value.trim();
-
-            // 11d. Kiểm tra thông tin hợp lệ
-            if (!recipient || !phone || !detail) {
-                showAddressExceptionError('Thông báo thêm thất bại: Vui lòng điền đầy đủ các thông tin địa chỉ!');
-                return;
-            }
-
-            // 11d. Kiểm tra định dạng số điện thoại (phải đúng 10 chữ số)
-            const phoneRegex = /^[0-9]{10}$/;
-            if (!phoneRegex.test(phone)) {
-                showAddressExceptionError('Thông báo thêm thất bại: Số điện thoại không hợp lệ (phải đúng 10 chữ số)');
-                return;
-            }
-
-            // 11d. Kiểm tra địa chỉ đã tồn tại (dùng hàm chuẩn hóa chuỗi để nhận diện cùng 1 địa chỉ dù viết hoa/thường hay có dấu phẩy)
-            const normNewDetail = normalizeAddress(detail);
-            const addressItems = document.querySelectorAll('.address-item');
-            let isDuplicate = false;
-            addressItems.forEach(item => {
-                const existingDetail = item.getAttribute('data-detail') || '';
-                const normExistingDetail = normalizeAddress(existingDetail);
-                if (normExistingDetail === normNewDetail) {
-                    isDuplicate = true;
-                }
-            });
-
-            if (isDuplicate) {
-                showAddressExceptionError('Thông báo thêm thất bại: Địa chỉ này đã tồn tại trong sổ địa chỉ của bạn!');
-                return;
-            }
-
-            // Hợp lệ -> Gửi form lên server (11. Thêm địa chỉ mới thành công)
-            document.getElementById('addAddressForm').submit();
-        }
-
-        // Khởi tạo trang khi tải xong
-        document.addEventListener('DOMContentLoaded', function () {
-            // Tách First name và Last name từ fullName hiện tại
-            const currentFullName = document.getElementById('inputFullName')?.value || '';
-            if (currentFullName) {
-                const parts = currentFullName.trim().split(' ');
-                if (parts.length > 1) {
-                    const last = parts.pop();
-                    const first = parts.join(' ');
-                    const fElem = document.getElementById('inputFirstName');
-                    const lElem = document.getElementById('inputLastName');
-                    if (fElem) fElem.value = first;
-                    if (lElem) lElem.value = last;
-                } else {
-                    const fElem = document.getElementById('inputFirstName');
-                    if (fElem) fElem.value = currentFullName;
-                }
-            }
-
-            // Tự động chuyển đến tab tương ứng nếu vừa có thông báo hoặc URL param
-            const successMsg = document.querySelector('.alert-success');
-            const errorMsg = document.querySelector('.alert-danger');
-            const urlParams = new URLSearchParams(window.location.search);
-
-            if (urlParams.get('tab') === 'address' ||
-                (successMsg && successMsg.textContent.toLowerCase().includes('địa chỉ')) ||
-                (errorMsg && errorMsg.textContent.toLowerCase().includes('địa chỉ'))) {
-                switchToAddressTab();
-            } else if ((successMsg && successMsg.textContent.includes('mật khẩu')) ||
-                (errorMsg && errorMsg.textContent.includes('mật khẩu'))) {
-                const passTab = document.getElementById('password-tab');
-                if (passTab) {
-                    bootstrap.Tab.getOrCreateInstance(passTab).show();
-                }
-            }
-        });
-    </script>
 </body>
-
 </html>
