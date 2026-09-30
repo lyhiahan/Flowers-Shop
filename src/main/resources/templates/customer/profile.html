@@ -6,18 +6,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fafafa; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-page); color: var(--text-main); }
         .font-serif { font-family: 'Playfair Display', Georgia, serif; }
-        .profile-card { border-radius: 16px; border: 1px solid #f1f5f9; box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05); }
-        .btn-flower { background-color: #e11d48; color: white; border: none; }
-        .btn-flower:hover { background-color: #be123c; color: white; }
+        .profile-card { border-radius: 16px; border: 1px solid var(--border-soft); background: var(--surface-card); box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05); }
+        .btn-flower { background-color: var(--brand-green); color: white; border: none; }
+        .btn-flower:hover { background-color: var(--brand-green-hover); color: white; }
     </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg bg-white border-bottom py-3 sticky-top">
     <div class="container">
-        <a class="navbar-brand font-serif fw-bold text-danger fs-4" th:href="@{/}">🌸 HOA TƯƠI SÀI GÒN</a>
+        <a class="navbar-brand font-serif fw-bold fs-4" style="color: var(--brand-green);" th:href="@{/}">🌸 HOA TƯƠI SÀI GÒN</a>
         <div class="d-flex align-items-center gap-2">
             <a th:href="@{/customer/orders}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-seam me-1"></i> Đơn hàng</a>
             <a th:href="@{/customer/profile/wishlist}" class="btn btn-outline-danger btn-sm"><i class="bi bi-heart me-1"></i> Yêu thích</a>

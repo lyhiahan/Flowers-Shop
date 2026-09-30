@@ -17,6 +17,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     java.util.Optional<Order> findLockedById(@Param("id") Long id);
     List<Order> findByUserIdOrderByCreatedAtDesc(Long userId);
     List<Order> findByPickupStoreIdOrderByCreatedAtDesc(Long storeId);
+    List<Order> findByPickupStoreIdAndCreatedAtBetweenOrderByCreatedAtDesc(Long storeId, java.time.LocalDateTime start, java.time.LocalDateTime end);
     List<Order> findByPickupStoreIdAndStatus(Long storeId, OrderStatus status);
 
     // Tìm các đơn hàng thuê quá hạn (RENTING mà có sản phẩm hết hạn trước ngày hiện tại)

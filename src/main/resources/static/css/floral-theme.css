@@ -1,0 +1,324 @@
+/* ==========================================================================
+   FLORAL THEME - UNIFIED DESIGN SYSTEM & TYPOGRAPHY
+   Warm Cream (#FAF7F2), Ivory (#FFFCF8), Deep Green (#355447), Rose Pink (#A64060)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+    /* Palette Tokens: Tiệm hoa ấm áp — kem, xanh lá và hồng cánh hoa */
+    --bg-page: #FAF7F2;          /* Nền toàn trang: Kem ấm */
+    --surface-card: #FFFCF8;     /* Header & Thẻ sản phẩm: Trắng ngà nhẹ nhàng */
+    --brand-green: #355447;      /* Logo, tiêu đề, nút chính: Xanh lá đậm */
+    --brand-green-hover: #284136;
+    --brand-green-light: #EBF3EE;
+    --accent-rose: #A64060;      /* Giá, mục đang chọn, số giỏ hàng: Hồng trầm */
+    --accent-rose-hover: #8C3450;
+    --accent-rose-soft: #F3E6E1; /* Thanh thông tin, nhãn nhỏ: Hồng kem */
+    --text-main: #293B32;        /* Chữ nội dung: Xám xanh đậm */
+    --text-muted: #686E65;       /* Chữ phụ, mô tả: Xám ấm */
+    --border-soft: #E7DED4;      /* Viền mảnh: Be */
+    --border-card: #E7DED4;
+    --sidebar-dark: #1C2D24;
+    --sidebar-hover: rgba(255, 255, 255, 0.08);
+
+    /* Amber (Pending status) */
+    --amber-bg: #FEF3C7;
+    --amber-text: #B45309;
+    --amber-border: #FDE68A;
+
+    /* Red (Alert / Issues ONLY) */
+    --alert-red-bg: #FEE2E2;
+    --alert-red-text: #DC2626;
+    --alert-red-border: #FECACA;
+
+    /* Typography Tokens: Giữ font chữ của banner */
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+}
+
+/* ==========================================================================
+   QUY CHUẨN TYPOGRAPHY TOÀN TRANG (Tiệm hoa ấm áp)
+   1. Tiêu đề trang: 28–32 px, 600 hoặc bold
+   2. Tên sản phẩm: 26–28 px, 400 — bình thường
+   3. Giá sản phẩm: 28–32 px, 400
+   4. Nội dung, thông tin sản phẩm: 18 px, 400
+   5. Menu, ô nhập, nút bấm: 16–18 px, 400
+   6. Thông tin phụ: 16 px, 400
+   ========================================================================== */
+
+/* 1. Tiêu đề trang: 28–32 px, 600 hoặc bold */
+h1, h2, .section-title, .page-title, .brand-hero-title, .brand-page-title {
+    font-family: var(--font-serif) !important;
+    font-size: clamp(28px, 2.5vw, 32px) !important;
+    font-weight: 600 !important;
+    line-height: 1.28 !important;
+    color: var(--brand-green);
+    letter-spacing: -0.01em;
+}
+
+/* 2. Tên sản phẩm trên thẻ danh sách: 18 px, Arial, chữ thường, tối đa 2 dòng */
+.flower-card-title, .product-card-title {
+    font-family: Arial, var(--font-sans), sans-serif !important;
+    font-size: 18px !important;
+    font-weight: 500 !important;
+    line-height: 1.35 !important;
+    text-transform: none !important;
+    text-decoration: none !important;
+    color: var(--text-main) !important;
+}
+/* Tên sản phẩm trang chi tiết: 30-34px Serif */
+.product-detail-title, h1.product-title {
+    font-family: var(--font-serif) !important;
+    font-size: 32px !important;
+    font-weight: 600 !important;
+    line-height: 1.25 !important;
+}
+
+/* 3. Giá sản phẩm trên thẻ danh sách: 20–22 px, không gạch chân */
+.flower-price, .product-price {
+    font-family: Arial, var(--font-sans), sans-serif !important;
+    font-size: 21px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    text-decoration: none !important;
+    color: var(--accent-rose) !important;
+}
+/* Giá sản phẩm trang chi tiết: 34-38px */
+.product-detail-price, .product-price-lg {
+    font-family: var(--font-sans) !important;
+    font-size: 36px !important;
+    font-weight: 600 !important;
+    line-height: 1.15 !important;
+    color: var(--accent-rose) !important;
+}
+
+/* Nút thêm vào giỏ trên thẻ: 16 px, cao 42–44 px */
+.btn-add-cart {
+    font-family: Arial, var(--font-sans), sans-serif !important;
+    font-size: 16px !important;
+    height: 42px !important;
+    font-weight: 500 !important;
+    text-decoration: none !important;
+}
+
+/* 4. Nội dung, thông tin sản phẩm: 18 px, 400 */
+body {
+    font-family: var(--font-sans) !important;
+    background-color: var(--bg-page);
+    color: var(--text-main);
+    font-size: 18px !important;
+    font-weight: 400 !important;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+p, .product-desc, .product-short-specs, .accordion-body, .product-info, .lead, .card-text, .desc-text {
+    font-family: var(--font-sans) !important;
+    font-size: 18px !important;
+    font-weight: 400 !important;
+    line-height: 1.65;
+}
+
+/* 5. Menu, ô nhập, nút bấm: 16–18 px, 400 */
+/* Menu */
+.cat-nav-link, .nav-link, .dropdown-item, .navbar-nav .nav-link {
+    font-family: var(--font-sans) !important;
+    font-size: 17px !important;
+    font-weight: 400 !important;
+}
+/* Ô nhập */
+input, select, textarea, .form-control, .form-select, .header-search-input, .header-search-type, .qty-input {
+    font-family: var(--font-sans) !important;
+    font-size: 17px !important;
+    font-weight: 400 !important;
+}
+/* Nút bấm */
+.btn, .btn-primary, .btn-floral-primary, .btn-brand-hero, .btn-flower-add, .btn-add-cart, .btn-qty, .btn-qty-step, .account-pill-btn {
+    font-family: var(--font-sans) !important;
+    font-size: 17px !important;
+    font-weight: 400 !important;
+}
+
+/* 6. Thông tin phụ: 16 px, 400 */
+.top-subbar, .brand-hero-badge, small, .small, .text-muted, .form-text, .badge, .flower-card-meta-sub, .store-subtext, .info-helper, .accordion-button, .breadcrumb, .meta-text {
+    font-family: var(--font-sans) !important;
+    font-size: 16px !important;
+    font-weight: 400 !important;
+}
+
+.text-brand-green { color: var(--brand-green) !important; }
+.bg-brand-green { background-color: var(--brand-green) !important; color: #FFFFFF !important; }
+.text-accent-rose { color: var(--accent-rose) !important; }
+.bg-accent-rose { background-color: var(--accent-rose) !important; color: #FFFFFF !important; }
+.bg-cream-soft { background-color: var(--bg-page) !important; }
+.bg-rose-soft { background-color: var(--accent-rose-soft) !important; }
+.bg-green-soft { background-color: var(--brand-green-light) !important; }
+
+/* Cards & Surfaces */
+.card, .card-floral {
+    background-color: var(--surface-card);
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(41, 59, 50, 0.04);
+}
+
+.card-header {
+    background-color: #FAF6F0;
+    border-bottom: 1px solid var(--border-soft);
+    font-family: var(--font-serif);
+    font-weight: 700;
+    color: var(--brand-green);
+    border-top-left-radius: 15px !important;
+    border-top-right-radius: 15px !important;
+}
+
+/* Primary Button Styling */
+.btn-primary, .btn-floral-primary {
+    background-color: var(--brand-green) !important;
+    border-color: var(--brand-green) !important;
+    color: #FFFFFF !important;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover, .btn-floral-primary:hover {
+    background-color: var(--brand-green-hover) !important;
+    border-color: var(--brand-green-hover) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(53, 84, 71, 0.25);
+}
+
+.btn-outline-primary, .btn-outline-forest {
+    border-color: var(--brand-green) !important;
+    color: var(--brand-green) !important;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.btn-outline-primary:hover, .btn-outline-forest:hover {
+    background-color: var(--brand-green) !important;
+    color: #FFFFFF !important;
+}
+
+.btn-accent, .btn-rose {
+    background-color: var(--accent-rose) !important;
+    border-color: var(--accent-rose) !important;
+    color: #FFFFFF !important;
+    font-weight: 600;
+    border-radius: 10px;
+}
+
+.btn-accent:hover, .btn-rose:hover {
+    background-color: var(--accent-rose-hover) !important;
+    border-color: var(--accent-rose-hover) !important;
+    box-shadow: 0 4px 12px rgba(166, 64, 96, 0.25);
+}
+
+/* Input Fields */
+.form-control, .form-select {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-soft);
+    color: var(--text-main);
+    border-radius: 10px;
+    padding: 9px 14px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--brand-green);
+    box-shadow: 0 0 0 0.2rem rgba(53, 84, 71, 0.15);
+}
+
+/* Tables */
+.table {
+    --bs-table-bg: transparent;
+    color: var(--text-main);
+}
+
+.table thead th {
+    background-color: #F4EFEA;
+    color: var(--text-main);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border-soft);
+    padding: 12px 16px;
+}
+
+.table tbody td {
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--border-soft);
+    vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #FAF5EE !important;
+}
+
+/* Badges */
+.badge-status-pending, .badge-amber {
+    background-color: var(--amber-bg) !important;
+    color: var(--amber-text) !important;
+    border: 1px solid var(--amber-border) !important;
+}
+
+.badge-status-alert, .badge-red {
+    background-color: var(--alert-red-bg) !important;
+    color: var(--alert-red-text) !important;
+    border: 1px solid var(--alert-red-border) !important;
+}
+
+.badge-status-success, .badge-green {
+    background-color: var(--brand-green-light) !important;
+    color: var(--brand-green) !important;
+}
+
+.badge-status-rose {
+    background-color: var(--accent-rose-soft) !important;
+    color: var(--accent-rose) !important;
+}
+
+/* Admin & Manager Sidebar Styling */
+.sidebar, .admin-sidebar, .manager-sidebar {
+    background-color: var(--sidebar-dark);
+    color: #E3ECE7;
+    min-height: 100vh;
+}
+
+.sidebar .nav-link, .sidebar a {
+    color: #A9BCB3;
+    font-weight: 500;
+    padding: 10px 16px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.sidebar .nav-link:hover, .sidebar a:hover {
+    background-color: var(--sidebar-hover);
+    color: #FFFFFF;
+}
+
+.sidebar .nav-link.active, .sidebar a.active {
+    background-color: var(--brand-green) !important;
+    color: #FFFFFF !important;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Breadcrumbs & Header Bars */
+.breadcrumb-item a {
+    color: var(--brand-green);
+    text-decoration: none;
+}
+
+.breadcrumb-item.active {
+    color: var(--text-muted);
+}

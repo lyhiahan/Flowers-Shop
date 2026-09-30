@@ -23,3 +23,10 @@ IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_transactions_orde
 
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_transactions_order_type' AND object_id = OBJECT_ID('dbo.transactions'))
     EXEC('CREATE INDEX IX_transactions_order_type ON dbo.transactions(order_id, type)');
+
+-- Sửa ảnh sản phẩm chuẩn hoa thật, góc chụp chuyên nghiệp, đúng tên
+EXEC('UPDATE dbo.products SET image_url = ''https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=800'' WHERE name LIKE N''%Hồng Đỏ%'' OR name LIKE N''%Ecuador%''');
+EXEC('UPDATE dbo.products SET image_url = ''https://images.unsplash.com/photo-1520763185298-1b434c919102?w=800'' WHERE name LIKE N''%Tulip%''');
+EXEC('UPDATE dbo.products SET image_url = ''https://images.unsplash.com/photo-1508610048659-a06b669e3321?w=800'' WHERE name LIKE N''%Cẩm Tú Cầu%''');
+EXEC('UPDATE dbo.products SET image_url = ''https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=800'' WHERE name LIKE N''%Hộp Hoa%''');
+

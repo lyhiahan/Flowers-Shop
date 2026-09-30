@@ -259,6 +259,28 @@ public class DataInitializer implements CommandLineRunner {
                         .description("Chậu hoa lan hồ điệp cao cấp trưng Tết, biếu sếp, mừng tân gia")
                         .build()));
 
+        // Tự động dọn dẹp và hợp nhất các danh mục trùng lặp liên quan đến "Tình Yêu" / "Valentine"
+        java.util.List<Category> allLoveCats = categoryRepository.findAll().stream()
+                .filter(c -> c.getName() != null && (c.getName().contains("Tình Yêu") || c.getName().contains("Valentine")))
+                .collect(java.util.stream.Collectors.toList());
+        if (allLoveCats.size() > 1) {
+            final Category mainLoveCat = catTinhYeu;
+            for (Category dupCat : allLoveCats) {
+                if (!dupCat.getId().equals(mainLoveCat.getId())) {
+                    java.util.List<Product> prodsToReassign = productRepository.findByCategoryId(dupCat.getId());
+                    if (prodsToReassign != null) {
+                        for (Product prod : prodsToReassign) {
+                            prod.setCategory(mainLoveCat);
+                            productRepository.save(prod);
+                        }
+                    }
+                    try {
+                        categoryRepository.delete(dupCat);
+                    } catch (Exception ignored) {}
+                }
+            }
+        }
+
         // 7. Tạo danh sách hoa mẫu phong phú có sold >= 10 phục vụ tiêu chí Khách vãng lai (Guest)
         if (productRepository.count() < 5) {
             Product p1 = Product.builder()
@@ -270,7 +292,7 @@ public class DataInitializer implements CommandLineRunner {
                     .importPrice(new BigDecimal("700000"))
                     .priceRentPerDay(new BigDecimal("150000"))
                     .depositFee(new BigDecimal("500000"))
-                    .imageUrl("https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&q=80")
+                    .imageUrl("https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=800")
                     .sold(85)
                     .rating(4.9)
                     .isActive(true)
@@ -392,7 +414,7 @@ public class DataInitializer implements CommandLineRunner {
             }
         }
 
-        // 8. Tự động chuẩn hóa toàn bộ tên sản phẩm trong CSDL nếu còn từ tiếng Anh
+        // 8. Tự động chuẩn hóa toàn bộ tên sản phẩm và sửa ảnh sản phẩm chính xác theo loài hoa
         productRepository.findAll().forEach(p -> {
             boolean changed = false;
             if (p.getName() != null && p.getName().contains("Forever Love")) {
@@ -407,6 +429,33 @@ public class DataInitializer implements CommandLineRunner {
                 p.setName(p.getName().replace("Sweet Love", "'Tình Yêu Ngọt Ngào'"));
                 changed = true;
             }
+
+            // Sửa ảnh sản phẩm bị lỗi hoặc không khớp loài hoa
+            String nameLower = p.getName() != null ? p.getName().toLowerCase() : "";
+            String currentImg = p.getImageUrl();
+            if (currentImg == null || currentImg.trim().isEmpty() || currentImg.contains("placeholder") || currentImg.contains("via.placeholder")) {
+                p.setImageUrl("https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800&q=80");
+                changed = true;
+            } else if (nameLower.contains("hướng dương") && !currentImg.contains("photo-1597848212624")) {
+                p.setImageUrl("https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=800&q=80");
+                changed = true;
+            } else if (nameLower.contains("hồ điệp") && !currentImg.contains("photo-1525310072745")) {
+                p.setImageUrl("https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?w=800&q=80");
+                changed = true;
+            } else if ((nameLower.contains("hồng đỏ") || nameLower.contains("ecuador")) && !currentImg.contains("photo-1548094878")) {
+                p.setImageUrl("https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=800");
+                changed = true;
+            } else if ((nameLower.contains("hoa cưới") || nameLower.contains("cô dâu") || nameLower.contains("trắng")) && !currentImg.contains("photo-1533616688419")) {
+                p.setImageUrl("https://images.unsplash.com/photo-1533616688419-b7a585564566?w=800&q=80");
+                changed = true;
+            } else if (nameLower.contains("khai trương") && !currentImg.contains("photo-1526047932273")) {
+                p.setImageUrl("https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=800&q=80");
+                changed = true;
+            } else if ((nameLower.contains("sinh nhật") || nameLower.contains("pastel") || nameLower.contains("thiên thần")) && !currentImg.contains("photo-1561181286")) {
+                p.setImageUrl("https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=800&q=80");
+                changed = true;
+            }
+
             if (changed) {
                 productRepository.save(p);
             }
