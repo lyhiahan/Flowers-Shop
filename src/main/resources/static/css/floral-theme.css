@@ -158,7 +158,11 @@ p, .product-desc, .product-description, .product-short-specs, .accordion-body, .
 }
 
 /* 6. Thông tin phụ: 16 px, 400 */
-.top-subbar, .brand-hero-badge, small, .small, .text-muted, .form-text, .badge, .flower-card-meta-sub, .store-subtext, .info-helper, .accordion-button, .breadcrumb, .meta-text {
+.top-subbar {
+    display: none !important;
+}
+
+.brand-hero-badge, small, .small, .text-muted, .form-text, .badge, .flower-card-meta-sub, .store-subtext, .info-helper, .accordion-button, .breadcrumb, .meta-text {
     font-family: var(--font-sans) !important;
     font-size: 16px !important;
     font-weight: 400 !important;

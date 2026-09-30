@@ -949,19 +949,6 @@
 
     <!-- Header: Dòng chính (Logo, Tìm Kiếm, Giỏ Hàng, Tài Khoản cùng hàng) + Danh Mục Gọn -->
     <header class="sticky-top shadow-sm" style="z-index: 1020;">
-        <!-- Dòng phụ nhỏ: Hotline + Giao hàng + Following + Cửa hàng + Người dùng -->
-        <div class="top-subbar">
-            <div class="container flower-container d-flex justify-content-between align-items-center">
-                <span class="d-none d-sm-inline"><i class="bi bi-flower1 me-1"></i>Chuỗi Cửa Hàng Hoa Tươi & Điện Hoa Sài Gòn</span>
-                <div class="d-flex align-items-center gap-3 ms-auto">
-                    <span class="d-none d-md-inline"><i class="bi bi-telephone me-1"></i>028 1111 222</span>
-                    <span class="d-none d-lg-inline"><i class="bi bi-clock me-1"></i>Giao nhanh 60–90 phút</span>
-                    <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/following}"><i class="bi bi-bookmark-heart me-1"></i>Following</a>
-                    <a th:href="@{/stores}"><i class="bi bi-shop me-1"></i>Hệ thống cửa hàng</a>
-                    <a th:href="@{/users}"><i class="bi bi-people me-1"></i>Người dùng</a>
-                </div>
-            </div>
-        </div>
         <!-- Dòng chính: Logo, Ô Tìm Kiếm, Giỏ Hàng & Tài Khoản TRÊN CÙNG MỘT HÀNG -->
         <div class="header-main-bar">
             <div class="container flower-container">
