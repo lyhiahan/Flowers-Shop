@@ -38,7 +38,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void registerCustomer(RegisterRequest request) {
+    public String registerCustomer(RegisterRequest request) {
         // 1. Kiểm tra trùng username, email hoặc số điện thoại trong Database (Exception Flow: 8b)
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new IllegalArgumentException("Thông tin tài khoản không hợp lệ, tên đăng nhập đã tồn tại!");
@@ -66,6 +66,7 @@ public class AuthServiceImpl implements AuthService {
 
         // 3. Gửi mã OTP xác thực qua email (và in ra console)
         emailService.sendOtpEmail(request.getEmail(), code);
+        return code;
     }
 
     @Override
@@ -152,7 +153,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void resendOtp(String email) {
+    public String resendOtp(String email) {
         String key = email.toLowerCase().trim();
         PendingRegistration pending = pendingRegistrations.get(key);
 
@@ -166,7 +167,7 @@ public class AuthServiceImpl implements AuthService {
             pending.setResendCount(pending.getResendCount() + 1);
 
             emailService.sendOtpEmail(email, newCode);
-            return;
+            return newCode;
         }
 
         User user = userRepository.findByEmail(email)
@@ -182,7 +183,7 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalStateException("Bạn đã yêu cầu gửi mã quá 3 lần. Vui lòng thử lại sau 10 phút.");
         }
 
-        createAndSendOtp(user, OtpType.ACTIVATE_ACCOUNT);
+        return createAndSendOtp(user, OtpType.ACTIVATE_ACCOUNT);
     }
 
     @Override

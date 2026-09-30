@@ -59,8 +59,9 @@ public class AuthController {
         }
 
         try {
-            authService.registerCustomer(request);
+            String otpCode = authService.registerCustomer(request);
             redirectAttributes.addFlashAttribute("successMessage", "Thông báo đăng ký thành công! Vui lòng nhập mã OTP đã gửi đến email của bạn để kích hoạt tài khoản.");
+            redirectAttributes.addFlashAttribute("devOtpCode", otpCode);
             return "redirect:/verify-otp?email=" + request.getEmail();
         } catch (IllegalArgumentException ex) {
             model.addAttribute("errorMessage", "Thông báo đăng ký thất bại: " + ex.getMessage());
@@ -103,8 +104,9 @@ public class AuthController {
     public String handleResendOtp(@RequestParam("email") String email,
                                   RedirectAttributes redirectAttributes) {
         try {
-            authService.resendOtp(email);
+            String newCode = authService.resendOtp(email);
             redirectAttributes.addFlashAttribute("successMessage", "Mã OTP mới đã được gửi đến email của bạn!");
+            redirectAttributes.addFlashAttribute("devOtpCode", newCode);
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
