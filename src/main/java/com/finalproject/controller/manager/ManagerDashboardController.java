@@ -22,7 +22,10 @@ import java.util.*;
 @Controller
 @RequestMapping({"/manager", "/vendor"})
 @RequiredArgsConstructor
+@org.springframework.transaction.annotation.Transactional(readOnly = true)
 public class ManagerDashboardController {
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ManagerDashboardController.class);
 
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
@@ -107,8 +110,14 @@ public class ManagerDashboardController {
 
         try {
             // 2. Lấy đơn hàng trong khoảng thời gian được chọn
-            List<Order> rangeOrders = orderRepository.findByPickupStoreIdAndCreatedAtBetweenOrderByCreatedAtDesc(
-                    storeId, startDateTime, endDateTime);
+            List<Order> rangeOrders;
+            try {
+                rangeOrders = orderRepository.findByPickupStoreIdAndCreatedAtBetweenOrderByCreatedAtDesc(
+                        storeId, startDateTime, endDateTime);
+            } catch (Exception e) {
+                log.warn("Lỗi truy vấn rangeOrders: {}", e.getMessage());
+                rangeOrders = Collections.emptyList();
+            }
 
             // Quy tắc: Doanh thu bán hoa chỉ ghi nhận đơn đã giao/hoàn thành và đã thanh toán; trừ khoản hoàn tiền
             BigDecimal grossFlowerRevenue = rangeOrders.stream()
@@ -134,7 +143,13 @@ public class ManagerDashboardController {
                     .count();
 
             // 3. Tình trạng hiện tại của chi nhánh
-            List<Order> allCurrentStoreOrders = orderRepository.findByPickupStoreIdOrderByCreatedAtDesc(storeId);
+            List<Order> allCurrentStoreOrders;
+            try {
+                allCurrentStoreOrders = orderRepository.findByPickupStoreIdOrderByCreatedAtDesc(storeId);
+            } catch (Exception e) {
+                log.warn("Lỗi truy vấn allCurrentStoreOrders: {}", e.getMessage());
+                allCurrentStoreOrders = Collections.emptyList();
+            }
 
             // Đơn chờ xử lý: PENDING, CONFIRMED, PREPARING
             List<Order> pendingOrdersList = allCurrentStoreOrders.stream()
@@ -146,7 +161,12 @@ public class ManagerDashboardController {
             long pendingOrdersCount = pendingOrdersList.size();
 
             // Sản phẩm sắp hết hàng (tồn kho <= 5 tại chi nhánh)
-            long lowStockCount = storeInventoryRepository.countByStoreIdAndQuantityLessThanEqual(storeId, 5);
+            long lowStockCount = 0;
+            try {
+                lowStockCount = storeInventoryRepository.countByStoreIdAndQuantityLessThanEqual(storeId, 5);
+            } catch (Exception e) {
+                log.warn("Lỗi đếm tồn kho thấp: {}", e.getMessage());
+            }
 
             // 4. Biểu đồ doanh thu theo thời gian
             List<String> chartLabels = new ArrayList<>();
@@ -197,59 +217,75 @@ public class ManagerDashboardController {
             boolean hasRevenueData = chartValues.stream().anyMatch(v -> v.compareTo(BigDecimal.ZERO) > 0);
 
             // 5. Top 5 mẫu hoa bán chạy nhất
-            Map<Long, Integer> productQtyMap = new HashMap<>();
-            Map<Long, BigDecimal> productRevenueMap = new HashMap<>();
-            Map<Long, Product> productMap = new HashMap<>();
+            List<TopFlowerDto> topProducts = new ArrayList<>();
+            try {
+                Map<Long, Integer> productQtyMap = new HashMap<>();
+                Map<Long, BigDecimal> productRevenueMap = new HashMap<>();
+                Map<Long, Product> productMap = new HashMap<>();
 
-            for (Order o : allCurrentStoreOrders) {
-                if ((o.getStatus() == OrderStatus.DELIVERED || o.getStatus() == OrderStatus.COMPLETED) && o.getOrderDetails() != null) {
-                    for (OrderDetail d : o.getOrderDetails()) {
-                        if (d.getProduct() != null) {
-                            Long pId = d.getProduct().getId();
-                            productMap.putIfAbsent(pId, d.getProduct());
-                            productQtyMap.merge(pId, d.getQuantity() != null ? d.getQuantity() : 1, Integer::sum);
-                            BigDecimal subtotal = (d.getUnitPrice() != null ? d.getUnitPrice() : BigDecimal.ZERO)
-                                    .multiply(BigDecimal.valueOf(d.getQuantity() != null ? d.getQuantity() : 1));
-                            productRevenueMap.merge(pId, subtotal, BigDecimal::add);
+                for (Order o : allCurrentStoreOrders) {
+                    if ((o.getStatus() == OrderStatus.DELIVERED || o.getStatus() == OrderStatus.COMPLETED) && o.getOrderDetails() != null) {
+                        for (OrderDetail d : o.getOrderDetails()) {
+                            if (d != null && d.getProduct() != null) {
+                                Long pId = d.getProduct().getId();
+                                productMap.putIfAbsent(pId, d.getProduct());
+                                int q = d.getQuantity() != null ? d.getQuantity() : 1;
+                                productQtyMap.merge(pId, q, Integer::sum);
+                                BigDecimal price = d.getUnitPrice() != null ? d.getUnitPrice() : BigDecimal.ZERO;
+                                productRevenueMap.merge(pId, price.multiply(BigDecimal.valueOf(q)), BigDecimal::add);
+                            }
                         }
                     }
                 }
-            }
 
-            List<TopFlowerDto> topProducts = new ArrayList<>();
-            if (!productQtyMap.isEmpty()) {
-                topProducts = productQtyMap.entrySet().stream()
-                        .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
-                        .limit(5)
-                        .map(entry -> {
-                            Product p = productMap.get(entry.getKey());
-                            return new TopFlowerDto(
-                                    p.getId(),
-                                    p.getName(),
-                                    p.getImageUrl(),
-                                    p.getCategory() != null ? p.getCategory().getName() : "Hoa tươi",
-                                    p.getPriceBuy(),
-                                    entry.getValue(),
-                                    productRevenueMap.getOrDefault(entry.getKey(), BigDecimal.ZERO),
-                                    p.getRating()
-                            );
-                        })
-                        .toList();
-            } else {
-                List<Product> storeProds = productRepository.findByStoreIdOrderByCreatedAtDesc(storeId);
-                topProducts = storeProds.stream()
-                        .limit(5)
-                        .map(p -> new TopFlowerDto(
-                                p.getId(),
-                                p.getName(),
-                                p.getImageUrl(),
-                                p.getCategory() != null ? p.getCategory().getName() : "Hoa tươi",
-                                p.getPriceBuy(),
-                                p.getSold() != null ? p.getSold() : 0,
-                                p.getPriceBuy().multiply(BigDecimal.valueOf(p.getSold() != null ? p.getSold() : 0)),
-                                p.getRating()
-                        ))
-                        .toList();
+                if (!productQtyMap.isEmpty()) {
+                    topProducts = productQtyMap.entrySet().stream()
+                            .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
+                            .limit(5)
+                            .map(entry -> {
+                                Product p = productMap.get(entry.getKey());
+                                String catName = "Hoa tươi";
+                                try {
+                                    if (p != null && p.getCategory() != null) catName = p.getCategory().getName();
+                                } catch (Exception ignored) {}
+                                return new TopFlowerDto(
+                                        p != null ? p.getId() : entry.getKey(),
+                                        p != null ? p.getName() : "Mẫu hoa chi nhánh",
+                                        p != null ? p.getImageUrl() : null,
+                                        catName,
+                                        p != null ? p.getPriceBuy() : BigDecimal.ZERO,
+                                        entry.getValue(),
+                                        productRevenueMap.getOrDefault(entry.getKey(), BigDecimal.ZERO),
+                                        p != null ? p.getRating() : 5.0
+                                );
+                            })
+                            .toList();
+                } else {
+                    List<Product> storeProds = productRepository.findByStoreIdOrderByCreatedAtDesc(storeId);
+                    topProducts = storeProds.stream()
+                            .limit(5)
+                            .map(p -> {
+                                String catName = "Hoa tươi";
+                                try {
+                                    if (p.getCategory() != null) catName = p.getCategory().getName();
+                                } catch (Exception ignored) {}
+                                int sold = p.getSold() != null ? p.getSold() : 0;
+                                BigDecimal pPrice = p.getPriceBuy() != null ? p.getPriceBuy() : BigDecimal.ZERO;
+                                return new TopFlowerDto(
+                                        p.getId(),
+                                        p.getName(),
+                                        p.getImageUrl(),
+                                        catName,
+                                        pPrice,
+                                        sold,
+                                        pPrice.multiply(BigDecimal.valueOf(sold)),
+                                        p.getRating()
+                                );
+                            })
+                            .toList();
+                }
+            } catch (Exception topEx) {
+                log.warn("Không tính được top hoa: {}", topEx.getMessage());
             }
 
             // Đổ dữ liệu thành công vào Model
@@ -265,6 +301,7 @@ public class ManagerDashboardController {
             model.addAttribute("pendingOrdersList", pendingOrdersList.stream().limit(6).toList());
 
         } catch (Exception ex) {
+            log.error("Lỗi tải dữ liệu dashboard chi nhánh " + storeId, ex);
             model.addAttribute("dataLoadError", true);
             model.addAttribute("flowerRevenue", null);
             model.addAttribute("completedOrdersCount", null);
