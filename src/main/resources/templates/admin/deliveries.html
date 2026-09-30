@@ -1,8 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Quản Lý Đơn Vị Vận Chuyển - Quản Trị Hệ Thống Hoa Tươi</title>
+    <title>Phương Thức Giao Hàng - Quản Trị Hệ Thống Hoa Tươi</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -17,8 +17,7 @@
 </head>
 <body class="admin-body">
 <div class="d-flex">
-    <!-- Sidebar -->
-        <!-- Sidebar Quản Trị Hệ Thống Chuẩn Thương Hiệu Tiệm Hoa -->
+    <!-- Sidebar Quản Trị Hệ Thống Chuẩn Thương Hiệu Tiệm Hoa -->
     <aside class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white">
         <a th:href="@{/admin/dashboard}" class="d-flex align-items-center gap-3 mb-4 text-white text-decoration-none px-2 pt-2">
             <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img flex-shrink-0" style="width: 40px; height: 40px; border-radius: 8px;">
@@ -125,57 +124,130 @@
 
     <!-- Main Content -->
     <div class="main-wrapper p-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <!-- 1. Header: Rút gọn tiêu đề và chuẩn hóa tên gọi -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
             <div>
-                <h1 class="admin-page-title mb-1">🚚 Đơn Vị Vận Chuyển & Phí Giao Hoa</h1>
-                <p class="text-muted small mb-0">Cấu hình các hãng giao vận (GrabExpress, Ahamove, GHTK...) và cước phí</p>
+                <div class="d-flex align-items-center gap-3">
+                    <h1 class="admin-page-title mb-0" style="font-size: 28px !important; font-weight: 800; color: #20382E;">Phương thức giao hàng</h1>
+                    <span class="badge rounded-pill" style="background-color: #E5EEE8; color: #20382E; border: 1px solid #D1E5DA; font-size: 14.5px; font-weight: 700; padding: 6px 14px;">
+                        <span th:text="${#lists.size(deliveries)}">0</span> phương thức
+                    </span>
+                </div>
+                <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Quản lý hình thức giao hoa, mức phí và phạm vi áp dụng.</p>
             </div>
-            <button class="btn btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#addDelivModal">
-                <i class="bi bi-plus-lg me-1"></i> Thêm Hãng Vận Chuyển
-            </button>
+            <div>
+                <button class="btn btn-primary d-inline-flex align-items-center gap-2 fw-bold shadow-sm" 
+                        data-bs-toggle="modal" data-bs-target="#addDelivModal"
+                        style="font-size: 15.5px; height: 44px; padding: 0 20px; border-radius: 10px; background-color: #20382E !important; border-color: #20382E !important;">
+                    <i class="bi bi-plus-lg"></i> Thêm phương thức
+                </button>
+            </div>
         </div>
 
-        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small" role="alert">
+        <!-- Flash alerts -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small" role="alert" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA; border-radius: 10px;">
             <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${successMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        <!-- 2. Bảng phương thức giao hàng: Chuẩn hóa cột, đầu bảng #E5EEE8 in đậm 800 -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light small text-secondary">
-                        <tr>
-                            <th class="ps-3">ID</th>
-                            <th>Đơn Vị Giao Vận</th>
-                            <th>Cước Phí Vận Chuyển</th>
-                            <th>Mô Tả Dịch Vụ</th>
-                            <th>Trạng Thái</th>
-                            <th class="text-end pe-3">Hành Động</th>
+                    <table class="table table-admin-deliveries align-middle mb-0">
+                        <thead style="background-color: #E5EEE8 !important;">
+                        <tr style="background-color: #E5EEE8 !important;">
+                            <th class="ps-4 fw-bold" style="min-width: 220px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Phương thức</th>
+                            <th class="fw-bold" style="min-width: 170px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Thời gian dự kiến</th>
+                            <th class="text-end fw-bold" style="min-width: 140px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Phí giao hàng</th>
+                            <th class="fw-bold" style="min-width: 200px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Phạm vi áp dụng</th>
+                            <th class="fw-bold" style="min-width: 150px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Trạng thái</th>
+                            <th class="text-end pe-4 fw-bold" style="min-width: 200px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Thao tác</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(deliveries)}">
-                            <td colspan="6" class="text-center py-5 text-muted">Chưa có đơn vị vận chuyển nào.</td>
+                            <td colspan="6" class="text-center py-5 text-muted" style="font-size: 15.5px;">
+                                <i class="bi bi-truck fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                                Chưa có phương thức giao hàng nào được cấu hình.
+                            </td>
                         </tr>
                         <tr th:each="d : ${deliveries}">
-                            <td class="ps-3 text-muted" th:text="'#' + ${d.id}"></td>
-                            <td><strong class="text-dark" th:text="${d.name}"></strong></td>
-                            <td>
-                                <strong class="text-danger" th:text="${#numbers.formatDecimal(d.price, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                            <!-- 1. Phương thức: Tên đậm 17px/700, mã ID nhỏ bên dưới -->
+                            <td class="ps-4">
+                                <div class="fw-bold text-dark" style="font-size: 17px; font-weight: 700; color: #20382E !important; line-height: 1.35;" th:text="${d.name}">
+                                    Giao Hỏa Tốc (2 Giờ)
+                                </div>
+                                <div style="font-size: 13.5px; color: #66736B; margin-top: 2px;">
+                                    Mã: #<span th:text="${d.id}">1</span>
+                                    <span class="mx-1">•</span>
+                                    <span>Shipper tiệm hoa & đối tác</span>
+                                </div>
                             </td>
-                            <td class="small text-muted" th:text="${d.description}"></td>
+
+                            <!-- 2. Thời gian dự kiến: ngắn gọn, rõ ràng -->
                             <td>
-                                <span th:if="${d.isActive == null or d.isActive}" class="badge bg-success-subtle text-success">Đang Áp Dụng</span>
-                                <span th:if="${d.isActive != null and !d.isActive}" class="badge bg-secondary-subtle text-secondary">Tạm Dừng</span>
+                                <div class="fw-semibold" style="font-size: 15.5px; color: #24332C;">
+                                    <i class="bi bi-clock-history me-1 text-success" style="font-size: 13px;"></i>
+                                    <span th:text="${d.name.toLowerCase().contains('hỏa tốc') or d.name.toLowerCase().contains('2h') or d.name.toLowerCase().contains('2 giờ') ? 'Trong 2 giờ' : (d.name.toLowerCase().contains('tiêu chuẩn') or d.name.toLowerCase().contains('trong ngày') ? 'Trong ngày (theo khung hẹn)' : '2-4 giờ')}">Trong 2 giờ</span>
+                                </div>
                             </td>
-                            <td class="text-end pe-3">
-                                <form th:action="@{'/admin/deliveries/toggle/' + ${d.id}}" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-sm rounded-pill px-3"
-                                            th:classappend="${d.isActive == null or d.isActive} ? 'btn-outline-warning' : 'btn-outline-success'">
-                                        <span th:text="${d.isActive == null or d.isActive} ? 'Tạm Dừng' : 'Kích Hoạt'"></span>
+
+                            <!-- 3. Phí giao hàng: 18px/800, hồng trầm #A64060, căn phải, không xuống dòng -->
+                            <td class="text-end" style="white-space: nowrap;">
+                                <div style="font-size: 18px; font-weight: 800; color: #A64060; white-space: nowrap;"
+                                     th:text="${d.price != null ? #numbers.formatDecimal(d.price, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">
+                                    35.000 ₫
+                                </div>
+                                <div style="font-size: 12.5px; color: #66736B; margin-top: 1px;">Phí cố định / đơn</div>
+                            </td>
+
+                            <!-- 4. Phạm vi áp dụng: Khu vực áp dụng thực tế, không tự ghi 'Toàn quốc' -->
+                            <td>
+                                <div style="font-size: 15px; color: #24332C; line-height: 1.4;">
+                                    <i class="bi bi-geo-alt me-1 text-muted"></i>
+                                    <span th:text="${d.name.toLowerCase().contains('hỏa tốc') ? 'Nội thành TP.HCM (bán kính ≤ 15km)' : 'Toàn khu vực TP.HCM'}">Khu vực áp dụng thực tế</span>
+                                </div>
+                            </td>
+
+                            <!-- 5. Trạng thái: Nhãn nền nhạt cùng chiều cao 28px, có chấm màu, in hoa trên 1 dòng -->
+                            <td style="white-space: nowrap;">
+                                <span th:if="${d.isActive == null or d.isActive}" class="status-pill-active" style="white-space: nowrap;">
+                                    <i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i>ĐANG BẬT
+                                </span>
+                                <span th:if="${d.isActive != null and !d.isActive}" class="badge" style="background-color: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; height: 28px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; padding: 0 12px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;">
+                                    <i class="bi bi-pause-circle me-1"></i>TẠM DỪNG
+                                </span>
+                            </td>
+
+                            <!-- 6. Thao tác: Nút 'Chỉnh sửa' chính; nút 'Tạm dừng' chữ nâu trên nền vàng nhạt, không xuống dòng -->
+                            <td class="text-end pe-4" style="white-space: nowrap;">
+                                <div class="d-inline-flex align-items-center gap-2">
+                                    <!-- Nút Chỉnh sửa (thao tác chính) -->
+                                    <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-1"
+                                            data-bs-toggle="modal" th:data-bs-target="'#editDelivModal' + ${d.id}"
+                                            style="height: 32px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px; border: 1px solid #D1E5DA; background-color: #FFFFFF; color: #20382E; white-space: nowrap;">
+                                        <i class="bi bi-pencil-square"></i> Chỉnh sửa
                                     </button>
-                                </form>
+
+                                    <!-- Nút Tạm dừng / Bật lại (thao tác phụ) -->
+                                    <form th:action="@{'/admin/deliveries/toggle/' + ${d.id}}" method="post" class="d-inline m-0">
+                                        <!-- Khi đang bật: Nút Tạm dừng (chữ nâu đậm trên nền vàng nhạt, 1 dòng) -->
+                                        <button th:if="${d.isActive == null or d.isActive}" type="submit"
+                                                class="btn btn-sm d-inline-flex align-items-center gap-1"
+                                                style="height: 32px; padding: 0 12px; font-size: 13px; font-weight: 700; border-radius: 8px; background-color: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; white-space: nowrap;"
+                                                th:onclick="'return confirm(\'Xác nhận TẠM DỪNG phương thức giao hàng [' + ${d.name} + ']?\\n\\nLưu ý quy tắc vận hành:\\n• Khách hàng sẽ không thể chọn phương thức này khi đặt đơn mới.\\n• Các đơn hàng đã đặt trước đó vẫn giữ nguyên hình thức và chi phí giao hàng.\')'">
+                                            <i class="bi bi-pause-circle"></i> Tạm dừng
+                                        </button>
+                                        <!-- Khi đang tắt: Nút Bật lại (chữ xanh đậm trên nền xanh nhạt) -->
+                                        <button th:if="${d.isActive != null and !d.isActive}" type="submit"
+                                                class="btn btn-sm d-inline-flex align-items-center gap-1"
+                                                style="height: 32px; padding: 0 12px; font-size: 13px; font-weight: 700; border-radius: 8px; background-color: #E5EEE8; color: #20382E; border: 1px solid #D1E5DA; white-space: nowrap;"
+                                                th:onclick="'return confirm(\'Xác nhận KÍCH HOẠT BẬT phương thức giao hàng [' + ${d.name} + ']?\\n\\nKhách hàng sẽ có thể lựa chọn phương thức này tại trang thanh toán.\')'">
+                                            <i class="bi bi-play-circle"></i> Bật lại
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         </tbody>
@@ -183,35 +255,96 @@
                 </div>
             </div>
         </div>
+
+        <!-- 4. Thẻ quy tắc vận hành phương thức giao hàng -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white" style="border: 1px solid #E2E7E2 !important; border-radius: 12px; background-color: #FAFBF9 !important;">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-shield-check text-success fs-5"></i>
+                <h5 class="fw-bold mb-0" style="font-size: 16.5px; color: #20382E;">Quy tắc vận hành phương thức giao hàng</h5>
+            </div>
+            <div class="row g-3 small" style="color: #4A5B53; line-height: 1.55;">
+                <div class="col-12 col-md-4">
+                    <strong class="d-block text-dark mb-1">• Tạm dừng phương thức:</strong>
+                    Khi tạm dừng, khách hàng sẽ không thể chọn phương thức này khi tạo đơn hàng mới. Các đơn hàng đã đặt trước đó vẫn giữ nguyên hình thức và chi phí giao hàng đã cam kết.
+                </div>
+                <div class="col-12 col-md-4">
+                    <strong class="d-block text-dark mb-1">• Thay đổi biểu phí:</strong>
+                    Mức phí mới chỉ áp dụng cho các đơn đặt hoa phát sinh sau thời điểm cập nhật; không điều chỉnh biểu phí của các đơn hàng cũ.
+                </div>
+                <div class="col-12 col-md-4">
+                    <strong class="d-block text-dark mb-1">• Thời gian cam kết:</strong>
+                    Thời gian giao ước tính tại đây được đồng bộ thống nhất với thông báo trên trang thanh toán của khách để đảm bảo chất lượng và độ tươi của hoa khi giao nhận.
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
-<!-- Modal Thêm Đơn Vị Vận Chuyển -->
-<div class="modal fade" id="addDelivModal" tabindex="-1">
+<!-- Modal Thêm Phương Thức Giao Hàng -->
+<div class="modal fade" id="addDelivModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="border: 1px solid #E2E7E2 !important; border-radius: 14px;">
             <form th:action="@{/admin/deliveries/add}" method="post">
-                <div class="modal-header">
-                    <h5 class="modal-title font-serif">🚚 Thêm Đơn Vị Vận Chuyển</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header text-white" style="background-color: #20382E; border-bottom: none; padding: 18px 24px;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-truck fs-5"></i>
+                        <h5 class="modal-title fw-bold mb-0 text-white" style="font-size: 18px;">Thêm Phương Thức Giao Hàng</h5>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body p-4" style="background-color: #FBFDFB;">
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold">Tên đơn vị vận chuyển:</label>
-                        <input type="text" name="name" class="form-control" placeholder="VD: Lalamove Giao Hoa 1H" required>
+                        <label class="form-label small fw-bold text-dark">Tên phương thức giao hàng:</label>
+                        <input type="text" name="name" class="form-control" placeholder="VD: Giao Hỏa Tốc (2 Giờ), Giao Hẹn Giờ..." required style="height: 44px; border-radius: 10px; border-color: #E2E7E2;">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold">Cước phí giao hàng (VNĐ):</label>
-                        <input type="number" name="price" class="form-control" placeholder="VD: 35000" min="0" required>
+                        <label class="form-label small fw-bold text-dark">Phí giao hàng cố định (VNĐ):</label>
+                        <input type="number" name="price" class="form-control" placeholder="VD: 35000" min="0" required style="height: 44px; border-radius: 10px; border-color: #E2E7E2;">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold">Mô tả đặc điểm dịch vụ:</label>
-                        <textarea name="description" rows="3" class="form-control" placeholder="Tài xế có thùng giữ lạnh chống héo hoa..."></textarea>
+                        <label class="form-label small fw-bold text-dark">Mô tả chi tiết & Cam kết bảo quản hoa:</label>
+                        <textarea name="description" rows="3" class="form-control" placeholder="Tài xế chuyên giao hoa tươi, bảo quản bằng thùng giữ lạnh chống héo dập..." style="border-radius: 10px; border-color: #E2E7E2;"></textarea>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-primary btn-sm">Thêm Đơn Vị</button>
+                <div class="modal-footer bg-white border-top-0 d-flex justify-content-end p-3">
+                    <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal" style="border-radius: 8px;">Đóng</button>
+                    <button type="submit" class="btn btn-primary btn-sm px-4 fw-bold" style="height: 38px; border-radius: 8px; background-color: #20382E !important; border-color: #20382E !important;">Thêm phương thức</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Chỉnh Sửa Phương Thức Giao Hàng (Từng dòng) -->
+<div th:each="d : ${deliveries}" class="modal fade" th:id="'editDelivModal' + ${d.id}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="border: 1px solid #E2E7E2 !important; border-radius: 14px;">
+            <form th:action="@{'/admin/deliveries/update/' + ${d.id}}" method="post">
+                <div class="modal-header text-white" style="background-color: #20382E; border-bottom: none; padding: 18px 24px;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-pencil-square fs-5"></i>
+                        <h5 class="modal-title fw-bold mb-0 text-white" style="font-size: 18px;">Chỉnh Sửa Phương Thức #<span th:text="${d.id}">1</span></h5>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4" style="background-color: #FBFDFB;">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Tên phương thức giao hàng:</label>
+                        <input type="text" name="name" th:value="${d.name}" class="form-control" required style="height: 44px; border-radius: 10px; border-color: #E2E7E2;">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Phí giao hàng (VNĐ) <span class="text-muted fw-normal">(áp dụng cho đơn mới)</span>:</label>
+                        <input type="number" name="price" th:value="${d.price}" class="form-control" min="0" required style="height: 44px; border-radius: 10px; border-color: #E2E7E2;">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Mô tả đặc điểm & Cam kết bảo quản:</label>
+                        <textarea name="description" rows="3" th:text="${d.description}" class="form-control" style="border-radius: 10px; border-color: #E2E7E2;"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-white border-top-0 d-flex justify-content-end p-3">
+                    <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal" style="border-radius: 8px;">Đóng</button>
+                    <button type="submit" class="btn btn-primary btn-sm px-4 fw-bold" style="height: 38px; border-radius: 8px; background-color: #20382E !important; border-color: #20382E !important;">Lưu thay đổi</button>
                 </div>
             </form>
         </div>

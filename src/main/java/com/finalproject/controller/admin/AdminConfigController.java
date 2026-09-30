@@ -122,7 +122,7 @@ public class AdminConfigController {
                               RedirectAttributes ra) {
         Delivery d = Delivery.builder().name(name).price(price).description(description).isActive(true).isDeleted(false).build();
         deliveryRepository.save(d);
-        ra.addFlashAttribute("successMessage", "Thêm đơn vị vận chuyển [" + name + "] thành công!");
+        ra.addFlashAttribute("successMessage", "Thêm phương thức giao hàng [" + name + "] thành công!");
         return "redirect:/admin/deliveries";
     }
 
@@ -137,16 +137,18 @@ public class AdminConfigController {
         d.setPrice(price);
         d.setDescription(description);
         deliveryRepository.save(d);
-        ra.addFlashAttribute("successMessage", "Cập nhật đơn vị vận chuyển thành công!");
+        ra.addFlashAttribute("successMessage", "Cập nhật phương thức giao hàng [" + name + "] thành công! (Lưu ý: Mức phí mới chỉ áp dụng cho các đơn hàng tạo mới)");
         return "redirect:/admin/deliveries";
     }
 
     @PostMapping("/deliveries/toggle/{id}")
     public String toggleDelivery(@PathVariable("id") Long id, RedirectAttributes ra) {
         Delivery d = deliveryRepository.findById(id).orElseThrow();
-        d.setIsActive(!Boolean.TRUE.equals(d.getIsActive()));
+        boolean newActive = !Boolean.TRUE.equals(d.getIsActive());
+        d.setIsActive(newActive);
         deliveryRepository.save(d);
-        ra.addFlashAttribute("successMessage", "Đã cập nhật trạng thái đơn vị vận chuyển!");
+        ra.addFlashAttribute("successMessage", "Đã " + (newActive ? "bật áp dụng" : "tạm dừng") + " phương thức giao hàng [" + d.getName() + "]. "
+                + (newActive ? "Khách hàng đã có thể chọn phương thức này khi đặt hoa." : "Khách hàng sẽ không thể chọn phương thức này cho đơn mới; các đơn đã đặt trước đó vẫn giữ nguyên phí và thông tin giao hàng."));
         return "redirect:/admin/deliveries";
     }
 
@@ -155,7 +157,7 @@ public class AdminConfigController {
         Delivery d = deliveryRepository.findById(id).orElseThrow();
         d.setIsDeleted(true);
         deliveryRepository.save(d);
-        ra.addFlashAttribute("successMessage", "Xóa đơn vị vận chuyển thành công!");
+        ra.addFlashAttribute("successMessage", "Xóa phương thức giao hàng thành công!");
         return "redirect:/admin/deliveries";
     }
 
