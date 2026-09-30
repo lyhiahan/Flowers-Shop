@@ -93,7 +93,7 @@
         <div th:if="${#lists.isEmpty(orders)}" class="card flower-card shadow-sm text-center p-5 bg-white my-4">
             <div class="mb-3 fs-1">📦</div>
             <h4 class="font-serif text-dark fw-bold">Bạn chưa có đơn đặt hoa nào</h4>
-            <p class="text-muted small">Các đơn hoa tươi và thuê khung sự kiện của bạn sẽ xuất hiện tại đây sau khi đặt hàng.</p>
+            <p class="text-muted small">Các đơn hoa tươi của bạn sẽ xuất hiện tại đây sau khi đặt hàng.</p>
             <div>
                 <a th:href="@{/}" class="btn btn-danger rounded-pill px-4 mt-2">Dạo Cửa Hàng Hoa Ngay</a>
             </div>
@@ -105,8 +105,7 @@
                 <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 border-bottom">
                     <div>
                         <span class="font-serif fw-bold fs-5 text-dark" th:text="'Đơn Hoa #' + ${o.id}"></span>
-                        <span th:if="${o.orderType.name() == 'BUY'}" class="badge bg-danger ms-2">HOA TƯƠI</span>
-                        <span th:if="${o.orderType.name() == 'RENT'}" class="badge bg-warning text-dark ms-2">THUÊ KHUNG SỰ KIỆN</span>
+                        <span class="badge bg-danger ms-2">HOA TƯƠI</span>
                         <span class="text-muted small ms-3">
                             <i class="bi bi-calendar-check me-1"></i><span th:text="${#temporals.format(o.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
                         </span>
@@ -179,8 +178,7 @@
                                 <th>Mẫu Hoa / Sản phẩm</th>
                                 <th>Số lượng</th>
                                 <th>Đơn giá</th>
-                                <th th:if="${o.orderType.name() == 'RENT'}">Thời gian thuê</th>
-                                <th th:if="${o.orderType.name() == 'RENT'}">Tiền cọc</th>
+                                <th class="text-end">Thao tác</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -190,10 +188,6 @@
                                 </td>
                                 <td><span class="badge bg-light text-dark border" th:text="'x ' + ${d.quantity}"></span></td>
                                 <td class="text-danger fw-semibold" th:text="${#numbers.formatDecimal(d.unitPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
-                                <td th:if="${o.orderType.name() == 'RENT'}">
-                                    <span class="badge bg-info text-dark" th:text="${d.rentStartDate} + ' → ' + ${d.rentEndDate}"></span>
-                                </td>
-                                <td th:if="${o.orderType.name() == 'RENT'}" class="text-warning fw-semibold" th:text="${#numbers.formatDecimal(d.depositFee, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
                                 <td class="text-end">
                                     <!-- Nút đánh giá khi đơn hoàn thành -->
                                     <a th:if="${o.status.name() == 'COMPLETED' or o.status.name() == 'DELIVERED'}" 

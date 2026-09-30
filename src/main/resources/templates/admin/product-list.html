@@ -132,7 +132,7 @@
         <header class="top-navbar d-flex justify-content-between align-items-center sticky-top">
             <div>
                 <h1 class="admin-page-title mb-0">Quản Lý Danh Mục Sản Phẩm</h1>
-                <small class="text-muted" style="font-size: 15px;">Kiểm soát giá cả, chính sách cho thuê và quy định cọc</small>
+                <small class="text-muted" style="font-size: 15px;">Kiểm soát giá cả và danh mục hoa tươi</small>
             </div>
             <div>
                 <a th:href="@{/admin/products/create}" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm fw-bold">
@@ -157,9 +157,7 @@
                             <th>Tên Sản Phẩm</th>
                             <th>Danh Mục</th>
                             <th>Giá Nhập Gốc</th>
-                            <th>Giá Bán Đứt</th>
-                            <th>Giá Thuê / Ngày</th>
-                            <th>Tiền Đặt Cọc</th>
+                            <th>Giá Bán</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -169,11 +167,9 @@
                             <td><span class="badge bg-secondary" th:text="${p.category.name}"></span></td>
                             <td class="text-muted" th:text="${#numbers.formatDecimal(p.importPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
                             <td class="text-primary fw-bold" th:text="${#numbers.formatDecimal(p.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
-                            <td class="text-success fw-bold" th:text="${#numbers.formatDecimal(p.priceRentPerDay, 0, 'COMMA', 0, 'POINT')} + ' đ/ngày'"></td>
-                            <td class="text-warning fw-bold" th:text="${#numbers.formatDecimal(p.depositFee, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(products)}">
-                            <td colspan="7" class="text-center py-4 text-muted">Chưa có sản phẩm nào trong hệ thống.</td>
+                            <td colspan="5" class="text-center py-4 text-muted">Chưa có sản phẩm nào trong hệ thống.</td>
                         </tr>
                         </tbody>
                     </table>

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -42,30 +42,22 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-3 mb-3">
+                    <div class="col-md-6 mb-3">
                         <label class="form-label">Giá nhập gốc (VNĐ) (*)</label>
                         <input type="number" th:field="*{importPrice}" class="form-control" th:classappend="${#fields.hasErrors('importPrice')} ? 'is-invalid' : ''">
                         <div class="invalid-feedback" th:errors="*{importPrice}"></div>
                     </div>
 
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Giá bán đứt (VNĐ) (*)</label>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Giá bán (VNĐ) (*)</label>
                         <input type="number" th:field="*{priceBuy}" id="priceBuyInput" class="form-control" th:classappend="${#fields.hasErrors('priceBuy')} ? 'is-invalid' : ''">
                         <div class="invalid-feedback" th:errors="*{priceBuy}"></div>
                     </div>
-
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Giá thuê / ngày (VNĐ) (*)</label>
-                        <input type="number" th:field="*{priceRentPerDay}" readonly class="form-control" th:classappend="${#fields.hasErrors('priceRentPerDay')} ? 'is-invalid' : ''">
-                        <div class="invalid-feedback" th:errors="*{priceRentPerDay}"></div>
-                    </div>
-
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Tiền cọc bắt buộc (VNĐ) (*)</label>
-                        <input type="number" th:field="*{depositFee}" readonly class="form-control" th:classappend="${#fields.hasErrors('depositFee')} ? 'is-invalid' : ''">
-                        <div class="invalid-feedback" th:errors="*{depositFee}"></div>
-                    </div>
                 </div>
+
+                <!-- Ẩn các trường cho thuê và cọc (hệ thống chỉ bán hoa tươi) -->
+                <input type="hidden" th:field="*{priceRentPerDay}" value="0">
+                <input type="hidden" th:field="*{depositFee}" value="0">
 
                 <div class="mb-3">
                     <label class="form-label">Mô tả chi tiết</label>

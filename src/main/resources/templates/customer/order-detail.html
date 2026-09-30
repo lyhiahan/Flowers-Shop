@@ -103,8 +103,7 @@
             <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 border-bottom flex-wrap gap-2">
                 <div>
                     <h4 class="font-serif fw-bold text-dark mb-0 d-inline align-middle" th:text="'Chi Tiết Đơn Hàng #' + ${order.id}"></h4>
-                    <span th:if="${order.orderType.name() == 'BUY'}" class="badge bg-danger ms-2">HOA TƯƠI</span>
-                    <span th:if="${order.orderType.name() == 'RENT'}" class="badge bg-warning text-dark ms-2">THUÊ KHUNG SỰ KIỆN</span>
+                    <span class="badge bg-danger ms-2">HOA TƯƠI</span>
                 </div>
                 <div>
                     <!-- Status Badges -->
@@ -170,8 +169,6 @@
                                 <th>Sản phẩm</th>
                                 <th class="text-center">Số lượng</th>
                                 <th class="text-end">Đơn giá</th>
-                                <th th:if="${order.orderType.name() == 'RENT'}">Thời gian thuê</th>
-                                <th th:if="${order.orderType.name() == 'RENT'}" class="text-end">Tiền cọc</th>
                                 <th class="text-end">Thành tiền</th>
                                 <!-- Cột Đánh giá cho đơn hàng thành công (UC_014 Step 4) -->
                                 <th th:if="${order.status.name() == 'COMPLETED' or order.status.name() == 'DELIVERED'}" class="text-center">Đánh giá</th>
@@ -185,8 +182,6 @@
                                 </td>
                                 <td class="text-center" th:text="${d.quantity}">1</td>
                                 <td class="text-end" th:text="${#numbers.formatDecimal(d.unitPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
-                                <td th:if="${order.orderType.name() == 'RENT'}" th:text="${d.rentStartDate} + ' → ' + ${d.rentEndDate}"></td>
-                                <td th:if="${order.orderType.name() == 'RENT'}" class="text-end text-warning" th:text="${#numbers.formatDecimal(d.depositFee, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
                                 <td class="text-end fw-bold text-danger" th:text="${#numbers.formatDecimal(d.subtotal, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
                                 
                                 <!-- UC_014 Main Flow 4: Chọn nút Review & rate của sản phẩm muốn phản hồi, đánh giá -->
