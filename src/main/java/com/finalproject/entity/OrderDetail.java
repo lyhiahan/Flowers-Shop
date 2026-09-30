@@ -44,4 +44,15 @@ public class OrderDetail {
         }
         return 0;
     }
+
+    public BigDecimal getSubtotal() {
+        if (unitPrice == null || quantity == null) {
+            return BigDecimal.ZERO;
+        }
+        if (orderType == OrderType.RENT) {
+            long days = getRentalDays();
+            return unitPrice.multiply(BigDecimal.valueOf(quantity)).multiply(BigDecimal.valueOf(days > 0 ? days : 1));
+        }
+        return unitPrice.multiply(BigDecimal.valueOf(quantity));
+    }
 }

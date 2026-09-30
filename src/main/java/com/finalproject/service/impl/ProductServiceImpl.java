@@ -129,6 +129,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public long getFollowerCount(Long productId) {
+        if (productId == null) return 0;
+        return wishlistRepository.countByProductId(productId);
+    }
+
+    @Override
     @Transactional
     public void recordRecentlyViewed(Long userId, Long productId) {
         if (userId == null) return;

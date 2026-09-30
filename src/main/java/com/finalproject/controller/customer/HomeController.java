@@ -6,6 +6,7 @@ import com.finalproject.repository.CategoryRepository;
 import com.finalproject.repository.ProductRepository;
 import com.finalproject.repository.StoreRepository;
 import com.finalproject.service.CartService;
+import com.finalproject.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,6 +30,8 @@ public class HomeController {
     private final CategoryRepository categoryRepository;
     private final StoreRepository storeRepository;
     private final CartService cartService;
+    private final ProductService productService;
+    private final com.finalproject.repository.UserRepository userRepository;
 
     @GetMapping({"/", "/products", "/search"})
     public String index(
@@ -49,6 +52,15 @@ public class HomeController {
             // Guest Featured Products (Bán trên 10 sản phẩm sắp xếp giảm dần)
             List<Product> guestFeatured = productRepository.findGuestFeaturedProducts();
             model.addAttribute("guestFeaturedProducts", guestFeatured);
+
+            if (principal != null) {
+                userRepository.findByUsername(principal.getName()).ifPresent(u -> {
+                    var followed = productService.getWishlist(u.getId()).stream()
+                            .map(Product::getId)
+                            .collect(java.util.stream.Collectors.toSet());
+                    model.addAttribute("followedProductIds", followed);
+                });
+            }
 
             // 1. Sắp xếp (Sorting)
             Sort sortObj;

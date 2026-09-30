@@ -19,6 +19,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
+    private final StoreRepository storeRepository;
 
     @Override
     @Transactional
@@ -76,11 +77,20 @@ public class ReviewServiceImpl implements ReviewService {
 
         Review saved = reviewRepository.save(review);
 
-        // Cập nhật rating trung bình của sản phẩm
+        // Cập nhật rating trung bình của sản phẩm (Post-condition UC_014)
         List<Review> allReviews = reviewRepository.findByProductIdOrderByCreatedAtDesc(productId);
         double avg = allReviews.stream().mapToInt(Review::getRating).average().orElse(5.0);
         product.setRating(Math.round(avg * 10.0) / 10.0);
         productRepository.save(product);
+
+        // Cập nhật rating trung bình của cửa hàng (Post-condition UC_014)
+        if (product.getStore() != null) {
+            Store store = product.getStore();
+            List<Review> storeReviews = reviewRepository.findByStoreIdOrderByCreatedAtDesc(store.getId());
+            double storeAvg = storeReviews.stream().mapToInt(Review::getRating).average().orElse(5.0);
+            store.setRating(Math.round(storeAvg * 10.0) / 10.0);
+            storeRepository.save(store);
+        }
 
         return saved;
     }

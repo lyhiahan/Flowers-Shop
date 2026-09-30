@@ -10,7 +10,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -59,25 +61,55 @@ public class UserServiceImpl implements UserService {
         return userAddressRepository.findByUserIdOrderByIsDefaultDescCreatedAtDesc(userId);
     }
 
+    private String normalizeAddress(String input) {
+        if (input == null) return "";
+        String nfd = Normalizer.normalize(input, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        String noAccent = pattern.matcher(nfd).replaceAll("").replace('đ', 'd').replace('Đ', 'd');
+        return noAccent.toLowerCase()
+                .replaceAll("[,.\\-\\/#]", " ")
+                .replaceAll("\\s+", " ")
+                .trim();
+    }
+
     @Override
     @Transactional
     public UserAddress addAddress(Long userId, String recipientName, String phone, String addressDetail, Boolean isDefault) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Người dùng không tồn tại"));
 
+        if (recipientName == null || recipientName.trim().isEmpty() ||
+            phone == null || phone.trim().isEmpty() ||
+            addressDetail == null || addressDetail.trim().isEmpty()) {
+            throw new IllegalArgumentException("Thông báo thêm thất bại: Vui lòng điền đầy đủ các thông tin địa chỉ!");
+        }
+
+        // Số điện thoại phải đúng 10 chữ số
+        if (!phone.trim().matches("^[0-9]{10}$")) {
+            throw new IllegalArgumentException("Thông báo thêm thất bại: Số điện thoại không hợp lệ (phải đúng 10 chữ số)");
+        }
+
+        String normDetail = normalizeAddress(addressDetail);
+        List<UserAddress> existing = userAddressRepository.findByUserIdOrderByIsDefaultDescCreatedAtDesc(userId);
+        boolean duplicate = existing.stream().anyMatch(a ->
+                normalizeAddress(a.getAddressDetail()).equals(normDetail)
+        );
+        if (duplicate) {
+            throw new IllegalArgumentException("Thông báo thêm thất bại: Địa chỉ này đã tồn tại trong sổ địa chỉ của bạn!");
+        }
+
         if (Boolean.TRUE.equals(isDefault)) {
             clearDefaultAddress(userId);
         } else {
             // Nếu là địa chỉ đầu tiên thì tự set làm mặc định
-            List<UserAddress> existing = userAddressRepository.findByUserIdOrderByIsDefaultDescCreatedAtDesc(userId);
             if (existing.isEmpty()) isDefault = true;
         }
 
         UserAddress address = UserAddress.builder()
                 .user(user)
-                .recipientName(recipientName)
-                .phone(phone)
-                .addressDetail(addressDetail)
+                .recipientName(recipientName.trim())
+                .phone(phone.trim())
+                .addressDetail(addressDetail.trim())
                 .isDefault(isDefault != null && isDefault)
                 .build();
 

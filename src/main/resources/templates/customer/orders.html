@@ -223,23 +223,83 @@
                             </div>
                         </div>
                         <div class="d-flex align-items-center gap-2">
+                            <!-- Nút ký hiệu chữ i để xem chi tiết (UC_011 Step 7) -->
+                            <a th:href="@{'/customer/orders/detail/' + ${o.id}}" class="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-sm" title="Xem chi tiết đơn hàng">
+                                <i class="bi bi-info-circle me-1"></i> Chi Tiết
+                            </a>
+
                             <!-- Nút yêu cầu hoàn tiền nếu đã giao hoặc gặp sự cố -->
                             <form th:if="${o.status.name() == 'DELIVERED' or o.status.name() == 'COMPLETED'}" th:action="@{'/customer/orders/refund/' + ${o.id}}" method="post" class="d-inline">
                                 <button type="submit" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="return confirm('Gửi yêu cầu hoàn tiền cho đơn hàng này?')">
                                     <i class="bi bi-arrow-return-left me-1"></i> Yêu Cầu Hoàn Tiền
                                 </button>
                             </form>
-                            <!-- Nút hủy đơn khi đơn còn PENDING -->
-                            <form th:if="${o.status.name() == 'PENDING'}" th:action="@{'/customer/orders/cancel/' + ${o.id}}" method="post" class="d-inline">
-                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="return confirm('Bạn có chắc chắn muốn hủy đơn đặt hoa này?')">
-                                    <i class="bi bi-x-circle me-1"></i> Hủy Đơn Hàng
+
+                            <!-- Nút ký hiệu cấm để hủy đơn hàng (UC_011 Alternative 7a) -->
+                            <!-- Nút này sẽ tồn tại nếu đơn hàng được đặt dưới 1 tiếng và đơn hàng chưa được cửa hàng xác nhận (PENDING) -->
+                            <button th:if="${o.isCancellable()}" type="button" 
+                                    class="btn btn-outline-danger btn-sm rounded-pill px-3" 
+                                    title="Hủy đơn hàng"
+                                    data-bs-toggle="modal" 
+                                    th:data-bs-target="'#confirmCancelOrderModal_' + ${o.id}">
+                                <i class="bi bi-slash-circle me-1"></i> Hủy Đơn Hàng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Xác Nhận Hủy Đơn (UC_011 Alternative 8a, 9a, 9b) -->
+                <div th:if="${o.isCancellable()}" class="modal fade" th:id="'confirmCancelOrderModal_' + ${o.id}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+                        <div class="modal-content rounded-4 border-0 shadow">
+                            <div class="modal-header border-0 pb-0">
+                                <h5 class="modal-title font-serif fw-bold text-danger">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i> Xác Nhận Hủy Đơn
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body py-3 text-secondary">
+                                Bạn có chắc chắn muốn hủy đơn hàng <strong class="text-dark" th:text="'#' + ${o.id}"></strong> này không?
+                            </div>
+                            <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
+                                <!-- 9b. Bấm nút Cancel -> 9b1. Hủy thao tác -->
+                                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">
+                                    Cancel
                                 </button>
-                            </form>
+                                <!-- 9a. Bấm nút Confirm -> 9a1. Hủy đơn hàng thành công -->
+                                <form th:action="@{'/customer/orders/cancel/' + ${o.id}}" method="post" class="d-inline m-0">
+                                    <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold">
+                                        Confirm
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Phân trang (UC_011 Step 6) -->
+        <nav th:if="${totalPages > 1}" aria-label="Page navigation" class="mt-4 d-flex justify-content-center">
+            <ul class="pagination pagination-rounded shadow-sm">
+                <!-- Chọn Previous -->
+                <li class="page-item" th:classappend="${!hasPrevious} ? 'disabled'">
+                    <a class="page-link rounded-start-pill px-3" th:href="@{/customer/orders(status=${currentStatus}, page=${currentPage - 1})}">
+                        <i class="bi bi-chevron-left me-1"></i> Previous
+                    </a>
+                </li>
+                <!-- Chọn số trang bất kỳ -->
+                <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}" class="page-item" th:classappend="${i == currentPage} ? 'active'">
+                    <a class="page-link px-3" th:href="@{/customer/orders(status=${currentStatus}, page=${i})}" th:text="${i + 1}">1</a>
+                </li>
+                <!-- Chọn Next -->
+                <li class="page-item" th:classappend="${!hasNext} ? 'disabled'">
+                    <a class="page-link rounded-end-pill px-3" th:href="@{/customer/orders(status=${currentStatus}, page=${currentPage + 1})}">
+                        Next <i class="bi bi-chevron-right ms-1"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

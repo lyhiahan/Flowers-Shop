@@ -23,7 +23,6 @@
             --flower-star: #E5A038;
         }
 
-        /* 4. Nội dung, thông tin sản phẩm: 18 px, 400 */
         body {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: var(--flower-bg);
@@ -41,7 +40,6 @@
             padding-right: 20px;
         }
 
-        /* 6. Thông tin phụ: 16 px, 400 */
         .top-subbar {
             background-color: var(--flower-accent-bg);
             border-bottom: 1px solid var(--flower-border);
@@ -59,7 +57,6 @@
             color: var(--flower-primary-hover);
         }
 
-        /* Main Header */
         .header-main-bar {
             background-color: #ffffff;
             border-bottom: 1px solid var(--flower-border);
@@ -74,7 +71,6 @@
             text-decoration: none;
         }
 
-        /* Product Gallery */
         .detail-card {
             background: #ffffff;
             border-radius: 20px;
@@ -113,7 +109,7 @@
         .active-thumb {
             transform: scale(1.04);
             border-color: var(--flower-primary) !important;
-            box-shadow: 0 4px 12px rgba(225, 29, 72, 0.25) !important;
+            box-shadow: 0 4px 12px rgba(53, 84, 71, 0.25) !important;
         }
         .thumbnail-card {
             transition: all 0.2s ease;
@@ -123,7 +119,6 @@
             transform: translateY(-2px);
         }
 
-        /* 3. Giá sản phẩm: 34–38 px */
         .product-price-lg {
             color: var(--flower-accent);
             font-size: 36px;
@@ -132,7 +127,6 @@
             letter-spacing: -0.5px;
         }
 
-        /* 5. Nút mua hàng: 18 px, đậm vừa */
         .btn-flower-add {
             background-color: var(--flower-primary);
             color: #ffffff !important;
@@ -155,7 +149,6 @@
             transform: translateY(-1px);
         }
 
-        /* Ô số lượng: cụm - 1 +, rộng 120-140px */
         .quantity-stepper {
             width: 130px;
             height: 44px;
@@ -222,7 +215,6 @@
             color: var(--flower-text-main);
         }
 
-        /* Thông tin chính, mô tả: 17–18 px */
         .product-summary-specs {
             background-color: var(--flower-bg);
             border: 1px solid var(--flower-border);
@@ -254,7 +246,6 @@
             overflow: hidden;
             margin-bottom: 14px;
         }
-        /* Tiêu đề phần mở rộng: 20–22 px */
         .flower-accordion .accordion-button {
             background-color: #ffffff;
             color: var(--flower-primary);
@@ -286,6 +277,8 @@
                 <span><i class="bi bi-truck me-1 text-danger"></i> Giao nhanh 60–90 phút tại TP.HCM & Hà Nội</span>
             </div>
             <div class="d-flex align-items-center gap-3">
+                <a th:href="@{/following}"><i class="bi bi-heart me-1 text-danger"></i> Đang theo dõi</a>
+                <span class="text-secondary opacity-50">|</span>
                 <a th:href="@{/stores}"><i class="bi bi-geo-alt me-1"></i> Hệ thống chi nhánh</a>
                 <span class="text-secondary opacity-50">|</span>
                 <a th:href="@{/customer/orders}"><i class="bi bi-receipt me-1"></i> Tra cứu đơn hàng</a>
@@ -341,10 +334,10 @@
                                 <a class="dropdown-item py-2" th:href="@{/customer/profile}"><i class="bi bi-person me-2 text-secondary"></i> Hồ sơ của tôi</a>
                             </li>
                             <li sec:authorize="hasRole('CUSTOMER')">
-                                <a class="dropdown-item py-2" th:href="@{/customer/orders}"><i class="bi bi-box2-heart me-2 text-secondary"></i> Đơn hoa đã đặt</a>
+                                <a class="dropdown-item py-2" th:href="@{/following}"><i class="bi bi-heart me-2 text-danger"></i> Đang theo dõi</a>
                             </li>
                             <li sec:authorize="hasRole('CUSTOMER')">
-                                <a class="dropdown-item py-2" th:href="@{/customer/profile/wishlist}"><i class="bi bi-heart me-2 text-danger"></i> Hoa yêu thích</a>
+                                <a class="dropdown-item py-2" th:href="@{/customer/orders}"><i class="bi bi-box2-heart me-2 text-secondary"></i> Đơn hoa đã đặt</a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
@@ -434,24 +427,40 @@
                 </div>
 
                 <div class="col-lg-6">
-                    <!-- Category Badge & Wishlist -->
-                    <div class="d-flex justify-content-between align-items-start mb-2">
+                    <!-- Category Badge, Follow (UC_015) & Wishlist -->
+                    <div class="d-flex justify-content-between align-items-center mb-2">
                         <span class="badge rounded-pill px-3 py-1 fw-medium" style="background-color: var(--flower-accent-bg); color: var(--flower-accent); font-size: 14px;" th:text="${product.category != null ? product.category.name : 'Hoa tươi thiết kế'}">Hoa tươi thiết kế</span>
-                        <!-- Wishlist Toggle -->
-                        <form th:action="@{/customer/profile/wishlist/toggle/{id}(id=${product.id})}" method="post">
-                            <button type="submit" class="btn btn-sm rounded-circle p-2 border"
-                                    th:classappend="${isLiked} ? 'btn-danger text-white' : 'btn-light text-danger'"
-                                    title="Yêu thích">
-                                <i class="bi fs-5" th:classappend="${isLiked} ? 'bi-heart-fill' : 'bi-heart'"></i>
-                            </button>
-                        </form>
+                        
+                        <div class="d-flex align-items-center gap-2">
+                            <!-- Follow / Following button (UC_015) -->
+                            <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/customer/following/toggle/{productId}(productId=${product.id})}" method="post" class="m-0">
+                                <button type="submit" id="btnFollowProductTop"
+                                        class="btn btn-sm rounded-pill px-3 fw-bold shadow-sm d-flex align-items-center gap-1"
+                                        th:classappend="${isFollowed or isLiked} ? 'btn-danger' : 'btn-outline-danger'">
+                                    <i class="bi" th:classappend="${isFollowed or isLiked} ? 'bi-check-circle-fill' : 'bi-plus-circle'"></i>
+                                    <span th:text="${isFollowed or isLiked} ? 'Following' : 'Follow'">Follow</span>
+                                </button>
+                            </form>
+                            <a sec:authorize="!hasRole('CUSTOMER')" th:href="@{/login}" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold">
+                                <i class="bi bi-plus-circle me-1"></i> Follow
+                            </a>
+
+                            <!-- Wishlist Toggle -->
+                            <form th:action="@{/customer/profile/wishlist/toggle/{id}(id=${product.id})}" method="post" class="m-0">
+                                <button type="submit" class="btn btn-sm rounded-circle p-2 border"
+                                        th:classappend="${isLiked} ? 'btn-danger text-white' : 'btn-light text-danger'"
+                                        title="Yêu thích">
+                                    <i class="bi fs-5" th:classappend="${isLiked} ? 'bi-heart-fill' : 'bi-heart'"></i>
+                                </button>
+                            </form>
+                        </div>
                     </div>
 
                     <!-- 1. Tên sản phẩm: 30–34 px (Serif Playfair Display) -->
                     <h1 class="mb-2 font-serif" style="font-size: 32px; font-weight: 600; color: var(--flower-text-heading); line-height: 1.25;" th:text="${product.name}">Tên Hoa</h1>
 
-                    <!-- 2. Điểm đánh giá & Thống kê: Đường dẫn, thông tin phụ: 14–16 px -->
-                    <div class="d-flex align-items-center gap-3 mb-3" style="font-size: 15px; font-weight: 400;">
+                    <!-- 2. Điểm đánh giá, Thống kê & Follower count (UC_015) -->
+                    <div class="d-flex align-items-center gap-3 mb-3 flex-wrap" style="font-size: 15px; font-weight: 400;">
                         <div class="text-warning">
                             <i class="bi bi-star-fill"></i>
                             <span class="text-dark fw-medium" th:text="${product.rating}">5.0</span>
@@ -460,6 +469,10 @@
                         <span class="text-muted">Đã bán: <strong class="text-dark fw-medium" th:text="${product.sold != null ? product.sold : 0}"></strong></span>
                         <span class="text-muted">|</span>
                         <span class="text-muted">Lượt xem: <strong class="text-dark fw-medium" th:text="${product.viewCount != null ? product.viewCount : 1}"></strong></span>
+                        <span class="text-muted">|</span>
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2 py-1">
+                            <i class="bi bi-people-fill me-1"></i><span id="followerCount" class="fw-bold" th:text="${followerCount != null ? followerCount : 0}">0</span> theo dõi
+                        </span>
                     </div>
 
                     <!-- 3. Giá bán: 34–38 px -->
@@ -467,7 +480,7 @@
                         <div class="product-price-lg" th:text="${#numbers.formatDecimal(product.sellingPrice, 0, 'COMMA', 0, 'POINT') + ' ₫'}">650.000 ₫</div>
                     </div>
 
-                    <!-- 4. Ba dòng thông tin chính ngay dưới giá: 17–18 px, tương phản cao, xanh đen đậm #293B32 -->
+                    <!-- 4. Ba dòng thông tin chính ngay dưới giá -->
                     <div class="product-summary-specs mb-4">
                         <div class="spec-row mb-2">
                             <span class="spec-label">Loại hoa:</span>
@@ -483,7 +496,7 @@
                         </div>
                     </div>
 
-                    <!-- 5. Số lượng và nút mua hàng: 18 px, đậm vừa -->
+                    <!-- 5. Số lượng và nút mua hàng -->
                     <form th:action="@{/cart/add}" method="post" class="mb-4">
                         <input type="hidden" name="productId" th:value="${product.id}">
                         <input type="hidden" name="storeId" th:value="${product.store != null ? product.store.id : 1}">
@@ -528,10 +541,10 @@
                 </div>
             </div>
 
-            <!-- PHÍA DƯỚI HAI CỘT: CÁC MỤC MỞ RỘNG ĐƯỢC RÚT GỌN GỌN GÀNG -->
+            <!-- PHÍA DƯỚI HAI CỘT: CÁC MỤC MỞ RỘNG -->
             <div class="border-top mt-5 pt-4">
                 <div class="accordion flower-accordion" id="flowerDetailAccordion">
-                    <!-- Mục 1: Chi tiết sản phẩm (bổ sung kiểu dáng, dịp tặng, kích thước, ý nghĩa; không lặp lại thành phần) -->
+                    <!-- Mục 1: Chi tiết sản phẩm -->
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="headingDetail">
                             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetail" aria-expanded="true" aria-controls="collapseDetail">

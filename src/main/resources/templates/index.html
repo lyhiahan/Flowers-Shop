@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -154,6 +155,7 @@
             padding: 8px 22px;
             transition: background-color 0.2s ease, transform 0.1s ease;
         }
+
         .header-search-btn:hover {
             background-color: var(--flower-primary-hover);
             color: #ffffff;
@@ -643,14 +645,16 @@
 
     <!-- Header: Dòng phụ + Dòng chính (Logo, Tìm Kiếm, Giỏ Hàng, Tài Khoản cùng hàng) + Danh Mục Gọn -->
     <header class="sticky-top shadow-sm" style="z-index: 1020;">
-        <!-- Dòng phụ nhỏ: Hotline + Giao hàng + Cửa hàng -->
+        <!-- Dòng phụ nhỏ: Hotline + Giao hàng + Following + Cửa hàng + Người dùng -->
         <div class="top-subbar">
             <div class="container flower-container d-flex justify-content-between align-items-center">
                 <span class="d-none d-sm-inline"><i class="bi bi-flower1 me-1"></i>Chuỗi Cửa Hàng Hoa Tươi & Điện Hoa Sài Gòn</span>
                 <div class="d-flex align-items-center gap-3 ms-auto">
                     <span class="d-none d-md-inline"><i class="bi bi-telephone me-1"></i>028 1111 222</span>
                     <span class="d-none d-lg-inline"><i class="bi bi-clock me-1"></i>Giao nhanh 60–90 phút</span>
+                    <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/following}"><i class="bi bi-bookmark-heart me-1"></i>Following</a>
                     <a th:href="@{/stores}"><i class="bi bi-shop me-1"></i>Hệ thống cửa hàng</a>
+                    <a th:href="@{/users}"><i class="bi bi-people me-1"></i>Người dùng</a>
                 </div>
             </div>
         </div>
@@ -669,16 +673,19 @@
 
                     <!-- Ô Tìm Kiếm -->
                     <div class="col-lg-6 col-md-6 col-12 order-3 order-md-2">
-                        <form id="headerSearchForm" th:action="@{/products#product-catalog}" method="get" class="w-100">
+                        <form id="globalSearchForm" th:action="@{/products#product-catalog}" method="get" class="w-100">
                             <div class="header-search-box d-flex align-items-center">
-                                <select id="headerSearchType" class="header-search-type ps-2 pe-1" onchange="updateSearchType(this.value)">
-                                    <option value="product" selected>Sản phẩm</option>
-                                    <option value="store">Cửa hàng</option>
+                                <select id="searchScopeSelect"
+                                    class="header-search-type ps-2 pe-1"
+                                    style="cursor: pointer;">
+                                    <option value="products" selected>🌸 Mẫu hoa</option>
+                                    <option value="stores">🏬 Cửa hàng</option>
+                                    <option value="users">👥 Người dùng</option>
                                 </select>
                                 <span class="text-muted opacity-50 px-1">|</span>
                                 <input type="text" id="headerSearchInput" name="keyword" th:value="${keyword}" 
                                        class="form-control header-search-input shadow-none ps-2" 
-                                       placeholder="Tìm hoa hồng, giỏ hoa, lan hồ điệp...">
+                                       placeholder="Tìm hoa hồng, cửa hàng hoặc người dùng...">
                                 <button class="btn header-search-btn d-flex align-items-center gap-1 flex-shrink-0" type="submit" id="btnHeaderSearch" title="Tìm kiếm">
                                     <i class="bi bi-search"></i>
                                     <span class="d-none d-sm-inline">Tìm</span>
@@ -689,6 +696,11 @@
 
                     <!-- Giỏ Hàng + Tài Khoản (Trên cùng một hàng) -->
                     <div class="col-lg-3 col-md-3 col-6 order-2 order-md-3 d-flex align-items-center justify-content-end gap-3">
+                        <!-- Following shortcut -->
+                        <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/following}" class="header-cart-link" id="navFollowingHeader" title="Following - Bộ Sưu Tầm Theo Dõi">
+                            <i class="bi bi-bookmark-heart"></i>
+                        </a>
+
                         <!-- Giỏ hàng -->
                         <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/cart}" class="header-cart-link" title="Giỏ hoa của bạn">
                             <i class="bi bi-cart3"></i>
@@ -714,6 +726,7 @@
                                 </li>
                                 <li sec:authorize="hasRole('CUSTOMER')"><a class="dropdown-item py-2 small" th:href="@{/customer/profile}"><i class="bi bi-person-badge text-secondary me-2"></i> Hồ Sơ & Sổ Địa Chỉ</a></li>
                                 <li sec:authorize="hasRole('CUSTOMER')"><a class="dropdown-item py-2 small" th:href="@{/customer/orders}"><i class="bi bi-bag-check text-secondary me-2"></i> Đơn Đặt Hoa Của Tôi</a></li>
+                                <li sec:authorize="hasRole('CUSTOMER')"><a class="dropdown-item py-2 small" th:href="@{/following}"><i class="bi bi-bookmark-heart text-secondary me-2"></i> Following (Bộ Sưu Tầm Theo Dõi)</a></li>
                                 <li sec:authorize="hasRole('CUSTOMER')"><a class="dropdown-item py-2 small" th:href="@{/customer/wishlist}"><i class="bi bi-heart text-secondary me-2"></i> Mẫu Hoa Yêu Thích</a></li>
                                 <li sec:authorize="hasRole('CUSTOMER')"><a class="dropdown-item py-2 small" th:href="@{/customer/recently-viewed}"><i class="bi bi-clock-history text-secondary me-2"></i> Hoa Đã Xem Gần Đây</a></li>
                                 <li sec:authorize="hasRole('CUSTOMER')"><a class="dropdown-item py-2 small" th:href="@{/customer/followed-stores}"><i class="bi bi-shop text-secondary me-2"></i> Cửa Hàng Đang Theo Dõi</a></li>
@@ -793,6 +806,7 @@
                             </th:block>
                         </ul>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -1058,8 +1072,8 @@
         </div>
 
         <!-- Thông báo bộ lọc đang áp dụng -->
-        <div th:if="${(keyword != null and !keyword.isEmpty()) or (categoryId != null and categoryId > 0) or (sort != null and sort != 'default')}" 
-             class="d-flex align-items-center gap-2 mb-3 flex-wrap small">
+        <div th:if="${(keyword != null and !keyword.isEmpty()) or (categoryId != null and categoryId > 0) or (sort != null and sort != 'default')}"
+            class="d-flex align-items-center gap-2 mb-3 flex-wrap small">
             <span class="text-muted">Đang lọc theo:</span>
             <span th:if="${keyword != null and !keyword.isEmpty()}" class="badge badge-flower-accent p-2">
                 Từ khóa: "<span th:text="${keyword}"></span>"
@@ -1087,7 +1101,17 @@
         <!-- Lưới sản phẩm hoa tươi: 4 sản phẩm/hàng máy tính, 2 trên điện thoại, khoảng cách 24px (g-4) -->
         <div th:if="${not #lists.isEmpty(products)}" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
             <div class="col" th:each="p : ${products}">
-                <div class="card flower-card h-100">
+                <div class="card flower-card h-100 position-relative">
+                    <!-- UC_015 Alternative 1a: Nút Follow/Following ở một thẻ sản phẩm -->
+                    <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/customer/following/toggle/{productId}(productId=${p.id})}" method="post" class="position-absolute top-0 end-0 m-2 z-1">
+                        <button type="submit" class="btn btn-sm rounded-circle shadow-sm p-1 d-flex align-items-center justify-content-center border-0 bg-white bg-opacity-75"
+                                style="width: 32px; height: 32px;"
+                                th:classappend="${followedProductIds != null and followedProductIds.contains(p.id)} ? 'text-danger' : 'text-muted'"
+                                th:title="${followedProductIds != null and followedProductIds.contains(p.id)} ? 'Following (Đang theo dõi)' : 'Follow (Theo dõi)'">
+                            <i class="bi" th:classappend="${followedProductIds != null and followedProductIds.contains(p.id)} ? 'bi-heart-fill text-danger' : 'bi-heart'"></i>
+                        </button>
+                    </form>
+
                     <!-- Ảnh đại diện sản phẩm (Tỷ lệ 1:1, không có nhãn 'Đã bán') -->
                     <div class="overflow-hidden">
                         <a th:href="@{/product/{id}(id=${p.id})}">
@@ -1099,7 +1123,7 @@
 
                     <div class="flower-card-body">
                         <!-- Tên sản phẩm: tối đa 2 dòng -->
-                        <a th:href="@{/product/{id}(id=${p.id})}" class="flower-card-title" th:title="${p.name}" th:text="${p.name}"></a>
+                        <a th:href="@{/product/{id}(id=${p.id})}" class="flower-card-title text-decoration-none" th:title="${p.name}" th:text="${p.name}"></a>
                         
                         <!-- Giá và đánh giá có vị trí thống nhất -->
                         <div class="flower-card-meta">
@@ -1253,9 +1277,9 @@
         }
 
         // Tự động điền ngày nhận hoa hôm nay
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             var today = new Date().toISOString().split('T')[0];
-            document.querySelectorAll('input[name="deliveryDate"]').forEach(function(inp) {
+            document.querySelectorAll('input[name="deliveryDate"]').forEach(function (inp) {
                 if (!inp.value) inp.value = today;
             });
         });
@@ -1328,14 +1352,14 @@
         }
 
         // Dừng và giữ ngay lập tức tại vị trí danh sách sản phẩm (không có hiệu ứng cuộn, không bị hoa mắt)
-        (function() {
+        (function () {
             var urlParams = new URLSearchParams(window.location.search);
             var hasFilter = urlParams.has('tab') || urlParams.has('keyword') || urlParams.has('categoryId') || urlParams.has('sort') || urlParams.has('page');
             if (hasFilter || window.location.hash === '#product-catalog') {
                 if ('scrollRestoration' in history) {
                     history.scrollRestoration = 'manual';
                 }
-                var jumpImmediately = function() {
+                var jumpImmediately = function () {
                     var catalogEl = document.getElementById('product-catalog');
                     if (catalogEl) {
                         catalogEl.scrollIntoView({ behavior: 'instant', block: 'start' });
@@ -1368,12 +1392,29 @@
                         Hủy
                     </button>
                     <!-- 4. Bấm nút Confirm -> 5. Đăng xuất thành công, hiển thị giao diện dành cho Khách (Guest) -->
-                    <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit"   class="btn btn-danger rounded-pill px-4 fw-semibold text-white text-decoration-none" id="btnConfirm" data-testid="btnConfirm">
+                    <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold text-white text-decoration-none" id="btnConfirm" data-testid="btnConfirm">
                         Xác nhận
                     </button></form>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Script điều hướng tìm kiếm thông minh theo Phạm vi (Hoa / Cửa Hàng / Người Dùng) -->
+    <script>
+        document.getElementById('globalSearchForm')?.addEventListener('submit', function (e) {
+            const scope = document.getElementById('searchScopeSelect')?.value;
+            const kwInput = this.querySelector('input[name="keyword"]');
+            const kw = kwInput ? kwInput.value.trim() : '';
+            if (scope === 'users') {
+                e.preventDefault();
+                window.location.href = '/users' + (kw ? '?keyword=' + encodeURIComponent(kw) : '');
+            } else if (scope === 'stores') {
+                e.preventDefault();
+                window.location.href = '/stores' + (kw ? '?keyword=' + encodeURIComponent(kw) : '');
+            }
+        });
+    </script>
 </body>
+
 </html>

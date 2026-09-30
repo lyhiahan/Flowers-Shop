@@ -472,6 +472,9 @@
                                 <span class="badge-rating" th:if="${s.rating != null}">
                                     <i class="bi bi-star-fill text-warning me-1"></i><span th:text="${s.rating}">5.0</span>
                                 </span>
+                                <span class="badge bg-danger-subtle text-danger rounded-pill small">
+                                    <i class="bi bi-people-fill me-1"></i><span th:text="${storeFollowerCounts != null and storeFollowerCounts.containsKey(s.id) ? storeFollowerCounts.get(s.id) : 0}">0</span>
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -490,10 +493,19 @@
                     </div>
 
                     <!-- Bottom Button -->
-                    <div class="mt-auto pt-2">
-                        <a th:href="@{/stores/{id}(id=${s.id})}" class="btn-store-visit">
-                            <i class="bi bi-shop me-1"></i> Xem cửa hàng & mẫu hoa
+                    <div class="mt-auto d-flex gap-2 align-items-center pt-3 border-top">
+                        <a th:href="@{/stores/{id}(id=${s.id})}" class="btn-store-visit flex-fill text-center">
+                            <i class="bi bi-shop me-1"></i> Tham Quan
                         </a>
+                        <!-- Nút Follow / Following trên store card (UC_015 Alternative 1a) -->
+                        <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/stores/{id}/follow(id=${s.id})}" method="post" class="m-0">
+                            <button type="submit" class="btn btn-sm rounded-pill px-3 py-2 fw-bold shadow-sm text-nowrap"
+                                    th:classappend="${followedStoreIds != null and followedStoreIds.contains(s.id)} ? 'btn-danger' : 'btn-outline-danger'"
+                                    th:title="${followedStoreIds != null and followedStoreIds.contains(s.id)} ? 'Bấm để hủy theo dõi' : 'Bấm để theo dõi cửa hàng'">
+                                <i class="bi me-1" th:classappend="${followedStoreIds != null and followedStoreIds.contains(s.id)} ? 'bi-check-circle-fill' : 'bi-plus-circle'"></i>
+                                <span th:text="${followedStoreIds != null and followedStoreIds.contains(s.id)} ? 'Following' : 'Follow'"></span>
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>

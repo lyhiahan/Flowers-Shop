@@ -30,6 +30,7 @@ public class CheckoutController {
     private final OrderService orderService;
     private final UserRepository userRepository;
     private final com.finalproject.repository.StoreRepository storeRepository;
+    private final com.finalproject.repository.DeliveryRepository deliveryRepository;
     private final com.finalproject.service.UserService userService;
     private final com.finalproject.service.VoucherService voucherService;
 
@@ -80,6 +81,7 @@ public class CheckoutController {
         model.addAttribute("addresses", customer != null ? userService.getUserAddresses(customer.getId()) : List.of());
         model.addAttribute("vouchers", voucherService.getAvailableVouchers(null));
         model.addAttribute("stores", storeRepository.findByStatusTrue());
+        model.addAttribute("deliveries", deliveryRepository.findAll());
         model.addAttribute("checkoutItems", checkoutItems);
         model.addAttribute("subtotalRentAndBuy", subtotalRentAndBuy);
         model.addAttribute("totalDeposit", totalDeposit);

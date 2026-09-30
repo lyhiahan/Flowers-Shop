@@ -111,7 +111,7 @@
             padding: 24px;
         }
 
-        /* Form Inputs (44-48px height, 14-15px labels) */
+        /* Form Inputs */
         .form-label-custom {
             font-size: 14.5px;
             font-weight: 500;
@@ -131,7 +131,7 @@
         }
         .form-control-custom:focus, .form-select-custom:focus {
             border-color: var(--flower-primary);
-            box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.1);
+            box-shadow: 0 0 0 3px rgba(53, 84, 71, 0.15);
             outline: none;
         }
         textarea.form-control-custom {
@@ -176,7 +176,7 @@
         }
         .payment-card-option.active {
             border-color: var(--flower-primary);
-            background-color: #fffafb;
+            background-color: #f7faf8;
         }
         .payment-desc {
             font-size: 13.5px;
@@ -265,7 +265,7 @@
             color: var(--flower-text-heading);
         }
         .grand-total-price {
-            font-size: 30px;
+            font-size: 28px;
             font-weight: 700;
             color: var(--flower-primary);
             line-height: 1;
@@ -282,7 +282,7 @@
             padding: 14px 28px;
             width: 100%;
             transition: background-color 0.2s ease, transform 0.15s ease;
-            box-shadow: 0 4px 12px rgba(225, 29, 72, 0.2);
+            box-shadow: 0 4px 12px rgba(53, 84, 71, 0.2);
         }
         .btn-order-submit:hover {
             background-color: var(--flower-primary-hover);
@@ -328,6 +328,7 @@
                 <span><i class="bi bi-flower1 text-danger me-1"></i>Chuỗi Cửa Hàng Hoa Tươi & Điện Hoa Sài Gòn</span>
                 <div class="d-flex align-items-center gap-3">
                     <span class="d-none d-md-inline"><i class="bi bi-telephone text-secondary me-1"></i>028 1111 222</span>
+                    <a th:href="@{/following}"><i class="bi bi-heart text-danger me-1"></i>Đang theo dõi</a>
                     <a th:href="@{/stores}"><i class="bi bi-shop text-secondary me-1"></i>Hệ thống cửa hàng</a>
                 </div>
             </div>
@@ -373,12 +374,10 @@
             <!-- BỐ CỤC: CỘT TRÁI ~65% (col-lg-8) - CỘT PHẢI ~35% (col-lg-4) -->
             <div class="row g-4">
                 
-                <!-- ========================================== -->
                 <!-- CỘT TRÁI (~65%): THÔNG TIN NHẬN HÀNG & PHƯƠNG THỨC THANH TOÁN -->
-                <!-- ========================================== -->
                 <div class="col-lg-8">
                     
-                    <!-- KHỐI 1: THÔNG TIN NHẬN HÀNG (3 nhóm ngắn) -->
+                    <!-- KHỐI 1: THÔNG TIN NHẬN HÀNG -->
                     <div class="checkout-card">
                         <div class="checkout-card-header">
                             <h2 class="checkout-card-title">
@@ -416,9 +415,21 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Đơn vị giao hàng khi chọn Giao hàng tận nơi -->
+                                <div class="mt-3" id="deliveryUnitSection" th:if="${deliveries != null and !#lists.isEmpty(deliveries)}">
+                                    <label class="form-label-custom"><i class="bi bi-box-seam me-1"></i>Đơn vị giao hàng (*)</label>
+                                    <select name="deliveryUnitId" id="deliveryUnitSelect" class="form-select-custom w-100" onchange="updateCheckoutTotal()">
+                                        <option th:each="d : ${deliveries}" 
+                                                th:value="${d.id}" 
+                                                th:data-price="${d.price}"
+                                                th:text="${d.name + ' (' + #numbers.formatDecimal(d.price, 0, 'COMMA', 0, 'POINT') + ' đ) - ' + (d.description != null ? d.description : 'Bảo đảm hoa tươi')}">
+                                        </option>
+                                    </select>
+                                </div>
                             </div>
 
-                            <!-- Nếu chọn Đến lấy: Dropdown chọn chi nhánh (thay thế địa chỉ giao) -->
+                            <!-- Nếu chọn Đến lấy: Dropdown chọn chi nhánh -->
                             <div class="mb-4 d-none" id="pickupStoreSection">
                                 <label class="form-label-custom" for="pickupStoreSelect">Chọn chi nhánh nhận hoa (*)</label>
                                 <select name="pickupStoreId" id="pickupStoreSelect" class="form-select-custom w-100">
@@ -430,7 +441,7 @@
 
                             <!-- Nhóm 2: Người nhận -->
                             <div class="mb-4 pt-2 border-top">
-                                <!-- Địa chỉ đã lưu (Rút gọn) -->
+                                <!-- Địa chỉ đã lưu -->
                                 <div th:if="${!#lists.isEmpty(addresses)}" class="saved-address-box mb-3" id="savedAddressSection">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <span class="small fw-semibold text-secondary">
@@ -492,7 +503,7 @@
                         </div>
                     </div>
 
-                    <!-- KHỐI 2: PHƯƠNG THỨC THANH TOÁN (Đặt dưới thông tin người nhận ở cột trái) -->
+                    <!-- KHỐI 2: PHƯƠNG THỨC THANH TOÁN -->
                     <div class="checkout-card">
                         <div class="checkout-card-header">
                             <h2 class="checkout-card-title">
@@ -530,13 +541,11 @@
 
                 </div>
 
-                <!-- ========================================== -->
                 <!-- CỘT PHẢI (~35%): SẢN PHẨM ĐÃ CHỌN, MÃ GIẢM GIÁ & TỔNG THANH TOÁN -->
-                <!-- ========================================== -->
                 <div class="col-lg-4">
                     <div class="sticky-top" style="top: 90px;">
                         
-                        <!-- 1. SẢN PHẨM ĐÃ CHỌN (Dòng sản phẩm gọn gàng, ẩn toàn bộ thông tin thuê/cọc) -->
+                        <!-- 1. SẢN PHẨM ĐÃ CHỌN -->
                         <div class="checkout-card">
                             <div class="checkout-card-header d-flex justify-content-between align-items-center py-3">
                                 <h3 class="checkout-card-title fs-6">
@@ -554,7 +563,7 @@
                                     <div class="product-line-info">
                                         <div class="product-line-name" th:text="${item.product.name}"></div>
                                         <div class="product-line-sub">
-                                            📍 <span th:text="${item.store.name}"></span>
+                                            📍 <span th:text="${item.store != null ? item.store.name : 'Chi nhánh trung tâm'}"></span>
                                         </div>
                                     </div>
 
@@ -567,7 +576,7 @@
                             </div>
                         </div>
 
-                        <!-- 2. THÊM MÃ GIẢM GIÁ (Thu gọn mượt mà, tránh nhãn xếp chồng) -->
+                        <!-- 2. THÊM MÃ GIẢM GIÁ -->
                         <div class="checkout-card">
                             <div class="checkout-card-body p-3">
                                 <div class="d-flex justify-content-between align-items-center">
@@ -604,11 +613,15 @@
                             <div class="checkout-card-body p-4">
                                 <div class="summary-row">
                                     <span>Tiền hàng:</span>
-                                    <span class="summary-val" th:text="${#numbers.formatDecimal(subtotalRentAndBuy, 0, 'COMMA', 0, 'POINT')} + ' ₫'">650.000 ₫</span>
+                                    <span class="summary-val" th:text="${#numbers.formatDecimal(subtotalRentAndBuy, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
                                 </div>
-                                <div class="summary-row">
+                                <div class="summary-row" th:if="${totalDeposit != null and totalDeposit > 0}">
+                                    <span>Tiền cọc:</span>
+                                    <span class="summary-val text-warning" th:text="${#numbers.formatDecimal(totalDeposit, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
+                                </div>
+                                <div class="summary-row" id="shippingFeeRow">
                                     <span>Phí giao hàng:</span>
-                                    <span class="summary-val text-success">Miễn phí</span>
+                                    <span class="summary-val text-primary" id="displayShippingFee">Miễn phí</span>
                                 </div>
                                 <div class="summary-row" th:if="${discountAmount != null and discountAmount > 0}">
                                     <span>Giảm giá:</span>
@@ -617,7 +630,9 @@
 
                                 <div class="grand-total-row">
                                     <span class="grand-total-label">Tổng thanh toán:</span>
-                                    <span class="grand-total-price" th:text="${#numbers.formatDecimal(grandTotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">650.000 ₫</span>
+                                    <span class="grand-total-price" id="displayGrandTotal"
+                                          th:data-base-total="${grandTotal}"
+                                          th:text="${#numbers.formatDecimal(grandTotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
                                 </div>
 
                                 <div class="mt-4">
@@ -666,6 +681,7 @@
             const pickupSection = document.getElementById('pickupStoreSection');
             const deliverySection = document.getElementById('deliveryAddressSection');
             const savedAddressSection = document.getElementById('savedAddressSection');
+            const deliveryUnitSection = document.getElementById('deliveryUnitSection');
             const addressInput = document.getElementById('recipientAddressInput');
             const pickupSelect = document.getElementById('pickupStoreSelect');
 
@@ -673,15 +689,18 @@
                 if (pickupSection) pickupSection.classList.remove('d-none');
                 if (deliverySection) deliverySection.classList.add('d-none');
                 if (savedAddressSection) savedAddressSection.classList.add('d-none');
+                if (deliveryUnitSection) deliveryUnitSection.classList.add('d-none');
                 if (addressInput) addressInput.removeAttribute('required');
                 if (pickupSelect) pickupSelect.setAttribute('required', 'required');
             } else {
                 if (pickupSection) pickupSection.classList.add('d-none');
                 if (deliverySection) deliverySection.classList.remove('d-none');
                 if (savedAddressSection) savedAddressSection.classList.remove('d-none');
+                if (deliveryUnitSection) deliveryUnitSection.classList.remove('d-none');
                 if (addressInput) addressInput.setAttribute('required', 'required');
                 if (pickupSelect) pickupSelect.removeAttribute('required');
             }
+            updateCheckoutTotal();
         }
 
         function selectPayment(radioId) {
@@ -700,25 +719,57 @@
             const descBank = document.getElementById('desc_pay_bank');
 
             if (isCod) {
-                optCod.classList.add('active');
-                optBank.classList.remove('active');
-                descCod.classList.remove('d-none');
-                descBank.classList.add('d-none');
+                if (optCod) optCod.classList.add('active');
+                if (optBank) optBank.classList.remove('active');
+                if (descCod) descCod.classList.remove('d-none');
+                if (descBank) descBank.classList.add('d-none');
             } else {
-                optCod.classList.remove('active');
-                optBank.classList.add('active');
-                descCod.classList.add('d-none');
-                descBank.classList.remove('d-none');
+                if (optCod) optCod.classList.remove('active');
+                if (optBank) optBank.classList.add('active');
+                if (descCod) descCod.classList.add('d-none');
+                if (descBank) descBank.classList.remove('d-none');
             }
         }
 
-        // Tự động điền ngày nhận hoa nếu trống
+        function updateCheckoutTotal() {
+            const isPickupElem = document.getElementById('methodPickup');
+            const isPickup = isPickupElem ? isPickupElem.checked : false;
+            const deliverySelect = document.getElementById('deliveryUnitSelect');
+            const shippingFeeRow = document.getElementById('shippingFeeRow');
+            const displayShippingFee = document.getElementById('displayShippingFee');
+            const displayGrandTotal = document.getElementById('displayGrandTotal');
+
+            if (!displayGrandTotal) return;
+
+            const baseTotal = parseFloat(displayGrandTotal.getAttribute('data-base-total')) || 0;
+            let shippingFee = 0;
+
+            if (isPickup) {
+                if (shippingFeeRow) shippingFeeRow.style.setProperty('display', 'none', 'important');
+                shippingFee = 0;
+            } else {
+                if (shippingFeeRow) shippingFeeRow.style.removeProperty('display');
+                if (deliverySelect && deliverySelect.selectedOptions && deliverySelect.selectedOptions.length > 0) {
+                    shippingFee = parseFloat(deliverySelect.selectedOptions[0].getAttribute('data-price')) || 0;
+                } else {
+                    shippingFee = 0;
+                }
+                if (displayShippingFee) {
+                    displayShippingFee.innerText = shippingFee > 0 ? (new Intl.NumberFormat('vi-VN').format(shippingFee) + ' ₫') : 'Miễn phí';
+                }
+            }
+
+            const finalTotal = baseTotal + shippingFee;
+            displayGrandTotal.innerText = new Intl.NumberFormat('vi-VN').format(finalTotal) + ' ₫';
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const dateInput = document.querySelector('input[name="deliveryDate"]');
             if (dateInput && !dateInput.value) {
                 dateInput.value = new Date().toISOString().split('T')[0];
             }
             updatePaymentStyle();
+            updateCheckoutTotal();
         });
     </script>
 </body>

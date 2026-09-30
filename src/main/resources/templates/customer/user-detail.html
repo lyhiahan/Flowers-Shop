@@ -35,7 +35,7 @@
         <div class="row justify-content-center">
             <div class="col-lg-8">
                 <div class="profile-card p-4 p-md-5 shadow-sm text-center">
-                    <img th:src="${user.avatarUrl != null and !user.avatarUrl.isEmpty() ? user.avatarUrl : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'}"
+                    <img th:src="${user.avatarUrl != null and user.avatarUrl != '' ? user.avatarUrl : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'}"
                          class="rounded-circle border shadow-sm mb-3" width="120" height="120" style="object-fit: cover;">
 
                     <h3 class="font-serif fw-bold mb-1 text-dark" th:text="${user.fullName != null ? user.fullName : user.username}"></h3>
@@ -49,18 +49,88 @@
                         <span th:if="${user.role != null and user.role.name() == 'CUSTOMER'}" class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-2">Khách hàng thành viên</span>
                     </div>
 
-                    <div class="row g-3 py-3 border-top border-bottom my-3">
-                        <div class="col-6">
-                            <span class="text-muted small d-block">Điểm thưởng tích lũy</span>
-                            <strong class="text-danger fs-5" th:text="${user.point != null ? user.point : 0} + ' điểm'"></strong>
+                    <!-- Thanh điều hướng người dùng (Tabs: Trang chủ & About) - Use case UC_007 Step 7, 8 -->
+                    <ul class="nav nav-pills justify-content-center gap-2 mb-4 bg-light p-1 rounded-pill" id="userProfileTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link rounded-pill px-4 active" id="user-home-tab" data-bs-toggle="pill" data-bs-target="#user-home" type="button" role="tab" aria-controls="user-home" aria-selected="true">
+                                <i class="bi bi-house me-1"></i> Trang Chủ
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link rounded-pill px-4" id="user-about-tab" data-bs-toggle="pill" data-bs-target="#user-about" type="button" role="tab" aria-controls="user-about" aria-selected="false">
+                                <i class="bi bi-info-circle me-1"></i> About (Giới Thiệu)
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Nội dung các Tab -->
+                    <div class="tab-content text-start" id="userProfileTabsContent">
+                        <!-- Tab 1: Trang chủ của người dùng (Step 7) -->
+                        <div class="tab-pane fade show active" id="user-home" role="tabpanel" aria-labelledby="user-home-tab">
+                            <div class="p-3 bg-light rounded-4 mb-3 text-center">
+                                <h6 class="fw-bold mb-1">🌿 Chào mừng đến với trang cá nhân của <span th:text="${user.fullName != null ? user.fullName : user.username}"></span>!</h6>
+                                <p class="text-muted small mb-0">Thành viên tích cực trong cộng đồng chuỗi hoa tươi Sài Gòn (Bloom Flower Chain).</p>
+                            </div>
+                            <div class="row g-3 py-2 text-center">
+                                <div class="col-6">
+                                    <div class="p-3 border rounded-3 bg-white">
+                                        <span class="text-muted small d-block">Điểm thưởng tích lũy</span>
+                                        <strong class="text-danger fs-5" th:text="${user.point != null ? user.point : 0} + ' điểm'"></strong>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="p-3 border rounded-3 bg-white">
+                                        <span class="text-muted small d-block">Hạng thành viên</span>
+                                        <strong class="text-dark fs-5" th:text="${user.userLevel != null ? user.userLevel.name : 'Thành viên mới'}"></strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div th:if="${user.store != null}" class="alert alert-success d-flex align-items-center gap-3 mt-3 rounded-3">
+                                <i class="bi bi-shop fs-3"></i>
+                                <div>
+                                    <div class="fw-bold" th:text="'Quản lý chi nhánh: ' + ${user.store.name}"></div>
+                                    <small class="text-muted" th:text="${user.store.address}"></small>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-6">
-                            <span class="text-muted small d-block">Hạng thành viên</span>
-                            <strong class="text-dark fs-5" th:text="${user.userLevel != null ? user.userLevel.name : 'Thành viên mới'}"></strong>
+
+                        <!-- Tab 2: About - Thông tin chi tiết người dùng (Step 8) -->
+                        <div class="tab-pane fade" id="user-about" role="tabpanel" aria-labelledby="user-about-tab">
+                            <div class="card border-0 bg-light rounded-4 p-4">
+                                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                                    <i class="bi bi-person-lines-fill text-danger me-2"></i> Hồ Sơ Chi Tiết (About)
+                                </h6>
+                                <div class="row g-3 small">
+                                    <div class="col-sm-6">
+                                        <span class="text-muted d-block">Họ và tên:</span>
+                                        <strong class="text-dark" th:text="${user.fullName != null ? user.fullName : 'Chưa cập nhật'}"></strong>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <span class="text-muted d-block">Tên đăng nhập (Username):</span>
+                                        <strong class="text-dark" th:text="'@' + ${user.username}"></strong>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <span class="text-muted d-block">Email liên hệ:</span>
+                                        <strong class="text-dark" th:text="${user.email != null ? user.email : 'Bảo mật'}"></strong>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <span class="text-muted d-block">Số điện thoại:</span>
+                                        <strong class="text-dark" th:text="${user.phone != null and user.phone != '' ? user.phone : 'Chưa cập nhật'}"></strong>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <span class="text-muted d-block">Địa chỉ:</span>
+                                        <strong class="text-dark" th:text="${user.address != null and user.address != '' ? user.address : 'Chưa cập nhật'}"></strong>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <span class="text-muted d-block">Ngày tham gia hệ thống:</span>
+                                        <strong class="text-dark" th:text="${user.createdDate != null ? user.createdDate : 'Thành viên sáng lập'}"></strong>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="mt-4">
+                    <div class="mt-4 text-center">
                         <a th:href="@{/users}" class="btn btn-outline-secondary rounded-pill px-4 py-2">
                             <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
                         </a>

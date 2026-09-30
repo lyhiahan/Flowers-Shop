@@ -126,8 +126,11 @@ public class CartServiceImpl implements CartService {
         }
 
         if (quantity == null || quantity <= 0) {
-            cart.getItems().remove(item);
+            if (cart.getItems() != null) {
+                cart.getItems().removeIf(ci -> ci.getId() != null && ci.getId().equals(cartItemId));
+            }
             cartItemRepository.delete(item);
+            cartItemRepository.flush();
         } else {
             if (quantity > 10000) throw new IllegalArgumentException("Số lượng không hợp lệ.");
             item.setQuantity(quantity);
@@ -140,20 +143,32 @@ public class CartServiceImpl implements CartService {
     public void removeCartItem(String username, Long cartItemId) {
         Cart cart = getCartForUpdate(username);
         CartItem item = cartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> new ResourceNotFoundException("Mục giỏ hàng không tồn tại"));
+                .orElse(null);
 
-        if (!item.getCart().getId().equals(cart.getId())) throw new org.springframework.security.access.AccessDeniedException("Không được sửa giỏ hàng người khác.");
-        if (item.getCart().getId().equals(cart.getId())) {
-            cart.getItems().remove(item);
-            cartItemRepository.delete(item);
+        if (item == null) {
+            return;
         }
+
+        if (!item.getCart().getId().equals(cart.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền thao tác trên mục giỏ hàng này");
+        }
+
+        if (cart.getItems() != null) {
+            cart.getItems().removeIf(ci -> ci.getId() != null && ci.getId().equals(cartItemId));
+        }
+        cartItemRepository.delete(item);
+        cartItemRepository.flush();
     }
 
     @Override
     @Transactional
     public void clearCart(String username) {
         Cart cart = getCartForUpdate(username);
-        cart.getItems().clear();
+        if (cart.getItems() != null) {
+            cart.getItems().clear();
+        }
+        cartItemRepository.deleteByCartId(cart.getId());
+        cartItemRepository.flush();
     }
     private Cart getCartForUpdate(String username) {
         User user = userRepository.findByUsername(username).orElseThrow();

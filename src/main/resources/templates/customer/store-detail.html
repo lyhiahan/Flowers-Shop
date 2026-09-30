@@ -336,6 +336,10 @@
                         <span class="badge-rating" th:if="${store.rating != null}">
                             <i class="bi bi-star-fill text-warning me-1"></i><span th:text="${store.rating}">5.0</span>
                         </span>
+                        <!-- Post-conditions UC_015: Cập nhật số người theo dõi của cửa hàng -->
+                        <span class="badge bg-danger-subtle text-danger rounded-pill">
+                            <i class="bi bi-people-fill me-1"></i><span id="storeFollowerCount" th:text="${followerCount != null ? followerCount : 0}">0</span> người theo dõi
+                        </span>
                     </div>
 
                     <p class="text-muted small mb-1">
@@ -348,13 +352,12 @@
                         Mô tả cửa hàng
                     </p>
                 </div>
-
                 <div class="d-flex flex-column gap-2 flex-shrink-0">
-                    <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/customer/store/follow/{id}(id=${store.id})}" method="post">
-                        <button type="submit" class="btn btn-sm rounded-pill px-4 py-2 w-100 fw-semibold" 
-                                th:classappend="${isFollowed} ? 'btn-secondary' : 'btn-danger'">
-                            <i class="bi me-1" th:classappend="${isFollowed} ? 'bi-check-lg' : 'bi-plus-lg'"></i>
-                            <span th:text="${isFollowed} ? 'Đang theo dõi' : 'Theo dõi cửa hàng'"></span>
+                    <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/stores/{id}/follow(id=${store.id})}" method="post">
+                        <button type="submit" id="btnToggleFollowStoreHeader" class="btn btn-sm rounded-pill px-4 py-2 w-100 fw-bold shadow-sm"
+                                th:classappend="${isFollowed} ? 'btn-danger' : 'btn-outline-danger'">
+                            <i class="bi me-1" th:classappend="${isFollowed} ? 'bi-check-circle-fill' : 'bi-plus-circle'"></i>
+                            <span th:text="${isFollowed} ? 'Following' : 'Follow'"></span>
                         </button>
                     </form>
                     <a th:href="@{/stores}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-2 text-decoration-none">
@@ -364,8 +367,8 @@
             </div>
         </div>
 
-        <!-- Store Navigation Tabs -->
-        <div class="text-center text-md-start">
+        <!-- Store Navigation Bar (UC_015 Step 2) with Follow / Following button -->
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
             <div class="store-tab-nav" id="storeNav">
                 <a class="store-tab-link" id="tabCollection"
                    th:classappend="${currentTab == 'collection' or currentTab == null} ? 'active' : ''" 
@@ -383,6 +386,15 @@
                     ℹ️ Thông tin chi nhánh
                 </a>
             </div>
+
+            <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/stores/{id}/follow(id=${store.id})}" method="post" class="m-0">
+                <button type="submit" id="btnToggleFollowStoreNav" class="btn rounded-pill px-4 py-2 fw-bold shadow-sm d-flex align-items-center gap-2"
+                        th:classappend="${isFollowed} ? 'btn-danger' : 'btn-outline-danger'"
+                        title="Bấm để theo dõi hoặc hủy theo dõi cửa hàng">
+                    <i class="bi" th:classappend="${isFollowed} ? 'bi-check-circle-fill' : 'bi-plus-circle'"></i>
+                    <span th:text="${isFollowed} ? 'Following' : 'Follow'"></span>
+                </button>
+            </form>
         </div>
 
         <!-- TAB 1: COLLECTION (BỘ SƯU TẬP & TÌM KIẾM SẢN PHẨM TRONG SHOP) -->
@@ -476,10 +488,15 @@
                             </div>
                         </div>
                         <span class="text-warning fw-bold small">
-                            <span th:text="${'★'.repeat(rev.stars)}">★★★★★</span>
+                            <span th:each="i : ${#numbers.sequence(1, 5)}"
+                                  th:text="${i <= (rev.rating != null ? rev.rating : 5) ? '★' : '☆'}"></span>
+                            <span class="text-muted small ms-1" th:text="'(' + (rev.rating != null ? rev.rating : 5) + '/5)'"></span>
                         </span>
                     </div>
                     <p class="small text-dark mb-0 ps-1" th:text="${rev.content}"></p>
+                    <div th:if="${rev.imageUrl != null and !rev.imageUrl.isEmpty()}" class="mt-2 ps-1">
+                        <img th:src="${rev.imageUrl}" class="rounded-3 border shadow-sm" style="max-height: 120px; object-fit: cover;" alt="Review photo">
+                    </div>
                 </div>
             </div>
         </div>

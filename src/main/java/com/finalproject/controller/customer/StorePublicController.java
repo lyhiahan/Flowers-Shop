@@ -15,11 +15,18 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Controller
 @RequestMapping("/stores")
@@ -36,7 +43,8 @@ public class StorePublicController {
     public String listStores(
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "size", required = false, defaultValue = "3") int size,
+            @RequestParam(value = "size", required = false, defaultValue = "6") int size,
+            Principal principal,
             Model model) {
         int pageNumber = Math.max(0, page - 1);
         Pageable pageable = PageRequest.of(pageNumber, size);
@@ -47,8 +55,23 @@ public class StorePublicController {
             storePage = storeRepository.findByStatusTrue(pageable);
         }
 
+        Set<Long> followedStoreIds = new HashSet<>();
+        Map<Long, Long> storeFollowerCounts = new HashMap<>();
+        for (Store s : storePage.getContent()) {
+            storeFollowerCounts.put(s.getId(), followStoreRepository.countByStoreId(s.getId()));
+        }
+
+        if (principal != null) {
+            userRepository.findByUsername(principal.getName()).ifPresent(user -> {
+                followedStoreIds.addAll(followStoreRepository.findByUserIdOrderByCreatedAtDesc(user.getId())
+                        .stream().map(f -> f.getStore().getId()).toList());
+            });
+        }
+
         model.addAttribute("storePage", storePage);
         model.addAttribute("stores", storePage.getContent());
+        model.addAttribute("followedStoreIds", followedStoreIds);
+        model.addAttribute("storeFollowerCounts", storeFollowerCounts);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", storePage.getTotalPages());
         model.addAttribute("totalItems", storePage.getTotalElements());
@@ -84,13 +107,37 @@ public class StorePublicController {
                 isFollowed = followStoreRepository.findByUserIdAndStoreId(userOpt.get().getId(), id).isPresent();
             }
         }
+        long followerCount = followStoreRepository.countByStoreId(id);
 
         model.addAttribute("store", store);
         model.addAttribute("products", products);
         model.addAttribute("reviews", reviews);
         model.addAttribute("isFollowed", isFollowed);
+        model.addAttribute("followerCount", followerCount);
         model.addAttribute("keyword", keyword != null ? keyword.trim() : "");
         model.addAttribute("currentTab", tab);
         return "customer/store-detail";
+    }
+
+    // UC_015: Toggle Follow / Unfollow Store
+    @PostMapping("/{id}/follow")
+    public String toggleFollowStorePublic(Principal principal, @PathVariable("id") Long storeId,
+                                          @RequestHeader(value = "Referer", required = false) String referer,
+                                          RedirectAttributes ra) {
+        if (principal == null) return "redirect:/login";
+        var user = userRepository.findByUsername(principal.getName()).orElse(null);
+        if (user == null) return "redirect:/login";
+        var existing = followStoreRepository.findByUserIdAndStoreId(user.getId(), storeId);
+        if (existing.isPresent()) {
+            followStoreRepository.delete(existing.get());
+            ra.addFlashAttribute("successMessage", "Đã hủy theo dõi cửa hàng thành công! (Unfollowed)");
+        } else {
+            var store = storeRepository.findById(storeId).orElse(null);
+            if (store != null) {
+                followStoreRepository.save(com.finalproject.entity.UserFollowStore.builder().user(user).store(store).build());
+                ra.addFlashAttribute("successMessage", "Đã theo dõi cửa hàng thành công! (Following)");
+            }
+        }
+        return referer != null ? "redirect:" + referer : "redirect:/stores/" + storeId;
     }
 }
