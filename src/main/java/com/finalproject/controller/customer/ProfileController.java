@@ -206,6 +206,9 @@ public class ProfileController {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         var follows = followStoreRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
         model.addAttribute("followedStores", follows.stream().map(com.finalproject.entity.UserFollowStore::getStore).toList());
+        try {
+            model.addAttribute("cartItemCount", cartService.getCartItemCount(principal.getName()));
+        } catch (Exception ignored) {}
         return "customer/followed-stores";
     }
 
