@@ -173,11 +173,11 @@
     <!-- Sub-menu Category Navigation -->
     <div class="border-t border-[#F0E6DE] bg-[#FAF6F0]">
       <div class="max-w-7xl mx-auto px-4 sm:px-8 flex items-center gap-6 sm:gap-8 overflow-x-auto text-[13.5px] py-2.5 font-bold">
-        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/}">Tất cả mẫu hoa</a>
-        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/(categoryId=1)}">🌸 Bó Hoa</a>
-        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/(categoryId=2)}">🧺 Giỏ / Lẵng Hoa</a>
-        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/(categoryId=3)}">🎉 Hoa Khai Trương</a>
-        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/(categoryId=4)}">💍 Hoa Cưới</a>
+        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/}">Tất cả</a>
+        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/(keyword='Sinh Nhật')}">🎂 Sinh Nhật</a>
+        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/(keyword='Tình Yêu')}">💖 Tình Yêu</a>
+        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/(keyword='Khai Trương')}">🎉 Khai Trương</a>
+        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/(keyword='Khác')}">✨ Khác</a>
         <span class="text-[#D8CBC2] hidden sm:inline">|</span>
         <a class="text-botanic-green font-extrabold whitespace-nowrap inline-flex items-center gap-1 border-b-2 border-botanic-green pb-0.5" th:href="@{/customer/profile/recently-viewed}">
           <span class="material-symbols-outlined text-[16px]">history</span>Đã xem gần đây
@@ -238,23 +238,23 @@
         <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0" id="filterContainer">
           <button class="filter-chip active-filter px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#264E43] text-white shadow-xs whitespace-nowrap" 
                   data-filter="all" onclick="filterCategory('all', this)">
-            Tất cả (<span th:text="${recentProducts != null ? #lists.size(recentProducts) : 0}">0</span>)
+            Tất cả
           </button>
           <button class="filter-chip px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#FAF6F0] text-[#555] hover:bg-[#F2E7DC] hover:text-botanic-dark whitespace-nowrap" 
-                  data-filter="hoa-bo" onclick="filterCategory('hoa-bo', this)">
-            🌸 Bó Hoa
+                  data-filter="sinh-nhat" onclick="filterCategory('sinh-nhat', this)">
+            🎂 Sinh Nhật
           </button>
           <button class="filter-chip px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#FAF6F0] text-[#555] hover:bg-[#F2E7DC] hover:text-botanic-dark whitespace-nowrap" 
-                  data-filter="hoa-gio" onclick="filterCategory('hoa-gio', this)">
-            🧺 Giỏ / Lẵng Hoa
+                  data-filter="tinh-yeu" onclick="filterCategory('tinh-yeu', this)">
+            💖 Tình Yêu
           </button>
           <button class="filter-chip px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#FAF6F0] text-[#555] hover:bg-[#F2E7DC] hover:text-botanic-dark whitespace-nowrap" 
                   data-filter="khai-truong" onclick="filterCategory('khai-truong', this)">
-            🎉 Hoa Khai Trương
+            🎉 Khai Trương
           </button>
           <button class="filter-chip px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#FAF6F0] text-[#555] hover:bg-[#F2E7DC] hover:text-botanic-dark whitespace-nowrap" 
-                  data-filter="hoa-cuoi" onclick="filterCategory('hoa-cuoi', this)">
-            💍 Hoa Cưới
+                  data-filter="khac" onclick="filterCategory('khac', this)">
+            ✨ Khác
           </button>
         </div>
 
@@ -285,7 +285,7 @@
              th:data-id="${p.id}"
              th:data-price="${p.priceBuy != null ? p.priceBuy : (p.sellingPrice != null ? p.sellingPrice : 0)}"
              th:data-rating="${p.rating != null ? p.rating : 5.0}"
-             th:data-category="${p.name.contains('Giỏ') or p.name.contains('Lẵng') ? 'hoa-gio' : (p.name.contains('Khai Trương') or p.name.contains('Kệ') ? 'khai-truong' : (p.name.contains('Cưới') or p.name.contains('Cầm Tay') ? 'hoa-cuoi' : 'hoa-bo'))}">
+             th:data-category="${p.name != null and (p.name.toLowerCase().contains('sinh nhật') or p.name.toLowerCase().contains('sn')) ? 'sinh-nhat' : (p.name != null and (p.name.toLowerCase().contains('tình yêu') or p.name.toLowerCase().contains('yêu') or p.name.toLowerCase().contains('hồng') or p.name.toLowerCase().contains('rose') or p.name.toLowerCase().contains('cưới')) ? 'tinh-yeu' : (p.name != null and (p.name.toLowerCase().contains('khai trương') or p.name.toLowerCase().contains('kệ') or p.name.toLowerCase().contains('chúc mừng') or p.name.toLowerCase().contains('lẵng')) ? 'khai-truong' : 'khac'))}">
           
           <!-- Image Thumbnail & Badges -->
           <div class="relative aspect-[4/5] overflow-hidden bg-[#F7EFE9]">
@@ -388,31 +388,6 @@
         </div>
       </div>
 
-      <!-- 7. CAM KẾT CHẤT LƯỢNG HOA TƯƠI (Quality Commitments) -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 pb-8">
-        <div class="p-4 rounded-xl bg-white border border-[#EBDED4] flex items-center gap-3.5 shadow-xs">
-          <div class="w-11 h-11 rounded-full bg-botanic-subtle text-botanic-rose flex items-center justify-center text-xl shrink-0">🌸</div>
-          <div>
-            <div class="font-bold text-[14px] text-botanic-dark">100% Hoa Tươi Mới</div>
-            <p class="text-xs text-[#777] font-medium mt-0.5">Nhập mới mỗi sáng từ Đà Lạt &amp; Hà Lan</p>
-          </div>
-        </div>
-        <div class="p-4 rounded-xl bg-white border border-[#EBDED4] flex items-center gap-3.5 shadow-xs">
-          <div class="w-11 h-11 rounded-full bg-[#E9F2EE] text-botanic-green flex items-center justify-center text-xl shrink-0">🚀</div>
-          <div>
-            <div class="font-bold text-[14px] text-botanic-dark">Giao Hỏa Tốc 60–90 Phút</div>
-            <p class="text-xs text-[#777] font-medium mt-0.5">Đóng gói giữ ẩm, gửi ảnh trước khi giao</p>
-          </div>
-        </div>
-        <div class="p-4 rounded-xl bg-white border border-[#EBDED4] flex items-center gap-3.5 shadow-xs">
-          <div class="w-11 h-11 rounded-full bg-botanic-subtle text-botanic-rose flex items-center justify-center text-xl shrink-0">✉️</div>
-          <div>
-            <div class="font-bold text-[14px] text-botanic-dark">Miễn Phí Thiệp &amp; Banner</div>
-            <p class="text-xs text-[#777] font-medium mt-0.5">In thông điệp chúc mừng theo yêu cầu</p>
-          </div>
-        </div>
-      </div>
-
     </div>
   </main>
 
@@ -455,6 +430,16 @@
               <p class="text-[#777] text-[11px] font-medium">456 Nguyễn Thị Thập, Tân Hưng, Quận 7, TP.HCM</p>
             </div>
             <span class="px-2 py-1 rounded bg-[#E9F2EE] text-botanic-green font-bold text-[11px] shrink-0">028 3333 444</span>
+          </div>
+          <!-- Chi nhánh 3 -->
+          <div class="p-3 rounded-xl bg-white border border-[#EBE1D8] text-xs flex items-center justify-between gap-3 shadow-2xs">
+            <div>
+              <div class="flex items-center gap-1.5 font-bold text-[#333] mb-0.5">
+                <span>🌸</span>Chi Nhánh Làng Đại Học (TP. Thủ Đức)
+              </div>
+              <p class="text-[#777] text-[11px] font-medium">1 Võ Văn Ngân, Linh Chiểu, TP. Thủ Đức, TP.HCM</p>
+            </div>
+            <span class="px-2 py-1 rounded bg-[#E9F2EE] text-botanic-green font-bold text-[11px] shrink-0">028 5555 666</span>
           </div>
         </div>
         <p class="text-xs text-[#888] flex items-center gap-1.5 font-medium">
@@ -540,12 +525,25 @@
       btn.classList.remove('bg-[#FAF6F0]', 'text-[#555]');
 
       const products = document.querySelectorAll('.product-item');
-      let visibleCount = 0;
       products.forEach(p => {
-        const cat = p.getAttribute('data-category');
-        if (category === 'all' || cat === category) {
+        const cat = (p.getAttribute('data-category') || '').toLowerCase();
+        const name = (p.querySelector('h3 a')?.textContent || '').toLowerCase();
+        
+        let match = false;
+        if (category === 'all') {
+          match = true;
+        } else if (category === 'sinh-nhat') {
+          match = cat === 'sinh-nhat' || name.includes('sinh nhật') || name.includes('sn') || name.includes('tươi');
+        } else if (category === 'tinh-yeu') {
+          match = cat === 'tinh-yeu' || name.includes('tình yêu') || name.includes('yêu') || name.includes('hồng') || name.includes('rose') || name.includes('cưới');
+        } else if (category === 'khai-truong') {
+          match = cat === 'khai-truong' || name.includes('khai trương') || name.includes('kệ') || name.includes('lẵng') || name.includes('chúc mừng');
+        } else if (category === 'khac') {
+          match = cat === 'khac' || (!name.includes('sinh nhật') && !name.includes('tình yêu') && !name.includes('khai trương') && !name.includes('hồng'));
+        }
+
+        if (match) {
           p.style.display = 'flex';
-          visibleCount++;
         } else {
           p.style.display = 'none';
         }
