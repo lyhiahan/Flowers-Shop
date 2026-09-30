@@ -43,7 +43,7 @@
             <li>
                 <a th:href="@{/admin/stores}" class="nav-link active">
                     <i class="bi bi-shop"></i>
-                    <span>Chi nhánh</span>
+                    <span>Cửa hàng</span>
                 </a>
             </li>
             <li>
@@ -91,7 +91,7 @@
             <li>
                 <a th:href="@{/admin/store-levels}" class="nav-link">
                     <i class="bi bi-shield-check"></i>
-                    <span>Cấp bậc chi nhánh</span>
+                    <span>Cấp bậc cửa hàng</span>
                 </a>
             </li>
 
@@ -123,12 +123,12 @@
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
             <div>
                 <div class="d-flex align-items-center gap-3">
-                    <h1 class="admin-page-title mb-0" style="font-size: 28px !important; font-weight: 800; color: #20382E;">Quản lý chi nhánh</h1>
+                    <h1 class="admin-page-title mb-0" style="font-size: 28px !important; font-weight: 800; color: #20382E;">Quản lý cửa hàng trong hệ thống</h1>
                     <span class="badge rounded-pill" style="background-color: #E5EEE8; color: #20382E; border: 1px solid #D1E5DA; font-size: 14.5px; font-weight: 700; padding: 6px 14px;">
-                        <span th:text="${#lists.size(stores)}">0</span> chi nhánh
+                        <span th:text="${countAll}">0</span> cửa hàng
                     </span>
                 </div>
-                <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Theo dõi thông tin và trạng thái hoạt động của các chi nhánh</p>
+                <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Xem danh sách, thẩm định cấp phép hoặc cấm cửa hàng kinh doanh trong toàn hệ thống</p>
             </div>
         </div>
 
@@ -138,9 +138,32 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <!-- 4. Thanh tìm kiếm và bộ lọc trạng thái (44px) -->
+        <!-- 2. Nhóm Tab kiểm duyệt cấp phép: Tất cả · Đã cấp phép · Bị cấm hoạt động -->
+        <div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
+            <a th:href="@{/admin/stores(tab='ALL', keyword=${keyword})}"
+               class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2"
+               th:classappend="${currentTab == 'ALL'} ? 'btn-dark' : 'btn-outline-secondary bg-white'"
+               style="font-size: 14px; font-weight: 600;">
+                Tất cả cửa hàng <span class="badge rounded-pill" th:classappend="${currentTab == 'ALL'} ? 'bg-light text-dark' : 'bg-secondary text-white'" th:text="${countAll}">0</span>
+            </a>
+            <a th:href="@{/admin/stores(tab='APPROVED', keyword=${keyword})}"
+               class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2"
+               th:classappend="${currentTab == 'APPROVED'} ? 'btn-success text-white' : 'btn-outline-secondary bg-white'"
+               style="font-size: 14px; font-weight: 600;">
+                <i class="bi bi-patch-check-fill"></i> Đã cấp phép <span class="badge rounded-pill" th:classappend="${currentTab == 'APPROVED'} ? 'bg-white text-success' : 'bg-secondary text-white'" th:text="${countApproved}">0</span>
+            </a>
+            <a th:href="@{/admin/stores(tab='BANNED', keyword=${keyword})}"
+               class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2"
+               th:classappend="${currentTab == 'BANNED'} ? 'btn-danger text-white' : 'btn-outline-secondary bg-white'"
+               style="font-size: 14px; font-weight: 600;">
+                <i class="bi bi-slash-circle-fill"></i> Bị cấm / Tạm ngưng <span class="badge rounded-pill" th:classappend="${currentTab == 'BANNED'} ? 'bg-white text-danger' : 'bg-secondary text-white'" th:text="${countBanned}">0</span>
+            </a>
+        </div>
+
+        <!-- 3. Thanh tìm kiếm và bộ lọc trạng thái (44px) -->
         <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
             <form th:action="@{/admin/stores}" method="get" class="row g-2 align-items-center">
+                <input type="hidden" name="tab" th:value="${currentTab}">
                 <div class="col-12 col-md-6 col-lg-7">
                     <div class="input-group" style="height: 44px;">
                         <span class="input-group-text bg-white border-end-0 text-muted" style="border-color: #E2E7E2; border-radius: 10px 0 0 10px;">
@@ -149,32 +172,32 @@
                         <input type="text" name="keyword" th:value="${keyword}" 
                                class="form-control border-start-0" 
                                style="height: 44px; border-color: #E2E7E2; border-radius: 0 10px 10px 0; font-size: 15px;" 
-                               placeholder="Tìm tên, địa chỉ chi nhánh…">
+                               placeholder="Tìm theo tên cửa hàng, địa chỉ, số điện thoại hoặc chủ sở hữu…">
                     </div>
                 </div>
                 <div class="col-12 col-sm-6 col-md-3 col-lg-3">
                     <select name="status" class="form-select" style="height: 44px; border-color: #E2E7E2; border-radius: 10px; font-size: 15px; color: #20382E; font-weight: 600;">
-                        <option value="ALL" th:selected="${currentStatus == 'ALL' or currentStatus == null}">Trạng thái: Tất cả</option>
-                        <option value="ACTIVE" th:selected="${currentStatus == 'ACTIVE'}">Đang hoạt động</option>
-                        <option value="PAUSED" th:selected="${currentStatus == 'PAUSED'}">Tạm ngừng</option>
+                        <option value="ALL" th:selected="${currentStatus == 'ALL' or currentStatus == null}">Tất cả giấy phép</option>
+                        <option value="ACTIVE" th:selected="${currentStatus == 'ACTIVE' or currentStatus == 'APPROVED'}">Đã cấp phép (Đang hoạt động)</option>
+                        <option value="PAUSED" th:selected="${currentStatus == 'PAUSED' or currentStatus == 'BANNED'}">Bị cấm / Tạm ngưng</option>
                     </select>
                 </div>
                 <div class="col-auto d-flex gap-2">
                     <button class="btn btn-primary d-inline-flex align-items-center justify-content-center px-4" 
                             type="submit" 
                             style="height: 44px; border-radius: 10px; font-size: 15.5px; font-weight: 700; background-color: #20382E !important; border-color: #20382E !important;">
-                        <i class="bi bi-funnel me-1"></i> Tìm
+                        <i class="bi bi-funnel me-1"></i> Lọc
                     </button>
                     <a th:href="@{/admin/stores}" 
                        class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center px-3" 
                        style="height: 44px; border-radius: 10px; font-size: 15px; color: #66736B; border-color: #E2E7E2; background: #FFFFFF;">
-                        Xóa bộ lọc
+                        Đặt lại
                     </a>
                 </div>
             </form>
         </div>
 
-        <!-- 2 & 3. Bảng chi nhánh chuẩn hóa cột, tăng tương phản đầu bảng (#E5EEE8) và padding 16-20px -->
+        <!-- 4. Bảng danh sách cửa hàng -->
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -182,97 +205,111 @@
                         <thead style="background-color: #E5EEE8 !important;">
                         <tr style="background-color: #E5EEE8 !important;">
                             <th class="ps-4 fw-bold" style="white-space: nowrap !important; width: 70px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Mã</th>
-                            <th class="fw-bold" style="white-space: nowrap !important; min-width: 220px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Chi nhánh</th>
+                            <th class="fw-bold" style="white-space: nowrap !important; min-width: 220px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Cửa hàng</th>
                             <th class="fw-bold" style="white-space: nowrap !important; min-width: 260px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Địa chỉ và liên hệ</th>
-                            <th class="fw-bold" style="white-space: nowrap !important; min-width: 150px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Phụ trách</th>
+                            <th class="fw-bold" style="white-space: nowrap !important; min-width: 150px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Chủ sở hữu</th>
                             <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 140px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Số dư ví</th>
-                            <th class="fw-bold" style="white-space: nowrap !important; min-width: 175px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Trạng thái</th>
-                            <th class="text-end pe-4 fw-bold" style="white-space: nowrap !important; min-width: 190px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Thao tác</th>
+                            <th class="fw-bold" style="white-space: nowrap !important; min-width: 185px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Trạng thái cấp phép</th>
+                            <th class="text-end pe-4 fw-bold" style="white-space: nowrap !important; min-width: 210px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Thao tác</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(stores)}">
                             <td colspan="7" class="text-center py-5 text-muted" style="font-size: 15.5px;">
                                 <i class="bi bi-shop fs-1 d-block mb-2 text-secondary opacity-50"></i>
-                                Không tìm thấy chi nhánh nào phù hợp với điều kiện tìm kiếm.
+                                Không tìm thấy cửa hàng nào phù hợp với điều kiện tìm kiếm.
                             </td>
                         </tr>
                         <tr th:each="s : ${stores}">
                             <!-- 1. Mã -->
                             <td class="ps-4 text-muted fw-bold" style="font-size: 14.5px;" th:text="'#' + ${s.id}">#1</td>
 
-                            <!-- 2. Chi nhánh: tên đậm 700, 17-18px, lược bỏ chữ 'Chi nhánh' lặp lại nếu có -->
+                            <!-- 2. Cửa hàng -->
                             <td>
-                                <div class="fw-bold" style="font-size: 17.5px; font-weight: 700; color: #20382E; line-height: 1.35;"
-                                     th:title="${s.name}"
-                                     th:text="${s.name != null and s.name.toLowerCase().startsWith('chi nhánh ') ? s.name.substring(10) : s.name}">
-                                    Bến Thành (Quận 1)
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm"
+                                         style="width: 38px; height: 38px; background-color: #20382E; font-size: 14px; flex-shrink: 0;">
+                                        <i class="bi bi-shop"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold" style="font-size: 16.5px; font-weight: 700; color: #20382E; line-height: 1.35;"
+                                             th:title="${s.name}"
+                                             th:text="${s.name}">
+                                            Tiệm Hoa Sài Gòn
+                                        </div>
+                                        <small class="text-muted" th:if="${s.createdAt != null}" th:text="'Tham gia: ' + ${#temporals.format(s.createdAt, 'dd/MM/yyyy')}"></small>
+                                    </div>
                                 </div>
                             </td>
 
-                            <!-- 3. Địa chỉ và liên hệ: 15-16px, tối đa 2-3 dòng, số điện thoại ở dòng riêng -->
+                            <!-- 3. Địa chỉ và liên hệ -->
                             <td>
-                                <div style="font-size: 15.5px; color: #24332C; line-height: 1.45; max-width: 320px;" th:text="${s.address}">
+                                <div style="font-size: 15px; color: #24332C; line-height: 1.45; max-width: 320px;" th:text="${s.address}">
                                     123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM
                                 </div>
-                                <div class="mt-1" style="font-size: 14.5px; color: #66736B;">
+                                <div class="mt-1" style="font-size: 14px; color: #66736B;">
                                     <i class="bi bi-telephone me-1" style="font-size: 13px;"></i><span th:text="${s.phone}">0281111222</span>
                                 </div>
                             </td>
 
-                            <!-- 4. Phụ trách: hiển thị người quản lý/chủ sở hữu được phân công -->
+                            <!-- 4. Chủ sở hữu -->
                             <td>
-                                <span style="font-size: 15.5px; font-weight: 600; color: #24332C;" 
+                                <span style="font-size: 15px; font-weight: 600; color: #24332C;" 
                                       th:text="${s.owner != null ? s.owner.fullName : 'Hệ Thống Tổng'}">
                                     Hệ Thống Tổng
                                 </span>
                             </td>
 
-                            <!-- 5. Số dư ví: căn phải, đậm 700, không xuống dòng giữa số tiền và ký hiệu: 15.500.000 ₫ -->
+                            <!-- 5. Số dư ví -->
                             <td class="text-end" style="white-space: nowrap;">
-                                <span style="font-size: 16.5px; font-weight: 700; color: #20382E; white-space: nowrap;"
+                                <span style="font-size: 16px; font-weight: 700; color: #20382E; white-space: nowrap;"
                                       th:text="${s.eWallet != null ? #numbers.formatDecimal(s.eWallet, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">
                                     15.500.000 ₫
                                 </span>
                             </td>
 
-                            <!-- 6. Trạng thái: nhãn cùng kích thước, có chấm màu và chữ, viết in hoa trên cùng 1 dòng -->
+                            <!-- 6. Trạng thái cấp phép -->
                             <td style="white-space: nowrap;">
-                                <span th:if="${s.status == null or s.status}" class="status-pill-active" style="white-space: nowrap;">
-                                    <i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i>ĐANG HOẠT ĐỘNG
+                                <span th:if="${s.status == null or s.status}" 
+                                      class="badge rounded-pill px-3 py-2 d-inline-flex align-items-center gap-1"
+                                      style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; font-size: 13px; font-weight: 700; letter-spacing: 0.3px;">
+                                    <i class="bi bi-patch-check-fill text-success"></i> ĐÃ CẤP PHÉP
                                 </span>
-                                <span th:if="${s.status != null and !s.status}" class="status-pill-locked" style="white-space: nowrap;">
-                                    <i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i>TẠM NGỪNG
+                                <span th:if="${s.status != null and !s.status}" 
+                                      class="badge rounded-pill px-3 py-2 d-inline-flex align-items-center gap-1"
+                                      style="background-color: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; font-size: 13px; font-weight: 700; letter-spacing: 0.3px;">
+                                    <i class="bi bi-slash-circle-fill text-danger"></i> BỊ CẤM HOẠT ĐỘNG
                                 </span>
                             </td>
 
-                            <!-- 7. Thao tác: nút cùng chiều cao, nội dung một dòng. "Chi tiết" chính, "Tạm ngừng"/"Mở lại" phụ -->
+                            <!-- 7. Thao tác: Cấp phép / Cấm / Chi tiết -->
                             <td class="text-end pe-4" style="white-space: nowrap;">
                                 <div class="d-inline-flex align-items-center gap-2">
-                                    <!-- Nút Chi tiết (thao tác chính) -->
+                                    <!-- Nút Chi tiết -->
                                     <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-1"
                                             data-bs-toggle="modal" th:data-bs-target="'#storeDetailModal' + ${s.id}"
-                                            style="height: 32px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px; border: 1px solid #D1E5DA; background-color: #FFFFFF; color: #20382E; white-space: nowrap;">
+                                            style="height: 34px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px; border: 1px solid #D1E5DA; background-color: #FFFFFF; color: #20382E; white-space: nowrap;">
                                         <i class="bi bi-eye"></i> Chi tiết
                                     </button>
 
-                                    <!-- Nút Tạm ngừng / Mở lại (thao tác phụ) -->
-                                    <form th:action="@{'/admin/stores/toggle-status/' + ${s.id}}" method="post" class="d-inline m-0">
-                                        <!-- Khi đang hoạt động: nút Tạm ngừng chữ đỏ -->
-                                        <button th:if="${s.status == null or s.status}" type="submit" 
-                                                class="btn btn-sm d-inline-flex align-items-center gap-1"
-                                                style="height: 32px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px; border: 1px solid #FEE2E2; background-color: #FFFFFF; color: #DC2626; white-space: nowrap;"
-                                                onmouseover="this.style.backgroundColor='#FEE2E2'" onmouseout="this.style.backgroundColor='#FFFFFF'"
-                                                th:onclick="'return confirm(\'Xác nhận TẠM NGỪNG hoạt động chi nhánh [' + ${s.name} + ']?\\n\\nLưu ý tác động nghiệp vụ:\\n• Chi nhánh sẽ không hiển thị nhận đơn đặt hoa mới trên toàn hệ thống.\\n• Các đơn hàng đang trong tiến trình xử lý hoặc đang giao vẫn phải được chi nhánh hoàn tất chu đáo.\')'">
-                                            <i class="bi bi-pause-circle"></i> Tạm ngừng
+                                    <!-- NÚT CẤP PHÉP (khi cửa hàng đang bị cấm hoặc chưa cấp phép) -->
+                                    <form th:if="${s.status != null and !s.status}" th:action="@{'/admin/stores/approve/' + ${s.id}}" method="post" class="d-inline m-0">
+                                        <button type="submit" 
+                                                class="btn btn-sm btn-success d-inline-flex align-items-center gap-1 text-white shadow-sm"
+                                                style="height: 34px; padding: 0 12px; font-size: 13.5px; font-weight: 700; border-radius: 8px; white-space: nowrap; background-color: #2E7D32; border-color: #2E7D32;"
+                                                th:onclick="'return confirm(\'Xác nhận CẤP PHÉP HOẠT ĐỘNG cho cửa hàng [' + ${s.name} + ']?\\n\\nSau khi cấp phép, cửa hàng sẽ có quyền:\\n• Mở bán hoa và tiếp nhận đơn hàng của khách.\\n• Hiển thị công khai trên ứng dụng người mua.\')'">
+                                            <i class="bi bi-patch-check"></i> Cấp phép
                                         </button>
-                                        <!-- Khi đã tạm ngừng: nút Mở lại chữ xanh lá -->
-                                        <button th:if="${s.status != null and !s.status}" type="submit" 
-                                                class="btn btn-sm d-inline-flex align-items-center gap-1"
-                                                style="height: 32px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px; border: 1px solid #D1E5DA; background-color: #FFFFFF; color: #166534; white-space: nowrap;"
-                                                onmouseover="this.style.backgroundColor='#E5EEE8'" onmouseout="this.style.backgroundColor='#FFFFFF'"
-                                                th:onclick="'return confirm(\'Xác nhận MỞ LẠI hoạt động chi nhánh [' + ${s.name} + ']?\\n\\nChi nhánh sẽ hiển thị trở lại và sẵn sàng tiếp nhận đơn đặt hàng từ khách.\')'">
-                                            <i class="bi bi-play-circle"></i> Mở lại
+                                    </form>
+
+                                    <!-- NÚT CẤM CỬA HÀNG (khi cửa hàng đang hoạt động bình thường) -->
+                                    <form th:if="${s.status == null or s.status}" th:action="@{'/admin/stores/ban/' + ${s.id}}" method="post" class="d-inline m-0">
+                                        <button type="submit" 
+                                                class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1"
+                                                style="height: 34px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px; border: 1px solid #FCA5A5; background-color: #FFF5F5; color: #DC2626; white-space: nowrap;"
+                                                onmouseover="this.style.backgroundColor='#FEE2E2'" onmouseout="this.style.backgroundColor='#FFF5F5'"
+                                                th:onclick="'return confirm(\'Xác nhận CẤM / THU HỒI GIẤY PHÉP hoạt động cửa hàng [' + ${s.name} + ']?\\n\\nTác động nghiêm trọng:\\n• Cửa hàng sẽ bị cấm kinh doanh và ẩn khỏi danh sách tìm kiếm.\\n• Cửa hàng không thể tiếp nhận thêm bất kỳ đơn hàng mới nào.\\n• Các đơn hàng đã nhận trước đó vẫn cần hoàn tất.\')'">
+                                            <i class="bi bi-slash-circle"></i> Cấm cửa hàng
                                         </button>
                                     </form>
                                 </div>
@@ -284,27 +321,31 @@
             </div>
         </div>
 
-        <!-- Modal Xem Chi Tiết Chi Nhánh (Chuyển điểm sao ★ và thông tin chi tiết vào đây) -->
+        <!-- Modal Xem Chi Tiết Cửa Hàng -->
         <div th:each="s : ${stores}" class="modal fade" th:id="'storeDetailModal' + ${s.id}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="border: 1px solid #E2E7E2 !important; border-radius: 14px;">
                     <div class="modal-header text-white" style="background-color: #20382E; border-bottom: none; padding: 18px 24px;">
                         <div class="d-flex align-items-center gap-2">
                             <i class="bi bi-shop fs-5"></i>
-                            <h5 class="modal-title fw-bold mb-0 text-white" style="font-size: 18px;" th:text="${s.name}">Tên Chi Nhánh</h5>
+                            <h5 class="modal-title fw-bold mb-0 text-white" style="font-size: 18px;" th:text="${s.name}">Tên Cửa Hàng</h5>
                         </div>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-4" style="background-color: #FBFDFB;">
-                        <!-- Trạng thái & Đánh giá -->
+                        <!-- Trạng thái Cấp phép & Đánh giá -->
                         <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom" style="border-color: #E2E7E2 !important;">
                             <div>
-                                <span class="text-muted small d-block mb-1">Trạng thái vận hành</span>
-                                <span th:if="${s.status == null or s.status}" class="status-pill-active" style="white-space: nowrap;">
-                                    <i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i>ĐANG HOẠT ĐỘNG
+                                <span class="text-muted small d-block mb-1">Giấy phép kinh doanh hệ thống</span>
+                                <span th:if="${s.status == null or s.status}" 
+                                      class="badge rounded-pill px-3 py-2 d-inline-flex align-items-center gap-1"
+                                      style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; font-size: 13px; font-weight: 700;">
+                                    <i class="bi bi-patch-check-fill text-success"></i> ĐÃ CẤP PHÉP
                                 </span>
-                                <span th:if="${s.status != null and !s.status}" class="status-pill-locked" style="white-space: nowrap;">
-                                    <i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i>TẠM NGỪNG
+                                <span th:if="${s.status != null and !s.status}" 
+                                      class="badge rounded-pill px-3 py-2 d-inline-flex align-items-center gap-1"
+                                      style="background-color: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; font-size: 13px; font-weight: 700;">
+                                    <i class="bi bi-slash-circle-fill text-danger"></i> BỊ CẤM HOẠT ĐỘNG
                                 </span>
                             </div>
                             <div class="text-end">
@@ -322,11 +363,11 @@
                                 <div class="fw-bold" style="color: #20382E; font-size: 15.5px;" th:text="'#' + ${s.id}">#1</div>
                             </div>
                             <div class="col-6">
-                                <div class="text-muted small">Người phụ trách</div>
+                                <div class="text-muted small">Chủ sở hữu / Đại diện</div>
                                 <div class="fw-bold" style="color: #20382E; font-size: 15.5px;" th:text="${s.owner != null ? s.owner.fullName : 'Hệ Thống Tổng'}">Admin</div>
                             </div>
                             <div class="col-6">
-                                <div class="text-muted small">Số dư ví chi nhánh</div>
+                                <div class="text-muted small">Số dư ví doanh thu</div>
                                 <div class="fw-bold" style="color: #20382E; font-size: 16.5px;" th:text="${s.eWallet != null ? #numbers.formatDecimal(s.eWallet, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">15.500.000 ₫</div>
                             </div>
                             <div class="col-6">
@@ -344,9 +385,25 @@
                         </div>
                     </div>
                     <div class="modal-footer bg-white border-top-0 d-flex justify-content-between p-3">
-                        <a th:href="@{'/stores/' + ${s.id}}" target="_blank" class="btn btn-outline-success btn-sm d-inline-flex align-items-center gap-1" style="border-radius: 8px; font-weight: 600; color: #20382E; border-color: #D1E5DA;">
-                            <i class="bi bi-box-arrow-up-right"></i> Xem trang cửa hàng
-                        </a>
+                        <div class="d-flex gap-2">
+                            <!-- Nút Cấp phép trong modal -->
+                            <form th:if="${s.status != null and !s.status}" th:action="@{'/admin/stores/approve/' + ${s.id}}" method="post" class="d-inline m-0">
+                                <button type="submit" class="btn btn-sm btn-success d-inline-flex align-items-center gap-1 fw-bold"
+                                        th:onclick="'return confirm(\'CẤP PHÉP hoạt động cho cửa hàng [' + ${s.name} + ']?\')'">
+                                    <i class="bi bi-patch-check"></i> Cấp phép cửa hàng
+                                </button>
+                            </form>
+                            <!-- Nút Cấm trong modal -->
+                            <form th:if="${s.status == null or s.status}" th:action="@{'/admin/stores/ban/' + ${s.id}}" method="post" class="d-inline m-0">
+                                <button type="submit" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1 fw-bold"
+                                        th:onclick="'return confirm(\'CẤM hoạt động cửa hàng [' + ${s.name} + ']?\')'">
+                                    <i class="bi bi-slash-circle"></i> Cấm cửa hàng
+                                </button>
+                            </form>
+                            <a th:href="@{'/stores/' + ${s.id}}" target="_blank" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1" style="border-radius: 8px; font-weight: 600;">
+                                <i class="bi bi-box-arrow-up-right"></i> Xem trang shop
+                            </a>
+                        </div>
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" style="border-radius: 8px;">Đóng</button>
                     </div>
                 </div>
