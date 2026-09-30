@@ -280,38 +280,9 @@ public class AdminConfigController {
         return "redirect:/admin/store-levels";
     }
 
-    // --- 7. Quản lý Thuộc tính sản phẩm (Style) ---
+    // --- 7. Quản lý Thuộc tính sản phẩm (Style - Đã loại bỏ) ---
     @GetMapping("/styles")
-    public String listStyles(Model model) {
-        model.addAttribute("styles", styleRepository.findByIsDeletedFalse());
-        return "admin/styles";
-    }
-
-    @PostMapping("/styles/add")
-    public String addStyle(@RequestParam("name") String name, RedirectAttributes ra) {
-        Style s = Style.builder().name(name).isDeleted(false).build();
-        styleRepository.save(s);
-        ra.addFlashAttribute("successMessage", "Thêm nhóm thuộc tính [" + name + "] thành công!");
-        return "redirect:/admin/styles";
-    }
-
-    @PostMapping("/styles/update/{id}")
-    public String updateStyle(@PathVariable("id") Long id,
-                              @RequestParam("name") String name,
-                              RedirectAttributes ra) {
-        Style s = styleRepository.findById(id).orElseThrow();
-        s.setName(name);
-        styleRepository.save(s);
-        ra.addFlashAttribute("successMessage", "Cập nhật nhóm thuộc tính thành công!");
-        return "redirect:/admin/styles";
-    }
-
-    @PostMapping("/styles/delete/{id}")
-    public String deleteStyle(@PathVariable("id") Long id, RedirectAttributes ra) {
-        Style s = styleRepository.findById(id).orElseThrow();
-        s.setIsDeleted(true);
-        styleRepository.save(s);
-        ra.addFlashAttribute("successMessage", "Xóa nhóm thuộc tính thành công!");
-        return "redirect:/admin/styles";
+    public String listStyles() {
+        return "redirect:/admin/dashboard";
     }
 }
