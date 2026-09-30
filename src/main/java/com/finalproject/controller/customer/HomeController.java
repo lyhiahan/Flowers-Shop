@@ -185,4 +185,12 @@ public class HomeController {
             throw t;
         }
     }
+
+    @GetMapping("/following")
+    public String redirectFollowing(@RequestParam(value = "tab", required = false) String tab) {
+        if (tab != null && !tab.isEmpty()) {
+            return "redirect:/customer/following?tab=" + tab;
+        }
+        return "redirect:/customer/following";
+    }
 }
