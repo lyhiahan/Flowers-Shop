@@ -1,8 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Quản Lý Cửa Hàng & Chi Nhánh - Quản Trị Hệ Thống Hoa Tươi</title>
+    <title>Quản Lý Chi Nhánh - Quản Trị Hệ Thống Hoa Tươi</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -18,7 +18,6 @@
 <body class="admin-body">
 <div class="d-flex">
     <!-- Sidebar -->
-        <!-- Sidebar Quản Trị Hệ Thống Chuẩn Thương Hiệu Tiệm Hoa -->
     <aside class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white">
         <a th:href="@{/admin/dashboard}" class="d-flex align-items-center gap-3 mb-4 text-white text-decoration-none px-2 pt-2">
             <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img flex-shrink-0" style="width: 40px; height: 40px; border-radius: 8px;">
@@ -125,69 +124,163 @@
 
     <!-- Main Content -->
     <div class="main-wrapper p-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <!-- 1. Header: Tiêu đề rõ ràng + Dòng phụ + Huy hiệu số lượng -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
             <div>
-                <h1 class="admin-page-title mb-1">🏬 Quản Lý Danh Sách & Cấp Phép Cửa Hàng / Chi Nhánh</h1>
-                <p class="text-muted small mb-0">Cấp phép kinh doanh hoặc cấm hoạt động các chi nhánh và shop trong chuỗi</p>
+                <div class="d-flex align-items-center gap-3">
+                    <h1 class="admin-page-title mb-0" style="font-size: 28px !important; font-weight: 800; color: #20382E;">Quản lý chi nhánh</h1>
+                    <span class="badge rounded-pill" style="background-color: #E5EEE8; color: #20382E; border: 1px solid #D1E5DA; font-size: 14.5px; font-weight: 700; padding: 6px 14px;">
+                        <span th:text="${#lists.size(stores)}">0</span> chi nhánh
+                    </span>
+                </div>
+                <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Theo dõi thông tin và trạng thái hoạt động của các chi nhánh</p>
             </div>
         </div>
 
         <!-- Flash alerts -->
-        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small" role="alert">
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small" role="alert" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA; border-radius: 10px;">
             <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${successMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <!-- Stores Table -->
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        <!-- 4. Thanh tìm kiếm và bộ lọc trạng thái (44px) -->
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
+            <form th:action="@{/admin/stores}" method="get" class="row g-2 align-items-center">
+                <div class="col-12 col-md-6 col-lg-7">
+                    <div class="input-group" style="height: 44px;">
+                        <span class="input-group-text bg-white border-end-0 text-muted" style="border-color: #E2E7E2; border-radius: 10px 0 0 10px;">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" name="keyword" th:value="${keyword}" 
+                               class="form-control border-start-0" 
+                               style="height: 44px; border-color: #E2E7E2; border-radius: 0 10px 10px 0; font-size: 15px;" 
+                               placeholder="Tìm tên, địa chỉ chi nhánh…">
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-md-3 col-lg-3">
+                    <select name="status" class="form-select" style="height: 44px; border-color: #E2E7E2; border-radius: 10px; font-size: 15px; color: #20382E; font-weight: 600;">
+                        <option value="ALL" th:selected="${currentStatus == 'ALL' or currentStatus == null}">Trạng thái: Tất cả</option>
+                        <option value="ACTIVE" th:selected="${currentStatus == 'ACTIVE'}">Đang hoạt động</option>
+                        <option value="PAUSED" th:selected="${currentStatus == 'PAUSED'}">Tạm ngừng</option>
+                    </select>
+                </div>
+                <div class="col-auto d-flex gap-2">
+                    <button class="btn btn-primary d-inline-flex align-items-center justify-content-center px-4" 
+                            type="submit" 
+                            style="height: 44px; border-radius: 10px; font-size: 15.5px; font-weight: 700; background-color: #20382E !important; border-color: #20382E !important;">
+                        <i class="bi bi-funnel me-1"></i> Tìm
+                    </button>
+                    <a th:href="@{/admin/stores}" 
+                       class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center px-3" 
+                       style="height: 44px; border-radius: 10px; font-size: 15px; color: #66736B; border-color: #E2E7E2; background: #FFFFFF;">
+                        Xóa bộ lọc
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- 2 & 3. Bảng chi nhánh chuẩn hóa cột, tăng tương phản đầu bảng (#E5EEE8) và padding 16-20px -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light small text-secondary">
+                    <table class="table table-admin-stores align-middle mb-0">
+                        <thead>
                         <tr>
-                            <th class="ps-3">ID</th>
-                            <th>Tên Chi Nhánh / Shop</th>
-                            <th>Địa Chỉ & Hotline</th>
-                            <th>Chủ Sở Hữu (Owner)</th>
-                            <th>Số Dư Ví</th>
-                            <th>Tình Trạng Giấy Phép</th>
-                            <th class="text-end pe-3">Hành Động Cấp/Cấm</th>
+                            <th style="width: 70px;" class="ps-4">Mã</th>
+                            <th style="min-width: 220px;">Chi nhánh</th>
+                            <th style="min-width: 260px;">Địa chỉ và liên hệ</th>
+                            <th style="min-width: 150px;">Phụ trách</th>
+                            <th class="text-end" style="min-width: 140px;">Số dư ví</th>
+                            <th style="min-width: 140px;">Trạng thái</th>
+                            <th class="text-end pe-4" style="min-width: 190px;">Thao tác</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(stores)}">
-                            <td colspan="7" class="text-center py-5 text-muted">Chưa có chi nhánh cửa hàng nào trong hệ thống.</td>
+                            <td colspan="7" class="text-center py-5 text-muted" style="font-size: 15.5px;">
+                                <i class="bi bi-shop fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                                Không tìm thấy chi nhánh nào phù hợp với điều kiện tìm kiếm.
+                            </td>
                         </tr>
                         <tr th:each="s : ${stores}">
-                            <td class="ps-3 text-muted" th:text="'#' + ${s.id}"></td>
+                            <!-- 1. Mã -->
+                            <td class="ps-4 text-muted fw-bold" style="font-size: 14.5px;" th:text="'#' + ${s.id}">#1</td>
+
+                            <!-- 2. Chi nhánh: tên đậm 700, 17-18px, lược bỏ chữ 'Chi nhánh' lặp lại nếu có -->
                             <td>
-                                <strong class="text-dark d-block" th:text="${s.name}"></strong>
-                                <span class="badge bg-light text-warning">★ <span th:text="${s.rating != null ? s.rating : '5.0'}"></span></span>
+                                <div class="fw-bold" style="font-size: 17.5px; font-weight: 700; color: #20382E; line-height: 1.35;"
+                                     th:title="${s.name}"
+                                     th:text="${s.name != null and s.name.toLowerCase().startsWith('chi nhánh ') ? s.name.substring(10) : s.name}">
+                                    Bến Thành (Quận 1)
+                                </div>
                             </td>
+
+                            <!-- 3. Địa chỉ và liên hệ: 15-16px, tối đa 2-3 dòng, số điện thoại ở dòng riêng -->
                             <td>
-                                <div class="small text-dark" th:text="${s.address}"></div>
-                                <small class="text-muted"><i class="bi bi-telephone me-1"></i><span th:text="${s.phone}"></span></small>
+                                <div style="font-size: 15.5px; color: #24332C; line-height: 1.45; max-width: 320px;" th:text="${s.address}">
+                                    123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM
+                                </div>
+                                <div class="mt-1" style="font-size: 14.5px; color: #66736B;">
+                                    <i class="bi bi-telephone me-1" style="font-size: 13px;"></i><span th:text="${s.phone}">0281111222</span>
+                                </div>
                             </td>
+
+                            <!-- 4. Phụ trách: hiển thị người quản lý/chủ sở hữu được phân công -->
                             <td>
-                                <span class="small fw-semibold text-primary" th:text="${s.owner != null ? s.owner.fullName : 'Hệ Thống Tổng'}"></span>
+                                <span style="font-size: 15.5px; font-weight: 600; color: #24332C;" 
+                                      th:text="${s.owner != null ? s.owner.fullName : 'Hệ Thống Tổng'}">
+                                    Hệ Thống Tổng
+                                </span>
                             </td>
+
+                            <!-- 5. Số dư ví: căn phải, đậm 700, không xuống dòng giữa số tiền và ký hiệu: 15.500.000 ₫ -->
+                            <td class="text-end" style="white-space: nowrap;">
+                                <span style="font-size: 16.5px; font-weight: 700; color: #20382E; white-space: nowrap;"
+                                      th:text="${s.eWallet != null ? #numbers.formatDecimal(s.eWallet, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">
+                                    15.500.000 ₫
+                                </span>
+                            </td>
+
+                            <!-- 6. Trạng thái: nhãn cùng kích thước, có chấm màu và chữ -->
                             <td>
-                                <strong class="text-success small"
-                                        th:text="${s.eWallet != null ? #numbers.formatDecimal(s.eWallet, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}"></strong>
+                                <span th:if="${s.status == null or s.status}" class="status-pill-active">
+                                    <i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i>Đang hoạt động
+                                </span>
+                                <span th:if="${s.status != null and !s.status}" class="status-pill-locked">
+                                    <i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i>Tạm ngừng
+                                </span>
                             </td>
-                            <td>
-                                <span th:if="${s.status == null or s.status}" class="badge bg-success-subtle text-success border border-success-subtle">Đã Cấp Phép</span>
-                                <span th:if="${s.status != null and !s.status}" class="badge bg-danger-subtle text-danger border border-danger-subtle">Bị Cấm / Tạm Dừng</span>
-                            </td>
-                            <td class="text-end pe-3">
-                                <form th:action="@{'/admin/stores/toggle-status/' + ${s.id}}" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-sm rounded-pill px-3"
-                                            th:classappend="${s.status == null or s.status} ? 'btn-outline-danger' : 'btn-outline-success'"
-                                            th:onclick="'return confirm(\'Bạn có chắc muốn ' + (${s.status == null or s.status} ? 'CẤM' : 'CẤP PHÉP LẠI') + ' chi nhánh này?\')'">
-                                        <i class="bi" th:classappend="${s.status == null or s.status} ? 'bi-slash-circle' : 'bi-check-circle'"></i>
-                                        <span th:text="${s.status == null or s.status} ? 'Cấm Cửa Hàng' : 'Cấp Phép Lại'"></span>
+
+                            <!-- 7. Thao tác: nút cùng chiều cao, nội dung một dòng. "Chi tiết" chính, "Tạm ngừng"/"Mở lại" phụ -->
+                            <td class="text-end pe-4" style="white-space: nowrap;">
+                                <div class="d-inline-flex align-items-center gap-2">
+                                    <!-- Nút Chi tiết (thao tác chính) -->
+                                    <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-1"
+                                            data-bs-toggle="modal" th:data-bs-target="'#storeDetailModal' + ${s.id}"
+                                            style="height: 32px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px; border: 1px solid #D1E5DA; background-color: #FFFFFF; color: #20382E; white-space: nowrap;">
+                                        <i class="bi bi-eye"></i> Chi tiết
                                     </button>
-                                </form>
+
+                                    <!-- Nút Tạm ngừng / Mở lại (thao tác phụ) -->
+                                    <form th:action="@{'/admin/stores/toggle-status/' + ${s.id}}" method="post" class="d-inline m-0">
+                                        <!-- Khi đang hoạt động: nút Tạm ngừng chữ đỏ -->
+                                        <button th:if="${s.status == null or s.status}" type="submit" 
+                                                class="btn btn-sm d-inline-flex align-items-center gap-1"
+                                                style="height: 32px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px; border: 1px solid #FEE2E2; background-color: #FFFFFF; color: #DC2626; white-space: nowrap;"
+                                                onmouseover="this.style.backgroundColor='#FEE2E2'" onmouseout="this.style.backgroundColor='#FFFFFF'"
+                                                th:onclick="'return confirm(\'Xác nhận TẠM NGỪNG hoạt động chi nhánh [' + ${s.name} + ']?\\n\\nLưu ý tác động nghiệp vụ:\\n• Chi nhánh sẽ không hiển thị nhận đơn đặt hoa mới trên toàn hệ thống.\\n• Các đơn hàng đang trong tiến trình xử lý hoặc đang giao vẫn phải được chi nhánh hoàn tất chu đáo.\')'">
+                                            <i class="bi bi-pause-circle"></i> Tạm ngừng
+                                        </button>
+                                        <!-- Khi đã tạm ngừng: nút Mở lại chữ xanh lá -->
+                                        <button th:if="${s.status != null and !s.status}" type="submit" 
+                                                class="btn btn-sm d-inline-flex align-items-center gap-1"
+                                                style="height: 32px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px; border: 1px solid #D1E5DA; background-color: #FFFFFF; color: #166534; white-space: nowrap;"
+                                                onmouseover="this.style.backgroundColor='#E5EEE8'" onmouseout="this.style.backgroundColor='#FFFFFF'"
+                                                th:onclick="'return confirm(\'Xác nhận MỞ LẠI hoạt động chi nhánh [' + ${s.name} + ']?\\n\\nChi nhánh sẽ hiển thị trở lại và sẵn sàng tiếp nhận đơn đặt hàng từ khách.\')'">
+                                            <i class="bi bi-play-circle"></i> Mở lại
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         </tbody>
@@ -195,6 +288,76 @@
                 </div>
             </div>
         </div>
+
+        <!-- Modal Xem Chi Tiết Chi Nhánh (Chuyển điểm sao ★ và thông tin chi tiết vào đây) -->
+        <div th:each="s : ${stores}" class="modal fade" th:id="'storeDetailModal' + ${s.id}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="border: 1px solid #E2E7E2 !important; border-radius: 14px;">
+                    <div class="modal-header text-white" style="background-color: #20382E; border-bottom: none; padding: 18px 24px;">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-shop fs-5"></i>
+                            <h5 class="modal-title fw-bold mb-0 text-white" style="font-size: 18px;" th:text="${s.name}">Tên Chi Nhánh</h5>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4" style="background-color: #FBFDFB;">
+                        <!-- Trạng thái & Đánh giá -->
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom" style="border-color: #E2E7E2 !important;">
+                            <div>
+                                <span class="text-muted small d-block mb-1">Trạng thái vận hành</span>
+                                <span th:if="${s.status == null or s.status}" class="status-pill-active">
+                                    <i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i>Đang hoạt động
+                                </span>
+                                <span th:if="${s.status != null and !s.status}" class="status-pill-locked">
+                                    <i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i>Tạm ngừng
+                                </span>
+                            </div>
+                            <div class="text-end">
+                                <span class="text-muted small d-block mb-1">Đánh giá khách hàng</span>
+                                <span class="badge" style="background-color: #FEF3C7; color: #92400E; font-size: 14.5px; font-weight: 700; padding: 6px 12px; border: 1px solid #FDE68A;">
+                                    ★ <span th:text="${s.rating != null ? #numbers.formatDecimal(s.rating, 1, 1) : '5.0'}">5.0</span> / 5.0
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Thông tin chi tiết -->
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="text-muted small">Mã hệ thống</div>
+                                <div class="fw-bold" style="color: #20382E; font-size: 15.5px;" th:text="'#' + ${s.id}">#1</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-muted small">Người phụ trách</div>
+                                <div class="fw-bold" style="color: #20382E; font-size: 15.5px;" th:text="${s.owner != null ? s.owner.fullName : 'Hệ Thống Tổng'}">Admin</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-muted small">Số dư ví chi nhánh</div>
+                                <div class="fw-bold" style="color: #20382E; font-size: 16.5px;" th:text="${s.eWallet != null ? #numbers.formatDecimal(s.eWallet, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">15.500.000 ₫</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-muted small">Hotline liên hệ</div>
+                                <div class="fw-semibold text-dark"><i class="bi bi-telephone me-1 text-muted"></i><span th:text="${s.phone}">0281111222</span></div>
+                            </div>
+                            <div class="col-12">
+                                <div class="text-muted small">Địa chỉ hoạt động</div>
+                                <div class="fw-semibold text-dark" style="line-height: 1.45; font-size: 15px;" th:text="${s.address}">Địa chỉ</div>
+                            </div>
+                            <div class="col-12" th:if="${s.bio != null and !s.bio.isEmpty()}">
+                                <div class="text-muted small">Mô tả / Giới thiệu</div>
+                                <div class="small text-muted p-2 rounded-3 mt-1" style="background-color: #F0F6F2; border: 1px solid #E2E7E2;" th:text="${s.bio}">Bio</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-white border-top-0 d-flex justify-content-between p-3">
+                        <a th:href="@{'/stores/' + ${s.id}}" target="_blank" class="btn btn-outline-success btn-sm d-inline-flex align-items-center gap-1" style="border-radius: 8px; font-weight: 600; color: #20382E; border-color: #D1E5DA;">
+                            <i class="bi bi-box-arrow-up-right"></i> Xem trang cửa hàng
+                        </a>
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" style="border-radius: 8px;">Đóng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
