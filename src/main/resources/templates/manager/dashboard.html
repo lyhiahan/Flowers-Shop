@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tổng Quan Chi Nhánh - Quản Lý Tiệm Hoa</title>
-    <!-- Google Fonts -->
+    <!-- Google Fonts: Nunito -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Bootstrap 5.3 & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -19,14 +19,14 @@
     <style>
         :root {
             --bg-page: #FAF7F2;
-            --surface-card: #FFFCF8;
-            --brand-green: #355447;
-            --brand-green-light: #EBF3EE;
+            --surface-card: #FFFFFF;
+            --brand-green: #20382E;
+            --brand-green-light: #E5EEE8;
             --accent-rose: #A64060;
-            --accent-rose-soft: #F3E6E1;
-            --text-main: #293B32;
+            --accent-rose-soft: #F9EBEF;
+            --text-main: #20382E;
             --text-muted: #686E65;
-            --border-soft: #E7DED4;
+            --border-soft: #E2E7E2;
             --amber-bg: #FEF3C7;
             --amber-text: #B45309;
             --amber-border: #FDE68A;
@@ -35,15 +35,11 @@
             --alert-red-border: #FECACA;
         }
 
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+        body, button, input, select, textarea {
+            font-family: 'Nunito', sans-serif !important;
             background-color: var(--bg-page);
             color: var(--text-main);
             min-height: 100vh;
-        }
-
-        .font-serif {
-            font-family: 'Playfair Display', Georgia, serif;
         }
 
         /* Sidebar Styling */
@@ -62,8 +58,8 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            font-weight: 500;
-            font-size: 0.925rem;
+            font-weight: 600;
+            font-size: 15px;
             transition: all 0.2s ease;
         }
 
@@ -75,7 +71,7 @@
         .sidebar a.active {
             background: var(--brand-green);
             color: #FFFFFF;
-            font-weight: 600;
+            font-weight: 700;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
@@ -84,82 +80,119 @@
             background: var(--surface-card);
             border: 1px solid var(--border-soft);
             border-radius: 16px;
-            box-shadow: 0 4px 16px rgba(41, 59, 50, 0.04);
+            box-shadow: 0 2px 12px rgba(32, 56, 46, 0.04);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .card-floral:hover {
-            box-shadow: 0 8px 24px rgba(41, 59, 50, 0.08);
-        }
-
-        /* KPI Cards */
+        /* KPI Card System: Đồng nhất kích thước, cấu trúc và khoảng đệm */
         .kpi-card {
-            border-radius: 16px;
-            background: var(--surface-card);
+            background: #FFFFFF;
             border: 1px solid var(--border-soft);
-            padding: 22px 20px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 16px rgba(41, 59, 50, 0.04);
+            border-radius: 16px;
+            padding: 22px 24px;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
             transition: all 0.25s ease;
+            text-decoration: none !important;
+            color: inherit;
+            position: relative;
+            box-shadow: 0 2px 10px rgba(32, 56, 46, 0.03);
         }
 
-        .kpi-card:hover {
+        .kpi-card.is-clickable {
+            cursor: pointer;
+        }
+
+        .kpi-card.is-clickable:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(41, 59, 50, 0.08);
+            box-shadow: 0 8px 20px rgba(32, 56, 46, 0.09);
+            border-color: var(--brand-green);
         }
 
-        .kpi-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 5px;
-            height: 100%;
+        .kpi-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
         }
 
-        .kpi-revenue::before { background: var(--brand-green); }
-        .kpi-completed::before { background: #2E7D32; }
-        .kpi-pending::before { background: var(--amber-text); }
-        .kpi-lowstock::before { background: var(--alert-red-text); }
+        .kpi-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 0;
+            line-height: 1.3;
+        }
 
         .kpi-icon-wrap {
-            width: 50px;
-            height: 50px;
+            width: 44px;
+            height: 44px;
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
+            font-size: 1.25rem;
+            flex-shrink: 0;
         }
 
-        /* Buttons & Filter Pills */
+        .kpi-value {
+            font-size: 34px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 6px;
+            white-space: nowrap;
+        }
+
+        .kpi-caption {
+            font-size: 15px;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .kpi-tag {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            letter-spacing: 0.3px;
+        }
+
+        /* Buttons & Filter Pills: Chiều cao chuẩn 40-44px */
         .btn-filter {
-            padding: 7px 18px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            border-radius: 30px;
-            border: 1px solid var(--border-soft);
+            height: 42px;
+            padding: 0 20px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 24px;
+            border: 1px solid #D5DDD7;
             background: #FFFFFF;
             color: var(--text-main);
             text-decoration: none;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            white-space: nowrap;
         }
 
         .btn-filter:hover {
-            background: var(--accent-rose-soft);
-            color: var(--accent-rose);
-            border-color: var(--accent-rose);
+            background: var(--brand-green-light);
+            color: var(--brand-green);
+            border-color: var(--brand-green);
         }
 
         .btn-filter.active {
             background: var(--brand-green);
             color: #FFFFFF;
             border-color: var(--brand-green);
-            box-shadow: 0 3px 10px rgba(53, 84, 71, 0.25);
+            box-shadow: 0 4px 12px rgba(32, 56, 46, 0.2);
         }
 
         .btn-action-primary {
@@ -167,14 +200,20 @@
             color: #FFFFFF;
             border: none;
             border-radius: 10px;
-            padding: 8px 18px;
-            font-weight: 600;
-            font-size: 0.875rem;
+            height: 42px;
+            padding: 0 20px;
+            font-weight: 700;
+            font-size: 14.5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
             transition: all 0.2s;
+            text-decoration: none;
         }
 
         .btn-action-primary:hover {
-            background: #284136;
+            background: #172922;
             color: #FFFFFF;
         }
 
@@ -198,37 +237,33 @@
         }
 
         .flower-thumb {
-            width: 52px;
-            height: 52px;
+            width: 48px;
+            height: 48px;
             border-radius: 10px;
             object-fit: cover;
             border: 1px solid var(--border-soft);
-            background: var(--accent-rose-soft);
+            background: #F4EFEA;
             flex-shrink: 0;
         }
 
         .rank-badge {
-            width: 24px;
-            height: 24px;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.75rem;
-            font-weight: 700;
+            font-weight: 800;
+            font-size: 13px;
             flex-shrink: 0;
         }
 
         .rank-1 { background: #FEF08A; color: #854D0E; }
-        .rank-2 { background: #E2E8F0; color: #475569; }
+        .rank-2 { background: #E2E8F0; color: #334155; }
         .rank-3 { background: #FED7AA; color: #9A3412; }
-        .rank-n { background: var(--bg-page); color: var(--text-muted); }
+        .rank-n { background: #F1F5F9; color: #64748B; }
 
-        /* Pending Table */
-        .table-floral {
-            margin-bottom: 0;
-        }
-
+        /* Table standard styling */
         .table-floral thead th {
             background: #E5EEE8 !important;
             color: #20382E !important;
@@ -253,11 +288,27 @@
         .badge-status {
             padding: 5px 12px;
             border-radius: 20px;
-            font-size: 0.775rem;
-            font-weight: 600;
+            font-size: 13px;
+            font-weight: 700;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
+            white-space: nowrap !important;
+        }
+
+        /* Loading Skeleton Placeholder State */
+        .is-loading-skeleton .kpi-value,
+        .is-loading-skeleton .kpi-caption {
+            color: transparent !important;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 6px;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
         }
 
         /* Custom scrollbar */
@@ -284,8 +335,8 @@
                         <img th:src="@{/images/flower-logo.png}" alt="Logo" style="width: 32px; height: 32px; object-fit: contain;">
                     </div>
                     <div>
-                        <h6 class="font-serif fw-bold text-white mb-0" style="letter-spacing: 0.5px;">TIỆM HOA TƯƠI</h6>
-                        <small style="color: #9DB7AA; font-size: 0.78rem;">Quản Lý Chi Nhánh</small>
+                        <h6 class="fw-bold text-white mb-0" style="letter-spacing: 0.5px; font-size: 16px;">TIỆM HOA TƯƠI</h6>
+                        <small style="color: #9DB7AA; font-size: 13px;">Quản Lý Chi Nhánh</small>
                     </div>
                 </div>
 
@@ -325,7 +376,7 @@
                         <i class="bi bi-box-arrow-up-right"></i> Xem Website Khách
                     </a>
                     <form th:action="@{/logout}" method="post" class="m-0">
-                        <button type="submit" class="btn text-start w-100 p-2 text-danger border-0 d-flex align-items-center gap-2" style="font-size: 0.925rem; font-weight: 500; background: none;">
+                        <button type="submit" class="btn text-start w-100 p-2 text-danger border-0 d-flex align-items-center gap-2" style="font-size: 15px; font-weight: 600; background: none;">
                             <i class="bi bi-box-arrow-right"></i> Đăng Xuất
                         </button>
                     </form>
@@ -336,28 +387,31 @@
         <!-- Main Dashboard Content -->
         <div class="col-lg-10 col-md-9 p-4 p-xl-5" style="overflow-y: auto; max-height: 100vh;">
             
-            <!-- 1. Header: Branch Overview & Time Filter -->
-            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 pb-4 mb-4 border-bottom" style="border-color: var(--border-soft) !important;">
+            <!-- 1. Header: Thu gọn đầu trang & Bộ lọc thời gian (40-44px) -->
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 pb-3 mb-4 border-bottom" style="border-color: var(--border-soft) !important;">
                 <div>
                     <div class="d-flex align-items-center gap-2 mb-1">
-                        <span class="badge px-3 py-1 rounded-pill" style="background: var(--brand-green-light); color: var(--brand-green); font-size: 0.75rem; font-weight: 600;">
+                        <span class="badge px-3 py-1 rounded-pill" style="background: var(--brand-green-light); color: var(--brand-green); font-size: 13px; font-weight: 700;">
                             <i class="bi bi-geo-alt-fill me-1"></i> Chi nhánh phụ trách
                         </span>
-                        <span class="text-muted small">• Cập nhật liên tục</span>
+                        <span class="text-muted" style="font-size: 14px;">
+                            • Cập nhật lúc <span class="fw-semibold text-dark" th:text="${lastUpdatedTime != null ? lastUpdatedTime : #temporals.format(#temporals.createNow(), 'HH:mm')}">18:30</span>
+                        </span>
                     </div>
-                    <h2 class="font-serif fw-bold mb-1" style="color: var(--brand-green);">
+                    <h1 class="fw-bold mb-1" style="font-size: 28px; font-weight: 800; color: var(--brand-green);">
                         Tổng Quan Chi Nhánh
-                    </h2>
-                    <p class="mb-0" style="color: var(--text-muted); font-size: 0.925rem;">
-                        Cơ sở: <strong class="text-dark" th:text="${store != null ? store.name : 'Chi Nhánh Tiệm Hoa'}">Tiệm Hoa Trung Tâm</strong>
-                        <span class="mx-2 text-secondary">|</span>
-                        <i class="bi bi-pin-map text-secondary me-1"></i>
-                        <span th:text="${store != null ? store.address : 'Đang cập nhật'}">Số 123 Đường Hoa Hồng, Quận 1</span>
+                    </h1>
+                    <p class="mb-0 text-muted" style="font-size: 15px;">
+                        <strong class="text-dark" th:text="${storeShortTitle != null ? storeShortTitle : (store != null ? store.name : 'Chi Nhánh Tiệm Hoa')}">Bến Thành · Quận 1</strong>
+                        <span class="mx-2 text-secondary">·</span>
+                        <a th:href="@{/manager/stores}" class="text-decoration-none fw-semibold" style="color: var(--brand-green); font-size: 14px;">
+                            <i class="bi bi-info-circle me-1"></i>Thông tin chi nhánh
+                        </a>
                     </p>
                 </div>
 
-                <!-- Time Filter Toolbar -->
-                <div class="d-flex flex-wrap align-items-center gap-2">
+                <!-- Time Filter Toolbar (Height 42px, flex-wrap) -->
+                <div class="d-flex flex-wrap align-items-center gap-2" id="filterToolbar">
                     <a th:href="@{/manager/dashboard(timeRange='today')}"
                        class="btn-filter"
                        th:classappend="${timeRange == 'today'} ? 'active' : ''">
@@ -377,177 +431,352 @@
                     <!-- Button trigger modal custom date -->
                     <button type="button" class="btn-filter" th:classappend="${timeRange == 'custom'} ? 'active' : ''" data-bs-toggle="modal" data-bs-target="#dateRangeModal">
                         <i class="bi bi-sliders"></i> Khoảng ngày
-                        <span th:if="${timeRange == 'custom'}" class="badge bg-white text-dark ms-1" style="font-size: 0.7rem;" th:text="${startDate + ' → ' + endDate}"></span>
+                        <span th:if="${timeRange == 'custom'}" class="badge bg-white text-dark ms-1" style="font-size: 0.75rem;" th:text="${startDate + ' → ' + endDate}"></span>
                     </button>
                 </div>
             </div>
 
-            <!-- 2. Four KPI Information Cards -->
+            <!-- 2. Four KPI Information Cards: Cùng mẫu, chiều cao >= 180px, padding 22px 24px, icon 44px -->
             <div class="row g-3 mb-4">
-                <!-- KPI 1: Doanh thu bán hoa -->
-                <div class="col-sm-6 col-xl-3">
-                    <div class="kpi-card kpi-revenue">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div>
-                                <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.75rem; letter-spacing: 0.5px;">
-                                    Doanh thu bán hoa
-                                </small>
-                                <h3 class="fw-bold mt-1 mb-0" style="color: var(--brand-green);" th:text="${#numbers.formatDecimal(flowerRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">
-                                    0 đ
-                                </h3>
-                            </div>
-                            <div class="kpi-icon-wrap" style="background: var(--brand-green-light); color: var(--brand-green);">
+                
+                <!-- KPI 1: Doanh thu (Theo kỳ lọc) -->
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="kpi-card" id="kpi-revenue-card">
+                        <div class="kpi-top">
+                            <span class="kpi-title">Doanh thu</span>
+                            <div class="kpi-icon-wrap" style="background: var(--accent-rose-soft); color: var(--accent-rose);">
                                 <i class="bi bi-cash-stack"></i>
                             </div>
                         </div>
-                        <div class="d-flex align-items-center gap-1 mt-2">
-                            <span class="badge rounded-pill" style="background: var(--brand-green-light); color: var(--brand-green); font-size: 0.72rem;">
-                                <i class="bi bi-shield-check me-1"></i> Đã thanh toán
-                            </span>
-                            <small class="text-muted ms-1" style="font-size: 0.75rem;">(Đã trừ tiền hoàn nếu có)</small>
+
+                        <!-- Trường hợp lỗi tải -->
+                        <div th:if="${dataLoadError == true or flowerRevenue == null}" class="my-auto py-2 text-center">
+                            <div class="text-danger fw-bold" style="font-size: 15px;">
+                                <i class="bi bi-exclamation-circle me-1"></i>Không tải được dữ liệu
+                            </div>
+                            <button type="button" onclick="window.location.reload()" class="btn btn-sm btn-outline-danger rounded-pill px-3 mt-2" style="font-size: 13px;">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Thử lại
+                            </button>
+                        </div>
+
+                        <!-- Trường hợp dữ liệu hợp lệ (kể cả = 0) -->
+                        <div th:if="${dataLoadError != true and flowerRevenue != null}">
+                            <div class="kpi-value" style="color: var(--accent-rose);" th:text="${#numbers.formatDecimal(flowerRevenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">
+                                0 ₫
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between mt-1">
+                                <span class="kpi-caption">Sau hoàn tiền trong kỳ</span>
+                                <span class="kpi-tag" style="background: var(--accent-rose-soft); color: var(--accent-rose);">Trong kỳ</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- KPI 2: Đơn hàng hoàn thành -->
-                <div class="col-sm-6 col-xl-3">
-                    <div class="kpi-card kpi-completed">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div>
-                                <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.75rem; letter-spacing: 0.5px;">
-                                    Đơn hàng hoàn thành
-                                </small>
-                                <h3 class="fw-bold mt-1 mb-0" style="color: #2E7D32;" th:text="${completedOrdersCount}">
-                                    0
-                                </h3>
-                            </div>
-                            <div class="kpi-icon-wrap" style="background: #E8F5E9; color: #2E7D32;">
+                <!-- KPI 2: Đơn hoàn thành (Theo kỳ lọc) -->
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="kpi-card" id="kpi-completed-card">
+                        <div class="kpi-top">
+                            <span class="kpi-title">Đơn hoàn thành</span>
+                            <div class="kpi-icon-wrap" style="background: var(--brand-green-light); color: var(--brand-green);">
                                 <i class="bi bi-bag-check-fill"></i>
                             </div>
                         </div>
-                        <div class="d-flex align-items-center gap-1 mt-2">
-                            <span class="badge rounded-pill" style="background: #E8F5E9; color: #2E7D32; font-size: 0.72rem;">
-                                <i class="bi bi-truck me-1"></i> Đã giao thành công
-                            </span>
-                            <small class="text-muted ms-1" style="font-size: 0.75rem;">trong kỳ lọc</small>
+
+                        <!-- Trường hợp lỗi tải -->
+                        <div th:if="${dataLoadError == true or completedOrdersCount == null}" class="my-auto py-2 text-center">
+                            <div class="text-danger fw-bold" style="font-size: 15px;">
+                                <i class="bi bi-exclamation-circle me-1"></i>Không tải được dữ liệu
+                            </div>
+                            <button type="button" onclick="window.location.reload()" class="btn btn-sm btn-outline-danger rounded-pill px-3 mt-2" style="font-size: 13px;">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Thử lại
+                            </button>
+                        </div>
+
+                        <!-- Trường hợp dữ liệu hợp lệ (kể cả = 0) -->
+                        <div th:if="${dataLoadError != true and completedOrdersCount != null}">
+                            <div class="kpi-value" style="color: var(--brand-green);" th:text="${completedOrdersCount}">
+                                0
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between mt-1">
+                                <span class="kpi-caption">Trong khoảng thời gian đã chọn</span>
+                                <span class="kpi-tag" style="background: var(--brand-green-light); color: var(--brand-green);">Trong kỳ</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- KPI 3: Đơn chờ xử lý (Current state: Amber) -->
-                <div class="col-sm-6 col-xl-3">
-                    <div class="kpi-card kpi-pending">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div>
-                                <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.75rem; letter-spacing: 0.5px;">
-                                    Đơn chờ xử lý
-                                </small>
-                                <h3 class="fw-bold mt-1 mb-0" style="color: var(--amber-text);" th:text="${pendingOrdersCount}">
-                                    0
-                                </h3>
+                <!-- KPI 3: Đơn cần xử lý (Hiện tại, Clickable dẫn đến danh sách đơn) -->
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <a th:href="@{/manager/orders(status='PENDING')}" class="kpi-card is-clickable" id="kpi-pending-card" title="Bấm để xem danh sách đơn cần xử lý">
+                        <div class="kpi-top">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="kpi-title">Đơn cần xử lý</span>
+                                <span class="kpi-tag" style="background: var(--amber-bg); color: var(--amber-text);">Hiện tại</span>
                             </div>
                             <div class="kpi-icon-wrap" style="background: var(--amber-bg); color: var(--amber-text);">
                                 <i class="bi bi-clock-history"></i>
                             </div>
                         </div>
-                        <div class="d-flex align-items-center gap-1 mt-2">
-                            <span class="badge rounded-pill" style="background: var(--amber-bg); color: var(--amber-text); font-size: 0.72rem;">
-                                <i class="bi bi-hourglass-split me-1"></i> Chờ tiếp nhận & cắm hoa
-                            </span>
-                            <small class="text-muted ms-1" style="font-size: 0.75rem;">hiện tại</small>
+
+                        <!-- Trường hợp lỗi tải -->
+                        <div th:if="${dataLoadError == true or pendingOrdersCount == null}" class="my-auto py-2 text-center">
+                            <div class="text-danger fw-bold" style="font-size: 15px;">
+                                <i class="bi bi-exclamation-circle me-1"></i>Không tải được dữ liệu
+                            </div>
+                            <button type="button" onclick="window.location.reload()" class="btn btn-sm btn-outline-danger rounded-pill px-3 mt-2" style="font-size: 13px;">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Thử lại
+                            </button>
                         </div>
-                    </div>
+
+                        <!-- Trường hợp dữ liệu hợp lệ -->
+                        <div th:if="${dataLoadError != true and pendingOrdersCount != null}">
+                            <div class="kpi-value" style="color: var(--amber-text);" th:text="${pendingOrdersCount}">
+                                0
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between mt-1">
+                                <span class="kpi-caption">Đang chờ xác nhận hoặc chuẩn bị</span>
+                                <i class="bi bi-arrow-right text-muted" style="font-size: 14px;"></i>
+                            </div>
+                        </div>
+                    </a>
                 </div>
 
-                <!-- KPI 4: Sản phẩm sắp hết hàng (Current state: Red alert ONLY for issues) -->
-                <div class="col-sm-6 col-xl-3">
-                    <div class="kpi-card kpi-lowstock">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div>
-                                <small class="text-uppercase fw-semibold" style="color: var(--text-muted); font-size: 0.75rem; letter-spacing: 0.5px;">
-                                    Sản phẩm sắp hết
-                                </small>
-                                <h3 class="fw-bold mt-1 mb-0" style="color: var(--alert-red-text);" th:text="${lowStockProductsCount}">
+                <!-- KPI 4: Sản phẩm sắp hết (Hiện tại, Clickable dẫn đến kho mẫu hoa, đỏ CHỈ KHI có cảnh báo) -->
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <a th:href="@{/manager/products}" class="kpi-card is-clickable" id="kpi-lowstock-card"
+                       th:style="${lowStockProductsCount != null and lowStockProductsCount > 0} ? 'border-color: #FECACA;' : ''"
+                       title="Bấm để xem danh sách kho mẫu hoa">
+                        <div class="kpi-top">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="kpi-title">Sản phẩm sắp hết</span>
+                                <span class="kpi-tag"
+                                      th:style="${lowStockProductsCount != null and lowStockProductsCount > 0} ? 'background: var(--alert-red-bg); color: var(--alert-red-text);' : 'background: var(--brand-green-light); color: var(--brand-green);'">
+                                    Hiện tại
+                                </span>
+                            </div>
+                            <!-- Biểu tượng: đỏ khi có cảnh báo (> 0), trung tính khi an toàn (= 0) -->
+                            <div class="kpi-icon-wrap"
+                                 th:style="${lowStockProductsCount != null and lowStockProductsCount > 0} ? 'background: var(--alert-red-bg); color: var(--alert-red-text);' : 'background: var(--brand-green-light); color: var(--brand-green);'">
+                                <i th:class="${lowStockProductsCount != null and lowStockProductsCount > 0} ? 'bi bi-exclamation-triangle-fill' : 'bi bi-box-seam'"></i>
+                            </div>
+                        </div>
+
+                        <!-- Trường hợp lỗi tải -->
+                        <div th:if="${dataLoadError == true or lowStockProductsCount == null}" class="my-auto py-2 text-center">
+                            <div class="text-danger fw-bold" style="font-size: 15px;">
+                                <i class="bi bi-exclamation-circle me-1"></i>Không tải được dữ liệu
+                            </div>
+                            <button type="button" onclick="window.location.reload()" class="btn btn-sm btn-outline-danger rounded-pill px-3 mt-2" style="font-size: 13px;">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Thử lại
+                            </button>
+                        </div>
+
+                        <!-- Trường hợp dữ liệu hợp lệ -->
+                        <div th:if="${dataLoadError != true and lowStockProductsCount != null}">
+                            <!-- Nếu có sản phẩm dưới ngưỡng cảnh báo: Dùng màu đỏ -->
+                            <div th:if="${lowStockProductsCount > 0}">
+                                <div class="kpi-value text-danger" th:text="${lowStockProductsCount}">
                                     0
-                                </h3>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between mt-1">
+                                    <span class="kpi-caption text-danger">Có tồn kho dưới ngưỡng cảnh báo</span>
+                                    <i class="bi bi-arrow-right text-danger" style="font-size: 14px;"></i>
+                                </div>
                             </div>
-                            <div class="kpi-icon-wrap" style="background: var(--alert-red-bg); color: var(--alert-red-text);">
-                                <i class="bi bi-exclamation-triangle-fill"></i>
+
+                            <!-- Nếu không có cảnh báo: Dùng màu xanh đậm/trung tính -->
+                            <div th:if="${lowStockProductsCount == 0}">
+                                <div class="kpi-value" style="color: var(--brand-green);" th:text="${lowStockProductsCount}">
+                                    0
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between mt-1">
+                                    <span class="kpi-caption">Có tồn kho dưới ngưỡng cảnh báo</span>
+                                    <i class="bi bi-arrow-right text-muted" style="font-size: 14px;"></i>
+                                </div>
                             </div>
                         </div>
-                        <div class="d-flex align-items-center gap-1 mt-2">
-                            <span class="badge rounded-pill" style="background: var(--alert-red-bg); color: var(--alert-red-text); font-size: 0.72rem;">
-                                <i class="bi bi-box-seam me-1"></i> Tồn kho ≤ 5 mẫu
-                            </span>
-                            <small class="text-muted ms-1" style="font-size: 0.75rem;">cần bổ sung hoa</small>
-                        </div>
-                    </div>
+                    </a>
                 </div>
+
             </div>
 
-            <!-- 3. Reporting Area: Revenue Over Time Chart + Top 5 Best-Selling Flowers -->
+            <!-- 3. Biểu đồ doanh thu chiếm toàn bộ chiều rộng (col-12), vùng vẽ cao 280-320px -->
             <div class="row g-4 mb-4">
-                <!-- Revenue Chart (Left Column) -->
-                <div class="col-xl-8">
-                    <div class="card-floral p-4 h-100">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="col-12">
+                    <div class="card-floral p-4">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
                             <div>
-                                <h5 class="font-serif fw-bold mb-1" style="color: var(--brand-green);">
+                                <h5 class="fw-bold mb-1" style="font-size: 18px; font-weight: 800; color: var(--brand-green);">
                                     <i class="bi bi-graph-up text-success me-2"></i>Doanh Thu Theo Thời Gian
                                 </h5>
-                                <p class="text-muted small mb-0">
+                                <p class="text-muted mb-0" style="font-size: 14.5px;">
                                     <span th:if="${timeRange == 'today'}">Thống kê theo 24 khung giờ trong ngày hôm nay</span>
                                     <span th:if="${timeRange == '7days' or timeRange == null}">Thống kê theo từng ngày trong 7 ngày qua</span>
                                     <span th:if="${timeRange == 'month'}">Thống kê theo các ngày trong tháng hiện tại</span>
                                     <span th:if="${timeRange == 'custom'}" th:text="'Khoảng ngày: ' + ${startDate} + ' đến ' + ${endDate}"></span>
                                 </p>
                             </div>
-                            <span class="badge rounded-pill px-3 py-2" style="background: var(--brand-green-light); color: var(--brand-green); font-size: 0.8rem; font-weight: 600;">
+                            <span class="badge rounded-pill px-3 py-2" style="background: var(--brand-green-light); color: var(--brand-green); font-size: 13.5px; font-weight: 700;">
                                 Đơn vị: VNĐ
                             </span>
                         </div>
 
-                        <!-- Empty state when NO revenue data -->
+                        <!-- Trường hợp biểu đồ không có dữ liệu -->
                         <div th:if="${!hasRevenueData}" class="d-flex flex-column align-items-center justify-content-center py-5 text-center" style="min-height: 290px;">
-                            <div class="rounded-circle p-3 mb-3" style="background-color: var(--accent-rose-soft); color: var(--accent-rose); width: 68px; height: 68px; display: flex; align-items: center; justify-content: center;">
+                            <div class="rounded-circle p-3 mb-3" style="background-color: var(--accent-rose-soft); color: var(--accent-rose); width: 64px; height: 64px; display: flex; align-items: center; justify-content: center;">
                                 <i class="bi bi-calendar-x fs-2"></i>
                             </div>
-                            <h6 class="fw-bold mb-1" style="color: var(--text-main); font-size: 1.05rem;">
+                            <h6 class="fw-bold mb-1" style="color: var(--brand-green); font-size: 17px; font-weight: 700;">
                                 Chưa có doanh thu trong khoảng thời gian này
                             </h6>
-                            <p class="text-muted small mb-3" style="max-width: 420px;">
-                                Chi nhánh chưa ghi nhận đơn hàng hoa nào được giao hoàn tất và thanh toán trong khoảng thời gian này.
+                            <p class="text-muted mb-3" style="font-size: 14.5px; max-width: 440px;">
+                                Chi nhánh chưa ghi nhận đơn hoa nào được hoàn thành và thanh toán trong khoảng thời gian đã chọn.
                             </p>
-                            <a th:href="@{/manager/orders}" class="btn btn-sm px-3 rounded-pill" style="background: var(--brand-green); color: #FFFFFF;">
+                            <a th:href="@{/manager/orders}" class="btn btn-sm px-4 rounded-pill btn-action-primary" style="height: 38px;">
                                 <i class="bi bi-eye me-1"></i> Kiểm tra danh sách đơn hàng
                             </a>
                         </div>
 
-                        <!-- Canvas Chart when data exists -->
+                        <!-- Canvas Chart khi có dữ liệu (vùng vẽ 300px) -->
                         <div th:if="${hasRevenueData}" style="position: relative; height: 300px; width: 100%;">
                             <canvas id="revenueTrendChart"></canvas>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Top 5 Best-Selling Flowers (Right Column) -->
+            <!-- 4. Danh sách công việc tiếp theo: Đơn cần xử lý nhanh & Top mẫu hoa -->
+            <div class="row g-4 mb-4">
+                
+                <!-- Bảng Đơn Hàng Cần Xử Lý Nhanh (8 Cột) -->
+                <div class="col-xl-8">
+                    <div class="card-floral p-4 h-100">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+                            <div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <h5 class="fw-bold mb-0" style="font-size: 18px; font-weight: 800; color: var(--brand-green);">
+                                        ⚡ Đơn Hàng Cần Xử Lý Nhanh
+                                    </h5>
+                                    <span class="badge rounded-pill" style="background: var(--amber-bg); color: var(--amber-text); font-size: 13px; font-weight: 700;" th:text="${pendingOrdersCount} + ' đơn'">
+                                        0 đơn
+                                    </span>
+                                </div>
+                                <p class="text-muted mb-0 mt-1" style="font-size: 14.5px;">Đơn đặt hoa mới tiếp nhận hoặc đang trong quy trình chuẩn bị cắm hoa</p>
+                            </div>
+
+                            <a th:href="@{/manager/orders}" class="text-decoration-none fw-bold" style="color: var(--brand-green); font-size: 14.5px;">
+                                Xem toàn bộ đơn <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+
+                        <!-- Empty State nếu không có đơn chờ xử lý -->
+                        <div th:if="${#lists.isEmpty(pendingOrdersList)}" class="text-center py-5">
+                            <div class="rounded-circle p-3 mb-2 d-inline-flex align-items-center justify-content-center" style="background: #E8F5E9; color: #2E7D32; width: 56px; height: 56px;">
+                                <i class="bi bi-check2-all fs-2"></i>
+                            </div>
+                            <h6 class="fw-bold mt-2 mb-1" style="color: var(--text-main); font-size: 16px;">Chi nhánh không có đơn nào đang chờ xử lý!</h6>
+                            <p class="text-muted mb-0" style="font-size: 14px;">Tất cả đơn đặt hoa đã được tiếp nhận và xử lý đầy đủ.</p>
+                        </div>
+
+                        <!-- Table Content -->
+                        <div th:if="${!#lists.isEmpty(pendingOrdersList)}" class="table-responsive">
+                            <table class="table table-floral align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>MÃ ĐƠN</th>
+                                        <th>NGƯỜI NHẬN</th>
+                                        <th>LỊCH NHẬN HOA</th>
+                                        <th>HÌNH THỨC</th>
+                                        <th>TRẠNG THÁI</th>
+                                        <th class="text-end">THAO TÁC</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="order : ${pendingOrdersList}">
+                                        <!-- Mã đơn -->
+                                        <td>
+                                            <span class="fw-bold" style="color: var(--brand-green);" th:text="'#HD' + ${order.id}">#HD101</span>
+                                            <div class="text-muted small" style="font-size: 13px;" th:text="${#temporals.format(order.createdAt, 'HH:mm dd/MM')}">10:30 30/09</div>
+                                        </td>
+
+                                        <!-- Người nhận -->
+                                        <td>
+                                            <div class="fw-bold" style="color: var(--text-main);" th:text="${order.recipientName != null and !order.recipientName.isEmpty() ? order.recipientName : (order.user != null ? order.user.fullName : 'Khách vãng lai')}">
+                                                Nguyễn Thị Mai
+                                            </div>
+                                            <small class="text-muted d-block" style="font-size: 13.5px;">
+                                                <i class="bi bi-telephone text-secondary me-1"></i>
+                                                <span th:text="${order.recipientPhone != null and !order.recipientPhone.isEmpty() ? order.recipientPhone : (order.user != null ? order.user.phone : '---')}">0901234567</span>
+                                            </small>
+                                        </td>
+
+                                        <!-- Hẹn giao / nhận hoa -->
+                                        <td>
+                                            <div th:if="${order.deliveryDate != null}">
+                                                <i class="bi bi-calendar-check text-success me-1"></i>
+                                                <strong th:text="${#temporals.format(order.deliveryDate, 'dd/MM/yyyy')}">30/09/2026</strong>
+                                            </div>
+                                            <div th:if="${order.deliveryDate == null}" class="text-muted" style="font-size: 13.5px;">
+                                                <i class="bi bi-lightning-charge text-warning me-1"></i>Giao sớm nhất
+                                            </div>
+                                        </td>
+
+                                        <!-- Hình thức nhận -->
+                                        <td>
+                                            <span th:if="${order.shippingMethod == 'STORE_PICKUP' or order.shippingMethod == 'PICKUP'}"
+                                                  class="badge px-2 py-1 rounded-pill" style="background: #E0F2FE; color: #0369A1; font-weight: 600; font-size: 13px;">
+                                                <i class="bi bi-shop me-1"></i> Nhận tại tiệm
+                                            </span>
+                                            <span th:if="${order.shippingMethod != 'STORE_PICKUP' and order.shippingMethod != 'PICKUP'}"
+                                                  class="badge px-2 py-1 rounded-pill" style="background: #EDE9FE; color: #6D28D9; font-weight: 600; font-size: 13px;">
+                                                <i class="bi bi-truck me-1"></i> Giao tận nơi
+                                            </span>
+                                        </td>
+
+                                        <!-- Trạng thái -->
+                                        <td>
+                                            <span th:if="${order.status.name() == 'PENDING'}" class="badge-status" style="background: var(--amber-bg); color: var(--amber-text); border: 1px solid var(--amber-border);">
+                                                <i class="bi bi-hourglass-split"></i> CHỜ TIẾP NHẬN
+                                            </span>
+                                            <span th:if="${order.status.name() == 'CONFIRMED'}" class="badge-status" style="background: #E0F2FE; color: #0369A1; border: 1px solid #BAE6FD;">
+                                                <i class="bi bi-check2-circle"></i> ĐÃ XÁC NHẬN
+                                            </span>
+                                            <span th:if="${order.status.name() == 'PREPARING'}" class="badge-status" style="background: #F3E8FF; color: #7E22CE; border: 1px solid #E9D5FF;">
+                                                <i class="bi bi-flower1"></i> ĐANG CẮM HOA
+                                            </span>
+                                        </td>
+
+                                        <!-- Thao tác -->
+                                        <td class="text-end">
+                                            <a th:href="@{/manager/orders(keyword=${order.id})}" class="btn btn-sm btn-action-primary py-1 px-3" style="font-size: 13.5px; height: 36px;">
+                                                Xử lý đơn <i class="bi bi-arrow-right-short"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top 5 Mẫu Hoa Bán Chạy (4 Cột) -->
                 <div class="col-xl-4">
                     <div class="card-floral p-4 h-100 d-flex flex-column">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <div>
-                                <h5 class="font-serif fw-bold mb-1" style="color: var(--brand-green);">
+                                <h5 class="fw-bold mb-1" style="font-size: 18px; font-weight: 800; color: var(--brand-green);">
                                     🌸 Mẫu Hoa Bán Chạy
                                 </h5>
-                                <p class="text-muted small mb-0">Top 5 mẫu hoa theo sản lượng</p>
+                                <p class="text-muted mb-0" style="font-size: 14px;">Top 5 mẫu hoa theo sản lượng</p>
                             </div>
-                            <span class="badge rounded-pill px-2 py-1" style="background: var(--accent-rose-soft); color: var(--accent-rose); font-size: 0.75rem; font-weight: 600;">
+                            <span class="badge rounded-pill px-3 py-1" style="background: var(--accent-rose-soft); color: var(--accent-rose); font-size: 13px; font-weight: 700;">
                                 Top 5
                             </span>
                         </div>
 
                         <!-- Flower List -->
-                        <div class="flex-grow-1 overflow-auto" style="max-height: 320px;">
-                            <div th:if="${#lists.isEmpty(topProducts)}" class="text-center py-5 text-muted small">
+                        <div class="flex-grow-1 overflow-auto" style="max-height: 340px;">
+                            <div th:if="${#lists.isEmpty(topProducts)}" class="text-center py-5 text-muted" style="font-size: 14px;">
                                 <i class="bi bi-flower2 fs-3 d-block mb-2 text-secondary"></i>
                                 Chưa có dữ liệu mẫu hoa bán chạy tại chi nhánh.
                             </div>
@@ -571,25 +800,25 @@
 
                                 <!-- Info -->
                                 <div class="flex-grow-1 text-truncate">
-                                    <h6 class="mb-0 fw-semibold text-truncate" style="font-size: 0.9rem; color: var(--text-main);" th:text="${flower.name}">
+                                    <h6 class="mb-0 fw-bold text-truncate" style="font-size: 15px; color: var(--text-main);" th:text="${flower.name}">
                                         Bó Hoa Hồng Juliette
                                     </h6>
                                     <div class="d-flex align-items-center gap-2 mt-1">
-                                        <small class="badge px-2 py-0" style="background: #F4EFEA; color: var(--text-muted); font-size: 0.72rem;" th:text="${flower.categoryName}">
+                                        <small class="badge px-2 py-0" style="background: #F4EFEA; color: var(--text-muted); font-size: 12px;" th:text="${flower.categoryName}">
                                             Hoa bó
                                         </small>
-                                        <small class="text-muted" style="font-size: 0.78rem;">
-                                            Đã bán: <strong class="text-dark" th:text="${flower.quantitySold}">10</strong> bó
+                                        <small class="text-muted" style="font-size: 13px;">
+                                            Đã bán: <strong class="text-dark" th:text="${flower.quantitySold}">10</strong>
                                         </small>
                                     </div>
                                 </div>
 
                                 <!-- Revenue with Rose Pink Accent -->
                                 <div class="text-end flex-shrink-0">
-                                    <div class="fw-bold" style="color: var(--accent-rose); font-size: 0.875rem;" th:text="${#numbers.formatDecimal(flower.revenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">
-                                        500.000 đ
+                                    <div class="fw-bold" style="color: var(--accent-rose); font-size: 15px;" th:text="${#numbers.formatDecimal(flower.revenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">
+                                        500.000 ₫
                                     </div>
-                                    <div th:if="${flower.rating != null and flower.rating > 0}" class="small text-warning" style="font-size: 0.72rem;">
+                                    <div th:if="${flower.rating != null and flower.rating > 0}" class="small text-warning" style="font-size: 12px;">
                                         ★ <span th:text="${#numbers.formatDecimal(flower.rating, 1, 1)}">5.0</span>
                                     </div>
                                 </div>
@@ -597,121 +826,13 @@
                         </div>
 
                         <div class="mt-3 pt-2 border-top border-light text-center">
-                            <a th:href="@{/manager/products}" class="text-decoration-none small fw-semibold" style="color: var(--brand-green);">
+                            <a th:href="@{/manager/products}" class="text-decoration-none fw-bold" style="color: var(--brand-green); font-size: 14px;">
                                 Xem toàn bộ kho hoa chi nhánh <i class="bi bi-arrow-right"></i>
                             </a>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- 4. Actionable Pending Orders Table -->
-            <div class="card-floral p-4">
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
-                    <div>
-                        <div class="d-flex align-items-center gap-2">
-                            <h5 class="font-serif fw-bold mb-0" style="color: var(--brand-green);">
-                                ⚡ Đơn Hàng Cần Xử Lý Nhanh
-                            </h5>
-                            <span class="badge rounded-pill" style="background: var(--amber-bg); color: var(--amber-text); font-size: 0.78rem; font-weight: 600;" th:text="${pendingOrdersCount} + ' đơn'">
-                                0 đơn
-                            </span>
-                        </div>
-                        <p class="text-muted small mb-0 mt-1">Đơn đặt hoa mới tiếp nhận hoặc đang trong quy trình chuẩn bị cắm hoa</p>
-                    </div>
-
-                    <a th:href="@{/manager/orders}" class="btn btn-sm rounded-pill px-3 fw-semibold" style="background: var(--brand-green-light); color: var(--brand-green); text-decoration: none;">
-                        Xem toàn bộ đơn hàng <i class="bi bi-arrow-right ms-1"></i>
-                    </a>
-                </div>
-
-                <!-- Empty State if no pending orders -->
-                <div th:if="${#lists.isEmpty(pendingOrdersList)}" class="text-center py-5">
-                    <div class="rounded-circle p-3 mb-2 d-inline-flex align-items-center justify-content-center" style="background: #E8F5E9; color: #2E7D32; width: 56px; height: 56px;">
-                        <i class="bi bi-check2-all fs-2"></i>
-                    </div>
-                    <h6 class="fw-bold mt-2 mb-1" style="color: var(--text-main);">Chi nhánh không có đơn nào đang chờ xử lý!</h6>
-                    <p class="text-muted small mb-0">Tất cả đơn đặt hoa đã được tiếp nhận và xử lý đầy đủ.</p>
-                </div>
-
-                <!-- Table Content -->
-                <div th:if="${!#lists.isEmpty(pendingOrdersList)}" class="table-responsive">
-                    <table class="table table-floral align-middle">
-                        <thead>
-                            <tr>
-                                <th>Mã đơn</th>
-                                <th>Người nhận hoa</th>
-                                <th>Hẹn giao / Nhận hoa</th>
-                                <th>Hình thức nhận</th>
-                                <th>Trạng thái</th>
-                                <th class="text-end">Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="order : ${pendingOrdersList}">
-                                <!-- Order Code -->
-                                <td>
-                                    <span class="fw-bold" style="color: var(--brand-green);" th:text="'#HD' + ${order.id}">#HD101</span>
-                                    <div class="text-muted small" style="font-size: 0.75rem;" th:text="${#temporals.format(order.createdAt, 'HH:mm dd/MM')}">10:30 30/09</div>
-                                </td>
-
-                                <!-- Recipient Info -->
-                                <td>
-                                    <div class="fw-semibold" th:text="${order.recipientName != null and !order.recipientName.isEmpty() ? order.recipientName : (order.user != null ? order.user.fullName : 'Khách vãng lai')}">
-                                        Nguyễn Thị Mai
-                                    </div>
-                                    <small class="text-muted d-block" style="font-size: 0.78rem;">
-                                        <i class="bi bi-telephone text-secondary me-1"></i>
-                                        <span th:text="${order.recipientPhone != null and !order.recipientPhone.isEmpty() ? order.recipientPhone : (order.user != null ? order.user.phone : '---')}">0901234567</span>
-                                    </small>
-                                </td>
-
-                                <!-- Delivery Date/Time -->
-                                <td>
-                                    <div th:if="${order.deliveryDate != null}">
-                                        <i class="bi bi-calendar-check text-success me-1"></i>
-                                        <strong th:text="${#temporals.format(order.deliveryDate, 'dd/MM/yyyy')}">30/09/2026</strong>
-                                    </div>
-                                    <div th:if="${order.deliveryDate == null}" class="text-muted small">
-                                        <i class="bi bi-lightning-charge text-warning me-1"></i>Giao sớm nhất có thể
-                                    </div>
-                                </td>
-
-                                <!-- Shipping Method -->
-                                <td>
-                                    <span th:if="${order.shippingMethod == 'STORE_PICKUP' or order.shippingMethod == 'PICKUP'}"
-                                          class="badge px-2 py-1 rounded-pill" style="background: #E0F2FE; color: #0369A1; font-weight: 500;">
-                                        <i class="bi bi-shop me-1"></i> Nhận tại tiệm
-                                    </span>
-                                    <span th:if="${order.shippingMethod != 'STORE_PICKUP' and order.shippingMethod != 'PICKUP'}"
-                                          class="badge px-2 py-1 rounded-pill" style="background: #EDE9FE; color: #6D28D9; font-weight: 500;">
-                                        <i class="bi bi-truck me-1"></i> Giao tận nơi
-                                    </span>
-                                </td>
-
-                                <!-- Status Badge -->
-                                <td>
-                                    <span th:if="${order.status.name() == 'PENDING'}" class="badge-status" style="background: var(--amber-bg); color: var(--amber-text); border: 1px solid var(--amber-border);">
-                                        <i class="bi bi-hourglass-split"></i> Chờ tiếp nhận
-                                    </span>
-                                    <span th:if="${order.status.name() == 'CONFIRMED'}" class="badge-status" style="background: #E0F2FE; color: #0369A1; border: 1px solid #BAE6FD;">
-                                        <i class="bi bi-check2-circle"></i> Đã xác nhận
-                                    </span>
-                                    <span th:if="${order.status.name() == 'PREPARING'}" class="badge-status" style="background: #F3E8FF; color: #7E22CE; border: 1px solid #E9D5FF;">
-                                        <i class="bi bi-flower1"></i> Đang cắm hoa
-                                    </span>
-                                </td>
-
-                                <!-- Action Buttons -->
-                                <td class="text-end">
-                                    <a th:href="@{/manager/orders(keyword=${order.id})}" class="btn btn-sm btn-action-primary py-1 px-3" style="font-size: 0.8rem;">
-                                        Xử lý đơn <i class="bi bi-arrow-right-short"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
             </div>
 
         </div>
@@ -723,29 +844,29 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content card-floral p-2 border-0">
             <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title font-serif fw-bold" id="dateRangeModalLabel" style="color: var(--brand-green);">
+                <h5 class="modal-title fw-bold" id="dateRangeModalLabel" style="font-size: 18px; color: var(--brand-green);">
                     <i class="bi bi-calendar3 me-2"></i>Chọn Khoảng Thời Gian
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form th:action="@{/manager/dashboard}" method="get">
+            <form th:action="@{/manager/dashboard}" method="get" id="customDateForm">
                 <input type="hidden" name="timeRange" value="custom">
                 <div class="modal-body py-3">
-                    <p class="text-muted small mb-3">Lọc số liệu doanh thu và kết quả bán hoa của chi nhánh theo khoảng ngày bạn muốn.</p>
+                    <p class="text-muted mb-3" style="font-size: 14px;">Lọc số liệu doanh thu và kết quả bán hoa của chi nhánh theo khoảng ngày bạn muốn.</p>
                     <div class="row g-3">
                         <div class="col-6">
-                            <label class="form-label small fw-semibold text-muted">Từ ngày</label>
-                            <input type="date" class="form-control rounded-3" name="startDate" th:value="${startDate}" required>
+                            <label class="form-label small fw-bold text-muted">Từ ngày</label>
+                            <input type="date" class="form-control rounded-3" name="startDate" th:value="${startDate}" required style="height: 42px; font-size: 14.5px;">
                         </div>
                         <div class="col-6">
-                            <label class="form-label small fw-semibold text-muted">Đến ngày</label>
-                            <input type="date" class="form-control rounded-3" name="endDate" th:value="${endDate}" required>
+                            <label class="form-label small fw-bold text-muted">Đến ngày</label>
+                            <input type="date" class="form-control rounded-3" name="endDate" th:value="${endDate}" required style="height: 42px; font-size: 14.5px;">
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-sm btn-light rounded-pill px-3" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-sm btn-action-primary rounded-pill px-4">
+                    <button type="button" class="btn btn-sm btn-light rounded-pill px-3" data-bs-dismiss="modal" style="height: 40px; font-weight: 600;">Đóng</button>
+                    <button type="submit" class="btn btn-sm btn-action-primary rounded-pill px-4" style="height: 40px;">
                         Áp Dụng Bộ Lọc
                     </button>
                 </div>
@@ -754,20 +875,29 @@
     </div>
 </div>
 
-<!-- Chart.js Render Script -->
+<!-- Chart.js Render Script & Loading Transition -->
 <script th:inline="javascript">
     /*<![CDATA[*/
     var hasRevenue = /*[[${hasRevenueData}]]*/ false;
     var chartLabels = /*[[${chartLabels}]]*/ [];
     var chartValues = /*[[${chartValues}]]*/ [];
 
+    // Trigger skeleton loading state on navigation filter click
+    document.querySelectorAll('.btn-filter, #customDateForm button[type="submit"]').forEach(function(el) {
+        el.addEventListener('click', function() {
+            document.querySelectorAll('.kpi-card').forEach(function(card) {
+                card.classList.add('is-loading-skeleton');
+            });
+        });
+    });
+
     if (hasRevenue && document.getElementById('revenueTrendChart')) {
         var ctx = document.getElementById('revenueTrendChart').getContext('2d');
         
         // Gradient fill for chart
         var gradient = ctx.createLinearGradient(0, 0, 0, 280);
-        gradient.addColorStop(0, 'rgba(53, 84, 71, 0.28)');
-        gradient.addColorStop(1, 'rgba(53, 84, 71, 0.01)');
+        gradient.addColorStop(0, 'rgba(166, 64, 96, 0.22)');
+        gradient.addColorStop(1, 'rgba(166, 64, 96, 0.01)');
 
         new Chart(ctx, {
             type: 'line',
@@ -776,16 +906,16 @@
                 datasets: [{
                     label: 'Doanh thu bán hoa',
                     data: chartValues,
-                    borderColor: '#355447',
-                    borderWidth: 2.5,
+                    borderColor: '#A64060',
+                    borderWidth: 3,
                     backgroundColor: gradient,
                     fill: true,
                     tension: 0.35,
                     pointBackgroundColor: '#A64060',
                     pointBorderColor: '#FFFFFF',
-                    pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
+                    pointBorderWidth: 2.5,
+                    pointRadius: 4.5,
+                    pointHoverRadius: 7,
                     pointHoverBackgroundColor: '#A64060'
                 }]
             },
@@ -797,15 +927,15 @@
                         display: false
                     },
                     tooltip: {
-                        backgroundColor: '#1C2D24',
-                        titleFont: { family: 'Plus Jakarta Sans', size: 12, weight: '600' },
-                        bodyFont: { family: 'Plus Jakarta Sans', size: 13 },
+                        backgroundColor: '#20382E',
+                        titleFont: { family: 'Nunito', size: 13, weight: '700' },
+                        bodyFont: { family: 'Nunito', size: 14, weight: '600' },
                         padding: 12,
                         cornerRadius: 8,
                         callbacks: {
                             label: function(context) {
                                 var val = context.raw || 0;
-                                return 'Doanh thu: ' + new Intl.NumberFormat('vi-VN').format(val) + ' đ';
+                                return 'Doanh thu: ' + new Intl.NumberFormat('vi-VN').format(val) + ' ₫';
                             }
                         }
                     }
@@ -816,18 +946,18 @@
                             display: false
                         },
                         ticks: {
-                            font: { family: 'Plus Jakarta Sans', size: 11 },
-                            color: '#6F746D'
+                            font: { family: 'Nunito', size: 12, weight: '600' },
+                            color: '#686E65'
                         }
                     },
                     y: {
                         beginAtZero: true,
                         grid: {
-                            color: 'rgba(235, 229, 220, 0.7)'
+                            color: 'rgba(226, 231, 226, 0.8)'
                         },
                         ticks: {
-                            font: { family: 'Plus Jakarta Sans', size: 11 },
-                            color: '#6F746D',
+                            font: { family: 'Nunito', size: 12, weight: '600' },
+                            color: '#686E65',
                             callback: function(value) {
                                 if (value >= 1000000) {
                                     return (value / 1000000).toFixed(1) + ' tr';
