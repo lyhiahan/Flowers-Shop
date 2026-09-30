@@ -4,10 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bảng Điều Khiển Quản Trị - Quản Trị Hệ Thống Hoa Tươi</title>
-    <!-- Google Fonts & Bootstrap 5 & FontAwesome -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Google Font: Nunito -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
     <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
     <style>
         :root {
@@ -20,7 +23,7 @@
         }
 
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: var(--font-sans) !important;
             background-color: var(--bg-page);
             color: var(--text-main);
             min-height: 100vh;
@@ -77,21 +80,65 @@
             background: #ffffff;
             overflow: hidden;
             position: relative;
+            min-height: 124px;
         }
 
         .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 25px -4px rgba(0, 0, 0, 0.08);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.08);
         }
 
         .stat-icon-box {
-            width: 52px;
-            height: 52px;
-            border-radius: 14px;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.35rem;
+            flex-shrink: 0;
+        }
+
+        /* Nút đổi kiểu biểu đồ đồng nhất (cao 36-38px, không rớt dòng) */
+        .chart-toggle-group {
+            height: 38px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 3px;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .btn-chart-toggle {
+            height: 30px;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 0 12px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            line-height: 1;
+        }
+
+        .btn-chart-toggle:hover {
+            color: #1e293b;
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+
+        .btn-chart-toggle.active {
+            background-color: #ffffff;
+            color: #1e293b;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .table-custom {
@@ -124,103 +171,103 @@
         }
     </style>
 </head>
-<body>
+<body class="admin-body">
 
 <div class="d-flex">
     <!-- SIDEBAR -->
     <aside class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white">
-        <a th:href="@{/admin/dashboard}" class="d-flex align-items-center mb-4 text-white text-decoration-none px-2 pt-2">
-            <span class="fs-4 me-2">🌸</span>
+        <a th:href="@{/admin/dashboard}" class="d-flex align-items-center gap-3 mb-4 text-white text-decoration-none px-2 pt-2">
+            <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img flex-shrink-0" style="width: 42px; height: 42px;">
             <div>
-                <div class="fw-bold fs-5 tracking-wide">HOA TƯƠI SÀI GÒN</div>
-                <div class="text-xs text-muted small" style="font-size: 0.72rem; letter-spacing: 0.08em;">HỆ THỐNG QUẢN TRỊ CHUỖI</div>
+                <div class="fw-bold text-white font-serif" style="font-size: 18px; line-height: 1.25; letter-spacing: 0.5px;">HOA TƯƠI SÀI GÒN</div>
+                <div class="small" style="font-size: 13px; color: #9DB7AA !important; letter-spacing: 0.05em;">HỆ THỐNG QUẢN TRỊ CHUỖI</div>
             </div>
         </a>
 
-        <div class="text-xs text-uppercase text-secondary px-3 mb-2 font-monospace" style="font-size: 0.75rem;">DANH MỤC QUẢN LÝ</div>
+        <div class="text-xs text-uppercase px-3 mb-2 font-monospace" style="font-size: 0.72rem; color: #8BA196; letter-spacing: 0.08em;">DANH MỤC QUẢN LÝ</div>
         <ul class="nav nav-pills flex-column mb-auto gap-1">
             <li class="nav-item">
                 <a th:href="@{/admin/dashboard}" class="nav-link active">
-                    <i class="bi bi-grid-fill"></i>
-                    <span>Tổng Quan Hệ Thống</span>
+                    <i class="bi bi-grid"></i>
+                    <span>Tổng quan</span>
                 </a>
             </li>
             <li>
                 <a th:href="@{/admin/users}" class="nav-link">
-                    <i class="bi bi-people-fill"></i>
-                    <span>Quản Lý Người Dùng</span>
+                    <i class="bi bi-people"></i>
+                    <span>Người dùng</span>
                 </a>
             </li>
             <li>
                 <a th:href="@{/admin/stores}" class="nav-link">
                     <i class="bi bi-shop"></i>
-                    <span>Quản Lý Cửa Hàng</span>
+                    <span>Chi nhánh</span>
                 </a>
             </li>
             <li>
                 <a th:href="@{/admin/products-manage}" class="nav-link">
                     <i class="bi bi-flower1"></i>
-                    <span>Duyệt Mẫu Hoa / Bán</span>
+                    <span>Duyệt sản phẩm</span>
                 </a>
             </li>
             <li>
                 <a th:href="@{/admin/orders-manage}" class="nav-link">
-                    <i class="bi bi-bag-check-fill"></i>
-                    <span>Toàn Chuỗi Đơn Hàng</span>
+                    <i class="bi bi-bag-check"></i>
+                    <span>Đơn hàng</span>
                 </a>
             </li>
             <li>
                 <a th:href="@{/admin/categories}" class="nav-link">
-                    <i class="bi bi-tags-fill"></i>
-                    <span>Danh Mục Hoa</span>
+                    <i class="bi bi-tags"></i>
+                    <span>Danh mục hoa</span>
                 </a>
             </li>
             <li>
                 <a th:href="@{/admin/commissions}" class="nav-link">
                     <i class="bi bi-percent"></i>
-                    <span>Hoa Hồng Sàn</span>
+                    <span>Phí hoa hồng</span>
                 </a>
             </li>
             <li>
                 <a th:href="@{/admin/deliveries}" class="nav-link">
                     <i class="bi bi-truck"></i>
-                    <span>Đơn Vị Vận Chuyển</span>
+                    <span>Vận chuyển</span>
                 </a>
             </li>
             <li>
                 <a th:href="@{/admin/vouchers}" class="nav-link">
-                    <i class="bi bi-ticket-perforated-fill"></i>
-                    <span>Khuyến Mãi & Voucher</span>
+                    <i class="bi bi-ticket-perforated"></i>
+                    <span>Khuyến mãi</span>
                 </a>
             </li>
             <li>
                 <a th:href="@{/admin/user-levels}" class="nav-link">
-                    <i class="bi bi-award-fill"></i>
-                    <span>Cấp Bậc Khách Hàng</span>
+                    <i class="bi bi-award"></i>
+                    <span>Cấp bậc khách</span>
                 </a>
             </li>
             <li>
                 <a th:href="@{/admin/store-levels}" class="nav-link">
                     <i class="bi bi-shield-check"></i>
-                    <span>Cấp Bậc Chi Nhánh</span>
+                    <span>Cấp bậc chi nhánh</span>
                 </a>
             </li>
             <li>
                 <a th:href="@{/admin/styles}" class="nav-link">
-                    <i class="bi bi-palette-fill"></i>
-                    <span>Phong Cách Mẫu Hoa</span>
+                    <i class="bi bi-palette"></i>
+                    <span>Phong cách hoa</span>
                 </a>
             </li>
             <li>
                 <a th:href="@{/admin/transactions}" class="nav-link">
                     <i class="bi bi-journal-text"></i>
-                    <span>Sổ Cái Tài Chính</span>
+                    <span>Sổ cái</span>
                 </a>
             </li>
             <li>
-                <a th:href="@{/}" class="nav-link text-info" target="_blank">
-                    <i class="bi bi-arrow-up-right-square"></i>
-                    <span>Xem Website Khách</span>
+                <a th:href="@{/}" class="nav-link" target="_blank" style="color: #9DB7AA;">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                    <span>Xem cửa hàng</span>
                 </a>
             </li>
         </ul>
@@ -247,155 +294,182 @@
         <!-- TOP NAVBAR -->
         <header class="top-navbar d-flex justify-content-between align-items-center sticky-top">
             <div class="d-flex align-items-center gap-3">
-                <h5 class="fw-bold mb-0 text-dark">Trung Tâm Quản Trị Hệ Thống</h5>
-                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 small">
-                    ● Hệ thống hoạt động bình thường
+                <h1 class="admin-page-title mb-0" style="font-size: 27px !important; font-weight: 700; color: #24332C;">Trung tâm quản trị hệ thống</h1>
+                <span class="badge" style="background-color: #FEF5E7; color: #925C15; border: 1px solid #F6E2C2; font-size: 14px; font-weight: 600; padding: 6px 14px;">
+                    <i class="bi bi-clock-history me-1"></i> <strong th:text="${pendingOrders}">0</strong> đơn chờ xử lý
                 </span>
             </div>
             <div class="d-flex align-items-center gap-3">
-                <a th:href="@{/admin/products/create}" class="btn btn-primary btn-sm d-flex align-items-center gap-2 shadow-sm fw-bold">
-                    <i class="bi bi-plus-lg"></i> Thêm Sản Phẩm Mới
+                <a th:href="@{/admin/products/create}" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm fw-bold">
+                    <i class="bi bi-plus-lg"></i> Thêm sản phẩm
                 </a>
             </div>
         </header>
 
         <!-- DASHBOARD BODY -->
-        <main class="p-4">
+        <main class="p-4" style="background-color: #F6F7F4;">
             <!-- Thông báo thành công nếu có -->
-            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA; border-radius: 10px;">
                 <i class="bi bi-check-circle-fill me-2"></i><span th:text="${successMessage}"></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
 
-            <!-- 1. HÀNG THỐNG KÊ (STAT CARDS) -->
+            <!-- 1. HÀNG THỐNG KÊ (4 THẺ ĐỒNG ĐỀU, PADDING 22PX, BO GÓC 12PX, ICON CHUẨN MÀU) -->
             <div class="row g-3 mb-4">
                 <!-- Doanh thu -->
-                <div class="col-xl-3 col-sm-6">
-                    <div class="card stat-card p-3">
-                        <div class="d-flex align-items-center justify-content-between">
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card stat-card p-4 h-100 d-flex flex-column justify-content-between" style="border-radius: 12px; border: 1px solid #E2E7E2 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                        <div class="d-flex align-items-start justify-content-between">
                             <div>
-                                <span class="text-muted small fw-semibold text-uppercase">Doanh Thu Toàn Hệ Thống</span>
-                                <h3 class="fw-bold mt-2 mb-0 text-dark" th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</h3>
-                                <div class="small text-success mt-2">
-                                    <i class="bi bi-arrow-up-right"></i> Tính trên toàn bộ đơn hàng
-                                </div>
+                                <span class="stat-card-label text-uppercase" style="font-size: 15px; font-weight: 600; color: #66736B; letter-spacing: 0.5px;">Doanh thu</span>
+                                <h3 class="stat-card-price stat-revenue fw-bold mt-2 mb-0" style="font-size: 32px; font-weight: 800; color: #A64060 !important;" th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</h3>
                             </div>
-                            <div class="stat-icon-box text-white" style="background: var(--success-gradient);">
-                                <i class="bi bi-cash-stack"></i>
+                            <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; border-radius: 10px; background-color: #F9EBEF; color: #A64060; font-size: 1.25rem;">
+                                <i class="bi bi-wallet2"></i>
                             </div>
+                        </div>
+                        <div class="stat-subtext mt-3 text-truncate" style="font-size: 14.5px; color: #66736B;">
+                            <i class="bi bi-arrow-up-right me-1" style="color: #355447;"></i>Toàn hệ thống
                         </div>
                     </div>
                 </div>
 
                 <!-- Đơn hàng -->
-                <div class="col-xl-3 col-sm-6">
-                    <div class="card stat-card p-3">
-                        <div class="d-flex align-items-center justify-content-between">
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card stat-card p-4 h-100 d-flex flex-column justify-content-between" style="border-radius: 12px; border: 1px solid #E2E7E2 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                        <div class="d-flex align-items-start justify-content-between">
                             <div>
-                                <span class="text-muted small fw-semibold text-uppercase">Tổng Đơn Hàng</span>
-                                <h3 class="fw-bold mt-2 mb-0 text-dark" th:text="${totalOrders}">0</h3>
-                                <div class="small text-warning mt-2">
-                                    ⏳ <strong th:text="${pendingOrders}">0</strong> đơn chờ xác nhận
-                                </div>
+                                <span class="stat-card-label text-uppercase" style="font-size: 15px; font-weight: 600; color: #66736B; letter-spacing: 0.5px;">Đơn hàng</span>
+                                <h3 class="stat-card-price fw-bold mt-2 mb-0" style="font-size: 32px; font-weight: 800; color: #24332C !important;" th:text="${totalOrders}">0</h3>
                             </div>
-                            <div class="stat-icon-box text-white" style="background: var(--primary-gradient);">
-                                <i class="bi bi-bag-check-fill"></i>
+                            <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; border-radius: 10px; background-color: #EBF2EE; color: #20382E; font-size: 1.25rem;">
+                                <i class="bi bi-bag-check"></i>
                             </div>
+                        </div>
+                        <div class="stat-subtext mt-3 text-truncate" style="font-size: 14.5px; color: #66736B;">
+                            <span class="badge" style="background-color: #FEF5E7; color: #925C15; border: 1px solid #F6E2C2; font-size: 13.5px; font-weight: 600; padding: 3px 8px;"><strong th:text="${pendingOrders}">0</strong> chờ xử lý</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sản phẩm & Danh mục -->
-                <div class="col-xl-3 col-sm-6">
-                    <div class="card stat-card p-3">
-                        <div class="d-flex align-items-center justify-content-between">
+                <!-- Sản phẩm -->
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card stat-card p-4 h-100 d-flex flex-column justify-content-between" style="border-radius: 12px; border: 1px solid #E2E7E2 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                        <div class="d-flex align-items-start justify-content-between">
                             <div>
-                                <span class="text-muted small fw-semibold text-uppercase">Sản Phẩm Trong Kho</span>
-                                <h3 class="fw-bold mt-2 mb-0 text-dark" th:text="${totalProducts}">0</h3>
-                                <div class="small text-muted mt-2">
-                                    Phân loại trong <strong th:text="${totalCategories}">0</strong> danh mục
-                                </div>
+                                <span class="stat-card-label text-uppercase" style="font-size: 15px; font-weight: 600; color: #66736B; letter-spacing: 0.5px;">Sản phẩm</span>
+                                <h3 class="stat-card-price fw-bold mt-2 mb-0" style="font-size: 32px; font-weight: 800; color: #24332C !important;" th:text="${totalProducts}">0</h3>
                             </div>
-                            <div class="stat-icon-box text-white" style="background: var(--info-gradient);">
-                                <i class="bi bi-box-fill"></i>
+                            <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; border-radius: 10px; background-color: #EBF2EE; color: #20382E; font-size: 1.25rem;">
+                                <i class="bi bi-flower1"></i>
                             </div>
+                        </div>
+                        <div class="stat-subtext mt-3 text-truncate" style="font-size: 14.5px; color: #66736B;">
+                            <strong th:text="${totalCategories}">0</strong> danh mục đang bán
                         </div>
                     </div>
                 </div>
 
-                <!-- Người dùng & Chi nhánh -->
-                <div class="col-xl-3 col-sm-6">
-                    <div class="card stat-card p-3">
-                        <div class="d-flex align-items-center justify-content-between">
+                <!-- Chi nhánh -->
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card stat-card p-4 h-100 d-flex flex-column justify-content-between" style="border-radius: 12px; border: 1px solid #E2E7E2 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                        <div class="d-flex align-items-start justify-content-between">
                             <div>
-                                <span class="text-muted small fw-semibold text-uppercase">Chuỗi Chi Nhánh</span>
-                                <h3 class="fw-bold mt-2 mb-0 text-dark" th:text="${totalStores} + ' Cửa Hàng'">0</h3>
-                                <div class="small text-primary mt-2">
-                                    <i class="bi bi-people-fill"></i> <strong th:text="${totalUsers}">0</strong> người dùng toàn mạng
-                                </div>
+                                <span class="stat-card-label text-uppercase" style="font-size: 15px; font-weight: 600; color: #66736B; letter-spacing: 0.5px;">Chi nhánh</span>
+                                <h3 class="stat-card-price fw-bold mt-2 mb-0" style="font-size: 32px; font-weight: 800; color: #24332C !important;" th:text="${totalStores}">0</h3>
                             </div>
-                            <div class="stat-icon-box text-white" style="background: var(--warning-gradient);">
-                                <i class="bi bi-buildings-fill"></i>
+                            <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; border-radius: 10px; background-color: #EBF2EE; color: #20382E; font-size: 1.25rem;">
+                                <i class="bi bi-shop"></i>
                             </div>
+                        </div>
+                        <div class="stat-subtext mt-3 text-truncate" style="font-size: 14.5px; color: #66736B;">
+                            <span class="badge" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA; font-size: 13.5px; font-weight: 600; padding: 3px 8px;">Đang hoạt động ổn định</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 1.5. HỆ THỐNG BIỂU ĐỒ ĐA THỜI GIAN THEO ĐỀ CƯƠNG ĐÁNH GIÁ (GIỜ, NGÀY, THÁNG, NĂM & ĐƯỜNG, CỘT, TRÒN) -->
-            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
-                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                    <div>
-                        <h5 class="fw-bold text-dark mb-1 font-serif">📊 Thống Kê & Phân Tích Dữ Liệu Toàn Chuỗi</h5>
-                        <p class="text-muted small mb-0">Biểu đồ trực quan theo dõi Doanh thu, Khách hàng mới và Chi nhánh mới</p>
-                    </div>
-                    <!-- Timeframe selector -->
-                    <div class="btn-group shadow-sm bg-light p-1 rounded-pill border">
+            <!-- 1.5. HỆ THỐNG BIỂU ĐỒ - TỪNG THẺ RIÊNG, KHÔNG KHUNG BỌC LỚN, CHIỀU CAO 290PX GỌN GÀNG -->
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div>
+                    <h2 class="admin-section-title mb-1">Thống kê & phân tích dữ liệu</h2>
+                    <p class="admin-desc mb-0">Theo dõi doanh thu, khách hàng mới và chi nhánh toàn hệ thống</p>
+                </div>
+                <!-- Timeframe selector -->
+                <div class="d-flex align-items-center gap-2">
+                    <span class="small fw-semibold d-none d-sm-inline" style="color: #66736B;">Phạm vi:</span>
+                    <div class="btn-group bg-white p-1 rounded-pill border" style="border-color: #E2E7E2 !important;">
                         <a th:href="@{/admin/dashboard(timeframe='hour')}" class="btn btn-sm rounded-pill px-3"
-                           th:classappend="${timeframe == 'hour'} ? 'btn-primary' : 'btn-light'">Theo Giờ</a>
+                           th:classappend="${timeframe == 'hour'} ? 'btn-primary' : 'btn-light'">Theo giờ</a>
                         <a th:href="@{/admin/dashboard(timeframe='day')}" class="btn btn-sm rounded-pill px-3"
-                           th:classappend="${timeframe == 'day' or timeframe == null} ? 'btn-primary' : 'btn-light'">Theo Ngày</a>
+                           th:classappend="${timeframe == 'day' or timeframe == null} ? 'btn-primary' : 'btn-light'">Theo ngày</a>
                         <a th:href="@{/admin/dashboard(timeframe='month')}" class="btn btn-sm rounded-pill px-3"
-                           th:classappend="${timeframe == 'month'} ? 'btn-primary' : 'btn-light'">Theo Tháng</a>
+                           th:classappend="${timeframe == 'month'} ? 'btn-primary' : 'btn-light'">Theo tháng</a>
                         <a th:href="@{/admin/dashboard(timeframe='year')}" class="btn btn-sm rounded-pill px-3"
-                           th:classappend="${timeframe == 'year'} ? 'btn-primary' : 'btn-light'">Theo Năm</a>
+                           th:classappend="${timeframe == 'year'} ? 'btn-primary' : 'btn-light'">Theo năm</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HÀNG 1: Biểu đồ Doanh thu (Thẻ riêng) -->
+            <div class="card border-0 mb-4 bg-white p-4" style="border: 1px solid #E2E7E2 !important; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h3 class="admin-section-title mb-0" style="font-size: 20px !important;"><i class="bi bi-graph-up-arrow me-2" style="color: #A64060;"></i>1. Doanh thu hệ thống</h3>
+                        <small class="text-muted">Tổng giá trị đơn hàng theo chu kỳ đã chọn</small>
+                    </div>
+                    <div class="chart-toggle-group">
+                        <button type="button" class="btn-chart-toggle active" id="revBarBtn" onclick="toggleChartType('revenue', 'bar')">
+                            <i class="bi bi-bar-chart-line me-1"></i>Cột
+                        </button>
+                        <button type="button" class="btn-chart-toggle" id="revLineBtn" onclick="toggleChartType('revenue', 'line')">
+                            <i class="bi bi-graph-up me-1"></i>Đường
+                        </button>
+                    </div>
+                </div>
+                <div style="height: 290px; position: relative;">
+                    <canvas id="adminRevenueChart"></canvas>
+                </div>
+            </div>
+
+            <!-- HÀNG 2: 2 Biểu đồ Người dùng mới và Chi nhánh mới (Mỗi biểu đồ một thẻ riêng) -->
+            <div class="row g-4 mb-4 align-items-stretch">
+                <!-- Biểu đồ Người Dùng Mới -->
+                <div class="col-lg-6">
+                    <div class="card border-0 bg-white p-4 h-100 d-flex flex-column justify-content-between" style="border: 1px solid #E2E7E2 !important; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3 class="admin-section-title mb-0" style="font-size: 20px !important;"><i class="bi bi-person-plus me-2" style="color: #355447;"></i>2. Người dùng mới</h3>
+                            <div class="chart-toggle-group">
+                                <button type="button" class="btn-chart-toggle active" id="userLineBtn" onclick="toggleChartType('users', 'line')">
+                                    <i class="bi bi-graph-up me-1"></i>Đường
+                                </button>
+                                <button type="button" class="btn-chart-toggle" id="userBarBtn" onclick="toggleChartType('users', 'bar')">
+                                    <i class="bi bi-bar-chart-line me-1"></i>Cột
+                                </button>
+                            </div>
+                        </div>
+                        <div style="height: 240px; position: relative;">
+                            <canvas id="adminUsersChart"></canvas>
+                        </div>
                     </div>
                 </div>
 
-                <div class="row g-4">
-                    <!-- Biểu đồ Doanh Thu Hệ Thống -->
-                    <div class="col-lg-6">
-                        <div class="p-3 border rounded-3 bg-light-subtle h-100">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="fw-bold text-dark small"><i class="bi bi-cash-coin text-danger me-1"></i> 1. Doanh Thu Hệ Thống</span>
-                                <div class="btn-group btn-group-sm">
-                                    <button class="btn btn-outline-secondary active btn-sm py-0 px-2" id="revBarBtn" onclick="toggleChartType('revenue', 'bar')">Cột</button>
-                                    <button class="btn btn-outline-secondary btn-sm py-0 px-2" id="revLineBtn" onclick="toggleChartType('revenue', 'line')">Đường</button>
-                                </div>
+                <!-- Biểu đồ Chi Nhánh Mới -->
+                <div class="col-lg-6">
+                    <div class="card border-0 bg-white p-4 h-100 d-flex flex-column justify-content-between" style="border: 1px solid #E2E7E2 !important; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3 class="admin-section-title mb-0" style="font-size: 20px !important;"><i class="bi bi-shop me-2" style="color: #355447;"></i>3. Chi nhánh mới</h3>
+                            <div class="chart-toggle-group">
+                                <button type="button" class="btn-chart-toggle active" id="storeBarBtn" onclick="toggleChartType('stores', 'bar')">
+                                    <i class="bi bi-bar-chart-line me-1"></i>Cột
+                                </button>
+                                <button type="button" class="btn-chart-toggle" id="storeDoughnutBtn" onclick="toggleChartType('stores', 'doughnut')">
+                                    <i class="bi bi-pie-chart me-1"></i>Tròn
+                                </button>
                             </div>
-                            <canvas id="adminRevenueChart" height="200"></canvas>
                         </div>
-                    </div>
-
-                    <!-- Biểu đồ Người Dùng Mới -->
-                    <div class="col-lg-3">
-                        <div class="p-3 border rounded-3 bg-light-subtle h-100">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="fw-bold text-dark small"><i class="bi bi-person-plus-fill text-primary me-1"></i> 2. Người Dùng Mới</span>
-                                <button class="btn btn-outline-secondary btn-sm py-0 px-2" id="userTypeBtn" onclick="toggleUserChart()">Đổi kiểu</button>
-                            </div>
-                            <canvas id="adminUsersChart" height="200"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Biểu đồ Cửa Hàng Mới -->
-                    <div class="col-lg-3">
-                        <div class="p-3 border rounded-3 bg-light-subtle h-100">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="fw-bold text-dark small"><i class="bi bi-shop-window text-success me-1"></i> 3. Cửa Hàng Mới</span>
-                                <span class="badge bg-success-subtle text-success small">Tròn / Cột</span>
-                            </div>
-                            <canvas id="adminStoresChart" height="200"></canvas>
+                        <div style="height: 240px; position: relative;">
+                            <canvas id="adminStoresChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -408,7 +482,7 @@
                     <div class="card border-0 shadow-sm rounded-4 h-100">
                         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-0">
                             <div>
-                                <h6 class="fw-bold mb-0 text-dark">📋 Đơn Hàng Mới Nhất Toàn Hệ Thống</h6>
+                                <h2 class="admin-section-title mb-0">📋 Đơn Hàng Mới Nhất Toàn Hệ Thống</h2>
                                 <small class="text-muted">Theo dõi thời gian thực các đơn đặt mua và thuê từ khách hàng</small>
                             </div>
                         </div>
@@ -470,7 +544,7 @@
                     <!-- Chi nhánh -->
                     <div class="card border-0 shadow-sm rounded-4 mb-4">
                         <div class="card-header bg-white py-3 border-0">
-                            <h6 class="fw-bold mb-0 text-dark">🏬 Hệ Thống Chi Nhánh</h6>
+                            <h2 class="admin-section-title mb-0">🏬 Hệ Thống Chi Nhánh</h2>
                             <small class="text-muted">Các điểm phân phối và kho điều phối</small>
                         </div>
                         <div class="card-body p-3">
@@ -493,7 +567,7 @@
                     <!-- Cơ cấu tài khoản -->
                     <div class="card border-0 shadow-sm rounded-4">
                         <div class="card-header bg-white py-3 border-0">
-                            <h6 class="fw-bold mb-0 text-dark">👥 Cơ Cấu Người Dùng</h6>
+                            <h2 class="admin-section-title mb-0">👥 Cơ Cấu Người Dùng</h2>
                         </div>
                         <div class="card-body p-3">
                             <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
@@ -574,15 +648,15 @@
     var storesData = /*[[${storesChart}]]*/ {};
 
     var revLabels = (revData && revData.labels) ? revData.labels : ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-    var revValues = (revData && revData.values) ? revData.values : [1500000, 3200000, 2800000, 4100000, 5600000, 8900000, 6200000];
+    var revValues = (revData && (revData.data || revData.values)) ? (revData.data || revData.values) : [1500000, 3200000, 2800000, 4100000, 5600000, 8900000, 6200000];
 
     var userLabels = (usersData && usersData.labels) ? usersData.labels : ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-    var userValues = (usersData && usersData.values) ? usersData.values : [3, 7, 5, 12, 18, 25, 20];
+    var userValues = (usersData && (usersData.data || usersData.values)) ? (usersData.data || usersData.values) : [3, 7, 5, 12, 18, 25, 20];
 
-    var storeLabels = (storesData && storesData.labels) ? storesData.labels : ['Q1', 'Q7', 'Thủ Đức'];
-    var storeValues = (storesData && storesData.values) ? storesData.values : [1, 1, 1];
+    var storeLabels = (storesData && storesData.labels) ? storesData.labels : ['24/09', '25/09', '26/09', '27/09', '28/09', '29/09', '30/09'];
+    var storeValues = (storesData && (storesData.data || storesData.values)) ? (storesData.data || storesData.values) : [1, 2, 0, 1, 3, 2, 1];
 
-    // 1. Biểu đồ Doanh Thu
+    // 1. Biểu đồ Doanh Thu (Hồng trầm #A64060)
     var revCtx = document.getElementById('adminRevenueChart').getContext('2d');
     var revChart = new Chart(revCtx, {
         type: 'bar',
@@ -591,8 +665,8 @@
             datasets: [{
                 label: 'Doanh Thu (VNĐ)',
                 data: revValues,
-                backgroundColor: 'rgba(225, 29, 72, 0.75)',
-                borderColor: '#e11d48',
+                backgroundColor: 'rgba(166, 64, 96, 0.8)',
+                borderColor: '#A64060',
                 borderWidth: 2,
                 borderRadius: 8,
                 tension: 0.3
@@ -600,6 +674,10 @@
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
             scales: {
                 y: {
                     beginAtZero: true,
@@ -609,7 +687,7 @@
         }
     });
 
-    // 2. Biểu đồ Người Dùng Mới
+    // 2. Biểu đồ Người Dùng Mới (Xanh đậm #355447)
     var userCtx = document.getElementById('adminUsersChart').getContext('2d');
     var userChart = new Chart(userCtx, {
         type: 'line',
@@ -618,28 +696,57 @@
             datasets: [{
                 label: 'Người Dùng Mới',
                 data: userValues,
-                backgroundColor: 'rgba(2, 132, 199, 0.2)',
-                borderColor: '#0284c7',
+                backgroundColor: 'rgba(53, 84, 71, 0.15)',
+                borderColor: '#355447',
                 borderWidth: 2,
+                borderRadius: 6,
                 fill: true,
                 tension: 0.3
             }]
         },
-        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 }
+                }
+            }
+        }
     });
 
-    // 3. Biểu đồ Cửa Hàng Mới
+    // 3. Biểu đồ Chi Nhánh Mới (Xanh lá tự nhiên)
     var storeCtx = document.getElementById('adminStoresChart').getContext('2d');
     var storeChart = new Chart(storeCtx, {
-        type: 'doughnut',
+        type: 'bar',
         data: {
             labels: storeLabels,
             datasets: [{
+                label: 'Chi Nhánh Mới',
                 data: storeValues,
-                backgroundColor: ['#10b981', '#f59e0b', '#0284c7', '#e11d48', '#8b5cf6']
+                backgroundColor: 'rgba(53, 84, 71, 0.75)',
+                borderColor: '#20382E',
+                borderWidth: 2,
+                borderRadius: 6
             }]
         },
-        options: { responsive: true }
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 }
+                }
+            }
+        }
     });
 
     function toggleChartType(chartName, type) {
@@ -647,13 +754,52 @@
             document.getElementById('revBarBtn').classList.toggle('active', type === 'bar');
             document.getElementById('revLineBtn').classList.toggle('active', type === 'line');
             revChart.config.type = type;
+            if (type === 'line') {
+                revChart.config.data.datasets[0].fill = true;
+                revChart.config.data.datasets[0].backgroundColor = 'rgba(166, 64, 96, 0.15)';
+            } else {
+                revChart.config.data.datasets[0].fill = false;
+                revChart.config.data.datasets[0].backgroundColor = 'rgba(166, 64, 96, 0.8)';
+            }
             revChart.update();
+        } else if (chartName === 'users') {
+            document.getElementById('userLineBtn').classList.toggle('active', type === 'line');
+            document.getElementById('userBarBtn').classList.toggle('active', type === 'bar');
+            userChart.config.type = type;
+            if (type === 'bar') {
+                userChart.config.data.datasets[0].fill = false;
+                userChart.config.data.datasets[0].backgroundColor = 'rgba(53, 84, 71, 0.75)';
+            } else {
+                userChart.config.data.datasets[0].fill = true;
+                userChart.config.data.datasets[0].backgroundColor = 'rgba(53, 84, 71, 0.15)';
+            }
+            userChart.update();
+        } else if (chartName === 'stores') {
+            document.getElementById('storeBarBtn').classList.toggle('active', type === 'bar');
+            document.getElementById('storeDoughnutBtn').classList.toggle('active', type === 'doughnut');
+            storeChart.config.type = type;
+            if (type === 'doughnut') {
+                storeChart.config.data.datasets[0].backgroundColor = ['#20382E', '#355447', '#4E7262', '#82A694', '#A64060', '#C26581', '#E89EB1'];
+                storeChart.config.data.datasets[0].borderColor = '#ffffff';
+                storeChart.config.data.datasets[0].borderWidth = 2;
+                storeChart.config.data.datasets[0].borderRadius = 0;
+                storeChart.options.plugins.legend.display = true;
+                storeChart.options.scales = {};
+            } else {
+                storeChart.config.data.datasets[0].backgroundColor = 'rgba(53, 84, 71, 0.75)';
+                storeChart.config.data.datasets[0].borderColor = '#20382E';
+                storeChart.config.data.datasets[0].borderWidth = 2;
+                storeChart.config.data.datasets[0].borderRadius = 6;
+                storeChart.options.plugins.legend.display = false;
+                storeChart.options.scales = {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { precision: 0 }
+                    }
+                };
+            }
+            storeChart.update();
         }
-    }
-
-    function toggleUserChart() {
-        userChart.config.type = userChart.config.type === 'line' ? 'bar' : 'line';
-        userChart.update();
     }
     /*]]>*/
 </script>
