@@ -349,7 +349,9 @@
       <a th:href="@{/customer/orders(status='DELIVERING')}"
         class="px-4 py-2 rounded-xl text-[13px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
         th:classappend="${currentStatus == 'DELIVERING'} ? 'bg-[#1E453E] text-white shadow-xs' : 'text-[#6E6464] hover:bg-[#F5ECE7] hover:text-[#2D2424]'">
-        <span class="material-symbols-outlined text-[17px]">local_shipping</span>
+        <svg class="w-[17px] h-[17px] shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-2 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+          </svg>
         <span>Đang giao hàng</span>
       </a>
 
@@ -440,7 +442,10 @@
             </span>
             <span th:if="${o.status.name() == 'DELIVERING'}"
               class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#E0F2FE] text-[#0369A1] border border-[#0284C7]/30 font-bold text-[12px]">
-              <span class="material-symbols-outlined text-[14px]">local_shipping</span> Đang Giao Hỏa Tốc
+              <svg class="w-[14px] h-[14px] shrink-0" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-2 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+            </svg>
+              <span>Đang Giao Hỏa Tốc</span>
             </span>
             <span th:if="${o.status.name() == 'COMPLETED' or o.status.name() == 'DELIVERED'}"
               class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#E9F3EE] text-[#1E453E] border border-[#264E43]/30 font-bold text-[12px]">
