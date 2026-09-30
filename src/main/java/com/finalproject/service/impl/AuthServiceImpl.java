@@ -39,16 +39,28 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public String registerCustomer(RegisterRequest request) {
-        // 1. Kiểm tra trùng username, email hoặc số điện thoại trong Database (Exception Flow: 8b)
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new IllegalArgumentException("Thông tin tài khoản không hợp lệ, tên đăng nhập đã tồn tại!");
+        // 1. Chuẩn hóa dữ liệu đầu vào
+        String username = request.getUsername() != null ? request.getUsername().trim() : "";
+        String email = request.getEmail() != null ? request.getEmail().trim().toLowerCase() : "";
+        String phone = request.getPhone() != null ? request.getPhone().trim() : "";
+        if (phone.startsWith("+84")) {
+            phone = "0" + phone.substring(3);
+        } else if (phone.startsWith("84") && phone.length() == 11) {
+            phone = "0" + phone.substring(2);
         }
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Thông tin tài khoản không hợp lệ, email đăng ký đã tồn tại!");
+        request.setUsername(username);
+        request.setEmail(email);
+        request.setPhone(phone);
+
+        // Kiểm tra trùng username, email hoặc số điện thoại trong Database
+        if (userRepository.existsByUsername(username)) {
+            throw new IllegalArgumentException("Tên đăng nhập '" + username + "' đã tồn tại trong hệ thống. Vui lòng chọn tên đăng nhập khác!");
         }
-        if (request.getPhone() != null && !request.getPhone().trim().isEmpty()
-                && userRepository.existsByPhone(request.getPhone().trim())) {
-            throw new IllegalArgumentException("Thông tin tài khoản không hợp lệ, số điện thoại đăng ký đã tồn tại!");
+        if (userRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("Email '" + email + "' đã được sử dụng để đăng ký tài khoản. Vui lòng sử dụng email khác hoặc đăng nhập!");
+        }
+        if (!phone.isEmpty() && userRepository.existsByPhone(phone)) {
+            throw new IllegalArgumentException("Số điện thoại '" + phone + "' đã được sử dụng bởi một tài khoản khác. Vui lòng kiểm tra lại!");
         }
 
         // 2. Tạo mã OTP và lưu tạm vào bộ nhớ (CHƯA LƯU VÀO DATABASE)

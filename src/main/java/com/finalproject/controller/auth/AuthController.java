@@ -54,7 +54,7 @@ public class AuthController {
                                  RedirectAttributes redirectAttributes,
                                  Model model) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("errorMessage", "Thông báo đăng ký thất bại: Thông tin tài khoản không hợp lệ, vui lòng kiểm tra lại các trường thông tin!");
+            model.addAttribute("errorMessage", "Thông báo đăng ký thất bại: Vui lòng kiểm tra và hoàn thiện các trường thông tin bị thiếu hoặc không đúng định dạng!");
             return "auth/register";
         }
 
@@ -64,7 +64,15 @@ public class AuthController {
             redirectAttributes.addFlashAttribute("devOtpCode", otpCode);
             return "redirect:/verify-otp?email=" + request.getEmail();
         } catch (IllegalArgumentException ex) {
-            model.addAttribute("errorMessage", "Thông báo đăng ký thất bại: " + ex.getMessage());
+            String msg = ex.getMessage();
+            model.addAttribute("errorMessage", "Thông báo đăng ký thất bại: " + msg);
+            if (msg.contains("Tên đăng nhập") || msg.contains("tên đăng nhập")) {
+                bindingResult.rejectValue("username", "duplicate", msg);
+            } else if (msg.contains("Email") || msg.contains("email")) {
+                bindingResult.rejectValue("email", "duplicate", msg);
+            } else if (msg.contains("Số điện thoại") || msg.contains("số điện thoại")) {
+                bindingResult.rejectValue("phone", "duplicate", msg);
+            }
             return "auth/register";
         } catch (Exception ex) {
             model.addAttribute("errorMessage", "Thông báo đăng ký thất bại: Đã xảy ra lỗi khi đăng ký (" + ex.getMessage() + ")");
