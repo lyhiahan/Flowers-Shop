@@ -1102,15 +1102,25 @@
         <div th:if="${not #lists.isEmpty(products)}" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
             <div class="col" th:each="p : ${products}">
                 <div class="card flower-card h-100 position-relative">
-                    <!-- UC_015 Alternative 1a: Nút Follow/Following ở một thẻ sản phẩm -->
-                    <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/customer/following/toggle/{productId}(productId=${p.id})}" method="post" class="position-absolute top-0 end-0 m-2 z-1">
+                    <!-- UC_015 Alternative 1a: Nút Follow/Following ở một thẻ sản phẩm (Nút theo dõi nhanh) -->
+                    <form sec:authorize="hasRole('CUSTOMER')" 
+                          th:action="@{/customer/following/toggle/{productId}(productId=${p.id})}" 
+                          method="post" 
+                          class="position-absolute top-0 end-0 m-2 z-1"
+                          onsubmit="toggleCardFollowAjax(event, this);">
                         <button type="submit" class="btn btn-sm rounded-circle shadow-sm p-1 d-flex align-items-center justify-content-center border-0 bg-white bg-opacity-75"
                                 style="width: 32px; height: 32px;"
                                 th:classappend="${followedProductIds != null and followedProductIds.contains(p.id)} ? 'text-danger' : 'text-muted'"
-                                th:title="${followedProductIds != null and followedProductIds.contains(p.id)} ? 'Following (Đang theo dõi)' : 'Follow (Theo dõi)'">
+                                th:title="${followedProductIds != null and followedProductIds.contains(p.id)} ? 'Đang theo dõi (Bấm để hủy)' : 'Theo dõi nhanh'">
                             <i class="bi" th:classappend="${followedProductIds != null and followedProductIds.contains(p.id)} ? 'bi-heart-fill text-danger' : 'bi-heart'"></i>
                         </button>
                     </form>
+                    <a sec:authorize="!hasRole('CUSTOMER')" th:href="@{/login}" 
+                       class="position-absolute top-0 end-0 m-2 z-1 btn btn-sm rounded-circle shadow-sm p-1 d-flex align-items-center justify-content-center border-0 bg-white bg-opacity-75 text-muted"
+                       style="width: 32px; height: 32px;"
+                       title="Đăng nhập để theo dõi">
+                        <i class="bi bi-heart"></i>
+                    </a>
 
                     <!-- Ảnh đại diện sản phẩm (Tỷ lệ 1:1, không có nhãn 'Đã bán') -->
                     <div class="overflow-hidden">
@@ -1400,7 +1410,13 @@
         </div>
     </div>
 
-    <!-- Script điều hướng tìm kiếm thông minh theo Phạm vi (Hoa / Cửa Hàng / Người Dùng) -->
+    <!-- Floating Toast Notification (Cho nút theo dõi nhanh ở trang chủ) -->
+    <div id="cardFollowToast" style="position: fixed; top: 90px; right: 24px; z-index: 9999; display: none; background: #264E43; color: #ffffff; padding: 12px 22px; border-radius: 50px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); font-weight: bold; font-size: 14px; align-items: center; gap: 8px;">
+        <i class="bi bi-check-circle-fill" style="color: #a7f3d0; font-size: 18px;"></i>
+        <span id="cardFollowToastMsg">Thông báo</span>
+    </div>
+
+    <!-- Script điều hướng tìm kiếm thông minh theo Phạm vi (Hoa / Cửa Hàng / Người Dùng) & Theo dõi nhanh -->
     <script>
         document.getElementById('globalSearchForm')?.addEventListener('submit', function (e) {
             const scope = document.getElementById('searchScopeSelect')?.value;
@@ -1414,6 +1430,70 @@
                 window.location.href = '/stores' + (kw ? '?keyword=' + encodeURIComponent(kw) : '');
             }
         });
+
+        let cardFollowToastTimer = null;
+        function showCardToast(msg) {
+            const toast = document.getElementById('cardFollowToast');
+            const toastMsg = document.getElementById('cardFollowToastMsg');
+            if (!toast || !toastMsg) return;
+            toastMsg.textContent = msg;
+            toast.style.display = 'inline-flex';
+            
+            if (cardFollowToastTimer) clearTimeout(cardFollowToastTimer);
+            cardFollowToastTimer = setTimeout(() => {
+                toast.style.display = 'none';
+            }, 2500);
+        }
+
+        function toggleCardFollowAjax(event, formEl) {
+            if (event) event.preventDefault();
+            const btn = formEl.querySelector('button');
+            const icon = btn ? btn.querySelector('i') : null;
+            const url = formEl.getAttribute('action');
+            const csrfInput = formEl.querySelector('input[name="_csrf"]');
+            const csrfToken = csrfInput ? csrfInput.value : '';
+
+            const headers = {
+                'X-Requested-With': 'XMLHttpRequest'
+            };
+            if (csrfToken) {
+                headers['X-CSRF-TOKEN'] = csrfToken;
+            }
+
+            fetch(url, {
+                method: 'POST',
+                headers: headers,
+                body: new FormData(formEl)
+            })
+            .then(res => {
+                if (res.status === 401 || res.status === 403) {
+                    window.location.href = '/login';
+                    return null;
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (!data) return;
+                showCardToast(data.message || (data.liked ? 'Đã theo dõi sản phẩm thành công!' : 'Đã hủy theo dõi sản phẩm!'));
+                if (btn && icon) {
+                    if (data.liked) {
+                        btn.classList.remove('text-muted');
+                        btn.classList.add('text-danger');
+                        btn.setAttribute('title', 'Đang theo dõi (Bấm để hủy)');
+                        icon.className = 'bi bi-heart-fill text-danger';
+                    } else {
+                        btn.classList.remove('text-danger');
+                        btn.classList.add('text-muted');
+                        btn.setAttribute('title', 'Theo dõi nhanh');
+                        icon.className = 'bi bi-heart';
+                    }
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                formEl.submit();
+            });
+        }
     </script>
 </body>
 

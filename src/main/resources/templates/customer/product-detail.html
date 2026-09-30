@@ -812,13 +812,30 @@
             if (event) event.preventDefault();
             const btn = formEl.querySelector('button');
             const url = formEl.getAttribute('action');
+            const csrfInput = formEl.querySelector('input[name="_csrf"]');
+            const csrfToken = csrfInput ? csrfInput.value : '';
+            
+            const headers = {
+                'X-Requested-With': 'XMLHttpRequest'
+            };
+            if (csrfToken) {
+                headers['X-CSRF-TOKEN'] = csrfToken;
+            }
 
             fetch(url, {
                 method: 'POST',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                headers: headers,
+                body: new FormData(formEl)
             })
-            .then(res => res.json())
+            .then(res => {
+                if (res.status === 401 || res.status === 403) {
+                    window.location.href = '/login';
+                    return null;
+                }
+                return res.json();
+            })
             .then(data => {
+                if (!data) return;
                 showDetailToast(data.message || (data.liked ? 'Đã theo dõi sản phẩm thành công!' : 'Đã hủy theo dõi sản phẩm!'));
                 if (btn) {
                     const icon = btn.querySelector('i');
@@ -848,7 +865,7 @@
                 }
             })
             .catch(err => {
-                console.error(err);
+                console.error('Lỗi theo dõi:', err);
                 formEl.submit();
             });
         }
