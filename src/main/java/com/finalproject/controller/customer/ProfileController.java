@@ -24,14 +24,56 @@ public class ProfileController {
     private final com.finalproject.service.ProductService productService;
     private final com.finalproject.repository.UserFollowStoreRepository followStoreRepository;
     private final com.finalproject.repository.StoreRepository storeRepository;
+    private final com.finalproject.service.RoleManagementService roleManagementService;
 
     @GetMapping({"", "/profile"})
-    public String viewProfile(Principal principal, Model model) {
+    public String viewProfile(@RequestParam(value = "tab", required = false) String activeTab,
+                              Principal principal, Model model) {
         User user = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new AccessDeniedException("Người dùng không tồn tại"));
         model.addAttribute("user", user);
         model.addAttribute("addresses", userService.getUserAddresses(user.getId()));
+        model.addAttribute("roleRequests", roleManagementService.getUserRoleRequests(user.getId()));
+        model.addAttribute("availableStores", storeRepository.findAll());
+        model.addAttribute("activeTab", activeTab != null ? activeTab : "info");
         return "customer/profile";
+    }
+
+    @PostMapping({"/role-request", "/profile/role-request"})
+    public String submitRoleRequest(Principal principal,
+                                    @RequestParam("targetRole") com.finalproject.enums.Role targetRole,
+                                    @RequestParam(value = "phone", required = false) String phone,
+                                    @RequestParam(value = "workArea", required = false) String workArea,
+                                    @RequestParam(value = "vehicleType", required = false) String vehicleType,
+                                    @RequestParam(value = "targetStoreId", required = false) Long targetStoreId,
+                                    @RequestParam(value = "shopName", required = false) String shopName,
+                                    @RequestParam(value = "shopAddress", required = false) String shopAddress,
+                                    @RequestParam(value = "contactInfo", required = false) String contactInfo,
+                                    @RequestParam(value = "experienceNote", required = false) String experienceNote,
+                                    RedirectAttributes ra) {
+        try {
+            User user = userRepository.findByUsername(principal.getName()).orElseThrow();
+            roleManagementService.submitRoleRequest(user.getId(), targetRole, phone, workArea, vehicleType,
+                    targetStoreId, shopName, shopAddress, contactInfo, experienceNote);
+            ra.addFlashAttribute("successMessage", "Gửi yêu cầu đăng ký vai trò thành công! Vui lòng chờ quản trị viên xét duyệt.");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/customer/profile?tab=roles";
+    }
+
+    @PostMapping({"/role-request/cancel/{id}", "/profile/role-request/cancel/{id}"})
+    public String cancelRoleRequest(@PathVariable("id") Long requestId,
+                                    Principal principal,
+                                    RedirectAttributes ra) {
+        try {
+            User user = userRepository.findByUsername(principal.getName()).orElseThrow();
+            roleManagementService.cancelRoleRequest(requestId, user.getId());
+            ra.addFlashAttribute("successMessage", "Đã rút yêu cầu đăng ký vai trò thành công.");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/customer/profile?tab=roles";
     }
 
     @PostMapping({"/update", "/profile/update"})

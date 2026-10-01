@@ -1010,19 +1010,31 @@
                                 <li class="px-3 py-2 border-bottom mb-1 bg-light bg-opacity-50">
                                     <div class="small text-muted" style="font-size: 0.8rem;">Xin chào,</div>
                                     <div class="fw-bold text-dark text-truncate" sec:authentication="name">khachhang</div>
-                                    <div class="mt-1" sec:authorize="hasRole('ADMIN')"><span class="badge bg-warning bg-opacity-75 text-dark" style="font-size:0.7rem;"><i class="bi bi-shield-check me-1"></i>Quản Trị</span></div>
-                                    <div class="mt-1" sec:authorize="hasAnyRole('VENDOR', 'MANAGER')"><span class="badge bg-success bg-opacity-75" style="font-size:0.7rem;"><i class="bi bi-shop me-1"></i>Quản Lý</span></div>
-                                    <div class="mt-1" sec:authorize="hasRole('SHIPPER')"><span class="badge bg-info bg-opacity-75 text-dark" style="font-size:0.7rem;"><i class="bi bi-truck me-1"></i>Giao Hàng</span></div>
+                                    <div class="mt-1 d-flex flex-wrap gap-1">
+                                        <span class="badge bg-warning bg-opacity-75 text-dark" style="font-size:0.7rem;" sec:authorize="hasRole('ADMIN')"><i class="bi bi-shield-check me-1"></i>Quản Trị</span>
+                                        <span class="badge bg-success bg-opacity-75" style="font-size:0.7rem;" sec:authorize="hasRole('MANAGER')"><i class="bi bi-building me-1"></i>Quản Lý</span>
+                                        <span class="badge bg-info bg-opacity-75 text-dark" style="font-size:0.7rem;" sec:authorize="hasRole('SHIPPER')"><i class="bi bi-truck me-1"></i>Giao Hàng</span>
+                                        <span class="badge bg-primary bg-opacity-75" style="font-size:0.7rem;" sec:authorize="hasRole('VENDOR')"><i class="bi bi-shop me-1"></i>Người Bán</span>
+                                    </div>
                                 </li>
                                 <li sec:authorize="hasRole('CUSTOMER')"><a class="dropdown-item py-2 small" th:href="@{/customer/profile}"><i class="bi bi-person-badge text-secondary me-2"></i> Hồ Sơ & Sổ Địa Chỉ</a></li>
+                                <li sec:authorize="hasRole('CUSTOMER')"><a class="dropdown-item py-2 small" th:href="@{/customer/profile(tab='roles')}"><i class="bi bi-person-plus text-primary me-2"></i> Đăng Ký Cấp Vai Trò</a></li>
                                 <li sec:authorize="hasRole('CUSTOMER')"><a class="dropdown-item py-2 small" th:href="@{/customer/orders}"><i class="bi bi-bag-check text-secondary me-2"></i> Đơn Đặt Hoa Của Tôi</a></li>
-                                <li sec:authorize="hasRole('CUSTOMER')"><a class="dropdown-item py-2 small" th:href="@{/following}"><i class="bi bi-bookmark-heart text-secondary me-2"></i> Following (Bộ Sưu Tầm Theo Dõi)</a></li>
+                                <li sec:authorize="hasRole('CUSTOMER')"><a class="dropdown-item py-2 small" th:href="@{/following}"><i class="bi bi-bookmark-heart text-secondary me-2"></i> Following (Bộ Sưu Tầm)</a></li>
                                 <li sec:authorize="hasRole('CUSTOMER')"><a class="dropdown-item py-2 small" th:href="@{/customer/wishlist}"><i class="bi bi-heart text-secondary me-2"></i> Mẫu Hoa Yêu Thích</a></li>
                                 <li sec:authorize="hasRole('CUSTOMER')"><a class="dropdown-item py-2 small" th:href="@{/customer/recently-viewed}"><i class="bi bi-clock-history text-secondary me-2"></i> Hoa Đã Xem Gần Đây</a></li>
                                 <li sec:authorize="hasRole('CUSTOMER')"><a class="dropdown-item py-2 small" th:href="@{/customer/followed-stores}"><i class="bi bi-shop text-secondary me-2"></i> Cửa Hàng Đang Theo Dõi</a></li>
-                                <li sec:authorize="hasRole('ADMIN')"><a class="dropdown-item py-2 small" th:href="@{/admin/dashboard}"><i class="bi bi-speedometer2 text-secondary me-2"></i> Trang Quản Trị Sàn</a></li>
-                                <li sec:authorize="hasAnyRole('VENDOR', 'MANAGER')"><a class="dropdown-item py-2 small" th:href="@{/manager/orders}"><i class="bi bi-shop-window text-secondary me-2"></i> Quản Lý Chi Nhánh</a></li>
-                                <li sec:authorize="hasRole('SHIPPER')"><a class="dropdown-item py-2 small" th:href="@{/shipper/orders}"><i class="bi bi-bicycle text-secondary me-2"></i> Kênh Giao Hàng</a></li>
+
+                                <!-- Chuyển chế độ làm việc nếu có nhiều vai trò -->
+                                <li sec:authorize="hasAnyRole('ADMIN', 'MANAGER', 'SHIPPER', 'VENDOR')"><hr class="dropdown-divider my-1"></li>
+                                <li sec:authorize="hasAnyRole('ADMIN', 'MANAGER', 'SHIPPER', 'VENDOR')" class="dropdown-header text-uppercase fw-bold text-muted" style="font-size: 0.72rem;">
+                                    <i class="bi bi-arrow-left-right me-1"></i> Chuyển chế độ:
+                                </li>
+                                <li sec:authorize="hasAnyRole('ADMIN', 'MANAGER', 'SHIPPER', 'VENDOR')"><a class="dropdown-item py-1 small" th:href="@{/}"><i class="bi bi-bag-heart text-success me-2"></i> Mua Hàng (Khách Hàng)</a></li>
+                                <li sec:authorize="hasRole('ADMIN')"><a class="dropdown-item py-1 small" th:href="@{/admin/dashboard}"><i class="bi bi-speedometer2 text-danger me-2"></i> Quản Trị Hệ Thống</a></li>
+                                <li sec:authorize="hasAnyRole('VENDOR', 'MANAGER')"><a class="dropdown-item py-1 small" th:href="@{/manager/orders}"><i class="bi bi-shop-window text-primary me-2"></i> Quản Lý Chi Nhánh</a></li>
+                                <li sec:authorize="hasRole('SHIPPER')"><a class="dropdown-item py-1 small" th:href="@{/shipper/orders}"><i class="bi bi-bicycle text-warning me-2"></i> Kênh Giao Hàng</a></li>
+
                                 <li><hr class="dropdown-divider my-1"></li>
                                 <li>
                                     <button type="button" class="dropdown-item py-2 text-danger small fw-semibold" data-bs-toggle="modal" data-bs-target="#signOutModal" id="btnSignOut">

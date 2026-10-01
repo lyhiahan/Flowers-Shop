@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Quản Lý Người Dùng - Quản Trị Hệ Thống Hoa Tươi</title>
+    <title>Quản Lý Người Dùng & Vai Trò - Quản Trị Hệ Thống Hoa Tươi</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -13,12 +13,57 @@
     <style>
         body { font-family: var(--font-sans) !important; background-color: var(--admin-bg); color: var(--admin-text-main); min-height: 100vh; }
         .main-wrapper { flex: 1; overflow-x: hidden; background-color: var(--admin-bg); }
+        .nav-tabs .nav-link {
+            font-weight: 700;
+            color: #64748B;
+            border: none;
+            border-bottom: 3px solid transparent;
+            padding: 12px 24px;
+            font-size: 16px;
+            background: transparent;
+        }
+        .nav-tabs .nav-link.active {
+            color: #20382E;
+            border-color: #20382E;
+            background: transparent;
+        }
+        .nav-tabs .nav-link:hover {
+            color: #20382E;
+            border-color: #CBD5E1;
+        }
+        .role-pill {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .role-pill-admin { background-color: #EDE9FE; color: #5B21B6; border: 1px solid #DDD6FE; }
+        .role-pill-manager { background-color: #E0F2FE; color: #0369A1; border: 1px solid #BAE6FD; }
+        .role-pill-shipper { background-color: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; }
+        .role-pill-vendor { background-color: #FFEDD5; color: #C2410C; border: 1px solid #FED7AA; }
+        .role-pill-customer { background-color: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+
+        .status-badge {
+            font-size: 12.5px;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .status-pending { background-color: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; }
+        .status-approved { background-color: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0; }
+        .status-rejected { background-color: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+        .status-cancelled { background-color: #F1F5F9; color: #64748B; border: 1px solid #E2E8F0; }
     </style>
 </head>
 <body class="admin-body">
 <div class="d-flex">
-    <!-- Sidebar -->
-        <!-- Sidebar Quản Trị Hệ Thống Chuẩn Thương Hiệu Tiệm Hoa -->
+    <!-- Sidebar Quản Trị Hệ Thống -->
     <aside class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white">
         <a th:href="@{/admin/dashboard}" class="d-flex align-items-center gap-3 mb-4 text-white text-decoration-none px-2 pt-2">
             <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img flex-shrink-0" style="width: 40px; height: 40px; border-radius: 8px;">
@@ -29,86 +74,19 @@
         </a>
 
         <ul class="nav nav-pills flex-column mb-auto gap-1">
-            <li>
-                <a th:href="@{/admin/dashboard}" class="nav-link">
-                    <i class="bi bi-grid"></i>
-                    <span>Thống kê</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/users}" class="nav-link active">
-                    <i class="bi bi-people"></i>
-                    <span>Người dùng</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/stores}" class="nav-link">
-                    <i class="bi bi-shop"></i>
-                    <span>Cửa hàng</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/store-levels}" class="nav-link">
-                    <i class="bi bi-award"></i>
-                    <span>Hạng chi nhánh</span>
-                </a>
-            </li>
-
-            <li>
-                <a th:href="@{/admin/products-manage}" class="nav-link">
-                    <i class="bi bi-box-seam"></i>
-                    <span>Sản phẩm</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/orders-manage}" class="nav-link">
-                    <i class="bi bi-bag"></i>
-                    <span>Đơn hàng</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/categories}" class="nav-link">
-                    <i class="bi bi-tags"></i>
-                    <span>Danh mục hoa</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/styles}" class="nav-link">
-                    <i class="bi bi-sliders"></i>
-                    <span>Thuộc tính sản phẩm</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/deliveries}" class="nav-link">
-                    <i class="bi bi-truck"></i>
-                    <span>Đơn vị vận chuyển</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/vouchers}" class="nav-link">
-                    <i class="bi bi-ticket-perforated"></i>
-                    <span>Khuyến mãi</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/user-levels}" class="nav-link">
-                    <i class="bi bi-award"></i>
-                    <span>Cấp bậc khách</span>
-                </a>
-            </li>
-
-            <li>
-                <a th:href="@{/admin/transactions}" class="nav-link">
-                    <i class="bi bi-journal-text"></i>
-                    <span>Sổ cái</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/}" class="nav-link" target="_blank" style="color: #9DB7AA;">
-                    <i class="bi bi-box-arrow-up-right"></i>
-                    <span>Xem cửa hàng</span>
-                </a>
-            </li>
+            <li><a th:href="@{/admin/dashboard}" class="nav-link"><i class="bi bi-grid"></i><span>Thống kê</span></a></li>
+            <li><a th:href="@{/admin/users}" class="nav-link active"><i class="bi bi-people"></i><span>Người dùng</span></a></li>
+            <li><a th:href="@{/admin/stores}" class="nav-link"><i class="bi bi-shop"></i><span>Cửa hàng</span></a></li>
+            <li><a th:href="@{/admin/store-levels}" class="nav-link"><i class="bi bi-award"></i><span>Hạng chi nhánh</span></a></li>
+            <li><a th:href="@{/admin/products-manage}" class="nav-link"><i class="bi bi-box-seam"></i><span>Sản phẩm</span></a></li>
+            <li><a th:href="@{/admin/orders-manage}" class="nav-link"><i class="bi bi-bag"></i><span>Đơn hàng</span></a></li>
+            <li><a th:href="@{/admin/categories}" class="nav-link"><i class="bi bi-tags"></i><span>Danh mục hoa</span></a></li>
+            <li><a th:href="@{/admin/styles}" class="nav-link"><i class="bi bi-sliders"></i><span>Thuộc tính sản phẩm</span></a></li>
+            <li><a th:href="@{/admin/deliveries}" class="nav-link"><i class="bi bi-truck"></i><span>Đơn vị vận chuyển</span></a></li>
+            <li><a th:href="@{/admin/vouchers}" class="nav-link"><i class="bi bi-ticket-perforated"></i><span>Khuyến mãi</span></a></li>
+            <li><a th:href="@{/admin/user-levels}" class="nav-link"><i class="bi bi-award"></i><span>Cấp bậc khách</span></a></li>
+            <li><a th:href="@{/admin/transactions}" class="nav-link"><i class="bi bi-journal-text"></i><span>Sổ cái</span></a></li>
+            <li><a th:href="@{/}" class="nav-link" target="_blank" style="color: #9DB7AA;"><i class="bi bi-box-arrow-up-right"></i><span>Xem cửa hàng</span></a></li>
         </ul>
 
         <hr class="border-secondary my-2">
@@ -121,143 +99,592 @@
 
     <!-- Main Content -->
     <div class="main-wrapper p-4">
-        <!-- 1. Header: Tiêu đề rõ ràng + Số lượng kết quả -->
-        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
             <div>
-                <div class="d-flex align-items-center gap-3">
-                    <h1 class="admin-page-title mb-0" style="font-size: 28px !important; font-weight: 800; color: #20382E;">Người dùng</h1>
-                    <span class="badge rounded-pill" style="background-color: #E5EEE8; color: #20382E; border: 1px solid #D1E5DA; font-size: 14.5px; font-weight: 700; padding: 6px 14px;">
-                        <span th:text="${#lists.size(users)}">0</span> tài khoản
-                    </span>
-                </div>
-                <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Quản lý tài khoản và quyền truy cập</p>
+                <h1 class="admin-page-title mb-0" style="font-size: 28px !important; font-weight: 800; color: #20382E;">
+                    Quản Lý Người Dùng & Vai Trò
+                </h1>
+                <p class="mb-0 mt-1" style="font-size: 15px; color: #66736B;">
+                    Quản lý tài khoản, phân quyền sử dụng và phê duyệt yêu cầu cấp vai trò
+                </p>
             </div>
         </div>
 
         <!-- Flash alerts -->
-        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small" role="alert" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA; border-radius: 10px;">
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 px-3 small rounded-3" role="alert" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA;">
             <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${successMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show py-2 small" role="alert" style="background-color: #FDEBEB; color: #B83232; border: 1px solid #F7C6C6; border-radius: 10px;">
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show py-2 px-3 small rounded-3" role="alert" style="background-color: #FDEBEB; color: #B83232; border: 1px solid #F7C6C6;">
             <i class="bi bi-exclamation-triangle-fill me-1"></i> <span th:text="${errorMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <!-- 3. Thanh lọc gọn gàng (44px) có trọng tâm -->
-        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
-            <form th:action="@{/admin/users}" method="get" class="row g-2 align-items-center">
-                <div class="col-12 col-md-5 col-lg-6">
-                    <div class="input-group" style="height: 44px;">
-                        <span class="input-group-text bg-white border-end-0 text-muted" style="border-color: #E2E7E2; border-radius: 10px 0 0 10px;">
-                            <i class="bi bi-search"></i>
-                        </span>
-                        <input type="text" name="keyword" th:value="${keyword}" 
-                               class="form-control border-start-0" 
-                               style="height: 44px; border-color: #E2E7E2; border-radius: 0 10px 10px 0; font-size: 15px;" 
-                               placeholder="Tìm theo tên đăng nhập, họ tên, email...">
+        <!-- Two Tabs Navigation (Không có nút "Thêm người dùng") -->
+        <ul class="nav nav-tabs border-bottom mb-4" id="userManagementTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" th:classappend="${activeTab == 'users' or activeTab == null} ? 'active' : ''"
+                   th:href="@{/admin/users(tab='users')}">
+                    <i class="bi bi-person-lines-fill me-2"></i>Người Dùng
+                    <span class="badge rounded-pill bg-light text-dark border ms-1" th:text="${#lists.size(users)}">0</span>
+                </a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link position-relative" th:classappend="${activeTab == 'requests'} ? 'active' : ''"
+                   th:href="@{/admin/users(tab='requests')}">
+                    <i class="bi bi-person-check-fill me-2"></i>Yêu Cầu Vai Trò
+                    <span th:if="${pendingCount > 0}" class="badge rounded-pill bg-danger ms-1" th:text="${pendingCount}"></span>
+                    <span th:if="${pendingCount == 0}" class="badge rounded-pill bg-light text-muted border ms-1">0</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- ========================================== -->
+        <!-- TAB 1: DANH SÁCH NGƯỜI DÙNG                -->
+        <!-- ========================================== -->
+        <div th:if="${activeTab == 'users' or activeTab == null}">
+            <!-- Thanh lọc người dùng -->
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
+                <form th:action="@{/admin/users}" method="get" class="row g-2 align-items-center">
+                    <input type="hidden" name="tab" value="users">
+                    <div class="col-12 col-md-5 col-lg-6">
+                        <div class="input-group" style="height: 44px;">
+                            <span class="input-group-text bg-white border-end-0 text-muted" style="border-color: #E2E7E2; border-radius: 10px 0 0 10px;">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" name="keyword" th:value="${keyword}" 
+                                   class="form-control border-start-0" 
+                                   style="height: 44px; border-color: #E2E7E2; border-radius: 0 10px 10px 0; font-size: 15px;" 
+                                   placeholder="Tìm theo tên đăng nhập, họ tên, email...">
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                        <select name="role" class="form-select" style="height: 44px; border-color: #E2E7E2; border-radius: 10px; font-size: 15px; color: #20382E; font-weight: 600;">
+                            <option value="ALL" th:selected="${currentRole == 'ALL' or currentRole == null}">Tất cả vai trò</option>
+                            <option value="CUSTOMER" th:selected="${currentRole == 'CUSTOMER'}">Khách hàng</option>
+                            <option value="VENDOR" th:selected="${currentRole == 'VENDOR'}">Người bán (Vendor)</option>
+                            <option value="SHIPPER" th:selected="${currentRole == 'SHIPPER'}">Giao hàng (Shipper)</option>
+                            <option value="MANAGER" th:selected="${currentRole == 'MANAGER'}">Quản lý (Manager)</option>
+                            <option value="ADMIN" th:selected="${currentRole == 'ADMIN'}">Quản trị viên (Admin)</option>
+                        </select>
+                    </div>
+                    <div class="col-auto d-flex gap-2">
+                        <button class="btn btn-primary d-inline-flex align-items-center justify-content-center px-4" 
+                                type="submit" 
+                                style="height: 44px; border-radius: 10px; font-size: 15px; font-weight: 700; background-color: #20382E !important; border-color: #20382E !important;">
+                            <i class="bi bi-funnel me-1"></i> Lọc
+                        </button>
+                        <a th:href="@{/admin/users(tab='users')}" 
+                           class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center px-3" 
+                           style="height: 44px; border-radius: 10px; font-size: 15px; color: #66736B; border-color: #E2E7E2; background: #FFFFFF;">
+                            Xóa lọc
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Bảng Người Dùng -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead style="background-color: #E5EEE8 !important;">
+                            <tr>
+                                <th class="ps-4 fw-bold" style="width: 70px; color: #20382E;">ID</th>
+                                <th class="fw-bold" style="color: #20382E;">Tài khoản</th>
+                                <th class="fw-bold" style="color: #20382E;">Họ tên & Liên hệ</th>
+                                <th class="fw-bold" style="color: #20382E;">Vai trò đã cấp</th>
+                                <th class="fw-bold" style="color: #20382E;">Chi nhánh trực thuộc</th>
+                                <th class="fw-bold" style="color: #20382E; min-width: 150px;">Trạng thái</th>
+                                <th class="text-end pe-4 fw-bold" style="color: #20382E;">Thao tác</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:if="${#lists.isEmpty(users)}">
+                                <td colspan="7" class="text-center py-5 text-muted">Không tìm thấy người dùng nào.</td>
+                            </tr>
+                            <tr th:each="u : ${users}">
+                                <td class="ps-4 text-muted small" th:text="'#' + ${u.id}"></td>
+                                <td>
+                                    <strong class="text-dark d-block" th:text="${u.username}"></strong>
+                                    <span class="text-muted small" th:text="${u.email}"></span>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark" th:text="${u.fullName}"></div>
+                                    <span class="text-muted small">
+                                        <i class="bi bi-telephone me-1"></i><span th:text="${u.phone != null and !#strings.isEmpty(u.phone) ? u.phone : 'Chưa cập nhật'}"></span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        <!-- Danh sách vai trò từ Set<Role> roles -->
+                                        <span th:each="r : ${u.roles}" class="role-pill"
+                                              th:classappend="${r.name() == 'ADMIN' ? 'role-pill-admin' : (r.name() == 'MANAGER' ? 'role-pill-manager' : (r.name() == 'SHIPPER' ? 'role-pill-shipper' : (r.name() == 'VENDOR' ? 'role-pill-vendor' : 'role-pill-customer')))}">
+                                            <i class="bi" th:classappend="${r.name() == 'ADMIN' ? 'bi-shield-shaded' : (r.name() == 'MANAGER' ? 'bi-building' : (r.name() == 'SHIPPER' ? 'bi-truck' : (r.name() == 'VENDOR' ? 'bi-shop' : 'bi-person')))}"></i>
+                                            <span th:text="${r.name() == 'ADMIN' ? 'Admin' : (r.name() == 'MANAGER' ? 'Quản lý' : (r.name() == 'SHIPPER' ? 'Giao hàng' : (r.name() == 'VENDOR' ? 'Người bán' : 'Khách hàng')))}"></span>
+                                        </span>
+                                        <!-- Fallback nếu user_roles chưa đồng bộ -->
+                                        <span th:if="${#sets.isEmpty(u.roles) and u.role != null}" class="role-pill role-pill-customer" th:text="${u.role.name()}"></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span th:if="${u.store != null}" class="fw-semibold text-primary small d-inline-flex align-items-center gap-1">
+                                        <i class="bi bi-geo-alt-fill"></i> <span th:text="${u.store.name}"></span>
+                                    </span>
+                                    <span th:if="${u.store == null}" class="text-muted small">—</span>
+                                </td>
+                                <td>
+                                    <span th:if="${u.isActive == null or u.isActive}" class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill px-3 py-1">
+                                        <i class="bi bi-check-circle-fill me-1"></i>Đang hoạt động
+                                    </span>
+                                    <span th:if="${u.isActive != null and !u.isActive}" class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle rounded-pill px-3 py-1">
+                                        <i class="bi bi-slash-circle-fill me-1"></i>Đã khóa
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="d-inline-flex align-items-center gap-2">
+                                        <!-- Nút Quản lý vai trò (gán / thu hồi) -->
+                                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold"
+                                                data-bs-toggle="modal" th:data-bs-target="'#modalManageRoles_' + ${u.id}">
+                                            <i class="bi bi-shield-lock me-1"></i>Vai trò
+                                        </button>
+
+                                        <!-- Khóa / Mở khóa tài khoản -->
+                                        <form th:if="${(u.role == null or u.role.name() != 'ADMIN') and u.username != 'admin'}"
+                                              th:action="@{'/admin/users/toggle-active/' + ${u.id}}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm rounded-pill px-3 fw-semibold"
+                                                    th:classappend="${u.isActive == null or u.isActive} ? 'btn-outline-danger' : 'btn-outline-success'"
+                                                    th:data-action="${u.isActive == null or u.isActive ? 'KHÓA' : 'MỞ KHÓA'}"
+                                                    th:data-user="${u.username}"
+                                                    onclick="return confirm('Bạn có chắc muốn ' + this.getAttribute('data-action') + ' tài khoản [' + this.getAttribute('data-user') + ']?')">
+                                                <i class="bi" th:classappend="${u.isActive == null or u.isActive} ? 'bi-lock' : 'bi-unlock'"></i>
+                                                <span th:text="${u.isActive == null or u.isActive} ? 'Khóa' : 'Mở'"></span>
+                                            </button>
+                                        </form>
+                                        <span th:if="${(u.role != null and u.role.name() == 'ADMIN') or u.username == 'admin'}" class="text-muted small px-2">—</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                    <select name="role" class="form-select" style="height: 44px; border-color: #E2E7E2; border-radius: 10px; font-size: 15px; color: #20382E; font-weight: 600;">
-                        <option value="ALL" th:selected="${currentRole == 'ALL' or currentRole == null}">Vai trò: Tất cả</option>
-                        <option value="CUSTOMER" th:selected="${currentRole == 'CUSTOMER'}">Khách hàng</option>
-                        <option value="VENDOR" th:selected="${currentRole == 'VENDOR'}">Người bán (Vendor)</option>
-                        <option value="SHIPPER" th:selected="${currentRole == 'SHIPPER'}">Giao hàng (Shipper)</option>
-                        <option value="MANAGER" th:selected="${currentRole == 'MANAGER'}">Quản lý (Manager)</option>
-                        <option value="ADMIN" th:selected="${currentRole == 'ADMIN'}">Quản trị viên (Admin)</option>
-                    </select>
-                </div>
-                <div class="col-auto d-flex gap-2">
-                    <button class="btn btn-primary d-inline-flex align-items-center justify-content-center px-4" 
-                            type="submit" 
-                            style="height: 44px; border-radius: 10px; font-size: 15.5px; font-weight: 700; background-color: #20382E !important; border-color: #20382E !important;">
-                        <i class="bi bi-funnel me-1"></i> Tìm
-                    </button>
-                    <a th:href="@{/admin/users}" 
-                       class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center px-3" 
-                       style="height: 44px; border-radius: 10px; font-size: 15px; color: #66736B; border-color: #E2E7E2; background: #FFFFFF;">
-                        Xóa bộ lọc
-                    </a>
-                </div>
-            </form>
+            </div>
         </div>
 
-        <!-- 2. Bảng người dùng nổi bật, tên cột rút gọn & hover xanh nhạt -->
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-admin-users align-middle mb-0">
-                        <thead style="background-color: #E5EEE8 !important;">
-                        <tr style="background-color: #E5EEE8 !important;">
-                            <th class="ps-4 fw-bold" style="white-space: nowrap !important; width: 70px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">ID</th>
-                            <th class="fw-bold" style="white-space: nowrap !important; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Tài khoản</th>
-                            <th class="fw-bold" style="white-space: nowrap !important; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Họ tên và liên hệ</th>
-                            <th class="fw-bold" style="white-space: nowrap !important; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Vai trò</th>
-                            <th class="fw-bold" style="white-space: nowrap !important; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Số dư ví</th>
-                            <th class="fw-bold" style="white-space: nowrap !important; min-width: 175px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Trạng thái</th>
-                            <th class="text-end pe-4 fw-bold" style="white-space: nowrap !important; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Thao tác</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:if="${#lists.isEmpty(users)}">
-                            <td colspan="7" class="text-center py-5 text-muted" style="font-size: 15px;">Không tìm thấy người dùng nào.</td>
-                        </tr>
-                        <tr th:each="u : ${users}">
-                            <td class="ps-3 text-muted" style="font-size: 14.5px;" th:text="'#' + ${u.id}"></td>
-                            <td>
-                                <strong style="font-size: 17px; font-weight: 700; color: #20382E; display: block;" th:text="${u.username}"></strong>
-                                <span style="font-size: 15px; color: #66736B;" th:text="${u.email}"></span>
-                            </td>
-                            <td>
-                                <div style="font-size: 16.5px; font-weight: 600; color: #24332C;" th:text="${u.fullName}"></div>
-                                <span style="font-size: 15px; color: #66736B;">
-                                    <i class="bi bi-telephone me-1"></i><span th:text="${u.phone != null and !#strings.isEmpty(u.phone) ? u.phone : 'Chưa cập nhật'}"></span>
-                                </span>
-                            </td>
-                            <td>
-                                <span th:if="${u.role != null and u.role.name() == 'ADMIN'}" class="role-badge role-badge-admin">Quản trị viên</span>
-                                <span th:if="${u.role != null and u.role.name() == 'MANAGER'}" class="role-badge role-badge-manager">Quản lý</span>
-                                <span th:if="${u.role != null and u.role.name() == 'CUSTOMER'}" class="role-badge role-badge-customer">Khách hàng</span>
-                                <span th:if="${u.role != null and u.role.name() == 'SHIPPER'}" class="role-badge role-badge-shipper">Giao hàng</span>
-                                <span th:if="${u.role != null and u.role.name() == 'VENDOR'}" class="role-badge role-badge-vendor">Người bán</span>
-                                <span th:if="${u.role == null}" class="badge bg-secondary">Khách hàng</span>
-                            </td>
-                            <td>
-                                <span style="font-size: 16px; font-weight: 700; color: #20382E;"
-                                      th:text="${u.eWallet != null ? #numbers.formatDecimal(u.eWallet, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">0 đ</span>
-                            </td>
-                            <td style="white-space: nowrap;">
-                                <span th:if="${u.isActive == null or u.isActive}" class="status-pill-active" style="white-space: nowrap;">
-                                    <i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i>ĐANG HOẠT ĐỘNG
-                                </span>
-                                <span th:if="${u.isActive != null and !u.isActive}" class="status-pill-locked" style="white-space: nowrap;">
-                                    <i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i>ĐÃ KHÓA
-                                </span>
-                            </td>
-                            <td class="text-end pe-3">
-                                <!-- Nút Khóa / Mở khóa tinh gọn hoặc hiển thị — nếu là Admin -->
-                                <form th:if="${(u.role == null or u.role.name() != 'ADMIN') and u.username != 'admin'}" th:action="@{'/admin/users/toggle-active/' + ${u.id}}" method="post" class="d-inline">
-                                    <button type="submit" 
-                                            class="btn-action-subtle"
-                                            th:classappend="${u.isActive == null or u.isActive} ? '' : 'btn-action-unlock'"
-                                            th:data-action="${u.isActive == null or u.isActive ? 'KHÓA' : 'MỞ KHÓA'}"
-                                            th:data-user="${u.username}"
-                                            onclick="return confirm('Bạn có chắc muốn ' + this.getAttribute('data-action') + ' tài khoản [' + this.getAttribute('data-user') + ']?')">
-                                        <i class="bi" th:classappend="${u.isActive == null or u.isActive} ? 'bi-lock' : 'bi-unlock'"></i>
-                                        <span th:text="${u.isActive == null or u.isActive} ? 'Khóa' : 'Mở khóa'"></span>
+        <!-- ========================================== -->
+        <!-- TAB 2: DUYỆT YÊU CẦU VAI TRÒ                -->
+        <!-- ========================================== -->
+        <div th:if="${activeTab == 'requests'}">
+            <!-- Bộ lọc trạng thái yêu cầu -->
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
+                <form th:action="@{/admin/users}" method="get" class="row g-2 align-items-center">
+                    <input type="hidden" name="tab" value="requests">
+                    <div class="col-12 col-sm-6 col-md-4">
+                        <select name="requestStatus" class="form-select" onchange="this.form.submit()"
+                                style="height: 44px; border-color: #E2E7E2; border-radius: 10px; font-size: 15px; color: #20382E; font-weight: 600;">
+                            <option value="ALL" th:selected="${currentRequestStatus == 'ALL'}">Tất cả trạng thái yêu cầu</option>
+                            <option value="PENDING" th:selected="${currentRequestStatus == 'PENDING'}">⏳ Chờ duyệt</option>
+                            <option value="APPROVED" th:selected="${currentRequestStatus == 'APPROVED'}">✅ Đã phê duyệt</option>
+                            <option value="REJECTED" th:selected="${currentRequestStatus == 'REJECTED'}">❌ Bị từ chối</option>
+                            <option value="CANCELLED" th:selected="${currentRequestStatus == 'CANCELLED'}">⚪ Đã rút yêu cầu</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <span class="text-muted small">Hiển thị <strong th:text="${#lists.size(roleRequests)}">0</strong> yêu cầu</span>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Bảng Yêu Cầu Vai Trò (Đúng theo mẫu yêu cầu) -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead style="background-color: #E5EEE8 !important;">
+                            <tr>
+                                <th class="ps-4 fw-bold" style="color: #20382E;">Người dùng</th>
+                                <th class="fw-bold" style="color: #20382E;">Vai trò đăng ký</th>
+                                <th class="fw-bold" style="color: #20382E;">Chi nhánh / Cửa hàng</th>
+                                <th class="fw-bold" style="color: #20382E;">Ngày gửi</th>
+                                <th class="fw-bold" style="color: #20382E;">Trạng thái</th>
+                                <th class="text-end pe-4 fw-bold" style="color: #20382E;">Thao tác</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:if="${#lists.isEmpty(roleRequests)}">
+                                <td colspan="6" class="text-center py-5 text-muted">Không có yêu cầu vai trò nào phù hợp.</td>
+                            </tr>
+                            <tr th:each="req : ${roleRequests}">
+                                <td class="ps-4">
+                                    <strong class="text-dark d-block" th:text="${req.user.fullName}">Nguyễn Văn A</strong>
+                                    <span class="text-muted small" th:text="'@' + ${req.user.username} + ' • ' + ${req.user.email}"></span>
+                                </td>
+                                <td>
+                                    <span class="role-pill"
+                                          th:classappend="${req.targetRole.name() == 'SHIPPER' ? 'role-pill-shipper' : (req.targetRole.name() == 'MANAGER' ? 'role-pill-manager' : 'role-pill-vendor')}">
+                                        <i class="bi" th:classappend="${req.targetRole.name() == 'SHIPPER' ? 'bi-truck' : (req.targetRole.name() == 'MANAGER' ? 'bi-building' : 'bi-shop')}"></i>
+                                        <span th:text="${req.targetRoleDisplayName}">Giao hàng</span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span th:if="${req.targetStore != null}" class="fw-semibold text-primary" th:text="${req.targetStore.name}">Bến Thành</span>
+                                    <span th:if="${req.targetStore == null and req.shopName != null and !#strings.isEmpty(req.shopName)}" class="fw-semibold text-dark" th:text="${req.shopName}"></span>
+                                    <span th:if="${req.targetStore == null and (req.shopName == null or #strings.isEmpty(req.shopName)) and req.workArea != null and !#strings.isEmpty(req.workArea)}" class="text-secondary small" th:text="${req.workArea}"></span>
+                                    <span th:if="${req.targetStore == null and (req.shopName == null or #strings.isEmpty(req.shopName)) and (req.workArea == null or #strings.isEmpty(req.workArea))}" class="text-muted small">—</span>
+                                </td>
+                                <td>
+                                    <span class="text-dark small fw-semibold" th:text="${#temporals.format(req.createdAt, 'dd/MM/yyyy HH:mm')}">Ngày gửi thực tế</span>
+                                </td>
+                                <td>
+                                    <span class="status-badge"
+                                          th:classappend="${req.status.name() == 'PENDING' ? 'status-pending' : (req.status.name() == 'APPROVED' ? 'status-approved' : (req.status.name() == 'REJECTED' ? 'status-rejected' : 'status-cancelled'))}">
+                                        <i class="bi" th:classappend="${req.status.name() == 'PENDING' ? 'bi-hourglass-split' : (req.status.name() == 'APPROVED' ? 'bi-check-circle-fill' : (req.status.name() == 'REJECTED' ? 'bi-x-circle-fill' : 'bi-slash-circle'))}"></i>
+                                        <span th:text="${req.status.displayName}">Chờ duyệt</span>
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold"
+                                            style="background-color: #20382E; border-color: #20382E;"
+                                            data-bs-toggle="modal" th:data-bs-target="'#modalReviewReq_' + ${req.id}">
+                                        <i class="bi bi-file-earmark-person me-1"></i>Xem hồ sơ
                                     </button>
-                                </form>
-                                <span th:if="${(u.role != null and u.role.name() == 'ADMIN') or u.username == 'admin'}" class="text-muted pe-3" style="font-size: 16px;">—</span>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- ======================================================== -->
+<!-- MODALS QUẢN LÝ VAI TRÒ TRỰC TIẾP (Gán / Thu hồi với lý do) -->
+<!-- ======================================================== -->
+<div th:each="u : ${users}">
+    <div class="modal fade" th:id="'modalManageRoles_' + ${u.id}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title font-serif fw-bold text-dark">
+                        <i class="bi bi-shield-lock-fill text-primary me-2"></i>Quản Lý Vai Trò Tài Khoản
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Thông tin tóm tắt user -->
+                    <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3 mb-4">
+                        <div class="avatar bg-white border rounded-circle d-flex align-items-center justify-content-center text-primary fw-bold" style="width: 48px; height: 48px; font-size: 20px;">
+                            <span th:text="${#strings.substring(u.fullName != null ? u.fullName : u.username, 0, 1)}">U</span>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-dark fs-6" th:text="${u.fullName} + ' (@' + ${u.username} + ')'"></div>
+                            <div class="text-muted small" th:text="${u.email} + ' • ' + (${u.phone != null ? u.phone : 'Chưa có SĐT'})"></div>
+                        </div>
+                    </div>
+
+                    <!-- Vai trò hiện có -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-dark small text-uppercase">Vai trò hiện tại đang sở hữu</label>
+                        <div class="d-flex flex-wrap gap-2 mt-1">
+                            <span th:each="r : ${u.roles}" class="role-pill fs-6 px-3 py-1"
+                                  th:classappend="${r.name() == 'ADMIN' ? 'role-pill-admin' : (r.name() == 'MANAGER' ? 'role-pill-manager' : (r.name() == 'SHIPPER' ? 'role-pill-shipper' : (r.name() == 'VENDOR' ? 'role-pill-vendor' : 'role-pill-customer')))}">
+                                <i class="bi" th:classappend="${r.name() == 'ADMIN' ? 'bi-shield-shaded' : (r.name() == 'MANAGER' ? 'bi-building' : (r.name() == 'SHIPPER' ? 'bi-truck' : (r.name() == 'VENDOR' ? 'bi-shop' : 'bi-person')))}"></i>
+                                <span th:text="${r.name() == 'ADMIN' ? 'Quản trị viên (Admin)' : (r.name() == 'MANAGER' ? 'Quản lý chi nhánh (Manager)' : (r.name() == 'SHIPPER' ? 'Nhân viên giao hàng (Shipper)' : (r.name() == 'VENDOR' ? 'Người bán hoa (Vendor)' : 'Khách hàng (Customer)')))}"></span>
+                            </span>
+                        </div>
+                        <div th:if="${u.store != null}" class="mt-2 text-primary small">
+                            <i class="bi bi-geo-alt-fill me-1"></i>Chi nhánh phân công quản lý: <strong th:text="${u.store.name} + ' (' + ${u.store.address} + ')'"></strong>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <!-- Cột Cấp / Gán thêm vai trò -->
+                        <div class="col-md-6 border-end">
+                            <div class="p-3 border rounded-3 bg-white h-100">
+                                <h6 class="fw-bold text-success mb-3">
+                                    <i class="bi bi-person-plus-fill me-1"></i> Gán thêm vai trò
+                                </h6>
+                                <form th:action="@{'/admin/users/assign-role/' + ${u.id}}" method="post">
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-semibold">Chọn vai trò muốn gán (*)</label>
+                                        <select name="role" class="form-select form-select-sm" required
+                                                th:onchange="'toggleStoreSelect(this.value, \'' + ${u.id} + '\')'">
+                                            <option value="" disabled selected>-- Chọn vai trò --</option>
+                                            <option value="SHIPPER">🛵 Nhân viên giao hàng (Shipper)</option>
+                                            <option value="MANAGER">🏢 Quản lý chi nhánh (Manager)</option>
+                                            <option value="VENDOR">🏪 Người bán đối tác (Vendor)</option>
+                                            <option value="ADMIN">🛡️ Quản trị viên (Admin)</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3" th:id="'storeSelectDiv_' + ${u.id}" style="display: none;">
+                                        <label class="form-label small fw-semibold text-primary">Chi nhánh phân công quản lý (*)</label>
+                                        <select name="storeId" class="form-select form-select-sm">
+                                            <option value="">-- Chọn chi nhánh áp dụng --</option>
+                                            <option th:each="st : ${stores}" th:value="${st.id}" th:text="${st.name} + ' (' + ${st.address} + ')'"></option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-semibold">Lý do cấp vai trò (*)</label>
+                                        <textarea name="reason" class="form-control form-control-sm" rows="2" required placeholder="Ghi nhận lý do phân công hoặc quyết định bổ nhiệm..."></textarea>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 fw-bold w-100">
+                                        <i class="bi bi-check-lg me-1"></i> Xác Nhận Cấp Vai Trò
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Cột Thu hồi vai trò -->
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-3 bg-white h-100">
+                                <h6 class="fw-bold text-danger mb-3">
+                                    <i class="bi bi-person-dash-fill me-1"></i> Thu hồi vai trò
+                                </h6>
+                                <form th:action="@{'/admin/users/revoke-role/' + ${u.id}}" method="post">
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-semibold">Chọn vai trò muốn thu hồi (*)</label>
+                                        <select name="role" class="form-select form-select-sm" required>
+                                            <option value="" disabled selected>-- Chọn vai trò cần gỡ --</option>
+                                            <option th:each="r : ${u.roles}"
+                                                    th:if="${r.name() != 'CUSTOMER'}"
+                                                    th:value="${r.name()}"
+                                                    th:text="${r.name() == 'MANAGER' ? '🏢 Quản lý chi nhánh' : (r.name() == 'SHIPPER' ? '🛵 Giao hàng' : (r.name() == 'VENDOR' ? '🏪 Người bán' : '🛡️ Quản trị viên'))}"></option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-semibold">Lý do thu hồi (*)</label>
+                                        <textarea name="reason" class="form-control form-control-sm" rows="2" required placeholder="Ghi nhận lý do miễn nhiệm, hết hạn hợp tác, điều chuyển..."></textarea>
+                                    </div>
+
+                                    <div class="alert alert-light border small text-muted p-2 rounded-2 mb-3">
+                                        <i class="bi bi-info-circle me-1 text-primary"></i>
+                                        Thu hồi vai trò không khóa toàn bộ tài khoản; người dùng vẫn duy trì quyền Khách hàng bình thường.
+                                    </div>
+
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold w-100"
+                                            onclick="return confirm('Bạn có chắc chắn muốn thu hồi vai trò này khỏi người dùng?');">
+                                        <i class="bi bi-trash3 me-1"></i> Xác Nhận Thu Hồi Vai Trò
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ======================================================== -->
+<!-- MODALS XEM HỒ SƠ & PHÊ DUYỆT / TỪ CHỐI YÊU CẦU VAI TRÒ   -->
+<!-- ======================================================== -->
+<div th:each="req : ${roleRequests}">
+    <div class="modal fade" th:id="'modalReviewReq_' + ${req.id}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title font-serif fw-bold text-dark">
+                        <i class="bi bi-file-earmark-person-fill text-primary me-2"></i>Hồ Sơ Yêu Cầu Cấp Vai Trò #[[${req.id}]]
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Thông tin người dùng -->
+                    <div class="row g-3 p-3 bg-light rounded-3 mb-4">
+                        <div class="col-md-6">
+                            <span class="text-muted small d-block">Người gửi yêu cầu:</span>
+                            <strong class="text-dark fs-6" th:text="${req.user.fullName}">Nguyễn Văn A</strong>
+                            <span class="text-muted small d-block" th:text="'Tài khoản: @' + ${req.user.username}"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <span class="text-muted small d-block">Email & SĐT:</span>
+                            <div class="text-dark" th:text="${req.user.email}"></div>
+                            <div class="text-dark small" th:text="${req.user.phone != null ? req.user.phone : 'Chưa có SĐT'}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <span class="text-muted small d-block">Vai trò xin cấp:</span>
+                            <span class="role-pill fs-6 mt-1"
+                                  th:classappend="${req.targetRole.name() == 'SHIPPER' ? 'role-pill-shipper' : (req.targetRole.name() == 'MANAGER' ? 'role-pill-manager' : 'role-pill-vendor')}">
+                                <span th:text="${req.targetRoleDisplayName}">Giao hàng</span>
+                            </span>
+                        </div>
+                        <div class="col-md-6">
+                            <span class="text-muted small d-block">Ngày gửi thực tế:</span>
+                            <span class="fw-semibold text-dark" th:text="${#temporals.format(req.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></span>
+                        </div>
+                    </div>
+
+                    <!-- Nội dung hồ sơ chi tiết theo vai trò -->
+                    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-card-text text-primary me-2"></i>Chi tiết thông tin đăng ký</h6>
+                    <div class="border rounded-3 p-3 mb-4 bg-white">
+                        <!-- Shipper fields -->
+                        <div th:if="${req.targetRole.name() == 'SHIPPER'}">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <span class="text-muted small d-block">Số điện thoại liên hệ:</span>
+                                    <strong class="text-dark" th:text="${req.phone != null ? req.phone : req.user.phone}"></strong>
+                                </div>
+                                <div class="col-md-6">
+                                    <span class="text-muted small d-block">Phương tiện vận chuyển:</span>
+                                    <strong class="text-dark" th:text="${req.vehicleType != null ? req.vehicleType : 'Chưa cập nhật'}"></strong>
+                                </div>
+                                <div class="col-12">
+                                    <span class="text-muted small d-block">Khu vực làm việc đăng ký:</span>
+                                    <strong class="text-primary" th:text="${req.workArea != null ? req.workArea : 'Toàn khu vực'}"></strong>
+                                </div>
+                                <div class="col-12" th:if="${req.experienceNote != null and !#strings.isEmpty(req.experienceNote)}">
+                                    <span class="text-muted small d-block">Kinh nghiệm giao hàng & bảo quản hoa:</span>
+                                    <p class="text-dark small bg-light p-2 rounded mb-0 mt-1" th:text="${req.experienceNote}"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Manager fields -->
+                        <div th:if="${req.targetRole.name() == 'MANAGER'}">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <span class="text-muted small d-block">Chi nhánh mong muốn ứng tuyển:</span>
+                                    <strong class="text-primary" th:text="${req.targetStore != null ? (req.targetStore.name + ' - ' + req.targetStore.address) : 'Chưa chọn'}"></strong>
+                                </div>
+                                <div class="col-md-6">
+                                    <span class="text-muted small d-block">Số điện thoại liên hệ:</span>
+                                    <strong class="text-dark" th:text="${req.phone != null ? req.phone : req.user.phone}"></strong>
+                                </div>
+                                <div class="col-12" th:if="${req.experienceNote != null and !#strings.isEmpty(req.experienceNote)}">
+                                    <span class="text-muted small d-block">Kinh nghiệm quản lý & phân công:</span>
+                                    <p class="text-dark small bg-light p-2 rounded mb-0 mt-1" th:text="${req.experienceNote}"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Vendor fields -->
+                        <div th:if="${req.targetRole.name() == 'VENDOR'}">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <span class="text-muted small d-block">Tên cửa hàng đối tác:</span>
+                                    <strong class="text-dark" th:text="${req.shopName}"></strong>
+                                </div>
+                                <div class="col-md-6">
+                                    <span class="text-muted small d-block">Thông tin liên hệ / Hotline:</span>
+                                    <strong class="text-dark" th:text="${req.contactInfo}"></strong>
+                                </div>
+                                <div class="col-12">
+                                    <span class="text-muted small d-block">Địa chỉ cửa hàng:</span>
+                                    <strong class="text-dark" th:text="${req.shopAddress}"></strong>
+                                </div>
+                                <div class="col-12" th:if="${req.experienceNote != null and !#strings.isEmpty(req.experienceNote)}">
+                                    <span class="text-muted small d-block">Giới thiệu sản phẩm đối tác:</span>
+                                    <p class="text-dark small bg-light p-2 rounded mb-0 mt-1" th:text="${req.experienceNote}"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- THAO TÁC DUYỆT (Nếu trạng thái PENDING) -->
+                    <div th:if="${req.status.name() == 'PENDING'}">
+                        <div class="row g-3">
+                            <!-- Phê duyệt form -->
+                            <div class="col-md-6">
+                                <div class="p-3 border border-success-subtle bg-success bg-opacity-10 rounded-3 h-100">
+                                    <h6 class="fw-bold text-success mb-2"><i class="bi bi-check-circle-fill me-1"></i> Phê Duyệt Cấp Vai Trò</h6>
+                                    <p class="text-muted small mb-3">Người dùng sẽ được cấp quyền truy cập các chức năng của vai trò này ngay lập tức.</p>
+                                    <form th:action="@{'/admin/users/role-request/approve/' + ${req.id}}" method="post">
+                                        <!-- Nếu là Quản lý chi nhánh: Bắt buộc chọn chi nhánh phân công -->
+                                        <div th:if="${req.targetRole.name() == 'MANAGER'}" class="mb-3">
+                                            <label class="form-label small fw-bold text-dark">Xác định chi nhánh được quản lý (*)</label>
+                                            <select name="assignedStoreId" class="form-select form-select-sm" required>
+                                                <option value="">-- Chọn chi nhánh phân công --</option>
+                                                <option th:each="st : ${stores}" th:value="${st.id}"
+                                                        th:selected="${req.targetStore != null and req.targetStore.id == st.id}"
+                                                        th:text="${st.name} + ' (' + ${st.address} + ')'"></option>
+                                            </select>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold w-100"
+                                                onclick="return confirm('Bạn có chắc chắn muốn phê duyệt cấp vai trò cho người dùng này?');">
+                                            <i class="bi bi-check-lg me-1"></i> Phê Duyệt Cấp Vai Trò
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Từ chối form -->
+                            <div class="col-md-6">
+                                <div class="p-3 border border-danger-subtle bg-danger bg-opacity-10 rounded-3 h-100">
+                                    <h6 class="fw-bold text-danger mb-2"><i class="bi bi-x-circle-fill me-1"></i> Từ Chối Yêu Cầu</h6>
+                                    <p class="text-muted small mb-2">Người dùng vẫn duy trì tài khoản Khách hàng và xem được lý do từ chối.</p>
+                                    <form th:action="@{'/admin/users/role-request/reject/' + ${req.id}}" method="post">
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-bold text-dark">Lý do từ chối (*)</label>
+                                            <textarea name="rejectionReason" class="form-control form-control-sm" rows="3" required
+                                                      placeholder="Nhập lý do cụ thể (Ví dụ: Chưa đủ kinh nghiệm, chi nhánh đã có quản lý...)..."></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-outline-danger rounded-pill px-4 fw-bold w-100"
+                                                onclick="return confirm('Bạn có chắc muốn từ chối yêu cầu vai trò này?');">
+                                            <i class="bi bi-x-lg me-1"></i> Xác Nhận Từ Chối
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- THÔNG TIN KẾT QUẢ ĐÃ XỬ LÝ -->
+                    <div th:if="${req.status.name() == 'APPROVED'}" class="alert alert-success d-flex align-items-center gap-2 mb-0 rounded-3">
+                        <i class="bi bi-check-circle-fill fs-5"></i>
+                        <div>
+                            Yêu cầu đã được <strong>Phê duyệt</strong> vào lúc
+                            <span th:text="${#temporals.format(req.reviewedAt, 'dd/MM/yyyy HH:mm')}"></span>.
+                            <span th:if="${req.assignedStore != null}">
+                                Phân công quản lý: <strong th:text="${req.assignedStore.name}"></strong>.
+                            </span>
+                        </div>
+                    </div>
+
+                    <div th:if="${req.status.name() == 'REJECTED'}" class="alert alert-danger d-flex align-items-start gap-2 mb-0 rounded-3">
+                        <i class="bi bi-x-circle-fill fs-5 mt-1"></i>
+                        <div>
+                            <div>Yêu cầu đã bị <strong>Từ chối</strong> vào lúc <span th:text="${#temporals.format(req.reviewedAt, 'dd/MM/yyyy HH:mm')}"></span>.</div>
+                            <div class="mt-1 small">Lý do từ chối: <strong th:text="${req.rejectionReason}"></strong></div>
+                        </div>
+                    </div>
+
+                    <div th:if="${req.status.name() == 'CANCELLED'}" class="alert alert-secondary d-flex align-items-center gap-2 mb-0 rounded-3">
+                        <i class="bi bi-slash-circle fs-5"></i>
+                        <div>Người dùng đã tự <strong>rút yêu cầu</strong> này.</div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function toggleStoreSelect(role, userId) {
+        const storeDiv = document.getElementById('storeSelectDiv_' + userId);
+        if (storeDiv) {
+            if (role === 'MANAGER') {
+                storeDiv.style.display = 'block';
+            } else {
+                storeDiv.style.display = 'none';
+            }
+        }
+    }
+</script>
 </body>
 </html>

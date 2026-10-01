@@ -28,6 +28,21 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .or(() -> userRepository.findByPhone(cleanInput))
                 .orElseThrow(() -> new UsernameNotFoundException("Email, số điện thoại hoặc mật khẩu không chính xác: " + cleanInput));
 
+        java.util.Set<org.springframework.security.core.GrantedAuthority> authorities = new java.util.HashSet<>();
+        // Mọi người dùng đang hoạt động luôn giữ quyền Khách hàng để mua hoa và sử dụng tính năng thông thường
+        authorities.add(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
+
+        if (user.getRole() != null) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+        }
+        if (user.getRoles() != null) {
+            for (com.finalproject.enums.Role r : user.getRoles()) {
+                if (r != null) {
+                    authorities.add(new SimpleGrantedAuthority("ROLE_" + r.name()));
+                }
+            }
+        }
+
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
@@ -35,7 +50,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 true, // accountNonExpired
                 true, // credentialsNonExpired
                 true, // accountNonLocked
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                authorities
         );
     }
 }

@@ -61,6 +61,13 @@ public class User {
     @Column(nullable = false, length = 20)
     private Role role;
 
+    @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, length = 30)
+    @Builder.Default
+    private java.util.Set<Role> roles = new java.util.HashSet<>();
+
     @Builder.Default
     private Boolean isActive = false;
 
@@ -70,4 +77,32 @@ public class User {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id")
     private Store store;
-}
+
+    public boolean hasRole(Role checkRole) {
+        if (this.role == checkRole) return true;
+        return roles != null && roles.contains(checkRole);
+    }
+
+    public void addRole(Role newRole) {
+        if (this.roles == null) this.roles = new java.util.HashSet<>();
+        this.roles.add(newRole);
+        this.roles.add(Role.CUSTOMER); // Luôn giữ quyền khách hàng
+    }
+
+    public void removeRole(Role targetRole) {
+        if (this.roles != null) {
+            this.roles.remove(targetRole);
+            this.roles.add(Role.CUSTOMER); // Không bao giờ mất quyền khách hàng
+        }
+        if (this.role == targetRole) {
+            if (this.roles != null && !this.roles.isEmpty()) {
+                this.role = this.roles.stream()
+                        .filter(r -> r != Role.CUSTOMER)
+                        .findFirst()
+                        .orElse(Role.CUSTOMER);
+            } else {
+                this.role = Role.CUSTOMER;
+            }
+        }
+    }
+}
