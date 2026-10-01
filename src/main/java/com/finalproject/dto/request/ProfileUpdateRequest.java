@@ -8,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Setter
 public class ProfileUpdateRequest {
-    @NotBlank(message = "Họ và tên không được để trống")
+    @NotBlank(message = "Vui lòng điền họ và tên")
     private String fullName;
 
     private String phone;

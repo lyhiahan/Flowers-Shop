@@ -601,7 +601,7 @@ public class AdminConfigController {
         try {
             String cleanName = name != null ? name.trim() : "";
             if (cleanName.isEmpty()) {
-                ra.addFlashAttribute("errorMessage", "Tên hạng chi nhánh không được để trống!");
+                ra.addFlashAttribute("errorMessage", "Vui lòng điền tên hạng chi nhánh!");
                 return "redirect:/admin/store-levels";
             }
             boolean nameExists = storeLevelRepository.findAll().stream()
@@ -643,7 +643,7 @@ public class AdminConfigController {
             }
             String cleanName = name != null ? name.trim() : sl.getName();
             if (cleanName.isEmpty()) {
-                ra.addFlashAttribute("errorMessage", "Tên hạng không được để trống!");
+                ra.addFlashAttribute("errorMessage", "Vui lòng điền tên hạng chi nhánh!");
                 return "redirect:/admin/store-levels";
             }
 

@@ -61,7 +61,9 @@
                             <label class="form-label small fw-semibold text-secondary">Email / Tên đăng nhập</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
-                                <input type="text" id="usernameInput" name="username" class="form-control border-start-0 ps-0" required autofocus placeholder="Nhập email của bạn (ví dụ: khachhang@gmail.com)">
+                                <input type="text" id="usernameInput" name="username" class="form-control border-start-0 ps-0" required autofocus placeholder="Nhập email của bạn (ví dụ: khachhang@gmail.com)"
+                                       oninvalid="this.setCustomValidity('Vui lòng điền email hoặc tên đăng nhập!')"
+                                       oninput="this.setCustomValidity('')">
                             </div>
                         </div>
 
@@ -72,7 +74,9 @@
                             </div>
                             <div class="input-group">
                                 <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-lock"></i></span>
-                                <input type="password" id="passwordInput" name="password" class="form-control border-start-0 ps-0" required placeholder="Nhập mật khẩu">
+                                <input type="password" id="passwordInput" name="password" class="form-control border-start-0 ps-0" required placeholder="Nhập mật khẩu"
+                                       oninvalid="this.setCustomValidity('Vui lòng điền mật khẩu!')"
+                                       oninput="this.setCustomValidity('')">
                             </div>
                         </div>
 
@@ -136,5 +140,6 @@
         }
     }
 </script>
+<script th:src="@{/js/form-validation.js}"></script>
 </body>
 </html>

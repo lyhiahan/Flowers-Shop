@@ -64,7 +64,9 @@
                         <div class="mb-3">
                             <label class="form-label text-center w-100 fw-semibold text-secondary small">Nhập mã OTP (Hiệu lực trong 5 phút)</label>
                             <input type="text" name="otpCode" class="form-control text-center fs-4 letter-spacing-2 rounded-pill"
-                                   maxlength="6" placeholder="------" required autofocus>
+                                   maxlength="6" placeholder="------" required autofocus
+                                   oninvalid="this.setCustomValidity('Vui lòng điền mã xác thực OTP!')"
+                                   oninput="this.setCustomValidity('')">
                         </div>
                         <button type="submit" class="btn btn-danger w-100 py-3 fw-bold rounded-pill shadow-sm mb-3">
                             <i class="bi bi-shield-check me-1"></i> Xác Nhận Kích Hoạt
@@ -87,5 +89,6 @@
         </div>
     </div>
 </div>
+<script th:src="@{/js/form-validation.js}"></script>
 </body>
 </html>

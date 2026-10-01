@@ -23,16 +23,16 @@ public class ProductForm {
     @NotNull(message = "Vui lòng chọn danh mục sản phẩm")
     private Long categoryId;
 
-    @NotBlank(message = "Vui lòng nhập tên sản phẩm, trường này không được bỏ trống.")
+    @NotBlank(message = "Vui lòng điền tên sản phẩm")
     private String name;
 
     private String description;
 
-    @NotNull(message = "Giá nhập hàng không được để trống")
+    @NotNull(message = "Vui lòng điền giá nhập hàng")
     @DecimalMin(value = "0.0", inclusive = false, message = "Giá nhập hàng phải lớn hơn 0")
     private BigDecimal importPrice;
 
-    @NotNull(message = "Giá bán đứt không được để trống")
+    @NotNull(message = "Vui lòng điền giá bán")
     @DecimalMin(value = "0.0", inclusive = false, message = "Giá bán đứt phải là số dương lớn hơn 0. Vui lòng nhập lại.")
     private BigDecimal priceBuy;
 

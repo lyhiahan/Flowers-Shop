@@ -15,24 +15,24 @@ import lombok.Setter;
 @AllArgsConstructor
 public class RegisterRequest {
 
-    @NotBlank(message = "Tên đăng nhập không được để trống")
+    @NotBlank(message = "Vui lòng điền tên đăng nhập")
     @Size(min = 4, max = 50, message = "Tên đăng nhập phải từ 4 đến 50 ký tự")
     @Pattern(regexp = "^[a-zA-Z0-9_.]+$", message = "Tên đăng nhập chỉ bao gồm chữ cái, số, dấu gạch dưới hoặc dấu chấm (không chứa dấu cách)")
     private String username;
 
-    @NotBlank(message = "Mật khẩu không được để trống")
+    @NotBlank(message = "Vui lòng điền mật khẩu")
     @Size(min = 6, max = 100, message = "Mật khẩu phải từ 6 ký tự trở lên")
     private String password;
 
-    @NotBlank(message = "Họ và tên không được để trống")
+    @NotBlank(message = "Vui lòng điền họ và tên")
     @Size(min = 2, max = 100, message = "Họ và tên phải từ 2 đến 100 ký tự")
     private String fullName;
 
-    @NotBlank(message = "Email không được để trống")
+    @NotBlank(message = "Vui lòng điền địa chỉ email")
     @Email(message = "Email không đúng định dạng (VD: example@domain.com)")
     private String email;
 
-    @NotBlank(message = "Số điện thoại không được để trống")
+    @NotBlank(message = "Vui lòng điền số điện thoại")
     @Pattern(regexp = "^(0|\\+?84)[35789][0-9]{8}$", message = "Số điện thoại không đúng chuẩn Việt Nam (10 chữ số, bắt đầu bằng 03, 05, 07, 08, 09)")
     private String phone;
 
