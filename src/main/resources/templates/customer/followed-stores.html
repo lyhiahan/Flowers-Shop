@@ -214,38 +214,7 @@
         </button>
       </div>
 
-      <!-- 3. BANNER TIÊU ĐỀ TRANG (Page Hero Banner) -->
-      <div class="relative overflow-hidden rounded-2xl bg-[#FFF7F2] border border-[#EEDFD5] p-6 sm:p-8 lg:p-9 mb-8 shadow-xs">
-        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div class="max-w-2xl">
-            <div class="flex flex-wrap items-center gap-2.5 mb-2.5">
-              <h1 class="font-extrabold text-2xl sm:text-3xl text-botanic-dark flex items-center gap-2">
-                <span>🏪</span> Chi Nhánh &amp; Cửa Hàng Đang Theo Dõi
-              </h1>
-              <span id="storeCountBadge" class="px-3.5 py-1 rounded-full bg-white border border-[#E8D6CB] text-botanic-rose font-bold text-xs shadow-xs"
-                    th:text="${followedStores != null ? #lists.size(followedStores) + ' cửa hàng đang theo dõi' : '0 cửa hàng'}">
-                0 cửa hàng
-              </span>
-            </div>
-            <p class="text-[14px] text-botanic-muted leading-relaxed font-medium">
-              Danh sách các chi nhánh hoa tươi và đối tác bạn đang quan tâm theo dõi. Cập nhật thông tin địa chỉ, hotline và những bộ sưu tập hoa mới nhất.
-            </p>
-          </div>
 
-          <!-- Action buttons -->
-          <div class="flex flex-wrap items-center gap-3 shrink-0">
-            <a th:href="@{/stores}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#264E43] hover:bg-[#1E433A] text-white text-xs sm:text-sm font-bold transition-all shadow-sm">
-              <span class="material-symbols-outlined text-[18px]">storefront</span>
-              <span>Khám phá thêm chi nhánh 🌸</span>
-            </a>
-            <a th:href="@{/customer/profile}" 
-               class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white hover:bg-[#FAF0E8] border border-[#E5D7CD] text-[#555] hover:text-botanic-green text-xs sm:text-sm font-bold transition-all shadow-xs">
-              <span class="material-symbols-outlined text-[17px]">arrow_back</span>
-              <span>Về hồ sơ tài khoản</span>
-            </a>
-          </div>
-        </div>
-      </div>
 
       <!-- 4. BỘ LỌC VÀ TÌM KIẾM NHANH (Filter & Toolbar) -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-3.5 sm:p-4 rounded-xl bg-white border border-[#EBDED4] mb-8 shadow-xs">
