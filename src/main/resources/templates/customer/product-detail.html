@@ -567,9 +567,9 @@
                          - Viết 850.000 ₫, số tiền và ký hiệu tiền nằm cùng dòng
                          - Nếu có giảm giá thực tế: giá hiện tại lớn, hồng trầm; giá gốc nhỏ hơn, xám và gạch ngang -->
                     <div class="product-price-block">
-                        <span class="product-price" th:text="${#numbers.formatDecimal(product.sellingPrice, 0, 'COMMA', 0, 'POINT') + ' ₫'}">850.000 ₫</span>
+                        <span class="product-price" th:text="${product.sellingPrice != null ? #numbers.formatDecimal(product.sellingPrice, 0, 'COMMA', 0, 'POINT') + ' ₫' : (product.priceBuy != null ? #numbers.formatDecimal(product.priceBuy, 0, 'COMMA', 0, 'POINT') + ' ₫' : 'Liên hệ')}">850.000 ₫</span>
 
-                        <span th:if="${product.promotionalPrice != null and product.promotionalPrice.compareTo(product.priceBuy) < 0}" 
+                        <span th:if="${product.promotionalPrice != null and product.priceBuy != null and product.promotionalPrice.compareTo(product.priceBuy) < 0}" 
                               class="product-original-price" 
                               th:text="${#numbers.formatDecimal(product.priceBuy, 0, 'COMMA', 0, 'POINT') + ' ₫'}">
                             950.000 ₫
@@ -947,15 +947,15 @@
                                 <div th:each="r : ${reviews}" class="p-3 border rounded-3 bg-white" style="border-color: var(--flower-border) !important;">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <div class="d-flex align-items-center gap-2">
-                                            <img th:src="${r.user.avatarUrl != null ? r.user.avatarUrl : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=50'}"
+                                            <img th:src="${r.user != null and r.user.avatarUrl != null ? r.user.avatarUrl : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=50'}"
                                                  class="rounded-circle border" width="38" height="38" style="object-fit: cover;">
                                             <div>
-                                                <strong class="d-block text-dark small" th:text="${r.user.fullName}">Tên khách hàng</strong>
-                                                <small class="text-muted" style="font-size: 12.5px;" th:text="${#temporals.format(r.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</small>
+                                                <strong class="d-block text-dark small" th:text="${r.user != null ? (r.user.fullName != null ? r.user.fullName : r.user.username) : 'Khách hàng'}">Tên khách hàng</strong>
+                                                <small class="text-muted" style="font-size: 12.5px;" th:text="${r.createdAt != null ? #temporals.format(r.createdAt, 'dd/MM/yyyy HH:mm') : ''}">01/01/2026</small>
                                             </div>
                                         </div>
                                         <div class="text-warning small">
-                                            <span th:each="i : ${#numbers.sequence(1, r.rating)}">⭐</span>
+                                            <span th:each="i : ${#numbers.sequence(1, (r.rating != null and r.rating > 0) ? (r.rating > 5 ? 5 : r.rating) : 5)}">⭐</span>
                                         </div>
                                     </div>
                                     <p class="text-dark small mb-2 ps-1" style="font-size: 15.5px; line-height: 1.5;" th:text="${r.content}"></p>

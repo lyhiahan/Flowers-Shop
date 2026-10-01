@@ -65,8 +65,10 @@ public class Product {
     private java.time.LocalDateTime createdAt;
 
     public BigDecimal getSellingPrice() {
-        if (priceBuy == null || priceBuy.signum() < 0) throw new IllegalStateException("Giá sản phẩm không hợp lệ.");
-        return promotionalPrice != null && promotionalPrice.signum() >= 0 && promotionalPrice.compareTo(priceBuy) <= 0
+        if (priceBuy == null) {
+            return promotionalPrice != null && promotionalPrice.compareTo(BigDecimal.ZERO) >= 0 ? promotionalPrice : BigDecimal.ZERO;
+        }
+        return promotionalPrice != null && promotionalPrice.compareTo(BigDecimal.ZERO) >= 0 && promotionalPrice.compareTo(priceBuy) <= 0
                 ? promotionalPrice : priceBuy;
     }
 

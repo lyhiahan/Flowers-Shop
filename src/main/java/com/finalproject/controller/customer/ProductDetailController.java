@@ -69,8 +69,9 @@ public class ProductDetailController {
         model.addAttribute("canReview", canReview);
         model.addAttribute("eligibleOrderId", eligibleOrderId);
         model.addAttribute("isFollowed", isLiked);
-        model.addAttribute("followerCount", productService.getFollowerCount(id));
-        model.addAttribute("relatedProducts", productRepository.findByCategoryId(product.getCategory().getId()).stream().limit(4).toList());
+        model.addAttribute("relatedProducts", product.getCategory() != null 
+                ? productRepository.findByCategoryId(product.getCategory().getId()).stream().limit(4).toList() 
+                : java.util.List.of());
 
         return "customer/product-detail";
     }
