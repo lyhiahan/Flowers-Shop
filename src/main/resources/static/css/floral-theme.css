@@ -41,6 +41,23 @@
     --font-serif: 'Nunito', Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+.brand-logo-img, .brand-logo-img-sm {
+    width: 36px !important;
+    height: 36px !important;
+    max-width: 36px !important;
+    max-height: 36px !important;
+    object-fit: contain !important;
+    display: inline-block !important;
+}
+.brand-logo-img-lg {
+    width: 54px !important;
+    height: 54px !important;
+    max-width: 54px !important;
+    max-height: 54px !important;
+    object-fit: contain !important;
+    display: inline-block !important;
+}
+
 /* ==========================================================================
    QUY CHUẨN TYPOGRAPHY CHUẨN THEO BẢNG QUY ĐỊNH (Font Nunito)
    - Tiêu đề trang:                     30–32 px | 700 (đậm)      | Xanh đậm #293B32
