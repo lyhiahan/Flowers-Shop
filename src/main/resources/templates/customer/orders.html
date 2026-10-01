@@ -1,42 +1,21 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+﻿<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head>
-    <meta charset="UTF-8">
-    <title>Lịch Sử Đơn Đặt Hoa - Chuỗi Cửa Hàng Hoa Tươi</title>
-    <!-- Google Fonts & Bootstrap 5 & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
-    <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
-    <style>
-        :root {
-            --flower-primary: #355447;
-            --flower-soft-pink: #F3E6E1;
-            --flower-accent: #A64060;
+    <!-- Google Font: Nunito, Plus Jakarta Sans, Playfair Display & Bootstrap 5 & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
         }
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg-page);
-            color: var(--text-main);
-        }
-        .font-serif {
-            font-family: 'Playfair Display', Georgia, serif;
-        }
-        .flower-card {
-            border: 1px solid var(--border-soft);
-            border-radius: 16px;
-            background: var(--surface-card);
-        }
-        .greeting-box {
-            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
-            border: 1px dashed #f97316;
-            border-radius: 12px;
-            padding: 12px 16px;
-        }
-    </style>
+      }
+    };
+  </script>
 </head>
-<body>
+
 
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg sticky-top shadow-sm" style="background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(8px); border-bottom: 1px solid #ffe4e6;">
@@ -66,19 +45,26 @@
                     <i class="bi bi-box-arrow-right"></i>
                 </button></form>
             </div>
-        </div>
-    </nav>
 
-    <div class="container py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h3 class="font-serif fw-bold mb-1 text-dark">📦 Lịch Sử Đơn Đặt Hoa & Dịch Vụ</h3>
-                <p class="text-muted small mb-0">Theo dõi tiến độ thợ cắm hoa, đơn vị vận chuyển và lịch giao hoa</p>
-            </div>
-            <a th:href="@{/}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                <i class="bi bi-arrow-left me-1"></i> Tiếp tục xem hoa
-            </a>
         </div>
+        <div class="flex items-center gap-4 sm:gap-6">
+          <a class="hover:text-primary flex items-center gap-1" href="tel:0281111222">
+            <span class="material-symbols-outlined text-[15px]">call</span>028 1111 222
+          </a>
+          <span class="hidden md:flex items-center gap-1">
+            <span class="material-symbols-outlined text-[15px]">schedule</span>Giao nhanh 60–90 phút
+          </span>
+          <a class="hidden sm:flex items-center gap-1 hover:text-primary" th:href="@{/following}">
+            <span class="material-symbols-outlined text-[15px]">bookmark</span>Following
+          </a>
+          <a class="hidden lg:flex items-center gap-1 hover:text-primary" th:href="@{/stores}">
+            <span class="material-symbols-outlined text-[15px]">store</span>Hệ thống cửa hàng
+          </a>
+          <a class="flex items-center gap-1 hover:text-primary" th:href="@{/users}">
+            <span class="material-symbols-outlined text-[15px]">group</span>Người dùng
+          </a>
+        </div>
+
 
         <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small rounded-3" role="alert">
             <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${successMessage}"></span>
@@ -295,8 +281,676 @@
                 </li>
             </ul>
         </nav>
+
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Main navigation bar -->
+    <div class="bg-white">
+      <div class="h-20 max-w-7xl mx-auto px-4 md:px-margin-desktop flex items-center justify-between gap-space-md">
+        <!-- Brand Logo -->
+        <div class="flex items-center shrink-0">
+          <a class="flex items-center gap-2.5 group" th:href="@{/}">
+            <span class="text-2xl text-secondary">🌸</span>
+            <span
+              class="font-extrabold text-[22px] tracking-tight text-[#2D2424] group-hover:text-primary transition-colors">
+              HOA TƯƠI SÀI GÒN
+            </span>
+          </a>
+        </div>
+
+        <!-- Search Input with compact select scope -->
+        <form id="globalSearchForm" th:action="@{/products#product-catalog}" method="get"
+          class="hidden md:flex items-center flex-1 max-w-xl mx-4">
+          <div
+            class="w-full flex items-center bg-white border border-[#E2D7D1] rounded-full pl-3 pr-1 py-1 shadow-xs focus-within:border-primary transition-all">
+            <!-- Khối chọn phạm vi tìm kiếm (khoảng cách chuẩn) -->
+            <div class="relative flex items-center border-r border-[#E2D7D1] pr-1">
+              <select id="searchScopeSelect"
+                class="bg-transparent text-[13px] text-[#2D2424] font-bold pl-1 pr-4 py-0.5 focus:outline-none cursor-pointer appearance-none transition-all"
+                onchange="this.style.width = this.value === 'users' ? '115px' : (this.value === 'stores' ? '98px' : '96px')"
+                style="width: 96px;">
+                <option value="products" selected>🌸 Mẫu hoa</option>
+                <option value="stores">🏬 Cửa hàng</option>
+                <option value="users">👥 Người dùng</option>
+              </select>
+              <span
+                class="material-symbols-outlined text-[16px] text-[#5C4A42] pointer-events-none absolute right-1">expand_more</span>
+            </div>
+            <input name="keyword"
+              class="flex-1 bg-transparent px-3 text-[13px] text-on-surface placeholder:text-[#9A8D87] focus:outline-none"
+              placeholder="Tìm hoa hồng, cửa hàng hoặc người dùng..." type="text">
+            <button type="submit"
+              class="px-5 py-2 rounded-full bg-[#1E453E] hover:bg-[#163630] text-white text-[13px] font-medium flex items-center gap-1 shadow-xs transition-colors cursor-pointer"
+              id="btnHeaderSearch" title="Tìm kiếm">
+              <span class="material-symbols-outlined text-[16px]">search</span>
+              <span>Tìm</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Right Actions -->
+        <div class="flex items-center gap-3 shrink-0">
+          <a class="p-2 text-[#5C4A42] hover:text-primary transition-colors rounded-full hover:bg-surface-container"
+            th:href="@{/customer/profile/wishlist}" title="Hoa yêu thích">
+            <span class="material-symbols-outlined text-[22px]">favorite_border</span>
+          </a>
+          <a class="p-2 text-[#5C4A42] hover:text-primary transition-colors rounded-full hover:bg-surface-container relative"
+            th:href="@{/cart}" title="Giỏ hoa">
+            <span class="material-symbols-outlined text-[22px]">shopping_cart</span>
+            <span th:if="${cartItemCount != null and cartItemCount > 0}"
+              class="absolute -top-1 -right-1 bg-secondary text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center"
+              th:text="${cartItemCount}"></span>
+          </a>
+          <a class="p-2 text-[#1E453E] bg-[#E9F3EE] rounded-full" th:href="@{/customer/orders}" title="Đơn hoa của tôi">
+            <span class="material-symbols-outlined text-[22px]">receipt_long</span>
+          </a>
+          <a class="p-2 text-[#5C4A42] hover:text-primary transition-colors rounded-full hover:bg-surface-container"
+            th:href="@{/customer/profile}" title="Hồ sơ cá nhân">
+            <span class="material-symbols-outlined text-[22px]">person</span>
+          </a>
+
+          <!-- Nút Đăng Xuất mở Modal -->
+          <button type="button" onclick="openModal('signOutModal')"
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#E2D7D1] text-[13px] text-[#5C4A42] hover:bg-[#F5ECE7] hover:text-secondary transition-colors cursor-pointer"
+            title="Đăng xuất">
+            <span class="material-symbols-outlined text-[18px]">logout</span>
+            <span class="hidden sm:inline">Đăng xuất</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==============================================
+       MAIN LAYOUT CONTAINER
+       ============================================== -->
+  <main class="pt-[124px] pb-space-xl max-w-7xl mx-auto px-4 md:px-margin-desktop">
+
+    <!-- Flash message alerts -->
+    <div th:if="${successMessage}"
+      class="mb-4 p-4 rounded-xl bg-[#E9F3EE] border border-[#264E43]/20 flex items-center gap-3 shadow-xs">
+      <span class="material-symbols-outlined text-[22px] text-[#1E453E]">check_circle</span>
+      <span class="font-body-md text-body-md text-[#1E453E] font-semibold" th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}"
+      class="mb-4 p-4 rounded-xl bg-[#FFDAD6] border border-[#BA1A1A]/20 flex items-center gap-3 shadow-xs">
+      <span class="material-symbols-outlined text-[22px] text-[#BA1A1A]">error</span>
+      <span class="font-body-md text-body-md text-[#BA1A1A] font-semibold" th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Top breadcrumb & Page Title Banner -->
+    <div class="py-space-md border-b border-[#EAE1DC] mb-space-lg">
+      <div class="flex flex-wrap items-center justify-between gap-space-sm mb-3">
+        <div class="flex items-center gap-space-xs font-body-sm text-body-sm text-on-surface-variant">
+          <a class="hover:text-primary flex items-center gap-0.5" th:href="@{/}">
+            <span class="material-symbols-outlined text-[16px]">home</span>Trang chủ
+          </a>
+          <span class="text-outline-variant">/</span>
+          <a class="hover:text-primary" th:href="@{/customer/profile}">Tài khoản khách hàng</a>
+          <span class="text-outline-variant">/</span>
+          <span class="text-secondary font-bold font-body-sm">Lịch sử đơn đặt hoa</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <a th:href="@{/}"
+            class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#1E453E] hover:bg-[#163630] text-white text-[13px] font-bold shadow-xs transition-colors">
+            <span class="material-symbols-outlined text-[16px]">add_shopping_cart</span>
+            <span>Đặt Thêm Hoa Tươi</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <h1 class="font-extrabold text-[26px] md:text-[28px] text-[#2D2424] tracking-tight flex items-center gap-2">
+            <span>Lịch Sử Đơn Đặt Hoa</span>
+            <span class="text-[13px] font-bold px-2.5 py-0.5 rounded-full bg-[#E9F3EE] text-[#1E453E]"
+              th:text="${totalOrders != null ? totalOrders + ' đơn hàng' : '0 đơn'}">0 đơn</span>
+          </h1>
+          <p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Theo dõi tiến độ thợ cắm hoa, đơn vị vận
+            chuyển và lịch giao hoa toàn thành phố</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==============================================
+         STATUS FILTER TABS (BỘ LỌC TRẠNG THÁI)
+         ============================================== -->
+    <div
+      class="bg-surface-container-lowest rounded-2xl shadow-xs border border-[#EAE1DC] p-1.5 mb-space-lg flex items-center gap-1.5 overflow-x-auto">
+      <!-- Tất cả đơn -->
+      <a th:href="@{/customer/orders(status='ALL')}"
+        class="px-4 py-2 rounded-xl text-[13px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
+        th:classappend="${currentStatus == 'ALL' or currentStatus == null} ? 'bg-[#1E453E] text-white shadow-xs' : 'text-[#6E6464] hover:bg-[#F5ECE7] hover:text-[#2D2424]'">
+        <span class="material-symbols-outlined text-[17px]">list_alt</span>
+        <span>Tất cả</span>
+      </a>
+
+      <!-- Chờ xác nhận (PENDING) -->
+      <a th:href="@{/customer/orders(status='PENDING')}"
+        class="px-4 py-2 rounded-xl text-[13px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
+        th:classappend="${currentStatus == 'PENDING'} ? 'bg-[#1E453E] text-white shadow-xs' : 'text-[#6E6464] hover:bg-[#F5ECE7] hover:text-[#2D2424]'">
+        <span class="material-symbols-outlined text-[17px]">hourglass_empty</span>
+        <span>Chờ xác nhận</span>
+      </a>
+
+      <!-- Đã tiếp nhận (CONFIRMED) -->
+      <a th:href="@{/customer/orders(status='CONFIRMED')}"
+        class="px-4 py-2 rounded-xl text-[13px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
+        th:classappend="${currentStatus == 'CONFIRMED'} ? 'bg-[#1E453E] text-white shadow-xs' : 'text-[#6E6464] hover:bg-[#F5ECE7] hover:text-[#2D2424]'">
+        <span class="material-symbols-outlined text-[17px]">task_alt</span>
+        <span>Đã tiếp nhận</span>
+      </a>
+
+      <!-- Đang cắm hoa (PREPARING) -->
+      <a th:href="@{/customer/orders(status='PREPARING')}"
+        class="px-4 py-2 rounded-xl text-[13px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
+        th:classappend="${currentStatus == 'PREPARING'} ? 'bg-[#1E453E] text-white shadow-xs' : 'text-[#6E6464] hover:bg-[#F5ECE7] hover:text-[#2D2424]'">
+        <span class="material-symbols-outlined text-[17px]">local_florist</span>
+        <span>Đang cắm hoa</span>
+      </a>
+
+      <!-- Đang giao (DELIVERING) -->
+      <a th:href="@{/customer/orders(status='DELIVERING')}"
+        class="px-4 py-2 rounded-xl text-[13px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
+        th:classappend="${currentStatus == 'DELIVERING'} ? 'bg-[#1E453E] text-white shadow-xs' : 'text-[#6E6464] hover:bg-[#F5ECE7] hover:text-[#2D2424]'">
+        <svg class="w-[17px] h-[17px] shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-2 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+          </svg>
+        <span>Đang giao hàng</span>
+      </a>
+
+      <!-- Hoàn tất (COMPLETED) -->
+      <a th:href="@{/customer/orders(status='COMPLETED')}"
+        class="px-4 py-2 rounded-xl text-[13px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
+        th:classappend="${currentStatus == 'COMPLETED'} ? 'bg-[#1E453E] text-white shadow-xs' : 'text-[#6E6464] hover:bg-[#F5ECE7] hover:text-[#2D2424]'">
+        <span class="material-symbols-outlined text-[17px]">verified</span>
+        <span>Hoàn thành</span>
+      </a>
+
+      <!-- Đã hủy (CANCELLED) -->
+      <a th:href="@{/customer/orders(status='CANCELLED')}"
+        class="px-4 py-2 rounded-xl text-[13px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
+        th:classappend="${currentStatus == 'CANCELLED'} ? 'bg-[#1E453E] text-white shadow-xs' : 'text-[#6E6464] hover:bg-[#F5ECE7] hover:text-[#2D2424]'">
+        <span class="material-symbols-outlined text-[17px]">cancel</span>
+        <span>Đã hủy</span>
+      </a>
+    </div>
+
+    <!-- ==============================================
+         EMPTY STATE (KHI CHƯA CÓ ĐƠN HÀNG)
+         ============================================== -->
+    <div th:if="${#lists.isEmpty(orders)}"
+      class="bg-surface-container-lowest rounded-2xl shadow-xs border border-[#EAE1DC] text-center p-12 my-6">
+      <div
+        class="w-16 h-16 rounded-full bg-[#F5ECE7] text-secondary flex items-center justify-center mx-auto mb-4 text-3xl">
+        🌸
+      </div>
+      <h3 class="font-extrabold text-[20px] text-[#2D2424]">Bạn chưa có đơn đặt hoa nào trong danh mục này</h3>
+      <p class="font-body-md text-body-md text-on-surface-variant max-w-md mx-auto mt-1 mb-6">
+        Các đơn hoa tươi sang trọng và điện hoa nghệ thuật của bạn sẽ hiển thị tại đây sau khi đặt hàng.
+      </p>
+      <a th:href="@{/}"
+        class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#1E453E] hover:bg-[#163630] text-white font-bold text-[14px] shadow-sm transition-all">
+        <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+        <span>Khám Phá Cửa Hàng Hoa Ngay</span>
+      </a>
+    </div>
+
+    <!-- ==============================================
+         ORDER CARDS LIST (DANH SÁCH ĐƠN HÀNG)
+         ============================================== -->
+    <div th:if="${not #lists.isEmpty(orders)}" class="space-y-space-md">
+
+      <div th:each="o : ${orders}"
+        class="bg-surface-container-lowest rounded-2xl border border-[#EAE1DC] shadow-xs hover:border-[#264E43]/40 transition-all overflow-hidden">
+
+        <!-- Order Card Header -->
+        <div
+          class="px-space-md sm:px-space-lg py-3.5 bg-[#FAF7F5] border-b border-[#EAE1DC] flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+            <span class="font-extrabold text-[16px] sm:text-[17px] text-[#2D2424] flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[18px] text-[#264E43]">receipt</span>
+              <span th:text="'Đơn Hoa #' + ${o.id}">Đơn Hoa #123</span>
+            </span>
+
+            <!-- Badge Loại Đơn (Mua hoa tươi / Thuê khung) -->
+            <span th:if="${o.orderType.name() == 'BUY'}"
+              class="px-2.5 py-0.5 rounded-full bg-[#E9F3EE] text-[#1E453E] text-[11.5px] font-bold border border-[#264E43]/20 flex items-center gap-1">
+              <span class="text-[12px]">🌸</span> HOA TƯƠI
+            </span>
+            <span th:if="${o.orderType.name() == 'RENT'}"
+              class="px-2.5 py-0.5 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11.5px] font-bold border border-[#F59E0B]/30 flex items-center gap-1">
+              <span class="text-[12px]">🎪</span> THUÊ KHUNG SỰ KIỆN
+            </span>
+
+            <!-- Ngày giờ đặt -->
+            <span class="text-[12.5px] text-[#7E726D] flex items-center gap-1 font-medium">
+              <span class="material-symbols-outlined text-[15px]">calendar_today</span>
+              <span th:text="${#temporals.format(o.createdAt, 'dd/MM/yyyy HH:mm')}">15/10/2026 14:30</span>
+            </span>
+          </div>
+
+          <!-- Status Badge -->
+          <div>
+            <span th:if="${o.status.name() == 'PENDING'}"
+              class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#FAF7F5] text-[#5C4A42] border border-[#E2D7D1] font-bold text-[12px]">
+              <span class="material-symbols-outlined text-[14px]">hourglass_top</span> Chờ Xác Nhận
+            </span>
+            <span th:if="${o.status.name() == 'CONFIRMED'}"
+              class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#E0F2FE] text-[#0369A1] border border-[#0284C7]/30 font-bold text-[12px]">
+              <span class="material-symbols-outlined text-[14px]">check_circle</span> Đã Tiếp Nhận
+            </span>
+            <span th:if="${o.status.name() == 'PREPARING'}"
+              class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#FCECEE] text-[#C93B50] border border-[#C93B50]/30 font-bold text-[12px]">
+              <span class="text-[12px]">🌸</span> Đang Cắm Hoa Nghệ Thuật
+            </span>
+            <span th:if="${o.status.name() == 'DELIVERING'}"
+              class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#E0F2FE] text-[#0369A1] border border-[#0284C7]/30 font-bold text-[12px]">
+              <svg class="w-[14px] h-[14px] shrink-0" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-2 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+            </svg>
+              <span>Đang Giao Hỏa Tốc</span>
+            </span>
+            <span th:if="${o.status.name() == 'COMPLETED' or o.status.name() == 'DELIVERED'}"
+              class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#E9F3EE] text-[#1E453E] border border-[#264E43]/30 font-bold text-[12px]">
+              <span class="material-symbols-outlined text-[14px]">verified</span> Giao Hoa Thành Công
+            </span>
+            <span th:if="${o.status.name() == 'RENTING'}"
+              class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] border border-[#F59E0B]/30 font-bold text-[12px]">
+              <span class="material-symbols-outlined text-[14px]">festival</span> Đang Sử Dụng Khung
+            </span>
+            <span th:if="${o.status.name() == 'RETURNED'}"
+              class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#E9F3EE] text-[#1E453E] border border-[#264E43]/30 font-bold text-[12px]">
+              <span class="material-symbols-outlined text-[14px]">inventory_2</span> Đã Trả Khung (Hoàn Cọc)
+            </span>
+            <span th:if="${o.status.name() == 'REFUND_REQUESTED'}"
+              class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] border border-[#F59E0B]/30 font-bold text-[12px]">
+              <span class="material-symbols-outlined text-[14px]">currency_exchange</span> Chờ Hoàn Tiền
+            </span>
+            <span th:if="${o.status.name() == 'REFUNDED'}"
+              class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#F3F4F6] text-[#4B5563] border border-[#E5E7EB] font-bold text-[12px]">
+              <span class="material-symbols-outlined text-[14px]">price_check</span> Đã Hoàn Tiền
+            </span>
+            <span th:if="${o.status.name() == 'CANCELLED'}"
+              class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#F5ECE7] text-[#7E726D] border border-[#E2D7D1] font-bold text-[12px]">
+              <span class="material-symbols-outlined text-[14px]">block</span> Đã Hủy
+            </span>
+          </div>
+        </div>
+
+        <!-- Order Card Body -->
+        <div class="p-space-md sm:p-space-lg space-y-space-md">
+
+          <!-- Store Branch & Delivery Information Card -->
+          <div
+            class="grid grid-cols-1 md:grid-cols-2 gap-space-md bg-[#FAF7F5] border border-[#EAE1DC] p-space-md rounded-xl text-[13px]">
+            <!-- Col 1: Store branch -->
+            <div class="space-y-1">
+              <div class="text-[#7E726D] font-bold flex items-center gap-1">
+                <span class="material-symbols-outlined text-[16px] text-secondary">storefront</span>
+                <span>Chi nhánh cắm &amp; chuẩn bị hoa:</span>
+              </div>
+              <p class="font-bold text-[#2D2424] text-[14px]" th:text="${o.pickupStore.name}">Tên Chi Nhánh</p>
+              <p class="text-[#6E6464] flex items-start gap-1">
+                <span class="material-symbols-outlined text-[15px] text-[#7E726D] shrink-0 mt-0.5">location_on</span>
+                <span th:text="${o.pickupStore.address}">Địa chỉ chi nhánh</span>
+              </p>
+            </div>
+
+            <!-- Col 2: Recipient info -->
+            <div class="space-y-1">
+              <div class="text-[#7E726D] font-bold flex items-center gap-1">
+                <span class="material-symbols-outlined text-[16px] text-[#264E43]">person_pin_circle</span>
+                <span>Thông tin người nhận &amp; Điểm giao hoa:</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-[#2D2424] text-[14px]"
+                  th:text="${o.recipientName != null ? o.recipientName : o.user.fullName}">Tên Người Nhận</span>
+                <span
+                  class="px-2 py-0.5 rounded-full bg-white border border-[#E2D7D1] text-[11.5px] font-bold text-[#2D2424]"
+                  th:text="${o.recipientPhone != null ? o.recipientPhone : o.user.phone}">0901234567</span>
+              </div>
+              <p class="text-[#6E6464] flex items-start gap-1">
+                <span class="material-symbols-outlined text-[15px] text-[#7E726D] shrink-0 mt-0.5">home_pin</span>
+                <span th:text="${o.recipientAddress != null ? o.recipientAddress : o.user.address}">Địa chỉ nhận</span>
+              </p>
+              <div th:if="${o.deliveryDate != null}"
+                class="text-secondary font-bold text-[12.5px] flex items-center gap-1 pt-0.5">
+                <span class="material-symbols-outlined text-[15px]">event</span>
+                <span>Ngày hẹn giao hoa: <strong th:text="${o.deliveryDate}"></strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Greeting Card Box if exists -->
+          <div th:if="${o.greetingMessage != null and !o.greetingMessage.isEmpty()}"
+            class="p-3.5 rounded-xl bg-[#FCFAF8] border border-[#F2C94C]/40 flex items-start gap-2.5">
+            <span class="material-symbols-outlined text-[20px] text-secondary shrink-0 mt-0.5">mark_email_read</span>
+            <div class="text-[13px]">
+              <span class="font-bold text-secondary block mb-0.5">Lời chúc in trên thiệp hoa / banner chúc mừng:</span>
+              <p class="italic text-[#2D2424]" th:text="'&quot;' + ${o.greetingMessage} + '&quot;'"></p>
+            </div>
+          </div>
+
+          <!-- Product Details Table -->
+          <div class="overflow-x-auto border border-[#EAE1DC] rounded-xl">
+            <table class="w-full text-left text-[13.5px]">
+              <thead
+                class="bg-[#FAF7F5] border-b border-[#EAE1DC] text-[#7E726D] font-bold text-[12px] uppercase tracking-wider">
+                <tr>
+                  <th class="py-2.5 px-4">Mẫu Hoa / Sản Phẩm</th>
+                  <th class="py-2.5 px-3 text-center">Số Lượng</th>
+                  <th class="py-2.5 px-4 text-right">Đơn Giá</th>
+                  <th th:if="${o.orderType.name() == 'RENT'}" class="py-2.5 px-4 text-center">Thời Gian Thuê</th>
+                  <th th:if="${o.orderType.name() == 'RENT'}" class="py-2.5 px-4 text-right">Tiền Cọc</th>
+                  <th class="py-2.5 px-4 text-right">Tác Vụ</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[#EAE1DC]/60">
+                <tr th:each="d : ${o.orderDetails}" class="hover:bg-[#FAF7F5]/50 transition-colors">
+                  <!-- Name -->
+                  <td class="py-3 px-4">
+                    <span class="font-bold text-[#2D2424] flex items-center gap-1.5">
+                      <span class="text-secondary text-[16px]">🌸</span>
+                      <span th:text="${d.product.name}">Tên Mẫu Hoa Tuyển Chọn</span>
+                    </span>
+                  </td>
+                  <!-- Quantity -->
+                  <td class="py-3 px-3 text-center">
+                    <span
+                      class="px-2.5 py-0.5 rounded-full bg-[#FAF7F5] border border-[#E2D7D1] text-[12px] font-bold text-[#2D2424]"
+                      th:text="'x' + ${d.quantity}">x1</span>
+                  </td>
+                  <!-- Unit price -->
+                  <td class="py-3 px-4 text-right font-bold text-secondary"
+                    th:text="${#numbers.formatDecimal(d.unitPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                    550,000 đ
+                  </td>
+                  <!-- Rental period -->
+                  <td th:if="${o.orderType.name() == 'RENT'}" class="py-3 px-4 text-center">
+                    <span class="px-2.5 py-1 rounded-lg bg-[#E9F3EE] text-[#1E453E] text-[12px] font-semibold"
+                      th:text="${d.rentStartDate} + ' → ' + ${d.rentEndDate}">10/10 → 12/10</span>
+                  </td>
+                  <!-- Deposit -->
+                  <td th:if="${o.orderType.name() == 'RENT'}" class="py-3 px-4 text-right font-bold text-[#B45309]"
+                    th:text="${#numbers.formatDecimal(d.depositFee, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                    200,000 đ
+                  </td>
+                  <!-- Review Button -->
+                  <td class="py-3 px-4 text-right">
+                    <a th:if="${o.status.name() == 'COMPLETED' or o.status.name() == 'DELIVERED'}"
+                      th:href="@{/product/{id}(id=${d.product.id})}"
+                      class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#FFF9E6] text-[#B45309] hover:bg-[#FEF3C7] border border-[#F59E0B]/40 text-[12px] font-bold transition-all shadow-2xs">
+                      <span>⭐ Viết Đánh Giá</span>
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Order Card Footer: Financials and Action Buttons -->
+          <div class="pt-3 border-t border-[#EAE1DC] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+
+            <!-- Financial breakdown -->
+            <div class="flex flex-wrap items-center gap-4">
+              <div>
+                <span class="text-[12.5px] text-[#7E726D]">Tổng thanh toán:</span>
+                <strong class="font-extrabold text-[18px] text-secondary ml-1"
+                  th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">1,200,000 đ</strong>
+              </div>
+              <div th:if="${o.totalDeposit != null and o.totalDeposit > 0}">
+                <span class="text-[12.5px] text-[#7E726D]">Tiền cọc:</span>
+                <strong class="font-bold text-[15px] text-[#B45309] ml-1"
+                  th:text="${#numbers.formatDecimal(o.totalDeposit, 0, 'COMMA', 0, 'POINT')} + ' đ'">300,000 đ</strong>
+              </div>
+              <div th:if="${o.fineAmount != null and o.fineAmount > 0}">
+                <span class="text-[12.5px] text-[#7E726D]">Phụ phí phát sinh:</span>
+                <strong class="font-bold text-[15px] text-[#BA1A1A] ml-1"
+                  th:text="${#numbers.formatDecimal(o.fineAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">50,000 đ</strong>
+              </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="flex items-center gap-2 self-end sm:self-auto">
+              <!-- Nút Chi Tiết Đơn -->
+              <a th:href="@{'/customer/orders/detail/' + ${o.id}}"
+                class="inline-flex items-center gap-1 px-4 py-2 rounded-full border border-[#E2D7D1] hover:border-[#1E453E] text-[#1E453E] hover:bg-[#E9F3EE] text-[13px] font-bold transition-all shadow-xs"
+                title="Xem chi tiết đơn hàng">
+                <span class="material-symbols-outlined text-[16px]">info</span>
+                <span>Chi Tiết</span>
+              </a>
+
+              <!-- Nút Yêu Cầu Hoàn Tiền (nếu đã hoàn tất) -->
+              <form th:if="${o.status.name() == 'DELIVERED' or o.status.name() == 'COMPLETED'}"
+                th:action="@{'/customer/orders/refund/' + ${o.id}}" method="post" class="inline">
+                <button type="submit"
+                  class="inline-flex items-center gap-1 px-4 py-2 rounded-full border border-[#E2D7D1] text-[#7E726D] hover:text-secondary hover:border-secondary hover:bg-[#FCECEE] text-[13px] font-bold transition-all shadow-xs cursor-pointer"
+                  onclick="return confirm('Bạn có chắc muốn gửi yêu cầu hoàn tiền cho đơn hàng này?');">
+                  <span class="material-symbols-outlined text-[16px]">assignment_return</span>
+                  <span>Hoàn Tiền</span>
+                </button>
+              </form>
+
+              <!-- Nút Hủy Đơn Hàng (nếu còn trong thời hạn) -->
+              <button th:if="${o.isCancellable()}" type="button"
+                class="inline-flex items-center gap-1 px-4 py-2 rounded-full border border-[#BA1A1A] text-[#BA1A1A] hover:bg-[#FFDAD6]/40 text-[13px] font-bold transition-all shadow-xs cursor-pointer"
+                th:onclick="'openCancelModal(' + ${o.id} + ')'" title="Hủy đơn hàng">
+                <span class="material-symbols-outlined text-[16px]">cancel</span>
+                <span>Hủy Đơn Hàng</span>
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ==============================================
+         PAGINATION (PHÂN TRANG)
+         ============================================== -->
+    <nav th:if="${totalPages > 1}" aria-label="Page navigation" class="mt-8 flex justify-center">
+      <ul class="flex items-center gap-1.5 p-1.5 bg-white rounded-full border border-[#EAE1DC] shadow-xs">
+        <!-- Previous -->
+        <li th:classappend="${!hasPrevious} ? 'opacity-40 pointer-events-none'">
+          <a class="px-3.5 py-1.5 rounded-full text-[13px] font-bold text-[#5C4A42] hover:bg-[#F5ECE7] transition-colors flex items-center gap-1"
+            th:href="@{/customer/orders(status=${currentStatus}, page=${currentPage - 1})}">
+            <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+            <span>Trước</span>
+          </a>
+        </li>
+
+        <!-- Sequence -->
+        <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+          <a class="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold transition-all"
+            th:classappend="${i == currentPage} ? 'bg-[#1E453E] text-white shadow-xs' : 'text-[#5C4A42] hover:bg-[#F5ECE7]'"
+            th:href="@{/customer/orders(status=${currentStatus}, page=${i})}" th:text="${i + 1}">1</a>
+        </li>
+
+        <!-- Next -->
+        <li th:classappend="${!hasNext} ? 'opacity-40 pointer-events-none'">
+          <a class="px-3.5 py-1.5 rounded-full text-[13px] font-bold text-[#5C4A42] hover:bg-[#F5ECE7] transition-colors flex items-center gap-1"
+            th:href="@{/customer/orders(status=${currentStatus}, page=${currentPage + 1})}">
+            <span>Sau</span>
+            <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+  </main>
+
+  <!-- ==============================================
+       MODALS: HỦY ĐƠN & ĐĂNG XUẤT
+       ============================================== -->
+  <!-- Modal: Xác nhận hủy đơn hàng -->
+  <div class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+    id="cancelOrderModal">
+    <div
+      class="bg-surface-container-lowest rounded-2xl max-w-sm w-full p-space-lg shadow-2xl text-center border border-[#EAE1DC]">
+      <div
+        class="w-12 h-12 rounded-full bg-[#FFDAD6] text-[#BA1A1A] flex items-center justify-center mx-auto mb-space-sm">
+        <span class="material-symbols-outlined text-[26px]">cancel</span>
+      </div>
+      <h4 class="font-extrabold text-[20px] text-[#2D2424]">Xác Nhận Hủy Đơn?</h4>
+      <p class="font-body-sm text-body-sm text-on-surface-variant mt-2">
+        Bạn có chắc chắn muốn hủy đơn hàng <strong id="cancelOrderIdText" class="text-secondary">#0</strong> không? Sau
+        khi hủy, cửa hàng sẽ ngừng chuẩn bị hoa cho đơn này.
+      </p>
+
+      <form id="cancelOrderForm" method="post" class="mt-space-lg grid grid-cols-2 gap-space-sm">
+        <button type="button"
+          class="py-2.5 rounded-full bg-[#F5ECE7] text-on-surface font-bold text-[13px] hover:bg-[#EFE7E2] transition-colors border border-[#E2D7D1] cursor-pointer"
+          onclick="closeModal('cancelOrderModal')">
+          Giữ Đơn
+        </button>
+        <button type="submit"
+          class="py-2.5 rounded-full bg-[#BA1A1A] text-white font-bold text-[13px] shadow-xs hover:bg-[#93000a] transition-all cursor-pointer">
+          Xác Nhận Hủy
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Xác nhận đăng xuất (#signOutModal) -->
+  <div class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+    id="signOutModal">
+    <div
+      class="bg-surface-container-lowest rounded-2xl max-w-sm w-full p-space-lg shadow-2xl text-center border border-[#EAE1DC]">
+      <div
+        class="w-12 h-12 rounded-full bg-[#FCECEE] text-secondary flex items-center justify-center mx-auto mb-space-sm">
+        <span class="material-symbols-outlined text-[26px]">logout</span>
+      </div>
+      <h4 class="font-extrabold text-[20px] text-[#2D2424]">Đăng Xuất Tài Khoản?</h4>
+      <p class="font-body-sm text-body-sm text-on-surface-variant mt-2">
+        Bạn có chắc chắn muốn rời khỏi phiên đăng nhập? Giỏ hoa và các đơn hàng đã lưu sẽ luôn được giữ an toàn.
+      </p>
+
+      <form th:action="@{/logout}" method="post" class="mt-space-lg grid grid-cols-2 gap-space-sm">
+        <button type="button"
+          class="py-2.5 rounded-full bg-[#F5ECE7] text-on-surface font-bold text-[13px] hover:bg-[#EFE7E2] transition-colors border border-[#E2D7D1] cursor-pointer"
+          onclick="closeModal('signOutModal')">
+          Ở lại
+        </button>
+        <button type="submit"
+          class="py-2.5 rounded-full bg-secondary text-white font-bold text-[13px] shadow-xs hover:bg-[#b02f43] transition-all cursor-pointer">
+          Xác nhận
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==============================================
+       FOOTER CHUẨN ĐỒNG BỘ THEO MẪU (BOTANICAL ATELIER)
+       ============================================== -->
+  <footer class="w-full border-top pt-4 pb-3 mt-12" style="background-color: #FAF4F0 !important; border-top: 1px solid #EBDED4 !important; font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif !important; color: #4A3E3D !important; width: 100%;">
+    <div style="max-width: 1240px; margin: 0 auto; padding-left: 20px; padding-right: 20px;">
+      
+      <!-- Hàng trên: 2 Cột thông tin -->
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 24px; padding-bottom: 24px;">
+        
+        <!-- Cột 1: Thương hiệu & Liên hệ -->
+        <div style="flex: 1 1 320px; max-width: 480px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+            <span style="font-size: 22px; line-height: 1;">🌸</span>
+            <span style="font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 700; color: #C84357; letter-spacing: 0.5px;">HOA TƯƠI SÀI GÒN</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; color: #555555;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; line-height: 1;">call</span>
+              <span>Hotline: <strong style="color: #222222; font-weight: 700;">028 1111 222 - 0909 888 777</strong></span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; line-height: 1;">mail</span>
+              <span>Email: <a href="mailto:atelier@hoatuoisaigon.vn" style="color: #555555; text-decoration: none;">atelier@hoatuoisaigon.vn</a></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột 2: Hệ thống Atelier & Chi nhánh -->
+        <div style="flex: 1 1 360px; max-width: 560px;">
+          <h4 style="font-size: 13px; font-weight: 800; color: #264E43; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; margin-top: 2px;">HỆ THỐNG ATELIER &amp; CHI NHÁNH</h4>
+          <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; color: #555555;">
+            <div style="display: flex; align-items: flex-start; gap: 8px;">
+              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
+              <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Q.1:</strong> 123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM</span>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 8px;">
+              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
+              <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Q.7:</strong> 456 Nguyễn Thị Thập, Tân Hưng, Quận 7, TP.HCM</span>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 8px;">
+              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
+              <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Thủ Đức:</strong> 1 Võ Văn Ngân, Linh Chiểu, TP. Thủ Đức, TP.HCM</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Hàng dưới: Bản quyền + Cam kết chất lượng & Giao hàng -->
+      <div style="border-top: 1px solid #EBDED4; padding-top: 16px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; font-size: 12.5px; color: #777777;">
+        <div>
+          <span>© 2026 HOA TƯƠI SÀI GÒN .</span>
+        </div>
+        <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <span style="display: inline-flex; align-items: center; gap: 5px; color: #333333; font-weight: 600;">
+            <span style="color: #C84357;">🌸</span> 100% Hoa Tươi Nhập Khẩu &amp; Đà Lạt
+          </span>
+          <span style="color: #D8CBC2;">•</span>
+          <span style="display: inline-flex; align-items: center; gap: 4px; color: #666666;">
+            <span class="material-symbols-outlined" style="font-size: 15px; color: #264E43; line-height: 1;">schedule</span> Giao hỏa tốc 60–90 phút
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ==============================================
+       SCRIPTS: MODALS & GLOBAL SEARCH
+       ============================================== -->
+  <script>
+    function openModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function openCancelModal(orderId) {
+      document.getElementById('cancelOrderIdText').textContent = '#' + orderId;
+      document.getElementById('cancelOrderForm').action = '/customer/orders/cancel/' + orderId;
+      openModal('cancelOrderModal');
+    }
+
+    // Script điều hướng tìm kiếm thông minh theo Phạm vi (Hoa / Cửa Hàng / Người Dùng)
+    document.getElementById('globalSearchForm')?.addEventListener('submit', function (e) {
+      const scope = document.getElementById('searchScopeSelect')?.value;
+      const kwInput = this.querySelector('input[name="keyword"]');
+      const kw = kwInput ? kwInput.value.trim() : '';
+      if (scope === 'users') {
+        e.preventDefault();
+        window.location.href = '/users' + (kw ? '?keyword=' + encodeURIComponent(kw) : '');
+      } else if (scope === 'stores') {
+        e.preventDefault();
+        window.location.href = '/stores' + (kw ? '?keyword=' + encodeURIComponent(kw) : '');
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const scopeSel = document.getElementById('searchScopeSelect');
+      if (scopeSel) {
+        scopeSel.style.width = scopeSel.value === 'users' ? '120px' : (scopeSel.value === 'stores' ? '110px' : '96px');
+      }
+    });
+  </script>
 </body>
+
 </html>

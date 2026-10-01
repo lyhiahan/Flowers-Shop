@@ -1,14 +1,18 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chuỗi Cửa Hàng Hoa Tươi - Nở Trọn Yêu Thương, Thắm Trọn Khoảnh Khắc</title>
-    <!-- Google Font: Nunito, Playfair Display & Bootstrap 5 & Icons -->
+    <!-- Google Font: Nunito, Plus Jakarta Sans, Playfair Display & Bootstrap 5 & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
@@ -83,16 +87,19 @@
             padding: 8px 0;
             font-weight: 400;
         }
+
         .top-subbar a {
             color: var(--flower-primary);
             text-decoration: none;
             transition: color 0.15s ease, opacity 0.15s ease;
         }
+
         .top-subbar a:hover {
             color: var(--flower-primary-hover);
             opacity: 0.85;
             text-decoration: underline;
         }
+
         .top-subbar .bi {
             color: var(--flower-primary) !important;
         }
@@ -103,6 +110,7 @@
             border-bottom: 1px solid var(--flower-border);
             padding: 14px 0;
         }
+
         .brand-logo-text {
             font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
             font-size: 24px;
@@ -111,45 +119,83 @@
             letter-spacing: 0.5px;
             line-height: 1;
         }
+
         .brand-logo-icon {
             color: var(--flower-primary) !important;
         }
 
-        /* Menu, ô nhập, nút bấm: 16–18 px, 400 */
+        /* Menu, ô nhập, nút bấm: Giống cấu trúc trang profile */
         .header-search-box {
             background: var(--flower-surface);
-            border: 1.5px solid var(--flower-border);
+            border: 1px solid var(--flower-border);
             border-radius: 9999px;
-            padding: 4px 6px 4px 16px;
+            padding: 3px 4px 3px 10px;
             box-shadow: 0 1px 3px rgba(41, 59, 50, 0.03);
             transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
         }
+
         .header-search-box:focus-within {
             border-color: var(--flower-primary);
             box-shadow: 0 0 0 3px rgba(53, 84, 71, 0.12);
         }
-        .header-search-type {
-            font-size: 16px;
-            font-weight: 400;
-            color: var(--flower-text-main);
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            outline: none;
-            max-width: 120px;
+
+        .header-search-type-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            border-right: 1px solid var(--flower-border);
+            padding-right: 4px;
+            flex-shrink: 0;
         }
+
+        .header-search-type {
+            background: transparent;
+            font-size: 13.5px !important;
+            color: #4A3E3D !important;
+            font-weight: 500 !important;
+            padding-left: 2px;
+            padding-right: 18px;
+            padding-top: 2px;
+            padding-bottom: 2px;
+            outline: none;
+            border: none;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            transition: width 0.2s ease, all 0.2s ease;
+        }
+
+        .header-search-type-icon {
+            font-size: 16px !important;
+            color: #5C4A42;
+            pointer-events: none;
+            position: absolute;
+            right: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         .header-search-input {
             border: none;
             outline: none;
-            font-size: 17px;
+            font-size: 13.5px;
             font-weight: 400;
             color: var(--flower-text-main);
             background: transparent;
+            padding-left: 10px;
+            padding-right: 10px;
         }
+
         .header-search-input:focus {
             box-shadow: none;
             background: transparent;
         }
+
         /* Nút “Tìm”: xanh lá trầm, chữ trắng */
         .header-search-btn {
             background-color: var(--flower-primary);
@@ -157,8 +203,8 @@
             color: #ffffff;
             border-radius: 9999px;
             font-weight: 600;
-            font-size: 14px;
-            padding: 8px 22px;
+            font-size: 13px;
+            padding: 6px 18px;
             transition: background-color 0.2s ease, transform 0.1s ease;
         }
 
@@ -178,9 +224,11 @@
             position: relative;
             transition: color 0.15s ease;
         }
+
         .header-cart-link:hover {
             color: var(--flower-accent);
         }
+
         .cart-badge-pill {
             position: absolute;
             top: 2px;
@@ -197,6 +245,7 @@
             justify-content: center;
             padding: 0 4px;
         }
+
         .account-pill-btn {
             border: 1px solid var(--flower-border);
             background-color: var(--flower-surface);
@@ -210,7 +259,9 @@
             gap: 6px;
             transition: all 0.15s ease;
         }
-        .account-pill-btn:hover, .account-pill-btn:focus {
+
+        .account-pill-btn:hover,
+        .account-pill-btn:focus {
             background-color: var(--flower-sub-bg);
             border-color: var(--flower-sub-border);
             color: var(--flower-primary);
@@ -222,6 +273,7 @@
             border-bottom: 1px solid var(--flower-border);
             padding: 8px 0;
         }
+
         .cat-nav-link {
             color: var(--flower-text-main);
             text-decoration: none;
@@ -232,9 +284,11 @@
             transition: all 0.15s ease;
             white-space: nowrap;
         }
+
         .cat-nav-link:hover {
             color: var(--flower-accent);
         }
+
         .cat-nav-link.active {
             color: var(--flower-accent);
             font-weight: 400;
@@ -565,6 +619,7 @@
             border: 1px solid rgba(231, 222, 212, 0.45);
             box-shadow: 0 2px 10px rgba(53, 84, 71, 0.03);
         }
+
         .brand-hero-content {
             flex: 0 0 45%;
             width: 45%;
@@ -575,6 +630,7 @@
             background-color: var(--flower-bg);
             z-index: 2;
         }
+
         /* Thông tin phụ: 16 px, 400 */
         .brand-hero-badge {
             font-size: 16px;
@@ -585,7 +641,9 @@
             opacity: 0.95;
             margin-bottom: 12px;
         }
+
         /* Tiêu đề trang: 30–32 px | 700 — đậm | Xanh đậm #293B32 */
+
         .brand-hero-title {
             font-size: 32px !important;
             font-weight: 700 !important;
@@ -594,7 +652,9 @@
             margin-bottom: 16px;
             letter-spacing: -0.3px;
         }
+
         /* Nội dung mô tả: 17–18 px | 400 — thường | Xám đậm #475569 */
+
         .brand-hero-subtext {
             font-size: 17.5px !important;
             font-weight: 400 !important;
@@ -602,7 +662,9 @@
             color: #475569 !important;
             margin-bottom: 26px;
         }
+
         /* Nút hành động: 17–18 px | 700 — đậm | Trắng trên nền xanh #355447 */
+
         .btn-brand-hero {
             display: inline-flex;
             align-items: center;
@@ -618,18 +680,21 @@
             transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
             box-shadow: 0 4px 12px rgba(53, 84, 71, 0.15);
         }
+
         .btn-brand-hero:hover {
             background-color: var(--flower-primary-hover);
             color: #ffffff !important;
             transform: translateY(-1px);
             box-shadow: 0 6px 16px rgba(53, 84, 71, 0.22);
         }
+
         .brand-hero-image-wrap {
             flex: 0 0 55%;
             width: 55%;
             position: relative;
             overflow: hidden;
         }
+
         .brand-hero-img {
             width: 100%;
             height: 100%;
@@ -637,6 +702,7 @@
             object-position: center;
             display: block;
         }
+
         .brand-hero-image-overlay {
             position: absolute;
             top: 0;
@@ -646,27 +712,32 @@
             background: linear-gradient(to right, var(--flower-bg) 0%, rgba(255, 240, 243, 0.4) 50%, transparent 100%);
             pointer-events: none;
         }
+
         @media (max-width: 991px) {
             .brand-hero-banner {
                 flex-direction: column;
                 max-height: none;
                 min-height: auto;
             }
+
             .brand-hero-content {
                 flex: 0 0 100%;
                 width: 100%;
                 padding: 32px 24px 28px 24px;
                 order: 1;
             }
+
             .brand-hero-title {
                 font-size: 28px;
             }
+
             .brand-hero-image-wrap {
                 flex: 0 0 100%;
                 width: 100%;
                 height: 250px;
                 order: 2;
             }
+
             .brand-hero-image-overlay {
                 display: none;
             }
@@ -692,11 +763,13 @@
             display: flex;
             flex-direction: column;
         }
+
         .flower-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(53, 84, 71, 0.06);
             border-color: var(--flower-border-hover);
         }
+
         /* Khung ảnh vuông, tỷ lệ 1:1, khoảng 280-300px mỗi cạnh trên máy tính */
         .flower-card-img {
             width: 100%;
@@ -705,16 +778,20 @@
             display: block;
             transition: transform 0.3s ease;
         }
+
         .flower-card:hover .flower-card-img {
             transform: scale(1.02);
         }
+
         .flower-card-body {
             padding: 14px 16px 16px;
             display: flex;
             flex-direction: column;
             flex-grow: 1;
         }
+
         /* Tên sản phẩm trên thẻ: 18 px, 600, Xanh đậm #293B32, tối đa 2 dòng */
+
         .flower-card-title {
             font-size: 18px !important;
             font-weight: 600 !important;
@@ -730,9 +807,11 @@
             text-decoration: none !important;
             transition: color 0.15s ease;
         }
+
         .flower-card-title:hover {
             color: var(--flower-accent) !important;
         }
+
         .flower-card-meta {
             display: flex;
             align-items: baseline;
@@ -740,15 +819,18 @@
             margin-top: auto;
             margin-bottom: 12px;
         }
+
         /* Giá trên thẻ sản phẩm: 22–24 px | 700 — đậm | Hồng trầm #A64060, không gạch chân */
         .flower-price {
             font-size: 23px !important;
             font-weight: 700 !important;
             color: #A64060 !important;
+
             text-decoration: none !important;
             line-height: 1.2;
             white-space: nowrap !important;
         }
+
         .flower-rating {
             font-size: 14.5px;
             font-weight: 400;
@@ -757,6 +839,7 @@
             align-items: center;
             gap: 3px;
         }
+
         .star-gold {
             color: var(--flower-star);
         }
@@ -779,6 +862,7 @@
             transition: background-color 0.2s ease, transform 0.15s ease !important;
             text-decoration: none !important;
         }
+
         .btn-add-cart:hover {
             background-color: var(--flower-primary-hover, #284136) !important;
             color: #ffffff !important;
@@ -796,6 +880,7 @@
             transition: transform 0.2s ease-in-out;
             font-size: 0.8rem;
         }
+
         #btnAllFilters[aria-expanded="true"] .filter-chevron {
             transform: rotate(180deg);
         }
@@ -813,11 +898,13 @@
             transition: all 0.15s ease;
             white-space: nowrap;
         }
+
         .category-pill:hover {
             background-color: var(--flower-sub-bg);
             color: var(--flower-accent);
             border-color: var(--flower-sub-border);
         }
+
         .category-pill.active {
             background-color: var(--flower-accent);
             color: #ffffff;
@@ -834,6 +921,7 @@
             justify-content: center;
             gap: 0.75rem;
         }
+
         .custom-pagination {
             display: inline-flex;
             align-items: center;
@@ -843,11 +931,13 @@
             margin: 0;
             gap: 16px;
         }
+
         .custom-pagination .page-item {
             display: inline-flex;
             align-items: center;
             justify-content: center;
         }
+
         .custom-pagination .page-link {
             display: inline-flex;
             align-items: center;
@@ -866,10 +956,12 @@
             cursor: pointer;
             user-select: none;
         }
+
         .custom-pagination .page-link:hover:not(.disabled):not(.page-ellipsis) {
             color: var(--flower-accent);
             background-color: var(--flower-sub-bg);
         }
+
         .custom-pagination .page-item.active .page-link {
             background-color: var(--flower-primary) !important;
             color: #ffffff !important;
@@ -877,6 +969,7 @@
             border-radius: 6px;
             box-shadow: 0 2px 6px rgba(53, 84, 71, 0.25);
         }
+
         .custom-pagination .page-item.disabled .page-link,
         .custom-pagination .page-item.disabled .page-nav-arrow {
             color: #d1cbc1 !important;
@@ -885,6 +978,7 @@
             background: transparent !important;
             opacity: 0.5;
         }
+
         .custom-pagination .page-nav-arrow {
             color: var(--flower-text-muted);
             font-size: 15px;
@@ -896,10 +990,12 @@
             height: 28px;
             transition: color 0.15s ease;
         }
+
         .custom-pagination .page-nav-arrow:hover:not(.disabled) {
             color: var(--flower-accent);
             background: transparent;
         }
+
         .custom-pagination .page-ellipsis {
             display: inline-flex;
             align-items: center;
@@ -916,21 +1012,25 @@
             border-color: var(--flower-primary);
             color: #ffffff;
         }
+
         .btn-flower-primary:hover {
             background-color: var(--flower-primary-hover);
             border-color: var(--flower-primary-hover);
             color: #ffffff;
         }
+
         .btn-flower-accent {
             background-color: var(--flower-accent);
             border-color: var(--flower-accent);
             color: #ffffff;
         }
+
         .btn-flower-accent:hover {
             background-color: var(--flower-accent-hover);
             border-color: var(--flower-accent-hover);
             color: #ffffff;
         }
+
         .badge-flower-accent {
             background-color: var(--flower-sub-bg);
             color: var(--flower-accent);
@@ -942,13 +1042,34 @@
 <body>
 
     <!-- Thông Báo Đăng Xuất Thành Công (Trở về Giao Diện Dành Cho Khách / Guest) -->
-    <div th:if="${param.logout}" class="alert alert-success alert-dismissible fade show rounded-0 mb-0 py-2 text-center border-0 shadow-sm fw-semibold" role="alert" id="logoutSuccessAlert">
-        <i class="bi bi-check-circle-fill me-1 text-success"></i> Đăng xuất thành công! Trở về giao diện dành cho Khách (Guest).
+    <div th:if="${param.logout}"
+        class="alert alert-success alert-dismissible fade show rounded-0 mb-0 py-2 text-center border-0 shadow-sm fw-semibold"
+        role="alert" id="logoutSuccessAlert">
+        <i class="bi bi-check-circle-fill me-1 text-success"></i> Đăng xuất thành công! Trở về giao diện dành cho Khách
+        (Guest).
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
     <!-- Header: Dòng chính (Logo, Tìm Kiếm, Giỏ Hàng, Tài Khoản cùng hàng) + Danh Mục Gọn -->
     <header class="sticky-top shadow-sm" style="z-index: 1020;">
+
+        <!-- Dòng phụ nhỏ: Hotline + Giao hàng + Following + Cửa hàng + Người dùng -->
+        <div class="top-subbar">
+            <div class="container flower-container d-flex justify-content-between align-items-center">
+                <span class="d-none d-sm-inline"><i class="bi bi-flower1 me-1"></i>Chuỗi Cửa Hàng Hoa Tươi & Điện Hoa
+                    Sài Gòn</span>
+                <div class="d-flex align-items-center gap-3 ms-auto">
+                    <span class="d-none d-md-inline"><i class="bi bi-telephone me-1"></i>028 1111 222</span>
+                    <span class="d-none d-lg-inline"><i class="bi bi-clock me-1"></i>Giao nhanh 60–90 phút</span>
+                    <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/following}"><i
+                            class="bi bi-bookmark-heart me-1"></i>Following</a>
+                    <a th:href="@{/stores}"><i class="bi bi-shop me-1"></i>Hệ thống cửa hàng</a>
+                    <a th:href="@{/users}"><i class="bi bi-people me-1"></i>Người dùng</a>
+                </div>
+            </div>
+        </div>
+
+
         <!-- Dòng chính: Logo, Ô Tìm Kiếm, Giỏ Hàng & Tài Khoản TRÊN CÙNG MỘT HÀNG -->
         <div class="header-main-bar">
             <div class="container flower-container">
@@ -965,19 +1086,23 @@
                     <div class="col-lg-6 col-md-6 col-12 order-3 order-md-2">
                         <form id="globalSearchForm" th:action="@{/products#product-catalog}" method="get" class="w-100">
                             <div class="header-search-box d-flex align-items-center">
-                                <select id="searchScopeSelect"
-                                    class="header-search-type ps-2 pe-1"
-                                    style="cursor: pointer;">
-                                    <option value="products" selected>🌸 Mẫu hoa</option>
-                                    <option value="stores">🏬 Cửa hàng</option>
-                                    <option value="users">👥 Người dùng</option>
-                                </select>
-                                <span class="text-muted opacity-50 px-1">|</span>
-                                <input type="text" id="headerSearchInput" name="keyword" th:value="${keyword}" 
-                                       class="form-control header-search-input shadow-none ps-2" 
-                                       placeholder="Tìm hoa hồng, cửa hàng hoặc người dùng...">
-                                <button class="btn header-search-btn d-flex align-items-center gap-1 flex-shrink-0" type="submit" id="btnHeaderSearch" title="Tìm kiếm">
-                                    <i class="bi bi-search"></i>
+                                <!-- Khối chọn phạm vi tìm kiếm (khoảng cách gọn gàng, tự điều chỉnh giống profile) -->
+                                <div class="header-search-type-wrapper">
+                                    <select id="searchScopeSelect" class="header-search-type"
+                                        onchange="this.style.width = this.value === 'users' ? '115px' : (this.value === 'stores' ? '103px' : '96px')"
+                                        style="width: 96px;">
+                                        <option value="products" selected>🌸 Mẫu hoa</option>
+                                        <option value="stores">🏬 Cửa hàng</option>
+                                        <option value="users">👥 Người dùng</option>
+                                    </select>
+                                    <span class="material-symbols-outlined header-search-type-icon">expand_more</span>
+                                </div>
+                                <input type="text" id="headerSearchInput" name="keyword" th:value="${keyword}"
+                                    class="form-control header-search-input shadow-none flex-grow-1"
+                                    placeholder="Tìm hoa hồng, cửa hàng hoặc người dùng...">
+                                <button class="btn header-search-btn d-flex align-items-center gap-1 flex-shrink-0"
+                                    type="submit" id="btnHeaderSearch" title="Tìm kiếm">
+                                    <span class="material-symbols-outlined" style="font-size: 16px;">search</span>
                                     <span class="d-none d-sm-inline">Tìm</span>
                                 </button>
                             </div>
@@ -985,26 +1110,31 @@
                     </div>
 
                     <!-- Giỏ Hàng + Tài Khoản (Trên cùng một hàng) -->
-                    <div class="col-lg-3 col-md-3 col-6 order-2 order-md-3 d-flex align-items-center justify-content-end gap-3">
+                    <div
+                        class="col-lg-3 col-md-3 col-6 order-2 order-md-3 d-flex align-items-center justify-content-end gap-3">
                         <!-- Following shortcut -->
+
                         <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/following}" class="header-cart-link" id="navFollowingHeader" title="Bộ sưu tập theo dõi">
+
                             <i class="bi bi-bookmark-heart"></i>
                         </a>
 
                         <!-- Giỏ hàng -->
-                        <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/cart}" class="header-cart-link" title="Giỏ hoa của bạn">
+                        <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/cart}" class="header-cart-link"
+                            title="Giỏ hoa của bạn">
                             <i class="bi bi-cart3"></i>
-                            <span th:if="${cartItemCount != null and cartItemCount > 0}" 
-                                  class="cart-badge-pill" 
-                                  th:text="${cartItemCount}">0</span>
+                            <span th:if="${cartItemCount != null and cartItemCount > 0}" class="cart-badge-pill"
+                                th:text="${cartItemCount}">0</span>
                         </a>
 
                         <!-- Dropdown Tài khoản Tinh Gọn -->
                         <div sec:authorize="isAuthenticated()" class="dropdown">
-                            <button class="account-pill-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="accountDropdown" title="Tài khoản" aria-label="Tài khoản">
+                            <button class="account-pill-btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                                id="accountDropdown" title="Tài khoản" aria-label="Tài khoản">
                                 <i class="bi bi-person-circle fs-6"></i>
                                 <span class="d-none d-sm-inline">Tài khoản</span>
                             </button>
+
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border border-light-subtle rounded-3 py-2" style="min-width: 250px;">
                                 <!-- Header: Tên tài khoản + Nhãn Vai trò (Xanh nhạt) + Trạng thái chế độ -->
                                 <li class="px-3 py-2 border-bottom mb-2 bg-light bg-opacity-50">
@@ -1097,6 +1227,7 @@
                                     <button type="button" class="dropdown-item py-2 text-danger small fw-semibold d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#signOutModal" id="btnSignOut">
                                         <i class="bi bi-box-arrow-right"></i>
                                         <span>Đăng xuất</span>
+
                                     </button>
                                 </li>
                             </ul>
@@ -1104,8 +1235,10 @@
 
                         <!-- Khách chưa đăng nhập -->
                         <div sec:authorize="!isAuthenticated()" class="d-flex align-items-center gap-2">
-                            <a th:href="@{/login}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">Đăng Nhập</a>
-                            <a th:href="@{/register}" class="btn btn-flower-primary btn-sm rounded-pill px-3">Đăng Ký</a>
+                            <a th:href="@{/login}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">Đăng
+                                Nhập</a>
+                            <a th:href="@{/register}" class="btn btn-flower-primary btn-sm rounded-pill px-3">Đăng
+                                Ký</a>
                         </div>
                     </div>
                 </div>
@@ -1117,6 +1250,7 @@
         <div class="nav-categories-bar position-relative">
             <div class="container flower-container">
                 <div class="d-flex align-items-center justify-content-center gap-4 flex-wrap">
+
                     <!-- 1. Nút Danh Mục Hoa ở đầu (mở Mega-Menu đầy đủ 3 nhóm) -->
                     <button type="button" 
                             id="btnFlowerMegaMenu" 
@@ -1128,6 +1262,7 @@
                         <i class="bi bi-grid-fill me-1"></i>
                         <span>Danh mục hoa</span>
                     </button>
+
 
                     <!-- 2. Tất cả mẫu hoa -->
                     <a th:href="@{/products} + '#product-catalog'" 
@@ -1362,11 +1497,13 @@
     <div class="container flower-container" style="padding-top: 24px; padding-bottom: 3rem;">
 
         <!-- Flash messages -->
-        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show mb-4 rounded-3 border-0 shadow-sm" role="alert">
+        <div th:if="${successMessage}"
+            class="alert alert-success alert-dismissible fade show mb-4 rounded-3 border-0 shadow-sm" role="alert">
             <i class="bi bi-check-circle-fill me-2"></i><span th:text="${successMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show mb-4 rounded-3 border-0 shadow-sm" role="alert">
+        <div th:if="${errorMessage}"
+            class="alert alert-danger alert-dismissible fade show mb-4 rounded-3 border-0 shadow-sm" role="alert">
             <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${errorMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
@@ -1390,11 +1527,9 @@
                 </div>
             </div>
             <div class="brand-hero-image-wrap">
-                <img th:src="@{/images/florist-artisan-banner.jpg}" 
-                     src="/images/florist-artisan-banner.jpg" 
-                     alt="Nghệ nhân tiệm hoa tỉ mỉ gói từng bó hoa tươi trao gửi yêu thương" 
-                     class="brand-hero-img"
-                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1563245372-f21724e3856d?w=1200&amp;q=80';">
+                <img th:src="@{/images/florist-artisan-banner.jpg}" src="/images/florist-artisan-banner.jpg"
+                    alt="Nghệ nhân tiệm hoa tỉ mỉ gói từng bó hoa tươi trao gửi yêu thương" class="brand-hero-img"
+                    onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1563245372-f21724e3856d?w=1200&amp;q=80';">
                 <div class="brand-hero-image-overlay"></div>
             </div>
         </section>
@@ -1588,26 +1723,27 @@
             <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
                 <div class="col" th:each="fp : ${guestFeaturedProducts}">
                     <a th:href="@{/product/{id}(id=${fp.id})}" class="text-decoration-none">
-                    <div class="card flower-card h-100">
-                        <!-- Ảnh sản phẩm: tỷ lệ 1:1, bo góc đồng đều, bỏ nhãn 'Đã bán ...' trên ảnh -->
-                        <div class="overflow-hidden">
-                            <img th:src="${fp.imageUrl != null ? fp.imageUrl : 'https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=800'}" 
-                                 class="card-img-top flower-card-img" th:alt="${fp.name}"
-                                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800&amp;q=80';">
-                        </div>
-                        <div class="flower-card-body">
-                            <!-- Tên sản phẩm: tối đa 2 dòng -->
-                            <h3 class="flower-card-title" th:title="${fp.name}" th:text="${fp.name}"></h3>
-                            <!-- Giá và đánh giá có vị trí thống nhất -->
-                            <div class="flower-card-meta">
-                                <span class="flower-price" th:text="${#numbers.formatDecimal(fp.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
-                                <span class="flower-rating">
-                                    <i class="bi bi-star-fill star-gold"></i>
-                                    <span th:text="${fp.rating != null ? fp.rating : '5.0'}"></span>
-                                </span>
+                        <div class="card flower-card h-100">
+                            <!-- Ảnh sản phẩm: tỷ lệ 1:1, bo góc đồng đều, bỏ nhãn 'Đã bán ...' trên ảnh -->
+                            <div class="overflow-hidden">
+                                <img th:src="${fp.imageUrl != null ? fp.imageUrl : 'https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=800'}"
+                                    class="card-img-top flower-card-img" th:alt="${fp.name}"
+                                    onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800&amp;q=80';">
+                            </div>
+                            <div class="flower-card-body">
+                                <!-- Tên sản phẩm: tối đa 2 dòng -->
+                                <h3 class="flower-card-title" th:title="${fp.name}" th:text="${fp.name}"></h3>
+                                <!-- Giá và đánh giá có vị trí thống nhất -->
+                                <div class="flower-card-meta">
+                                    <span class="flower-price"
+                                        th:text="${#numbers.formatDecimal(fp.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                                    <span class="flower-rating">
+                                        <i class="bi bi-star-fill star-gold"></i>
+                                        <span th:text="${fp.rating != null ? fp.rating : '5.0'}"></span>
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                    </div>
                     </a>
                 </div>
             </div>
@@ -1615,6 +1751,7 @@
 
         <!-- MỤC 2: TABS TOP 20 & BỘ LỌC TÌM KIẾM, DANH MỤC, PHÂN TRANG CHO KHÁCH HÀNG -->
         <div id="product-catalog" class="card filter-card p-4 mb-4" style="scroll-margin-top: 85px;">
+
             <!-- Breadcrumb điều hướng quay lại danh mục cha / trang chủ (Rubric 3-5c) -->
             <nav aria-label="breadcrumb" class="mb-3" th:if="${selectedCategory != null or (keyword != null and !keyword.isEmpty())}">
                 <ol class="breadcrumb bg-light p-2 px-3 rounded-3 small mb-0 align-items-center">
@@ -1679,11 +1816,13 @@
                            th:id="'sub-category-' + ${sub.id}">
                         </a>
                     </div>
+
                 </div>
             </div>
 
             <!-- Tabs Top 20 theo Rubric (Mới nhất, Bán chạy nhất, Đánh giá cao) -->
             <div class="d-flex flex-wrap gap-2 mb-3 pb-3 border-bottom">
+
                 <a th:href="@{/products(categoryId=${categoryId}, keyword=${keyword}, sort=${sort})} + '#product-catalog'" 
                    class="btn btn-sm rounded-pill px-3 fw-semibold"
                    th:classappend="${tab == null or tab == ''} ? 'btn-flower-primary text-white' : 'btn-light text-secondary border'">
@@ -1702,17 +1841,17 @@
                 <a th:href="@{/products(tab='toprated', categoryId=${categoryId})} + '#product-catalog'" 
                    class="btn btn-sm rounded-pill px-3 fw-semibold"
                    th:classappend="${tab == 'toprated'} ? 'btn-flower-primary text-white' : 'btn-light text-secondary border'">
+
                     Đánh giá cao
                 </a>
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-0">
-                <button class="btn btn-light btn-sm rounded-pill px-3 py-2 fw-semibold border d-inline-flex align-items-center gap-2 text-secondary" 
-                        type="button" 
-                        data-bs-toggle="collapse" 
-                        data-bs-target="#allFiltersCollapse" 
-                        th:aria-expanded="${(minPrice != null) or (maxPrice != null) or (minRating != null)} ? 'true' : 'false'" 
-                        id="btnAllFilters">
+                <button
+                    class="btn btn-light btn-sm rounded-pill px-3 py-2 fw-semibold border d-inline-flex align-items-center gap-2 text-secondary"
+                    type="button" data-bs-toggle="collapse" data-bs-target="#allFiltersCollapse"
+                    th:aria-expanded="${(minPrice != null) or (maxPrice != null) or (minRating != null)} ? 'true' : 'false'"
+                    id="btnAllFilters">
                     <i class="bi bi-sliders" style="color: var(--flower-primary);"></i>
                     <span>Tất cả bộ lọc</span>
                     <i class="bi bi-chevron-down filter-chevron ms-1"></i>
@@ -1725,36 +1864,88 @@
 
             <!-- Mặc định ẩn bộ lọc, chỉ hiển thị khi người dùng bấm nút All filters -->
             <div class="collapse pt-3" id="allFiltersCollapse"
-                 th:classappend="${(minPrice != null) or (maxPrice != null) or (minRating != null)} ? 'show' : ''">
+                th:classappend="${(minPrice != null) or (maxPrice != null) or (minRating != null)} ? 'show' : ''">
                 <!-- Form Tìm kiếm & Sắp xếp & Lọc -->
                 <form id="filterForm" th:action="@{/products#product-catalog}" method="get">
-                <input type="hidden" name="categoryId" th:value="${categoryId}">
-                <input type="hidden" name="tab" th:value="${tab}">
-                <input type="hidden" name="size" th:value="${size}">
-                <input type="hidden" name="page" value="1"> <!-- Reset về trang 1 khi đổi bộ lọc -->
+                    <input type="hidden" name="categoryId" th:value="${categoryId}">
+                    <input type="hidden" name="tab" th:value="${tab}">
+                    <input type="hidden" name="size" th:value="${size}">
+                    <input type="hidden" name="page" value="1"> <!-- Reset về trang 1 khi đổi bộ lọc -->
 
-                <div class="row g-3 align-items-end">
-                    <!-- Ô tìm kiếm từ khóa -->
-                    <div class="col-lg-3 col-md-6">
-                        <label class="form-label small fw-semibold text-secondary mb-1">
-                            <i class="bi bi-search me-1" style="color: var(--flower-primary);"></i>Từ khóa:
-                        </label>
-                        <input type="text" name="keyword" th:value="${keyword}" 
-                                class="form-control form-control-sm rounded-pill ps-3" 
+                    <div class="row g-3 align-items-end">
+                        <!-- Ô tìm kiếm từ khóa -->
+                        <div class="col-lg-3 col-md-6">
+                            <label class="form-label small fw-semibold text-secondary mb-1">
+                                <i class="bi bi-search me-1" style="color: var(--flower-primary);"></i>Từ khóa:
+                            </label>
+                            <input type="text" name="keyword" th:value="${keyword}"
+                                class="form-control form-control-sm rounded-pill ps-3"
                                 placeholder="Nhập tên sản phẩm...">
-                    </div>
+                        </div>
 
-                    <!-- Lọc theo khoảng giá -->
-                    <div class="col-lg-3 col-md-6">
-                        <label class="form-label small fw-semibold text-secondary mb-1">
-                            <i class="bi bi-cash-coin me-1" style="color: var(--flower-primary);"></i>Khoảng giá (VNĐ):
-                        </label>
-                        <div class="input-group input-group-sm">
-                            <input type="number" name="minPrice" th:value="${minPrice}" class="form-control rounded-start-pill ps-2" placeholder="Từ">
-                            <span class="input-group-text bg-light border-start-0 border-end-0">-</span>
-                            <input type="number" name="maxPrice" th:value="${maxPrice}" class="form-control rounded-end-pill ps-2" placeholder="Đến">
+                        <!-- Lọc theo khoảng giá -->
+                        <div class="col-lg-3 col-md-6">
+                            <label class="form-label small fw-semibold text-secondary mb-1">
+                                <i class="bi bi-cash-coin me-1" style="color: var(--flower-primary);"></i>Khoảng giá
+                                (VNĐ):
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <input type="number" name="minPrice" th:value="${minPrice}"
+                                    class="form-control rounded-start-pill ps-2" placeholder="Từ">
+                                <span class="input-group-text bg-light border-start-0 border-end-0">-</span>
+                                <input type="number" name="maxPrice" th:value="${maxPrice}"
+                                    class="form-control rounded-end-pill ps-2" placeholder="Đến">
+                            </div>
+                        </div>
+
+                        <!-- Lọc theo đánh giá tối thiểu -->
+                        <div class="col-lg-2 col-md-6">
+                            <label class="form-label small fw-semibold text-secondary mb-1">
+                                <i class="bi bi-star-fill text-warning me-1"></i>Đánh giá:
+                            </label>
+                            <select name="minRating" class="form-select form-select-sm rounded-pill ps-3">
+                                <option value="" th:selected="${minRating == null}">Tất cả sao</option>
+                                <option value="5.0" th:selected="${minRating != null and minRating == 5.0}">★★★★★ 5 sao
+                                </option>
+                                <option value="4.0" th:selected="${minRating != null and minRating == 4.0}">★ Từ 4 sao
+                                    trở lên</option>
+                                <option value="3.0" th:selected="${minRating != null and minRating == 3.0}">★ Từ 3 sao
+                                    trở lên</option>
+                            </select>
+                        </div>
+
+                        <!-- Dropdown Sắp xếp theo giá / bán chạy -->
+                        <div class="col-lg-2 col-md-6">
+                            <label class="form-label small fw-semibold text-secondary mb-1">
+                                <i class="bi bi-arrow-down-up me-1" style="color: var(--flower-primary);"></i>Sắp xếp:
+                            </label>
+                            <select name="sort" class="form-select form-select-sm rounded-pill ps-3">
+                                <option value="default" th:selected="${sort == null or sort == 'default'}">Mới nhất /
+                                    Nổi bật</option>
+                                <option value="price_asc" th:selected="${sort == 'price_asc'}">Giá: Thấp → Cao</option>
+                                <option value="price_desc" th:selected="${sort == 'price_desc'}">Giá: Cao → Thấp
+                                </option>
+                                <option value="sold_desc" th:selected="${sort == 'sold_desc'}">Bán chạy nhất</option>
+                                <option value="rating_desc" th:selected="${sort == 'rating_desc'}">Đánh giá cao nhất
+                                </option>
+                                <option value="name_asc" th:selected="${sort == 'name_asc'}">Tên: A → Z</option>
+                            </select>
+                        </div>
+
+                        <!-- Nút thao tác -->
+                        <div class="col-lg-2 col-md-12 d-flex gap-2">
+                            <button class="btn btn-flower-primary btn-sm rounded-pill px-3 fw-semibold w-100"
+                                type="submit" id="btnApplyFilter">
+                                <i class="bi bi-funnel-fill me-1"></i> Lọc
+                            </button>
+                            <a th:href="@{/products#product-catalog}"
+                                class="btn btn-outline-secondary rounded-pill px-3 btn-sm" id="btnResetFilter"
+                                title="Xóa bộ lọc">
+                                <i class="bi bi-arrow-counterclockwise"></i>
+                            </a>
                         </div>
                     </div>
+
 
                     <!-- Lọc theo đánh giá tối thiểu -->
                     <div class="col-lg-2 col-md-6">
@@ -1794,6 +1985,7 @@
                         </a>
                     </div>
                 </div>
+
                 </form>
 
                 <hr class="my-3 border-light-subtle">
@@ -1805,23 +1997,28 @@
                             <i class="bi bi-grid me-1" style="color: var(--flower-primary);"></i>Phân loại danh mục:
                         </span>
                         <span class="small text-muted">
-                            Tìm thấy <strong style="color: var(--flower-accent);" th:text="${totalItems}"></strong> mẫu hoa
+                            Tìm thấy <strong style="color: var(--flower-accent);" th:text="${totalItems}"></strong> mẫu
+                            hoa
                         </span>
                     </div>
                     <div class="d-flex flex-wrap gap-2">
                         <!-- Nút Tất Cả -->
+
                         <a th:href="@{/products(keyword=${keyword}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, size=${size})} + '#product-catalog'" 
                            class="category-pill"
                            th:classappend="${categoryId == null or categoryId == 0} ? 'active' : ''">
+
                             Tất Cả Mẫu Hoa
                         </a>
 
                         <!-- Danh sách các danh mục hoa -->
+
                         <a th:each="cat : ${categories}" 
                            th:href="@{/products(categoryId=${cat.id}, keyword=${keyword}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, size=${size})} + '#product-catalog'" 
                            class="category-pill"
                            th:classappend="${categoryId != null and (categoryId == cat.id or (parentCategory != null and parentCategory.id == cat.id))} ? 'active' : ''"
                            th:text="${cat.name}">
+
                         </a>
                     </div>
                 </div>
@@ -1834,6 +2031,7 @@
             <span class="text-muted">Đang lọc theo:</span>
             <span th:if="${keyword != null and !keyword.isEmpty()}" class="badge badge-flower-accent p-2">
                 Từ khóa: "<span th:text="${keyword}"></span>"
+
                 <a th:href="@{/products(categoryId=${categoryId}, sort=${sort}, size=${size})} + '#product-catalog'" class="ms-1 text-decoration-none" style="color: var(--flower-accent);">×</a>
             </span>
             <span th:if="${categoryId != null and categoryId > 0}" class="badge badge-flower-accent p-2">
@@ -1843,6 +2041,7 @@
             <span th:if="${sort == 'price_asc'}" class="badge bg-light text-dark border p-2">Giá: Thấp → Cao</span>
             <span th:if="${sort == 'price_desc'}" class="badge bg-light text-dark border p-2">Giá: Cao → Thấp</span>
             <a th:href="@{/products} + '#product-catalog'" class="small ms-2 text-decoration-none fw-semibold" style="color: var(--flower-accent);">Xóa tất cả</a>
+
         </div>
 
         <!-- Khi không tìm thấy sản phẩm nào -->
@@ -1859,32 +2058,43 @@
         <div th:if="${not #lists.isEmpty(products)}" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
             <div class="col" th:each="p : ${products}">
                 <div class="card flower-card h-100 position-relative">
-                    <!-- UC_015 Alternative 1a: Nút Follow/Following ở một thẻ sản phẩm -->
-                    <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/customer/following/toggle/{productId}(productId=${p.id})}" method="post" class="position-absolute top-0 end-0 m-2 z-1">
-                        <button type="submit" class="btn btn-sm rounded-circle shadow-sm p-1 d-flex align-items-center justify-content-center border-0 bg-white bg-opacity-75"
-                                style="width: 32px; height: 32px;"
-                                th:classappend="${followedProductIds != null and followedProductIds.contains(p.id)} ? 'text-danger' : 'text-muted'"
-                                th:title="${followedProductIds != null and followedProductIds.contains(p.id)} ? 'Following (Đang theo dõi)' : 'Follow (Theo dõi)'">
-                            <i class="bi" th:classappend="${followedProductIds != null and followedProductIds.contains(p.id)} ? 'bi-heart-fill text-danger' : 'bi-heart'"></i>
+                    <!-- UC_015 Alternative 1a: Nút Follow/Following ở một thẻ sản phẩm (Nút theo dõi nhanh) -->
+                    <form sec:authorize="hasRole('CUSTOMER')"
+                        th:action="@{/customer/following/toggle/{productId}(productId=${p.id})}" method="post"
+                        class="position-absolute top-0 end-0 m-2 z-1" onsubmit="toggleCardFollowAjax(event, this);">
+                        <button type="submit"
+                            class="btn btn-sm rounded-circle shadow-sm p-1 d-flex align-items-center justify-content-center border-0 bg-white bg-opacity-75"
+                            style="width: 32px; height: 32px;"
+                            th:classappend="${followedProductIds != null and followedProductIds.contains(p.id)} ? 'text-danger' : 'text-muted'"
+                            th:title="${followedProductIds != null and followedProductIds.contains(p.id)} ? 'Đang theo dõi (Bấm để hủy)' : 'Theo dõi nhanh'">
+                            <i class="bi"
+                                th:classappend="${followedProductIds != null and followedProductIds.contains(p.id)} ? 'bi-heart-fill text-danger' : 'bi-heart'"></i>
                         </button>
                     </form>
+                    <a sec:authorize="!hasRole('CUSTOMER')" th:href="@{/login}"
+                        class="position-absolute top-0 end-0 m-2 z-1 btn btn-sm rounded-circle shadow-sm p-1 d-flex align-items-center justify-content-center border-0 bg-white bg-opacity-75 text-muted"
+                        style="width: 32px; height: 32px;" title="Đăng nhập để theo dõi">
+                        <i class="bi bi-heart"></i>
+                    </a>
 
                     <!-- Ảnh đại diện sản phẩm (Tỷ lệ 1:1, không có nhãn 'Đã bán') -->
                     <div class="overflow-hidden">
                         <a th:href="@{/product/{id}(id=${p.id})}">
-                            <img th:src="${p.imageUrl != null ? p.imageUrl : 'https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=800'}" 
-                                 class="card-img-top flower-card-img" th:alt="${p.name}"
-                                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800&amp;q=80';">
+                            <img th:src="${p.imageUrl != null ? p.imageUrl : 'https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=800'}"
+                                class="card-img-top flower-card-img" th:alt="${p.name}"
+                                onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800&amp;q=80';">
                         </a>
                     </div>
 
                     <div class="flower-card-body">
                         <!-- Tên sản phẩm: tối đa 2 dòng -->
-                        <a th:href="@{/product/{id}(id=${p.id})}" class="flower-card-title text-decoration-none" th:title="${p.name}" th:text="${p.name}"></a>
-                        
+                        <a th:href="@{/product/{id}(id=${p.id})}" class="flower-card-title text-decoration-none"
+                            th:title="${p.name}" th:text="${p.name}"></a>
+
                         <!-- Giá và đánh giá có vị trí thống nhất -->
                         <div class="flower-card-meta">
-                            <span class="flower-price" th:text="${#numbers.formatDecimal(p.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                            <span class="flower-price"
+                                th:text="${#numbers.formatDecimal(p.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
                             <span class="flower-rating">
                                 <i class="bi bi-star-fill star-gold"></i>
                                 <span th:text="${p.rating != null ? p.rating : '5.0'}"></span>
@@ -1892,7 +2102,8 @@
                         </div>
 
                         <!-- Nút thao tác giỏ hàng -->
-                        <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/cart/add}" method="post" class="mt-auto pt-2">
+                        <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/cart/add}" method="post"
+                            class="mt-auto pt-2">
                             <input type="hidden" name="productId" th:value="${p.id}">
                             <input type="hidden" name="storeId" th:value="${p.store != null ? p.store.id : 1}">
                             <input type="hidden" name="orderType" value="BUY">
@@ -1903,7 +2114,8 @@
                         </form>
 
                         <div sec:authorize="!hasRole('CUSTOMER')" class="mt-auto pt-2">
-                            <a th:href="@{/login}" class="btn btn-light btn-sm w-100 text-secondary border rounded-pill py-2 small">
+                            <a th:href="@{/login}"
+                                class="btn btn-light btn-sm w-100 text-secondary border rounded-pill py-2 small">
                                 Đăng nhập để đặt hoa
                             </a>
                         </div>
@@ -1918,21 +2130,24 @@
                 <ul class="custom-pagination">
                     <!-- Nút Trang Trước (<) -->
                     <li class="page-item" th:classappend="${currentPage <= 1} ? 'disabled' : ''">
+
                         <a class="page-link page-nav-arrow" id="btnPrevPage" 
                            th:href="@{/products(page=${currentPage - 1}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
                            title="Trang trước" aria-label="Previous">
+
                             <i class="bi bi-chevron-left"></i>
                         </a>
                     </li>
 
                     <!-- Trường hợp 1: Tổng số trang <= 5: Hiển thị đầy đủ tất cả các trang -->
                     <th:block th:if="${totalPages <= 5}">
-                        <li th:each="i : ${#numbers.sequence(1, totalPages)}" 
-                            class="page-item" 
+                        <li th:each="i : ${#numbers.sequence(1, totalPages)}" class="page-item"
                             th:classappend="${i == currentPage} ? 'active' : ''">
+
                             <a class="page-link" 
                                th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
                                th:text="${i}">1</a>
+
                         </li>
                     </th:block>
 
@@ -1940,9 +2155,9 @@
                     <th:block th:if="${totalPages > 5}">
                         <!-- Khi ở các trang đầu (currentPage <= 4): Hiển thị 1 2 3 4 5 ... -->
                         <th:block th:if="${currentPage <= 4}">
-                            <li th:each="i : ${#numbers.sequence(1, 5)}" 
-                                class="page-item" 
+                            <li th:each="i : ${#numbers.sequence(1, 5)}" class="page-item"
                                 th:classappend="${i == currentPage} ? 'active' : ''">
+
                                 <a class="page-link" 
                                    th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
                                    th:text="${i}">1</a>
@@ -1951,34 +2166,40 @@
                                 <a class="page-link page-ellipsis" 
                                    th:href="@{/products(page=6, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
                                    title="Xem thêm các trang tiếp theo">...</a>
+
                             </li>
                         </th:block>
 
                         <!-- Khi ở các trang cuối (currentPage >= totalPages - 3): Hiển thị ... (totalPages-4)..totalPages -->
                         <th:block th:if="${currentPage >= totalPages - 3}">
                             <li class="page-item">
+
                                 <a class="page-link page-ellipsis" 
                                    th:href="@{/products(page=${totalPages - 5}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
                                    title="Xem các trang trước">...</a>
+
                             </li>
-                            <li th:each="i : ${#numbers.sequence(totalPages - 4, totalPages)}" 
-                                class="page-item" 
+                            <li th:each="i : ${#numbers.sequence(totalPages - 4, totalPages)}" class="page-item"
                                 th:classappend="${i == currentPage} ? 'active' : ''">
+
                                 <a class="page-link" 
                                    th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
                                    th:text="${i}">1</a>
+
                             </li>
                         </th:block>
 
                         <!-- Khi ở các trang ở giữa: ... (currentPage-2)..currentPage..(currentPage+2) ... -->
                         <th:block th:if="${currentPage > 4 and currentPage < totalPages - 3}">
                             <li class="page-item">
+
                                 <a class="page-link page-ellipsis" 
                                    th:href="@{/products(page=${currentPage - 3}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'">...</a>
+
                             </li>
-                            <li th:each="i : ${#numbers.sequence(currentPage - 2, currentPage + 2)}" 
-                                class="page-item" 
+                            <li th:each="i : ${#numbers.sequence(currentPage - 2, currentPage + 2)}" class="page-item"
                                 th:classappend="${i == currentPage} ? 'active' : ''">
+
                                 <a class="page-link" 
                                    th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
                                    th:text="${i}">1</a>
@@ -1986,15 +2207,18 @@
                             <li class="page-item">
                                 <a class="page-link page-ellipsis" 
                                    th:href="@{/products(page=${currentPage + 3}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'">...</a>
+
                             </li>
                         </th:block>
                     </th:block>
 
                     <!-- Nút Trang Sau (>) -->
                     <li class="page-item" th:classappend="${currentPage >= totalPages} ? 'disabled' : ''">
+
                         <a class="page-link page-nav-arrow" id="btnNextPage" 
                            th:href="@{/products(page=${currentPage + 1}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
                            title="Trang sau" aria-label="Next">
+
                             <i class="bi bi-chevron-right"></i>
                         </a>
                     </li>
@@ -2003,19 +2227,76 @@
 
             <!-- Dòng chú thích số trang nhỏ gọn -->
             <div class="text-muted small" style="font-size: 0.8rem;">
-                Hiển thị trang <strong style="color: var(--flower-accent);" th:text="${currentPage}">1</strong> / <strong th:text="${totalPages}">1</strong> 
+                Hiển thị trang <strong style="color: var(--flower-accent);" th:text="${currentPage}">1</strong> /
+                <strong th:text="${totalPages}">1</strong>
                 (Tổng cộng <span th:text="${totalItems}">0</span> mẫu hoa)
             </div>
         </div>
 
     </div>
 
-    <!-- Footer -->
-    <footer class="border-top py-4 mt-5 small" style="background-color: var(--flower-surface); border-color: var(--flower-border) !important; color: var(--flower-text-muted);">
-        <div class="container text-center">
-            <h5 class="fw-bold mb-2 font-serif d-inline-flex align-items-center justify-content-center gap-2" style="color: var(--flower-primary);"><img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img-sm">CHUỖI CỬA HÀNG HOA TƯƠI SÀI GÒN</h5>
-            <p class="mb-1 fw-semibold" style="color: var(--flower-text-main);">Nở Trọn Yêu Thương, Thắm Trọn Khoảnh Khắc</p>
-            <p class="mb-0" style="color: var(--flower-text-muted);">Chi nhánh Quận 1 • Chi nhánh Quận 7 • Chi nhánh TP. Thủ Đức | Hotline: 028 1111 222</p>
+    <!-- ==============================================
+         FOOTER CHUẨN ĐỒNG BỘ THEO MẪU (BOTANICAL ATELIER)
+         ============================================== -->
+    <footer class="w-full border-top pt-4 pb-3 mt-12" style="background-color: #FAF4F0 !important; border-top: 1px solid #EBDED4 !important; font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif !important; color: #4A3E3D !important; width: 100%;">
+        <div style="max-width: 1240px; margin: 0 auto; padding-left: 20px; padding-right: 20px;">
+            <!-- Hàng trên: 2 Cột thông tin -->
+            <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 24px; padding-bottom: 24px;">
+                <!-- Cột 1: Thương hiệu & Liên hệ -->
+                <div style="flex: 1 1 320px; max-width: 480px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+                        <span style="font-size: 22px; line-height: 1;">🌸</span>
+                        <span style="font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 700; color: #C84357; letter-spacing: 0.5px;">HOA TƯƠI SÀI GÒN</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; color: #555555;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; line-height: 1;">call</span>
+                            <span>Hotline: <strong style="color: #222222; font-weight: 700;">028 1111 222 - 0909 888 777</strong></span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; line-height: 1;">mail</span>
+                            <span>Email: <a href="mailto:atelier@hoatuoisaigon.vn" style="color: #555555; text-decoration: none;">atelier@hoatuoisaigon.vn</a></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột 2: Hệ thống Atelier & Chi nhánh -->
+                <div style="flex: 1 1 360px; max-width: 560px;">
+                    <h4 style="font-size: 13px; font-weight: 800; color: #264E43; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; margin-top: 2px;">HỆ THỐNG ATELIER &amp; CHI NHÁNH</h4>
+                    <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; color: #555555;">
+                        <div style="display: flex; align-items: flex-start; gap: 8px;">
+                            <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
+                            <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Q.1:</strong> 123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM</span>
+                        </div>
+                        <div style="display: flex; align-items: flex-start; gap: 8px;">
+                            <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
+                            <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Q.7:</strong> 456 Nguyễn Thị Thập, Tân Hưng, Quận 7, TP.HCM</span>
+                        </div>
+                        <div style="display: flex; align-items: flex-start; gap: 8px;">
+                            <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
+                            <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Thủ Đức:</strong> 1 Võ Văn Ngân, Linh Chiểu, TP. Thủ Đức, TP.HCM</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hàng dưới: Bản quyền + Cam kết chất lượng & Giao hàng -->
+            <div style="border-top: 1px solid #EBDED4; padding-top: 16px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; font-size: 12.5px; color: #777777;">
+                <div>
+                    <span>© 2026 HOA TƯƠI SÀI GÒN .</span>
+                </div>
+                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
+                    <span style="display: inline-flex; align-items: center; gap: 5px; color: #333333; font-weight: 600;">
+                        <span style="color: #C84357;">🌸</span> 100% Hoa Tươi Nhập Khẩu &amp; Đà Lạt
+                    </span>
+                    <span style="color: #D8CBC2;">•</span>
+                    <span style="display: inline-flex; align-items: center; gap: 4px; color: #666666;">
+                        <span class="material-symbols-outlined" style="font-size: 15px; color: #264E43; line-height: 1;">schedule</span> Giao hỏa tốc 60–90 phút
+                    </span>
+                </div>
+            </div>
+        </div>
+    </footer>
         </div>
     </footer>
 
@@ -2248,22 +2529,39 @@
                 </div>
                 <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
                     <!-- 4a. Bấm nút Cancel -> 5a. Hủy thao tác -->
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancel" data-testid="btnCancel">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancel"
+                        data-testid="btnCancel">
                         Hủy
                     </button>
                     <!-- 4. Bấm nút Confirm -> 5. Đăng xuất thành công, hiển thị giao diện dành cho Khách (Guest) -->
+
                     <form th:action="@{/logout}" method="post" class="d-inline">
                         <button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold text-white text-decoration-none" id="btnConfirm" data-testid="btnConfirm">
                             Xác nhận
                         </button>
                     </form>
+
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Script điều hướng tìm kiếm thông minh theo Phạm vi (Hoa / Cửa Hàng / Người Dùng) -->
+    <!-- Floating Toast Notification (Cho nút theo dõi nhanh ở trang chủ) -->
+    <div id="cardFollowToast"
+        style="position: fixed; top: 90px; right: 24px; z-index: 9999; display: none; background: #264E43; color: #ffffff; padding: 12px 22px; border-radius: 50px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); font-weight: bold; font-size: 14px; align-items: center; gap: 8px;">
+        <i class="bi bi-check-circle-fill" style="color: #a7f3d0; font-size: 18px;"></i>
+        <span id="cardFollowToastMsg">Thông báo</span>
+    </div>
+
+    <!-- Script điều hướng tìm kiếm thông minh theo Phạm vi (Hoa / Cửa Hàng / Người Dùng) & Theo dõi nhanh -->
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const scopeSel = document.getElementById('searchScopeSelect');
+            if (scopeSel) {
+                scopeSel.style.width = scopeSel.value === 'users' ? '115px' : (scopeSel.value === 'stores' ? '103px' : '96px');
+            }
+        });
+
         document.getElementById('globalSearchForm')?.addEventListener('submit', function (e) {
             const scope = document.getElementById('searchScopeSelect')?.value;
             const kwInput = this.querySelector('input[name="keyword"]');
@@ -2276,6 +2574,70 @@
                 window.location.href = '/stores' + (kw ? '?keyword=' + encodeURIComponent(kw) : '');
             }
         });
+
+        let cardFollowToastTimer = null;
+        function showCardToast(msg) {
+            const toast = document.getElementById('cardFollowToast');
+            const toastMsg = document.getElementById('cardFollowToastMsg');
+            if (!toast || !toastMsg) return;
+            toastMsg.textContent = msg;
+            toast.style.display = 'inline-flex';
+
+            if (cardFollowToastTimer) clearTimeout(cardFollowToastTimer);
+            cardFollowToastTimer = setTimeout(() => {
+                toast.style.display = 'none';
+            }, 2500);
+        }
+
+        function toggleCardFollowAjax(event, formEl) {
+            if (event) event.preventDefault();
+            const btn = formEl.querySelector('button');
+            const icon = btn ? btn.querySelector('i') : null;
+            const url = formEl.getAttribute('action');
+            const csrfInput = formEl.querySelector('input[name="_csrf"]');
+            const csrfToken = csrfInput ? csrfInput.value : '';
+
+            const headers = {
+                'X-Requested-With': 'XMLHttpRequest'
+            };
+            if (csrfToken) {
+                headers['X-CSRF-TOKEN'] = csrfToken;
+            }
+
+            fetch(url, {
+                method: 'POST',
+                headers: headers,
+                body: new FormData(formEl)
+            })
+                .then(res => {
+                    if (res.status === 401 || res.status === 403) {
+                        window.location.href = '/login';
+                        return null;
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    if (!data) return;
+                    showCardToast(data.message || (data.liked ? 'Đã theo dõi sản phẩm thành công!' : 'Đã hủy theo dõi sản phẩm!'));
+                    if (btn && icon) {
+                        if (data.liked) {
+                            btn.classList.remove('text-muted');
+                            btn.classList.add('text-danger');
+                            btn.setAttribute('title', 'Đang theo dõi (Bấm để hủy)');
+                            icon.className = 'bi bi-heart-fill text-danger';
+                        } else {
+                            btn.classList.remove('text-danger');
+                            btn.classList.add('text-muted');
+                            btn.setAttribute('title', 'Theo dõi nhanh');
+                            icon.className = 'bi bi-heart';
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    formEl.submit();
+                });
+        }
     </script>
 </body>
 

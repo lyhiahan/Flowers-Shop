@@ -48,7 +48,9 @@ public class SecurityConfig {
                 "/resend-otp",
                 "/forgot-password",
                 "/reset-password",
-                "/api/public/**"
+                "/api/public/**",
+                "/customer/profile/send-password-otp",
+                "/customer/send-password-otp"
             ))
             .authorizeHttpRequests(auth -> auth
                 .dispatcherTypeMatchers(jakarta.servlet.DispatcherType.FORWARD, jakarta.servlet.DispatcherType.ERROR).permitAll()
@@ -58,7 +60,7 @@ public class SecurityConfig {
                 .requestMatchers("/staff", "/staff/**").hasAnyRole("ADMIN", "MANAGER", "VENDOR", "STAFF")
                 .requestMatchers("/ws", "/ws/**").hasAnyRole("ADMIN", "MANAGER", "VENDOR", "STAFF")
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/inventory/check").permitAll()
-                .requestMatchers("/customer/**", "/cart", "/cart/**", "/checkout", "/checkout/**", "/following").hasRole("CUSTOMER")
+                .requestMatchers("/customer/**", "/cart", "/cart/**", "/checkout", "/checkout/**", "/following").hasAnyRole("CUSTOMER", "ADMIN", "MANAGER", "VENDOR", "STAFF", "SHIPPER")
                 .requestMatchers("/", "/products/**", "/product/**", "/stores/**", "/users/**", "/login", "/register", "/verify-otp", "/resend-otp", "/forgot-password", "/reset-password", "/api/public/**", "/ws/**", "/css/**", "/js/**", "/images/**", "/upload/**", "/error", "/favicon.ico", "/webjars/**").permitAll()
                 .anyRequest().authenticated()
             )

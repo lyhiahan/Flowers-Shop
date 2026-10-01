@@ -1,71 +1,406 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+﻿<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <meta charset="UTF-8">
-    <title>Cửa Hàng Đang Theo Dõi - Chuỗi Cửa Hàng Hoa Tươi</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
-    <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-page); color: var(--text-main); }
-        .font-serif { font-family: 'Playfair Display', Georgia, serif; }
-        .store-card { border-radius: 16px; border: 1px solid var(--border-soft); background: var(--surface-card); }
-    </style>
-</head>
-<body>
-<nav class="navbar navbar-expand-lg bg-white border-bottom py-3 sticky-top">
-    <div class="container">
-        <a class="navbar-brand font-serif fw-bold fs-4 d-inline-flex align-items-center gap-2" style="color: var(--brand-green);" th:href="@{/}">
-            <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img">
-            <span>HOA TƯƠI SÀI GÒN</span>
+    <!-- Google Font: Nunito, Plus Jakarta Sans, Playfair Display & Bootstrap 5 & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
+        </div>
+        <div class="flex flex-col">
+          <span class="font-extrabold text-lg sm:text-xl tracking-wide text-botanic-dark group-hover:text-botanic-green transition-colors">HOA TƯƠI SÀI GÒN</span>
+          <span class="text-[10px] uppercase tracking-[0.2em] text-[#888] font-bold -mt-0.5">Atelier Floral Botanique</span>
+        </div>
+      </a>
+
+      <!-- Ô tìm kiếm Pill-shape -->
+      <div class="flex-1 max-w-xl hidden md:block">
+        <form th:action="@{/}" method="get" class="flex items-center bg-white border border-[#DDD] hover:border-botanic-green/60 focus-within:border-botanic-green focus-within:ring-2 focus-within:ring-botanic-green/10 rounded-full p-1 pl-4 transition-all shadow-xs">
+          <div class="flex items-center gap-1 text-xs font-bold text-[#444] pr-3 border-r border-[#E5E5E5] shrink-0">
+            <span class="text-botanic-rose text-sm">🌸</span> Mẫu hoa
+          </div>
+          <input name="keyword" class="w-full bg-transparent px-3 py-1.5 text-xs sm:text-[13.5px] font-medium text-botanic-dark placeholder-[#888] border-none focus:ring-0 focus:outline-none" 
+                 placeholder="Tìm hoa hồng, mẫu đơn, hướng dương..." type="text">
+          <button class="bg-[#264E43] hover:bg-[#1E433A] text-white text-xs font-bold px-4 py-2 rounded-full flex items-center gap-1 transition-colors shrink-0 shadow-xs" type="submit">
+            <span class="material-symbols-outlined text-[15px]">search</span>Tìm
+          </button>
+        </form>
+      </div>
+
+      <!-- Cụm nút tiện ích bên phải -->
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+        <!-- Wishlist -->
+        <a class="w-9 h-9 rounded-full border border-[#EBE3DC] flex items-center justify-center text-[#555] hover:text-botanic-rose hover:border-botanic-rose transition-colors" 
+           th:href="@{/customer/wishlist}" title="Hoa yêu thích">
+          <span class="material-symbols-outlined text-[19px]">favorite_border</span>
         </a>
-        <div class="d-flex align-items-center gap-3">
-            <a th:href="@{/customer/profile}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-person me-1"></i> Hồ sơ</a>
-            <a th:href="@{/}" class="btn btn-light btn-sm"><i class="bi bi-house me-1"></i> Trang chủ</a>
+
+        <!-- Following -->
+        <a class="w-9 h-9 rounded-full border border-[#EBE3DC] flex items-center justify-center text-[#555] hover:text-botanic-green hover:border-botanic-green transition-colors" 
+           th:href="@{/following}" title="Following">
+          <span class="material-symbols-outlined text-[19px]">bookmark_border</span>
+        </a>
+
+        <!-- Giỏ hàng -->
+        <a class="relative w-9 h-9 rounded-full border border-[#EBE3DC] flex items-center justify-center text-[#555] hover:text-botanic-green hover:border-botanic-green transition-colors" 
+           th:href="@{/cart}" title="Giỏ hàng">
+          <span class="material-symbols-outlined text-[19px]">shopping_bag</span>
+          <span class="absolute -top-1 -right-1 bg-botanic-rose text-white text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shadow-xs"
+                th:text="${cartItemCount != null ? cartItemCount : 0}">0</span>
+        </a>
+
+        <!-- Tài khoản dropdown -->
+        <div class="flex items-center gap-2 pl-2 border-l border-[#EBDED4]">
+          <a th:href="@{/customer/profile}" class="flex items-center gap-1.5 py-1.5 px-3 rounded-full hover:bg-botanic-subtle text-xs sm:text-[13px] font-bold text-[#333] transition-colors">
+            <span class="material-symbols-outlined text-[19px] text-botanic-green">account_circle</span>
+            <span class="hidden sm:inline" sec:authentication="name">Tài khoản</span>
+          </a>
         </div>
+      </div>
     </div>
-</nav>
 
-<div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h3 class="font-serif fw-bold mb-1">🏪 Chi Nhánh & Shop Đang Theo Dõi</h3>
-            <p class="text-muted small mb-0">Các chi nhánh trong chuỗi hoa tươi bạn quan tâm</p>
+    <!-- Sub-menu Category Navigation -->
+    <div class="border-t border-[#F0E6DE] bg-[#FAF6F0]">
+      <div class="max-w-7xl mx-auto px-4 sm:px-8 flex items-center gap-6 sm:gap-8 overflow-x-auto text-[13.5px] py-2.5 font-bold">
+        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/}">Tất cả</a>
+        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/(keyword='Sinh Nhật')}">🎂 Sinh Nhật</a>
+        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/(keyword='Tình Yêu')}">💖 Tình Yêu</a>
+        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/(keyword='Khai Trương')}">🎉 Khai Trương</a>
+        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/(keyword='Khác')}">✨ Khác</a>
+        <span class="text-[#D8CBC2] hidden sm:inline">|</span>
+        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap inline-flex items-center gap-1 pb-0.5" th:href="@{/customer/profile/recently-viewed}">
+          <span class="material-symbols-outlined text-[16px]">history</span>Đã xem gần đây
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="w-full bg-[#FAF6F0] min-h-screen py-6 sm:py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8">
+
+      <!-- Breadcrumbs -->
+      <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs font-semibold text-[#777] mb-5">
+        <a class="hover:text-botanic-green transition-colors flex items-center gap-1" th:href="@{/}">
+          <span class="material-symbols-outlined text-[16px]">home</span>Trang chủ
+        </a>
+        <span class="material-symbols-outlined text-[14px] text-[#BBB]">chevron_right</span>
+        <a class="hover:text-botanic-green transition-colors" th:href="@{/customer/profile}">Tài khoản</a>
+        <span class="material-symbols-outlined text-[14px] text-[#BBB]">chevron_right</span>
+        <span class="text-botanic-rose font-bold">Cửa hàng đang theo dõi</span>
+      </nav>
+
+      <!-- Alert Flash Message -->
+      <div th:if="${successMessage}" class="mb-6 p-4 rounded-xl bg-[#E9F2EE] border border-[#CCE2D8] text-botanic-green text-sm font-bold flex items-center justify-between shadow-xs">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[20px]">check_circle</span>
+          <span th:text="${successMessage}">Thao tác thành công!</span>
         </div>
-    </div>
+        <button type="button" onclick="this.parentElement.remove()" class="text-botanic-green hover:opacity-75">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
 
-    <div th:if="${#lists.isEmpty(followedStores)}" class="text-center py-5 bg-white rounded-4 border p-5">
-        <div class="fs-1 text-secondary opacity-50 mb-3">🏢</div>
-        <h5>Bạn chưa theo dõi cửa hàng nào</h5>
-        <p class="text-muted small">Hãy bấm theo dõi các chi nhánh shop hoa để nhận tin tức khuyến mãi mới nhất.</p>
-        <a th:href="@{/}" class="btn btn-danger rounded-pill px-4 py-2 mt-2">Dạo Chuỗi Cửa Hàng</a>
-    </div>
 
-    <div th:if="${!#lists.isEmpty(followedStores)}" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        <div class="col" th:each="s : ${followedStores}">
-            <div class="card h-100 store-card bg-white p-4">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <img th:src="${s.avatar != null ? s.avatar : 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=100'}"
-                         class="rounded-circle border" width="60" height="60" style="object-fit: cover;">
-                    <div>
-                        <h6 class="fw-bold mb-0 font-serif" th:text="${s.name}"></h6>
-                        <span class="badge bg-success-subtle text-success rounded-pill small">Đang Hoạt Động</span>
-                    </div>
-                </div>
-                <p class="text-muted small mb-2"><i class="bi bi-geo-alt text-danger me-1"></i> <span th:text="${s.address}"></span></p>
-                <p class="text-muted small mb-4"><i class="bi bi-telephone text-primary me-1"></i> Hotline: <span th:text="${s.phone}"></span></p>
 
-                <div class="d-flex gap-2 mt-auto">
-                    <a th:href="@{/stores/{id}(id=${s.id})}" class="btn btn-outline-danger btn-sm rounded-pill flex-fill">Tham Quan Cửa Hàng</a>
-                    <form th:action="@{/customer/profile/store/follow/{id}(id=${s.id})}" method="post">
-                        <button type="submit" class="btn btn-outline-secondary btn-sm rounded-pill">Bỏ theo dõi</button>
-                    </form>
-                </div>
+      <!-- 4. BỘ LỌC VÀ TÌM KIẾM NHANH (Filter & Toolbar) -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-3.5 sm:p-4 rounded-xl bg-white border border-[#EBDED4] mb-8 shadow-xs">
+        
+        <!-- Search Store Filter Input -->
+        <div class="flex-1 max-w-md">
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#888] text-[18px]">search</span>
+            <input id="storeSearchInput" type="text" onkeyup="filterStores()"
+                   placeholder="Tìm theo tên chi nhánh, địa chỉ, quận..."
+                   class="w-full pl-9 pr-4 py-1.5 text-xs sm:text-[13.5px] rounded-full bg-[#FAF6F0] border border-[#E2D4C8] text-botanic-dark placeholder-[#888] focus:outline-none focus:border-botanic-green transition-colors font-medium">
+          </div>
+        </div>
+
+        <!-- Filter Chips -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0" id="storeFilterContainer">
+          <button class="store-filter-chip active-filter px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#264E43] text-white shadow-xs whitespace-nowrap" 
+                  data-filter="all" onclick="filterStoreByTab('all', this)">
+            Tất cả
+          </button>
+          <button class="store-filter-chip px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#FAF6F0] text-[#555] hover:bg-[#F2E7DC] hover:text-botanic-dark whitespace-nowrap" 
+                  data-filter="open" onclick="filterStoreByTab('open', this)">
+            🟢 Đang mở cửa
+          </button>
+          <button class="store-filter-chip px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#FAF6F0] text-[#555] hover:bg-[#F2E7DC] hover:text-botanic-dark whitespace-nowrap" 
+                  data-filter="quan-1" onclick="filterStoreByTab('quan-1', this)">
+            📍 Quận 1
+          </button>
+          <button class="store-filter-chip px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#FAF6F0] text-[#555] hover:bg-[#F2E7DC] hover:text-botanic-dark whitespace-nowrap" 
+                  data-filter="quan-7" onclick="filterStoreByTab('quan-7', this)">
+            📍 Quận 7
+          </button>
+          <button class="store-filter-chip px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#FAF6F0] text-[#555] hover:bg-[#F2E7DC] hover:text-botanic-dark whitespace-nowrap" 
+                  data-filter="thu-duc" onclick="filterStoreByTab('thu-duc', this)">
+            📍 Thủ Đức
+          </button>
+        </div>
+      </div>
+
+      <!-- 5. LƯỚI DANH SÁCH CỬA HÀNG ĐANG THEO DÕI (Store Cards Grid) -->
+      <div th:if="${!#lists.isEmpty(followedStores)}" 
+           class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10" id="storeGrid">
+        
+        <div th:each="s : ${followedStores}" 
+             class="store-card group flex flex-col rounded-2xl bg-white border border-[#EFE8E1] overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-card shadow-xs"
+             th:data-id="${s.id}"
+             th:data-name="${s.name}"
+             th:data-address="${s.address}"
+             th:data-is-open="${s.isOpen != null ? s.isOpen : true}">
+          
+          <!-- Top Cover Banner / Header -->
+          <div class="relative h-28 bg-gradient-to-r from-[#F5E6DC] via-[#FAF0EA] to-[#E9F2EE] overflow-hidden">
+            <img th:if="${s.cover != null}" th:src="${s.cover}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Store Cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+            
+            <!-- Open / Status Badge -->
+            <div class="absolute top-3 right-3">
+              <span th:if="${s.isOpen == null or s.isOpen}" 
+                    class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold flex items-center gap-1 border border-emerald-200/80 shadow-xs backdrop-blur-xs">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>Đang mở cửa
+              </span>
+              <span th:if="${s.isOpen != null and !s.isOpen}" 
+                    class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-bold flex items-center gap-1 border border-amber-200/80 shadow-xs backdrop-blur-xs">
+                <span class="w-2 h-2 rounded-full bg-amber-500"></span>Tạm đóng cửa
+              </span>
             </div>
+          </div>
+
+          <!-- Store Card Body -->
+          <div class="p-5 pt-0 flex-1 flex flex-col justify-between">
+            <div>
+              <!-- Store Avatar & Verified Header -->
+              <div class="relative flex items-end justify-between -mt-10 mb-3.5">
+                <div class="relative">
+                  <img th:src="${s.avatar != null ? s.avatar : 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=150'}"
+                       class="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl border-3 border-white object-cover shadow-sm bg-white" 
+                       th:alt="${s.name}"
+                       onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=150';">
+                  <span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-botanic-green text-white flex items-center justify-center text-[12px] border-2 border-white shadow-xs" title="Chi nhánh xác thực">
+                    🌸
+                  </span>
+                </div>
+                
+                <span class="px-2.5 py-1 rounded-full bg-botanic-subtle text-botanic-dark text-[11px] font-bold flex items-center gap-1 border border-[#EBDED4]">
+                  <span class="material-symbols-outlined text-[13px] text-botanic-rose">verified</span>Chi nhánh chuỗi
+                </span>
+              </div>
+
+              <!-- Store Name -->
+              <h3 class="text-[17px] font-extrabold text-botanic-dark group-hover:text-botanic-green transition-colors mb-1.5 leading-snug">
+                <a th:href="@{/stores/{id}(id=${s.id})}" th:text="${s.name}">Tên Chi Nhánh Hoa Tươi</a>
+              </h3>
+
+              <!-- Bio/Mô tả ngắn -->
+              <p class="text-xs text-botanic-muted line-clamp-2 mb-3.5 font-medium leading-relaxed" 
+                 th:text="${s.bio != null and !#strings.isEmpty(s.bio) ? s.bio : 'Hệ thống hoa tươi cao cấp & điện hoa nghệ thuật, giao hỏa tốc 60-90 phút.'}">
+                Hệ thống hoa tươi cao cấp &amp; điện hoa nghệ thuật, giao hỏa tốc 60-90 phút.
+              </p>
+
+              <!-- Address & Phone Info Box -->
+              <div class="space-y-2 bg-[#FAF6F0] p-3 rounded-xl border border-[#EDE2D8] mb-4 text-xs font-medium">
+                <div class="flex items-start gap-2 text-[#444]">
+                  <span class="material-symbols-outlined text-[16px] text-botanic-rose shrink-0 mt-0.5">location_on</span>
+                  <span class="line-clamp-2 leading-relaxed" th:text="${s.address != null ? s.address : 'Địa chỉ đang cập nhật'}">Địa chỉ chi nhánh</span>
+                </div>
+                <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-[#E8DCD2]">
+                  <div class="flex items-center gap-1.5 text-botanic-green font-bold">
+                    <span class="material-symbols-outlined text-[15px]">call</span>
+                    <span th:text="${s.phone != null ? s.phone : '028 1111 222'}">028 1111 222</span>
+                  </div>
+                  <span class="text-[11px] text-[#777] font-semibold flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px] text-[#999]">schedule</span>07:00 - 22:00
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons Row -->
+            <div class="flex items-center gap-2 pt-2 border-t border-[#F0E6DE]">
+              <a th:href="@{/stores/{id}(id=${s.id})}" 
+                 class="flex-1 py-2 px-3 rounded-full bg-[#264E43] hover:bg-[#1E433A] text-white text-xs font-bold text-center transition-colors shadow-xs flex items-center justify-center gap-1">
+                <span>Tham Quan Cửa Hàng</span>
+                <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+              </a>
+              
+              <!-- Unfollow Button Form -->
+              <form th:action="@{/customer/profile/store/follow/{id}(id=${s.id})}" method="post" class="m-0"
+                    onsubmit="return confirm('Bạn có chắc muốn bỏ theo dõi chi nhánh này không?');">
+                <button type="submit" 
+                        class="px-3.5 py-2 rounded-full bg-white hover:bg-rose-50 text-[#666] hover:text-botanic-rose text-xs font-bold transition-colors border border-[#E5D7CD] hover:border-rose-200 cursor-pointer shadow-2xs" 
+                        title="Bỏ theo dõi chi nhánh này">
+                  Bỏ theo dõi
+                </button>
+              </form>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <!-- 6. KHỐI TRẠNG THÁI RỖNG (Empty State) -->
+      <div id="emptyStoreState" th:classappend="${#lists.isEmpty(followedStores)} ? '' : 'hidden'" class="mb-12">
+        <div class="border-2 border-dashed border-[#DFCEC3] rounded-2xl bg-[#FFFBF8] p-8 sm:p-14 text-center transition-all max-w-2xl mx-auto shadow-xs">
+          <div class="w-18 h-18 mx-auto rounded-full bg-[#E9F2EE] flex items-center justify-center text-3xl text-botanic-green mb-4 shadow-xs">
+            🏬
+          </div>
+          <h3 class="text-xl sm:text-2xl font-bold text-botanic-dark mb-2">Bạn chưa theo dõi chi nhánh nào</h3>
+          <p class="text-sm font-medium text-botanic-muted max-w-md mx-auto mb-6 leading-relaxed">
+            Hãy theo dõi các chi nhánh và cửa hàng hoa tươi gần bạn nhất để cập nhật ưu đãi, bộ sưu tập mới và được ưu tiên giao hoa hỏa tốc!
+          </p>
+          <a th:href="@{/stores}" class="inline-flex items-center gap-2 px-7 py-2.5 rounded-full bg-[#264E43] hover:bg-[#1E433A] text-white text-sm font-bold transition-all shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">storefront</span>
+            <span>Khám Phá Chuỗi Cửa Hàng Ngay</span>
+          </a>
+        </div>
+      </div>
+
     </div>
-</div>
+  </main>
+
+  <!-- ==============================================
+       FOOTER CHUẨN ĐỒNG BỘ THEO MẪU (BOTANICAL ATELIER)
+       ============================================== -->
+  <footer class="w-full border-top pt-4 pb-3 mt-12" style="background-color: #FAF4F0 !important; border-top: 1px solid #EBDED4 !important; font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif !important; color: #4A3E3D !important; width: 100%;">
+    <div style="max-width: 1240px; margin: 0 auto; padding-left: 20px; padding-right: 20px;">
+      
+      <!-- Hàng trên: 2 Cột thông tin -->
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 24px; padding-bottom: 24px;">
+        
+        <!-- Cột 1: Thương hiệu & Liên hệ -->
+        <div style="flex: 1 1 320px; max-width: 480px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+            <span style="font-size: 22px; line-height: 1;">🌸</span>
+            <span style="font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 700; color: #C84357; letter-spacing: 0.5px;">HOA TƯƠI SÀI GÒN</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; color: #555555;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; line-height: 1;">call</span>
+              <span>Hotline: <strong style="color: #222222; font-weight: 700;">028 1111 222 - 0909 888 777</strong></span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; line-height: 1;">mail</span>
+              <span>Email: <a href="mailto:atelier@hoatuoisaigon.vn" style="color: #555555; text-decoration: none;">atelier@hoatuoisaigon.vn</a></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột 2: Hệ thống Atelier & Chi nhánh -->
+        <div style="flex: 1 1 360px; max-width: 560px;">
+          <h4 style="font-size: 13px; font-weight: 800; color: #264E43; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; margin-top: 2px;">HỆ THỐNG ATELIER &amp; CHI NHÁNH</h4>
+          <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; color: #555555;">
+            <div style="display: flex; align-items: flex-start; gap: 8px;">
+              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
+              <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Q.1:</strong> 123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM</span>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 8px;">
+              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
+              <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Q.7:</strong> 456 Nguyễn Thị Thập, Tân Hưng, Quận 7, TP.HCM</span>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 8px;">
+              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
+              <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Thủ Đức:</strong> 1 Võ Văn Ngân, Linh Chiểu, TP. Thủ Đức, TP.HCM</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Hàng dưới: Bản quyền + Cam kết chất lượng & Giao hàng -->
+      <div style="border-top: 1px solid #EBDED4; padding-top: 16px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; font-size: 12.5px; color: #777777;">
+        <div>
+          <span>© 2026 HOA TƯƠI SÀI GÒN .</span>
+        </div>
+        <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <span style="display: inline-flex; align-items: center; gap: 5px; color: #333333; font-weight: 600;">
+            <span style="color: #C84357;">🌸</span> 100% Hoa Tươi Nhập Khẩu &amp; Đà Lạt
+          </span>
+          <span style="color: #D8CBC2;">•</span>
+          <span style="display: inline-flex; align-items: center; gap: 4px; color: #666666;">
+            <span class="material-symbols-outlined" style="font-size: 15px; color: #264E43; line-height: 1;">schedule</span> Giao hỏa tốc 60–90 phút
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- Floating Toast Notification -->
+  <div id="storeToast" 
+       class="fixed top-6 right-6 z-50 transform -translate-y-4 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2.5 px-5 py-3 rounded-full bg-[#264E43] text-white shadow-2xl text-xs sm:text-sm font-bold border border-white/20">
+    <span class="material-symbols-outlined text-[18px] text-[#97F5CC]">check_circle</span>
+    <span id="storeToastMsg">Thao tác thành công</span>
+  </div>
+
+  <script>
+    let currentTab = 'all';
+
+    // Search and tab filter combined
+    function filterStores() {
+      const keyword = (document.getElementById('storeSearchInput')?.value || '').toLowerCase().trim();
+      const cards = document.querySelectorAll('.store-card');
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        const name = (card.getAttribute('data-name') || '').toLowerCase();
+        const address = (card.getAttribute('data-address') || '').toLowerCase();
+        const isOpen = card.getAttribute('data-is-open') === 'true';
+
+        // Tab match
+        let tabMatch = false;
+        if (currentTab === 'all') {
+          tabMatch = true;
+        } else if (currentTab === 'open') {
+          tabMatch = isOpen;
+        } else if (currentTab === 'quan-1') {
+          tabMatch = address.includes('quận 1') || address.includes('q1') || name.includes('bến thành');
+        } else if (currentTab === 'quan-7') {
+          tabMatch = address.includes('quận 7') || address.includes('q7') || name.includes('phú mỹ hưng');
+        } else if (currentTab === 'thu-duc') {
+          tabMatch = address.includes('thủ đức') || name.includes('làng đại học');
+        }
+
+        // Keyword match
+        const searchMatch = !keyword || name.includes(keyword) || address.includes(keyword);
+
+        if (tabMatch && searchMatch) {
+          card.style.display = 'flex';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      const emptyState = document.getElementById('emptyStoreState');
+      if (emptyState) {
+        if (visibleCount === 0 && cards.length > 0) {
+          emptyState.classList.remove('hidden');
+          const title = emptyState.querySelector('h3');
+          if (title) title.textContent = 'Không tìm thấy chi nhánh phù hợp';
+        } else if (cards.length > 0) {
+          emptyState.classList.add('hidden');
+        }
+      }
+    }
+
+    // Filter by tab
+    function filterStoreByTab(tab, btn) {
+      currentTab = tab;
+      const chips = document.querySelectorAll('.store-filter-chip');
+      chips.forEach(c => {
+        c.classList.remove('bg-[#264E43]', 'text-white', 'shadow-xs', 'active-filter');
+        c.classList.add('bg-[#FAF6F0]', 'text-[#555]');
+      });
+      btn.classList.add('bg-[#264E43]', 'text-white', 'shadow-xs', 'active-filter');
+      btn.classList.remove('bg-[#FAF6F0]', 'text-[#555]');
+
+      filterStores();
+    }
+  </script>
 </body>
 </html>
