@@ -278,12 +278,12 @@ public class DataInitializer implements CommandLineRunner {
             commissionRepository.save(Commission.builder().name("Gói Đối Tác Chiến Lược").cost(new BigDecimal("5")).description("Tỷ lệ chiết khấu đặc biệt 5% cho chuỗi phân phối hoa tươi lớn").isDeleted(false).build());
         }
 
-        // Nhóm thuộc tính sản phẩm (Styles)
+        // Nhóm thuộc tính sản phẩm (Styles) - Tên ngắn gọn <= 30 ký tự để phù hợp giới hạn cột DB
         if (styleRepository.count() == 0) {
-            styleRepository.save(Style.builder().name("Tone Màu Hoa (Pastel, Đỏ Nhung, Vàng Nắng...)").isDeleted(false).build());
-            styleRepository.save(Style.builder().name("Kiểu Dáng Cắm (Bó Hoa, Giỏ Hoa, Hộp Hoa, Bình Hoa)").isDeleted(false).build());
-            styleRepository.save(Style.builder().name("Phong Cách Thiết Kế (Hàn Quốc, Vintage, Hiện Đại)").isDeleted(false).build());
-            styleRepository.save(Style.builder().name("Kích Cỡ Bó Hoa (Size S Nhỏ, Size M Tiêu Chuẩn, Size VIP Khổng Lồ)").isDeleted(false).build());
+            styleRepository.save(Style.builder().name("Tone màu hoa").isDeleted(false).build());
+            styleRepository.save(Style.builder().name("Kiểu dáng cắm").isDeleted(false).build());
+            styleRepository.save(Style.builder().name("Phong cách thiết kế").isDeleted(false).build());
+            styleRepository.save(Style.builder().name("Kích cỡ bó hoa").isDeleted(false).build());
         }
 
         // Gán cấp bậc và gói hoa hồng cho các cửa hàng nếu chưa có
