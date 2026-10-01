@@ -31,9 +31,16 @@ public class ProfileController {
                               Principal principal, Model model) {
         User user = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new AccessDeniedException("Người dùng không tồn tại"));
+        java.util.List<com.finalproject.entity.RoleRequest> roleReqs = roleManagementService.getUserRoleRequests(user.getId());
+        // Flag: có yêu cầu được duyệt nhưng session hiện tại chưa có quyền mới (cần re-login)
+        boolean hasApprovedUnactivated = roleReqs.stream().anyMatch(r ->
+            r.getStatus() == com.finalproject.enums.RoleRequestStatus.APPROVED
+            && !user.hasRole(r.getTargetRole())
+        );
         model.addAttribute("user", user);
         model.addAttribute("addresses", userService.getUserAddresses(user.getId()));
-        model.addAttribute("roleRequests", roleManagementService.getUserRoleRequests(user.getId()));
+        model.addAttribute("roleRequests", roleReqs);
+        model.addAttribute("hasApprovedUnactivated", hasApprovedUnactivated);
         model.addAttribute("availableStores", storeRepository.findAll());
         model.addAttribute("activeTab", activeTab != null ? activeTab : "info");
         return "customer/profile";
