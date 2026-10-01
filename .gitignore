@@ -4,6 +4,13 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+# Uploaded Files
+upload/
+upload/*
+!upload/**/.gitkeep
+src/main/resources/static/upload/*
+!src/main/resources/static/upload/**/.gitkeep
+
 ### STS ###
 .apt_generated
 .classpath

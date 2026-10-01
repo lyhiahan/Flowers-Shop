@@ -41,7 +41,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
             log.warn("Cloudinary upload failed: {}, fallback to local storage", ex.getMessage());
         }
 
-        // Fallback: Lưu file cục bộ vào thư mục upload/avatar/ theo chuẩn WebMvcConfig của dự án
+        // Fallback: Lưu file cục bộ vào DUY NHẤT 1 thư mục upload/avatar ở gốc dự án
         String extension = ".jpg";
         String origName = file.getOriginalFilename();
         if (origName != null && origName.contains(".")) {
@@ -49,25 +49,12 @@ public class CloudinaryServiceImpl implements CloudinaryService {
         }
         String fileName = "avatar_" + UUID.randomUUID().toString().substring(0, 8) + extension;
 
-        // 1. Lưu vào thư mục upload/avatar ở gốc dự án (WebMvcConfig phục vụ từ file:upload/)
+        // Lưu vào thư mục upload/avatar ở gốc dự án (WebMvcConfig phục vụ từ file:upload/)
         Path rootUploadDir = Paths.get("upload/avatar");
         if (!Files.exists(rootUploadDir)) {
             Files.createDirectories(rootUploadDir);
         }
         Files.copy(file.getInputStream(), rootUploadDir.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
-
-        // 2. Lưu đồng thời vào static/upload/avatar để đồng bộ mã nguồn và target
-        Path staticUploadDir = Paths.get("src/main/resources/static/upload/avatar");
-        if (!Files.exists(staticUploadDir)) {
-            Files.createDirectories(staticUploadDir);
-        }
-        Files.copy(rootUploadDir.resolve(fileName), staticUploadDir.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
-
-        Path targetUploadDir = Paths.get("target/classes/static/upload/avatar");
-        if (!Files.exists(targetUploadDir)) {
-            Files.createDirectories(targetUploadDir);
-        }
-        Files.copy(rootUploadDir.resolve(fileName), targetUploadDir.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
 
         return "/upload/avatar/" + fileName;
     }
