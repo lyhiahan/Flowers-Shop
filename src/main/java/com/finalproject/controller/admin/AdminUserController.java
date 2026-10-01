@@ -10,12 +10,17 @@ import com.finalproject.repository.StoreRepository;
 import com.finalproject.repository.UserRepository;
 import com.finalproject.service.RoleManagementService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -38,43 +43,63 @@ public class AdminUserController {
                             @RequestParam(value = "keyword", required = false) String keyword,
                             @RequestParam(value = "role", required = false) String roleStr,
                             @RequestParam(value = "requestStatus", required = false) String requestStatusStr,
+                            @RequestParam(value = "page", defaultValue = "0") int page,
+                            @RequestParam(value = "size", defaultValue = "10") int size,
                             Model model) {
-        // Tab 1: Danh sách người dùng
-        List<User> users;
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            users = userRepository.findByUsernameContainingIgnoreCaseOrFullNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
-                    keyword.trim(), keyword.trim(), keyword.trim());
-        } else if (roleStr != null && !roleStr.trim().isEmpty() && !"ALL".equalsIgnoreCase(roleStr)) {
-            try {
-                Role role = Role.valueOf(roleStr.toUpperCase());
-                users = userRepository.findByRole(role);
-            } catch (Exception ex) {
-                users = userRepository.findAll();
+        try {
+            // Tab 1: Danh sách người dùng có phân trang (UC_027)
+            Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, size), Sort.by(Sort.Direction.DESC, "id"));
+            Page<User> userPage;
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                userPage = userRepository.findByUsernameContainingIgnoreCaseOrFullNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
+                        keyword.trim(), keyword.trim(), keyword.trim(), pageable);
+            } else if (roleStr != null && !roleStr.trim().isEmpty() && !"ALL".equalsIgnoreCase(roleStr)) {
+                try {
+                    Role role = Role.valueOf(roleStr.toUpperCase());
+                    userPage = userRepository.findByRole(role, pageable);
+                } catch (Exception ex) {
+                    userPage = userRepository.findAll(pageable);
+                }
+            } else {
+                userPage = userRepository.findAll(pageable);
             }
-        } else {
-            users = userRepository.findAll();
-        }
 
-        // Tab 2: Danh sách yêu cầu vai trò
-        RoleRequestStatus statusFilter = null;
-        if (requestStatusStr != null && !requestStatusStr.trim().isEmpty() && !"ALL".equalsIgnoreCase(requestStatusStr)) {
-            try {
-                statusFilter = RoleRequestStatus.valueOf(requestStatusStr.toUpperCase());
-            } catch (Exception ignored) {}
-        }
-        List<RoleRequest> roleRequests = roleManagementService.getAllRoleRequests(statusFilter);
-        long pendingCount = roleRequestRepository.countByStatus(RoleRequestStatus.PENDING);
-        List<Store> stores = storeRepository.findAll();
+            // Tab 2: Danh sách yêu cầu vai trò
+            RoleRequestStatus statusFilter = null;
+            if (requestStatusStr != null && !requestStatusStr.trim().isEmpty() && !"ALL".equalsIgnoreCase(requestStatusStr)) {
+                try {
+                    statusFilter = RoleRequestStatus.valueOf(requestStatusStr.toUpperCase());
+                } catch (Exception ignored) {}
+            }
+            List<RoleRequest> roleRequests = roleManagementService.getAllRoleRequests(statusFilter);
+            long pendingCount = roleRequestRepository.countByStatus(RoleRequestStatus.PENDING);
+            List<Store> stores = storeRepository.findAll();
 
-        model.addAttribute("activeTab", tab);
-        model.addAttribute("users", users);
-        model.addAttribute("keyword", keyword);
-        model.addAttribute("currentRole", roleStr != null ? roleStr : "ALL");
-        model.addAttribute("roles", Role.values());
-        model.addAttribute("roleRequests", roleRequests);
-        model.addAttribute("pendingCount", pendingCount);
-        model.addAttribute("currentRequestStatus", requestStatusStr != null ? requestStatusStr : "ALL");
-        model.addAttribute("stores", stores);
+            model.addAttribute("activeTab", tab);
+            model.addAttribute("users", userPage.getContent());
+            model.addAttribute("userPage", userPage);
+            model.addAttribute("currentPage", userPage.getNumber());
+            model.addAttribute("totalPages", userPage.getTotalPages());
+            model.addAttribute("totalElements", userPage.getTotalElements());
+            model.addAttribute("pageSize", size);
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("currentRole", roleStr != null ? roleStr : "ALL");
+            model.addAttribute("roles", Role.values());
+            model.addAttribute("roleRequests", roleRequests);
+            model.addAttribute("pendingCount", pendingCount);
+            model.addAttribute("currentRequestStatus", requestStatusStr != null ? requestStatusStr : "ALL");
+            model.addAttribute("stores", stores);
+            model.addAttribute("dataLoadError", false);
+        } catch (Exception ex) {
+            model.addAttribute("dataLoadError", true);
+            model.addAttribute("errorMessage", "Không thể tải danh sách người dùng. Vui lòng thử lại!");
+            model.addAttribute("users", Collections.emptyList());
+            model.addAttribute("currentPage", 0);
+            model.addAttribute("totalPages", 0);
+            model.addAttribute("totalElements", 0L);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("roles", Role.values());
+        }
 
         return "admin/users";
     }

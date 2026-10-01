@@ -24,4 +24,8 @@ public class Category {
     @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
     @Builder.Default
     private java.util.List<Category> subCategories = new java.util.ArrayList<>();
+
+    @Column(name = "is_deleted")
+    @Builder.Default
+    private Boolean isDeleted = false;
 }

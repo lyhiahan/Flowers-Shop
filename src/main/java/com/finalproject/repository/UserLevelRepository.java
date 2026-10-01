@@ -8,5 +8,7 @@ import java.util.List;
 
 @Repository
 public interface UserLevelRepository extends JpaRepository<UserLevel, Long> {
+    List<UserLevel> findAllByOrderByMinPointAsc();
     List<UserLevel> findByIsDeletedFalseOrderByMinPointAsc();
+    List<UserLevel> findByIsDeletedFalse();
 }

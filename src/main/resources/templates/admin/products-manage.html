@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -55,7 +55,7 @@
             </li>
 
             <li>
-                <a th:href="@{/admin/products-manage}" class="nav-link active">
+                <a th:href="@{/admin/products-manage}" class="nav-link active" id="sidebarProductsLink">
                     <i class="bi bi-box-seam"></i>
                     <span>Sản phẩm</span>
                 </a>
@@ -146,37 +146,47 @@
             </div>
         </div>
 
-        <!-- Flash alerts -->
+        <!-- Flash alerts & Data load error (Post-conditions UC_028) -->
         <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small" role="alert" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA; border-radius: 10px;">
             <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${successMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
+        <div th:if="${errorMessage != null or dataLoadError == true}" class="alert alert-danger alert-dismissible fade show py-2 small" id="dataLoadAlert" role="alert" style="background-color: #FDEBEB; color: #B83232; border: 1px solid #F7C6C6; border-radius: 10px;">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i> <span th:text="${errorMessage != null ? errorMessage : 'Không thể tải danh sách sản phẩm. Vui lòng thử lại!'}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
 
-        <!-- 2. Nhóm kiểm duyệt: Tất cả · Chờ duyệt · Đã duyệt · Từ chối / Ngừng bán -->
-        <div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
+        <!-- 2. Nhóm kiểm duyệt (BƯỚC 3 THEO UC_028): Tất cả · Licensed products (Được cấp phép) · Unlicensed products (Bị cấm) · Chờ duyệt -->
+        <div class="d-flex gap-2 mb-3 flex-wrap align-items-center" id="productFilterTabs">
             <a th:href="@{/admin/products-manage(tab='ALL', keyword=${keyword}, style=${currentStyle}, status=${currentStatus})}"
                class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2"
+               id="tabAllProducts"
                th:classappend="${currentTab == 'ALL'} ? 'btn-dark' : 'btn-outline-secondary bg-white'"
                style="font-size: 14px; font-weight: 600;">
                 Tất cả <span class="badge rounded-pill" th:classappend="${currentTab == 'ALL'} ? 'bg-light text-dark' : 'bg-secondary text-white'" th:text="${countAll}">0</span>
             </a>
-            <a th:href="@{/admin/products-manage(tab='APPROVED', keyword=${keyword}, style=${currentStyle}, status=${currentStatus})}"
+            <!-- BƯỚC 3 THEO UC_028: Chọn Licensed products để xem sản phẩm được cấp phép -->
+            <a th:href="@{/admin/products-manage(tab='LICENSED', keyword=${keyword}, style=${currentStyle}, status=${currentStatus})}"
                class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2"
-               th:classappend="${currentTab == 'APPROVED'} ? 'btn-success text-white' : 'btn-outline-secondary bg-white'"
+               id="tabLicensedProducts"
+               th:classappend="${currentTab == 'LICENSED' or currentTab == 'APPROVED'} ? 'btn-success text-white' : 'btn-outline-secondary bg-white'"
                style="font-size: 14px; font-weight: 600;">
-                Đã duyệt <span class="badge rounded-pill" th:classappend="${currentTab == 'APPROVED'} ? 'bg-white text-success' : 'bg-secondary text-white'" th:text="${countApproved}">0</span>
+                Licensed products (Được cấp phép) <span class="badge rounded-pill" th:classappend="${currentTab == 'LICENSED' or currentTab == 'APPROVED'} ? 'bg-white text-success' : 'bg-secondary text-white'" th:text="${countApproved}">0</span>
+            </a>
+            <!-- BƯỚC 3 THEO UC_028: Chọn Unlicensed products để xem sản phẩm bị cấm -->
+            <a th:href="@{/admin/products-manage(tab='UNLICENSED', keyword=${keyword}, style=${currentStyle}, status=${currentStatus})}"
+               class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2"
+               id="tabUnlicensedProducts"
+               th:classappend="${currentTab == 'UNLICENSED' or currentTab == 'BANNED' or currentTab == 'REJECTED'} ? 'btn-danger text-white' : 'btn-outline-secondary bg-white'"
+               style="font-size: 14px; font-weight: 600;">
+                Unlicensed products (Bị cấm) <span class="badge rounded-pill" th:classappend="${currentTab == 'UNLICENSED' or currentTab == 'BANNED' or currentTab == 'REJECTED'} ? 'bg-white text-danger' : 'bg-secondary text-white'" th:text="${countBanned}">0</span>
             </a>
             <a th:href="@{/admin/products-manage(tab='PENDING', keyword=${keyword}, style=${currentStyle}, status=${currentStatus})}"
                class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2"
+               id="tabPendingProducts"
                th:classappend="${currentTab == 'PENDING'} ? 'btn-warning text-dark' : 'btn-outline-secondary bg-white'"
                style="font-size: 14px; font-weight: 600;">
                 Chờ duyệt <span class="badge rounded-pill" th:classappend="${currentTab == 'PENDING'} ? 'bg-dark text-white' : 'bg-secondary text-white'" th:text="${countPending}">0</span>
-            </a>
-            <a th:href="@{/admin/products-manage(tab='REJECTED', keyword=${keyword}, style=${currentStyle}, status=${currentStatus})}"
-               class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2"
-               th:classappend="${currentTab == 'REJECTED'} ? 'btn-danger text-white' : 'btn-outline-secondary bg-white'"
-               style="font-size: 14px; font-weight: 600;">
-                Từ chối / Ngừng bán <span class="badge rounded-pill" th:classappend="${currentTab == 'REJECTED'} ? 'bg-white text-danger' : 'bg-secondary text-white'" th:text="${countRejected}">0</span>
             </a>
         </div>
 
@@ -233,7 +243,7 @@
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-admin-products align-middle mb-0">
+                    <table class="table table-admin-products align-middle mb-0" id="productsTable">
                         <thead style="background-color: #E5EEE8 !important;">
                         <tr style="background-color: #E5EEE8 !important;">
                             <th class="ps-4 fw-bold" style="white-space: nowrap !important; width: 80px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Mã</th>
@@ -366,6 +376,49 @@
                         </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- BƯỚC 5 THEO UC_028: Phân trang (Next, Previous, hoặc số trang bất kỳ) -->
+                <div th:if="${totalPages > 1}" class="d-flex justify-content-between align-items-center flex-wrap gap-3 p-3 border-top" style="border-color: #E2E7E2 !important;" id="productsPagination">
+                    <div class="small text-muted" style="font-size: 14px;">
+                        Hiển thị <strong th:text="${totalElements > 0 ? (currentPage * pageSize) + 1 : 0}">1</strong> - 
+                        <strong th:text="${(currentPage + 1) * pageSize < totalElements ? (currentPage + 1) * pageSize : totalElements}">10</strong>
+                        trên tổng số <strong th:text="${totalElements}">10</strong> sản phẩm
+                    </div>
+                    <nav aria-label="Products pagination">
+                        <ul class="pagination pagination-sm mb-0">
+                            <!-- Nút Previous -->
+                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+                                <a class="page-link" 
+                                   th:href="@{/admin/products-manage(tab=${currentTab}, keyword=${keyword}, style=${currentStyle}, status=${currentStatus}, page=${currentPage - 1}, size=${pageSize})}" 
+                                   id="btnPrevPage" 
+                                   data-testid="btnPrevPage" 
+                                   aria-label="Previous">
+                                    <i class="bi bi-chevron-left me-1"></i> Previous
+                                </a>
+                            </li>
+
+                            <!-- Các số trang -->
+                            <li class="page-item" th:each="p : ${#numbers.sequence(1, totalPages)}"
+                                th:classappend="${currentPage == (p - 1)} ? 'active' : ''">
+                                <a class="page-link" 
+                                   th:href="@{/admin/products-manage(tab=${currentTab}, keyword=${keyword}, style=${currentStyle}, status=${currentStatus}, page=${p - 1}, size=${pageSize})}" 
+                                   th:text="${p}"
+                                   th:id="'pageBtn_' + ${p}">1</a>
+                            </li>
+
+                            <!-- Nút Next -->
+                            <li class="page-item" th:classappend="${currentPage >= (totalPages - 1)} ? 'disabled' : ''">
+                                <a class="page-link" 
+                                   th:href="@{/admin/products-manage(tab=${currentTab}, keyword=${keyword}, style=${currentStyle}, status=${currentStatus}, page=${currentPage + 1}, size=${pageSize})}" 
+                                   id="btnNextPage" 
+                                   data-testid="btnNextPage" 
+                                   aria-label="Next">
+                                    Next <i class="bi bi-chevron-right ms-1"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             </div>
         </div>

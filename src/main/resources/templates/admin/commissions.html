@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -197,6 +197,17 @@
                     <i class="bi bi-truck"></i>
                     <span>Đơn vị vận chuyển</span>
                 </a>
+            <li>
+                <a th:href="@{/admin/deliveries}" class="nav-link" id="sidebarDeliveriesLink">
+                    <i class="bi bi-truck"></i>
+                    <span>Đơn vị vận chuyển</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/commissions}" class="nav-link active" id="sidebarCommissionsLink" data-testid="sidebarCommissionsLink">
+                    <i class="bi bi-percent"></i>
+                    <span>Chính sách hoa hồng</span>
+                </a>
             </li>
             <li>
                 <a th:href="@{/admin/vouchers}" class="nav-link">
@@ -234,7 +245,7 @@
 
     <!-- Main Content -->
     <div class="main-wrapper p-4">
-        <!-- 1. Header: gọn với nút Hướng dẫn + Thêm chính sách -->
+        <!-- 1. Header: nút New commission -->
         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
             <div class="d-flex align-items-center gap-3">
                 <h1 class="page-title mb-0">Chính sách hoa hồng</h1>
@@ -245,22 +256,23 @@
                 </span>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <button class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"
-                        type="button" data-bs-toggle="collapse" data-bs-target="#guideCollapse"
-                        style="border-radius: 9999px; padding: 8px 18px; font-size: 14.5px; font-weight: 600; border-color: #D1E5DA; color: #20382E;">
-                    <i class="bi bi-info-circle"></i> Hướng dẫn
-                </button>
-                <button class="btn btn-primary-dark shadow-sm d-inline-flex align-items-center gap-2"
-                        data-bs-toggle="modal" data-bs-target="#addCommModal">
-                    <i class="bi bi-plus-lg"></i> Thêm chính sách
-                </button>
+                <!-- Bước 5: Chọn nút New commission để thêm mới -->
+                <a th:href="@{/admin/commissions/create}" id="btnNewCommission" data-testid="btnNewCommission" class="btn btn-primary-dark shadow-sm d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-plus-lg"></i> New commission
+                </a>
             </div>
         </div>
 
-        <!-- Flash alerts -->
-        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small shadow-sm rounded-3 border-0 d-flex align-items-center gap-2 mb-3" role="alert" style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7 !important; font-size: 15px;">
+        <!-- Post-conditions: Flash alerts -->
+        <div th:if="${successMessage != null}" id="successAlert" data-testid="successAlert" class="alert alert-success alert-dismissible fade show py-2 small shadow-sm rounded-3 border-0 d-flex align-items-center gap-2 mb-3" role="alert" style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7 !important; font-size: 15px;">
             <i class="bi bi-check-circle-fill fs-5"></i>
             <span th:text="${successMessage}" style="font-weight: 600;"></span>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${errorMessage != null or dataLoadError == true}" id="dataLoadAlert" data-testid="dataLoadAlert" class="alert alert-danger alert-dismissible fade show py-2 small shadow-sm rounded-3 border-0 d-flex align-items-center gap-2 mb-3" role="alert" style="background-color: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2 !important; font-size: 15px;">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            <span th:text="${errorMessage != null ? errorMessage : 'Có lỗi khi tải danh sách chính sách hoa hồng!'}" style="font-weight: 600;"></span>
             <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
         </div>
 
@@ -328,16 +340,16 @@
         <!-- 3. Bảng Chính sách hoa hồng (rút gọn) -->
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white" style="border: 1px solid #E2E7E2 !important;">
             <div class="card-body p-0">
-                <table class="table table-hover align-middle mb-0" style="table-layout: fixed; width: 100%;">
+                <table id="commissionsTable" data-testid="commissionsTable" class="table table-hover align-middle mb-0" style="table-layout: fixed; width: 100%;">
                     <thead>
                     <tr>
-                        <th class="ps-4" style="width: 25%;">Chính sách</th>
+                        <th class="ps-4" style="width: 8%;">ID</th>
+                        <th style="width: 25%;">Chính sách</th>
                         <th style="width: 15%;">Cách tính</th>
-                        <th class="text-end" style="width: 13%;">Mức thu</th>
-                        <th class="text-center" style="width: 15%;">Cửa hàng</th>
-                        <th style="width: 12%;">Hiệu lực</th>
+                        <th class="text-end" style="width: 15%;">Mức thu</th>
+                        <th class="text-center" style="width: 12%;">Cửa hàng</th>
                         <th class="text-center" style="width: 10%;">Trạng thái</th>
-                        <th class="text-end pe-4" style="width: 10%;">Thao tác</th>
+                        <th class="text-end pe-4" style="width: 15%;">Thao tác</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -351,17 +363,15 @@
 
                     <!-- Danh sách chính sách -->
                     <tr th:each="c : ${commissions}">
-                        <!-- 1. Chính sách: Tên bấm mở modal chi tiết -->
-                        <td class="ps-4">
+                        <!-- ID -->
+                        <td class="ps-4 fw-bold text-muted" th:text="'#' + ${c.id}">#1</td>
+
+                        <!-- 1. Chính sách: Tên -->
+                        <td>
                             <div>
-                                <a href="javascript:void(0)"
-                                   data-bs-toggle="modal" th:data-bs-target="'#commDetailModal' + ${c.id}"
-                                   class="text-decoration-none"
-                                   style="font-size: 16px; font-weight: 700; color: #20382E;">
-                                    <span th:text="${c.name}">Hoa hồng tiêu chuẩn (10%)</span>
-                                </a>
-                                <small class="text-muted d-block mt-0.5" style="font-size: 12px;">
-                                    <i class="bi bi-check2-circle text-success me-1"></i>Thu khi đơn giao thành công
+                                <span class="fw-bold" style="font-size: 16px; color: #20382E;" th:text="${c.name}">Hoa hồng tiêu chuẩn</span>
+                                <small th:if="${c.description != null and !c.description.isEmpty()}" class="text-muted d-block mt-0.5" style="font-size: 12px;" th:text="${c.description}">
+                                    Mô tả chính sách
                                 </small>
                             </div>
                         </td>
@@ -394,24 +404,12 @@
 
                         <!-- 4. Cửa hàng áp dụng -->
                         <td class="text-center">
-                            <button type="button" 
-                                    class="btn shop-counter-btn d-inline-flex align-items-center gap-1"
-                                    data-bs-toggle="modal" th:data-bs-target="'#commShopsModal' + ${c.id}">
-                                <i class="bi bi-shop"></i>
-                                <span th:text="${stores != null ? #lists.size(stores.?[commission != null and commission.id == #root.c.id]) : 0}">
-                                    0
-                                </span>
-                            </button>
+                            <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 13px;" th:text="${stores != null ? #lists.size(stores.?[commission != null and commission.id == #root.c.id]) : 0}">
+                                0
+                            </span>
                         </td>
 
-                        <!-- 5. Hiệu lực -->
-                        <td>
-                            <div class="fw-semibold text-dark" style="font-size: 13.5px;">
-                                <i class="bi bi-calendar-check text-muted me-1"></i>Vô thời hạn
-                            </div>
-                        </td>
-
-                        <!-- 6. Trạng thái: Đang bật / Đã tắt -->
+                        <!-- 5. Trạng thái: Đang bật / Đã tắt -->
                         <td class="text-center">
                             <span th:if="${c.isDeleted == null or !c.isDeleted}" class="status-pill-active">
                                 <i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i>Đang bật
@@ -421,38 +419,49 @@
                             </span>
                         </td>
 
-                        <!-- 7. Thao tác: Sửa + ⋯ dropdown -->
+                        <!-- 6. Thao tác: Edit, Delete, Restore -->
                         <td class="text-end pe-4" style="white-space: nowrap;">
                             <div class="d-inline-flex align-items-center gap-1">
-                                <button type="button"
-                                        class="btn btn-sm d-inline-flex align-items-center gap-1"
-                                        data-bs-toggle="modal" th:data-bs-target="'#editCommModal' + ${c.id}"
-                                        style="height: 30px; padding: 0 10px; font-size: 13.5px; font-weight: 600; border-radius: 8px; border: 1px solid #D1E5DA; background-color: #FFFFFF; color: #20382E;">
-                                    <i class="bi bi-pencil-square"></i> Sửa
-                                </button>
-                                <div class="dropdown">
-                                    <button class="btn btn-sm" type="button" data-bs-toggle="dropdown"
-                                            style="height: 30px; width: 30px; padding: 0; border-radius: 8px; border: 1px solid #E2E7E2; background: #FFFFFF; color: #6B7280; font-size: 17px; line-height: 1;">
-                                        ⋯
+                                <!-- 5a. Nút Edit -->
+                                <a th:href="@{'/admin/commissions/edit/' + ${c.id}}"
+                                   th:id="'btnEditCommission_' + ${c.id}"
+                                   th:data-testid="'btnEditCommission_' + ${c.id}"
+                                   class="btn btn-sm btn-outline-secondary py-1 px-2 d-inline-flex align-items-center gap-1"
+                                   style="border-radius: 8px; font-size: 13.5px; font-weight: 600;"
+                                   title="Chỉnh sửa chính sách">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+
+                                <!-- 5-8b. Nút Delete (khi chưa bị xóa) -->
+                                <form th:if="${c.isDeleted == null or !c.isDeleted}"
+                                      th:action="@{'/admin/commissions/delete/' + ${c.id}}"
+                                      method="post" class="d-inline m-0">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                    <button type="submit"
+                                            th:id="'btnDeleteCommission_' + ${c.id}"
+                                            th:data-testid="'btnDeleteCommission_' + ${c.id}"
+                                            class="btn btn-sm btn-outline-danger py-1 px-2 d-inline-flex align-items-center gap-1"
+                                            style="border-radius: 8px; font-size: 13.5px; font-weight: 600;"
+                                            title="Xóa / Ngừng áp dụng"
+                                            onclick="return confirm('Bạn có chắc chắn muốn ngưng áp dụng chính sách này?')">
+                                        <i class="bi bi-trash"></i> Delete
                                     </button>
-                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="border-radius: 10px; min-width: 165px;">
-                                        <li>
-                                            <a class="dropdown-item py-2" href="javascript:void(0)"
-                                               data-bs-toggle="modal" th:data-bs-target="'#commDetailModal' + ${c.id}">
-                                                <i class="bi bi-eye me-2 text-primary"></i>Xem chi tiết
-                                            </a>
-                                        </li>
-                                        <li><hr class="dropdown-divider my-1"></li>
-                                        <li>
-                                            <form th:action="@{'/admin/commissions/delete/' + ${c.id}}" method="post" class="m-0"
-                                                  onsubmit="return confirm('Xóa/ngừng áp dụng chính sách này?');">
-                                                <button type="submit" class="dropdown-item py-2 text-danger">
-                                                    <i class="bi bi-trash me-2"></i>Xóa / Ngừng áp dụng
-                                                </button>
-                                            </form>
-                                        </li>
-                                    </ul>
-                                </div>
+                                </form>
+
+                                <!-- 5-8c. Nút Restore (khi đã bị xóa) -->
+                                <form th:if="${c.isDeleted != null and c.isDeleted}"
+                                      th:action="@{'/admin/commissions/restore/' + ${c.id}}"
+                                      method="post" class="d-inline m-0">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                    <button type="submit"
+                                            th:id="'btnRestoreCommission_' + ${c.id}"
+                                            th:data-testid="'btnRestoreCommission_' + ${c.id}"
+                                            class="btn btn-sm btn-outline-success py-1 px-2 d-inline-flex align-items-center gap-1 shadow-sm"
+                                            style="border-radius: 8px; font-size: 13.5px; font-weight: 600;"
+                                            title="Khôi phục chính sách">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Restore
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
@@ -460,6 +469,25 @@
                 </table>
             </div>
         </div>
+
+        <!-- Bước 4: Chọn Next (hoặc Previous, hoặc trang bất kỳ) để xem trang tiếp theo -->
+        <nav id="commissionsPagination" data-testid="commissionsPagination" th:if="${totalPages > 1}" class="mt-4 d-flex justify-content-center" aria-label="Commissions pagination">
+            <ul class="pagination mb-0 gap-1">
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+                    <a class="page-link" id="btnPrevPage" data-testid="btnPrevPage" th:href="@{/admin/commissions(page=${currentPage - 1}, size=${pageSize}, keyword=${keyword})}">
+                        <i class="bi bi-chevron-left me-1"></i> Previous
+                    </a>
+                </li>
+                <li th:each="p : ${#numbers.sequence(0, totalPages - 1)}" class="page-item" th:classappend="${p == currentPage} ? 'active' : ''">
+                    <a class="page-link" th:id="'pageBtn_' + ${p + 1}" th:href="@{/admin/commissions(page=${p}, size=${pageSize}, keyword=${keyword})}" th:text="${p + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled' : ''">
+                    <a class="page-link" id="btnNextPage" data-testid="btnNextPage" th:href="@{/admin/commissions(page=${currentPage + 1}, size=${pageSize}, keyword=${keyword})}">
+                        Next <i class="bi bi-chevron-right ms-1"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
     </div>
 </div>
 

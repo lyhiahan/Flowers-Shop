@@ -23,8 +23,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByStoreId(Long storeId);
     long countByRole(Role role);
     List<User> findByRole(Role role);
+    org.springframework.data.domain.Page<User> findByRole(Role role, org.springframework.data.domain.Pageable pageable);
 
     List<User> findByUsernameContainingIgnoreCaseOrFullNameContainingIgnoreCaseOrEmailContainingIgnoreCase(String username, String fullName, String email);
+    org.springframework.data.domain.Page<User> findByUsernameContainingIgnoreCaseOrFullNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
+            String username, String fullName, String email, org.springframework.data.domain.Pageable pageable);
 
     List<User> findByCreatedDateBetween(java.time.LocalDate start, java.time.LocalDate end);
 }

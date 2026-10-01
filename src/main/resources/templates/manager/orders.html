@@ -21,7 +21,7 @@
 <body>
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar -->
+        <!-- Sidebar: Bước 6 theo UC_022: Chọn Orders trên thanh sidebar -->
         <div class="col-md-2 p-3 sidebar">
             <div class="d-flex align-items-center gap-2 mb-4 px-2">
                 <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img me-1">
@@ -32,14 +32,14 @@
             </div>
             <nav class="d-flex flex-column gap-1">
                 <a th:href="@{/manager/dashboard}"><i class="bi bi-speedometer2"></i> Tổng Quan Chi Nhánh</a>
-                <a th:href="@{/manager/orders}" class="active"><i class="bi bi-bag-check-fill"></i> Quản Lý Đơn Hàng</a>
+                <!-- BƯỚC 6 THEO UC_022: Chọn Orders trên thanh sidebar -->
+                <a th:href="@{/manager/orders}" class="active" id="sidebarOrders"><i class="bi bi-bag-check-fill"></i> Orders (Quản Lý Đơn Hàng)</a>
                 <a th:href="@{/manager/products}"><i class="bi bi-flower1"></i> Kho Mẫu Hoa</a>
-                <a th:href="@{/manager/staff}"><i class="bi bi-people"></i> Nhân Viên Cửa Hàng</a>
-                <a th:href="@{/manager/wallet}"><i class="bi bi-wallet2"></i> Ví Cửa Hàng & Rút Tiền</a>
+                <a th:href="@{/manager/staff}"><i class="bi bi-people"></i> Staffs (Nhân Viên)</a>
+                <a th:href="@{/manager/wallet}" id="sidebarGdCoins"><i class="bi bi-coin"></i> GD Coins (Ví Cửa Hàng)</a>
                 <a th:href="@{/manager/vouchers}"><i class="bi bi-ticket-perforated-fill"></i> Khuyến Mãi Shop</a>
                 <a th:href="@{/manager/analytics}"><i class="bi bi-graph-up-arrow"></i> Báo Cáo Doanh Thu</a>
                 <a th:href="@{/manager/stores}"><i class="bi bi-shop"></i> Danh Sách Cửa Hàng</a>
-                <!-- BƯỚC 6 THEO UC_019: Chọn Profile trên thanh sidebar -->
                 <a th:href="@{/manager/profile}" id="sidebarProfile"><i class="bi bi-person-badge"></i> Profile</a>
                 <hr class="border-secondary my-2">
                 <a th:href="@{/}"><i class="bi bi-house-door"></i> Xem Website Khách</a>
@@ -49,16 +49,16 @@
 
         <!-- Main Content -->
         <div class="col-md-10 p-4">
-            <!-- 1. Header: Rút gọn tiêu đề chuẩn hóa -->
+            <!-- 1. Header -->
             <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                 <div>
                     <div class="d-flex align-items-center gap-3">
-                        <h1 class="admin-page-title mb-0" style="font-size: 28px !important; font-weight: 800; color: #20382E;">Quản lý đơn hàng</h1>
+                        <h1 class="admin-page-title mb-0" style="font-size: 28px !important; font-weight: 800; color: #20382E;">Quản lý đơn hàng của cửa hàng</h1>
                         <span class="badge rounded-pill" style="background-color: #E5EEE8; color: #20382E; border: 1px solid #D1E5DA; font-size: 14.5px; font-weight: 700; padding: 6px 14px;">
-                            <span th:text="${#lists.size(orders)}">0</span> đơn hàng
+                            <span th:text="${totalElements}">0</span> đơn hàng
                         </span>
                     </div>
-                    <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Theo dõi tiến độ cắm hoa, điều phối giao hàng và xử lý thanh toán của chi nhánh.</p>
+                    <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Theo dõi tiến độ cắm hoa, điều phối giao hàng và cập nhật trạng thái đơn hàng của chi nhánh.</p>
                 </div>
             </div>
 
@@ -72,27 +72,61 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
 
-            <!-- Filter Status Tabs -->
+            <!-- Bước 8 theo UC_022: Chọn Processing orders (hoặc Processed orders) để xem bảng danh sách các đơn hàng đang xử lý (đã xử lý) -->
             <div class="d-flex flex-wrap gap-2 mb-4 bg-white p-3 rounded-4 shadow-sm" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
-                <a th:href="@{/manager/orders(status='ALL')}" class="btn btn-sm rounded-pill px-3 fw-semibold"
-                   th:style="${currentStatus == 'ALL' or currentStatus == null} ? 'background-color: #20382E; color: #FFFFFF; border-color: #20382E;' : 'background-color: #F8F9F8; color: #20382E; border: 1px solid #D1E5DA;'">Tất cả đơn</a>
-                <a th:href="@{/manager/orders(status='PENDING')}" class="btn btn-sm rounded-pill px-3 fw-semibold"
-                   th:style="${currentStatus == 'PENDING'} ? 'background-color: #20382E; color: #FFFFFF; border-color: #20382E;' : 'background-color: #F8F9F8; color: #20382E; border: 1px solid #D1E5DA;'">⏳ Chờ xác nhận</a>
-                <a th:href="@{/manager/orders(status='CONFIRMED')}" class="btn btn-sm rounded-pill px-3 fw-semibold"
-                   th:style="${currentStatus == 'CONFIRMED'} ? 'background-color: #20382E; color: #FFFFFF; border-color: #20382E;' : 'background-color: #F8F9F8; color: #20382E; border: 1px solid #D1E5DA;'">✅ Đã tiếp nhận</a>
-                <a th:href="@{/manager/orders(status='PREPARING')}" class="btn btn-sm rounded-pill px-3 fw-semibold"
-                   th:style="${currentStatus == 'PREPARING'} ? 'background-color: #20382E; color: #FFFFFF; border-color: #20382E;' : 'background-color: #F8F9F8; color: #20382E; border: 1px solid #D1E5DA;'">🌸 Đang cắm hoa</a>
-                <a th:href="@{/manager/orders(status='DELIVERING')}" class="btn btn-sm rounded-pill px-3 fw-semibold"
-                   th:style="${currentStatus == 'DELIVERING'} ? 'background-color: #20382E; color: #FFFFFF; border-color: #20382E;' : 'background-color: #F8F9F8; color: #20382E; border: 1px solid #D1E5DA;'">🚚 Đang giao</a>
-                <a th:href="@{/manager/orders(status='DELIVERED')}" class="btn btn-sm rounded-pill px-3 fw-semibold"
-                   th:style="${currentStatus == 'DELIVERED'} ? 'background-color: #20382E; color: #FFFFFF; border-color: #20382E;' : 'background-color: #F8F9F8; color: #20382E; border: 1px solid #D1E5DA;'">📦 Đã giao</a>
-                <a th:href="@{/manager/orders(status='COMPLETED')}" class="btn btn-sm rounded-pill px-3 fw-semibold"
-                   th:style="${currentStatus == 'COMPLETED'} ? 'background-color: #20382E; color: #FFFFFF; border-color: #20382E;' : 'background-color: #F8F9F8; color: #20382E; border: 1px solid #D1E5DA;'">🎉 Hoàn thành</a>
-                <a th:href="@{/manager/orders(status='CANCELLED')}" class="btn btn-sm rounded-pill px-3 fw-semibold"
-                   th:style="${currentStatus == 'CANCELLED'} ? 'background-color: #20382E; color: #FFFFFF; border-color: #20382E;' : 'background-color: #F8F9F8; color: #20382E; border: 1px solid #D1E5DA;'">❌ Đã hủy</a>
+                <!-- Tab: Processing orders (Đang xử lý) -->
+                <a th:href="@{/manager/orders(tab='processing')}" 
+                   class="btn btn-sm rounded-pill px-3 fw-semibold d-inline-flex align-items-center gap-1.5"
+                   id="tabProcessingOrders"
+                   data-testid="tabProcessingOrders"
+                   th:style="${activeTab == 'processing' or currentStatus == 'PROCESSING'} ? 'background-color: #20382E; color: #FFFFFF; border-color: #20382E;' : 'background-color: #F8F9F8; color: #20382E; border: 1px solid #D1E5DA;'">
+                    <i class="bi bi-arrow-repeat"></i>
+                    <span>Processing orders</span>
+                    <span class="badge rounded-pill ms-1" 
+                          th:classappend="${activeTab == 'processing' or currentStatus == 'PROCESSING'} ? 'bg-light text-dark' : 'bg-secondary text-white'"
+                          th:text="${processingCount}">0</span>
+                </a>
+
+                <!-- Tab: Processed orders (Đã xử lý) -->
+                <a th:href="@{/manager/orders(tab='processed')}" 
+                   class="btn btn-sm rounded-pill px-3 fw-semibold d-inline-flex align-items-center gap-1.5"
+                   id="tabProcessedOrders"
+                   data-testid="tabProcessedOrders"
+                   th:style="${activeTab == 'processed' or currentStatus == 'PROCESSED'} ? 'background-color: #20382E; color: #FFFFFF; border-color: #20382E;' : 'background-color: #F8F9F8; color: #20382E; border: 1px solid #D1E5DA;'">
+                    <i class="bi bi-check2-all"></i>
+                    <span>Processed orders</span>
+                    <span class="badge rounded-pill ms-1" 
+                          th:classappend="${activeTab == 'processed' or currentStatus == 'PROCESSED'} ? 'bg-light text-dark' : 'bg-secondary text-white'"
+                          th:text="${processedCount}">0</span>
+                </a>
+
+                <!-- Tab: Tất cả đơn hàng -->
+                <a th:href="@{/manager/orders(tab='all')}" 
+                   class="btn btn-sm rounded-pill px-3 fw-semibold d-inline-flex align-items-center gap-1.5"
+                   id="tabAllOrders"
+                   th:style="${activeTab == 'all' and currentStatus == 'ALL'} ? 'background-color: #20382E; color: #FFFFFF; border-color: #20382E;' : 'background-color: #F8F9F8; color: #20382E; border: 1px solid #D1E5DA;'">
+                    <span>Tất cả đơn</span>
+                    <span class="badge rounded-pill ms-1" 
+                          th:classappend="${activeTab == 'all' and currentStatus == 'ALL'} ? 'bg-light text-dark' : 'bg-secondary text-white'"
+                          th:text="${totalCount}">0</span>
+                </a>
+
+                <div class="vr my-1 mx-1 d-none d-md-block"></div>
+
+                <!-- Sub-filters chi tiết -->
+                <a th:href="@{/manager/orders(status='PENDING')}" class="btn btn-sm rounded-pill px-2.5 fw-semibold"
+                   th:style="${currentStatus == 'PENDING'} ? 'background-color: #20382E; color: #FFFFFF;' : 'background-color: #F8F9F8; color: #66736B; border: 1px solid #E2E7E2;'">⏳ Chờ xác nhận</a>
+                <a th:href="@{/manager/orders(status='CONFIRMED')}" class="btn btn-sm rounded-pill px-2.5 fw-semibold"
+                   th:style="${currentStatus == 'CONFIRMED'} ? 'background-color: #20382E; color: #FFFFFF;' : 'background-color: #F8F9F8; color: #66736B; border: 1px solid #E2E7E2;'">✅ Đã tiếp nhận</a>
+                <a th:href="@{/manager/orders(status='PREPARING')}" class="btn btn-sm rounded-pill px-2.5 fw-semibold"
+                   th:style="${currentStatus == 'PREPARING'} ? 'background-color: #20382E; color: #FFFFFF;' : 'background-color: #F8F9F8; color: #66736B; border: 1px solid #E2E7E2;'">🌸 Đang cắm hoa</a>
+                <a th:href="@{/manager/orders(status='DELIVERING')}" class="btn btn-sm rounded-pill px-2.5 fw-semibold"
+                   th:style="${currentStatus == 'DELIVERING'} ? 'background-color: #20382E; color: #FFFFFF;' : 'background-color: #F8F9F8; color: #66736B; border: 1px solid #E2E7E2;'">🚚 Đang giao</a>
+                <a th:href="@{/manager/orders(status='COMPLETED')}" class="btn btn-sm rounded-pill px-2.5 fw-semibold"
+                   th:style="${currentStatus == 'COMPLETED'} ? 'background-color: #20382E; color: #FFFFFF;' : 'background-color: #F8F9F8; color: #66736B; border: 1px solid #E2E7E2;'">🎉 Hoàn thành</a>
             </div>
 
-            <!-- Orders Table: thead #E5EEE8, chữ đậm 800, nowrap -->
+            <!-- Orders Table -->
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -105,7 +139,7 @@
                                 <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 130px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Tổng tiền</th>
                                 <th class="fw-bold" style="white-space: nowrap !important; min-width: 160px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Lịch nhận hoa</th>
                                 <th class="fw-bold" style="white-space: nowrap !important; min-width: 160px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Trạng thái</th>
-                                <th class="text-end pe-4 fw-bold" style="white-space: nowrap !important; min-width: 190px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Thao tác</th>
+                                <th class="text-end pe-4 fw-bold" style="white-space: nowrap !important; min-width: 220px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Thao tác</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -116,7 +150,7 @@
                                 </td>
                             </tr>
                             <tr th:each="o : ${orders}">
-                                <!-- 1. Mã đơn: đậm nổi bật, ngày đặt nhỏ bên dưới -->
+                                <!-- 1. Mã đơn -->
                                 <td class="ps-4" style="white-space: nowrap;">
                                     <div class="fw-bold" style="font-size: 16px; color: #20382E;" th:text="'#' + ${o.id}">#101</div>
                                     <div style="font-size: 13px; color: #66736B; margin-top: 2px;" th:text="${#temporals.format(o.createdAt, 'dd/MM/yyyy HH:mm')}">01/10/2026 09:30</div>
@@ -128,7 +162,7 @@
                                     <div style="font-size: 14px; color: #66736B; margin-top: 2px;">
                                         <i class="bi bi-telephone me-1"></i><span th:text="${o.recipientPhone != null ? o.recipientPhone : (o.user != null ? o.user.phone : '---')}">0901234567</span>
                                     </div>
-                                    <div style="font-size: 13px; color: #8C9990; margin-top: 1px;" class="text-truncate" style="max-width: 220px;" th:text="${o.recipientAddress != null ? o.recipientAddress : (o.user != null ? o.user.address : '')}"></div>
+                                    <div style="font-size: 13px; color: #8C9990; margin-top: 1px; max-width: 220px;" class="text-truncate" th:text="${o.recipientAddress != null ? o.recipientAddress : (o.user != null ? o.user.address : '')}"></div>
                                 </td>
 
                                 <!-- 3. Chi tiết hoa -->
@@ -142,7 +176,7 @@
                                     </div>
                                 </td>
 
-                                <!-- 4. Tổng tiền: 18px 800 hồng trầm #A64060 nowrap -->
+                                <!-- 4. Tổng tiền -->
                                 <td class="text-end" style="white-space: nowrap;">
                                     <div style="font-size: 18px; font-weight: 800; color: #A64060; white-space: nowrap;"
                                          th:text="${o.totalAmount != null ? #numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">
@@ -162,7 +196,7 @@
                                     </div>
                                 </td>
 
-                                <!-- 6. Trạng thái: nhãn in hoa trên một dòng -->
+                                <!-- 6. Trạng thái -->
                                 <td style="white-space: nowrap;">
                                     <span th:if="${o.status.name() == 'PENDING'}" class="badge" style="background-color: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; height: 28px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; padding: 0 12px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;">
                                         <i class="bi bi-clock me-1"></i>CHỜ XÁC NHẬN
@@ -192,26 +226,37 @@
                                         <i class="bi bi-check2 me-1"></i>ĐÃ HOÀN TIỀN
                                     </span>
                                 </td>
+
+                                <!-- 7. Thao tác -->
                                 <td class="text-end pe-3">
-                                    <div class="btn-group btn-group-sm">
-                                        <form th:if="${o.paymentMethod == 'BANK_TRANSFER' and o.paymentStatus == 'UNPAID' and o.status.name() != 'CANCELLED'}" th:action="@{/manager/orders/confirm-payment/{id}(id=${o.id})}" method="post" class="d-inline" onsubmit="return confirm('Bạn đã kiểm tra và nhận đủ tiền chuyển khoản?');">
-                                            <button class="btn btn-outline-success btn-sm">Xác nhận đã nhận tiền</button>
+                                    <div class="d-flex align-items-center justify-content-end gap-1.5 flex-wrap">
+                                        <!-- Bước 10 theo UC_022: Chọn nút xem chi tiết -->
+                                        <a th:href="@{'/manager/orders/' + ${o.id}}" 
+                                           class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1 fw-bold"
+                                           th:id="'btnViewDetail_' + ${o.id}"
+                                           data-testid="btnViewDetail">
+                                            <i class="bi bi-eye"></i> Xem chi tiết
+                                        </a>
+
+                                        <!-- Quick actions -->
+                                        <form th:if="${o.paymentMethod == 'BANK_TRANSFER' and o.paymentStatus == 'UNPAID' and o.status.name() != 'CANCELLED'}" 
+                                              th:action="@{/manager/orders/confirm-payment/{id}(id=${o.id})}" 
+                                              method="post" class="d-inline" onsubmit="return confirm('Bạn đã kiểm tra và nhận đủ tiền chuyển khoản?');">
+                                            <input type="hidden" name="redirect" th:value="@{/manager/orders(tab=${activeTab}, status=${currentStatus}, page=${currentPage})}">
+                                            <button class="btn btn-outline-success btn-sm">Nhận tiền</button>
                                         </form>
-                                        <form th:if="${o.status.name() == 'REFUND_REQUESTED'}" th:action="@{/manager/orders/update-status/{id}(id=${o.id})}" method="post" class="d-inline" onsubmit="return confirm('Bạn đã hoàn tiền thực tế cho khách hàng?');">
-                                            <input type="hidden" name="status" value="REFUNDED"><button class="btn btn-outline-danger btn-sm">Xác nhận đã hoàn tiền</button>
-                                        </form>
-                                        <form th:if="${o.status.name() == 'PREPARING' and o.shippingMethod == 'PICKUP'}" th:action="@{/manager/orders/update-status/{id}(id=${o.id})}" method="post" class="d-inline">
-                                            <input type="hidden" name="status" value="COMPLETED"><button class="btn btn-success btn-sm">Đã giao hoa tại quầy và nhận tiền</button>
-                                        </form>
+
                                         <!-- Tiếp nhận đơn -->
                                         <form th:if="${o.status.name() == 'PENDING'}" th:action="@{'/manager/orders/update-status/' + ${o.id}}" method="post" class="d-inline">
                                             <input type="hidden" name="status" value="CONFIRMED">
+                                            <input type="hidden" name="redirect" th:value="@{/manager/orders(tab=${activeTab}, status=${currentStatus}, page=${currentPage})}">
                                             <button type="submit" class="btn btn-outline-info btn-sm">Nhận Đơn</button>
                                         </form>
 
                                         <!-- Cắm hoa -->
                                         <form th:if="${o.status.name() == 'CONFIRMED'}" th:action="@{'/manager/orders/update-status/' + ${o.id}}" method="post" class="d-inline">
                                             <input type="hidden" name="status" value="PREPARING">
+                                            <input type="hidden" name="redirect" th:value="@{/manager/orders(tab=${activeTab}, status=${currentStatus}, page=${currentPage})}">
                                             <button type="submit" class="btn btn-outline-danger btn-sm">Cắm Hoa</button>
                                         </form>
 
@@ -221,9 +266,17 @@
                                             Giao Shipper
                                         </button>
 
-                                        <!-- Hoàn tất đơn -->
+                                        <!-- Hoàn tất đơn nhận tại quầy -->
+                                        <form th:if="${o.status.name() == 'PREPARING' and o.shippingMethod == 'PICKUP'}" th:action="@{'/manager/orders/update-status/' + ${o.id}}" method="post" class="d-inline">
+                                            <input type="hidden" name="status" value="COMPLETED">
+                                            <input type="hidden" name="redirect" th:value="@{/manager/orders(tab=${activeTab}, status=${currentStatus}, page=${currentPage})}">
+                                            <button type="submit" class="btn btn-success btn-sm">Đã giao quầy</button>
+                                        </form>
+
+                                        <!-- Hoàn tất đơn giao hàng -->
                                         <form th:if="${o.status.name() == 'DELIVERED'}" th:action="@{'/manager/orders/update-status/' + ${o.id}}" method="post" class="d-inline">
                                             <input type="hidden" name="status" value="COMPLETED">
+                                            <input type="hidden" name="redirect" th:value="@{/manager/orders(tab=${activeTab}, status=${currentStatus}, page=${currentPage})}">
                                             <button type="submit" class="btn btn-success btn-sm">Hoàn Tất</button>
                                         </form>
                                     </div>
@@ -233,6 +286,7 @@
                                         <div class="modal-dialog modal-dialog-centered">
                                             <div class="modal-content">
                                                 <form th:action="@{'/manager/orders/assign-shipper/' + ${o.id}}" method="post">
+                                                    <input type="hidden" name="redirect" th:value="@{/manager/orders(tab=${activeTab}, status=${currentStatus}, page=${currentPage})}">
                                                     <div class="modal-header">
                                                         <h5 class="modal-title font-serif">Điều Phối Shipper Đơn #<span th:text="${o.id}"></span></h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -259,33 +313,76 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Bước 9 theo UC_022: Phân trang (Next, Previous, hoặc số trang bất kỳ) -->
+            <div th:if="${totalPages > 1}" class="d-flex justify-content-between align-items-center flex-wrap gap-3 mt-4 pt-3 border-top" style="border-color: #E2E7E2 !important;">
+                <div class="small text-muted" style="font-size: 14px;">
+                    Hiển thị <strong th:text="${totalElements > 0 ? (currentPage * pageSize) + 1 : 0}">1</strong> - 
+                    <strong th:text="${T(java.lang.Math).min((currentPage + 1) * pageSize, totalElements)}">8</strong>
+                    trên tổng số <strong th:text="${totalElements}">10</strong> đơn hàng
+                </div>
+                <nav aria-label="Orders pagination">
+                    <ul class="pagination pagination-sm mb-0">
+                        <!-- Nút Previous -->
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+                            <a class="page-link" 
+                               th:href="@{/manager/orders(tab=${activeTab}, status=${currentStatus}, page=${currentPage - 1}, size=${pageSize})}" 
+                               id="btnPrevPage" 
+                               data-testid="btnPrevPage" 
+                               aria-label="Previous">
+                                <i class="bi bi-chevron-left me-1"></i> Previous
+                            </a>
+                        </li>
+
+                        <!-- Các số trang -->
+                        <li class="page-item" th:each="p : ${#numbers.sequence(1, totalPages)}"
+                            th:classappend="${currentPage == (p - 1)} ? 'active' : ''">
+                            <a class="page-link" 
+                               th:href="@{/manager/orders(tab=${activeTab}, status=${currentStatus}, page=${p - 1}, size=${pageSize})}" 
+                               th:text="${p}"
+                               th:id="'pageBtn_' + ${p}">1</a>
+                        </li>
+
+                        <!-- Nút Next -->
+                        <li class="page-item" th:classappend="${currentPage >= (totalPages - 1)} ? 'disabled' : ''">
+                            <a class="page-link" 
+                               th:href="@{/manager/orders(tab=${activeTab}, status=${currentStatus}, page=${currentPage + 1}, size=${pageSize})}" 
+                               id="btnNextPage" 
+                               data-testid="btnNextPage" 
+                               aria-label="Next">
+                                Next <i class="bi bi-chevron-right ms-1"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
         </div>
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Modal Xác Nhận Đăng Xuất (Sign Out Modal) -->
-    <div class="modal fade" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
-            <div class="modal-content rounded-4 border-0 shadow">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title font-serif fw-bold text-dark" id="signOutModalLabel">
-                        🌸 Xác Nhận Đăng Xuất
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body py-3 text-secondary">
-                    Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?
-                </div>
-                <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancel" data-testid="btnCancel">
-                        Cancel
-                    </button>
-                    <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit"   class="btn btn-danger rounded-pill px-4 fw-semibold text-white text-decoration-none" id="btnConfirm" data-testid="btnConfirm">
-                        Confirm
-                    </button></form>
-                </div>
+<!-- Modal Xác Nhận Đăng Xuất (Sign Out Modal) -->
+<div class="modal fade" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title font-serif fw-bold text-dark" id="signOutModalLabel">
+                    🌸 Xác Nhận Đăng Xuất
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3 text-secondary">
+                Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?
+            </div>
+            <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancel">
+                    Cancel
+                </button>
+                <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold text-white text-decoration-none" id="btnConfirm">
+                    Confirm
+                </button></form>
             </div>
         </div>
     </div>
+</div>
 </body>
 </html>

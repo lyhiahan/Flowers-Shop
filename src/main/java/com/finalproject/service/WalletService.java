@@ -19,7 +19,12 @@ public class WalletService {
 
     @Transactional
     public void requestWithdrawal(BigDecimal amount, String bank, String account, String holder) {
-        Store assigned = access.assignedStore();
+        requestWithdrawal(null, amount, bank, account, holder);
+    }
+
+    @Transactional
+    public void requestWithdrawal(Store targetStore, BigDecimal amount, String bank, String account, String holder) {
+        Store assigned = targetStore != null ? targetStore : access.assignedStore();
         access.requireManager(assigned);
         if (amount == null || amount.compareTo(BigDecimal.valueOf(50000)) < 0 || amount.scale() > 2) {
             throw new IllegalArgumentException("Số tiền rút tối thiểu là 50.000 VNĐ và tối đa 2 chữ số thập phân.");

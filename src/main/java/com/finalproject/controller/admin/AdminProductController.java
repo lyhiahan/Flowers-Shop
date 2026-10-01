@@ -42,7 +42,7 @@ public class AdminProductController {
     }
 
     /**
-     * Xem danh sách sản phẩm trong hệ thống với bộ lọc, tab phân loại và trạng thái cấp phép
+     * Xem danh sách sản phẩm trong hệ thống với bộ lọc, tab phân loại và trạng thái cấp phép (UC_028)
      */
     @GetMapping
     public String listProducts(
@@ -51,105 +51,137 @@ public class AdminProductController {
             @RequestParam(value = "style", required = false) String style,
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "tab", required = false, defaultValue = "ALL") String tab,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
             Model model) {
+        try {
+            List<Product> allProducts = productRepository.findAll();
 
-        List<Product> allProducts = productRepository.findAll();
-
-        // Tự động bảo toàn dữ liệu cho sản phẩm nếu có trường rỗng
-        for (Product p : allProducts) {
-            boolean modified = false;
-            if (p.getPriceBuy() == null) {
-                p.setPriceBuy(new BigDecimal("750000"));
-                modified = true;
+            // Tự động bảo toàn dữ liệu cho sản phẩm nếu có trường rỗng
+            for (Product p : allProducts) {
+                boolean modified = false;
+                if (p.getPriceBuy() == null) {
+                    p.setPriceBuy(new BigDecimal("750000"));
+                    modified = true;
+                }
+                if (p.getSold() == null) {
+                    p.setSold(0);
+                    modified = true;
+                }
+                if (p.getIsActive() == null) {
+                    p.setIsActive(true);
+                    modified = true;
+                }
+                if (p.getImportPrice() == null && p.getPriceBuy() != null) {
+                    p.setImportPrice(p.getPriceBuy().multiply(new BigDecimal("0.6")).setScale(0, java.math.RoundingMode.HALF_UP));
+                    modified = true;
+                }
+                if (p.getIsSelling() == null) {
+                    p.setIsSelling(true);
+                    modified = true;
+                }
+                if (modified) {
+                    productRepository.save(p);
+                }
             }
-            if (p.getSold() == null) {
-                p.setSold(0);
-                modified = true;
-            }
-            if (p.getIsActive() == null) {
-                p.setIsActive(true);
-                modified = true;
-            }
-            if (p.getImportPrice() == null && p.getPriceBuy() != null) {
-                p.setImportPrice(p.getPriceBuy().multiply(new BigDecimal("0.6")).setScale(0, java.math.RoundingMode.HALF_UP));
-                modified = true;
-            }
-            if (p.getIsSelling() == null) {
-                p.setIsSelling(true);
-                modified = true;
-            }
-            if (modified) {
-                productRepository.save(p);
-            }
-        }
 
-        // Tính số lượng cho từng tab kiểm duyệt / cấp phép
-        long countAll = allProducts.size();
-        long countApproved = allProducts.stream().filter(p -> Boolean.TRUE.equals(p.getIsActive())).count();
-        long countPending = allProducts.stream().filter(p -> p.getIsActive() == null).count();
-        long countBanned = allProducts.stream().filter(p -> Boolean.FALSE.equals(p.getIsActive())).count();
+            // Tính số lượng cho từng tab kiểm duyệt / cấp phép
+            long countAll = allProducts.size();
+            long countApproved = allProducts.stream().filter(p -> Boolean.TRUE.equals(p.getIsActive())).count();
+            long countPending = allProducts.stream().filter(p -> p.getIsActive() == null).count();
+            long countBanned = allProducts.stream().filter(p -> Boolean.FALSE.equals(p.getIsActive())).count();
 
-        // Lọc theo Tab kiểm duyệt
-        List<Product> filtered = allProducts;
-        if ("APPROVED".equalsIgnoreCase(tab)) {
-            filtered = filtered.stream().filter(p -> Boolean.TRUE.equals(p.getIsActive())).toList();
-        } else if ("PENDING".equalsIgnoreCase(tab)) {
-            filtered = filtered.stream().filter(p -> p.getIsActive() == null).toList();
-        } else if ("BANNED".equalsIgnoreCase(tab) || "REJECTED".equalsIgnoreCase(tab)) {
-            filtered = filtered.stream().filter(p -> Boolean.FALSE.equals(p.getIsActive())).toList();
-        }
-
-        // Lọc theo từ khóa
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            String kw = keyword.trim().toLowerCase().replace("#", "");
-            filtered = filtered.stream().filter(p ->
-                    (p.getName() != null && p.getName().toLowerCase().contains(kw))
-                    || String.valueOf(p.getId()).contains(kw)
-            ).toList();
-        }
-
-        // Lọc theo Chi nhánh
-        if (storeId != null && storeId > 0) {
-            filtered = filtered.stream().filter(p ->
-                    p.getStore() != null && storeId.equals(p.getStore().getId())
-            ).toList();
-        }
-
-        // Lọc theo Kiểu dáng
-        if (style != null && !style.trim().isEmpty() && !"ALL".equalsIgnoreCase(style)) {
-            filtered = filtered.stream().filter(p ->
-                    detectStyle(p.getName()).equalsIgnoreCase(style.trim())
-            ).toList();
-        }
-
-        // Lọc theo Trạng thái kinh doanh / cấp phép
-        if (status != null && !status.trim().isEmpty() && !"ALL".equalsIgnoreCase(status)) {
-            if ("APPROVED".equalsIgnoreCase(status) || "ACTIVE".equalsIgnoreCase(status)) {
+            // Lọc theo Tab kiểm duyệt / cấp phép (UC_028: Licensed products vs Unlicensed products)
+            List<Product> filtered = allProducts;
+            if ("LICENSED".equalsIgnoreCase(tab) || "APPROVED".equalsIgnoreCase(tab)) {
                 filtered = filtered.stream().filter(p -> Boolean.TRUE.equals(p.getIsActive())).toList();
-            } else if ("SELLING".equalsIgnoreCase(status)) {
-                filtered = filtered.stream().filter(p -> Boolean.TRUE.equals(p.getIsActive()) && Boolean.TRUE.equals(p.getIsSelling())).toList();
-            } else if ("PAUSED".equalsIgnoreCase(status)) {
-                filtered = filtered.stream().filter(p -> Boolean.TRUE.equals(p.getIsActive()) && !Boolean.TRUE.equals(p.getIsSelling())).toList();
-            } else if ("BANNED".equalsIgnoreCase(status) || "REJECTED".equalsIgnoreCase(status)) {
+            } else if ("UNLICENSED".equalsIgnoreCase(tab) || "BANNED".equalsIgnoreCase(tab) || "REJECTED".equalsIgnoreCase(tab)) {
                 filtered = filtered.stream().filter(p -> !Boolean.TRUE.equals(p.getIsActive())).toList();
+            } else if ("PENDING".equalsIgnoreCase(tab)) {
+                filtered = filtered.stream().filter(p -> p.getIsActive() == null).toList();
             }
+
+            // Lọc theo từ khóa
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String kw = keyword.trim().toLowerCase().replace("#", "");
+                filtered = filtered.stream().filter(p ->
+                        (p.getName() != null && p.getName().toLowerCase().contains(kw))
+                        || String.valueOf(p.getId()).contains(kw)
+                ).toList();
+            }
+
+            // Lọc theo Chi nhánh
+            if (storeId != null && storeId > 0) {
+                filtered = filtered.stream().filter(p ->
+                        p.getStore() != null && storeId.equals(p.getStore().getId())
+                ).toList();
+            }
+
+            // Lọc theo Kiểu dáng
+            if (style != null && !style.trim().isEmpty() && !"ALL".equalsIgnoreCase(style)) {
+                filtered = filtered.stream().filter(p ->
+                        detectStyle(p.getName()).equalsIgnoreCase(style.trim())
+                ).toList();
+            }
+
+            // Lọc theo Trạng thái kinh doanh / cấp phép
+            if (status != null && !status.trim().isEmpty() && !"ALL".equalsIgnoreCase(status)) {
+                if ("APPROVED".equalsIgnoreCase(status) || "ACTIVE".equalsIgnoreCase(status) || "LICENSED".equalsIgnoreCase(status)) {
+                    filtered = filtered.stream().filter(p -> Boolean.TRUE.equals(p.getIsActive())).toList();
+                } else if ("SELLING".equalsIgnoreCase(status)) {
+                    filtered = filtered.stream().filter(p -> Boolean.TRUE.equals(p.getIsActive()) && Boolean.TRUE.equals(p.getIsSelling())).toList();
+                } else if ("PAUSED".equalsIgnoreCase(status)) {
+                    filtered = filtered.stream().filter(p -> Boolean.TRUE.equals(p.getIsActive()) && !Boolean.TRUE.equals(p.getIsSelling())).toList();
+                } else if ("BANNED".equalsIgnoreCase(status) || "REJECTED".equalsIgnoreCase(status) || "UNLICENSED".equalsIgnoreCase(status)) {
+                    filtered = filtered.stream().filter(p -> !Boolean.TRUE.equals(p.getIsActive())).toList();
+                }
+            }
+
+            // Phân trang sản phẩm (UC_028)
+            int totalElements = filtered.size();
+            int totalPages = (int) Math.ceil((double) totalElements / size);
+            if (totalPages == 0) totalPages = 1;
+            int fromIndex = Math.min(page * size, totalElements);
+            int toIndex = Math.min(fromIndex + size, totalElements);
+            List<Product> pagedProducts = filtered.subList(fromIndex, toIndex);
+
+            List<Store> stores = storeRepository.findAll();
+
+            model.addAttribute("products", pagedProducts);
+            model.addAttribute("stores", stores);
+            model.addAttribute("countAll", countAll);
+            model.addAttribute("countApproved", countApproved);
+            model.addAttribute("countPending", countPending);
+            model.addAttribute("countBanned", countBanned);
+            model.addAttribute("countRejected", countBanned); // alias
+
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("currentStoreId", storeId);
+            model.addAttribute("currentStyle", style != null ? style : "ALL");
+            model.addAttribute("currentStatus", status != null ? status : "ALL");
+            model.addAttribute("currentTab", tab != null ? tab.toUpperCase() : "ALL");
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("totalElements", (long) totalElements);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("dataLoadError", false);
+
+        } catch (Exception ex) {
+            model.addAttribute("dataLoadError", true);
+            model.addAttribute("errorMessage", "Không thể tải danh sách sản phẩm. Vui lòng thử lại!");
+            model.addAttribute("products", java.util.Collections.emptyList());
+            model.addAttribute("currentPage", 0);
+            model.addAttribute("totalPages", 0);
+            model.addAttribute("totalElements", 0L);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("stores", java.util.Collections.emptyList());
+            model.addAttribute("countAll", 0L);
+            model.addAttribute("countApproved", 0L);
+            model.addAttribute("countPending", 0L);
+            model.addAttribute("countBanned", 0L);
+            model.addAttribute("countRejected", 0L);
+            model.addAttribute("currentTab", tab != null ? tab.toUpperCase() : "ALL");
         }
-
-        List<Store> stores = storeRepository.findAll();
-
-        model.addAttribute("products", filtered);
-        model.addAttribute("stores", stores);
-        model.addAttribute("countAll", countAll);
-        model.addAttribute("countApproved", countApproved);
-        model.addAttribute("countPending", countPending);
-        model.addAttribute("countBanned", countBanned);
-        model.addAttribute("countRejected", countBanned); // alias
-
-        model.addAttribute("keyword", keyword);
-        model.addAttribute("currentStoreId", storeId);
-        model.addAttribute("currentStyle", style != null ? style : "ALL");
-        model.addAttribute("currentStatus", status != null ? status : "ALL");
-        model.addAttribute("currentTab", tab != null ? tab.toUpperCase() : "ALL");
 
         return "admin/products-manage";
     }

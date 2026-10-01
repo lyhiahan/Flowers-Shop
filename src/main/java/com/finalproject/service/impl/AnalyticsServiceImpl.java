@@ -48,8 +48,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
     @Override
     public ChartSeriesDto getNewUsersChart(String timeframe) {
-        // Legacy user records store a date only, so never invent hourly registration times.
-        return chart("hour".equals(timeframe) ? "day" : timeframe, users.findAll().stream()
+        return chart(timeframe, users.findAll().stream()
                 .filter(u -> u.getCreatedDate() != null).map(u -> new Point(u.getCreatedDate().atStartOfDay(), BigDecimal.ONE)).toList());
     }
 

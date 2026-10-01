@@ -27,36 +27,145 @@ public class AdminConfigController {
     private final StyleValueRepository styleValueRepository;
     private final StoreRepository storeRepository;
 
-    // --- 1. Quản lý Loại sản phẩm / Danh mục (Categories) ---
+    // --- 1. Quản lý Loại sản phẩm / Danh mục (Categories - UC_030) ---
     @GetMapping({"/categories", "/category", "/loai-san-pham"})
-    public String listCategories(Model model) {
-        model.addAttribute("categories", categoryRepository.findAll());
+    public String listCategories(
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            Model model) {
+        try {
+            java.util.List<Category> allCategories = categoryRepository.findAll();
+
+            java.util.List<Category> filtered = allCategories;
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String kw = keyword.trim().toLowerCase();
+                filtered = filtered.stream().filter(c ->
+                        (c.getName() != null && c.getName().toLowerCase().contains(kw))
+                        || (c.getDescription() != null && c.getDescription().toLowerCase().contains(kw))
+                        || String.valueOf(c.getId()).contains(kw)
+                ).toList();
+            }
+
+            // Phân trang danh sách loại sản phẩm (Bước 4)
+            int totalElements = filtered.size();
+            int totalPages = (int) Math.ceil((double) totalElements / size);
+            if (totalPages == 0) totalPages = 1;
+            int fromIndex = Math.min(page * size, totalElements);
+            int toIndex = Math.min(fromIndex + size, totalElements);
+            java.util.List<Category> pagedCategories = filtered.subList(fromIndex, toIndex);
+
+            // Cây danh mục (Bước 5: Review cây category)
+            java.util.List<Category> rootCategories = allCategories.stream()
+                    .filter(c -> c.getParent() == null)
+                    .toList();
+
+            model.addAttribute("categories", pagedCategories);
+            model.addAttribute("allCategories", allCategories);
+            model.addAttribute("rootCategories", rootCategories);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("totalElements", (long) totalElements);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("dataLoadError", false);
+
+        } catch (Exception ex) {
+            model.addAttribute("dataLoadError", true);
+            model.addAttribute("errorMessage", "Không thể tải danh sách loại sản phẩm. Vui lòng thử lại!");
+            model.addAttribute("categories", java.util.Collections.emptyList());
+            model.addAttribute("allCategories", java.util.Collections.emptyList());
+            model.addAttribute("rootCategories", java.util.Collections.emptyList());
+            model.addAttribute("currentPage", 0);
+            model.addAttribute("totalPages", 0);
+            model.addAttribute("totalElements", 0L);
+            model.addAttribute("pageSize", size);
+        }
         return "admin/categories";
     }
 
+    /**
+     * Bước 6 & 7: Chuyển đến trang form tạo category mới
+     */
+    @GetMapping("/categories/create")
+    public String createCategoryForm(Model model) {
+        model.addAttribute("category", new Category());
+        model.addAttribute("allCategories", categoryRepository.findAll());
+        model.addAttribute("isEdit", false);
+        return "admin/category-form";
+    }
+
+    /**
+     * Alternative 6a & 7a: Chuyển đến trang form chỉnh sửa category
+     */
+    @GetMapping("/categories/edit/{id}")
+    public String editCategoryForm(@PathVariable("id") Long id, Model model) {
+        Category cat = categoryRepository.findById(id).orElse(null);
+        if (cat == null) {
+            return "redirect:/admin/categories";
+        }
+        model.addAttribute("category", cat);
+        model.addAttribute("allCategories", categoryRepository.findAll().stream().filter(c -> !c.getId().equals(id)).toList());
+        model.addAttribute("isEdit", true);
+        return "admin/category-form";
+    }
+
+    /**
+     * Bước 8 - 12: Thêm mới category
+     */
     @PostMapping("/categories/add")
     public String addCategory(@RequestParam("name") String name,
                               @RequestParam(value = "description", required = false) String description,
+                              @RequestParam(value = "parentId", required = false) Long parentId,
                               RedirectAttributes ra) {
-        Category cat = Category.builder().name(name).description(description).build();
-        categoryRepository.save(cat);
-        ra.addFlashAttribute("successMessage", "Thêm loại sản phẩm [" + name + "] thành công!");
+        try {
+            Category parent = null;
+            if (parentId != null && parentId > 0) {
+                parent = categoryRepository.findById(parentId).orElse(null);
+            }
+            Category cat = Category.builder()
+                    .name(name)
+                    .description(description)
+                    .parent(parent)
+                    .isDeleted(false)
+                    .build();
+            categoryRepository.save(cat);
+            ra.addFlashAttribute("successMessage", "Thêm mới loại sản phẩm [" + name + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Không thể thêm loại sản phẩm: " + ex.getMessage());
+        }
         return "redirect:/admin/categories";
     }
 
+    /**
+     * Cập nhật category
+     */
     @PostMapping("/categories/update/{id}")
     public String updateCategory(@PathVariable("id") Long id,
-                                @RequestParam("name") String name,
-                                @RequestParam(value = "description", required = false) String description,
-                                RedirectAttributes ra) {
-        Category cat = categoryRepository.findById(id).orElseThrow();
-        cat.setName(name);
-        cat.setDescription(description);
-        categoryRepository.save(cat);
-        ra.addFlashAttribute("successMessage", "Cập nhật loại sản phẩm [" + name + "] thành công!");
+                                 @RequestParam("name") String name,
+                                 @RequestParam(value = "description", required = false) String description,
+                                 @RequestParam(value = "parentId", required = false) Long parentId,
+                                 RedirectAttributes ra) {
+        try {
+            Category cat = categoryRepository.findById(id).orElseThrow();
+            cat.setName(name);
+            cat.setDescription(description);
+            if (parentId != null && parentId > 0 && !parentId.equals(id)) {
+                cat.setParent(categoryRepository.findById(parentId).orElse(null));
+            } else if (parentId != null && parentId == 0) {
+                cat.setParent(null);
+            }
+            categoryRepository.save(cat);
+            ra.addFlashAttribute("successMessage", "Cập nhật loại sản phẩm [" + name + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Không thể cập nhật loại sản phẩm: " + ex.getMessage());
+        }
         return "redirect:/admin/categories";
     }
 
+    /**
+     * Alternative 6-9b: Xóa category (đánh dấu xóa mềm isDeleted = true)
+     */
     @PostMapping("/categories/delete/{id}")
     public String deleteCategory(@PathVariable("id") Long id, RedirectAttributes ra) {
         try {
@@ -66,24 +175,32 @@ public class AdminConfigController {
                 return "redirect:/admin/categories";
             }
             String catName = cat.getName();
-
-            // Chuyển các sản phẩm liên kết sang loại hoa khác để bảo toàn dữ liệu và tránh lỗi khóa ngoại
-            java.util.List<Product> products = productRepository.findByCategoryId(id);
-            if (products != null && !products.isEmpty()) {
-                Category fallback = categoryRepository.findAll().stream()
-                        .filter(c -> !c.getId().equals(id))
-                        .findFirst()
-                        .orElseGet(() -> categoryRepository.save(Category.builder().name("Hoa Tươi Khác").description("Danh mục hoa tươi tổng hợp").build()));
-                for (Product p : products) {
-                    p.setCategory(fallback);
-                    productRepository.save(p);
-                }
-            }
-
-            categoryRepository.deleteById(id);
+            cat.setIsDeleted(true);
+            categoryRepository.save(cat);
             ra.addFlashAttribute("successMessage", "Đã xóa loại sản phẩm [" + catName + "] thành công!");
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", "Không thể xóa loại sản phẩm này: " + ex.getMessage());
+        }
+        return "redirect:/admin/categories";
+    }
+
+    /**
+     * Alternative 6-9c: Khôi phục category (isDeleted = false)
+     */
+    @PostMapping("/categories/restore/{id}")
+    public String restoreCategory(@PathVariable("id") Long id, RedirectAttributes ra) {
+        try {
+            Category cat = categoryRepository.findById(id).orElse(null);
+            if (cat == null) {
+                ra.addFlashAttribute("errorMessage", "Không tìm thấy loại sản phẩm cần khôi phục!");
+                return "redirect:/admin/categories";
+            }
+            String catName = cat.getName();
+            cat.setIsDeleted(false);
+            categoryRepository.save(cat);
+            ra.addFlashAttribute("successMessage", "Khôi phục loại sản phẩm [" + catName + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Không thể khôi phục loại sản phẩm này: " + ex.getMessage());
         }
         return "redirect:/admin/categories";
     }
@@ -105,63 +222,179 @@ public class AdminConfigController {
         for (DefCat d : defaults) {
             java.util.Optional<Category> existing = categoryRepository.findByName(d.name());
             if (existing.isEmpty()) {
-                categoryRepository.save(Category.builder().name(d.name()).description(d.desc()).build());
+                categoryRepository.save(Category.builder().name(d.name()).description(d.desc()).isDeleted(false).build());
+            } else if (Boolean.TRUE.equals(existing.get().getIsDeleted())) {
+                Category c = existing.get();
+                c.setIsDeleted(false);
+                categoryRepository.save(c);
             }
         }
         ra.addFlashAttribute("successMessage", "Khôi phục toàn bộ danh sách 9 loại sản phẩm hoa tươi mẫu thành công!");
         return "redirect:/admin/categories";
     }
 
-    // --- 2. Quản lý Chính sách hoa hồng (Đã gỡ bỏ - chuyển hướng sang Cấp độ chi nhánh) ---
+    // --- 2. Quản lý Chính sách hoa hồng (Commissions - UC_035) ---
     @GetMapping({"/commissions", "/commission", "/chinh-sach-hoa-hong"})
-    public String listCommissions(Model model) {
-        return "redirect:/admin/store-levels";
+    public String listCommissions(
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            Model model) {
+        try {
+            java.util.List<Commission> allCommissions = commissionRepository.findAllByOrderByIdAsc();
+            java.util.List<Commission> filtered = allCommissions;
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String kw = keyword.trim().toLowerCase();
+                filtered = filtered.stream().filter(c ->
+                        (c.getName() != null && c.getName().toLowerCase().contains(kw))
+                        || String.valueOf(c.getId()).contains(kw)
+                        || (c.getDescription() != null && c.getDescription().toLowerCase().contains(kw))
+                ).toList();
+            }
+
+            int totalElements = filtered.size();
+            int totalPages = (int) Math.ceil((double) totalElements / size);
+            if (totalPages == 0) totalPages = 1;
+            int fromIndex = Math.min(page * size, totalElements);
+            int toIndex = Math.min(fromIndex + size, totalElements);
+            java.util.List<Commission> pagedCommissions = filtered.subList(fromIndex, toIndex);
+
+            model.addAttribute("commissions", pagedCommissions);
+            model.addAttribute("allCommissions", allCommissions);
+            model.addAttribute("stores", storeRepository.findAll());
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("totalElements", (long) totalElements);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("dataLoadError", false);
+        } catch (Exception ex) {
+            model.addAttribute("dataLoadError", true);
+            model.addAttribute("errorMessage", "Không thể tải danh sách chính sách hoa hồng. Vui lòng thử lại!");
+            model.addAttribute("commissions", java.util.Collections.emptyList());
+            model.addAttribute("allCommissions", java.util.Collections.emptyList());
+            model.addAttribute("stores", java.util.Collections.emptyList());
+            model.addAttribute("currentPage", 0);
+            model.addAttribute("totalPages", 0);
+            model.addAttribute("totalElements", 0L);
+            model.addAttribute("pageSize", size);
+        }
+        return "admin/commissions";
     }
 
+    /**
+     * Bước 5 & 6: Chọn nút New commission để thêm mới -> Hiển thị form thêm mới
+     */
+    @GetMapping("/commissions/create")
+    public String createCommissionForm(Model model) {
+        model.addAttribute("commission", Commission.builder().cost(BigDecimal.TEN).isDeleted(false).build());
+        model.addAttribute("isEdit", false);
+        return "admin/commission-form";
+    }
+
+    /**
+     * Alternative 5a & 6a: Chọn nút Edit để chỉnh sửa -> Hiển thị form chỉnh sửa
+     */
+    @GetMapping("/commissions/edit/{id}")
+    public String editCommissionForm(@PathVariable("id") Long id, Model model) {
+        Commission c = commissionRepository.findById(id).orElse(null);
+        if (c == null) {
+            return "redirect:/admin/commissions";
+        }
+        model.addAttribute("commission", c);
+        model.addAttribute("isEdit", true);
+        return "admin/commission-form";
+    }
+
+    /**
+     * Bước 7 - 11: Nhập đầy đủ thông tin, Submit, Confirm -> Thêm mới thành công
+     */
     @PostMapping("/commissions/add")
     public String addCommission(@RequestParam("name") String name,
-                                @RequestParam("cost") BigDecimal cost,
+                                @RequestParam(value = "cost", defaultValue = "0") BigDecimal cost,
                                 @RequestParam(value = "description", required = false) String description,
                                 RedirectAttributes ra) {
-        Commission c = Commission.builder().name(name).cost(cost).description(description).isDeleted(false).build();
-        commissionRepository.save(c);
-        ra.addFlashAttribute("successMessage", "Thêm chính sách hoa hồng [" + name + "] thành công!");
+        try {
+            String cleanName = name != null ? name.trim() : "";
+            if (cleanName.isEmpty()) {
+                ra.addFlashAttribute("errorMessage", "Vui lòng nhập tên chính sách hoa hồng!");
+                return "redirect:/admin/commissions";
+            }
+            Commission c = Commission.builder()
+                    .name(cleanName)
+                    .cost(cost != null ? cost : BigDecimal.ZERO)
+                    .description(description)
+                    .isDeleted(false)
+                    .build();
+            commissionRepository.save(c);
+            ra.addFlashAttribute("successMessage", "Thêm chính sách hoa hồng [" + cleanName + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Lỗi khi thêm chính sách hoa hồng: " + ex.getMessage());
+        }
         return "redirect:/admin/commissions";
     }
 
-    @PostMapping("/commissions/update/{id}")
+    /**
+     * Alternative 5a: Cập nhật chính sách hoa hồng
+     */
+    @RequestMapping(value = "/commissions/update/{id}", method = {RequestMethod.GET, RequestMethod.POST})
     public String updateCommission(@PathVariable("id") Long id,
                                    @RequestParam("name") String name,
-                                   @RequestParam("cost") BigDecimal cost,
+                                   @RequestParam(value = "cost", defaultValue = "0") BigDecimal cost,
                                    @RequestParam(value = "description", required = false) String description,
                                    @RequestParam(value = "isDeleted", required = false) Boolean isDeleted,
                                    RedirectAttributes ra) {
-        Commission c = commissionRepository.findById(id).orElseThrow();
-        c.setName(name);
-        c.setCost(cost);
-        c.setDescription(description);
-        if (isDeleted != null) {
-            c.setIsDeleted(isDeleted);
+        try {
+            Commission c = commissionRepository.findById(id).orElse(null);
+            if (c == null) {
+                ra.addFlashAttribute("errorMessage", "Không tìm thấy chính sách hoa hồng #" + id);
+                return "redirect:/admin/commissions";
+            }
+            String cleanName = name != null ? name.trim() : c.getName();
+            c.setName(cleanName);
+            if (cost != null) {
+                c.setCost(cost);
+            }
+            c.setDescription(description);
+            if (isDeleted != null) {
+                c.setIsDeleted(isDeleted);
+            }
+            commissionRepository.save(c);
+            ra.addFlashAttribute("successMessage", "Cập nhật chính sách hoa hồng [" + cleanName + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Lỗi khi cập nhật chính sách hoa hồng: " + ex.getMessage());
         }
-        commissionRepository.save(c);
-        ra.addFlashAttribute("successMessage", "Cập nhật chính sách hoa hồng [" + name + "] thành công!");
         return "redirect:/admin/commissions";
     }
 
-    @PostMapping("/commissions/delete/{id}")
+    /**
+     * Alternative 5-8b: Xóa chính sách hoa hồng (soft delete)
+     */
+    @RequestMapping(value = "/commissions/delete/{id}", method = {RequestMethod.GET, RequestMethod.POST})
     public String deleteCommission(@PathVariable("id") Long id, RedirectAttributes ra) {
-        Commission c = commissionRepository.findById(id).orElseThrow();
-        long storeCount = storeRepository.findAll().stream()
-                .filter(s -> s.getCommission() != null && s.getCommission().getId().equals(id))
-                .count();
-        if (storeCount > 0) {
-            c.setIsDeleted(true);
-            commissionRepository.save(c);
-            ra.addFlashAttribute("successMessage", "Chính sách hoa hồng [" + c.getName() + "] đang có " + storeCount + " cửa hàng áp dụng. Đã chuyển sang trạng thái 'Ngừng áp dụng' để bảo toàn lịch sử giao dịch.");
-        } else {
+        try {
+            Commission c = commissionRepository.findById(id).orElseThrow();
             c.setIsDeleted(true);
             commissionRepository.save(c);
             ra.addFlashAttribute("successMessage", "Xóa chính sách hoa hồng [" + c.getName() + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Lỗi khi xóa chính sách hoa hồng: " + ex.getMessage());
+        }
+        return "redirect:/admin/commissions";
+    }
+
+    /**
+     * Alternative 5-8c: Khôi phục chính sách hoa hồng
+     */
+    @PostMapping("/commissions/restore/{id}")
+    public String restoreCommission(@PathVariable("id") Long id, RedirectAttributes ra) {
+        try {
+            Commission c = commissionRepository.findById(id).orElseThrow();
+            c.setIsDeleted(false);
+            commissionRepository.save(c);
+            ra.addFlashAttribute("successMessage", "Khôi phục chính sách hoa hồng [" + c.getName() + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Lỗi khi khôi phục chính sách hoa hồng: " + ex.getMessage());
         }
         return "redirect:/admin/commissions";
     }
@@ -193,36 +426,136 @@ public class AdminConfigController {
         return "redirect:/admin/commissions";
     }
 
-    // --- 3. Quản lý Đơn vị vận chuyển / Nhà vận chuyển (Deliveries) ---
+    // --- 3. Quản lý Đơn vị vận chuyển / Nhà vận chuyển (Deliveries - UC_034) ---
     @GetMapping({"/deliveries", "/delivery", "/don-vi-van-chuyen"})
-    public String listDeliveries(Model model) {
-        model.addAttribute("deliveries", deliveryRepository.findByIsDeletedFalse());
+    public String listDeliveries(
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            Model model) {
+        try {
+            java.util.List<Delivery> allDeliveries = deliveryRepository.findAllByOrderByIdAsc();
+            java.util.List<Delivery> filtered = allDeliveries;
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String kw = keyword.trim().toLowerCase();
+                filtered = filtered.stream().filter(d ->
+                        (d.getName() != null && d.getName().toLowerCase().contains(kw))
+                        || String.valueOf(d.getId()).contains(kw)
+                        || (d.getDescription() != null && d.getDescription().toLowerCase().contains(kw))
+                ).toList();
+            }
+
+            int totalElements = filtered.size();
+            int totalPages = (int) Math.ceil((double) totalElements / size);
+            if (totalPages == 0) totalPages = 1;
+            int fromIndex = Math.min(page * size, totalElements);
+            int toIndex = Math.min(fromIndex + size, totalElements);
+            java.util.List<Delivery> pagedDeliveries = filtered.subList(fromIndex, toIndex);
+
+            model.addAttribute("deliveries", pagedDeliveries);
+            model.addAttribute("allDeliveries", allDeliveries);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("totalElements", (long) totalElements);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("dataLoadError", false);
+        } catch (Exception ex) {
+            model.addAttribute("dataLoadError", true);
+            model.addAttribute("errorMessage", "Không thể tải danh sách đơn vị vận chuyển. Vui lòng thử lại!");
+            model.addAttribute("deliveries", java.util.Collections.emptyList());
+            model.addAttribute("allDeliveries", java.util.Collections.emptyList());
+            model.addAttribute("currentPage", 0);
+            model.addAttribute("totalPages", 0);
+            model.addAttribute("totalElements", 0L);
+            model.addAttribute("pageSize", size);
+        }
         return "admin/deliveries";
     }
 
+    /**
+     * Bước 5 & 6: Chọn nút New delivery unit để thêm mới -> Hiển thị form thêm mới
+     */
+    @GetMapping("/deliveries/create")
+    public String createDeliveryForm(Model model) {
+        model.addAttribute("delivery", Delivery.builder().price(BigDecimal.ZERO).isActive(true).isDeleted(false).build());
+        model.addAttribute("isEdit", false);
+        return "admin/delivery-form";
+    }
+
+    /**
+     * Alternative 5a & 6a: Chọn nút Edit để chỉnh sửa -> Hiển thị form chỉnh sửa
+     */
+    @GetMapping("/deliveries/edit/{id}")
+    public String editDeliveryForm(@PathVariable("id") Long id, Model model) {
+        Delivery d = deliveryRepository.findById(id).orElse(null);
+        if (d == null) {
+            return "redirect:/admin/deliveries";
+        }
+        model.addAttribute("delivery", d);
+        model.addAttribute("isEdit", true);
+        return "admin/delivery-form";
+    }
+
+    /**
+     * Bước 7 - 11: Nhập thông tin, Submit, Confirm -> Thêm mới thành công
+     */
     @PostMapping("/deliveries/add")
     public String addDelivery(@RequestParam("name") String name,
-                              @RequestParam("price") BigDecimal price,
+                              @RequestParam(value = "price", defaultValue = "0") BigDecimal price,
                               @RequestParam(value = "description", required = false) String description,
                               RedirectAttributes ra) {
-        Delivery d = Delivery.builder().name(name).price(price).description(description).isActive(true).isDeleted(false).build();
-        deliveryRepository.save(d);
-        ra.addFlashAttribute("successMessage", "Thêm đơn vị vận chuyển [" + name + "] thành công!");
+        try {
+            String cleanName = name != null ? name.trim() : "";
+            if (cleanName.isEmpty()) {
+                ra.addFlashAttribute("errorMessage", "Vui lòng nhập tên đơn vị vận chuyển!");
+                return "redirect:/admin/deliveries";
+            }
+            Delivery d = Delivery.builder()
+                    .name(cleanName)
+                    .price(price != null ? price : BigDecimal.ZERO)
+                    .description(description)
+                    .isActive(true)
+                    .isDeleted(false)
+                    .build();
+            deliveryRepository.save(d);
+            ra.addFlashAttribute("successMessage", "Thêm đơn vị vận chuyển [" + cleanName + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Lỗi khi thêm đơn vị vận chuyển: " + ex.getMessage());
+        }
         return "redirect:/admin/deliveries";
     }
 
-    @PostMapping("/deliveries/update/{id}")
+    /**
+     * Alternative 5a: Cập nhật đơn vị vận chuyển
+     */
+    @RequestMapping(value = "/deliveries/update/{id}", method = {RequestMethod.GET, RequestMethod.POST})
     public String updateDelivery(@PathVariable("id") Long id,
                                  @RequestParam("name") String name,
-                                 @RequestParam("price") BigDecimal price,
+                                 @RequestParam(value = "price", defaultValue = "0") BigDecimal price,
                                  @RequestParam(value = "description", required = false) String description,
+                                 @RequestParam(value = "isActive", required = false) Boolean isActive,
                                  RedirectAttributes ra) {
-        Delivery d = deliveryRepository.findById(id).orElseThrow();
-        d.setName(name);
-        d.setPrice(price);
-        d.setDescription(description);
-        deliveryRepository.save(d);
-        ra.addFlashAttribute("successMessage", "Cập nhật đơn vị vận chuyển [" + name + "] thành công! (Lưu ý: Mức phí mới chỉ áp dụng cho các đơn hàng tạo mới)");
+        try {
+            Delivery d = deliveryRepository.findById(id).orElse(null);
+            if (d == null) {
+                ra.addFlashAttribute("errorMessage", "Không tìm thấy đơn vị vận chuyển #" + id);
+                return "redirect:/admin/deliveries";
+            }
+            String cleanName = name != null ? name.trim() : d.getName();
+            d.setName(cleanName);
+            if (price != null) {
+                d.setPrice(price);
+            }
+            d.setDescription(description);
+            if (isActive != null) {
+                d.setIsActive(isActive);
+            }
+            deliveryRepository.save(d);
+            ra.addFlashAttribute("successMessage", "Cập nhật đơn vị vận chuyển [" + cleanName + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Lỗi khi cập nhật đơn vị vận chuyển: " + ex.getMessage());
+        }
         return "redirect:/admin/deliveries";
     }
 
@@ -232,17 +565,39 @@ public class AdminConfigController {
         boolean newActive = !Boolean.TRUE.equals(d.getIsActive());
         d.setIsActive(newActive);
         deliveryRepository.save(d);
-        ra.addFlashAttribute("successMessage", "Đã " + (newActive ? "bật áp dụng" : "tạm dừng") + " đơn vị vận chuyển [" + d.getName() + "]. "
-                + (newActive ? "Khách hàng đã có thể chọn phương thức này khi đặt hoa." : "Khách hàng sẽ không thể chọn phương thức này cho đơn mới; các đơn đã đặt trước đó vẫn giữ nguyên phí và thông tin giao hàng."));
+        ra.addFlashAttribute("successMessage", "Đã " + (newActive ? "bật áp dụng" : "tạm dừng") + " đơn vị vận chuyển [" + d.getName() + "].");
         return "redirect:/admin/deliveries";
     }
 
-    @PostMapping("/deliveries/delete/{id}")
+    /**
+     * Alternative 5-8b: Xóa đơn vị vận chuyển (soft delete)
+     */
+    @RequestMapping(value = "/deliveries/delete/{id}", method = {RequestMethod.GET, RequestMethod.POST})
     public String deleteDelivery(@PathVariable("id") Long id, RedirectAttributes ra) {
-        Delivery d = deliveryRepository.findById(id).orElseThrow();
-        d.setIsDeleted(true);
-        deliveryRepository.save(d);
-        ra.addFlashAttribute("successMessage", "Xóa đơn vị vận chuyển [" + d.getName() + "] thành công!");
+        try {
+            Delivery d = deliveryRepository.findById(id).orElseThrow();
+            d.setIsDeleted(true);
+            deliveryRepository.save(d);
+            ra.addFlashAttribute("successMessage", "Xóa đơn vị vận chuyển [" + d.getName() + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Lỗi khi xóa đơn vị vận chuyển: " + ex.getMessage());
+        }
+        return "redirect:/admin/deliveries";
+    }
+
+    /**
+     * Alternative 5-8c: Khôi phục đơn vị vận chuyển
+     */
+    @PostMapping("/deliveries/restore/{id}")
+    public String restoreDelivery(@PathVariable("id") Long id, RedirectAttributes ra) {
+        try {
+            Delivery d = deliveryRepository.findById(id).orElseThrow();
+            d.setIsDeleted(false);
+            deliveryRepository.save(d);
+            ra.addFlashAttribute("successMessage", "Khôi phục đơn vị vận chuyển [" + d.getName() + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Lỗi khi khôi phục đơn vị vận chuyển: " + ex.getMessage());
+        }
         return "redirect:/admin/deliveries";
     }
 
@@ -513,45 +868,155 @@ public class AdminConfigController {
         return "redirect:/admin/vouchers";
     }
 
-    // --- 5. Quản lý Cấp độ người dùng (UserLevel) ---
-    @GetMapping("/user-levels")
-    public String listUserLevels(Model model) {
-        model.addAttribute("levels", userLevelRepository.findByIsDeletedFalseOrderByMinPointAsc());
+    // --- 5. Quản lý Cấp độ người dùng (UserLevel - UC_032) ---
+    /**
+     * Bước 1 - 5: Hiển thị bảng danh sách các user level, phân trang Next/Prev
+     */
+    @GetMapping({"/user-levels", "/user-level", "/cap-bac-khach-hang"})
+    public String listUserLevels(
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            Model model) {
+        try {
+            java.util.List<UserLevel> allLevels = userLevelRepository.findAllByOrderByMinPointAsc();
+
+            java.util.List<UserLevel> filtered = allLevels;
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String kw = keyword.trim().toLowerCase();
+                filtered = filtered.stream().filter(ul ->
+                        (ul.getName() != null && ul.getName().toLowerCase().contains(kw))
+                        || String.valueOf(ul.getId()).contains(kw)
+                        || (ul.getMinPoint() != null && String.valueOf(ul.getMinPoint()).contains(kw))
+                ).toList();
+            }
+
+            int totalElements = filtered.size();
+            int totalPages = (int) Math.ceil((double) totalElements / size);
+            if (totalPages == 0) totalPages = 1;
+            int fromIndex = Math.min(page * size, totalElements);
+            int toIndex = Math.min(fromIndex + size, totalElements);
+            java.util.List<UserLevel> pagedLevels = filtered.subList(fromIndex, toIndex);
+
+            model.addAttribute("levels", pagedLevels);
+            model.addAttribute("allLevels", allLevels);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("totalElements", (long) totalElements);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("dataLoadError", false);
+        } catch (Exception ex) {
+            model.addAttribute("dataLoadError", true);
+            model.addAttribute("errorMessage", "Không thể tải danh sách cấp bậc người dùng. Vui lòng thử lại!");
+            model.addAttribute("levels", java.util.Collections.emptyList());
+            model.addAttribute("allLevels", java.util.Collections.emptyList());
+            model.addAttribute("currentPage", 0);
+            model.addAttribute("totalPages", 0);
+            model.addAttribute("totalElements", 0L);
+            model.addAttribute("pageSize", size);
+        }
         return "admin/user-levels";
     }
 
+    /**
+     * Bước 6 & 7: Hiển thị form thêm level mới
+     */
+    @GetMapping("/user-levels/create")
+    public String createUserLevelForm(Model model) {
+        model.addAttribute("userLevel", UserLevel.builder().minPoint(0).discount(BigDecimal.ZERO).build());
+        model.addAttribute("isEdit", false);
+        return "admin/user-level-form";
+    }
+
+    /**
+     * Alternative 6a & 7a: Hiển thị form chỉnh sửa level
+     */
+    @GetMapping("/user-levels/edit/{id}")
+    public String editUserLevelForm(@PathVariable("id") Long id, Model model) {
+        UserLevel ul = userLevelRepository.findById(id).orElse(null);
+        if (ul == null) {
+            return "redirect:/admin/user-levels";
+        }
+        model.addAttribute("userLevel", ul);
+        model.addAttribute("isEdit", true);
+        return "admin/user-level-form";
+    }
+
+    /**
+     * Bước 8 - 12: Thêm mới user level
+     */
     @PostMapping("/user-levels/add")
     public String addUserLevel(@RequestParam("name") String name,
                                @RequestParam("minPoint") int minPoint,
                                @RequestParam("discount") BigDecimal discount,
                                RedirectAttributes ra) {
-        UserLevel ul = UserLevel.builder().name(name).minPoint(minPoint).discount(discount).isDeleted(false).build();
-        userLevelRepository.save(ul);
-        ra.addFlashAttribute("successMessage", "Thêm cấp bậc khách hàng [" + name + "] thành công!");
+        try {
+            UserLevel ul = UserLevel.builder()
+                    .name(name)
+                    .minPoint(minPoint)
+                    .discount(discount)
+                    .isDeleted(false)
+                    .build();
+            userLevelRepository.save(ul);
+            ra.addFlashAttribute("successMessage", "Thêm mới cấp bậc khách hàng [" + name + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Không thể thêm cấp bậc khách hàng: " + ex.getMessage());
+        }
         return "redirect:/admin/user-levels";
     }
 
+    /**
+     * Alternative 6a: Cập nhật user level
+     */
     @PostMapping("/user-levels/update/{id}")
     public String updateUserLevel(@PathVariable("id") Long id,
                                   @RequestParam("name") String name,
                                   @RequestParam("minPoint") int minPoint,
                                   @RequestParam("discount") BigDecimal discount,
                                   RedirectAttributes ra) {
-        UserLevel ul = userLevelRepository.findById(id).orElseThrow();
-        ul.setName(name);
-        ul.setMinPoint(minPoint);
-        ul.setDiscount(discount);
-        userLevelRepository.save(ul);
-        ra.addFlashAttribute("successMessage", "Cập nhật cấp bậc khách hàng thành công!");
+        try {
+            UserLevel ul = userLevelRepository.findById(id).orElseThrow();
+            ul.setName(name);
+            ul.setMinPoint(minPoint);
+            ul.setDiscount(discount);
+            userLevelRepository.save(ul);
+            ra.addFlashAttribute("successMessage", "Cập nhật cấp bậc khách hàng [" + name + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Không thể cập nhật cấp bậc khách hàng: " + ex.getMessage());
+        }
         return "redirect:/admin/user-levels";
     }
 
+    /**
+     * Alternative 6-10b: Xóa level (isDeleted = true)
+     */
     @PostMapping("/user-levels/delete/{id}")
     public String deleteUserLevel(@PathVariable("id") Long id, RedirectAttributes ra) {
-        UserLevel ul = userLevelRepository.findById(id).orElseThrow();
-        ul.setIsDeleted(true);
-        userLevelRepository.save(ul);
-        ra.addFlashAttribute("successMessage", "Xóa cấp bậc khách hàng thành công!");
+        try {
+            UserLevel ul = userLevelRepository.findById(id).orElseThrow();
+            ul.setIsDeleted(true);
+            userLevelRepository.save(ul);
+            ra.addFlashAttribute("successMessage", "Đã xóa cấp bậc khách hàng [" + ul.getName() + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Không thể xóa cấp bậc khách hàng: " + ex.getMessage());
+        }
+        return "redirect:/admin/user-levels";
+    }
+
+    /**
+     * Alternative 6-10c: Khôi phục level (isDeleted = false)
+     */
+    @PostMapping("/user-levels/restore/{id}")
+    public String restoreUserLevel(@PathVariable("id") Long id, RedirectAttributes ra) {
+        try {
+            UserLevel ul = userLevelRepository.findById(id).orElseThrow();
+            ul.setIsDeleted(false);
+            userLevelRepository.save(ul);
+            ra.addFlashAttribute("successMessage", "Khôi phục cấp bậc khách hàng [" + ul.getName() + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Không thể khôi phục cấp bậc khách hàng: " + ex.getMessage());
+        }
         return "redirect:/admin/user-levels";
     }
 
@@ -582,17 +1047,86 @@ public class AdminConfigController {
         return "redirect:/admin/user-levels";
     }
 
-    // --- 6. Quản lý Hạng chi nhánh (StoreLevel) ---
+    // --- 6. Quản lý Hạng chi nhánh / Cấp độ cửa hàng (StoreLevel - UC_033) ---
+    /**
+     * Bước 1 - 5: Hiển thị bảng danh sách các store level, phân trang Next/Prev
+     */
     @GetMapping({"/store-levels", "/store-level", "/cap-do-cua-hang", "/hang-chi-nhanh"})
-    public String listStoreLevels(Model model) {
-        java.util.List<StoreLevel> sortedLevels = storeLevelRepository.findAll().stream()
-                .sorted(java.util.Comparator.comparing(sl -> sl.getMinPoint() != null ? sl.getMinPoint() : 0))
-                .toList();
-        model.addAttribute("levels", sortedLevels);
-        model.addAttribute("stores", storeRepository.findAll());
+    public String listStoreLevels(
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            Model model) {
+        try {
+            java.util.List<StoreLevel> allLevels = storeLevelRepository.findAllByOrderByMinPointAsc();
+
+            java.util.List<StoreLevel> filtered = allLevels;
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String kw = keyword.trim().toLowerCase();
+                filtered = filtered.stream().filter(sl ->
+                        (sl.getName() != null && sl.getName().toLowerCase().contains(kw))
+                        || String.valueOf(sl.getId()).contains(kw)
+                        || (sl.getMinPoint() != null && String.valueOf(sl.getMinPoint()).contains(kw))
+                ).toList();
+            }
+
+            int totalElements = filtered.size();
+            int totalPages = (int) Math.ceil((double) totalElements / size);
+            if (totalPages == 0) totalPages = 1;
+            int fromIndex = Math.min(page * size, totalElements);
+            int toIndex = Math.min(fromIndex + size, totalElements);
+            java.util.List<StoreLevel> pagedLevels = filtered.subList(fromIndex, toIndex);
+
+            model.addAttribute("levels", pagedLevels);
+            model.addAttribute("allLevels", allLevels);
+            model.addAttribute("stores", storeRepository.findAll());
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("totalElements", (long) totalElements);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("dataLoadError", false);
+        } catch (Exception ex) {
+            model.addAttribute("dataLoadError", true);
+            model.addAttribute("errorMessage", "Không thể tải danh sách cấp độ cửa hàng. Vui lòng thử lại!");
+            model.addAttribute("levels", java.util.Collections.emptyList());
+            model.addAttribute("allLevels", java.util.Collections.emptyList());
+            model.addAttribute("stores", java.util.Collections.emptyList());
+            model.addAttribute("currentPage", 0);
+            model.addAttribute("totalPages", 0);
+            model.addAttribute("totalElements", 0L);
+            model.addAttribute("pageSize", size);
+        }
         return "admin/store-levels";
     }
 
+    /**
+     * Bước 6 & 7: Hiển thị form thêm level mới
+     */
+    @GetMapping("/store-levels/create")
+    public String createStoreLevelForm(Model model) {
+        model.addAttribute("storeLevel", StoreLevel.builder().minPoint(0).discount(BigDecimal.ZERO).build());
+        model.addAttribute("isEdit", false);
+        return "admin/store-level-form";
+    }
+
+    /**
+     * Alternative 6a & 7a: Hiển thị form chỉnh sửa level
+     */
+    @GetMapping("/store-levels/edit/{id}")
+    public String editStoreLevelForm(@PathVariable("id") Long id, Model model) {
+        StoreLevel sl = storeLevelRepository.findById(id).orElse(null);
+        if (sl == null) {
+            return "redirect:/admin/store-levels";
+        }
+        model.addAttribute("storeLevel", sl);
+        model.addAttribute("isEdit", true);
+        return "admin/store-level-form";
+    }
+
+    /**
+     * Bước 8 - 12: Thêm mới store level
+     */
     @PostMapping("/store-levels/add")
     public String addStoreLevel(@RequestParam("name") String name,
                                 @RequestParam("minPoint") Integer minPoint,
@@ -601,33 +1135,24 @@ public class AdminConfigController {
         try {
             String cleanName = name != null ? name.trim() : "";
             if (cleanName.isEmpty()) {
-                ra.addFlashAttribute("errorMessage", "Vui lòng điền tên hạng chi nhánh!");
-                return "redirect:/admin/store-levels";
-            }
-            boolean nameExists = storeLevelRepository.findAll().stream()
-                    .anyMatch(sl -> sl.getName().equalsIgnoreCase(cleanName));
-            if (nameExists) {
-                ra.addFlashAttribute("errorMessage", "Tên hạng [" + cleanName + "] đã tồn tại trong hệ thống!");
+                ra.addFlashAttribute("errorMessage", "Vui lòng điền tên cấp độ cửa hàng!");
                 return "redirect:/admin/store-levels";
             }
             int pointVal = minPoint != null ? minPoint : 0;
-            boolean pointExists = storeLevelRepository.findAll().stream()
-                    .anyMatch(sl -> sl.getMinPoint() != null && sl.getMinPoint().equals(pointVal));
-            if (pointExists) {
-                ra.addFlashAttribute("errorMessage", "Điều kiện doanh số / điểm [" + pointVal + "] đã trùng với một hạng khác!");
-                return "redirect:/admin/store-levels";
-            }
             StoreLevel sl = StoreLevel.builder().name(cleanName).minPoint(pointVal)
                     .discount(discount != null ? discount : BigDecimal.ZERO)
                     .isDeleted(false).build();
             storeLevelRepository.save(sl);
-            ra.addFlashAttribute("successMessage", "Thêm hạng chi nhánh [" + cleanName + "] thành công!");
+            ra.addFlashAttribute("successMessage", "Thêm mới cấp bậc cửa hàng [" + cleanName + "] thành công!");
         } catch (Exception e) {
-            ra.addFlashAttribute("errorMessage", "Lỗi khi thêm hạng chi nhánh: " + e.getMessage());
+            ra.addFlashAttribute("errorMessage", "Lỗi khi thêm cấp bậc cửa hàng: " + e.getMessage());
         }
         return "redirect:/admin/store-levels";
     }
 
+    /**
+     * Alternative 6a: Cập nhật store level
+     */
     @RequestMapping(value = "/store-levels/update/{id}", method = {RequestMethod.GET, RequestMethod.POST})
     public String updateStoreLevel(@PathVariable("id") Long id,
                                    @RequestParam("name") String name,
@@ -638,31 +1163,11 @@ public class AdminConfigController {
         try {
             StoreLevel sl = storeLevelRepository.findById(id).orElse(null);
             if (sl == null) {
-                ra.addFlashAttribute("errorMessage", "Không tìm thấy hạng chi nhánh #" + id);
+                ra.addFlashAttribute("errorMessage", "Không tìm thấy cấp bậc cửa hàng #" + id);
                 return "redirect:/admin/store-levels";
             }
             String cleanName = name != null ? name.trim() : sl.getName();
-            if (cleanName.isEmpty()) {
-                ra.addFlashAttribute("errorMessage", "Vui lòng điền tên hạng chi nhánh!");
-                return "redirect:/admin/store-levels";
-            }
-
-            // Kiểm tra trùng tên với hạng khác
-            boolean nameExists = storeLevelRepository.findAll().stream()
-                    .anyMatch(other -> !other.getId().equals(id) && other.getName().equalsIgnoreCase(cleanName));
-            if (nameExists) {
-                ra.addFlashAttribute("errorMessage", "Tên hạng [" + cleanName + "] đã tồn tại ở một hạng khác!");
-                return "redirect:/admin/store-levels";
-            }
-
-            // Kiểm tra trùng minPoint với hạng khác
             int pointVal = minPoint != null ? minPoint : (sl.getMinPoint() != null ? sl.getMinPoint() : 0);
-            boolean pointExists = storeLevelRepository.findAll().stream()
-                    .anyMatch(other -> !other.getId().equals(id) && other.getMinPoint() != null && other.getMinPoint().equals(pointVal));
-            if (pointExists) {
-                ra.addFlashAttribute("errorMessage", "Điều kiện doanh số / điểm [" + pointVal + "] đã trùng với một hạng khác!");
-                return "redirect:/admin/store-levels";
-            }
 
             sl.setName(cleanName);
             sl.setMinPoint(pointVal);
@@ -670,58 +1175,44 @@ public class AdminConfigController {
                 sl.setDiscount(discount);
             }
             if (isDeleted != null) {
-                if (sl.getMinPoint() != null && sl.getMinPoint() == 0) {
-                    sl.setIsDeleted(false);
-                } else {
-                    sl.setIsDeleted(isDeleted);
-                }
+                sl.setIsDeleted(isDeleted);
             }
             storeLevelRepository.save(sl);
-            ra.addFlashAttribute("successMessage", "Cập nhật hạng chi nhánh [" + cleanName + "] thành công!");
+            ra.addFlashAttribute("successMessage", "Cập nhật cấp bậc cửa hàng [" + cleanName + "] thành công!");
         } catch (Exception e) {
-            ra.addFlashAttribute("errorMessage", "Lỗi khi cập nhật hạng: " + e.getMessage());
+            ra.addFlashAttribute("errorMessage", "Lỗi khi cập nhật cấp bậc: " + e.getMessage());
         }
         return "redirect:/admin/store-levels";
     }
 
-    @RequestMapping(value = "/store-levels/toggle/{id}", method = {RequestMethod.GET, RequestMethod.POST})
-    public String toggleStoreLevel(@PathVariable("id") Long id, RedirectAttributes ra) {
-        try {
-            StoreLevel sl = storeLevelRepository.findById(id).orElseThrow();
-            if (sl.getMinPoint() != null && sl.getMinPoint() == 0) {
-                ra.addFlashAttribute("errorMessage", "Hạng [" + sl.getName() + "] là hạng mặc định cơ sở của hệ thống, không thể ngừng áp dụng!");
-                return "redirect:/admin/store-levels";
-            }
-            boolean newDeleted = !Boolean.TRUE.equals(sl.getIsDeleted());
-            sl.setIsDeleted(newDeleted);
-            storeLevelRepository.save(sl);
-            ra.addFlashAttribute("successMessage", "Đã chuyển trạng thái hạng [" + sl.getName() + "] sang [" + (newDeleted ? "Ngừng áp dụng" : "Đang áp dụng") + "]!");
-        } catch (Exception e) {
-            ra.addFlashAttribute("errorMessage", "Lỗi chuyển trạng thái: " + e.getMessage());
-        }
-        return "redirect:/admin/store-levels";
-    }
-
+    /**
+     * Alternative 6-10b: Xóa level (isDeleted = true)
+     */
     @RequestMapping(value = "/store-levels/delete/{id}", method = {RequestMethod.GET, RequestMethod.POST})
     public String deleteStoreLevel(@PathVariable("id") Long id, RedirectAttributes ra) {
         try {
             StoreLevel sl = storeLevelRepository.findById(id).orElseThrow();
-            if (sl.getMinPoint() != null && sl.getMinPoint() == 0) {
-                ra.addFlashAttribute("errorMessage", "Hạng [" + sl.getName() + "] là hạng mặc định cơ sở của hệ thống, không thể xóa!");
-                return "redirect:/admin/store-levels";
-            }
-            long storeCount = storeRepository.findAll().stream()
-                    .filter(s -> s.getStoreLevel() != null && s.getStoreLevel().getId().equals(id))
-                    .count();
             sl.setIsDeleted(true);
             storeLevelRepository.save(sl);
-            if (storeCount > 0) {
-                ra.addFlashAttribute("successMessage", "Hạng [" + sl.getName() + "] đang có " + storeCount + " chi nhánh áp dụng. Hệ thống đã chuyển sang trạng thái [Ngừng áp dụng] để bảo toàn lịch sử.");
-            } else {
-                ra.addFlashAttribute("successMessage", "Đã chuyển hạng chi nhánh [" + sl.getName() + "] sang trạng thái Ngừng áp dụng!");
-            }
+            ra.addFlashAttribute("successMessage", "Đã xóa cấp bậc cửa hàng [" + sl.getName() + "] thành công!");
         } catch (Exception e) {
-            ra.addFlashAttribute("errorMessage", "Lỗi khi xóa hạng: " + e.getMessage());
+            ra.addFlashAttribute("errorMessage", "Lỗi khi xóa cấp bậc: " + e.getMessage());
+        }
+        return "redirect:/admin/store-levels";
+    }
+
+    /**
+     * Alternative 6-10c: Khôi phục level (isDeleted = false)
+     */
+    @PostMapping("/store-levels/restore/{id}")
+    public String restoreStoreLevel(@PathVariable("id") Long id, RedirectAttributes ra) {
+        try {
+            StoreLevel sl = storeLevelRepository.findById(id).orElseThrow();
+            sl.setIsDeleted(false);
+            storeLevelRepository.save(sl);
+            ra.addFlashAttribute("successMessage", "Khôi phục cấp bậc cửa hàng [" + sl.getName() + "] thành công!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Lỗi khi khôi phục cấp bậc: " + e.getMessage());
         }
         return "redirect:/admin/store-levels";
     }
@@ -772,39 +1263,289 @@ public class AdminConfigController {
         return "redirect:/admin/store-levels";
     }
 
-    // --- 7. Quản lý Thuộc tính sản phẩm (Style) ---
-    @GetMapping("/styles")
-    public String listStyles(Model model) {
-        model.addAttribute("styles", styleRepository.findByIsDeletedFalse());
+    // --- 7. Quản lý Thuộc tính sản phẩm (Style - UC_031) ---
+    /**
+     * Bước 1 - 4: Hiển thị danh sách style, phân trang Next/Prev
+     */
+    @GetMapping({"/styles", "/style", "/thuoc-tinh-san-pham"})
+    public String listStyles(
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            Model model) {
+        try {
+            java.util.List<Style> allStyles = styleRepository.findAll();
+
+            java.util.List<Style> filtered = allStyles;
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String kw = keyword.trim().toLowerCase();
+                filtered = filtered.stream().filter(s ->
+                        (s.getName() != null && s.getName().toLowerCase().contains(kw))
+                        || (s.getCategory() != null && s.getCategory().getName() != null && s.getCategory().getName().toLowerCase().contains(kw))
+                        || String.valueOf(s.getId()).contains(kw)
+                ).toList();
+            }
+
+            int totalElements = filtered.size();
+            int totalPages = (int) Math.ceil((double) totalElements / size);
+            if (totalPages == 0) totalPages = 1;
+            int fromIndex = Math.min(page * size, totalElements);
+            int toIndex = Math.min(fromIndex + size, totalElements);
+            java.util.List<Style> pagedStyles = filtered.subList(fromIndex, toIndex);
+
+            model.addAttribute("styles", pagedStyles);
+            model.addAttribute("allStyles", allStyles);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("totalElements", (long) totalElements);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("dataLoadError", false);
+        } catch (Exception ex) {
+            model.addAttribute("dataLoadError", true);
+            model.addAttribute("errorMessage", "Không thể tải danh sách thuộc tính sản phẩm. Vui lòng thử lại!");
+            model.addAttribute("styles", java.util.Collections.emptyList());
+            model.addAttribute("allStyles", java.util.Collections.emptyList());
+            model.addAttribute("currentPage", 0);
+            model.addAttribute("totalPages", 0);
+            model.addAttribute("totalElements", 0L);
+            model.addAttribute("pageSize", size);
+        }
         return "admin/styles";
     }
 
+    /**
+     * Bước 5 & 6: Chuyển đến form tạo style mới
+     */
+    @GetMapping("/styles/create")
+    public String createStyleForm(Model model) {
+        model.addAttribute("style", new Style());
+        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("isEdit", false);
+        return "admin/style-form";
+    }
+
+    /**
+     * Alternative 5a & 6a: Chuyển đến form chỉnh sửa style
+     */
+    @GetMapping("/styles/edit/{id}")
+    public String editStyleForm(@PathVariable("id") Long id, Model model) {
+        Style s = styleRepository.findById(id).orElse(null);
+        if (s == null) {
+            return "redirect:/admin/styles";
+        }
+        model.addAttribute("style", s);
+        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("isEdit", true);
+        return "admin/style-form";
+    }
+
+    /**
+     * Bước 7 - 11: Thêm mới style
+     */
     @PostMapping("/styles/add")
-    public String addStyle(@RequestParam("name") String name, RedirectAttributes ra) {
-        Style s = Style.builder().name(name).isDeleted(false).build();
-        styleRepository.save(s);
-        ra.addFlashAttribute("successMessage", "Thêm nhóm thuộc tính [" + name + "] thành công!");
+    public String addStyle(@RequestParam("name") String name,
+                           @RequestParam(value = "categoryId", required = false) Long categoryId,
+                           RedirectAttributes ra) {
+        try {
+            Category cat = null;
+            if (categoryId != null && categoryId > 0) {
+                cat = categoryRepository.findById(categoryId).orElse(null);
+            }
+            Style s = Style.builder()
+                    .name(name)
+                    .category(cat)
+                    .isDeleted(false)
+                    .build();
+            styleRepository.save(s);
+            ra.addFlashAttribute("successMessage", "Thêm mới thuộc tính [" + name + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Không thể thêm thuộc tính: " + ex.getMessage());
+        }
         return "redirect:/admin/styles";
     }
 
+    /**
+     * Alternative 6a: Cập nhật style
+     */
     @PostMapping("/styles/update/{id}")
     public String updateStyle(@PathVariable("id") Long id,
                               @RequestParam("name") String name,
+                              @RequestParam(value = "categoryId", required = false) Long categoryId,
                               RedirectAttributes ra) {
-        Style s = styleRepository.findById(id).orElseThrow();
-        s.setName(name);
-        styleRepository.save(s);
-        ra.addFlashAttribute("successMessage", "Cập nhật nhóm thuộc tính thành công!");
+        try {
+            Style s = styleRepository.findById(id).orElseThrow();
+            s.setName(name);
+            if (categoryId != null && categoryId > 0) {
+                s.setCategory(categoryRepository.findById(categoryId).orElse(null));
+            } else if (categoryId != null && categoryId == 0) {
+                s.setCategory(null);
+            }
+            styleRepository.save(s);
+            ra.addFlashAttribute("successMessage", "Cập nhật thuộc tính [" + name + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Không thể cập nhật thuộc tính: " + ex.getMessage());
+        }
         return "redirect:/admin/styles";
     }
 
+    /**
+     * Alternative 5-9b: Xóa style (isDeleted = true)
+     */
     @PostMapping("/styles/delete/{id}")
     public String deleteStyle(@PathVariable("id") Long id, RedirectAttributes ra) {
-        Style s = styleRepository.findById(id).orElseThrow();
-        s.setIsDeleted(true);
-        styleRepository.save(s);
-        ra.addFlashAttribute("successMessage", "Xóa nhóm thuộc tính thành công!");
+        try {
+            Style s = styleRepository.findById(id).orElseThrow();
+            s.setIsDeleted(true);
+            styleRepository.save(s);
+            ra.addFlashAttribute("successMessage", "Đã xóa thuộc tính [" + s.getName() + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Không thể xóa thuộc tính: " + ex.getMessage());
+        }
         return "redirect:/admin/styles";
+    }
+
+    /**
+     * Alternative 5-9c: Khôi phục style (isDeleted = false)
+     */
+    @PostMapping("/styles/restore/{id}")
+    public String restoreStyle(@PathVariable("id") Long id, RedirectAttributes ra) {
+        try {
+            Style s = styleRepository.findById(id).orElseThrow();
+            s.setIsDeleted(false);
+            styleRepository.save(s);
+            ra.addFlashAttribute("successMessage", "Khôi phục thuộc tính [" + s.getName() + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Không thể khôi phục thuộc tính: " + ex.getMessage());
+        }
+        return "redirect:/admin/styles";
+    }
+
+    /**
+     * Alternative 5d & 6d1: Chọn nút Detail để xem danh sách các giá trị của thuộc tính (style value)
+     */
+    @GetMapping("/styles/{id}/values")
+    public String listStyleValues(@PathVariable("id") Long id,
+                                  @RequestParam(value = "keyword", required = false) String keyword,
+                                  @RequestParam(value = "page", defaultValue = "0") int page,
+                                  @RequestParam(value = "size", defaultValue = "10") int size,
+                                  Model model) {
+        try {
+            Style style = styleRepository.findById(id).orElse(null);
+            if (style == null) {
+                return "redirect:/admin/styles";
+            }
+            java.util.List<StyleValue> allValues = styleValueRepository.findByStyleId(id);
+            java.util.List<StyleValue> filtered = allValues;
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String kw = keyword.trim().toLowerCase();
+                filtered = filtered.stream()
+                        .filter(v -> v.getName() != null && v.getName().toLowerCase().contains(kw))
+                        .toList();
+            }
+
+            int totalElements = filtered.size();
+            int totalPages = (int) Math.ceil((double) totalElements / size);
+            if (totalPages == 0) totalPages = 1;
+            int fromIndex = Math.min(page * size, totalElements);
+            int toIndex = Math.min(fromIndex + size, totalElements);
+            java.util.List<StyleValue> pagedValues = filtered.subList(fromIndex, toIndex);
+
+            model.addAttribute("style", style);
+            model.addAttribute("styleValues", pagedValues);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("totalElements", (long) totalElements);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("dataLoadError", false);
+        } catch (Exception ex) {
+            model.addAttribute("dataLoadError", true);
+            model.addAttribute("errorMessage", "Không thể tải danh sách giá trị thuộc tính. Vui lòng thử lại!");
+            model.addAttribute("styleValues", java.util.Collections.emptyList());
+            model.addAttribute("currentPage", 0);
+            model.addAttribute("totalPages", 0);
+            model.addAttribute("totalElements", 0L);
+            model.addAttribute("pageSize", size);
+        }
+        return "admin/style-values";
+    }
+
+    /**
+     * Alternative 6d2 & 6d3: Thêm mới style value
+     */
+    @PostMapping("/styles/{styleId}/values/add")
+    public String addStyleValue(@PathVariable("styleId") Long styleId,
+                                @RequestParam("name") String name,
+                                RedirectAttributes ra) {
+        try {
+            Style style = styleRepository.findById(styleId).orElseThrow();
+            StyleValue val = StyleValue.builder()
+                    .name(name)
+                    .style(style)
+                    .isDeleted(false)
+                    .build();
+            styleValueRepository.save(val);
+            ra.addFlashAttribute("successMessage", "Thêm mới giá trị thuộc tính [" + name + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Không thể thêm giá trị thuộc tính: " + ex.getMessage());
+        }
+        return "redirect:/admin/styles/" + styleId + "/values";
+    }
+
+    /**
+     * Alternative 6e2 & 6e3: Sửa style value
+     */
+    @PostMapping("/styles/{styleId}/values/update/{valueId}")
+    public String updateStyleValue(@PathVariable("styleId") Long styleId,
+                                  @PathVariable("valueId") Long valueId,
+                                  @RequestParam("name") String name,
+                                  RedirectAttributes ra) {
+        try {
+            StyleValue val = styleValueRepository.findById(valueId).orElseThrow();
+            val.setName(name);
+            styleValueRepository.save(val);
+            ra.addFlashAttribute("successMessage", "Cập nhật giá trị thuộc tính [" + name + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Không thể cập nhật giá trị thuộc tính: " + ex.getMessage());
+        }
+        return "redirect:/admin/styles/" + styleId + "/values";
+    }
+
+    /**
+     * Alternative 6f2-9: Xóa style value (isDeleted = true)
+     */
+    @PostMapping("/styles/{styleId}/values/delete/{valueId}")
+    public String deleteStyleValue(@PathVariable("styleId") Long styleId,
+                                  @PathVariable("valueId") Long valueId,
+                                  RedirectAttributes ra) {
+        try {
+            StyleValue val = styleValueRepository.findById(valueId).orElseThrow();
+            val.setIsDeleted(true);
+            styleValueRepository.save(val);
+            ra.addFlashAttribute("successMessage", "Đã xóa giá trị thuộc tính [" + val.getName() + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Không thể xóa giá trị thuộc tính: " + ex.getMessage());
+        }
+        return "redirect:/admin/styles/" + styleId + "/values";
+    }
+
+    /**
+     * Alternative 6g2-9: Khôi phục style value (isDeleted = false)
+     */
+    @PostMapping("/styles/{styleId}/values/restore/{valueId}")
+    public String restoreStyleValue(@PathVariable("styleId") Long styleId,
+                                   @PathVariable("valueId") Long valueId,
+                                   RedirectAttributes ra) {
+        try {
+            StyleValue val = styleValueRepository.findById(valueId).orElseThrow();
+            val.setIsDeleted(false);
+            styleValueRepository.save(val);
+            ra.addFlashAttribute("successMessage", "Khôi phục giá trị thuộc tính [" + val.getName() + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Không thể khôi phục giá trị thuộc tính: " + ex.getMessage());
+        }
+        return "redirect:/admin/styles/" + styleId + "/values";
     }
 
     @PostMapping("/styles/reset-defaults")

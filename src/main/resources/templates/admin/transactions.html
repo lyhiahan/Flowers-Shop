@@ -1,25 +1,64 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lịch Sử Giao Dịch & Dòng Tiền Hệ Thống - Quản Trị Hệ Thống Hoa Tươi</title>
+    <!-- Google Fonts & Bootstrap 5 & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
     <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
     <style>
-        body { font-family: var(--font-sans) !important; background-color: var(--admin-bg); color: var(--admin-text-main); min-height: 100vh; }
-        .main-wrapper { flex: 1; overflow-x: hidden; background-color: var(--admin-bg); }
+        body, .admin-body { 
+            font-family: 'Nunito', sans-serif !important; 
+            background-color: #F8FAF8; 
+            color: #24332C; 
+            min-height: 100vh; 
+            font-size: 16px;
+        }
+        .main-wrapper { flex: 1; overflow-x: hidden; background-color: #F8FAF8; }
+        .page-title {
+            font-size: 28px !important;
+            font-weight: 800 !important;
+            color: #20382E;
+            line-height: 1.25;
+            letter-spacing: -0.3px;
+        }
+        .table thead th {
+            background-color: #E5EEE8 !important;
+            color: #20382E !important;
+            font-weight: 800 !important;
+            font-size: 15px !important;
+            letter-spacing: 0.2px;
+            border-bottom: 2px solid #D1E5DA !important;
+            padding: 14px 16px;
+        }
+        .table tbody td {
+            padding: 14px 16px;
+            vertical-align: middle;
+            border-bottom: 1px solid #EAEFEA;
+            font-size: 15px;
+        }
+        .pagination .page-link {
+            color: #20382E;
+            border-color: #D1E5DA;
+            font-weight: 600;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: #20382E;
+            border-color: #20382E;
+            color: #FFFFFF;
+        }
     </style>
 </head>
-<body class="admin-body"><p class="alert alert-success" th:if="${successMessage}" th:text="${successMessage}"></p><p class="alert alert-danger" th:if="${errorMessage}" th:text="${errorMessage}"></p>
+<body class="admin-body">
 <div class="d-flex">
-    <!-- Sidebar -->
-        <!-- Sidebar Quản Trị Hệ Thống Chuẩn Thương Hiệu Tiệm Hoa -->
-    <aside class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white">
+    <!-- Sidebar Quản Trị Hệ Thống Chuẩn Thương Hiệu Tiệm Hoa -->
+    <aside class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white" style="width: 260px; min-width: 260px; background-color: #1C2E24;">
         <a th:href="@{/admin/dashboard}" class="d-flex align-items-center gap-3 mb-4 text-white text-decoration-none px-2 pt-2">
             <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img flex-shrink-0" style="width: 40px; height: 40px; border-radius: 8px;">
             <div>
@@ -53,6 +92,12 @@
                     <span>Hạng chi nhánh</span>
                 </a>
             </li>
+            <li>
+                <a th:href="@{/admin/commissions}" class="nav-link" id="sidebarCommissionsLink">
+                    <i class="bi bi-percent"></i>
+                    <span>Chính sách hoa hồng</span>
+                </a>
+            </li>
 
             <li>
                 <a th:href="@{/admin/products-manage}" class="nav-link">
@@ -79,7 +124,7 @@
                 </a>
             </li>
             <li>
-                <a th:href="@{/admin/deliveries}" class="nav-link">
+                <a th:href="@{/admin/deliveries}" class="nav-link" id="sidebarDeliveriesLink">
                     <i class="bi bi-truck"></i>
                     <span>Đơn vị vận chuyển</span>
                 </a>
@@ -91,14 +136,15 @@
                 </a>
             </li>
             <li>
-                <a th:href="@{/admin/user-levels}" class="nav-link">
+                <a th:href="@{/admin/user-levels}" class="nav-link" id="sidebarUserLevelsLink">
                     <i class="bi bi-award"></i>
                     <span>Cấp bậc khách</span>
                 </a>
             </li>
 
+            <!-- Bước 2: Chọn Transaction trên thanh sidebar -->
             <li>
-                <a th:href="@{/admin/transactions}" class="nav-link active">
+                <a th:href="@{/admin/transactions}" class="nav-link active" id="sidebarTransactionsLink" data-testid="sidebarTransactionsLink">
                     <i class="bi bi-journal-text"></i>
                     <span>Lịch sử giao dịch</span>
                 </a>
@@ -113,7 +159,7 @@
 
         <hr class="border-secondary my-2">
         <form th:action="@{/logout}" method="post" class="d-inline">
-            <button type="submit" class="btn btn-outline-danger btn-sm w-100 d-flex align-items-center justify-content-center gap-2">
+            <button type="submit" class="btn btn-outline-danger btn-sm w-100 d-flex align-items-center justify-content-center gap-2" style="border-radius: 8px;">
                 <i class="bi bi-box-arrow-right"></i> Đăng xuất
             </button>
         </form>
@@ -121,53 +167,135 @@
 
     <!-- Main Content -->
     <div class="main-wrapper p-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <!-- Bước 3: Chuyển đến trang quản lý giao dịch, hiển thị bảng danh sách các giao dịch trong hệ thống -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
             <div>
-                <h1 class="admin-page-title mb-1">📖 Quản Lý Dòng Tiền & Lịch Sử Giao Dịch</h1>
-                <p class="text-muted small mb-0">Theo dõi chi tiết dòng tiền thanh toán đơn hàng, hoàn cọc và rút tiền của các chi nhánh</p>
+                <h1 class="page-title mb-1">📖 Quản Lý Dòng Tiền & Giao Dịch</h1>
+                <p class="text-muted small mb-0">Theo dõi chi tiết biến động dòng tiền thanh toán đơn hàng, phí dịch vụ và rút tiền trong hệ thống</p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge rounded-pill" 
+                      style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; font-size: 13.5px; font-weight: 700; padding: 6px 14px;"
+                      th:text="${totalElements != null ? totalElements : #lists.size(transactions)} + ' giao dịch'">
+                    0 giao dịch
+                </span>
             </div>
         </div>
 
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        <!-- Post-conditions: Thông báo thành công / Thông báo lỗi -->
+        <div th:if="${successMessage != null}" id="successAlert" data-testid="successAlert" class="alert alert-success alert-dismissible fade show py-2 small shadow-sm rounded-3 border-0 d-flex align-items-center gap-2 mb-3" role="alert" style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7 !important; font-size: 15px;">
+            <i class="bi bi-check-circle-fill fs-5"></i>
+            <span th:text="${successMessage}" style="font-weight: 600;"></span>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${errorMessage != null or dataLoadError == true}" id="dataLoadAlert" data-testid="dataLoadAlert" class="alert alert-danger alert-dismissible fade show py-2 small shadow-sm rounded-3 border-0 d-flex align-items-center gap-2 mb-3" role="alert" style="background-color: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2 !important; font-size: 15px;">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            <span th:text="${errorMessage != null ? errorMessage : 'Có lỗi khi tải danh sách giao dịch hệ thống!'}" style="font-weight: 600;"></span>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Thanh tìm kiếm lọc giao dịch -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white" style="border: 1px solid #E2E7E2 !important;">
+            <div class="card-body p-3">
+                <form th:action="@{/admin/transactions}" method="get" class="row g-2 align-items-center">
+                    <div class="col-md-9">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                            <input type="text" name="keyword" th:value="${keyword}" class="form-control border-start-0" placeholder="Tìm kiếm theo nội dung diễn giải giao dịch...">
+                        </div>
+                    </div>
+                    <div class="col-md-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-outline-dark w-100 fw-semibold" style="border-radius: 8px;">
+                            <i class="bi bi-funnel me-1"></i> Lọc dữ liệu
+                        </button>
+                        <a th:if="${keyword != null and !keyword.isEmpty()}" th:href="@{/admin/transactions}" class="btn btn-outline-secondary" style="border-radius: 8px;" title="Xóa lọc">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Bảng danh sách các giao dịch trong hệ thống -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white" style="border: 1px solid #E2E7E2 !important;">
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light small text-secondary">
+                    <table id="transactionsTable" data-testid="transactionsTable" class="table table-hover align-middle mb-0">
+                        <thead>
                         <tr>
-                            <th class="ps-3">ID</th>
-                            <th>Thời Gian</th>
-                            <th>Chi Nhánh / Đối Tác</th>
-                            <th>Loại Biến Động</th>
-                            <th>Số Tiền</th>
-                            <th>Nội Dung Diễn Giải</th>
-                            <th class="text-end pe-3">Trạng Thái</th>
+                            <th class="ps-4" style="width: 8%;">ID</th>
+                            <th style="width: 15%;">Thời gian</th>
+                            <th style="width: 20%;">Đối tác / Khách hàng</th>
+                            <th style="width: 15%;">Loại giao dịch</th>
+                            <th class="text-end" style="width: 14%;">Số tiền</th>
+                            <th style="width: 18%;">Diễn giải</th>
+                            <th class="text-end pe-4" style="width: 10%;">Trạng thái</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(transactions)}">
-                            <td colspan="7" class="text-center py-5 text-muted">Chưa có giao dịch phát sinh nào trong lịch sử giao dịch.</td>
+                            <td colspan="7" class="text-center py-5 text-muted" style="font-size: 16px;">
+                                <i class="bi bi-journal-x fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                                Chưa có giao dịch phát sinh nào trong hệ thống.
+                            </td>
                         </tr>
                         <tr th:each="tx : ${transactions}">
-                            <td class="ps-3 text-muted" th:text="'#' + ${tx.id}"></td>
-                            <td class="small text-muted" th:text="${#temporals.format(tx.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
-                            <td>
-                                <strong class="text-dark" th:text="${tx.store != null ? tx.store.name : (tx.user != null ? tx.user.fullName : 'Hệ Thống')}"></strong>
+                            <td class="ps-4 fw-bold text-muted" th:text="'#' + ${tx.id}">#1</td>
+                            <td class="text-muted" style="font-size: 14px;">
+                                <i class="bi bi-calendar-event me-1"></i>
+                                <span th:text="${tx.createdAt != null ? #temporals.format(tx.createdAt, 'dd/MM/yyyy HH:mm') : 'N/A'}"></span>
                             </td>
                             <td>
-                                <span th:if="${tx.type == 'WITHDRAWAL'}" class="badge bg-danger-subtle text-danger">Rút Tiền</span>
-                                <span th:if="${tx.type == 'ORDER_PAYOUT'}" class="badge bg-success-subtle text-success">Thu Tiền Đơn Hoa</span>
-                                <span th:if="${tx.type != 'WITHDRAWAL' and tx.type != 'ORDER_PAYOUT'}" class="badge bg-info-subtle text-info" th:text="${tx.type}"></span>
+                                <strong class="text-dark d-block" th:text="${tx.store != null ? tx.store.name : (tx.user != null ? tx.user.fullName : 'Hệ Thống')}"></strong>
+                                <small th:if="${tx.order != null}" class="text-muted">
+                                    Mã đơn: <span th:text="'#' + ${tx.order.id}"></span>
+                                </small>
                             </td>
                             <td>
-                                <strong th:classappend="${tx.isUp} ? 'text-success' : 'text-danger'"
-                                        th:text="(${tx.isUp} ? '+' : '-') + ${#numbers.formatDecimal(tx.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                                <span th:if="${tx.type == 'WITHDRAWAL'}" class="badge rounded-pill px-2.5 py-1" style="background-color: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; font-weight: 700;">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i> Rút tiền
+                                </span>
+                                <span th:if="${tx.type == 'ORDER_PAYOUT' or tx.type == 'ORDER_PAYMENT'}" class="badge rounded-pill px-2.5 py-1" style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; font-weight: 700;">
+                                    <i class="bi bi-cash-stack me-1"></i> Đơn hàng
+                                </span>
+                                <span th:if="${tx.type == 'COMMISSION_FEE'}" class="badge rounded-pill px-2.5 py-1" style="background-color: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; font-weight: 700;">
+                                    <i class="bi bi-percent me-1"></i> Phí hoa hồng
+                                </span>
+                                <span th:if="${tx.type == 'REFUND'}" class="badge rounded-pill px-2.5 py-1" style="background-color: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; font-weight: 700;">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i> Hoàn cọc
+                                </span>
+                                <span th:if="${tx.type != 'WITHDRAWAL' and tx.type != 'ORDER_PAYOUT' and tx.type != 'ORDER_PAYMENT' and tx.type != 'COMMISSION_FEE' and tx.type != 'REFUND'}" 
+                                      class="badge rounded-pill px-2.5 py-1 bg-light text-dark border font-weight: 700;" th:text="${tx.type}">
+                                </span>
                             </td>
-                            <td class="small" th:text="${tx.description}"></td>
-                            <td class="text-end pe-3">
-                                <span class="badge bg-success rounded-pill px-2 py-1" th:text="${tx.status}"></span>
-                                <form th:if="${tx.type == 'WITHDRAWAL' and tx.status == 'PENDING'}" th:action="@{/admin/transactions/{id}/resolve(id=${tx.id})}" method="post" onsubmit="return confirm('Xác nhận kết quả xử lý yêu cầu rút tiền?');">
-                                    <button name="paid" value="true" class="btn btn-success btn-sm">Đã chuyển tiền</button>
-                                    <button name="paid" value="false" class="btn btn-outline-danger btn-sm">Từ chối và trả lại số dư</button>
+                            <td class="text-end">
+                                <strong th:classappend="${tx.isUp != null and tx.isUp} ? 'text-success' : 'text-danger'"
+                                        style="font-size: 16px;"
+                                        th:text="(${tx.isUp != null and tx.isUp} ? '+' : '-') + ${tx.amount != null ? #numbers.formatDecimal(tx.amount, 0, 'COMMA', 0, 'POINT') : '0'} + ' ₫'">
+                                </strong>
+                            </td>
+                            <td>
+                                <span class="text-secondary" style="font-size: 14px;" th:text="${tx.description != null ? tx.description : 'Không có ghi chú'}"></span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <span th:if="${tx.status == 'COMPLETED'}" class="badge rounded-pill px-2.5 py-1" style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; font-weight: 700;">
+                                    Hoàn tất
+                                </span>
+                                <span th:if="${tx.status == 'PENDING'}" class="badge rounded-pill px-2.5 py-1" style="background-color: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; font-weight: 700;">
+                                    Chờ xử lý
+                                </span>
+                                <span th:if="${tx.status == 'REJECTED'}" class="badge rounded-pill px-2.5 py-1" style="background-color: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; font-weight: 700;">
+                                    Từ chối
+                                </span>
+                                <span th:if="${tx.status != 'COMPLETED' and tx.status != 'PENDING' and tx.status != 'REJECTED'}" class="badge rounded-pill px-2.5 py-1 bg-light text-dark border" th:text="${tx.status}"></span>
+
+                                <form th:if="${tx.type == 'WITHDRAWAL' and tx.status == 'PENDING'}" th:action="@{/admin/transactions/{id}/resolve(id=${tx.id})}" method="post" class="mt-2" onsubmit="return confirm('Xác nhận kết quả xử lý yêu cầu rút tiền?');">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                    <div class="btn-group btn-group-sm">
+                                        <button name="paid" value="true" class="btn btn-success btn-sm">Chuyển tiền</button>
+                                        <button name="paid" value="false" class="btn btn-outline-danger btn-sm">Từ chối</button>
+                                    </div>
                                 </form>
                             </td>
                         </tr>
@@ -176,6 +304,25 @@
                 </div>
             </div>
         </div>
+
+        <!-- Bước 4: Chọn Next (hoặc Previous, hoặc trang bất kỳ) để xem trang tiếp theo (hoặc trang trước đó, hoặc trang tương ứng) -->
+        <nav id="transactionsPagination" data-testid="transactionsPagination" th:if="${totalPages > 1}" class="mt-4 d-flex justify-content-center" aria-label="Transactions pagination">
+            <ul class="pagination mb-0 gap-1">
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+                    <a class="page-link" id="btnPrevPage" data-testid="btnPrevPage" th:href="@{/admin/transactions(page=${currentPage - 1}, size=${pageSize}, keyword=${keyword})}">
+                        <i class="bi bi-chevron-left me-1"></i> Previous
+                    </a>
+                </li>
+                <li th:each="p : ${#numbers.sequence(0, totalPages - 1)}" class="page-item" th:classappend="${p == currentPage} ? 'active' : ''">
+                    <a class="page-link" th:id="'pageBtn_' + ${p + 1}" th:href="@{/admin/transactions(page=${p}, size=${pageSize}, keyword=${keyword})}" th:text="${p + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled' : ''">
+                    <a class="page-link" id="btnNextPage" data-testid="btnNextPage" th:href="@{/admin/transactions(page=${currentPage + 1}, size=${pageSize}, keyword=${keyword})}">
+                        Next <i class="bi bi-chevron-right ms-1"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

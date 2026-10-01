@@ -17,6 +17,12 @@ IF COL_LENGTH('dbo.transactions', 'order_id') IS NULL
 IF COL_LENGTH('dbo.categories', 'parent_id') IS NULL
     ALTER TABLE dbo.categories ADD parent_id BIGINT NULL;
 
+IF COL_LENGTH('dbo.categories', 'is_deleted') IS NULL
+    ALTER TABLE dbo.categories ADD is_deleted BIT DEFAULT 0;
+
+IF COL_LENGTH('dbo.deliveries', 'is_deleted') IS NULL
+    ALTER TABLE dbo.deliveries ADD is_deleted BIT DEFAULT 0;
+
 -- Dynamic SQL allows SQL Server to compile statements after adding the columns.
 IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_categories_parent')
     EXEC('ALTER TABLE dbo.categories ADD CONSTRAINT FK_categories_parent FOREIGN KEY (parent_id) REFERENCES dbo.categories(id)');

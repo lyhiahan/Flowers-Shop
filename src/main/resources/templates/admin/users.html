@@ -75,7 +75,7 @@
 
         <ul class="nav nav-pills flex-column mb-auto gap-1">
             <li><a th:href="@{/admin/dashboard}" class="nav-link"><i class="bi bi-grid"></i><span>Thống kê</span></a></li>
-            <li><a th:href="@{/admin/users}" class="nav-link active"><i class="bi bi-people"></i><span>Người dùng</span></a></li>
+            <li><a th:href="@{/admin/users}" class="nav-link active" id="sidebarUsersLink"><i class="bi bi-people"></i><span>Người dùng</span></a></li>
             <li><a th:href="@{/admin/stores}" class="nav-link"><i class="bi bi-shop"></i><span>Cửa hàng</span></a></li>
             <li><a th:href="@{/admin/store-levels}" class="nav-link"><i class="bi bi-award"></i><span>Hạng chi nhánh</span></a></li>
             <li><a th:href="@{/admin/products-manage}" class="nav-link"><i class="bi bi-box-seam"></i><span>Sản phẩm</span></a></li>
@@ -111,13 +111,13 @@
             </div>
         </div>
 
-        <!-- Flash alerts -->
+        <!-- Flash alerts & Data load error (Post-conditions UC_027) -->
         <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 px-3 small rounded-3" role="alert" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA;">
             <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${successMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show py-2 px-3 small rounded-3" role="alert" style="background-color: #FDEBEB; color: #B83232; border: 1px solid #F7C6C6;">
-            <i class="bi bi-exclamation-triangle-fill me-1"></i> <span th:text="${errorMessage}"></span>
+        <div th:if="${errorMessage != null or dataLoadError == true}" class="alert alert-danger alert-dismissible fade show py-2 px-3 small rounded-3" id="dataLoadAlert" role="alert" style="background-color: #FDEBEB; color: #B83232; border: 1px solid #F7C6C6;">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i> <span th:text="${errorMessage != null ? errorMessage : 'Không thể tải danh sách người dùng. Vui lòng thử lại!'}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
@@ -127,7 +127,7 @@
                 <a class="nav-link" th:classappend="${activeTab == 'users' or activeTab == null} ? 'active' : ''"
                    th:href="@{/admin/users(tab='users')}">
                     <i class="bi bi-person-lines-fill me-2"></i>Người Dùng
-                    <span class="badge rounded-pill bg-light text-dark border ms-1" th:text="${#lists.size(users)}">0</span>
+                    <span class="badge rounded-pill bg-light text-dark border ms-1" th:text="${totalElements != null ? totalElements : #lists.size(users)}">0</span>
                 </a>
             </li>
             <li class="nav-item" role="presentation">
@@ -188,7 +188,7 @@
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
+                        <table class="table table-hover align-middle mb-0" id="usersTable">
                             <thead style="background-color: #E5EEE8 !important;">
                             <tr>
                                 <th class="ps-4 fw-bold" style="width: 70px; color: #20382E;">ID</th>
@@ -280,6 +280,49 @@
                             </tr>
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- BƯỚC 4 THEO UC_027: Phân trang (Next, Previous, hoặc số trang bất kỳ) -->
+                    <div th:if="${totalPages > 1}" class="d-flex justify-content-between align-items-center flex-wrap gap-3 p-3 border-top" style="border-color: #E2E7E2 !important;" id="usersPagination">
+                        <div class="small text-muted" style="font-size: 14px;">
+                            Hiển thị <strong th:text="${totalElements > 0 ? (currentPage * pageSize) + 1 : 0}">1</strong> - 
+                            <strong th:text="${(currentPage + 1) * pageSize < totalElements ? (currentPage + 1) * pageSize : totalElements}">10</strong>
+                            trên tổng số <strong th:text="${totalElements}">10</strong> người dùng
+                        </div>
+                        <nav aria-label="Users pagination">
+                            <ul class="pagination pagination-sm mb-0">
+                                <!-- Nút Previous -->
+                                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+                                    <a class="page-link" 
+                                       th:href="@{/admin/users(tab=${activeTab}, keyword=${keyword}, role=${currentRole}, page=${currentPage - 1}, size=${pageSize})}" 
+                                       id="btnPrevPage" 
+                                       data-testid="btnPrevPage" 
+                                       aria-label="Previous">
+                                        <i class="bi bi-chevron-left me-1"></i> Previous
+                                    </a>
+                                </li>
+
+                                <!-- Các số trang -->
+                                <li class="page-item" th:each="p : ${#numbers.sequence(1, totalPages)}"
+                                    th:classappend="${currentPage == (p - 1)} ? 'active' : ''">
+                                    <a class="page-link" 
+                                       th:href="@{/admin/users(tab=${activeTab}, keyword=${keyword}, role=${currentRole}, page=${p - 1}, size=${pageSize})}" 
+                                       th:text="${p}"
+                                       th:id="'pageBtn_' + ${p}">1</a>
+                                </li>
+
+                                <!-- Nút Next -->
+                                <li class="page-item" th:classappend="${currentPage >= (totalPages - 1)} ? 'disabled' : ''">
+                                    <a class="page-link" 
+                                       th:href="@{/admin/users(tab=${activeTab}, keyword=${keyword}, role=${currentRole}, page=${currentPage + 1}, size=${pageSize})}" 
+                                       id="btnNextPage" 
+                                       data-testid="btnNextPage" 
+                                       aria-label="Next">
+                                        Next <i class="bi bi-chevron-right ms-1"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
                 </div>
             </div>

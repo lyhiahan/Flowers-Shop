@@ -47,7 +47,7 @@ public class OrderWorkflowService {
             case CONFIRMED -> next == OrderStatus.PREPARING || next == OrderStatus.CANCELLED;
             case PREPARING -> next == OrderStatus.CANCELLED
                     || (pickup && next == OrderStatus.COMPLETED)
-                    || (!pickup && next == OrderStatus.PICKED_UP && order.getShipper() != null);
+                    || (!pickup && ((next == OrderStatus.PICKED_UP && order.getShipper() != null) || next == OrderStatus.DELIVERING));
             case PICKED_UP -> next == OrderStatus.DELIVERING;
             case DELIVERING -> next == OrderStatus.DELIVERED;
             case DELIVERED -> next == OrderStatus.COMPLETED;
@@ -102,8 +102,12 @@ public class OrderWorkflowService {
         entityManager.refresh(store, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
         if (!transactions.findAllByOrderIdAndType(order.getId(), "ORDER_PAYMENT").isEmpty()) return;
 
-        // Chuỗi chi nhánh nội bộ: Doanh thu đơn hàng ghi nhận 100% cho chi nhánh
-        BigDecimal income = order.getTotalAmount().setScale(2, RoundingMode.HALF_UP);
+        BigDecimal rate = store.getCommission() == null ? BigDecimal.TEN : store.getCommission().getCost();
+        if (rate == null || rate.signum() < 0 || rate.compareTo(BigDecimal.valueOf(100)) > 0) {
+            throw new IllegalStateException("Tỷ lệ hoa hồng phải nằm trong khoảng 0 đến 100%.");
+        }
+        BigDecimal income = order.getTotalAmount().multiply(BigDecimal.ONE.subtract(rate.movePointLeft(2)))
+                .setScale(2, RoundingMode.HALF_UP);
         store.setEWallet(store.getEWallet().add(income));
 
         // Tích lũy điểm thi đua cho chi nhánh (1 điểm = 10.000 ₫ doanh số hoàn tất)

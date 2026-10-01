@@ -199,6 +199,48 @@
             box-shadow: 0 4px 12px rgba(32, 56, 46, 0.2);
         }
 
+        /* Nút đổi kiểu biểu đồ đồng nhất (Đường, Cột, Tròn) */
+        .chart-toggle-group {
+            height: 38px;
+            background: #F1F5F9;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 3px;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .btn-chart-toggle {
+            height: 30px;
+            border: none;
+            background: transparent;
+            color: #64748B;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 0 12px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            line-height: 1;
+        }
+
+        .btn-chart-toggle:hover {
+            color: #1E293B;
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+
+        .btn-chart-toggle.active {
+            background-color: #FFFFFF;
+            color: #1E293B;
+            font-weight: 800;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
         .btn-action-primary {
             background: var(--brand-green);
             color: #FFFFFF;
@@ -347,8 +389,9 @@
                     <a th:href="@{/manager/dashboard}" class="active">
                         <i class="bi bi-speedometer2"></i> Tổng Quan Chi Nhánh
                     </a>
-                    <a th:href="@{/manager/orders}">
-                        <i class="bi bi-bag-check"></i> Quản Lý Đơn Hàng
+                    <!-- BƯỚC 6 THEO UC_022: Chọn Orders trên thanh sidebar -->
+                    <a th:href="@{/manager/orders}" id="sidebarOrders">
+                        <i class="bi bi-bag-check"></i> Orders (Quản Lý Đơn Hàng)
                     </a>
                     <a th:href="@{/manager/products}">
                         <i class="bi bi-flower1"></i> Kho Mẫu Hoa
@@ -357,8 +400,9 @@
                     <a th:href="@{/manager/staff}" id="sidebarStaffs">
                         <i class="bi bi-people"></i> Staffs (Nhân Viên)
                     </a>
-                    <a th:href="@{/manager/wallet}">
-                        <i class="bi bi-wallet2"></i> Ví Cửa Hàng & Rút Tiền
+                    <!-- BƯỚC 6 THEO UC_023: Chọn GD Coins trên thanh sidebar -->
+                    <a th:href="@{/manager/wallet}" id="sidebarGdCoins">
+                        <i class="bi bi-coin"></i> GD Coins (Ví Cửa Hàng)
                     </a>
                     <a th:href="@{/manager/vouchers}">
                         <i class="bi bi-ticket-perforated"></i> Khuyến Mãi Shop
@@ -436,11 +480,19 @@
                 </div>
             </div>
 
-            <!-- 2. Four KPI Information Cards: Cùng mẫu, chiều cao >= 180px, padding 22px 24px, icon 44px -->
+            <!-- Thông báo lỗi nếu thất bại (Post-condition UC_024) -->
+            <div th:if="${dataLoadError == true}" class="alert alert-danger d-flex align-items-center mb-4" id="dataLoadAlert" role="alert" style="border-radius: 12px;">
+                <i class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2 fs-5"></i>
+                <div>
+                    <strong th:text="${errorMessage != null ? errorMessage : 'Không tải được dữ liệu thống kê chi nhánh. Vui lòng thử lại!'}">Không tải được dữ liệu thống kê chi nhánh. Vui lòng thử lại!</strong>
+                </div>
+            </div>
+
+            <!-- Bước 6 theo UC_024: Hiển thị tổng số sản phẩm, đơn hàng + Doanh thu & Cảnh báo -->
             <div class="row g-3 mb-4">
                 
                 <!-- KPI 1: Doanh thu (Theo kỳ lọc) -->
-                <div class="col-12 col-sm-6 col-xl-3">
+                <div class="col-12 col-sm-6 col-lg-4 col-xl-2">
                     <div class="kpi-card" id="kpi-revenue-card">
                         <div class="kpi-top">
                             <span class="kpi-title">Doanh thu</span>
@@ -451,68 +503,119 @@
 
                         <!-- Trường hợp lỗi tải -->
                         <div th:if="${dataLoadError == true or flowerRevenue == null}" class="my-auto py-2 text-center">
-                            <div class="text-danger fw-bold" style="font-size: 15px;">
-                                <i class="bi bi-exclamation-circle me-1"></i>Không tải được dữ liệu
+                            <div class="text-danger fw-bold" style="font-size: 13.5px;">
+                                <i class="bi bi-exclamation-circle me-1"></i>Lỗi tải
                             </div>
-                            <button type="button" onclick="window.location.reload()" class="btn btn-sm btn-outline-danger rounded-pill px-3 mt-2" style="font-size: 13px;">
-                                <i class="bi bi-arrow-clockwise me-1"></i>Thử lại
-                            </button>
                         </div>
 
                         <!-- Trường hợp dữ liệu hợp lệ (kể cả = 0) -->
                         <div th:if="${dataLoadError != true and flowerRevenue != null}">
-                            <div class="kpi-value" style="color: var(--accent-rose);" th:text="${#numbers.formatDecimal(flowerRevenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">
+                            <div class="kpi-value" style="color: var(--accent-rose); font-size: 26px;" th:text="${#numbers.formatDecimal(flowerRevenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">
                                 0 ₫
                             </div>
                             <div class="d-flex align-items-center justify-content-between mt-1">
-                                <span class="kpi-caption">Sau hoàn tiền trong kỳ</span>
-                                <span class="kpi-tag" style="background: var(--accent-rose-soft); color: var(--accent-rose);">Trong kỳ</span>
+                                <span class="kpi-caption" style="font-size: 13px;">Sau hoàn tiền</span>
+                                <span class="kpi-tag" style="background: var(--accent-rose-soft); color: var(--accent-rose);">Kỳ lọc</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- KPI 2: Đơn hoàn thành (Theo kỳ lọc) -->
-                <div class="col-12 col-sm-6 col-xl-3">
+                <!-- KPI 2 (BƯỚC 6 UC_024): Tổng số sản phẩm -->
+                <div class="col-12 col-sm-6 col-lg-4 col-xl-2">
+                    <div class="kpi-card" id="kpi-total-products">
+                        <div class="kpi-top">
+                            <span class="kpi-title">Tổng sản phẩm</span>
+                            <div class="kpi-icon-wrap" style="background: var(--brand-green-light); color: var(--brand-green);">
+                                <i class="bi bi-flower1"></i>
+                            </div>
+                        </div>
+
+                        <!-- Trường hợp lỗi tải -->
+                        <div th:if="${dataLoadError == true or totalProductsCount == null}" class="my-auto py-2 text-center">
+                            <div class="text-danger fw-bold" style="font-size: 13.5px;">
+                                <i class="bi bi-exclamation-circle me-1"></i>Lỗi tải
+                            </div>
+                        </div>
+
+                        <!-- Trường hợp hợp lệ -->
+                        <div th:if="${dataLoadError != true and totalProductsCount != null}">
+                            <div class="kpi-value" id="totalProductsCount" style="color: var(--brand-green); font-size: 26px;" th:text="${totalProductsCount}">
+                                0
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between mt-1">
+                                <span class="kpi-caption" style="font-size: 13px;">Kho hoa chi nhánh</span>
+                                <span class="kpi-tag" style="background: var(--brand-green-light); color: var(--brand-green);">Toàn bộ</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KPI 3 (BƯỚC 6 UC_024): Tổng số đơn hàng -->
+                <div class="col-12 col-sm-6 col-lg-4 col-xl-2">
+                    <div class="kpi-card" id="kpi-total-orders">
+                        <div class="kpi-top">
+                            <span class="kpi-title">Tổng đơn hàng</span>
+                            <div class="kpi-icon-wrap" style="background: #E0F2FE; color: #0369A1;">
+                                <i class="bi bi-bag-check"></i>
+                            </div>
+                        </div>
+
+                        <!-- Trường hợp lỗi tải -->
+                        <div th:if="${dataLoadError == true or totalOrdersCount == null}" class="my-auto py-2 text-center">
+                            <div class="text-danger fw-bold" style="font-size: 13.5px;">
+                                <i class="bi bi-exclamation-circle me-1"></i>Lỗi tải
+                            </div>
+                        </div>
+
+                        <!-- Trường hợp hợp lệ -->
+                        <div th:if="${dataLoadError != true and totalOrdersCount != null}">
+                            <div class="kpi-value" id="totalOrdersCount" style="color: #0369A1; font-size: 26px;" th:text="${totalOrdersCount}">
+                                0
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between mt-1">
+                                <span class="kpi-caption" style="font-size: 13px;">Tiếp nhận tại tiệm</span>
+                                <span class="kpi-tag" style="background: #E0F2FE; color: #0369A1;">Toàn bộ</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KPI 4: Đơn hoàn thành (Theo kỳ lọc) -->
+                <div class="col-12 col-sm-6 col-lg-4 col-xl-2">
                     <div class="kpi-card" id="kpi-completed-card">
                         <div class="kpi-top">
-                            <span class="kpi-title">Đơn hoàn thành</span>
-                            <div class="kpi-icon-wrap" style="background: var(--brand-green-light); color: var(--brand-green);">
-                                <i class="bi bi-bag-check-fill"></i>
+                            <span class="kpi-title">Đơn hoàn tất</span>
+                            <div class="kpi-icon-wrap" style="background: #DCFCE7; color: #15803D;">
+                                <i class="bi bi-check2-circle"></i>
                             </div>
                         </div>
 
                         <!-- Trường hợp lỗi tải -->
                         <div th:if="${dataLoadError == true or completedOrdersCount == null}" class="my-auto py-2 text-center">
-                            <div class="text-danger fw-bold" style="font-size: 15px;">
-                                <i class="bi bi-exclamation-circle me-1"></i>Không tải được dữ liệu
+                            <div class="text-danger fw-bold" style="font-size: 13.5px;">
+                                <i class="bi bi-exclamation-circle me-1"></i>Lỗi tải
                             </div>
-                            <button type="button" onclick="window.location.reload()" class="btn btn-sm btn-outline-danger rounded-pill px-3 mt-2" style="font-size: 13px;">
-                                <i class="bi bi-arrow-clockwise me-1"></i>Thử lại
-                            </button>
                         </div>
 
-                        <!-- Trường hợp dữ liệu hợp lệ (kể cả = 0) -->
+                        <!-- Trường hợp hợp lệ -->
                         <div th:if="${dataLoadError != true and completedOrdersCount != null}">
-                            <div class="kpi-value" style="color: var(--brand-green);" th:text="${completedOrdersCount}">
+                            <div class="kpi-value" style="color: #15803D; font-size: 26px;" th:text="${completedOrdersCount}">
                                 0
                             </div>
                             <div class="d-flex align-items-center justify-content-between mt-1">
-                                <span class="kpi-caption">Trong khoảng thời gian đã chọn</span>
-                                <span class="kpi-tag" style="background: var(--brand-green-light); color: var(--brand-green);">Trong kỳ</span>
+                                <span class="kpi-caption" style="font-size: 13px;">Đã giao khách</span>
+                                <span class="kpi-tag" style="background: #DCFCE7; color: #15803D;">Kỳ lọc</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- KPI 3: Đơn cần xử lý (Hiện tại, Clickable dẫn đến danh sách đơn) -->
-                <div class="col-12 col-sm-6 col-xl-3">
+                <!-- KPI 5: Đơn cần xử lý (Hiện tại, Clickable dẫn đến danh sách đơn) -->
+                <div class="col-12 col-sm-6 col-lg-4 col-xl-2">
                     <a th:href="@{/manager/orders(status='PENDING')}" class="kpi-card is-clickable" id="kpi-pending-card" title="Bấm để xem danh sách đơn cần xử lý">
                         <div class="kpi-top">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="kpi-title">Đơn cần xử lý</span>
-                                <span class="kpi-tag" style="background: var(--amber-bg); color: var(--amber-text);">Hiện tại</span>
-                            </div>
+                            <span class="kpi-title">Cần xử lý</span>
                             <div class="kpi-icon-wrap" style="background: var(--amber-bg); color: var(--amber-text);">
                                 <i class="bi bi-clock-history"></i>
                             </div>
@@ -520,41 +623,31 @@
 
                         <!-- Trường hợp lỗi tải -->
                         <div th:if="${dataLoadError == true or pendingOrdersCount == null}" class="my-auto py-2 text-center">
-                            <div class="text-danger fw-bold" style="font-size: 15px;">
-                                <i class="bi bi-exclamation-circle me-1"></i>Không tải được dữ liệu
+                            <div class="text-danger fw-bold" style="font-size: 13.5px;">
+                                <i class="bi bi-exclamation-circle me-1"></i>Lỗi tải
                             </div>
-                            <button type="button" onclick="window.location.reload()" class="btn btn-sm btn-outline-danger rounded-pill px-3 mt-2" style="font-size: 13px;">
-                                <i class="bi bi-arrow-clockwise me-1"></i>Thử lại
-                            </button>
                         </div>
 
-                        <!-- Trường hợp dữ liệu hợp lệ -->
+                        <!-- Trường hợp hợp lệ -->
                         <div th:if="${dataLoadError != true and pendingOrdersCount != null}">
-                            <div class="kpi-value" style="color: var(--amber-text);" th:text="${pendingOrdersCount}">
+                            <div class="kpi-value" style="color: var(--amber-text); font-size: 26px;" th:text="${pendingOrdersCount}">
                                 0
                             </div>
                             <div class="d-flex align-items-center justify-content-between mt-1">
-                                <span class="kpi-caption">Đang chờ xác nhận hoặc chuẩn bị</span>
-                                <i class="bi bi-arrow-right text-muted" style="font-size: 14px;"></i>
+                                <span class="kpi-caption" style="font-size: 13px;">Chờ duyệt & cắm hoa</span>
+                                <i class="bi bi-arrow-right text-muted" style="font-size: 13px;"></i>
                             </div>
                         </div>
                     </a>
                 </div>
 
-                <!-- KPI 4: Sản phẩm sắp hết (Hiện tại, Clickable dẫn đến kho mẫu hoa, đỏ CHỈ KHI có cảnh báo) -->
-                <div class="col-12 col-sm-6 col-xl-3">
+                <!-- KPI 6: Sản phẩm sắp hết (Hiện tại, Clickable dẫn đến kho mẫu hoa) -->
+                <div class="col-12 col-sm-6 col-lg-4 col-xl-2">
                     <a th:href="@{/manager/products}" class="kpi-card is-clickable" id="kpi-lowstock-card"
                        th:style="${lowStockProductsCount != null and lowStockProductsCount > 0} ? 'border-color: #FECACA;' : ''"
                        title="Bấm để xem danh sách kho mẫu hoa">
                         <div class="kpi-top">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="kpi-title">Sản phẩm sắp hết</span>
-                                <span class="kpi-tag"
-                                      th:style="${lowStockProductsCount != null and lowStockProductsCount > 0} ? 'background: var(--alert-red-bg); color: var(--alert-red-text);' : 'background: var(--brand-green-light); color: var(--brand-green);'">
-                                    Hiện tại
-                                </span>
-                            </div>
-                            <!-- Biểu tượng: đỏ khi có cảnh báo (> 0), trung tính khi an toàn (= 0) -->
+                            <span class="kpi-title">Sắp hết hàng</span>
                             <div class="kpi-icon-wrap"
                                  th:style="${lowStockProductsCount != null and lowStockProductsCount > 0} ? 'background: var(--alert-red-bg); color: var(--alert-red-text);' : 'background: var(--brand-green-light); color: var(--brand-green);'">
                                 <i th:class="${lowStockProductsCount != null and lowStockProductsCount > 0} ? 'bi bi-exclamation-triangle-fill' : 'bi bi-box-seam'"></i>
@@ -563,35 +656,29 @@
 
                         <!-- Trường hợp lỗi tải -->
                         <div th:if="${dataLoadError == true or lowStockProductsCount == null}" class="my-auto py-2 text-center">
-                            <div class="text-danger fw-bold" style="font-size: 15px;">
-                                <i class="bi bi-exclamation-circle me-1"></i>Không tải được dữ liệu
+                            <div class="text-danger fw-bold" style="font-size: 13.5px;">
+                                <i class="bi bi-exclamation-circle me-1"></i>Lỗi tải
                             </div>
-                            <button type="button" onclick="window.location.reload()" class="btn btn-sm btn-outline-danger rounded-pill px-3 mt-2" style="font-size: 13px;">
-                                <i class="bi bi-arrow-clockwise me-1"></i>Thử lại
-                            </button>
                         </div>
 
-                        <!-- Trường hợp dữ liệu hợp lệ -->
+                        <!-- Trường hợp hợp lệ -->
                         <div th:if="${dataLoadError != true and lowStockProductsCount != null}">
-                            <!-- Nếu có sản phẩm dưới ngưỡng cảnh báo: Dùng màu đỏ -->
                             <div th:if="${lowStockProductsCount > 0}">
-                                <div class="kpi-value text-danger" th:text="${lowStockProductsCount}">
+                                <div class="kpi-value text-danger" style="font-size: 26px;" th:text="${lowStockProductsCount}">
                                     0
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between mt-1">
-                                    <span class="kpi-caption text-danger">Có tồn kho dưới ngưỡng cảnh báo</span>
-                                    <i class="bi bi-arrow-right text-danger" style="font-size: 14px;"></i>
+                                    <span class="kpi-caption text-danger" style="font-size: 13px;">Dưới ngưỡng cảnh báo</span>
+                                    <i class="bi bi-arrow-right text-danger" style="font-size: 13px;"></i>
                                 </div>
                             </div>
-
-                            <!-- Nếu không có cảnh báo: Dùng màu xanh đậm/trung tính -->
                             <div th:if="${lowStockProductsCount == 0}">
-                                <div class="kpi-value" style="color: var(--brand-green);" th:text="${lowStockProductsCount}">
+                                <div class="kpi-value" style="color: var(--brand-green); font-size: 26px;" th:text="${lowStockProductsCount}">
                                     0
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between mt-1">
-                                    <span class="kpi-caption">Có tồn kho dưới ngưỡng cảnh báo</span>
-                                    <i class="bi bi-arrow-right text-muted" style="font-size: 14px;"></i>
+                                    <span class="kpi-caption" style="font-size: 13px;">Tồn kho an toàn</span>
+                                    <i class="bi bi-arrow-right text-muted" style="font-size: 13px;"></i>
                                 </div>
                             </div>
                         </div>
@@ -600,57 +687,224 @@
 
             </div>
 
-            <!-- 3. Biểu đồ doanh thu chiếm toàn bộ chiều rộng (col-12), vùng vẽ cao 280-320px -->
-            <div class="row g-4 mb-4">
-                <div class="col-12">
-                    <div class="card-floral p-4">
-                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
-                            <div>
-                                <h5 class="fw-bold mb-1" style="font-size: 18px; font-weight: 800; color: var(--brand-green);">
-                                    <i class="bi bi-graph-up text-success me-2"></i>Doanh Thu Theo Thời Gian
-                                </h5>
-                                <p class="text-muted mb-0" style="font-size: 14.5px;">
-                                    <span th:if="${timeRange == 'today'}">Thống kê theo 24 khung giờ trong ngày hôm nay</span>
-                                    <span th:if="${timeRange == '7days' or timeRange == null}">Thống kê theo từng ngày trong 7 ngày qua</span>
-                                    <span th:if="${timeRange == 'month'}">Thống kê theo các ngày trong tháng hiện tại</span>
-                                    <span th:if="${timeRange == 'custom'}" th:text="'Khoảng ngày: ' + ${startDate} + ' đến ' + ${endDate}"></span>
-                                </p>
+            <!-- BƯỚC 7 & 8 THEO UC_024:
+                 Cột Trái: Biểu đồ thống kê đa tiêu chí (đơn hàng, sản phẩm, doanh thu), đa thời gian (giờ, ngày, tháng, năm), đa dạng biểu đồ (đường, cột, tròn)
+                 Cột Phải bên cạnh biểu đồ: Top sản phẩm bán chạy (lên đến 1000 SP), Top đơn hàng mới nhất (lên đến 1000 đơn) -->
+            <div class="row g-4 mb-4 align-items-stretch">
+                
+                <!-- Cột Biểu Đồ Thống Kê (col-xl-7 col-lg-12) -->
+                <div class="col-xl-7 col-lg-12">
+                    <div class="card-floral p-4 h-100 d-flex flex-column justify-content-between">
+                        
+                        <!-- Thanh công cụ điều khiển Bước 7 -->
+                        <div class="d-flex flex-column gap-3 mb-3">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                <div>
+                                    <h5 class="fw-bold mb-1" style="font-size: 18px; font-weight: 800; color: var(--brand-green);">
+                                        <i class="bi bi-bar-chart-line text-success me-2"></i>Biểu Đồ Thống Kê Chi Nhánh
+                                    </h5>
+                                    <p class="text-muted mb-0" style="font-size: 13.5px;">
+                                        <span id="chartSubTitleCriteria" th:text="${criteria == 'orders' ? 'Số lượng đơn hàng' : (criteria == 'products' ? 'Số lượng sản phẩm bán' : 'Doanh thu bán hoa')}">Doanh thu bán hoa</span>
+                                        <span> · </span>
+                                        <span th:text="${timeRange == 'hour' ? 'Theo 24 khung giờ' : (timeRange == 'month' ? 'Các ngày trong tháng' : (timeRange == 'year' ? '12 tháng trong năm' : '7 ngày gần nhất'))}">7 ngày gần nhất</span>
+                                    </p>
+                                </div>
+                                
+                                <!-- Loại biểu đồ (Đường, Cột, Tròn) theo Bước 7 -->
+                                <div class="chart-toggle-group" id="chartTypeGroup">
+                                    <button type="button" class="btn-chart-toggle" id="chartTypeLine" th:classappend="${chartType == 'line' or chartType == null} ? 'active' : ''" onclick="switchChartType('line')">
+                                        <i class="bi bi-graph-up me-1"></i>Đường
+                                    </button>
+                                    <button type="button" class="btn-chart-toggle" id="chartTypeBar" th:classappend="${chartType == 'bar'} ? 'active' : ''" onclick="switchChartType('bar')">
+                                        <i class="bi bi-bar-chart-line me-1"></i>Cột
+                                    </button>
+                                    <button type="button" class="btn-chart-toggle" id="chartTypePie" th:classappend="${chartType == 'pie'} ? 'active' : ''" onclick="switchChartType('pie')">
+                                        <i class="bi bi-pie-chart me-1"></i>Tròn
+                                    </button>
+                                </div>
                             </div>
-                            <span class="badge rounded-pill px-3 py-2" style="background: var(--brand-green-light); color: var(--brand-green); font-size: 13.5px; font-weight: 700;">
-                                Đơn vị: VNĐ
-                            </span>
+
+                            <!-- Nhóm Tùy Chọn Xem Thống Kê Theo Đơn Hàng, Sản Phẩm, Doanh Thu & Thời Gian (Giờ, Ngày, Tháng, Năm) -->
+                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 pt-2 border-top" style="border-color: var(--border-soft) !important;">
+                                <!-- Tiêu chí thống kê (Criteria) -->
+                                <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                                    <span class="small fw-bold text-muted me-1" style="font-size: 13px;">Chỉ số:</span>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a th:href="@{/manager/dashboard(criteria='revenue', timeRange=${timeRange}, chartType=${chartType})}"
+                                           class="btn btn-sm"
+                                           id="filterCriteriaRevenue"
+                                           th:classappend="${criteria == 'revenue' or criteria == null} ? 'btn-success' : 'btn-outline-secondary'"
+                                           style="font-size: 13px; font-weight: 700;">
+                                            <i class="bi bi-cash-stack me-1"></i>Doanh thu
+                                        </a>
+                                        <a th:href="@{/manager/dashboard(criteria='orders', timeRange=${timeRange}, chartType=${chartType})}"
+                                           class="btn btn-sm"
+                                           id="filterCriteriaOrders"
+                                           th:classappend="${criteria == 'orders'} ? 'btn-success' : 'btn-outline-secondary'"
+                                           style="font-size: 13px; font-weight: 700;">
+                                            <i class="bi bi-bag-check me-1"></i>Đơn hàng
+                                        </a>
+                                        <a th:href="@{/manager/dashboard(criteria='products', timeRange=${timeRange}, chartType=${chartType})}"
+                                           class="btn btn-sm"
+                                           id="filterCriteriaProducts"
+                                           th:classappend="${criteria == 'products'} ? 'btn-success' : 'btn-outline-secondary'"
+                                           style="font-size: 13px; font-weight: 700;">
+                                            <i class="bi bi-flower1 me-1"></i>Sản phẩm
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- Thời gian thống kê (TimeRange) -->
+                                <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                                    <span class="small fw-bold text-muted me-1" style="font-size: 13px;">Thời gian:</span>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a th:href="@{/manager/dashboard(criteria=${criteria}, timeRange='hour', chartType=${chartType})}"
+                                           class="btn btn-sm"
+                                           id="filterTimeHour"
+                                           th:classappend="${timeRange == 'hour'} ? 'btn-primary' : 'btn-outline-secondary'"
+                                           style="font-size: 13px; font-weight: 700;">
+                                            Theo giờ
+                                        </a>
+                                        <a th:href="@{/manager/dashboard(criteria=${criteria}, timeRange='day', chartType=${chartType})}"
+                                           class="btn btn-sm"
+                                           id="filterTimeDay"
+                                           th:classappend="${timeRange == 'day' or timeRange == null} ? 'btn-primary' : 'btn-outline-secondary'"
+                                           style="font-size: 13px; font-weight: 700;">
+                                            Theo ngày
+                                        </a>
+                                        <a th:href="@{/manager/dashboard(criteria=${criteria}, timeRange='month', chartType=${chartType})}"
+                                           class="btn btn-sm"
+                                           id="filterTimeMonth"
+                                           th:classappend="${timeRange == 'month'} ? 'btn-primary' : 'btn-outline-secondary'"
+                                           style="font-size: 13px; font-weight: 700;">
+                                            Theo tháng
+                                        </a>
+                                        <a th:href="@{/manager/dashboard(criteria=${criteria}, timeRange='year', chartType=${chartType})}"
+                                           class="btn btn-sm"
+                                           id="filterTimeYear"
+                                           th:classappend="${timeRange == 'year'} ? 'btn-primary' : 'btn-outline-secondary'"
+                                           style="font-size: 13px; font-weight: 700;">
+                                            Theo năm
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Trường hợp biểu đồ không có dữ liệu -->
-                        <div th:if="${!hasRevenueData}" class="d-flex flex-column align-items-center justify-content-center py-5 text-center" style="min-height: 290px;">
+                        <div th:if="${!hasRevenueData}" class="d-flex flex-column align-items-center justify-content-center py-5 text-center my-auto" style="min-height: 290px;">
                             <div class="rounded-circle p-3 mb-3" style="background-color: var(--accent-rose-soft); color: var(--accent-rose); width: 64px; height: 64px; display: flex; align-items: center; justify-content: center;">
                                 <i class="bi bi-calendar-x fs-2"></i>
                             </div>
                             <h6 class="fw-bold mb-1" style="color: var(--brand-green); font-size: 17px; font-weight: 700;">
-                                Chưa có doanh thu trong khoảng thời gian này
+                                Chưa có số liệu ghi nhận trong khoảng thời gian này
                             </h6>
                             <p class="text-muted mb-3" style="font-size: 14.5px; max-width: 440px;">
-                                Chi nhánh chưa ghi nhận đơn hoa nào được hoàn thành và thanh toán trong khoảng thời gian đã chọn.
+                                Chi nhánh chưa ghi nhận đơn hoa hoàn thành hoặc giao dịch phát sinh trong khoảng thời gian đã chọn.
                             </p>
                             <a th:href="@{/manager/orders}" class="btn btn-sm px-4 rounded-pill btn-action-primary" style="height: 38px;">
                                 <i class="bi bi-eye me-1"></i> Kiểm tra danh sách đơn hàng
                             </a>
                         </div>
 
-                        <!-- Canvas Chart khi có dữ liệu (vùng vẽ 300px) -->
-                        <div th:if="${hasRevenueData}" style="position: relative; height: 300px; width: 100%;">
+                        <!-- Canvas Chart khi có dữ liệu (vùng vẽ 310px) -->
+                        <div th:if="${hasRevenueData}" style="position: relative; height: 310px; width: 100%;">
                             <canvas id="revenueTrendChart"></canvas>
                         </div>
                     </div>
                 </div>
+
+                <!-- Cột Hiển Thị Bên Cạnh Biểu Đồ (Bước 8 UC_024): Top sản phẩm bán chạy & Top đơn hàng mới nhất -->
+                <div class="col-xl-5 col-lg-12 d-flex flex-column gap-3">
+                    
+                    <!-- Card 1 (BƯỚC 8 UC_024): Top sản phẩm bán chạy (cho tới 1000 sản phẩm) -->
+                    <div class="card-floral p-3 flex-fill d-flex flex-column" id="topSellingProductsCard" style="min-height: 240px;">
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom" style="border-color: var(--border-soft) !important;">
+                            <div>
+                                <h6 class="fw-bold mb-0" style="color: var(--brand-green); font-size: 16px;">
+                                    🌸 Top Sản Phẩm Bán Chạy
+                                </h6>
+                                <small class="text-muted" style="font-size: 12.5px;">Xếp hạng theo sản lượng đã bán</small>
+                            </div>
+                            <span class="badge rounded-pill px-2.5 py-1" style="background: var(--accent-rose-soft); color: var(--accent-rose); font-size: 12px; font-weight: 700;">
+                                Top SP
+                            </span>
+                        </div>
+
+                        <div class="flex-grow-1 overflow-auto" style="max-height: 185px;">
+                            <div th:if="${#lists.isEmpty(topProducts)}" class="text-center py-4 text-muted small">
+                                Chưa có sản phẩm bán chạy trong danh mục.
+                            </div>
+                            <div th:each="flower, iter : ${topProducts}" class="flower-item py-1.5 px-2 mb-1.5" style="border-radius: 8px;">
+                                <span class="rank-badge"
+                                      th:classappend="${iter.index == 0 ? 'rank-1' : (iter.index == 1 ? 'rank-2' : (iter.index == 2 ? 'rank-3' : 'rank-n'))}"
+                                      th:text="${iter.index + 1}" style="width: 22px; height: 22px; font-size: 12px;">1</span>
+
+                                <img th:if="${flower.imageUrl != null and !flower.imageUrl.isEmpty()}"
+                                     th:src="${flower.imageUrl}"
+                                     alt="Hoa"
+                                     class="flower-thumb"
+                                     style="width: 36px; height: 36px; border-radius: 6px;"
+                                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1563245372-f21724e3856d?w=100';">
+                                <div th:if="${flower.imageUrl == null or flower.imageUrl.isEmpty()}"
+                                     class="flower-thumb d-flex align-items-center justify-content-center text-muted"
+                                     style="width: 36px; height: 36px; border-radius: 6px; font-size: 1rem;">💐</div>
+
+                                <div class="flex-grow-1 text-truncate">
+                                    <div class="fw-bold text-truncate" style="font-size: 13.5px; color: var(--text-main);" th:text="${flower.name}">Tên hoa</div>
+                                    <small class="text-muted" style="font-size: 12px;">
+                                        Đã bán: <strong class="text-dark" th:text="${flower.quantitySold}">0</strong> bó
+                                    </small>
+                                </div>
+                                <div class="text-end flex-shrink-0">
+                                    <div class="fw-bold" style="color: var(--accent-rose); font-size: 13.5px;" th:text="${#numbers.formatDecimal(flower.revenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2 (BƯỚC 8 UC_024): Top đơn hàng mới nhất (cho tới 1000 đơn hàng) -->
+                    <div class="card-floral p-3 flex-fill d-flex flex-column" id="topRecentOrdersCard" style="min-height: 240px;">
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom" style="border-color: var(--border-soft) !important;">
+                            <div>
+                                <h6 class="fw-bold mb-0" style="color: var(--brand-green); font-size: 16px;">
+                                    📋 Top Đơn Hàng Mới Nhất
+                                </h6>
+                                <small class="text-muted" style="font-size: 12.5px;">Các đơn hàng chi nhánh tiếp nhận gần đây</small>
+                            </div>
+                            <span class="badge rounded-pill px-2.5 py-1" style="background: #E0F2FE; color: #0369A1; font-size: 12px; font-weight: 700;">
+                                Đơn mới
+                            </span>
+                        </div>
+
+                        <div class="flex-grow-1 overflow-auto" style="max-height: 185px;">
+                            <div th:if="${#lists.isEmpty(recentOrders)}" class="text-center py-4 text-muted small">
+                                Chưa có đơn hàng phát sinh gần đây.
+                            </div>
+                            <div th:each="ro : ${recentOrders}" class="d-flex align-items-center justify-content-between py-1.5 px-2 mb-1.5 border rounded-2 bg-white" style="font-size: 13px;">
+                                <div class="text-truncate me-2">
+                                    <span class="fw-bold" style="color: var(--brand-green);" th:text="'#HD' + ${ro.id}">#HD101</span>
+                                    <span class="text-muted ms-1" th:text="${ro.recipientName != null and !ro.recipientName.isEmpty() ? ro.recipientName : (ro.user != null ? ro.user.fullName : 'Khách')}">Nguyễn Văn A</span>
+                                </div>
+                                <div class="text-end flex-shrink-0">
+                                    <strong class="text-dark" th:text="${#numbers.formatDecimal(ro.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</strong>
+                                    <span th:if="${ro.status.name() == 'PENDING'}" class="badge bg-warning text-dark ms-1" style="font-size: 11px;">Chờ duyệt</span>
+                                    <span th:if="${ro.status.name() == 'CONFIRMED'}" class="badge bg-info text-dark ms-1" style="font-size: 11px;">Đã duyệt</span>
+                                    <span th:if="${ro.status.name() == 'PREPARING'}" class="badge bg-purple text-white ms-1" style="background: #9333ea; font-size: 11px;">Đang cắm</span>
+                                    <span th:if="${ro.status.name() == 'COMPLETED' or ro.status.name() == 'DELIVERED'}" class="badge bg-success ms-1" style="font-size: 11px;">Hoàn tất</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
             </div>
 
-            <!-- 4. Danh sách công việc tiếp theo: Đơn cần xử lý nhanh & Top mẫu hoa -->
+            <!-- Bảng Đơn Hàng Cần Xử Lý Nhanh (Hỗ trợ tác nghiệp đơn hàng chi nhánh) -->
             <div class="row g-4 mb-4">
-                
-                <!-- Bảng Đơn Hàng Cần Xử Lý Nhanh (8 Cột) -->
-                <div class="col-xl-8">
-                    <div class="card-floral p-4 h-100">
+                <div class="col-12">
+                    <div class="card-floral p-4">
                         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
                             <div>
                                 <div class="d-flex align-items-center gap-2">
@@ -670,12 +924,12 @@
                         </div>
 
                         <!-- Empty State nếu không có đơn chờ xử lý -->
-                        <div th:if="${#lists.isEmpty(pendingOrdersList)}" class="text-center py-5">
-                            <div class="rounded-circle p-3 mb-2 d-inline-flex align-items-center justify-content-center" style="background: #E8F5E9; color: #2E7D32; width: 56px; height: 56px;">
-                                <i class="bi bi-check2-all fs-2"></i>
+                        <div th:if="${#lists.isEmpty(pendingOrdersList)}" class="text-center py-4">
+                            <div class="rounded-circle p-2.5 mb-2 d-inline-flex align-items-center justify-content-center" style="background: #E8F5E9; color: #2E7D32; width: 48px; height: 48px;">
+                                <i class="bi bi-check2-all fs-3"></i>
                             </div>
-                            <h6 class="fw-bold mt-2 mb-1" style="color: var(--text-main); font-size: 16px;">Chi nhánh không có đơn nào đang chờ xử lý!</h6>
-                            <p class="text-muted mb-0" style="font-size: 14px;">Tất cả đơn đặt hoa đã được tiếp nhận và xử lý đầy đủ.</p>
+                            <h6 class="fw-bold mt-1 mb-1" style="color: var(--text-main); font-size: 15.5px;">Chi nhánh không có đơn nào đang chờ xử lý!</h6>
+                            <p class="text-muted mb-0" style="font-size: 13.5px;">Tất cả đơn đặt hoa đã được tiếp nhận và xử lý đầy đủ.</p>
                         </div>
 
                         <!-- Table Content -->
@@ -758,81 +1012,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Top 5 Mẫu Hoa Bán Chạy (4 Cột) -->
-                <div class="col-xl-4">
-                    <div class="card-floral p-4 h-100 d-flex flex-column">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div>
-                                <h5 class="fw-bold mb-1" style="font-size: 18px; font-weight: 800; color: var(--brand-green);">
-                                    🌸 Mẫu Hoa Bán Chạy
-                                </h5>
-                                <p class="text-muted mb-0" style="font-size: 14px;">Top 5 mẫu hoa theo sản lượng</p>
-                            </div>
-                            <span class="badge rounded-pill px-3 py-1" style="background: var(--accent-rose-soft); color: var(--accent-rose); font-size: 13px; font-weight: 700;">
-                                Top 5
-                            </span>
-                        </div>
-
-                        <!-- Flower List -->
-                        <div class="flex-grow-1 overflow-auto" style="max-height: 340px;">
-                            <div th:if="${#lists.isEmpty(topProducts)}" class="text-center py-5 text-muted" style="font-size: 14px;">
-                                <i class="bi bi-flower2 fs-3 d-block mb-2 text-secondary"></i>
-                                Chưa có dữ liệu mẫu hoa bán chạy tại chi nhánh.
-                            </div>
-
-                            <div th:each="flower, iter : ${topProducts}" class="flower-item">
-                                <!-- Rank Badge -->
-                                <span class="rank-badge"
-                                      th:classappend="${iter.index == 0 ? 'rank-1' : (iter.index == 1 ? 'rank-2' : (iter.index == 2 ? 'rank-3' : 'rank-n'))}"
-                                      th:text="${iter.index + 1}">1</span>
-
-                                <!-- Flower Thumbnail -->
-                                <img th:if="${flower.imageUrl != null and !flower.imageUrl.isEmpty()}"
-                                     th:src="${flower.imageUrl}"
-                                     alt="Hoa"
-                                     class="flower-thumb"
-                                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1563245372-f21724e3856d?w=150';">
-                                <div th:if="${flower.imageUrl == null or flower.imageUrl.isEmpty()}"
-                                     class="flower-thumb d-flex align-items-center justify-content-center text-muted fs-4">
-                                    💐
-                                </div>
-
-                                <!-- Info -->
-                                <div class="flex-grow-1 text-truncate">
-                                    <h6 class="mb-0 fw-bold text-truncate" style="font-size: 15px; color: var(--text-main);" th:text="${flower.name}">
-                                        Bó Hoa Hồng Juliette
-                                    </h6>
-                                    <div class="d-flex align-items-center gap-2 mt-1">
-                                        <small class="badge px-2 py-0" style="background: #F4EFEA; color: var(--text-muted); font-size: 12px;" th:text="${flower.categoryName}">
-                                            Hoa bó
-                                        </small>
-                                        <small class="text-muted" style="font-size: 13px;">
-                                            Đã bán: <strong class="text-dark" th:text="${flower.quantitySold}">10</strong>
-                                        </small>
-                                    </div>
-                                </div>
-
-                                <!-- Revenue with Rose Pink Accent -->
-                                <div class="text-end flex-shrink-0">
-                                    <div class="fw-bold" style="color: var(--accent-rose); font-size: 15px;" th:text="${#numbers.formatDecimal(flower.revenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">
-                                        500.000 ₫
-                                    </div>
-                                    <div th:if="${flower.rating != null and flower.rating > 0}" class="small text-warning" style="font-size: 12px;">
-                                        ★ <span th:text="${#numbers.formatDecimal(flower.rating, 1, 1)}">5.0</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mt-3 pt-2 border-top border-light text-center">
-                            <a th:href="@{/manager/products}" class="text-decoration-none fw-bold" style="color: var(--brand-green); font-size: 14px;">
-                                Xem toàn bộ kho hoa chi nhánh <i class="bi bi-arrow-right"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
             </div>
 
         </div>
@@ -880,10 +1059,14 @@
     /*<![CDATA[*/
     var hasRevenue = /*[[${hasRevenueData}]]*/ false;
     var chartLabels = /*[[${chartLabels}]]*/ [];
-    var chartValues = /*[[${chartValues}]]*/ [];
+    var chartRevenueValues = /*[[${chartRevenueValues}]]*/ [];
+    var chartOrderValues = /*[[${chartOrderValues}]]*/ [];
+    var chartProductValues = /*[[${chartProductValues}]]*/ [];
+    var currentCriteria = /*[[${criteria}]]*/ 'revenue';
+    var currentChartType = /*[[${chartType}]]*/ 'line';
 
     // Trigger skeleton loading state on navigation filter click
-    document.querySelectorAll('.btn-filter, #customDateForm button[type="submit"]').forEach(function(el) {
+    document.querySelectorAll('.btn-filter, #customDateForm button[type="submit"], #chartTypeGroup button, .btn-group a').forEach(function(el) {
         el.addEventListener('click', function() {
             document.querySelectorAll('.kpi-card').forEach(function(card) {
                 card.classList.add('is-loading-skeleton');
@@ -891,86 +1074,164 @@
         });
     });
 
-    if (hasRevenue && document.getElementById('revenueTrendChart')) {
-        var ctx = document.getElementById('revenueTrendChart').getContext('2d');
-        
-        // Gradient fill for chart
-        var gradient = ctx.createLinearGradient(0, 0, 0, 280);
-        gradient.addColorStop(0, 'rgba(166, 64, 96, 0.22)');
-        gradient.addColorStop(1, 'rgba(166, 64, 96, 0.01)');
+    var myChart = null;
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: chartLabels,
-                datasets: [{
-                    label: 'Doanh thu bán hoa',
-                    data: chartValues,
-                    borderColor: '#A64060',
-                    borderWidth: 3,
-                    backgroundColor: gradient,
-                    fill: true,
-                    tension: 0.35,
-                    pointBackgroundColor: '#A64060',
-                    pointBorderColor: '#FFFFFF',
-                    pointBorderWidth: 2.5,
-                    pointRadius: 4.5,
-                    pointHoverRadius: 7,
-                    pointHoverBackgroundColor: '#A64060'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: '#20382E',
-                        titleFont: { family: 'Nunito', size: 13, weight: '700' },
-                        bodyFont: { family: 'Nunito', size: 14, weight: '600' },
-                        padding: 12,
-                        cornerRadius: 8,
-                        callbacks: {
-                            label: function(context) {
-                                var val = context.raw || 0;
-                                return 'Doanh thu: ' + new Intl.NumberFormat('vi-VN').format(val) + ' ₫';
-                            }
-                        }
+    function getDatasetForCriteria(criteria) {
+        if (criteria === 'orders') {
+            return {
+                label: 'Số lượng đơn hàng',
+                data: chartOrderValues,
+                color: '#0369A1',
+                unit: ' đơn',
+                isCurrency: false
+            };
+        } else if (criteria === 'products') {
+            return {
+                label: 'Số lượng sản phẩm bán',
+                data: chartProductValues,
+                color: '#2E7D32',
+                unit: ' bó',
+                isCurrency: false
+            };
+        } else {
+            return {
+                label: 'Doanh thu bán hoa',
+                data: chartRevenueValues,
+                color: '#A64060',
+                unit: ' ₫',
+                isCurrency: true
+            };
+        }
+    }
+
+    function initChart(chartType, criteria) {
+        if (!hasRevenue || !document.getElementById('revenueTrendChart')) return;
+        var ctx = document.getElementById('revenueTrendChart').getContext('2d');
+        var dsInfo = getDatasetForCriteria(criteria);
+
+        var palette = [
+            '#A64060', '#20382E', '#355447', '#0369A1', '#B45309',
+            '#7E22CE', '#2E7D32', '#C26581', '#4E7262', '#38BDF8',
+            '#F59E0B', '#9333EA', '#10B981', '#EC4899', '#6366F1'
+        ];
+
+        var configType = chartType === 'pie' ? 'doughnut' : (chartType === 'bar' ? 'bar' : 'line');
+
+        var gradient = ctx.createLinearGradient(0, 0, 0, 280);
+        gradient.addColorStop(0, dsInfo.color + '33');
+        gradient.addColorStop(1, dsInfo.color + '03');
+
+        var datasetConfig = {
+            label: dsInfo.label,
+            data: dsInfo.data,
+            borderWidth: 2.5
+        };
+
+        if (configType === 'doughnut') {
+            datasetConfig.backgroundColor = palette.slice(0, chartLabels.length);
+            datasetConfig.borderColor = '#FFFFFF';
+            datasetConfig.borderWidth = 2;
+        } else if (configType === 'bar') {
+            datasetConfig.backgroundColor = dsInfo.color + 'CC';
+            datasetConfig.borderColor = dsInfo.color;
+            datasetConfig.borderRadius = 6;
+        } else {
+            datasetConfig.backgroundColor = gradient;
+            datasetConfig.borderColor = dsInfo.color;
+            datasetConfig.fill = true;
+            datasetConfig.tension = 0.35;
+            datasetConfig.pointBackgroundColor = dsInfo.color;
+            datasetConfig.pointBorderColor = '#FFFFFF';
+            datasetConfig.pointBorderWidth = 2;
+            datasetConfig.pointRadius = 4;
+            datasetConfig.pointHoverRadius = 6;
+        }
+
+        var options = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: configType === 'doughnut',
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        font: { family: 'Nunito', size: 11, weight: '600' }
                     }
                 },
-                scales: {
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            font: { family: 'Nunito', size: 12, weight: '600' },
-                            color: '#686E65'
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: 'rgba(226, 231, 226, 0.8)'
-                        },
-                        ticks: {
-                            font: { family: 'Nunito', size: 12, weight: '600' },
-                            color: '#686E65',
-                            callback: function(value) {
-                                if (value >= 1000000) {
-                                    return (value / 1000000).toFixed(1) + ' tr';
-                                } else if (value >= 1000) {
-                                    return (value / 1000).toFixed(0) + ' k';
-                                }
-                                return value;
+                tooltip: {
+                    backgroundColor: '#20382E',
+                    titleFont: { family: 'Nunito', size: 13, weight: '700' },
+                    bodyFont: { family: 'Nunito', size: 14, weight: '600' },
+                    padding: 10,
+                    cornerRadius: 8,
+                    callbacks: {
+                        label: function(context) {
+                            var val = context.raw || 0;
+                            if (dsInfo.isCurrency) {
+                                return dsInfo.label + ': ' + new Intl.NumberFormat('vi-VN').format(val) + dsInfo.unit;
+                            } else {
+                                return dsInfo.label + ': ' + new Intl.NumberFormat('vi-VN').format(val) + dsInfo.unit;
                             }
                         }
                     }
                 }
             }
+        };
+
+        if (configType !== 'doughnut') {
+            options.scales = {
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { family: 'Nunito', size: 12, weight: '600' }, color: '#686E65' }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(226, 231, 226, 0.8)' },
+                    ticks: {
+                        font: { family: 'Nunito', size: 12, weight: '600' },
+                        color: '#686E65',
+                        callback: function(value) {
+                            if (dsInfo.isCurrency) {
+                                if (value >= 1000000) return (value / 1000000).toFixed(1) + ' tr';
+                                if (value >= 1000) return (value / 1000).toFixed(0) + ' k';
+                                return value;
+                            } else {
+                                return Number.isInteger(value) ? value : '';
+                            }
+                        }
+                    }
+                }
+            };
+        }
+
+        if (myChart) {
+            myChart.destroy();
+        }
+
+        myChart = new Chart(ctx, {
+            type: configType,
+            data: {
+                labels: chartLabels,
+                datasets: [datasetConfig]
+            },
+            options: options
         });
+    }
+
+    function switchChartType(type) {
+        currentChartType = type;
+        var btnLine = document.getElementById('chartTypeLine');
+        var btnBar = document.getElementById('chartTypeBar');
+        var btnPie = document.getElementById('chartTypePie');
+        if (btnLine) btnLine.classList.toggle('active', type === 'line');
+        if (btnBar) btnBar.classList.toggle('active', type === 'bar');
+        if (btnPie) btnPie.classList.toggle('active', type === 'pie');
+        initChart(type, currentCriteria);
+    }
+
+    if (hasRevenue && document.getElementById('revenueTrendChart')) {
+        initChart(currentChartType, currentCriteria);
     }
     /*]]>*/
 </script>

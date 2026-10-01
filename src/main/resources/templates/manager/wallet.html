@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Ví Cửa Hàng & Rút Tiền - Chuỗi Cửa Hàng Hoa Tươi</title>
+    <title>GD Coins - Ví Cửa Hàng & Rút Tiền - Kênh Cửa Hàng</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -15,13 +15,13 @@
         .sidebar a { color: #A9BCB3; text-decoration: none; padding: 10px 16px; border-radius: 10px; display: flex; align-items: center; gap: 10px; font-weight: 500; transition: all 0.2s ease; }
         .sidebar a:hover { background: rgba(255, 255, 255, 0.08); color: #ffffff; }
         .sidebar a.active { background: var(--brand-green); color: #ffffff; font-weight: 600; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
-        .wallet-card { background: linear-gradient(135deg, #355447 0%, #284136 100%); color: white; border-radius: 20px; }
+        .wallet-card { background: linear-gradient(135deg, #20382E 0%, #162820 100%); color: white; border-radius: 20px; }
     </style>
 </head>
 <body>
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar -->
+        <!-- Sidebar Navigation: Bước 6 theo UC_023: Chọn GD Coins trên thanh sidebar -->
         <div class="col-md-2 p-3 sidebar">
             <div class="d-flex align-items-center gap-2 mb-4 px-2">
                 <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img me-1">
@@ -32,78 +32,107 @@
             </div>
             <nav class="d-flex flex-column gap-1">
                 <a th:href="@{/manager/dashboard}"><i class="bi bi-speedometer2"></i> Tổng Quan Chi Nhánh</a>
-                <a th:href="@{/manager/orders}"><i class="bi bi-bag-check"></i> Quản Lý Đơn Hàng</a>
+                <a th:href="@{/manager/orders}" id="sidebarOrders"><i class="bi bi-bag-check"></i> Orders (Quản Lý Đơn Hàng)</a>
                 <a th:href="@{/manager/products}"><i class="bi bi-flower1"></i> Kho Mẫu Hoa</a>
-                <a th:href="@{/manager/staff}"><i class="bi bi-people"></i> Nhân Viên Cửa Hàng</a>
-                <a th:href="@{/manager/wallet}" class="active"><i class="bi bi-wallet2"></i> Ví Cửa Hàng & Rút Tiền</a>
+                <a th:href="@{/manager/staff}"><i class="bi bi-people"></i> Staffs (Nhân Viên)</a>
+                <!-- BƯỚC 6 THEO UC_023: Chọn GD Coins trên thanh sidebar -->
+                <a th:href="@{/manager/wallet}" class="active" id="sidebarGdCoins"><i class="bi bi-coin"></i> GD Coins (Ví Cửa Hàng)</a>
                 <a th:href="@{/manager/vouchers}"><i class="bi bi-ticket-perforated"></i> Khuyến Mãi Shop</a>
                 <a th:href="@{/manager/analytics}"><i class="bi bi-graph-up-arrow"></i> Báo Cáo Doanh Thu</a>
                 <a th:href="@{/manager/stores}"><i class="bi bi-shop"></i> Danh Sách Cửa Hàng</a>
-                <!-- BƯỚC 6 THEO UC_019: Chọn Profile trên thanh sidebar -->
                 <a th:href="@{/manager/profile}" id="sidebarProfile"><i class="bi bi-person-badge"></i> Profile</a>
                 <hr class="border-secondary my-2">
                 <a th:href="@{/}"><i class="bi bi-house-door"></i> Xem Website Khách</a>
-                <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit"   class="text-danger"><i class="bi bi-box-arrow-right"></i> Đăng Xuất</button></form>
+                <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#signOutModal" class="text-danger"><i class="bi bi-box-arrow-right"></i> Đăng Xuất</a>
             </nav>
         </div>
 
-        <!-- Main Content -->
+        <!-- Main Content: Bước 7 theo UC_023: Chuyển đến trang quản lý ví điện tử cửa hàng, hiển thị bảng danh sách các giao dịch của cửa hàng -->
         <div class="col-md-10 p-4">
-            <!-- 1. Header: Rút gọn tiêu đề chuẩn hóa -->
+            <!-- 1. Header -->
             <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                 <div>
-                    <h1 class="admin-page-title mb-0" style="font-size: 28px !important; font-weight: 800; color: #20382E;">Ví cửa hàng & Rút tiền</h1>
-                    <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Doanh thu bán hoa tươi tự động cộng vào ví sau khi đơn hoàn tất.</p>
+                    <div class="d-flex align-items-center gap-3">
+                        <h1 class="admin-page-title mb-0" style="font-size: 28px !important; font-weight: 800; color: #20382E;">Quản lý ví điện tử (GD Coins)</h1>
+                        <span class="badge rounded-pill" style="background-color: #E5EEE8; color: #20382E; border: 1px solid #D1E5DA; font-size: 14.5px; font-weight: 700; padding: 6px 14px;">
+                            <span th:text="${totalElements}">0</span> giao dịch
+                        </span>
+                    </div>
+                    <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Theo dõi số dư GD Coins, lịch sử thu nhập đơn hoa và thực hiện yêu cầu rút tiền về ngân hàng.</p>
                 </div>
             </div>
 
-            <!-- Flash alerts -->
-            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small" role="alert" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA; border-radius: 10px;">
-                <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${successMessage}"></span>
+            <!-- Flash alerts (Step 14: Thông báo thành công / Thất bại) -->
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2.5 px-3 rounded-4 shadow-sm mb-4" role="alert" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA;">
+                <i class="bi bi-check-circle-fill me-2 fs-5 align-middle"></i>
+                <span class="fw-semibold align-middle" th:text="${successMessage}"></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show py-2 small" role="alert" style="border-radius: 10px;">
-                <i class="bi bi-exclamation-triangle-fill me-1"></i> <span th:text="${errorMessage}"></span>
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show py-2.5 px-3 rounded-4 shadow-sm mb-4" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2 fs-5 align-middle"></i>
+                <span class="fw-semibold align-middle" th:text="${errorMessage}"></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
 
             <!-- Wallet Overview Card -->
             <div class="row g-4 mb-4">
                 <div class="col-md-6">
-                    <div class="wallet-card p-4 shadow-sm" style="background: linear-gradient(135deg, #20382E 0%, #162820 100%); border-radius: 16px;">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div>
-                                <small class="text-white-50 text-uppercase fw-semibold" style="letter-spacing: 0.5px;">Số dư khả dụng</small>
-                                <h2 class="display-6 fw-bold mb-0 text-white mt-1" style="font-family: var(--font-sans);"
-                                    th:text="${store != null and store.eWallet != null ? #numbers.formatDecimal(store.eWallet, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">
-                                </h2>
+                    <div class="wallet-card p-4 shadow-sm h-100 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <small class="text-white-50 text-uppercase fw-semibold" style="letter-spacing: 0.5px;">Số dư GD Coins khả dụng</small>
+                                    <h2 class="display-6 fw-bold mb-0 text-white mt-1"
+                                        th:text="${store != null and store.eWallet != null ? #numbers.formatDecimal(store.eWallet, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">
+                                        0 ₫
+                                    </h2>
+                                </div>
+                                <span class="fs-1">🪙</span>
                             </div>
-                            <span class="fs-1">💳</span>
+                            <p class="small text-white-50 mb-0">Cửa hàng: <strong class="text-white" th:text="${store != null ? store.name : 'Chi nhánh'}"></strong></p>
                         </div>
-                        <p class="small text-white-50 mb-3">Chi nhánh: <strong class="text-white" th:text="${store != null ? store.name : 'Chi nhánh'}"></strong></p>
-                        <button class="btn btn-light fw-bold rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#withdrawModal"
-                                style="color: #20382E; height: 42px;">
-                            <i class="bi bi-arrow-up-right-circle me-1"></i> Tạo lệnh rút tiền về ngân hàng
-                        </button>
+
+                        <div class="pt-3">
+                            <!-- BƯỚC 9 THEO UC_023: Chọn nút Withdraw (nút này sẽ tồn tại nếu người quản lý là chủ cửa hàng) -->
+                            <button th:if="${isOwner}" 
+                                    type="button" 
+                                    class="btn btn-light fw-bold rounded-pill px-4 shadow-sm d-inline-flex align-items-center gap-1.5"
+                                    id="btnWithdraw"
+                                    data-testid="btnWithdraw"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#withdrawModal"
+                                    style="color: #20382E; height: 44px; font-size: 15px;">
+                                <i class="bi bi-arrow-up-right-circle"></i> Withdraw
+                            </button>
+                            <div th:if="${!isOwner}" class="badge bg-white text-dark px-3 py-2 rounded-pill shadow-sm" style="font-size: 13px;">
+                                <i class="bi bi-shield-lock me-1 text-secondary"></i> Chỉ chủ cửa hàng mới có quyền rút tiền
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="col-md-6">
                     <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 d-flex flex-column justify-content-center" style="border: 1px solid #E2E7E2 !important; border-radius: 16px;">
-                        <h6 class="fw-bold mb-2" style="color: #20382E;">Quy định rút tiền chi nhánh hoa</h6>
-                        <ul class="small ps-3 mb-0" style="color: #66736B; line-height: 1.7;">
+                        <h6 class="fw-bold mb-2" style="color: #20382E;">
+                            <i class="bi bi-info-circle-fill me-1 text-primary"></i> Quy định rút tiền GD Coins
+                        </h6>
+                        <ul class="small ps-3 mb-0" style="color: #66736B; line-height: 1.8;">
                             <li>Số tiền rút tối thiểu mỗi lần là <strong>50.000 ₫</strong>.</li>
-                            <li>Hệ thống chuỗi không thu phí rút tiền của chi nhánh / đối tác.</li>
-                            <li>Tiền về tài khoản ngân hàng liên kết trong vòng 5 - 15 phút 24/7.</li>
+                            <li>Yêu cầu rút tiền yêu cầu xác thực bằng <strong>Mật khẩu tài khoản</strong>.</li>
+                            <li>Hệ thống chuỗi không thu phí giao dịch rút tiền của cửa hàng.</li>
+                            <li>Lệnh rút được ghi nhận và gửi đến quản trị viên xử lý đối soát.</li>
                         </ul>
                     </div>
                 </div>
             </div>
 
-            <!-- Transaction History -->
+            <!-- Bảng danh sách các giao dịch của cửa hàng (Bước 7) -->
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
-                <div class="card-header py-3 border-bottom" style="background-color: #FAFCFA;">
-                    <h5 class="fw-bold mb-0" style="font-size: 17px; color: #20382E;">Lịch sử giao dịch & Biến động số dư</h5>
+                <div class="card-header py-3 border-bottom d-flex justify-content-between align-items-center" style="background-color: #FAFCFA;">
+                    <h5 class="fw-bold mb-0" style="font-size: 17px; color: #20382E;">
+                        <i class="bi bi-clock-history me-1.5 text-secondary"></i> Lịch sử giao dịch & Biến động số dư
+                    </h5>
+                    <span class="small text-muted" th:text="'Tổng ' + ${totalElements} + ' bản ghi'"></span>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -113,13 +142,14 @@
                                 <th class="ps-4 fw-bold" style="white-space: nowrap !important; min-width: 160px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Thời gian</th>
                                 <th class="fw-bold" style="white-space: nowrap !important; min-width: 170px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Loại giao dịch</th>
                                 <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 140px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Số tiền</th>
-                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 220px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Nội dung</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 240px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Nội dung</th>
                                 <th class="text-end pe-4 fw-bold" style="white-space: nowrap !important; min-width: 130px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Trạng thái</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr th:if="${#lists.isEmpty(transactions)}">
                                 <td colspan="5" class="text-center py-5 text-muted" style="font-size: 15.5px;">
+                                    <div class="fs-2 mb-2">🪙</div>
                                     Chưa có giao dịch rút tiền hoặc cộng tiền nào.
                                 </td>
                             </tr>
@@ -127,8 +157,9 @@
                                 <td class="ps-4" style="white-space: nowrap; font-size: 14.5px; color: #24332C;" th:text="${#temporals.format(tx.createdAt, 'dd/MM/yyyy HH:mm')}">01/10/2026 10:00</td>
                                 <td style="white-space: nowrap;">
                                     <span th:if="${tx.type == 'WITHDRAWAL'}" class="badge" style="background-color: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; padding: 4px 10px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;">RÚT TIỀN VỀ TK</span>
-                                    <span th:if="${tx.type == 'ORDER_PAYOUT'}" class="badge" style="background-color: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0; padding: 4px 10px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;">CỘNG TIỀN ĐƠN HÀNG</span>
-                                    <span th:if="${tx.type != 'WITHDRAWAL' and tx.type != 'ORDER_PAYOUT'}" class="badge" style="background-color: #E0F2FE; color: #0369A1; border: 1px solid #BAE6FD; padding: 4px 10px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;" th:text="${tx.type}">GIAO DỊCH</span>
+                                    <span th:if="${tx.type == 'ORDER_PAYMENT' or tx.type == 'ORDER_PAYOUT'}" class="badge" style="background-color: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0; padding: 4px 10px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;">CỘNG TIỀN ĐƠN HÀNG</span>
+                                    <span th:if="${tx.type == 'REFUND'}" class="badge" style="background-color: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; padding: 4px 10px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;">HOÀN TIỀN</span>
+                                    <span th:if="${tx.type != 'WITHDRAWAL' and tx.type != 'ORDER_PAYMENT' and tx.type != 'ORDER_PAYOUT' and tx.type != 'REFUND'}" class="badge" style="background-color: #E0F2FE; color: #0369A1; border: 1px solid #BAE6FD; padding: 4px 10px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;" th:text="${tx.type}">GIAO DỊCH</span>
                                 </td>
                                 <td class="text-end" style="white-space: nowrap;">
                                     <span style="font-size: 16.5px; font-weight: 800; white-space: nowrap;"
@@ -137,8 +168,14 @@
                                 </td>
                                 <td style="font-size: 14.5px; color: #4A5B53;" th:text="${tx.description}">Nội dung giao dịch</td>
                                 <td class="text-end pe-4" style="white-space: nowrap;">
-                                    <span class="status-pill-active" style="white-space: nowrap;">
-                                        <i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i><span th:text="${tx.status}">THÀNH CÔNG</span>
+                                    <span th:if="${tx.status == 'COMPLETED'}" class="status-pill-active" style="white-space: nowrap;">
+                                        <i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i>THÀNH CÔNG
+                                    </span>
+                                    <span th:if="${tx.status == 'PENDING'}" class="badge" style="background-color: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; padding: 4px 10px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;">
+                                        <i class="bi bi-clock me-1"></i>CHỜ DUYỆT
+                                    </span>
+                                    <span th:if="${tx.status == 'REJECTED'}" class="badge" style="background-color: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; padding: 4px 10px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;">
+                                        <i class="bi bi-x-circle me-1"></i>TỪ CHỐI
                                     </span>
                                 </td>
                             </tr>
@@ -147,27 +184,80 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Bước 8 theo UC_023: Phân trang (Next, Previous, hoặc số trang bất kỳ) -->
+            <div th:if="${totalPages > 1}" class="d-flex justify-content-between align-items-center flex-wrap gap-3 mt-4 pt-3 border-top" style="border-color: #E2E7E2 !important;">
+                <div class="small text-muted" style="font-size: 14px;">
+                    Hiển thị <strong th:text="${totalElements > 0 ? (currentPage * pageSize) + 1 : 0}">1</strong> - 
+                    <strong th:text="${T(java.lang.Math).min((currentPage + 1) * pageSize, totalElements)}">8</strong>
+                    trên tổng số <strong th:text="${totalElements}">10</strong> giao dịch
+                </div>
+                <nav aria-label="Transactions pagination">
+                    <ul class="pagination pagination-sm mb-0">
+                        <!-- Nút Previous -->
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+                            <a class="page-link" 
+                               th:href="@{/manager/wallet(page=${currentPage - 1}, size=${pageSize})}" 
+                               id="btnPrevPage" 
+                               data-testid="btnPrevPage" 
+                               aria-label="Previous">
+                                <i class="bi bi-chevron-left me-1"></i> Previous
+                            </a>
+                        </li>
+
+                        <!-- Các số trang -->
+                        <li class="page-item" th:each="p : ${#numbers.sequence(1, totalPages)}"
+                            th:classappend="${currentPage == (p - 1)} ? 'active' : ''">
+                            <a class="page-link" 
+                               th:href="@{/manager/wallet(page=${p - 1}, size=${pageSize})}" 
+                               th:text="${p}"
+                               th:id="'pageBtn_' + ${p}">1</a>
+                        </li>
+
+                        <!-- Nút Next -->
+                        <li class="page-item" th:classappend="${currentPage >= (totalPages - 1)} ? 'disabled' : ''">
+                            <a class="page-link" 
+                               th:href="@{/manager/wallet(page=${currentPage + 1}, size=${pageSize})}" 
+                               id="btnNextPage" 
+                               data-testid="btnNextPage" 
+                               aria-label="Next">
+                                Next <i class="bi bi-chevron-right ms-1"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Rút Tiền -->
-<div class="modal fade" id="withdrawModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form th:action="@{/manager/wallet/withdraw}" method="post">
-                <div class="modal-header">
-                    <h5 class="modal-title font-serif">🏦 Yêu Cầu Rút Tiền Doanh Thu</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<!-- ================= MODALS CHO USE CASE UC_023 ================= -->
+
+<!-- Bước 10: Hiển thị form rút tiền -->
+<!-- Bước 11: Nhập số tiền và xác nhận mật khẩu -->
+<div class="modal fade" id="withdrawModal" tabindex="-1" aria-labelledby="withdrawModalLabel" aria-hidden="true" th:if="${isOwner}">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form id="formWithdraw" th:action="@{/manager/wallet/withdraw}" method="post">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title font-serif fw-bold text-dark" id="withdrawModalLabel">
+                        🪙 Yêu Cầu Rút Tiền GD Coins
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body py-3">
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold">Số tiền muốn rút (VNĐ):</label>
-                        <input type="number" name="amount" class="form-control" placeholder="Tối thiểu 50,000" min="50000" required>
+                        <label class="form-label small fw-semibold text-secondary">Số tiền muốn rút (VNĐ):</label>
+                        <input type="number" name="amount" id="inputWithdrawAmount" class="form-control" placeholder="Tối thiểu 50.000" min="50000" required style="border-radius: 10px;">
+                    </div>
+                    <!-- Bước 11: Xác nhận mật khẩu -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Xác nhận mật khẩu tài khoản:</label>
+                        <input type="password" name="password" id="inputWithdrawPassword" class="form-control" placeholder="Nhập mật khẩu tài khoản của bạn" required style="border-radius: 10px;">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold">Tên ngân hàng thụ hưởng:</label>
-                        <select name="bankName" class="form-select" required>
+                        <label class="form-label small fw-semibold text-secondary">Tên ngân hàng thụ hưởng:</label>
+                        <select name="bankName" id="inputBankName" class="form-select" required style="border-radius: 10px;">
                             <option value="Vietcombank">Vietcombank</option>
                             <option value="Techcombank">Techcombank</option>
                             <option value="MBBank">MBBank (Quân Đội)</option>
@@ -177,23 +267,116 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold">Số tài khoản ngân hàng:</label>
-                        <input type="text" name="accountNumber" class="form-control" placeholder="VD: 1012345678" required>
+                        <label class="form-label small fw-semibold text-secondary">Số tài khoản ngân hàng:</label>
+                        <input type="text" name="accountNumber" id="inputAccountNumber" class="form-control" placeholder="VD: 1012345678" required style="border-radius: 10px;">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold">Tên chủ tài khoản (Viết in hoa không dấu):</label>
-                        <input type="text" name="accountHolder" class="form-control" placeholder="VD: NGUYEN VAN A" required>
+                        <label class="form-label small fw-semibold text-secondary">Tên chủ tài khoản (In hoa không dấu):</label>
+                        <input type="text" name="accountHolder" id="inputAccountHolder" class="form-control" placeholder="VD: NGUYEN VAN A" required style="border-radius: 10px;">
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-success btn-sm">Xác Nhận Rút Tiền</button>
+                <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+                    <!-- Nút kích hoạt Bước 12: Hiển thị thông báo xác nhận -->
+                    <button type="button" class="btn btn-primary rounded-pill px-4 fw-semibold" id="btnOpenConfirmWithdraw" onclick="triggerConfirmWithdrawModal()">
+                        Tiếp tục
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+<!-- Bước 12: Hiển thị thông báo xác nhận -->
+<div class="modal fade" id="confirmWithdrawModal" tabindex="-1" aria-labelledby="confirmWithdrawModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title font-serif fw-bold text-dark" id="confirmWithdrawModalLabel">
+                    🌸 Xác Nhận Rút Tiền
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3 text-secondary">
+                <p class="mb-2">Bạn có chắc chắn muốn gửi yêu cầu rút số tiền sau từ ví cửa hàng không?</p>
+                <div class="alert alert-info py-2 px-3 fw-bold text-center mb-0" id="displayConfirmAmount" style="border-radius: 10px; font-size: 18px; color: #20382E;">
+                    0 VNĐ
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
+                <!-- 14a. Bấm nút Cancel -> 15a. Hủy thao tác -->
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancel" data-testid="btnCancel">
+                    Cancel
+                </button>
+                <!-- 13. Bấm nút Confirm -> 14. Thông báo thành công -->
+                <button type="button" class="btn btn-primary rounded-pill px-4 fw-semibold text-white" id="btnConfirm" data-testid="btnConfirm" onclick="submitWithdrawForm()">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Đăng Xuất -->
+<div class="modal fade" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title font-serif fw-bold text-dark" id="signOutModalLabel">
+                    🌸 Xác Nhận Đăng Xuất
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3 text-secondary">
+                Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?
+            </div>
+            <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">
+                    Cancel
+                </button>
+                <form th:action="@{/logout}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold text-white">
+                        Confirm
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Hàm kích hoạt modal xác nhận rút tiền (Bước 12)
+    function triggerConfirmWithdrawModal() {
+        const form = document.getElementById('formWithdraw');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const amountInput = document.getElementById('inputWithdrawAmount');
+        const amountVal = amountInput ? parseFloat(amountInput.value) : 0;
+        document.getElementById('displayConfirmAmount').innerText = amountVal.toLocaleString('vi-VN') + ' VNĐ';
+
+        // Ẩn modal form rút tiền
+        const withdrawModalEl = document.getElementById('withdrawModal');
+        const withdrawModal = bootstrap.Modal.getInstance(withdrawModalEl);
+        if (withdrawModal) {
+            withdrawModal.hide();
+        }
+
+        // Hiện modal xác nhận (Bước 12)
+        const confirmModal = new bootstrap.Modal(document.getElementById('confirmWithdrawModal'));
+        confirmModal.show();
+    }
+
+    // Hàm submit form khi bấm nút Confirm (Bước 13)
+    function submitWithdrawForm() {
+        const form = document.getElementById('formWithdraw');
+        if (form) {
+            form.submit();
+        }
+    }
+</script>
 </body>
 </html>

@@ -8,6 +8,8 @@ import java.util.List;
 
 @Repository
 public interface StyleValueRepository extends JpaRepository<StyleValue, Long> {
+    List<StyleValue> findByStyleId(Long styleId);
     List<StyleValue> findByStyleIdAndIsDeletedFalse(Long styleId);
     List<StyleValue> findByIsDeletedFalse();
 }
+

@@ -10,4 +10,5 @@ import java.util.List;
 public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
     List<Delivery> findByIsDeletedFalseAndIsActiveTrue();
     List<Delivery> findByIsDeletedFalse();
+    List<Delivery> findAllByOrderByIdAsc();
 }

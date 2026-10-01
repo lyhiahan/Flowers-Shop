@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${isEdit ? 'Chỉnh Sửa Cấp Bậc Người Dùng' : 'Thêm Mới Cấp Bậc Người Dùng'} + ' - Quản Trị Hệ Thống Hoa Tươi'">Quản Lý Cấp Bậc Người Dùng</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
+    <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
+    <style>
+        body { font-family: var(--font-sans) !important; background-color: var(--admin-bg); color: var(--admin-text-main); min-height: 100vh; }
+        .main-wrapper { flex: 1; overflow-x: hidden; background-color: var(--admin-bg); }
+    </style>
+</head>
+<body class="admin-body">
+<div class="d-flex">
+    <!-- Sidebar -->
+    <aside class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white">
+        <a th:href="@{/admin/dashboard}" class="d-flex align-items-center gap-3 mb-4 text-white text-decoration-none px-2 pt-2">
+            <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img flex-shrink-0" style="width: 40px; height: 40px; border-radius: 8px;">
+            <div>
+                <div class="fw-bold text-white" style="font-size: 16px; line-height: 1.2; letter-spacing: 0.5px;">HOA TƯƠI SÀI GÒN</div>
+                <div class="small" style="font-size: 11px; color: #9DB7AA !important; letter-spacing: 0.05em;">QUẢN TRỊ VIÊN HỆ THỐNG</div>
+            </div>
+        </a>
+
+        <ul class="nav nav-pills flex-column mb-auto gap-1">
+            <li>
+                <a th:href="@{/admin/dashboard}" class="nav-link">
+                    <i class="bi bi-grid"></i>
+                    <span>Thống kê</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/users}" class="nav-link">
+                    <i class="bi bi-people"></i>
+                    <span>Người dùng</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/products-manage}" class="nav-link" id="sidebarProductsLink">
+                    <i class="bi bi-box-seam"></i>
+                    <span>Sản phẩm</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/orders-manage}" class="nav-link" id="sidebarOrdersLink">
+                    <i class="bi bi-bag"></i>
+                    <span>Đơn hàng</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/categories}" class="nav-link" id="sidebarCategoriesLink">
+                    <i class="bi bi-tags"></i>
+                    <span>Danh mục hoa</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/styles}" class="nav-link" id="sidebarStylesLink">
+                    <i class="bi bi-sliders"></i>
+                    <span>Thuộc tính sản phẩm</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/user-levels}" class="nav-link active" id="sidebarUserLevelsLink">
+                    <i class="bi bi-award"></i>
+                    <span>Cấp bậc khách</span>
+                </a>
+            </li>
+        </ul>
+
+        <hr class="border-secondary my-2">
+        <form th:action="@{/logout}" method="post" class="d-inline">
+            <button type="submit" class="btn btn-outline-danger btn-sm w-100 d-flex align-items-center justify-content-center gap-2">
+                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+            </button>
+        </form>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-wrapper p-4">
+        <!-- Header & Back button -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <a th:href="@{/admin/user-levels}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" style="border-radius: 10px; height: 42px;">
+                    <i class="bi bi-arrow-left"></i> Quay lại danh sách
+                </a>
+                <h1 class="admin-page-title mb-0" style="font-size: 24px !important; font-weight: 800; color: #20382E;"
+                    th:text="${isEdit ? 'Chỉnh sửa cấp bậc khách hàng: ' + userLevel.name : 'Thêm mới cấp bậc khách hàng (New level)'}">
+                    Thêm mới cấp bậc khách hàng
+                </h1>
+            </div>
+        </div>
+
+        <!-- Form Card (BƯỚC 7 & 8 THEO UC_032: Hiển thị form thêm level mới, nhập đầy đủ thông tin) -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white" style="border: 1px solid #E2E7E2 !important; max-width: 800px;">
+            <form id="userLevelForm" th:action="${isEdit ? '/admin/user-levels/update/' + userLevel.id : '/admin/user-levels/add'}" method="post">
+                <div class="mb-3">
+                    <label class="form-label fw-bold" style="color: #20382E; font-size: 15px;">Tên cấp bậc khách hàng (*):</label>
+                    <input type="text" name="name" id="userLevelNameInput" class="form-control" th:value="${userLevel.name}" 
+                           placeholder="VD: Thành Viên Đồng, Bạc, Vàng, VIP Kim Cương..." 
+                           style="height: 44px; border-radius: 10px; border-color: #E2E7E2; font-size: 15px;" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold" style="color: #20382E; font-size: 15px;">Điểm tích lũy tối thiểu (min point) (*):</label>
+                    <input type="number" name="minPoint" id="userLevelMinPointInput" class="form-control" th:value="${userLevel.minPoint}" 
+                           placeholder="VD: 0 (Đồng), 200 (Bạc), 500 (Vàng)..." min="0"
+                           style="height: 44px; border-radius: 10px; border-color: #E2E7E2; font-size: 15px;" required>
+                    <small class="text-muted">Mức điểm tích lũy cần đạt để thăng cấp bậc này.</small>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold" style="color: #20382E; font-size: 15px;">Mức chiết khấu ưu đãi mua hàng (%) (*):</label>
+                    <input type="number" name="discount" id="userLevelDiscountInput" class="form-control" th:value="${userLevel.discount}" 
+                           placeholder="VD: 0 (Đồng), 3 (Bạc), 5 (Vàng), 10 (Kim Cương)..." min="0" max="100" step="0.5"
+                           style="height: 44px; border-radius: 10px; border-color: #E2E7E2; font-size: 15px;" required>
+                    <small class="text-muted">Tỷ lệ giảm giá trực tiếp trên giá trị giỏ hàng khi thành viên đạt cấp bậc này.</small>
+                </div>
+
+                <!-- BƯỚC 9 THEO UC_032: Bấm nút Submit -->
+                <div class="d-flex justify-content-end gap-2">
+                    <a th:href="@{/admin/user-levels}" class="btn btn-outline-secondary px-4 py-2" style="border-radius: 10px;">
+                        Hủy
+                    </a>
+                    <button type="button" class="btn btn-primary px-4 py-2 fw-bold" 
+                            id="btnSubmitUserLevel" data-testid="btnSubmitUserLevel"
+                            onclick="triggerConfirmUserLevelModal()"
+                            style="border-radius: 10px; background-color: #20382E !important; border-color: #20382E !important;">
+                        <i class="bi bi-check2-circle me-1"></i> Submit
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<!-- BƯỚC 10 & 11 THEO UC_032: Hiển thị thông báo yêu cầu xác nhận -> Bấm Confirm -->
+<div class="modal fade" id="confirmUserLevelModal" tabindex="-1" aria-labelledby="confirmUserLevelModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 450px;">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title font-serif fw-bold text-dark" id="confirmUserLevelModalLabel">
+                    🎖️ Xác Nhận Cấp Bậc Người Dùng
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3 text-secondary">
+                Bạn có chắc chắn muốn lưu cấu hình cấp bậc người dùng:
+                <div class="alert alert-info py-2 px-3 mt-2 mb-0 fw-bold" id="confirmUserLevelNameDisplay">
+                    Tên cấp bậc
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
+                <!-- Alternative 11d: Bấm nút Cancel -> 12d: Hủy thao tác -->
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancelUserLevel" data-testid="btnCancelUserLevel">
+                    Cancel
+                </button>
+                <!-- Bước 11: Bấm nút Confirm -> Bước 12: Thông báo thành công -->
+                <button type="button" class="btn btn-primary rounded-pill px-4 fw-semibold text-white" 
+                        id="btnConfirmUserLevel" data-testid="btnConfirmUserLevel"
+                        onclick="document.getElementById('userLevelForm').submit();">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function triggerConfirmUserLevelModal() {
+        const nameInput = document.getElementById('userLevelNameInput');
+        const minPointInput = document.getElementById('userLevelMinPointInput');
+        const discountInput = document.getElementById('userLevelDiscountInput');
+
+        if (!nameInput.value || nameInput.value.trim() === '') {
+            nameInput.reportValidity();
+            return;
+        }
+        if (minPointInput.value === '' || minPointInput.value < 0) {
+            minPointInput.reportValidity();
+            return;
+        }
+        if (discountInput.value === '' || discountInput.value < 0) {
+            discountInput.reportValidity();
+            return;
+        }
+
+        document.getElementById('confirmUserLevelNameDisplay').innerText = nameInput.value.trim() + " (" + discountInput.value + "% chiết khấu)";
+        const confirmModal = new bootstrap.Modal(document.getElementById('confirmUserLevelModal'));
+        confirmModal.show();
+    }
+</script>
+</body>
+</html>

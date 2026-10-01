@@ -232,7 +232,7 @@
                 </a>
             </li>
             <li>
-                <a th:href="@{/admin/store-levels}" class="nav-link active">
+                <a th:href="@{/admin/store-levels}" class="nav-link active" id="sidebarStoreLevelsLink" data-testid="sidebarStoreLevelsLink">
                     <i class="bi bi-award"></i>
                     <span>Hạng chi nhánh</span>
                 </a>
@@ -320,11 +320,10 @@
                 </p>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <!-- Nút Thêm hạng -->
-                <button type="button" class="btn btn-primary-dark shadow-sm d-inline-flex align-items-center gap-2"
-                        data-bs-toggle="modal" data-bs-target="#addStoreLevelModal">
-                    <i class="bi bi-plus-lg"></i> Thêm hạng
-                </button>
+                <!-- Bước 6: Chọn nút New level để thêm level mới -->
+                <a th:href="@{/admin/store-levels/create}" id="btnNewStoreLevel" data-testid="btnNewStoreLevel" class="btn btn-primary-dark shadow-sm d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-plus-lg"></i> New level
+                </a>
 
                 <!-- Menu phụ tùy chọn khác (chứa nạp lại chuẩn có giải thích rõ) -->
                 <div class="dropdown">
@@ -357,38 +356,32 @@
             </div>
         </div>
 
-        <!-- 2. Flash alerts -->
-        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small shadow-sm rounded-3 border-0 d-flex align-items-center gap-2 mb-3" role="alert" style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7 !important; font-size: 14.5px;">
+        <!-- Post-conditions: Hiển thị thông báo thành công hoặc thông báo lỗi -->
+        <div th:if="${successMessage != null}" id="successAlert" data-testid="successAlert" class="alert alert-success alert-dismissible fade show py-2 small shadow-sm rounded-3 border-0 d-flex align-items-center gap-2 mb-3" role="alert" style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7 !important; font-size: 14.5px;">
             <i class="bi bi-check-circle-fill fs-5"></i>
             <span th:text="${successMessage}" style="font-weight: 600;"></span>
             <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
         </div>
 
-        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show py-2 small shadow-sm rounded-3 border-0 d-flex align-items-center gap-2 mb-3" role="alert" style="background-color: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2 !important; font-size: 14.5px;">
+        <div th:if="${errorMessage != null or dataLoadError == true}" id="dataLoadAlert" data-testid="dataLoadAlert" class="alert alert-danger alert-dismissible fade show py-2 small shadow-sm rounded-3 border-0 d-flex align-items-center gap-2 mb-3" role="alert" style="background-color: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2 !important; font-size: 14.5px;">
             <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-            <span th:text="${errorMessage}" style="font-weight: 600;"></span>
+            <span th:text="${errorMessage != null ? errorMessage : 'Có lỗi khi tải danh sách cấp độ cửa hàng!'}" style="font-weight: 600;"></span>
             <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
         </div>
 
-        <!-- 3. Dòng hướng dẫn tinh gọn 1 dòng duy nhất -->
-        <div class="d-flex align-items-center gap-2 mb-3" style="font-size: 14.5px; color: #556B60;">
-            <i class="bi bi-info-circle text-success fs-5"></i>
-            <span>Xét hạng hằng tháng &bull; Quyền lợi áp dụng kỳ tiếp theo &bull; Không cộng dồn hạng</span>
-        </div>
-
-        <!-- 4. Bảng danh sách hạng chi nhánh rút gọn theo đúng mẫu -->
+        <!-- Bước 4: Hiển thị bảng danh sách các store level -->
         <div class="card-table-wrap shadow-sm">
             <div class="table-responsive">
-                <table class="table align-middle mb-0" id="storeLevelsTable">
+                <table class="table align-middle mb-0" id="storeLevelsTable" data-testid="storeLevelsTable">
                     <thead>
                     <tr>
-                        <th class="ps-4" style="width: 18%; min-width: 130px;">Hạng</th>
-                        <th style="width: 20%; min-width: 140px;">Điều kiện doanh số</th>
-                        <th style="width: 18%; min-width: 130px;">Thưởng tập thể / kỳ</th>
-                        <th style="width: 18%; min-width: 140px;">Ngân sách quảng cáo / kỳ</th>
-                        <th class="text-center" style="width: 8%; min-width: 70px;">Chi nhánh</th>
-                        <th class="text-center" style="width: 8%; min-width: 90px;">Trạng thái</th>
-                        <th class="text-end pe-3" style="width: 10%; min-width: 110px;">Thao tác</th>
+                        <th class="ps-4" style="width: 8%; min-width: 60px;">ID</th>
+                        <th style="width: 22%; min-width: 150px;">Cấp bậc cửa hàng</th>
+                        <th style="width: 20%; min-width: 140px;">Doanh số tối thiểu</th>
+                        <th style="width: 15%; min-width: 120px;">Giảm phí sàn</th>
+                        <th class="text-center" style="width: 10%; min-width: 70px;">Chi nhánh</th>
+                        <th class="text-center" style="width: 12%; min-width: 100px;">Trạng thái</th>
+                        <th class="text-end pe-4" style="width: 13%; min-width: 130px;">Thao tác</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -396,16 +389,19 @@
                     <tr th:if="${#lists.isEmpty(levels)}">
                         <td colspan="7" class="text-center py-5 text-muted" style="font-size: 15px;">
                             <i class="bi bi-award fs-1 d-block mb-2 text-secondary opacity-50"></i>
-                            Chưa có hạng chi nhánh nào. Nhấn <strong>"Thêm hạng"</strong> để khởi tạo.
+                            Chưa có cấp bậc cửa hàng nào. Nhấn <strong>"New level"</strong> để khởi tạo.
                         </td>
                     </tr>
 
                     <!-- Từng dòng hạng chi nhánh -->
                     <tr th:each="l : ${levels}">
-                        <!-- 1. Hạng (Tên bấm được để xem chi tiết, Tiêu chuẩn có nhãn Mặc định phía dưới) -->
-                        <td class="ps-4">
+                        <!-- ID -->
+                        <td class="ps-4 fw-semibold text-secondary" th:text="'#' + ${l.id}">#1</td>
+
+                        <!-- 1. Hạng (Tên bấm được để xem chi tiết) -->
+                        <td>
                             <div>
-                                <button type="button" class="level-name-btn"
+                                <button type="button" class="level-name-btn fw-bold"
                                         data-bs-toggle="modal" th:data-bs-target="'#detailModal' + ${l.id}"
                                         th:text="${l.name}">
                                     Tiêu chuẩn
@@ -418,27 +414,20 @@
 
                         <!-- 2. Điều kiện doanh số -->
                         <td>
-                            <span th:if="${l.minPoint == 0}" class="text-muted">Mặc định</span>
+                            <span th:if="${l.minPoint == null or l.minPoint == 0}" class="text-muted">0 ₫ (Mặc định)</span>
                             <span th:if="${l.minPoint != null and l.minPoint > 0}" style="font-weight: 600; color: #24332C; white-space: nowrap;">
                                 Từ <span th:text="${#numbers.formatDecimal(l.minPoint >= 100000 ? l.minPoint : l.minPoint * 10000, 0, 'COMMA', 0, 'POINT')}">10.000.000</span> ₫
                             </span>
                         </td>
 
-                        <!-- 3. Thưởng tập thể / kỳ -->
+                        <!-- 3. Chiết khấu giảm phí sàn -->
                         <td>
-                            <span th:if="${l.minPoint == 0}" class="text-muted">—</span>
-                            <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('uy tín') or l.name.toLowerCase().contains('bạc') or l.minPoint < 20000000)}" class="reward-money">40.000 ₫</span>
-                            <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('xuất sắc') or l.name.toLowerCase().contains('vàng') or l.minPoint >= 20000000)}" class="reward-money">200.000 ₫</span>
+                            <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 13px;" th:text="${l.discount != null ? l.discount + '%' : '0%'}">
+                                0%
+                            </span>
                         </td>
 
-                        <!-- 4. Ngân sách quảng cáo / kỳ -->
-                        <td>
-                            <span th:if="${l.minPoint == 0}" class="text-muted">—</span>
-                            <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('uy tín') or l.name.toLowerCase().contains('bạc') or l.minPoint < 20000000)}" class="ad-budget-money">Tối đa 30.000 ₫</span>
-                            <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('xuất sắc') or l.name.toLowerCase().contains('vàng') or l.minPoint >= 20000000)}" class="ad-budget-money">Tối đa 150.000 ₫</span>
-                        </td>
-
-                        <!-- 5. Chi nhánh (chỉ hiển thị con số 0, 1, 2) -->
+                        <!-- 4. Chi nhánh -->
                         <td class="text-center">
                             <span class="shop-count-badge"
                                   data-bs-toggle="modal" th:data-bs-target="'#shopsModal' + ${l.id}"
@@ -448,69 +437,58 @@
                             </span>
                         </td>
 
-                        <!-- 6. Trạng thái -->
+                        <!-- 5. Trạng thái -->
                         <td class="text-center">
-                            <a th:href="@{'/admin/store-levels/toggle/' + ${l.id}}" 
-                               th:class="${l.isDeleted == null or !l.isDeleted} ? 'status-pill-active' : 'status-pill-inactive'"
-                               th:title="${l.minPoint == 0} ? 'Hạng mặc định không thể ngừng áp dụng' : (${l.isDeleted == null or !l.isDeleted} ? 'Nhấn để chuyển sang [Ngừng áp dụng]' : 'Nhấn để kích hoạt [Đang áp dụng]')">
-                                <i class="bi me-1" th:classappend="${l.isDeleted == null or !l.isDeleted} ? 'bi-check-circle-fill' : 'bi-pause-circle'"></i>
-                                <span th:text="${l.isDeleted == null or !l.isDeleted} ? 'Đang áp dụng' : 'Ngừng áp dụng'">Đang áp dụng</span>
-                            </a>
+                            <span th:if="${l.isDeleted == null or !l.isDeleted}" class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill" style="font-size: 12.5px;">
+                                <i class="bi bi-check-circle-fill me-1"></i> Đang áp dụng
+                            </span>
+                            <span th:if="${l.isDeleted != null and l.isDeleted}" class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 rounded-pill" style="font-size: 12.5px;">
+                                <i class="bi bi-x-circle-fill me-1"></i> Đã xóa
+                            </span>
                         </td>
 
-                        <!-- 7. Thao tác: Sửa · ⋯ dropdown -->
-                        <td class="text-end pe-3" style="white-space: nowrap;">
+                        <!-- 6. Thao tác: Edit, Delete, Restore -->
+                        <td class="text-end pe-4" style="white-space: nowrap;">
                             <div class="d-inline-flex align-items-center gap-1">
-                                <!-- Nút Sửa trực tiếp chuẩn Bootstrap 5 -->
-                                <button type="button"
-                                        class="btn btn-sm btn-outline-secondary py-1 px-2 d-inline-flex align-items-center gap-1 shadow-sm"
-                                        data-bs-toggle="modal"
-                                        th:data-bs-target="'#editLevelModal' + ${l.id}"
-                                        style="border-radius: 8px; font-size: 13.5px; font-weight: 600;"
-                                        title="Chỉnh sửa thông số hạng">
-                                    <i class="bi bi-pencil-square text-success"></i> Sửa
-                                </button>
+                                <!-- Alternative 6a & 7a: Chọn nút Edit tại level muốn chỉnh sửa -> Form chỉnh sửa level -->
+                                <a th:href="@{'/admin/store-levels/edit/' + ${l.id}}"
+                                   th:id="'btnEditStoreLevel_' + ${l.id}"
+                                   th:data-testid="'btnEditStoreLevel_' + ${l.id}"
+                                   class="btn btn-sm btn-outline-secondary py-1 px-2 d-inline-flex align-items-center gap-1 shadow-sm"
+                                   style="border-radius: 8px; font-size: 13.5px; font-weight: 600;"
+                                   title="Chỉnh sửa level">
+                                    <i class="bi bi-pencil-square text-success"></i> Edit
+                                </a>
 
-                                <!-- Dropdown ⋯ -->
-                                <div class="dropdown d-inline-block">
-                                    <button class="action-more-btn shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Thao tác khác">
-                                        <i class="bi bi-three-dots"></i>
+                                <!-- Alternative 6-10b: Chọn nút Delete để xóa level -->
+                                <form th:if="${l.isDeleted == null or !l.isDeleted}" 
+                                      th:action="@{'/admin/store-levels/delete/' + ${l.id}}" 
+                                      method="post" class="d-inline"
+                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa level này?');">
+                                    <button type="submit" 
+                                            th:id="'btnDeleteStoreLevel_' + ${l.id}"
+                                            th:data-testid="'btnDeleteStoreLevel_' + ${l.id}"
+                                            class="btn btn-sm btn-outline-danger py-1 px-2 d-inline-flex align-items-center gap-1 shadow-sm"
+                                            style="border-radius: 8px; font-size: 13.5px; font-weight: 600;"
+                                            title="Xóa level">
+                                        <i class="bi bi-trash"></i> Delete
                                     </button>
-                                    <ul class="dropdown-menu dropdown-menu-end shadow">
-                                        <!-- Chỉnh sửa trong dropdown -->
-                                        <li>
-                                            <a class="dropdown-item py-2 small d-flex align-items-center gap-2 rounded-2 text-dark fw-semibold"
-                                               href="javascript:void(0)"
-                                               data-bs-toggle="modal"
-                                               th:data-bs-target="'#editLevelModal' + ${l.id}">
-                                                <i class="bi bi-pencil text-success"></i>
-                                                <span>Chỉnh sửa hạng</span>
-                                            </a>
-                                        </li>
-                                        <!-- Xem chi tiết -->
-                                        <li>
-                                            <a class="dropdown-item py-2 small d-flex align-items-center gap-2 rounded-2 text-dark"
-                                               href="javascript:void(0)" data-bs-toggle="modal" th:data-bs-target="'#detailModal' + ${l.id}">
-                                                <i class="bi bi-eye text-primary"></i>
-                                                <span>Xem chi tiết</span>
-                                            </a>
-                                        </li>
-                                        <li><hr class="dropdown-divider my-1"></li>
-                                        <!-- Ngừng áp dụng / Xóa -->
-                                        <li>
-                                            <a th:if="${l.minPoint != 0}" th:href="@{'/admin/store-levels/delete/' + ${l.id}}"
-                                               class="dropdown-item py-2 small d-flex align-items-center gap-2 rounded-2 text-danger"
-                                               th:data-name="${l.name}"
-                                               onclick="return confirm('Bạn có chắc chắn muốn ngừng áp dụng hoặc xóa hạng [' + this.getAttribute('data-name') + ']?\n(Nếu đang có chi nhánh áp dụng, hệ thống sẽ tự động chuyển sang [Ngừng áp dụng] để bảo toàn lịch sử).');">
-                                                <i class="bi bi-dash-circle"></i>
-                                                <span>Ngừng áp dụng / Xóa</span>
-                                            </a>
-                                            <span th:if="${l.minPoint == 0}" class="dropdown-item py-2 small text-muted disabled">
-                                                <i class="bi bi-lock me-1"></i>Hạng mặc định cơ sở
-                                            </span>
-                                        </li>
-                                    </ul>
-                                </div>
+                                </form>
+
+                                <!-- Alternative 6-10c: Chọn nút Restore để khôi phục level -->
+                                <form th:if="${l.isDeleted != null and l.isDeleted}" 
+                                      th:action="@{'/admin/store-levels/restore/' + ${l.id}}" 
+                                      method="post" class="d-inline"
+                                      onsubmit="return confirm('Bạn có chắc chắn muốn khôi phục level này?');">
+                                    <button type="submit" 
+                                            th:id="'btnRestoreStoreLevel_' + ${l.id}"
+                                            th:data-testid="'btnRestoreStoreLevel_' + ${l.id}"
+                                            class="btn btn-sm btn-outline-success py-1 px-2 d-inline-flex align-items-center gap-1 shadow-sm"
+                                            style="border-radius: 8px; font-size: 13.5px; font-weight: 600;"
+                                            title="Khôi phục level">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Restore
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
@@ -519,6 +497,24 @@
             </div>
         </div>
 
+        <!-- Bước 5: Chọn Next (hoặc Previous, hoặc trang bất kỳ) để xem trang tiếp theo (hoặc trang trước, hoặc trang tương ứng) -->
+        <nav id="storeLevelsPagination" data-testid="storeLevelsPagination" th:if="${totalPages > 1}" class="mt-4 d-flex justify-content-center" aria-label="Store levels pagination">
+            <ul class="pagination mb-0 gap-1">
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+                    <a class="page-link" id="btnPrevPage" data-testid="btnPrevPage" th:href="@{/admin/store-levels(page=${currentPage - 1}, size=${pageSize}, keyword=${keyword})}">
+                        <i class="bi bi-chevron-left me-1"></i> Previous
+                    </a>
+                </li>
+                <li th:each="p : ${#numbers.sequence(0, totalPages - 1)}" class="page-item" th:classappend="${p == currentPage} ? 'active' : ''">
+                    <a class="page-link" th:id="'pageBtn_' + ${p + 1}" th:href="@{/admin/store-levels(page=${p}, size=${pageSize}, keyword=${keyword})}" th:text="${p + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled' : ''">
+                    <a class="page-link" id="btnNextPage" data-testid="btnNextPage" th:href="@{/admin/store-levels(page=${currentPage + 1}, size=${pageSize}, keyword=${keyword})}">
+                        Next <i class="bi bi-chevron-right ms-1"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
     </div>
 </div>
 

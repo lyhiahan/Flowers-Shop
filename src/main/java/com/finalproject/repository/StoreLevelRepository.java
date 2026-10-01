@@ -8,5 +8,7 @@ import java.util.List;
 
 @Repository
 public interface StoreLevelRepository extends JpaRepository<StoreLevel, Long> {
+    List<StoreLevel> findAllByOrderByMinPointAsc();
     List<StoreLevel> findByIsDeletedFalseOrderByMinPointAsc();
+    List<StoreLevel> findByIsDeletedFalse();
 }

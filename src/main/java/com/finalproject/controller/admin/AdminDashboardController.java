@@ -1,6 +1,7 @@
 package com.finalproject.controller.admin;
 
 import com.finalproject.entity.Order;
+import com.finalproject.entity.Store;
 import com.finalproject.entity.User;
 import com.finalproject.enums.OrderStatus;
 import com.finalproject.enums.Role;
@@ -30,54 +31,126 @@ public class AdminDashboardController {
     @GetMapping({"", "/dashboard"})
     public String showDashboard(
             @org.springframework.web.bind.annotation.RequestParam(value = "timeframe", defaultValue = "day") String timeframe,
+            @org.springframework.web.bind.annotation.RequestParam(value = "userChartType", defaultValue = "line") String userChartType,
+            @org.springframework.web.bind.annotation.RequestParam(value = "storeChartType", defaultValue = "bar") String storeChartType,
             Principal principal,
             Model model) {
-        User admin = userRepository.findByUsername(principal.getName()).orElse(null);
+        try {
+            User admin = userRepository.findByUsername(principal.getName()).orElse(null);
 
-        long totalProducts = productRepository.count();
-        long totalCategories = categoryRepository.count();
-        long totalStores = storeRepository.count();
-        long totalUsers = userRepository.count();
-        long totalCustomers = userRepository.countByRole(Role.CUSTOMER);
-        long totalManagers = userRepository.countByRole(Role.MANAGER);
-        long totalVendors = userRepository.countByRole(Role.VENDOR);
-        long totalShippers = userRepository.countByRole(Role.SHIPPER);
+            long totalProducts = productRepository.count();
+            long totalCategories = categoryRepository.count();
+            long totalStores = storeRepository.count();
+            long totalUsers = userRepository.count();
+            long totalCustomers = userRepository.countByRole(Role.CUSTOMER);
+            long totalManagers = userRepository.countByRole(Role.MANAGER);
+            long totalVendors = userRepository.countByRole(Role.VENDOR);
+            long totalShippers = userRepository.countByRole(Role.SHIPPER);
 
-        long totalOrders = orderRepository.count();
-        long pendingOrders = orderRepository.countByStatus(OrderStatus.PENDING);
-        long rentingOrders = orderRepository.countByStatus(OrderStatus.RENTING);
-        long completedOrders = orderRepository.countByStatus(OrderStatus.COMPLETED);
+            long totalOrders = orderRepository.count();
+            long pendingOrders = orderRepository.countByStatus(OrderStatus.PENDING);
+            long rentingOrders = orderRepository.countByStatus(OrderStatus.RENTING);
+            long completedOrders = orderRepository.countByStatus(OrderStatus.COMPLETED);
 
-        List<Order> recentOrders = orderRepository.findTop10ByOrderByCreatedAtDesc();
+            List<Order> recentOrders;
+            try {
+                recentOrders = orderRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"))).getContent();
+            } catch (Exception e) {
+                recentOrders = orderRepository.findTop10ByOrderByCreatedAtDesc();
+            }
 
-        BigDecimal totalRevenue = analyticsService.getStoreRevenueStats(null).getTotalBuyRevenue();
+            List<com.finalproject.entity.Product> topProducts;
+            try {
+                topProducts = productRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "sold"))).getContent();
+            } catch (Exception e) {
+                topProducts = java.util.Collections.emptyList();
+            }
 
-        // Biểu đồ đa thời gian theo đề cương
-        var revenueChart = analyticsService.getRevenueChart(timeframe, null);
-        var usersChart = analyticsService.getNewUsersChart(timeframe);
-        var storesChart = analyticsService.getNewStoresChart(timeframe);
+            // UC_025: Top người dùng điểm cao nhất hệ thống (lên đến 1000 người dùng)
+            List<User> topPointUsers;
+            try {
+                topPointUsers = userRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "point"))).getContent();
+            } catch (Exception e) {
+                topPointUsers = java.util.Collections.emptyList();
+            }
 
-        model.addAttribute("admin", admin);
-        model.addAttribute("timeframe", timeframe);
-        model.addAttribute("totalProducts", totalProducts);
-        model.addAttribute("totalCategories", totalCategories);
-        model.addAttribute("totalStores", totalStores);
-        model.addAttribute("totalUsers", totalUsers);
-        model.addAttribute("totalCustomers", totalCustomers);
-        model.addAttribute("totalManagers", totalManagers);
-        model.addAttribute("totalVendors", totalVendors);
-        model.addAttribute("totalShippers", totalShippers);
-        model.addAttribute("totalOrders", totalOrders);
-        model.addAttribute("pendingOrders", pendingOrders);
-        model.addAttribute("rentingOrders", rentingOrders);
-        model.addAttribute("completedOrders", completedOrders);
-        model.addAttribute("totalRevenue", totalRevenue);
-        model.addAttribute("recentOrders", recentOrders);
-        model.addAttribute("revenueChart", revenueChart);
-        model.addAttribute("usersChart", usersChart);
-        model.addAttribute("storesChart", storesChart);
-        model.addAttribute("products", productRepository.findAll());
-        model.addAttribute("stores", storeRepository.findAll());
+            // UC_025: 1000 người dùng mới nhất
+            List<User> recentUsers;
+            try {
+                recentUsers = userRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "id"))).getContent();
+            } catch (Exception e) {
+                recentUsers = java.util.Collections.emptyList();
+            }
+
+            // UC_026: Top cửa hàng điểm cao nhất hệ thống (lên đến 1000 cửa hàng)
+            List<Store> topPointStores;
+            try {
+                topPointStores = storeRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "point"))).getContent();
+            } catch (Exception e) {
+                topPointStores = java.util.Collections.emptyList();
+            }
+
+            // UC_026: 1000 cửa hàng mới nhất
+            List<Store> recentStores;
+            try {
+                recentStores = storeRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "id"))).getContent();
+            } catch (Exception e) {
+                recentStores = java.util.Collections.emptyList();
+            }
+
+            BigDecimal totalRevenue = analyticsService.getStoreRevenueStats(null).getTotalBuyRevenue();
+
+            // Biểu đồ đa thời gian theo đề cương
+            var revenueChart = analyticsService.getRevenueChart(timeframe, null);
+            var usersChart = analyticsService.getNewUsersChart(timeframe);
+            var storesChart = analyticsService.getNewStoresChart(timeframe);
+
+            model.addAttribute("dataLoadError", false);
+            model.addAttribute("admin", admin);
+            model.addAttribute("timeframe", timeframe);
+            model.addAttribute("userChartType", userChartType != null ? userChartType.toLowerCase() : "line");
+            model.addAttribute("storeChartType", storeChartType != null ? storeChartType.toLowerCase() : "bar");
+            model.addAttribute("totalProducts", totalProducts);
+            model.addAttribute("totalProductsCount", totalProducts);
+            model.addAttribute("totalCategories", totalCategories);
+            model.addAttribute("totalStores", totalStores);
+            model.addAttribute("totalStoresCount", totalStores);
+            model.addAttribute("totalUsers", totalUsers);
+            model.addAttribute("totalUsersCount", totalUsers);
+            model.addAttribute("totalCustomers", totalCustomers);
+            model.addAttribute("totalManagers", totalManagers);
+            model.addAttribute("totalVendors", totalVendors);
+            model.addAttribute("totalShippers", totalShippers);
+            model.addAttribute("totalOrders", totalOrders);
+            model.addAttribute("totalOrdersCount", totalOrders);
+            model.addAttribute("pendingOrders", pendingOrders);
+            model.addAttribute("rentingOrders", rentingOrders);
+            model.addAttribute("completedOrders", completedOrders);
+            model.addAttribute("totalRevenue", totalRevenue);
+            model.addAttribute("recentOrders", recentOrders);
+            model.addAttribute("topProducts", topProducts);
+            model.addAttribute("topPointUsers", topPointUsers);
+            model.addAttribute("recentUsers", recentUsers);
+            model.addAttribute("topPointStores", topPointStores);
+            model.addAttribute("recentStores", recentStores);
+            model.addAttribute("revenueChart", revenueChart);
+            model.addAttribute("usersChart", usersChart);
+            model.addAttribute("storesChart", storesChart);
+            model.addAttribute("products", productRepository.findAll());
+            model.addAttribute("stores", storeRepository.findAll());
+
+        } catch (Exception ex) {
+            model.addAttribute("dataLoadError", true);
+            model.addAttribute("errorMessage", "Không thể tải dữ liệu thống kê hệ thống. Vui lòng thử lại!");
+            model.addAttribute("totalUsers", 0L);
+            model.addAttribute("totalUsersCount", 0L);
+            model.addAttribute("totalStores", 0L);
+            model.addAttribute("totalStoresCount", 0L);
+            model.addAttribute("topPointUsers", java.util.Collections.emptyList());
+            model.addAttribute("recentUsers", java.util.Collections.emptyList());
+            model.addAttribute("topPointStores", java.util.Collections.emptyList());
+            model.addAttribute("recentStores", java.util.Collections.emptyList());
+        }
 
         return "admin/dashboard";
     }

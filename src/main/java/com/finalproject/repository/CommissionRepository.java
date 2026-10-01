@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface CommissionRepository extends JpaRepository<Commission, Long> {
     List<Commission> findByIsDeletedFalse();
+    List<Commission> findAllByOrderByIdAsc();
 }
