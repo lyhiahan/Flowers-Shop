@@ -63,9 +63,8 @@ public class AuthController {
         }
 
         try {
-            String otpCode = authService.registerCustomer(request);
+            authService.registerCustomer(request);
             redirectAttributes.addFlashAttribute("successMessage", "Thông báo đăng ký thành công! Vui lòng nhập mã OTP đã gửi đến email của bạn để kích hoạt tài khoản.");
-            redirectAttributes.addFlashAttribute("devOtpCode", otpCode);
             return "redirect:/verify-otp?email=" + request.getEmail();
         } catch (IllegalArgumentException ex) {
             String msg = ex.getMessage();
@@ -116,9 +115,8 @@ public class AuthController {
     public String handleResendOtp(@RequestParam("email") String email,
                                   RedirectAttributes redirectAttributes) {
         try {
-            String newCode = authService.resendOtp(email);
+            authService.resendOtp(email);
             redirectAttributes.addFlashAttribute("successMessage", "Mã OTP mới đã được gửi đến email của bạn!");
-            redirectAttributes.addFlashAttribute("devOtpCode", newCode);
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
@@ -144,10 +142,9 @@ public class AuthController {
                                        RedirectAttributes redirectAttributes,
                                        Model model) {
         try {
-            String otpCode = authService.forgotPassword(email);
+            authService.forgotPassword(email);
             redirectAttributes.addFlashAttribute("emailSent", true);
             redirectAttributes.addFlashAttribute("email", email.trim());
-            redirectAttributes.addFlashAttribute("devOtpCode", otpCode);
             redirectAttributes.addFlashAttribute("successMessage", "Hệ thống đã xác thực tài khoản thành công! Đã gửi mã OTP khôi phục mật khẩu.");
             return "redirect:/forgot-password?sent=true&email=" + java.net.URLEncoder.encode(email.trim(), java.nio.charset.StandardCharsets.UTF_8);
         } catch (Exception ex) {
@@ -159,12 +156,8 @@ public class AuthController {
 
     @GetMapping("/reset-password")
     public String showResetPasswordForm(@RequestParam(value = "email", required = false) String email,
-                                        @RequestParam(value = "otpCode", required = false) String otpCode,
                                         Model model) {
         model.addAttribute("email", email);
-        if (otpCode != null && !otpCode.trim().isEmpty()) {
-            model.addAttribute("otpCode", otpCode.trim());
-        }
         return "auth/reset-password";
     }
 
