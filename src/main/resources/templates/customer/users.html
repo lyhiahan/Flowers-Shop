@@ -208,38 +208,7 @@
         <span class="text-botanic-rose font-bold">Cộng đồng thành viên</span>
       </nav>
 
-      <!-- 3. BANNER TIÊU ĐỀ TRANG (Page Hero Banner) -->
-      <div class="relative overflow-hidden rounded-2xl bg-[#FFF7F2] border border-[#EEDFD5] p-6 sm:p-8 lg:p-9 mb-8 shadow-xs">
-        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div class="max-w-2xl">
-            <div class="flex flex-wrap items-center gap-2.5 mb-2.5">
-              <h1 class="font-extrabold text-2xl sm:text-3xl text-botanic-dark flex items-center gap-2">
-                <span>👥</span> Cộng Đồng Người Dùng &amp; Thành Viên
-              </h1>
-              <span id="userCountBadge" class="px-3.5 py-1 rounded-full bg-white border border-[#E8D6CB] text-botanic-rose font-bold text-xs shadow-xs"
-                    th:text="${totalUsers != null ? totalUsers + ' thành viên' : '0 thành viên'}">
-                0 thành viên
-              </span>
-            </div>
-            <p class="text-[14px] text-botanic-muted leading-relaxed font-medium">
-              Khám phá danh sách các thành viên, khách hàng thân thiết, nhân viên và đối tác chủ chi nhánh trong hệ sinh thái Hoa Tươi Sài Gòn.
-            </p>
-          </div>
 
-          <!-- Action buttons -->
-          <div class="flex flex-wrap items-center gap-3 shrink-0">
-            <a th:href="@{/stores}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#264E43] hover:bg-[#1E433A] text-white text-xs sm:text-sm font-bold transition-all shadow-sm">
-              <span class="material-symbols-outlined text-[18px]">storefront</span>
-              <span>Dạo chuỗi cửa hàng 🏬</span>
-            </a>
-            <a th:href="@{/}" 
-               class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white hover:bg-[#FAF0E8] border border-[#E5D7CD] text-[#555] hover:text-botanic-rose text-xs sm:text-sm font-bold transition-all shadow-xs">
-              <span class="material-symbols-outlined text-[17px]">local_florist</span>
-              <span>Khám phá mẫu hoa 🌸</span>
-            </a>
-          </div>
-        </div>
-      </div>
 
       <!-- 4. BỘ LỌC VÀ TÌM KIẾM NHANH (Filter & Toolbar) -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-3.5 sm:p-4 rounded-xl bg-white border border-[#EBDED4] mb-8 shadow-xs">
