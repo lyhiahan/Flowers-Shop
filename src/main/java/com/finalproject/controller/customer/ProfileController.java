@@ -158,6 +158,9 @@ public class ProfileController {
         model.addAttribute("followedProducts", followedProducts);
         model.addAttribute("followedStores", followedStores);
         model.addAttribute("activeTab", tab != null ? tab : "products");
+        try {
+            model.addAttribute("cartItemCount", cartService.getCartItemCount(principal.getName()));
+        } catch (Exception ignored) {}
         return "customer/following";
     }
 
