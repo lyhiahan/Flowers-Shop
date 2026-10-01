@@ -3,525 +3,721 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${store != null ? store.name + ' - Hồ Sơ Cửa Hàng' : 'Hồ Sơ Cửa Hàng'}">Hồ Sơ Cửa Hàng - Quản Lý Tiệm Hoa</title>
-    <!-- Google Fonts: Nunito -->
+    <title th:text="${store != null ? store.name + ' – Thông Tin Chi Nhánh' : 'Thông Tin Chi Nhánh'}">Thông Tin Chi Nhánh – Quản Lý Tiệm Hoa</title>
+    <meta name="description" content="Quản lý thông tin, hình ảnh và giờ hoạt động của chi nhánh tiệm hoa.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Bootstrap 5.3 & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
-    <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
 
     <style>
+        /* ── Design tokens ─────────────────────────────────────────── */
         :root {
-            --bg-page: #FFF0F3;
-            --surface-card: #FFFFFF;
-            --brand-green: #20382E;
-            --brand-green-light: #E5EEE8;
-            --accent-rose: #A64060;
-            --accent-rose-soft: #F9EBEF;
-            --text-main: #20382E;
-            --text-muted: #686E65;
-            --border-soft: #E2E7E2;
+            --bg-page:        #F5F3EE;   /* nền xám kem */
+            --surface:        #FFFFFF;
+            --brand:          #1C3A2B;   /* xanh đậm */
+            --brand-mid:      #2D5040;
+            --brand-light:    #E6EEE9;
+            --rose:           #A64060;
+            --rose-soft:      #F9EBEF;
+            --text:           #1C3A2B;
+            --text-muted:     #6B7280;
+            --border:         #DDE5DA;
+            --radius-card:    18px;
+            --radius-btn:     10px;
+            --shadow-card:    0 2px 16px rgba(28,58,43,.07);
         }
+
+        /* ── Base ──────────────────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; }
 
         body {
-            font-family: 'Nunito', sans-serif !important;
-            background-color: var(--bg-page);
-            color: var(--text-main);
-            min-height: 100vh;
-        }
-
-        button, input, select, textarea {
-            font-family: 'Nunito', sans-serif !important;
-        }
-
-        /* Sidebar Styling */
-        .sidebar {
-            background: #1C2D24;
-            min-height: 100vh;
-            color: #E3ECE7;
-            box-shadow: 2px 0 16px rgba(28, 45, 36, 0.08);
-        }
-
-        .sidebar a {
-            color: #A9BCB3;
-            text-decoration: none;
-            padding: 10px 16px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 600;
-            font-size: 15px;
-            transition: all 0.2s ease;
-        }
-
-        .sidebar a:hover {
-            background: rgba(255, 255, 255, 0.08);
-            color: #FFFFFF;
-        }
-
-        .sidebar a.active {
-            background: var(--brand-green);
-            color: #FFFFFF;
-            font-weight: 700;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        /* Profile Banner & Cover */
-        .store-cover-wrapper {
-            position: relative;
-            height: 280px;
-            border-radius: 20px 20px 0 0;
-            overflow: hidden;
-            background: linear-gradient(135deg, #1C2D24 0%, #304E3F 100%);
-        }
-
-        .store-cover-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-
-        .btn-edit-cover {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            color: var(--brand-green);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            border-radius: 10px;
-            padding: 8px 16px;
-            font-weight: 700;
-            font-size: 14px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            backdrop-filter: blur(8px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-            transition: all 0.2s ease;
-        }
-
-        .btn-edit-cover:hover {
-            background: #FFFFFF;
-            color: var(--accent-rose);
-            transform: translateY(-2px);
-        }
-
-        /* Profile Avatar with Camera Icon */
-        .avatar-container {
-            position: relative;
-            display: inline-block;
-            margin-top: -65px;
-            margin-left: 32px;
-        }
-
-        .store-avatar-img {
-            width: 130px;
-            height: 130px;
-            border-radius: 50%;
-            border: 4px solid #FFFFFF;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-            object-fit: cover;
-            background-color: #FFFFFF;
-        }
-
-        .btn-avatar-camera {
-            position: absolute;
-            bottom: 6px;
-            right: 6px;
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            background: var(--brand-green);
-            color: #FFFFFF;
-            border: 2px solid #FFFFFF;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-family: 'Nunito', sans-serif;
             font-size: 16px;
+            background: var(--bg-page);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        button, input, select, textarea { font-family: inherit; }
+
+        /* ── Sidebar ───────────────────────────────────────────────── */
+        .sidebar {
+            background: #162B1F;
+            min-height: 100vh;
+            width: 230px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 12px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        .sidebar-brand { display: flex; align-items: center; gap: 10px; padding: 0 6px 20px; border-bottom: 1px solid rgba(255,255,255,.08); margin-bottom: 12px; }
+        .sidebar-brand img { height: 36px; }
+        .sidebar-brand-text h6 { font-size: 15px; font-weight: 800; color: #fff; margin: 0; letter-spacing: .4px; }
+        .sidebar-brand-text small { font-size: 12px; color: #8AADA0; }
+
+        .nav-link-sidebar {
+            color: #8AADA0;
+            text-decoration: none;
+            padding: 9px 12px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 14.5px;
+            transition: background .18s, color .18s;
+            margin-bottom: 2px;
+        }
+        .nav-link-sidebar:hover  { background: rgba(255,255,255,.07); color: #fff; }
+        .nav-link-sidebar.active { background: var(--brand); color: #fff; font-weight: 700; box-shadow: 0 3px 10px rgba(0,0,0,.18); }
+
+        .sidebar-divider { border-color: rgba(255,255,255,.09); margin: 8px 0; }
+
+        /* Nút đăng xuất sidebar – đồng bộ với nav-link */
+        .btn-logout-sidebar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 9px 12px;
+            border-radius: 10px;
+            background: transparent;
+            border: none;
+            color: #F87171;
+            font-weight: 700;
+            font-size: 14.5px;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            transition: all 0.2s ease;
+            transition: background .18s, color .18s;
+            text-align: left;
         }
+        .btn-logout-sidebar:hover { background: rgba(248,113,113,.12); color: #EF4444; }
 
-        .btn-avatar-camera:hover {
-            background: var(--accent-rose);
-            transform: scale(1.1);
-            color: #FFFFFF;
+        /* ── Main content ──────────────────────────────────────────── */
+        .main-content { flex: 1; min-width: 0; padding: 32px 28px; }
+
+        /* ── Page header ───────────────────────────────────────────── */
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--brand);
+            margin: 0;
         }
+        .page-subtitle { font-size: 15px; color: var(--text-muted); margin-top: 4px; }
 
-        /* Store Info Card */
-        .profile-card {
-            background: #FFFFFF;
-            border: 1px solid var(--border-soft);
-            border-radius: 20px;
-            box-shadow: 0 4px 20px rgba(32, 56, 46, 0.05);
-            overflow: hidden;
+        /* ── Section card ──────────────────────────────────────────── */
+        .section-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-card);
+            box-shadow: var(--shadow-card);
+            padding: 28px;
             margin-bottom: 24px;
         }
-
-        .btn-pencil-edit {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: var(--brand-green-light);
-            color: var(--brand-green);
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 15px;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .btn-pencil-edit:hover {
-            background: var(--brand-green);
-            color: #FFFFFF;
-            transform: rotate(15deg);
-        }
-
-        /* Featured Images Grid */
-        .featured-card {
-            position: relative;
-            border-radius: 14px;
-            overflow: hidden;
-            border: 1px solid var(--border-soft);
-            background: #FAFAFA;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-            transition: all 0.25s ease;
-            height: 220px;
-        }
-
-        .featured-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(32, 56, 46, 0.12);
-        }
-
-        .featured-card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .featured-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(28, 45, 36, 0.55);
+        .section-title {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--brand);
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
-            opacity: 0;
-            transition: opacity 0.2s ease;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+        .section-icon {
+            width: 34px; height: 34px;
+            border-radius: 9px;
+            background: var(--brand-light);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+            color: var(--brand);
         }
 
-        .featured-card:hover .featured-overlay {
-            opacity: 1;
-        }
-
-        .badge-status {
-            padding: 6px 12px;
-            border-radius: 20px;
+        /* ── Form labels / inputs ──────────────────────────────────── */
+        .form-label-custom {
+            font-size: 14px;
             font-weight: 700;
-            font-size: 12.5px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+            color: var(--text);
+            margin-bottom: 6px;
+            display: block;
         }
-        .badge-open { background: #E8F5E9; color: #2E7D32; }
-        .badge-closed { background: #FFEBEE; color: #C62828; }
-        .badge-licensed { background: #E0F2FE; color: #0369A1; }
-        .badge-banned { background: #FEE2E2; color: #991B1B; }
+        .form-control, .form-select {
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 15px;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 3px rgba(28,58,43,.1);
+            outline: none;
+        }
+        .form-hint { font-size: 12.5px; color: var(--text-muted); margin-top: 4px; }
+
+        /* ── Read-only info rows ───────────────────────────────────── */
+        .info-row { display: flex; flex-wrap: wrap; gap: 8px 24px; padding: 10px 0; border-bottom: 1px dashed var(--border); }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { font-size: 13px; font-weight: 700; color: var(--text-muted); min-width: 130px; }
+        .info-value { font-size: 14px; font-weight: 600; color: var(--text); }
+
+        /* ── Status badges ─────────────────────────────────────────── */
+        .badge-pill {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 12px; border-radius: 999px;
+            font-size: 12.5px; font-weight: 700;
+        }
+        .badge-open    { background: #DCFCE7; color: #166534; }
+        .badge-closed  { background: #FEE2E2; color: #991B1B; }
+        .badge-active  { background: #DBEAFE; color: #1D4ED8; }
+        .badge-banned  { background: #FEF3C7; color: #92400E; }
+
+        /* ── Primary button ────────────────────────────────────────── */
+        .btn-primary-custom {
+            background: var(--brand);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-btn);
+            padding: 10px 24px;
+            font-size: 15px;
+            font-weight: 700;
+            display: inline-flex; align-items: center; gap: 7px;
+            cursor: pointer;
+            transition: background .2s, transform .15s, box-shadow .2s;
+            box-shadow: 0 3px 10px rgba(28,58,43,.18);
+        }
+        .btn-primary-custom:hover { background: var(--brand-mid); transform: translateY(-1px); box-shadow: 0 5px 16px rgba(28,58,43,.22); }
+        .btn-primary-custom:active { transform: translateY(0); }
+
+        .btn-secondary-custom {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-btn);
+            padding: 9px 20px;
+            font-size: 14px;
+            font-weight: 700;
+            display: inline-flex; align-items: center; gap: 6px;
+            cursor: pointer;
+            transition: background .18s, color .18s;
+        }
+        .btn-secondary-custom:hover { background: var(--bg-page); color: var(--text); }
+
+        /* ── Image upload areas ────────────────────────────────────── */
+        /* Avatar */
+        .avatar-upload-zone {
+            position: relative; display: inline-block;
+        }
+        .avatar-preview {
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--border);
+            box-shadow: 0 4px 14px rgba(0,0,0,.1);
+            background: var(--bg-page);
+        }
+        .avatar-change-btn {
+            position: absolute; bottom: 4px; right: 4px;
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            background: var(--brand);
+            color: #fff;
+            border: 2px solid #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 3px 8px rgba(0,0,0,.2);
+            transition: background .18s, transform .18s;
+        }
+        .avatar-change-btn:hover { background: var(--rose); transform: scale(1.1); }
+
+        /* Cover */
+        .cover-preview-wrap {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--brand-light);
+            border: 2px dashed var(--border);
+            cursor: pointer;
+            transition: border-color .2s;
+        }
+        .cover-preview-wrap:hover { border-color: var(--brand); }
+        .cover-preview-img {
+            width: 100%; height: 160px;
+            object-fit: cover; display: block;
+        }
+        .cover-overlay {
+            position: absolute; inset: 0;
+            background: rgba(28,58,43,.45);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: #fff; gap: 6px; font-size: 13px; font-weight: 700;
+            opacity: 0; transition: opacity .2s;
+        }
+        .cover-preview-wrap:hover .cover-overlay { opacity: 1; }
+
+        /* Library grid */
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+        .gallery-thumb {
+            position: relative; border-radius: 10px; overflow: hidden;
+            border: 1.5px solid var(--border); background: var(--bg-page);
+            aspect-ratio: 1 / 1;
+            cursor: pointer; transition: box-shadow .2s, transform .2s;
+        }
+        .gallery-thumb:hover { box-shadow: 0 6px 18px rgba(0,0,0,.12); transform: translateY(-2px); }
+        .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .gallery-thumb-overlay {
+            position: absolute; inset: 0;
+            background: rgba(28,58,43,.55);
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            opacity: 0; transition: opacity .2s;
+        }
+        .gallery-thumb:hover .gallery-thumb-overlay { opacity: 1; }
+        .btn-thumb-action {
+            width: 32px; height: 32px; border-radius: 8px; border: none;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; cursor: pointer; transition: background .15s;
+        }
+        .btn-thumb-edit   { background: #fff; color: var(--brand); }
+        .btn-thumb-delete { background: #EF4444; color: #fff; }
+        .btn-thumb-edit:hover   { background: var(--brand-light); }
+        .btn-thumb-delete:hover { background: #DC2626; }
+
+        .btn-add-photo {
+            border: 2px dashed var(--border);
+            border-radius: 10px;
+            background: var(--bg-page);
+            aspect-ratio: 1 / 1;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 6px; color: var(--text-muted); font-size: 13px; font-weight: 700;
+            cursor: pointer; transition: border-color .2s, color .2s;
+        }
+        .btn-add-photo:hover { border-color: var(--brand); color: var(--brand); }
+        .btn-add-photo i { font-size: 22px; }
+
+        /* ── Modal custom ──────────────────────────────────────────── */
+        .modal-content { border: none; border-radius: 18px; box-shadow: 0 8px 40px rgba(0,0,0,.14); }
+        .modal-header { border-bottom: 1px solid var(--border); padding: 18px 22px 14px; }
+        .modal-title { font-size: 17px; font-weight: 800; color: var(--brand); }
+        .modal-body { padding: 20px 22px; }
+        .modal-footer { border-top: 1px solid var(--border); padding: 14px 22px; }
+
+        /* ── Toggle switch for "isOpen" ────────────────────────────── */
+        .toggle-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px; border-radius: 10px; background: var(--bg-page);
+            border: 1.5px solid var(--border);
+        }
+        .toggle-label { font-size: 14px; font-weight: 700; }
+        .form-check-input:checked { background-color: var(--brand); border-color: var(--brand); }
+
+        /* ── Alert banner ──────────────────────────────────────────── */
+        .alert-success-custom {
+            background: #DCFCE7; color: #166534;
+            border: 1.5px solid #86EFAC; border-radius: 12px;
+            padding: 12px 18px; font-weight: 700; font-size: 14.5px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .alert-error-custom {
+            background: #FEE2E2; color: #991B1B;
+            border: 1.5px solid #FCA5A5; border-radius: 12px;
+            padding: 12px 18px; font-weight: 700; font-size: 14.5px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .alert-close { margin-left: auto; background: none; border: none; font-size: 18px; cursor: pointer; color: inherit; line-height: 1; }
+
+        /* ── Responsive ────────────────────────────────────────────── */
+        @media (max-width: 767px) {
+            .sidebar { display: none; }
+            .main-content { padding: 20px 16px; }
+            .two-col-layout { flex-direction: column !important; }
+        }
     </style>
 </head>
 <body>
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar Navigation (Thanh điều hướng người bán) -->
-        <div class="col-md-2 p-3 sidebar">
-            <div class="d-flex align-items-center gap-2 mb-4 px-2">
-                <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img me-1" style="height: 38px;">
-                <div>
-                    <h6 class="fw-bold text-white mb-0" style="letter-spacing: 0.5px; font-size: 16px;">TIỆM HOA TƯƠI</h6>
-                    <small style="color: #9DB7AA; font-size: 13px;" th:text="${store != null ? store.name : 'Quản Lý Chi Nhánh'}">Quản Lý Chi Nhánh</small>
-                </div>
-            </div>
 
-            <!-- Navigation Links -->
-            <nav class="d-flex flex-column gap-1">
-                <a th:href="@{/manager/dashboard}">
-                    <i class="bi bi-speedometer2"></i> Tổng Quan Chi Nhánh
-                </a>
-                <a th:href="@{/manager/orders}">
-                    <i class="bi bi-bag-check"></i> Quản Lý Đơn Hàng
-                </a>
-                <a th:href="@{/manager/products}">
-                    <i class="bi bi-flower1"></i> Kho Mẫu Hoa
-                </a>
-                <a th:href="@{/manager/staff}">
-                    <i class="bi bi-people"></i> Nhân Viên Cửa Hàng
-                </a>
-                <a th:href="@{/manager/wallet}">
-                    <i class="bi bi-wallet2"></i> Ví Cửa Hàng & Rút Tiền
-                </a>
-                <a th:href="@{/manager/vouchers}">
-                    <i class="bi bi-ticket-perforated"></i> Khuyến Mãi Shop
-                </a>
-                <a th:href="@{/manager/analytics}">
-                    <i class="bi bi-graph-up-arrow"></i> Báo Cáo Doanh Thu
-                </a>
-                <a th:href="@{/manager/stores}">
-                    <i class="bi bi-shop"></i> Danh Sách Cửa Hàng
-                </a>
-                <!-- BƯỚC 6 THEO UC_019: Chọn Profile trên thanh sidebar -->
-                <a th:href="@{/manager/profile}" id="sidebarProfile" class="active">
-                    <i class="bi bi-person-badge"></i> Profile
-                </a>
-                <hr class="border-secondary my-2">
-                <a th:href="@{/}" target="_blank">
-                    <i class="bi bi-house-door"></i> Xem Website Khách
-                </a>
-                <form th:action="@{/logout}" method="post" class="m-0">
-                    <button type="submit" class="btn text-danger p-2 text-start w-100 fw-bold" style="font-size: 15px;">
-                        <i class="bi bi-box-arrow-right me-2"></i> Đăng Xuất
-                    </button>
-                </form>
-            </nav>
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  APP SHELL                                                  -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div style="display:flex; min-height:100vh;">
+
+    <!-- ── SIDEBAR ──────────────────────────────────────────── -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <img th:src="@{/images/flower-logo.png}" alt="Logo">
+            <div class="sidebar-brand-text">
+                <h6>TIỆM HOA TƯƠI</h6>
+                <small th:text="${store != null ? store.name : 'Quản Lý Chi Nhánh'}">Chi Nhánh</small>
+            </div>
         </div>
 
-        <!-- Main Content: Bước 7 - Quản lý thông tin cửa hàng -->
-        <div class="col-md-10 p-4">
-            <!-- Toast / Alert Thông Báo -->
-            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-3 mb-4" role="alert" style="background-color: #E8F5E9; color: #1B5E20;">
-                <i class="bi bi-check-circle-fill me-2 fs-5"></i>
-                <span class="fw-bold" th:text="${successMessage}">Cập nhật thành công!</span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            <!-- Exception 10f1: Thông báo cập nhật thất bại -->
-            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-3 mb-4" role="alert" style="background-color: #FFEBEE; color: #B71C1C;">
-                <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
-                <span class="fw-bold" th:text="${errorMessage}">Cập nhật thất bại!</span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+        <nav style="flex:1; display:flex; flex-direction:column; gap:2px;">
+            <a class="nav-link-sidebar" th:href="@{/manager/dashboard}">
+                <i class="bi bi-speedometer2"></i> Tổng Quan
+            </a>
+            <a class="nav-link-sidebar" th:href="@{/manager/orders}">
+                <i class="bi bi-bag-check"></i> Đơn Hàng
+            </a>
+            <a class="nav-link-sidebar" th:href="@{/manager/products}">
+                <i class="bi bi-flower1"></i> Kho Mẫu Hoa
+            </a>
+            <a class="nav-link-sidebar" th:href="@{/manager/staff}">
+                <i class="bi bi-people"></i> Nhân Viên
+            </a>
+            <a class="nav-link-sidebar" th:href="@{/manager/analytics}">
+                <i class="bi bi-graph-up-arrow"></i> Báo Cáo Doanh Thu
+            </a>
+            <a class="nav-link-sidebar" th:href="@{/manager/vouchers}">
+                <i class="bi bi-ticket-perforated"></i> Khuyến Mãi
+            </a>
+            <a class="nav-link-sidebar" th:href="@{/manager/stores}">
+                <i class="bi bi-shop"></i> Danh Sách Chi Nhánh
+            </a>
+            <a class="nav-link-sidebar active" th:href="@{/manager/profile}" id="sidebarProfile">
+                <i class="bi bi-person-badge"></i> Thông Tin Chi Nhánh
+            </a>
 
-            <!-- Header Title -->
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <h1 class="fw-bold mb-1" style="font-size: 28px; color: var(--brand-green);">
-                        <i class="bi bi-shop me-2"></i>Thông Tin Cửa Hàng (Store Profile)
-                    </h1>
-                    <p class="text-muted mb-0" style="font-size: 15px;">
-                        Quản lý hồ sơ công khai, ảnh bìa, avatar và bộ sưu tập ảnh đặc trưng của cửa hàng trên hệ thống.
-                    </p>
-                </div>
-                <div class="d-flex align-items-center gap-2">
-                    <a th:href="@{/manager/dashboard}" class="btn btn-outline-secondary fw-bold px-3 py-2" style="border-radius: 10px; font-size: 14px;">
-                        <i class="bi bi-speedometer2 me-1"></i> Dashboard
-                    </a>
-                    <a th:href="@{/manager/stores}" class="btn btn-outline-secondary fw-bold px-3 py-2" style="border-radius: 10px; font-size: 14px;">
-                        <i class="bi bi-arrow-left me-1"></i> Danh Sách Chi Nhánh
-                    </a>
-                </div>
+            <hr class="sidebar-divider mt-auto mb-0">
+            <a class="nav-link-sidebar" th:href="@{/}" target="_blank">
+                <i class="bi bi-house-door"></i> Xem Website
+            </a>
+            <form th:action="@{/logout}" method="post" class="m-0">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit" class="btn-logout-sidebar">
+                    <i class="bi bi-box-arrow-right"></i> Đăng Xuất
+                </button>
+            </form>
+        </nav>
+    </aside>
+
+    <!-- ── MAIN CONTENT ──────────────────────────────────────── -->
+    <main class="main-content">
+
+        <!-- Alerts -->
+        <div th:if="${successMessage}" class="alert-success-custom mb-4" id="alertSuccess">
+            <i class="bi bi-check-circle-fill fs-5"></i>
+            <span th:text="${successMessage}">Cập nhật thành công!</span>
+            <button class="alert-close" onclick="document.getElementById('alertSuccess').remove()">×</button>
+        </div>
+        <div th:if="${errorMessage}" class="alert-error-custom mb-4" id="alertError">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            <span th:text="${errorMessage}">Có lỗi xảy ra!</span>
+            <button class="alert-close" onclick="document.getElementById('alertError').remove()">×</button>
+        </div>
+
+        <!-- Page header -->
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+            <div>
+                <h1 class="page-title">
+                    <i class="bi bi-person-badge me-2" style="color:var(--brand);"></i>Thông Tin Chi Nhánh
+                </h1>
+                <p class="page-subtitle">Chỉnh sửa thông tin, hình ảnh và giờ hoạt động của chi nhánh bạn phụ trách.</p>
             </div>
+            <a th:href="@{/manager/dashboard}" class="btn-secondary-custom">
+                <i class="bi bi-arrow-left"></i> Quay lại
+            </a>
+        </div>
 
-            <!-- PHẦN 1: STORE PROFILE HERO CARD (Cover + Avatar + Main Info) -->
-            <div class="profile-card">
-                <!-- Cover Photo Area -->
-                <div class="store-cover-wrapper">
-                    <img th:src="${store.cover != null && !store.cover.isEmpty() ? store.cover : 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=1200&q=80'}"
-                         alt="Cover Photo" class="store-cover-img" id="storeCoverDisplay">
-                    
-                    <!-- Bước 8a: Chọn nút Edit Cover Photo trên ảnh bìa -->
-                    <button type="button" class="btn btn-edit-cover shadow" id="btnEditCoverPhoto" data-bs-toggle="modal" data-bs-target="#editCoverModal">
-                        <i class="bi bi-camera me-1"></i> Edit Cover Photo
-                    </button>
+        <!-- ══ TWO-COLUMN LAYOUT ══ -->
+        <div class="two-col-layout d-flex gap-4 align-items-start">
+
+            <!-- ─── LEFT COLUMN: Forms ─────────────────────────── -->
+            <div style="flex:1; min-width:0;">
+
+                <!-- ① THÔNG TIN CƠ BẢN -->
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="section-icon"><i class="bi bi-info-circle-fill"></i></div>
+                        Thông tin cơ bản
+                    </div>
+                    <form th:action="@{/manager/profile/info}" method="post" id="formBasicInfo">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <div class="mb-3">
+                            <label class="form-label-custom" for="inputName">
+                                Tên chi nhánh <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" id="inputName" name="name" class="form-control"
+                                   th:value="${store.name}" required
+                                   placeholder="Vui lòng điền tên chi nhánh…">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label-custom" for="inputPhone">Số điện thoại</label>
+                            <input type="tel" id="inputPhone" name="phone" class="form-control"
+                                   th:value="${store.phone}" placeholder="0901 234 567">
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label-custom" for="inputBio">Giới thiệu chi nhánh</label>
+                            <textarea id="inputBio" name="bio" class="form-control" rows="3"
+                                      th:text="${store.bio}"
+                                      placeholder="Mô tả ngắn về không gian, phong cách và thế mạnh của chi nhánh…"></textarea>
+                            <p class="form-hint">Hiển thị cho khách hàng trên trang chi nhánh.</p>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn-primary-custom" id="btnSaveBasic">
+                                <i class="bi bi-floppy2-fill"></i> Lưu thay đổi
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
-                <div class="p-4 pt-0">
-                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-3">
-                        <!-- Avatar Area (Bước 8: Chọn hình camera trên ảnh đại diện) -->
-                        <div class="d-flex align-items-end">
-                            <div class="avatar-container">
-                                <img th:src="${store.avatar != null && !store.avatar.isEmpty() ? store.avatar : 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=300&q=80'}"
-                                     alt="Avatar" class="store-avatar-img" id="storeAvatarDisplay">
-                                <!-- Nút hình camera trên ảnh đại diện (Bước 8) -->
-                                <button type="button" class="btn-avatar-camera" id="btnChangeAvatar" data-bs-toggle="modal" data-bs-target="#editAvatarModal" title="Chọn ảnh đại diện mới">
+                <!-- ② ĐỊA CHỈ & GIỜ HOẠT ĐỘNG -->
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="section-icon"><i class="bi bi-clock-fill"></i></div>
+                        Địa chỉ và giờ hoạt động
+                    </div>
+                    <form th:action="@{/manager/profile/info}" method="post" id="formAddressHours">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <!-- Giữ lại các trường khác để không bị ghi đè null -->
+                        <input type="hidden" name="name"  th:value="${store.name}">
+                        <input type="hidden" name="bio"   th:value="${store.bio}">
+                        <input type="hidden" name="phone" th:value="${store.phone}">
+
+                        <div class="mb-3">
+                            <label class="form-label-custom" for="inputAddress">Địa chỉ cụ thể</label>
+                            <input type="text" id="inputAddress" name="address" class="form-control"
+                                   th:value="${store.address}"
+                                   placeholder="Số nhà, tên đường, phường/xã, quận/huyện…">
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-sm-6">
+                                <label class="form-label-custom" for="inputOpenTime">Giờ mở cửa</label>
+                                <input type="time" id="inputOpenTime" class="form-control" value="08:00"
+                                       title="Tính năng giờ mở cửa đang cập nhật">
+                                <p class="form-hint">Ví dụ: 08:00</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label-custom" for="inputCloseTime">Giờ đóng cửa</label>
+                                <input type="time" id="inputCloseTime" class="form-control" value="21:00"
+                                       title="Tính năng giờ đóng cửa đang cập nhật">
+                                <p class="form-hint">Ví dụ: 21:00</p>
+                            </div>
+                        </div>
+
+                        <!-- Toggle đang mở cửa -->
+                        <div class="toggle-row mb-4">
+                            <div>
+                                <div class="toggle-label">Trạng thái tiếp nhận đơn hàng</div>
+                                <div class="form-hint mt-1">Tắt để tạm dừng nhận đơn, không ảnh hưởng thông tin hồ sơ.</div>
+                            </div>
+                            <div class="form-check form-switch ms-3 mb-0">
+                                <input class="form-check-input" type="checkbox" role="switch"
+                                       name="isOpen" id="toggleIsOpen"
+                                       th:checked="${store.isOpen}" value="true"
+                                       style="width:48px; height:26px; cursor:pointer;">
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn-primary-custom" id="btnSaveAddress">
+                                <i class="bi bi-floppy2-fill"></i> Lưu thay đổi
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- ③ READ-ONLY: Thông tin do Admin quản lý -->
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="section-icon"><i class="bi bi-shield-lock-fill"></i></div>
+                        Thông tin hệ thống <small class="ms-2 text-muted fw-normal" style="font-size:12px;">(chỉ Admin chỉnh sửa)</small>
+                    </div>
+                    <div>
+                        <div class="info-row">
+                            <span class="info-label">Mã chi nhánh</span>
+                            <span class="info-value" th:text="'#' + ${store.id}">#1</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Hạng chi nhánh</span>
+                            <span class="info-value" th:text="${store.storeLevel != null ? store.storeLevel.name : 'Tiêu chuẩn'}">Tiêu chuẩn</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Trạng thái hoạt động</span>
+                            <span>
+                                <span th:if="${store.status}" class="badge-pill badge-active"><i class="bi bi-shield-check"></i> Đã cấp phép</span>
+                                <span th:unless="${store.status}" class="badge-pill badge-banned"><i class="bi bi-slash-circle"></i> Bị tạm đình chỉ</span>
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Trạng thái cửa</span>
+                            <span>
+                                <span th:if="${store.isOpen}" class="badge-pill badge-open"><i class="bi bi-door-open-fill"></i> Đang mở cửa</span>
+                                <span th:unless="${store.isOpen}" class="badge-pill badge-closed"><i class="bi bi-door-closed-fill"></i> Tạm đóng cửa</span>
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Đánh giá</span>
+                            <span class="info-value d-flex align-items-center gap-1">
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <span th:text="${store.rating != null ? #numbers.formatDecimal(store.rating,1,1) : '5.0'}">5.0</span>
+                                <span class="text-muted fw-normal">/ 5.0</span>
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Ngày tạo</span>
+                            <span class="info-value text-muted">—</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /LEFT -->
+
+            <!-- ─── RIGHT COLUMN: Hình ảnh ───────────────────── -->
+            <div style="width:340px; flex-shrink:0;">
+
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="section-icon"><i class="bi bi-images"></i></div>
+                        Hình ảnh chi nhánh
+                    </div>
+
+                    <!-- --- ẢNH ĐẠI DIỆN --- -->
+                    <div class="mb-4">
+                        <label class="form-label-custom mb-2">Ảnh đại diện</label>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="avatar-upload-zone">
+                                <img id="avatarDisplay"
+                                     th:src="${store.avatar != null and !store.avatar.isEmpty() ? store.avatar : 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=300&q=80'}"
+                                     class="avatar-preview" alt="Ảnh đại diện">
+                                <button type="button" class="avatar-change-btn"
+                                        data-bs-toggle="modal" data-bs-target="#modalAvatar"
+                                        title="Đổi ảnh đại diện">
                                     <i class="bi bi-camera-fill"></i>
                                 </button>
                             </div>
+                            <div>
+                                <div class="fw-bold" style="font-size:14px;" th:text="${store.name}">Tên chi nhánh</div>
+                                <div class="form-hint mt-1">Ảnh vuông, tối thiểu 200×200 px</div>
+                                <button type="button" class="btn-secondary-custom mt-2"
+                                        data-bs-toggle="modal" data-bs-target="#modalAvatar"
+                                        style="padding:6px 14px; font-size:13px;">
+                                    <i class="bi bi-pencil"></i> Đổi ảnh
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
-                            <div class="ms-3 mb-2">
-                                <div class="d-flex align-items-center gap-2">
-                                    <h2 class="fw-bold mb-0 text-dark" style="font-size: 26px;" th:text="${store.name}" id="storeNameHeader">Tên Cửa Hàng Hoa</h2>
-                                    <!-- Bước 8e: Chọn nút hình cây bút ở phần thông tin cửa hàng -->
-                                    <button type="button" class="btn-pencil-edit shadow-sm" id="btnEditStoreInfo" data-bs-toggle="modal" data-bs-target="#editStoreInfoModal" title="Tùy chỉnh thông tin cửa hàng (name, bio)">
-                                        <i class="bi bi-pencil-fill"></i>
+                    <hr style="border-color:var(--border);">
+
+                    <!-- --- ẢNH BÌA --- -->
+                    <div class="mb-4">
+                        <label class="form-label-custom mb-2">Ảnh bìa</label>
+                        <div class="cover-preview-wrap"
+                             data-bs-toggle="modal" data-bs-target="#modalCover">
+                            <img id="coverDisplay"
+                                 th:src="${store.cover != null and !store.cover.isEmpty() ? store.cover : 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=1200&q=80'}"
+                                 class="cover-preview-img" alt="Ảnh bìa">
+                            <div class="cover-overlay">
+                                <i class="bi bi-camera fs-4"></i>
+                                <span>Tải ảnh bìa mới</span>
+                            </div>
+                        </div>
+                        <p class="form-hint mt-2">Khuyến nghị: 1200×400 px, tỷ lệ 3:1</p>
+                    </div>
+
+                    <hr style="border-color:var(--border);">
+
+                    <!-- --- THƯ VIỆN ẢNH --- -->
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <label class="form-label-custom mb-0">Thư viện ảnh</label>
+                            <span class="form-hint" th:text="${featuredImages != null ? featuredImages.size() + ' ảnh' : '0 ảnh'}">0 ảnh</span>
+                        </div>
+
+                        <div class="gallery-grid" id="galleryGrid">
+                            <!-- Ảnh hiện có -->
+                            <div th:each="imgUrl, iter : ${featuredImages}" class="gallery-thumb">
+                                <img th:src="${imgUrl}" alt="Ảnh thư viện"
+                                     onerror="this.src='https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=400&q=80'">
+                                <div class="gallery-thumb-overlay">
+                                    <button type="button" class="btn-thumb-action btn-thumb-edit"
+                                            th:data-index="${iter.index}" th:data-url="${imgUrl}"
+                                            onclick="openEditFeatured(this.dataset.index, this.dataset.url)"
+                                            title="Chỉnh sửa">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button type="button" class="btn-thumb-action btn-thumb-delete"
+                                            th:data-index="${iter.index}"
+                                            onclick="openDeleteFeatured(this.dataset.index)"
+                                            title="Xóa ảnh">
+                                        <i class="bi bi-trash3"></i>
                                     </button>
                                 </div>
-                                <div class="d-flex align-items-center gap-2 mt-1">
-                                    <!-- Trạng thái mở cửa -->
-                                    <span th:if="${store.isOpen}" class="badge-status badge-open">
-                                        <i class="bi bi-check-circle-fill"></i> Đang mở cửa đón khách
-                                    </span>
-                                    <span th:unless="${store.isOpen}" class="badge-status badge-closed">
-                                        <i class="bi bi-dash-circle-fill"></i> Tạm ngưng đón khách
-                                    </span>
-                                    <!-- Trạng thái cấp phép -->
-                                    <span th:if="${store.status}" class="badge-status badge-licensed">
-                                        <i class="bi bi-shield-check"></i> Đã cấp phép hoạt động
-                                    </span>
-                                    <span th:unless="${store.status}" class="badge-status badge-banned">
-                                        <i class="bi bi-slash-circle"></i> Bị cấm hoạt động
-                                    </span>
-                                </div>
                             </div>
+
+                            <!-- Nút thêm ảnh -->
+                            <button type="button" class="btn-add-photo"
+                                    data-bs-toggle="modal" data-bs-target="#modalAddFeatured">
+                                <i class="bi bi-plus-lg"></i>
+                                <span>Thêm ảnh</span>
+                            </button>
                         </div>
 
-                        <!-- Điểm & Đánh giá -->
-                        <div class="text-md-end mt-3 mt-md-0 pe-2">
-                            <div class="d-inline-flex align-items-center gap-1 px-3 py-1 bg-light rounded-pill border">
-                                <i class="bi bi-star-fill text-warning"></i>
-                                <span class="fw-bold text-dark" th:text="${store.rating != null ? #numbers.formatDecimal(store.rating, 1, 1) : '5.0'}">5.0</span>
-                                <span class="text-muted small">/ 5.0</span>
-                            </div>
-                            <div class="small text-muted mt-1">
-                                Hạng: <strong class="text-dark" th:text="${store.storeLevel != null ? store.storeLevel.name : 'Tiêu Chuẩn'}">Tiêu chuẩn</strong>
-                            </div>
+                        <div th:if="${featuredImages == null or featuredImages.isEmpty()}" class="text-center py-3">
+                            <p class="text-muted" style="font-size:13px;">Chưa có ảnh thư viện. Nhấn <strong>+ Thêm ảnh</strong> để bắt đầu.</p>
                         </div>
                     </div>
+                </div><!-- /section-card images -->
 
-                    <!-- Giới thiệu (Bio) & Chi tiết liên hệ -->
-                    <div class="row g-3 mt-1 pt-3 border-top" style="border-color: #F0F3F1 !important;">
-                        <div class="col-md-7">
-                            <h6 class="fw-bold text-secondary text-uppercase small mb-2" style="letter-spacing: 0.5px;">Giới thiệu cửa hàng</h6>
-                            <p class="text-muted fst-italic mb-0" style="font-size: 15px; line-height: 1.6;" th:text="${store.bio != null && !store.bio.isEmpty() ? store.bio : 'Cửa hàng chưa có lời giới thiệu. Bấm vào nút cây bút bên trên để cập nhật bio cho cửa hàng!'}">
-                                Chuyên cung cấp các mẫu hoa tươi nghệ thuật chất lượng cao...
-                            </p>
-                        </div>
-                        <div class="col-md-5">
-                            <h6 class="fw-bold text-secondary text-uppercase small mb-2" style="letter-spacing: 0.5px;">Thông tin liên hệ</h6>
-                            <div class="d-flex flex-column gap-1 small text-muted">
-                                <div><i class="bi bi-telephone-fill me-2 text-success"></i>Hotline: <strong class="text-dark" th:text="${store.phone != null ? store.phone : 'Chưa cập nhật'}">0901234567</strong></div>
-                                <div><i class="bi bi-geo-alt-fill me-2 text-danger"></i>Địa chỉ: <strong class="text-dark" th:text="${store.address != null ? store.address : 'Chưa cập nhật'}">TP. Hồ Chí Minh</strong></div>
-                                <div><i class="bi bi-wallet2 me-2 text-primary"></i>Ví cửa hàng: <strong class="text-dark" th:text="${store.eWallet != null ? #numbers.formatDecimal(store.eWallet, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">0 ₫</strong></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </div><!-- /RIGHT -->
+        </div><!-- /two-col-layout -->
 
-            <!-- PHẦN 2: BỘ SƯU TẬP ẢNH ĐẶC TRƯNG (FEATURED IMAGES) -->
-            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white" style="border: 1px solid var(--border-soft) !important;">
-                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4 pb-2 border-bottom" style="border-color: #F0F3F1 !important;">
-                    <div>
-                        <h4 class="fw-bold mb-1" style="color: var(--brand-green); font-size: 20px;">
-                            <i class="bi bi-images me-2"></i>Ảnh Đặc Trưng Cửa Hàng (Featured Images)
-                        </h4>
-                        <p class="text-muted small mb-0">Các hình ảnh nổi bật thể hiện không gian tiệm hoa, sản phẩm và dịch vụ nổi bật của chi nhánh.</p>
-                    </div>
-                    <!-- Bước 8b: Chọn nút New Featured Image -->
-                    <button type="button" class="btn btn-success fw-bold px-3 py-2 shadow-sm d-inline-flex align-items-center gap-2"
-                            id="btnNewFeaturedImage" data-bs-toggle="modal" data-bs-target="#newFeaturedImageModal"
-                            style="border-radius: 10px; background-color: #2E7D32 !important; border-color: #2E7D32 !important; font-size: 14px;">
-                        <i class="bi bi-plus-circle-fill"></i> New Featured Image
-                    </button>
-                </div>
+    </main>
+</div><!-- /app shell -->
 
-                <!-- Danh sách ảnh đặc trưng -->
-                <div th:if="${featuredImages == null || featuredImages.isEmpty()}" class="text-center py-5">
-                    <div class="mb-3 text-muted" style="font-size: 48px; opacity: 0.4;">
-                        <i class="bi bi-image"></i>
-                    </div>
-                    <h6 class="fw-bold text-dark mb-1">Chưa có ảnh đặc trưng nào</h6>
-                    <p class="text-muted small mb-3">Hãy thêm các hình ảnh đẹp về cửa hàng của bạn để thu hút khách hàng ghé thăm.</p>
-                    <button type="button" class="btn btn-outline-success btn-sm fw-bold px-3" data-bs-toggle="modal" data-bs-target="#newFeaturedImageModal">
-                        <i class="bi bi-plus-circle me-1"></i> Thêm ảnh đặc trưng ngay
-                    </button>
-                </div>
 
-                <div th:if="${featuredImages != null && !featuredImages.isEmpty()}" class="row g-3" id="featuredImagesGrid">
-                    <div class="col-6 col-md-4 col-lg-3" th:each="imgUrl, iter : ${featuredImages}">
-                        <div class="featured-card">
-                            <img th:src="${imgUrl}" alt="Featured Image" onerror="this.src='https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=600&q=80'">
-                            <div class="featured-overlay">
-                                <!-- Bước 8c: Chọn nút Edit trên ảnh đặc trưng -->
-                                <button type="button" class="btn btn-sm btn-light fw-bold btn-edit-featured shadow-sm"
-                                        th:id="'btnEditFeatured_' + ${iter.index}"
-                                        th:data-index="${iter.index}"
-                                        th:data-url="${imgUrl}"
-                                        onclick="openEditFeaturedModal(this.getAttribute('data-index'), this.getAttribute('data-url'))"
-                                        title="Chỉnh sửa ảnh này">
-                                    <i class="bi bi-pencil-square me-1"></i> Edit
-                                </button>
-                                <!-- Bước 8d: Chọn nút Delete trên ảnh đặc trưng -->
-                                <button type="button" class="btn btn-sm btn-danger fw-bold btn-delete-featured shadow-sm"
-                                        th:id="'btnDeleteFeatured_' + ${iter.index}"
-                                        th:data-index="${iter.index}"
-                                        onclick="openDeleteFeaturedModal(this.getAttribute('data-index'))"
-                                        title="Xóa ảnh này">
-                                    <i class="bi bi-trash3-fill me-1"></i> Delete
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- ════════════════ MODALS ════════════════ -->
 
-<!-- ================= MODALS CHO USE CASE UC_019 ================= -->
-
-<!-- 1. MODAL ĐỔI ẢNH ĐẠI DIỆN (MAIN FLOW: Bước 8, 9, 10) -->
-<div class="modal fade" id="editAvatarModal" tabindex="-1" aria-labelledby="editAvatarModalLabel" aria-hidden="true">
+<!-- Modal: Đổi ảnh đại diện -->
+<div class="modal fade" id="modalAvatar" tabindex="-1" aria-labelledby="modalAvatarLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow rounded-4">
-            <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold" id="editAvatarModalLabel" style="color: var(--brand-green);">
-                    <i class="bi bi-camera-fill me-2"></i>Chọn Ảnh Đại Diện Mới
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAvatarLabel"><i class="bi bi-camera-fill me-2"></i>Đổi ảnh đại diện</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <!-- Exception 10f: Kiểm tra tệp ảnh hợp lệ -->
-            <form th:action="@{/manager/profile/avatar}" method="post" enctype="multipart/form-data" id="avatarUploadForm" onsubmit="return validateImageInput('avatarFileInput', 'avatarUrlInput')">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <form th:action="@{/manager/profile/avatar}" method="post" enctype="multipart/form-data" id="formAvatar">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <div class="modal-body">
-                    <p class="text-muted small mb-3">Tải lên tệp ảnh từ thiết bị hoặc nhập đường dẫn ảnh đại diện cho chi nhánh của bạn.</p>
-
                     <!-- Preview -->
-                    <div class="text-center mb-3">
-                        <img id="avatarPreview" th:src="${store.avatar != null && !store.avatar.isEmpty() ? store.avatar : 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=300&q=80'}"
-                             class="rounded-circle border" style="width: 110px; height: 110px; object-fit: cover;" alt="Avatar Preview">
+                    <div class="text-center mb-4">
+                        <img id="avatarPreviewModal"
+                             th:src="${store.avatar != null and !store.avatar.isEmpty() ? store.avatar : 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=300&q=80'}"
+                             class="rounded-circle border"
+                             style="width:110px;height:110px;object-fit:cover;" alt="Xem trước">
                     </div>
 
-                    <!-- Bước 9: Chọn ảnh đại diện mới -->
+                    <!-- File upload (chính) -->
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">Chọn tệp hình ảnh từ máy tính:</label>
-                        <input type="file" name="avatarFile" id="avatarFileInput" class="form-control" accept="image/*" onchange="previewFile(this, 'avatarPreview')">
-                        <div class="form-text small">Hỗ trợ các định dạng: JPG, PNG, WEBP, GIF (Tối đa 10MB).</div>
+                        <label class="form-label-custom">Tải ảnh từ thiết bị</label>
+                        <input type="file" name="avatarFile" id="avatarFileInput" class="form-control"
+                               accept="image/jpeg,image/png,image/webp,image/gif"
+                               onchange="previewFile(this,'avatarPreviewModal')">
+                        <p class="form-hint">JPG, PNG, WEBP, GIF – tối đa 10 MB</p>
                     </div>
 
-                    <div class="text-center text-muted small my-2">hoặc</div>
-
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold">Đường dẫn hình ảnh (URL):</label>
-                        <input type="text" name="avatarUrl" id="avatarUrlInput" class="form-control" placeholder="https://..." onchange="previewUrl(this.value, 'avatarPreview')">
-                    </div>
+                    <!-- URL fallback (thu gọn) -->
+                    <details class="mt-1">
+                        <summary style="font-size:13px; color:var(--text-muted); cursor:pointer; font-weight:700;">
+                            Dùng đường dẫn ảnh (URL)
+                        </summary>
+                        <div class="mt-2">
+                            <input type="text" name="avatarUrl" id="avatarUrlInput" class="form-control"
+                                   placeholder="https://..." onchange="previewUrl(this.value,'avatarPreviewModal')">
+                        </div>
+                    </details>
                 </div>
-                <div class="modal-footer border-top-0 pt-0">
-                    <button type="button" class="btn btn-outline-secondary px-3 py-2 fw-bold" data-bs-dismiss="modal" style="border-radius: 8px;">Cancel</button>
-                    <!-- Bước 10: Ảnh đại diện được cập nhật -->
-                    <button type="submit" class="btn btn-primary px-4 py-2 fw-bold shadow-sm" style="border-radius: 8px; background-color: var(--brand-green); border-color: var(--brand-green);">
-                        <i class="bi bi-cloud-arrow-up me-1"></i> Cập nhật ảnh đại diện
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary-custom" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="submit" class="btn-primary-custom" id="btnSaveAvatar"
+                            onclick="return validateAvatarInput()">
+                        <i class="bi bi-cloud-arrow-up-fill"></i> Lưu ảnh đại diện
                     </button>
                 </div>
             </form>
@@ -529,46 +725,45 @@
     </div>
 </div>
 
-<!-- 2. MODAL ĐỔI ẢNH BÌA (ALTERNATIVE FLOW: Bước 8a, 9a, 10a) -->
-<div class="modal fade" id="editCoverModal" tabindex="-1" aria-labelledby="editCoverModalLabel" aria-hidden="true">
+<!-- Modal: Đổi ảnh bìa -->
+<div class="modal fade" id="modalCover" tabindex="-1" aria-labelledby="modalCoverLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow rounded-4">
-            <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold" id="editCoverModalLabel" style="color: var(--brand-green);">
-                    <i class="bi bi-image me-2"></i>Chọn Ảnh Bìa Mới (Edit Cover Photo)
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCoverLabel"><i class="bi bi-image-fill me-2"></i>Tải ảnh bìa mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form th:action="@{/manager/profile/cover}" method="post" enctype="multipart/form-data" id="coverUploadForm" onsubmit="return validateImageInput('coverFileInput', 'coverUrlInput')">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <form th:action="@{/manager/profile/cover}" method="post" enctype="multipart/form-data" id="formCover">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <div class="modal-body">
-                    <p class="text-muted small mb-3">Tải lên tệp ảnh bìa banner từ thiết bị hoặc nhập đường dẫn trực tuyến.</p>
-
-                    <!-- Preview -->
-                    <div class="text-center mb-3">
-                        <img id="coverPreview" th:src="${store.cover != null && !store.cover.isEmpty() ? store.cover : 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=1200&q=80'}"
-                             class="rounded-3 border w-100" style="height: 180px; object-fit: cover;" alt="Cover Preview">
-                    </div>
-
-                    <!-- Bước 9a: Chọn ảnh bìa mới -->
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">Chọn tệp hình ảnh từ máy tính:</label>
-                        <input type="file" name="coverFile" id="coverFileInput" class="form-control" accept="image/*" onchange="previewFile(this, 'coverPreview')">
-                        <div class="form-text small">Kích thước khuyến nghị: 1200x400 px. Hỗ trợ JPG, PNG, WEBP.</div>
+                        <img id="coverPreviewModal"
+                             th:src="${store.cover != null and !store.cover.isEmpty() ? store.cover : 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=1200&q=80'}"
+                             class="rounded-3 w-100 border"
+                             style="height:180px;object-fit:cover;" alt="Xem trước ảnh bìa">
                     </div>
-
-                    <div class="text-center text-muted small my-2">hoặc</div>
-
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">Đường dẫn hình ảnh (URL):</label>
-                        <input type="text" name="coverUrl" id="coverUrlInput" class="form-control" placeholder="https://..." onchange="previewUrl(this.value, 'coverPreview')">
+                        <label class="form-label-custom">Tải ảnh từ thiết bị</label>
+                        <input type="file" name="coverFile" id="coverFileInput" class="form-control"
+                               accept="image/jpeg,image/png,image/webp,image/gif"
+                               onchange="previewFile(this,'coverPreviewModal')">
+                        <p class="form-hint">Khuyến nghị 1200×400 px – JPG, PNG, WEBP – tối đa 10 MB</p>
                     </div>
+                    <details class="mt-1">
+                        <summary style="font-size:13px; color:var(--text-muted); cursor:pointer; font-weight:700;">
+                            Dùng đường dẫn ảnh (URL)
+                        </summary>
+                        <div class="mt-2">
+                            <input type="text" name="coverUrl" id="coverUrlInput" class="form-control"
+                                   placeholder="https://..." onchange="previewUrl(this.value,'coverPreviewModal')">
+                        </div>
+                    </details>
                 </div>
-                <div class="modal-footer border-top-0 pt-0">
-                    <button type="button" class="btn btn-outline-secondary px-3 py-2 fw-bold" data-bs-dismiss="modal" style="border-radius: 8px;">Cancel</button>
-                    <!-- Bước 10a: Ảnh bìa được cập nhật -->
-                    <button type="submit" class="btn btn-primary px-4 py-2 fw-bold shadow-sm" style="border-radius: 8px; background-color: var(--brand-green); border-color: var(--brand-green);">
-                        <i class="bi bi-cloud-arrow-up me-1"></i> Cập nhật ảnh bìa
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary-custom" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="submit" class="btn-primary-custom" id="btnSaveCover"
+                            onclick="return validateCoverInput()">
+                        <i class="bi bi-cloud-arrow-up-fill"></i> Lưu ảnh bìa
                     </button>
                 </div>
             </form>
@@ -576,46 +771,44 @@
     </div>
 </div>
 
-<!-- 3. MODAL THÊM ẢNH ĐẶC TRƯNG MỚI (ALTERNATIVE FLOW: Bước 8b, 9b, 9b1, 9b2, 10b) -->
-<div class="modal fade" id="newFeaturedImageModal" tabindex="-1" aria-labelledby="newFeaturedImageModalLabel" aria-hidden="true">
+<!-- Modal: Thêm ảnh thư viện -->
+<div class="modal fade" id="modalAddFeatured" tabindex="-1" aria-labelledby="modalAddFeaturedLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow rounded-4">
-            <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold" id="newFeaturedImageModalLabel" style="color: var(--brand-green);">
-                    <i class="bi bi-plus-circle me-2"></i>Thêm Ảnh Đặc Trưng (New Featured Image)
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAddFeaturedLabel"><i class="bi bi-plus-circle-fill me-2"></i>Thêm ảnh thư viện</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <!-- Form thêm ảnh đặc trưng -->
-            <form th:action="@{/manager/profile/featured/add}" method="post" enctype="multipart/form-data" id="addFeaturedForm">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <form th:action="@{/manager/profile/featured/add}" method="post" enctype="multipart/form-data" id="formAddFeatured">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <div class="modal-body">
-                    <p class="text-muted small mb-3">Tải lên hình ảnh đặc trưng mới đại diện cho sản phẩm, dịch vụ của cửa hàng.</p>
-
-                    <!-- Preview -->
-                    <div class="text-center mb-3">
-                        <img id="newFeaturedPreview" src="https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=600&q=80"
-                             class="rounded-3 border w-100" style="height: 160px; object-fit: cover;" alt="Featured Preview">
-                    </div>
-
-                    <!-- Bước 9b: Chọn ảnh đặc trưng mới -->
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">Chọn tệp hình ảnh:</label>
-                        <input type="file" name="featuredFile" id="newFeaturedFileInput" class="form-control" accept="image/*" onchange="previewFile(this, 'newFeaturedPreview')">
+                        <img id="addFeaturedPreview"
+                             src="https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=600&q=80"
+                             class="rounded-3 w-100 border" style="height:150px;object-fit:cover;" alt="Xem trước">
                     </div>
-
-                    <div class="text-center text-muted small my-2">hoặc</div>
-
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">Đường dẫn hình ảnh (URL):</label>
-                        <input type="text" name="imageUrl" id="newFeaturedUrlInput" class="form-control" placeholder="https://..." onchange="previewUrl(this.value, 'newFeaturedPreview')">
+                        <label class="form-label-custom">Tải ảnh từ thiết bị</label>
+                        <input type="file" name="featuredFile" id="addFeaturedFile" class="form-control"
+                               accept="image/jpeg,image/png,image/webp,image/gif"
+                               onchange="previewFile(this,'addFeaturedPreview')">
+                        <p class="form-hint">JPG, PNG, WEBP, GIF – tối đa 10 MB</p>
                     </div>
+                    <details>
+                        <summary style="font-size:13px; color:var(--text-muted); cursor:pointer; font-weight:700;">
+                            Dùng đường dẫn ảnh (URL)
+                        </summary>
+                        <div class="mt-2">
+                            <input type="text" name="imageUrl" id="addFeaturedUrl" class="form-control"
+                                   placeholder="https://..." onchange="previewUrl(this.value,'addFeaturedPreview')">
+                        </div>
+                    </details>
                 </div>
-                <div class="modal-footer border-top-0 pt-0">
-                    <button type="button" class="btn btn-outline-secondary px-3 py-2 fw-bold" data-bs-dismiss="modal" style="border-radius: 8px;">Cancel</button>
-                    <!-- Bước 9b1: Bấm nút Submit -->
-                    <button type="button" class="btn btn-success px-4 py-2 fw-bold shadow-sm" id="btnSubmitFeaturedImage" onclick="triggerConfirmAddFeatured()" style="border-radius: 8px; background-color: #2E7D32; border-color: #2E7D32;">
-                        <i class="bi bi-check2-circle me-1"></i> Submit
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary-custom" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="submit" class="btn-primary-custom" id="btnConfirmAddFeatured"
+                            onclick="return validateFeaturedInput('addFeaturedFile','addFeaturedUrl')">
+                        <i class="bi bi-check2-circle"></i> Thêm ảnh
                     </button>
                 </div>
             </form>
@@ -623,63 +816,44 @@
     </div>
 </div>
 
-<!-- MODAL YÊU CẦU XÁC NHẬN THÊM ẢNH ĐẶC TRƯNG (Bước 9b2) -->
-<div class="modal fade" id="confirmAddFeaturedModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 shadow rounded-4 text-center p-3">
-            <div class="modal-body">
-                <i class="bi bi-question-circle text-success" style="font-size: 42px;"></i>
-                <h6 class="fw-bold mt-2">Xác nhận thêm ảnh</h6>
-                <p class="text-muted small mb-0">Bạn có chắc chắn muốn thêm ảnh đặc trưng này vào hồ sơ cửa hàng không?</p>
-            </div>
-            <div class="d-flex justify-content-center gap-2 pb-2">
-                <button type="button" class="btn btn-outline-secondary btn-sm px-3 fw-bold" data-bs-dismiss="modal">Cancel</button>
-                <!-- Bước 9b2: Bấm nút Confirm -->
-                <button type="button" class="btn btn-success btn-sm px-3 fw-bold" id="btnConfirmAddFeatured" onclick="document.getElementById('addFeaturedForm').submit();">
-                    Confirm
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- 4. MODAL CHỈNH SỬA ẢNH ĐẶC TRƯNG (ALTERNATIVE FLOW: Bước 8c) -->
-<div class="modal fade" id="editFeaturedImageModal" tabindex="-1" aria-labelledby="editFeaturedImageModalLabel" aria-hidden="true">
+<!-- Modal: Sửa ảnh thư viện -->
+<div class="modal fade" id="modalEditFeatured" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow rounded-4">
-            <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold" id="editFeaturedImageModalLabel" style="color: var(--brand-green);">
-                    <i class="bi bi-pencil-square me-2"></i>Chỉnh Sửa Ảnh Đặc Trưng
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Thay ảnh thư viện</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form th:action="@{/manager/profile/featured/edit}" method="post" enctype="multipart/form-data" id="editFeaturedForm" onsubmit="return validateImageInput('editFeaturedFileInput', 'editFeaturedUrlInput')">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <input type="hidden" name="index" id="editFeaturedIndexInput" value="0">
+            <form th:action="@{/manager/profile/featured/edit}" method="post" enctype="multipart/form-data" id="formEditFeatured">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <input type="hidden" name="index" id="editFeaturedIndex" value="0">
                 <div class="modal-body">
-                    <p class="text-muted small mb-3">Chọn ảnh mới để thay thế ảnh đặc trưng hiện tại.</p>
-
-                    <!-- Preview -->
-                    <div class="text-center mb-3">
-                        <img id="editFeaturedPreview" src="" class="rounded-3 border w-100" style="height: 160px; object-fit: cover;" alt="Edit Preview">
-                    </div>
-
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">Chọn tệp hình ảnh mới:</label>
-                        <input type="file" name="editFile" id="editFeaturedFileInput" class="form-control" accept="image/*" onchange="previewFile(this, 'editFeaturedPreview')">
+                        <img id="editFeaturedPreview" src="" class="rounded-3 w-100 border"
+                             style="height:150px;object-fit:cover;" alt="Xem trước">
                     </div>
-
-                    <div class="text-center text-muted small my-2">hoặc</div>
-
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">Nhập đường dẫn ảnh mới (URL):</label>
-                        <input type="text" name="editUrl" id="editFeaturedUrlInput" class="form-control" placeholder="https://..." onchange="previewUrl(this.value, 'editFeaturedPreview')">
+                        <label class="form-label-custom">Chọn ảnh thay thế</label>
+                        <input type="file" name="editFile" id="editFeaturedFile" class="form-control"
+                               accept="image/jpeg,image/png,image/webp,image/gif"
+                               onchange="previewFile(this,'editFeaturedPreview')">
+                        <p class="form-hint">JPG, PNG, WEBP, GIF – tối đa 10 MB</p>
                     </div>
+                    <details>
+                        <summary style="font-size:13px; color:var(--text-muted); cursor:pointer; font-weight:700;">
+                            Dùng đường dẫn ảnh (URL)
+                        </summary>
+                        <div class="mt-2">
+                            <input type="text" name="editUrl" id="editFeaturedUrl" class="form-control"
+                                   placeholder="https://..." onchange="previewUrl(this.value,'editFeaturedPreview')">
+                        </div>
+                    </details>
                 </div>
-                <div class="modal-footer border-top-0 pt-0">
-                    <button type="button" class="btn btn-outline-secondary px-3 py-2 fw-bold" data-bs-dismiss="modal" style="border-radius: 8px;">Cancel</button>
-                    <button type="submit" class="btn btn-primary px-4 py-2 fw-bold shadow-sm" style="border-radius: 8px; background-color: var(--brand-green); border-color: var(--brand-green);">
-                        <i class="bi bi-check2-circle me-1"></i> Lưu thay đổi
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary-custom" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="submit" class="btn-primary-custom"
+                            onclick="return validateFeaturedInput('editFeaturedFile','editFeaturedUrl')">
+                        <i class="bi bi-check2-circle"></i> Lưu thay đổi
                     </button>
                 </div>
             </form>
@@ -687,23 +861,22 @@
     </div>
 </div>
 
-<!-- 5. MODAL XÁC NHẬN XÓA ẢNH ĐẶC TRƯNG (ALTERNATIVE FLOW: Bước 8d, 9d, 10d) -->
-<div class="modal fade" id="deleteFeaturedModal" tabindex="-1" aria-hidden="true">
+<!-- Modal: Xác nhận xóa ảnh thư viện -->
+<div class="modal fade" id="modalDeleteFeatured" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 shadow rounded-4 text-center p-3">
-            <div class="modal-body">
-                <i class="bi bi-trash3 text-danger" style="font-size: 42px;"></i>
-                <h6 class="fw-bold mt-2">Xác nhận xóa ảnh</h6>
-                <p class="text-muted small mb-0">Bạn có chắc chắn muốn xóa ảnh đặc trưng này khỏi hồ sơ cửa hàng không?</p>
+        <div class="modal-content text-center p-3">
+            <div class="modal-body pt-2">
+                <i class="bi bi-trash3-fill text-danger" style="font-size:40px;"></i>
+                <h6 class="fw-bold mt-3 mb-1">Xóa ảnh này?</h6>
+                <p class="text-muted" style="font-size:13px;">Thao tác này không thể hoàn tác.</p>
             </div>
-            <form th:action="@{/manager/profile/featured/delete}" method="post" id="deleteFeaturedForm">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <input type="hidden" name="index" id="deleteFeaturedIndexInput" value="0">
+            <form th:action="@{/manager/profile/featured/delete}" method="post" id="formDeleteFeatured">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <input type="hidden" name="index" id="deleteFeaturedIndex" value="0">
                 <div class="d-flex justify-content-center gap-2 pb-2">
-                    <button type="button" class="btn btn-outline-secondary btn-sm px-3 fw-bold" data-bs-dismiss="modal">Cancel</button>
-                    <!-- Bước 9d: Bấm nút Confirm -->
-                    <button type="submit" class="btn btn-danger btn-sm px-3 fw-bold" id="btnConfirmDeleteFeatured">
-                        Confirm
+                    <button type="button" class="btn-secondary-custom" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="submit" class="btn-primary-custom" style="background:#EF4444; box-shadow:none;">
+                        <i class="bi bi-trash3"></i> Xóa ảnh
                     </button>
                 </div>
             </form>
@@ -711,166 +884,127 @@
     </div>
 </div>
 
-<!-- 6. MODAL TÙY CHỈNH THÔNG TIN CỬA HÀNG (ALTERNATIVE FLOW: Bước 8e, 9e, 9e1, 9e2, 9e3, 10e) -->
-<div class="modal fade" id="editStoreInfoModal" tabindex="-1" aria-labelledby="editStoreInfoModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow rounded-4">
-            <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold" id="editStoreInfoModalLabel" style="color: var(--brand-green);">
-                    <i class="bi bi-pencil-fill me-2"></i>Tùy Chỉnh Thông Tin Cửa Hàng
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <!-- Bước 9e: Tùy chỉnh thông tin cửa hàng (name, bio, phone, address) -->
-            <form th:action="@{/manager/profile/info}" method="post" id="storeInfoForm">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold">Tên cửa hàng <span class="text-danger">*</span>:</label>
-                        <input type="text" name="name" id="inputStoreName" class="form-control" th:value="${store.name}" required placeholder="Vui lòng điền tên cửa hàng...">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold">Giới thiệu ngắn (Bio):</label>
-                        <textarea name="bio" id="inputStoreBio" rows="3" class="form-control" th:text="${store.bio}" placeholder="Giới thiệu về phong cách, thế mạnh của cửa hàng..."></textarea>
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold">Số điện thoại hotline:</label>
-                            <input type="text" name="phone" id="inputStorePhone" class="form-control" th:value="${store.phone}" placeholder="0901234567">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold">Địa chỉ chi nhánh:</label>
-                            <input type="text" name="address" id="inputStoreAddress" class="form-control" th:value="${store.address}" placeholder="Số nhà, đường, phường, quận...">
-                        </div>
-                    </div>
-                    <div class="form-check form-switch mb-2">
-                        <input class="form-check-input" type="checkbox" role="switch" name="isOpen" id="inputStoreIsOpen" th:checked="${store.isOpen}" value="true">
-                        <label class="form-check-label small fw-bold" for="inputStoreIsOpen">Đang mở cửa bán và tiếp nhận đơn hàng</label>
-                    </div>
-                </div>
-                <div class="modal-footer border-top-0 pt-0">
-                    <button type="button" class="btn btn-outline-secondary px-3 py-2 fw-bold" data-bs-dismiss="modal" style="border-radius: 8px;">Cancel</button>
-                    <!-- Bước 9e1: Bấm nút Save -->
-                    <button type="button" class="btn btn-primary px-4 py-2 fw-bold shadow-sm" id="btnSaveStoreInfo" onclick="triggerConfirmSaveInfo()" style="border-radius: 8px; background-color: var(--brand-green); border-color: var(--brand-green);">
-                        <i class="bi bi-floppy me-1"></i> Save
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
-<!-- Bước 9e2: Hiển thị thông báo yêu cầu xác nhận cập nhật thông tin cửa hàng -->
-<div class="modal fade" id="confirmSaveStoreInfoModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 shadow rounded-4 text-center p-3">
-            <div class="modal-body">
-                <i class="bi bi-question-circle text-primary" style="font-size: 42px;"></i>
-                <h6 class="fw-bold mt-2">Xác nhận cập nhật</h6>
-                <p class="text-muted small mb-0">Bạn có chắc chắn muốn lưu các thay đổi thông tin cửa hàng không?</p>
-            </div>
-            <div class="d-flex justify-content-center gap-2 pb-2">
-                <button type="button" class="btn btn-outline-secondary btn-sm px-3 fw-bold" data-bs-dismiss="modal">Cancel</button>
-                <!-- Bước 9e3: Bấm nút Confirm -->
-                <button type="button" class="btn btn-primary btn-sm px-3 fw-bold" id="btnConfirmSaveStoreInfo" onclick="document.getElementById('storeInfoForm').submit();" style="background-color: var(--brand-green); border-color: var(--brand-green);">
-                    Confirm
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Bootstrap JS -->
+<!-- ════════ SCRIPTS ════════ -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
-    // Preview hình ảnh từ file
+    /* ── Preview helpers ─────────────────────────────────────── */
     function previewFile(input, previewId) {
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-            // Exception 10f: Kiểm tra loại file
-            if (!file.type.startsWith('image/')) {
-                alert('Hình ảnh không hợp lệ! Vui lòng chọn tệp hình ảnh định dạng JPG, PNG, WEBP hoặc GIF.');
-                input.value = '';
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById(previewId).src = e.target.result;
-            }
-            reader.readAsDataURL(file);
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        const maxMb = 10;
+        if (file.size > maxMb * 1024 * 1024) {
+            alert('Tệp quá lớn! Vui lòng chọn ảnh dưới ' + maxMb + ' MB.');
+            input.value = '';
+            return;
         }
+        const allowed = ['image/jpeg','image/png','image/webp','image/gif'];
+        if (!allowed.includes(file.type)) {
+            alert('Định dạng không hỗ trợ! Chỉ chấp nhận JPG, PNG, WEBP, GIF.');
+            input.value = '';
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = e => {
+            const el = document.getElementById(previewId);
+            if (el) el.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
     }
 
-    // Preview hình ảnh từ URL
     function previewUrl(url, previewId) {
-        if (url && url.trim() !== '') {
-            document.getElementById(previewId).src = url.trim();
-        }
+        if (!url || !url.startsWith('http')) return;
+        const el = document.getElementById(previewId);
+        if (el) el.src = url;
     }
 
-    // Client-side Validation (Exception 10f)
-    function validateImageInput(fileInputId, urlInputId) {
-        const fileInput = document.getElementById(fileInputId);
-        const urlInput = document.getElementById(urlInputId);
-        const hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
-        const hasUrl = urlInput && urlInput.value && urlInput.value.trim() !== '';
-
-        if (!hasFile && !hasUrl) {
-            alert('Hình ảnh không hợp lệ! Vui lòng chọn tệp hình ảnh hoặc nhập đường dẫn ảnh.');
+    /* ── Validation ──────────────────────────────────────────── */
+    function validateAvatarInput() {
+        const file = document.getElementById('avatarFileInput').value;
+        const url  = document.getElementById('avatarUrlInput').value.trim();
+        if (!file && !url) {
+            alert('Vui lòng chọn tệp ảnh hoặc nhập đường dẫn ảnh đại diện.');
             return false;
-        }
-
-        if (hasFile) {
-            const file = fileInput.files[0];
-            if (!file.type.startsWith('image/')) {
-                alert('Hình ảnh không hợp lệ! Vui lòng chọn tệp hình ảnh (.jpg, .png, .webp, .gif).');
-                return false;
-            }
-            if (file.size > 10 * 1024 * 1024) {
-                alert('Dung lượng hình ảnh quá lớn! Vui lòng chọn ảnh nhỏ hơn 10MB.');
-                return false;
-            }
         }
         return true;
     }
 
-    // Kích hoạt Modal xác nhận thêm ảnh đặc trưng (Bước 9b1 -> 9b2)
-    function triggerConfirmAddFeatured() {
-        if (!validateImageInput('newFeaturedFileInput', 'newFeaturedUrlInput')) {
-            return;
+    function validateCoverInput() {
+        const file = document.getElementById('coverFileInput').value;
+        const url  = document.getElementById('coverUrlInput').value.trim();
+        if (!file && !url) {
+            alert('Vui lòng chọn tệp ảnh hoặc nhập đường dẫn ảnh bìa.');
+            return false;
         }
-        const confirmModal = new bootstrap.Modal(document.getElementById('confirmAddFeaturedModal'));
-        confirmModal.show();
+        return true;
     }
 
-    // Mở modal Edit ảnh đặc trưng (Bước 8c)
-    function openEditFeaturedModal(index, url) {
-        document.getElementById('editFeaturedIndexInput').value = index;
-        document.getElementById('editFeaturedPreview').src = url;
-        document.getElementById('editFeaturedUrlInput').value = url;
-        const editModal = new bootstrap.Modal(document.getElementById('editFeaturedImageModal'));
-        editModal.show();
-    }
-
-    // Mở modal Delete ảnh đặc trưng (Bước 8d)
-    function openDeleteFeaturedModal(index) {
-        document.getElementById('deleteFeaturedIndexInput').value = index;
-        const delModal = new bootstrap.Modal(document.getElementById('deleteFeaturedModal'));
-        delModal.show();
-    }
-
-    // Kích hoạt Modal xác nhận lưu thông tin cửa hàng (Bước 9e1 -> 9e2)
-    function triggerConfirmSaveInfo() {
-        const nameInput = document.getElementById('inputStoreName');
-        if (!nameInput.value || nameInput.value.trim() === '') {
-            alert('Vui lòng điền tên cửa hàng!');
-            nameInput.focus();
-            return;
+    function validateFeaturedInput(fileId, urlId) {
+        const file = document.getElementById(fileId).value;
+        const url  = document.getElementById(urlId).value.trim();
+        if (!file && !url) {
+            alert('Vui lòng chọn tệp ảnh hoặc nhập đường dẫn ảnh thư viện.');
+            return false;
         }
-        const confirmModal = new bootstrap.Modal(document.getElementById('confirmSaveStoreInfoModal'));
-        confirmModal.show();
+        return true;
     }
+
+    /* ── Open edit/delete modals ─────────────────────────────── */
+    function openEditFeatured(index, url) {
+        document.getElementById('editFeaturedIndex').value = index;
+        document.getElementById('editFeaturedPreview').src  = url || '';
+        document.getElementById('editFeaturedFile').value   = '';
+        document.getElementById('editFeaturedUrl').value    = '';
+        new bootstrap.Modal(document.getElementById('modalEditFeatured')).show();
+    }
+
+    function openDeleteFeatured(index) {
+        document.getElementById('deleteFeaturedIndex').value = index;
+        new bootstrap.Modal(document.getElementById('modalDeleteFeatured')).show();
+    }
+
+    /* ── Sync avatar to page header when changed ─────────────── */
+    document.getElementById('formAvatar')?.addEventListener('submit', function() {
+        const file = document.getElementById('avatarFileInput').files[0];
+        const url  = document.getElementById('avatarUrlInput').value.trim();
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const el = document.getElementById('avatarDisplay');
+                if (el) el.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        } else if (url) {
+            const el = document.getElementById('avatarDisplay');
+            if (el) el.src = url;
+        }
+    });
+
+    /* ── Sync cover to page when changed ─────────────────────── */
+    document.getElementById('formCover')?.addEventListener('submit', function() {
+        const file = document.getElementById('coverFileInput').files[0];
+        const url  = document.getElementById('coverUrlInput').value.trim();
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const el = document.getElementById('coverDisplay');
+                if (el) el.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        } else if (url) {
+            const el = document.getElementById('coverDisplay');
+            if (el) el.src = url;
+        }
+    });
+
+    /* ── Auto-dismiss alerts after 5s ───────────────────────── */
+    setTimeout(() => {
+        ['alertSuccess','alertError'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.transition = 'opacity .5s';
+            if (el) { el.style.opacity = '0'; setTimeout(() => el.remove(), 500); }
+        });
+    }, 5000);
 </script>
 </body>
 </html>
