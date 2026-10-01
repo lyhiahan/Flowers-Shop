@@ -221,64 +221,63 @@
 
         <!-- Profile Header Body -->
         <div class="px-6 sm:px-10 pb-8">
-          <div class="relative flex flex-col sm:flex-row items-center sm:items-end justify-between gap-4 -mt-16 sm:-mt-20 mb-6">
-            
-            <!-- Avatar & Main Identifiers -->
-            <div class="flex flex-col sm:flex-row items-center sm:items-end gap-4 text-center sm:text-left">
-              <div class="relative">
-                <img th:src="${user.avatarUrl != null and !user.avatarUrl.isEmpty() ? user.avatarUrl : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200'}"
-                     class="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl border-4 border-white object-cover shadow-md bg-white" 
-                     th:alt="${user.fullName != null ? user.fullName : user.username}"
-                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200';">
-                <span class="absolute bottom-1 right-1 w-6 h-6 rounded-full bg-emerald-500 border-3 border-white shadow-xs" title="Đang hoạt động"></span>
-              </div>
-              
-              <div class="pb-1">
-                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1">
-                  <h1 class="text-2xl sm:text-3xl font-extrabold text-botanic-dark" 
-                      th:text="${user.fullName != null and !user.fullName.isEmpty() ? user.fullName : user.username}">Họ Và Tên Thành Viên</h1>
-                  
-                  <!-- Role Badges -->
-                  <span th:if="${user.role != null and user.role.name() == 'ADMIN'}" 
-                        class="px-3 py-1 rounded-full bg-rose-50 text-rose-700 text-xs font-bold border border-rose-200">
-                    👑 Quản trị viên
-                  </span>
-                  <span th:if="${user.role != null and (user.role.name() == 'MANAGER' or user.role.name() == 'VENDOR')}" 
-                        class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
-                    🏪 Chủ cửa hàng
-                  </span>
-                  <span th:if="${user.role != null and user.role.name() == 'STAFF'}" 
-                        class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-bold border border-amber-200">
-                    💼 Nhân viên tư vấn
-                  </span>
-                  <span th:if="${user.role != null and user.role.name() == 'SHIPPER'}" 
-                        class="px-3 py-1 rounded-full bg-sky-50 text-sky-700 text-xs font-bold border border-sky-200">
-                    🚚 Đối tác giao hàng
-                  </span>
-                  <span th:if="${user.role != null and user.role.name() == 'CUSTOMER'}" 
-                        class="px-3 py-1 rounded-full bg-botanic-subtle text-botanic-dark text-xs font-bold border border-[#EBDED4]">
-                    🌸 Khách hàng thân thiết
-                  </span>
-                </div>
-                
-                <p class="text-sm text-[#888] font-bold flex items-center justify-center sm:justify-start gap-1">
-                  <span>@</span><span th:text="${user.username}">username</span>
-                  <span class="text-[#CCC] mx-1">•</span>
-                  <span class="text-botanic-green flex items-center gap-1 font-semibold text-xs">
-                    <span class="material-symbols-outlined text-[15px]">verified_user</span>Tài khoản đã xác thực
-                  </span>
-                </p>
-              </div>
+          <!-- Top Row: Avatar overlapping cover, and Action Button -->
+          <div class="relative flex flex-col sm:flex-row items-center sm:items-end justify-between gap-4 -mt-14 sm:-mt-16 mb-4">
+            <!-- Avatar with border -->
+            <div class="relative shrink-0">
+              <img th:src="${user.avatarUrl != null and !user.avatarUrl.isEmpty() ? user.avatarUrl : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200'}"
+                   class="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl border-4 border-white object-cover shadow-md bg-white" 
+                   th:alt="${user.fullName != null ? user.fullName : user.username}"
+                   onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200';">
+              <span class="absolute bottom-1 right-1 w-6 h-6 rounded-full bg-emerald-500 border-3 border-white shadow-xs" title="Đang hoạt động"></span>
             </div>
 
-            <!-- Back & Action CTA -->
-            <div class="flex items-center gap-2 shrink-0 pb-1">
+            <!-- Action button on the right -->
+            <div class="flex items-center gap-2 shrink-0 pt-2 sm:pt-0">
               <a th:href="@{/users}" 
                  class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white hover:bg-botanic-subtle border border-[#E5D7CD] text-[#555] hover:text-botanic-dark text-xs font-bold transition-all shadow-xs">
                 <span class="material-symbols-outlined text-[16px]">arrow_back</span>
                 <span>Danh sách thành viên</span>
               </a>
             </div>
+          </div>
+
+          <!-- User Name, Badges & Handle - Fully situated on the white card background -->
+          <div class="text-center sm:text-left mb-6 pt-1">
+            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 mb-2">
+              <h1 class="text-2xl sm:text-3xl font-extrabold text-botanic-dark leading-tight" 
+                  th:text="${user.fullName != null and !user.fullName.isEmpty() ? user.fullName : user.username}">Họ Và Tên Thành Viên</h1>
+              
+              <!-- Role Badges -->
+              <span th:if="${user.role != null and user.role.name() == 'ADMIN'}" 
+                    class="px-3 py-1 rounded-full bg-rose-50 text-rose-700 text-xs font-bold border border-rose-200">
+                👑 Quản trị viên
+              </span>
+              <span th:if="${user.role != null and (user.role.name() == 'MANAGER' or user.role.name() == 'VENDOR')}" 
+                    class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
+                🏪 Chủ cửa hàng
+              </span>
+              <span th:if="${user.role != null and user.role.name() == 'STAFF'}" 
+                    class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-bold border border-amber-200">
+                💼 Nhân viên tư vấn
+              </span>
+              <span th:if="${user.role != null and user.role.name() == 'SHIPPER'}" 
+                    class="px-3 py-1 rounded-full bg-sky-50 text-sky-700 text-xs font-bold border border-sky-200">
+                🚚 Đối tác giao hàng
+              </span>
+              <span th:if="${user.role != null and user.role.name() == 'CUSTOMER'}" 
+                    class="px-3 py-1 rounded-full bg-botanic-subtle text-botanic-dark text-xs font-bold border border-[#EBDED4]">
+                🌸 Khách hàng thân thiết
+              </span>
+            </div>
+            
+            <p class="text-sm text-[#888] font-bold flex flex-wrap items-center justify-center sm:justify-start gap-1.5">
+              <span>@</span><span th:text="${user.username}">username</span>
+              <span class="text-[#CCC] mx-1">•</span>
+              <span class="text-botanic-green flex items-center gap-1 font-semibold text-xs">
+                <span class="material-symbols-outlined text-[15px]">verified_user</span>Tài khoản đã xác thực
+              </span>
+            </p>
           </div>
 
           <!-- Dynamic Metric Stats Cards: Tự động hiện Điểm cho KHÁCH HÀNG, hiện Chức vụ cho QUẢN LÝ / NHÂN VIÊN -->
