@@ -256,43 +256,7 @@
         </div>
       </div>
 
-      <!-- Atelier Page Header Banner (ui/DESIGN.md & code.html aesthetic) -->
-      <div class="relative overflow-hidden rounded-2xl p-6 md:p-8 shadow-xs border border-[#EDE4D9] bg-[#F8F3EC]">
-        <!-- Subtle botanical watermark illustration -->
-        <div class="absolute right-0 top-0 translate-x-12 -translate-y-8 opacity-10 pointer-events-none text-secondary">
-          <svg fill="currentColor" height="340" viewBox="0 0 200 200" width="340">
-            <path d="M100 0 C120 40 160 80 200 100 C160 120 120 160 100 200 C80 160 40 120 0 100 C40 80 80 40 100 0 Z"></path>
-          </svg>
-        </div>
 
-        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div class="max-w-2xl">
-            <div class="flex items-center gap-2 mb-2 flex-wrap">
-              <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white text-[12px] font-bold text-secondary border border-[#C93B50]/20 shadow-2xs">
-                <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
-                Bộ Sưu Tập Cá Nhân
-              </span>
-              <span id="wishlistCountBadge" class="inline-flex items-center px-3 py-1 rounded-full bg-[#E9F3EE] text-[12px] font-bold text-[#1E453E]">
-                <span id="wishlistCountNumber" th:text="${wishlist != null ? #lists.size(wishlist) : 0}">0</span>&nbsp;mẫu hoa đã lưu
-              </span>
-            </div>
-            <h1 class="font-extrabold text-[26px] md:text-[30px] text-[#2D2424] tracking-tight mb-1.5 flex items-center gap-2">
-              <span class="text-secondary">❤️</span>
-              <span>Bộ Sưu Tập Hoa Yêu Thích</span>
-            </h1>
-            <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-              Các mẫu hoa tươi bạn đã thả tim lưu lại. Dễ dàng theo dõi mức giá, kiểm tra ưu đãi và đặt giao hỏa tốc 60–90 phút bất cứ khi nào bạn cần.
-            </p>
-          </div>
-
-          <div class="shrink-0 flex items-center gap-3">
-            <a th:href="@{/}" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[#1E453E] hover:bg-[#163630] text-white text-[13.5px] font-bold transition-all shadow-xs active:scale-95 text-center">
-              <span>Khám Phá Thêm Hoa Tươi 🌸</span>
-              <span class="material-symbols-outlined text-[17px]">arrow_forward</span>
-            </a>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- ==============================================
