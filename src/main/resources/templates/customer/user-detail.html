@@ -1,144 +1,567 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <meta charset="UTF-8">
-    <title th:text="${(user.fullName != null ? user.fullName : user.username) + ' - Trang Cá Nhân'}">Trang Cá Nhân</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-page); color: var(--text-main); }
-        .font-serif { font-family: 'Playfair Display', Georgia, serif; }
-        .profile-card { border-radius: 20px; border: 1px solid var(--border-soft); background: var(--surface-card); }
-    </style>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title th:text="${user != null ? (user.fullName != null ? user.fullName : user.username) + ' - Trang Cá Nhân' : 'Trang Cá Nhân'}">Trang Cá Nhân - HOA TƯƠI SÀI GÒN</title>
+
+  <!-- Google Fonts: Nunito & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,700;1,800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <style>
+    @layer base {
+      html, body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Nunito', sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      body { overscroll-behavior: none; }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
+      * {
+        font-family: 'Nunito', sans-serif;
+      }
+      .material-symbols-outlined {
+        font-family: 'Material Symbols Outlined' !important;
+        font-weight: normal;
+        font-style: normal;
+        display: inline-block;
+        line-height: 1;
+        text-transform: none;
+        letter-spacing: normal;
+        word-wrap: normal;
+        white-space: nowrap;
+        direction: ltr;
+      }
+    }
+    ::-webkit-scrollbar { display: none; }
+  </style>
+
+  <!-- Tailwind CSS CDN matching ui/DESIGN.md -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "botanic-bg": "#FAF6F0",
+            "botanic-subtle": "#F7EFE9",
+            "botanic-border": "#EBDED4",
+            "botanic-card": "#FFFFFF",
+            "botanic-card-soft": "#FFF7F2",
+            "botanic-dark": "#222222",
+            "botanic-muted": "#666666",
+            "botanic-green": "#264E43",
+            "botanic-green-dark": "#1E433A",
+            "botanic-green-light": "#E9F2EE",
+            "botanic-rose": "#C84357",
+            "botanic-rose-dark": "#B83A4B",
+            "botanic-rose-soft": "#FDF0F2",
+            "botanic-tag-border": "#F3D5DB"
+          },
+          fontFamily: {
+            sans: ["Nunito", "sans-serif"],
+            nunito: ["Nunito", "sans-serif"]
+          },
+          boxShadow: {
+            "soft": "0 2px 10px rgba(0,0,0,0.04)",
+            "card": "0 4px 16px -2px rgba(38,78,67,0.06), 0 2px 6px -1px rgba(200,67,87,0.03)",
+            "hover": "0 14px 28px -4px rgba(38,78,67,0.12), 0 6px 12px -2px rgba(200,67,87,0.06)"
+          }
+        }
+      }
+    };
+  </script>
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg bg-white border-bottom py-3 sticky-top">
-        <div class="container">
-            <a class="navbar-brand font-serif fw-bold fs-4" style="color: var(--brand-green);" th:href="@{/}">🌸 HOA TƯƠI SÀI GÒN</a>
-            <div class="d-flex align-items-center gap-3">
-                <a th:href="@{/}" class="btn btn-light btn-sm"><i class="bi bi-house me-1"></i> Trang chủ</a>
-                <a th:href="@{/stores}" class="btn btn-outline-danger btn-sm"><i class="bi bi-shop me-1"></i> Cửa hàng</a>
-                <a th:href="@{/users}" class="btn btn-outline-secondary btn-sm active"><i class="bi bi-people me-1"></i> Người dùng</a>
-                <div sec:authorize="isAuthenticated()">
-                    <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/customer/profile}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-person me-1"></i> Hồ sơ</a>
-                </div>
-                <div sec:authorize="!isAuthenticated()">
-                    <a th:href="@{/login}" class="btn btn-danger btn-sm rounded-pill px-3"><i class="bi bi-box-arrow-in-right me-1"></i> Sign in</a>
-                </div>
-            </div>
-        </div>
-    </nav>
 
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="profile-card p-4 p-md-5 shadow-sm text-center">
-                    <img th:src="${user.avatarUrl != null and user.avatarUrl != '' ? user.avatarUrl : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'}"
-                         class="rounded-circle border shadow-sm mb-3" width="120" height="120" style="object-fit: cover;">
+<body class="bg-[#FAF6F0] font-sans text-botanic-dark antialiased selection:bg-botanic-rose-soft selection:text-botanic-rose">
 
-                    <h3 class="font-serif fw-bold mb-1 text-dark" th:text="${user.fullName != null ? user.fullName : user.username}"></h3>
-                    <p class="text-muted small mb-3" th:text="'@' + ${user.username}"></p>
-
-                    <div class="d-flex justify-content-center gap-2 mb-4">
-                        <span th:if="${user.role != null and user.role.name() == 'ADMIN'}" class="badge bg-danger-subtle text-danger rounded-pill px-3 py-2">Quản trị viên</span>
-                        <span th:if="${user.role != null and (user.role.name() == 'MANAGER' or user.role.name() == 'VENDOR')}" class="badge bg-success-subtle text-success rounded-pill px-3 py-2">Chủ cửa hàng</span>
-                        <span th:if="${user.role != null and user.role.name() == 'STAFF'}" class="badge bg-warning-subtle text-warning-emphasis rounded-pill px-3 py-2">Nhân viên</span>
-                        <span th:if="${user.role != null and user.role.name() == 'SHIPPER'}" class="badge bg-info-subtle text-info-emphasis rounded-pill px-3 py-2">Giao hàng</span>
-                        <span th:if="${user.role != null and user.role.name() == 'CUSTOMER'}" class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-2">Khách hàng thành viên</span>
-                    </div>
-
-                    <!-- Thanh điều hướng người dùng (Tabs: Trang chủ & About) - Use case UC_007 Step 7, 8 -->
-                    <ul class="nav nav-pills justify-content-center gap-2 mb-4 bg-light p-1 rounded-pill" id="userProfileTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link rounded-pill px-4 active" id="user-home-tab" data-bs-toggle="pill" data-bs-target="#user-home" type="button" role="tab" aria-controls="user-home" aria-selected="true">
-                                <i class="bi bi-house me-1"></i> Trang Chủ
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link rounded-pill px-4" id="user-about-tab" data-bs-toggle="pill" data-bs-target="#user-about" type="button" role="tab" aria-controls="user-about" aria-selected="false">
-                                <i class="bi bi-info-circle me-1"></i> About (Giới Thiệu)
-                            </button>
-                        </li>
-                    </ul>
-
-                    <!-- Nội dung các Tab -->
-                    <div class="tab-content text-start" id="userProfileTabsContent">
-                        <!-- Tab 1: Trang chủ của người dùng (Step 7) -->
-                        <div class="tab-pane fade show active" id="user-home" role="tabpanel" aria-labelledby="user-home-tab">
-                            <div class="p-3 bg-light rounded-4 mb-3 text-center">
-                                <h6 class="fw-bold mb-1">🌿 Chào mừng đến với trang cá nhân của <span th:text="${user.fullName != null ? user.fullName : user.username}"></span>!</h6>
-                                <p class="text-muted small mb-0">Thành viên tích cực trong cộng đồng chuỗi hoa tươi Sài Gòn (Bloom Flower Chain).</p>
-                            </div>
-                            <div class="row g-3 py-2 text-center">
-                                <div class="col-6">
-                                    <div class="p-3 border rounded-3 bg-white">
-                                        <span class="text-muted small d-block">Điểm thưởng tích lũy</span>
-                                        <strong class="text-danger fs-5" th:text="${user.point != null ? user.point : 0} + ' điểm'"></strong>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="p-3 border rounded-3 bg-white">
-                                        <span class="text-muted small d-block">Hạng thành viên</span>
-                                        <strong class="text-dark fs-5" th:text="${user.userLevel != null ? user.userLevel.name : 'Thành viên mới'}"></strong>
-                                    </div>
-                                </div>
-                            </div>
-                            <div th:if="${user.store != null}" class="alert alert-success d-flex align-items-center gap-3 mt-3 rounded-3">
-                                <i class="bi bi-shop fs-3"></i>
-                                <div>
-                                    <div class="fw-bold" th:text="'Quản lý chi nhánh: ' + ${user.store.name}"></div>
-                                    <small class="text-muted" th:text="${user.store.address}"></small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tab 2: About - Thông tin chi tiết người dùng (Step 8) -->
-                        <div class="tab-pane fade" id="user-about" role="tabpanel" aria-labelledby="user-about-tab">
-                            <div class="card border-0 bg-light rounded-4 p-4">
-                                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
-                                    <i class="bi bi-person-lines-fill text-danger me-2"></i> Hồ Sơ Chi Tiết (About)
-                                </h6>
-                                <div class="row g-3 small">
-                                    <div class="col-sm-6">
-                                        <span class="text-muted d-block">Họ và tên:</span>
-                                        <strong class="text-dark" th:text="${user.fullName != null ? user.fullName : 'Chưa cập nhật'}"></strong>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <span class="text-muted d-block">Tên đăng nhập (Username):</span>
-                                        <strong class="text-dark" th:text="'@' + ${user.username}"></strong>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <span class="text-muted d-block">Email liên hệ:</span>
-                                        <strong class="text-dark" th:text="${user.email != null ? user.email : 'Bảo mật'}"></strong>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <span class="text-muted d-block">Số điện thoại:</span>
-                                        <strong class="text-dark" th:text="${user.phone != null and user.phone != '' ? user.phone : 'Chưa cập nhật'}"></strong>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <span class="text-muted d-block">Địa chỉ:</span>
-                                        <strong class="text-dark" th:text="${user.address != null and user.address != '' ? user.address : 'Chưa cập nhật'}"></strong>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <span class="text-muted d-block">Ngày tham gia hệ thống:</span>
-                                        <strong class="text-dark" th:text="${user.createdDate != null ? user.createdDate : 'Thành viên sáng lập'}"></strong>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-4 text-center">
-                        <a th:href="@{/users}" class="btn btn-outline-secondary rounded-pill px-4 py-2">
-                            <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <!-- 1. THANH TIỆN ÍCH TRÊN CÙNG (Top Utility Bar) -->
+  <div class="bg-[#F7EFE9] border-b border-[#EBDED4] text-[13px] text-[#555555] py-2 px-4 sm:px-8">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2 font-bold text-[#444]">
+        <span class="text-botanic-rose">🌸</span>
+        <span>Chuỗi Cửa Hàng Hoa Tươi &amp; Điện Hoa Sài Gòn</span>
+      </div>
+      <div class="flex items-center flex-wrap gap-4 sm:gap-6 text-xs sm:text-[13px] font-medium">
+        <span class="flex items-center gap-1.5 font-bold text-botanic-dark">
+          <span class="text-botanic-rose">📞</span> Hotline: 028 1111 222
+        </span>
+        <span class="hidden md:inline-flex items-center gap-1.5 text-botanic-green font-bold">
+          <span class="material-symbols-outlined text-[15px]">schedule</span> Giao nhanh 60–90 phút
+        </span>
+        <a class="flex items-center gap-1 text-botanic-green font-bold hover:text-botanic-dark transition-colors" th:href="@{/users}">
+          <span class="material-symbols-outlined text-[15px]">group</span>Thành viên
+        </a>
+        <a class="flex items-center gap-1 hover:text-botanic-green transition-colors" th:href="@{/stores}">
+          <span class="material-symbols-outlined text-[16px]">store</span>Hệ thống chi nhánh
+        </a>
+        <a class="flex items-center gap-1 hover:text-botanic-green transition-colors" th:href="@{/following}">
+          <span class="material-symbols-outlined text-[15px]">bookmark</span>Following
+        </a>
+        <a class="flex items-center gap-1 hover:text-botanic-green transition-colors" th:href="@{/customer/profile}">
+          <span class="material-symbols-outlined text-[16px]">person</span>Hồ sơ
+        </a>
+      </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </div>
+
+  <!-- 2. THANH ĐIỀU HƯỚNG CHÍNH (Main Header) -->
+  <header class="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-[#EBDED4]/80 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4 lg:gap-8">
+      
+      <!-- Logo -->
+      <a class="flex items-center gap-2.5 shrink-0 group" th:href="@{/}">
+        <div class="w-10 h-10 rounded-full bg-botanic-subtle flex items-center justify-center text-botanic-rose text-2xl shadow-xs group-hover:scale-105 transition-transform">
+          🌸
+        </div>
+        <div class="flex flex-col">
+          <span class="font-extrabold text-lg sm:text-xl tracking-wide text-botanic-dark group-hover:text-botanic-green transition-colors">HOA TƯƠI SÀI GÒN</span>
+          <span class="text-[10px] uppercase tracking-[0.2em] text-[#888] font-bold -mt-0.5">Atelier Floral Botanique</span>
+        </div>
+      </a>
+
+      <!-- Ô tìm kiếm Pill-shape -->
+      <div class="flex-1 max-w-xl hidden md:block">
+        <form th:action="@{/users}" method="get" class="flex items-center bg-white border border-[#DDD] hover:border-botanic-green/60 focus-within:border-botanic-green focus-within:ring-2 focus-within:ring-botanic-green/10 rounded-full p-1 pl-4 transition-all shadow-xs">
+          <div class="flex items-center gap-1 text-xs font-bold text-[#444] pr-3 border-r border-[#E5E5E5] shrink-0">
+            <span class="text-botanic-rose text-sm">👥</span> Thành viên
+          </div>
+          <input name="keyword" class="w-full bg-transparent px-3 py-1.5 text-xs sm:text-[13.5px] font-medium text-botanic-dark placeholder-[#888] border-none focus:ring-0 focus:outline-none" 
+                 placeholder="Tìm thành viên theo tên..." type="text">
+          <button class="bg-[#264E43] hover:bg-[#1E433A] text-white text-xs font-bold px-4 py-2 rounded-full flex items-center gap-1 transition-colors shrink-0 shadow-xs" type="submit">
+            <span class="material-symbols-outlined text-[15px]">search</span>Tìm
+          </button>
+        </form>
+      </div>
+
+      <!-- Cụm nút tiện ích bên phải -->
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+        <!-- Wishlist -->
+        <a class="w-9 h-9 rounded-full border border-[#EBE3DC] flex items-center justify-center text-[#555] hover:text-botanic-rose hover:border-botanic-rose transition-colors" 
+           th:href="@{/customer/wishlist}" title="Hoa yêu thích">
+          <span class="material-symbols-outlined text-[19px]">favorite_border</span>
+        </a>
+
+        <!-- Following -->
+        <a class="w-9 h-9 rounded-full border border-[#EBE3DC] flex items-center justify-center text-[#555] hover:text-botanic-green hover:border-botanic-green transition-colors" 
+           th:href="@{/following}" title="Following">
+          <span class="material-symbols-outlined text-[19px]">bookmark_border</span>
+        </a>
+
+        <!-- Giỏ hàng -->
+        <a class="relative w-9 h-9 rounded-full border border-[#EBE3DC] flex items-center justify-center text-[#555] hover:text-botanic-green hover:border-botanic-green transition-colors" 
+           th:href="@{/cart}" title="Giỏ hàng">
+          <span class="material-symbols-outlined text-[19px]">shopping_bag</span>
+          <span class="absolute -top-1 -right-1 bg-botanic-rose text-white text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shadow-xs"
+                th:text="${cartItemCount != null ? cartItemCount : 0}">0</span>
+        </a>
+
+        <!-- Tài khoản dropdown / Auth -->
+        <div class="flex items-center gap-2 pl-2 border-l border-[#EBDED4]">
+          <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/customer/profile}" class="flex items-center gap-1.5 py-1.5 px-3 rounded-full hover:bg-botanic-subtle text-xs sm:text-[13px] font-bold text-[#333] transition-colors">
+              <span class="material-symbols-outlined text-[19px] text-botanic-green">account_circle</span>
+              <span class="hidden sm:inline" sec:authentication="name">Tài khoản</span>
+            </a>
+          </div>
+          <div sec:authorize="!isAuthenticated()">
+            <a th:href="@{/login}" class="inline-flex items-center gap-1 py-1.5 px-4 rounded-full bg-[#264E43] hover:bg-[#1E433A] text-white text-xs sm:text-[13px] font-bold transition-all shadow-xs">
+              <span class="material-symbols-outlined text-[16px]">login</span>Đăng nhập
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sub-menu Category Navigation -->
+    <div class="border-t border-[#F0E6DE] bg-[#FAF6F0]">
+      <div class="max-w-7xl mx-auto px-4 sm:px-8 flex items-center gap-6 sm:gap-8 overflow-x-auto text-[13.5px] py-2.5 font-bold">
+        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/}">Tất cả</a>
+        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/(keyword='Sinh Nhật')}">🎂 Sinh Nhật</a>
+        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/(keyword='Tình Yêu')}">💖 Tình Yêu</a>
+        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/(keyword='Khai Trương')}">🎉 Khai Trương</a>
+        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap transition-colors pb-0.5" th:href="@{/(keyword='Khác')}">✨ Khác</a>
+        <span class="text-[#D8CBC2] hidden sm:inline">|</span>
+        <a class="text-[#666] hover:text-botanic-dark whitespace-nowrap inline-flex items-center gap-1 pb-0.5" th:href="@{/customer/profile/recently-viewed}">
+          <span class="material-symbols-outlined text-[16px]">history</span>Đã xem gần đây
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="w-full bg-[#FAF6F0] min-h-screen py-6 sm:py-8">
+    <div class="max-w-5xl mx-auto px-4 sm:px-8">
+
+      <!-- Breadcrumbs -->
+      <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs font-semibold text-[#777] mb-5">
+        <a class="hover:text-botanic-green transition-colors flex items-center gap-1" th:href="@{/}">
+          <span class="material-symbols-outlined text-[16px]">home</span>Trang chủ
+        </a>
+        <span class="material-symbols-outlined text-[14px] text-[#BBB]">chevron_right</span>
+        <a class="hover:text-botanic-green transition-colors" th:href="@{/users}">Cộng đồng thành viên</a>
+        <span class="material-symbols-outlined text-[14px] text-[#BBB]">chevron_right</span>
+        <span class="text-botanic-rose font-bold" th:text="${user != null ? (user.fullName != null ? user.fullName : user.username) : 'Trang cá nhân'}">Thành viên</span>
+      </nav>
+
+      <!-- 3. PROFILE HERO CARD -->
+      <div class="bg-white rounded-3xl border border-[#EBDED4] overflow-hidden shadow-card mb-8">
+        
+        <!-- Cover Banner -->
+        <div class="relative h-36 sm:h-48 bg-gradient-to-r from-[#F7EFE9] via-[#FAF0EA] to-[#E9F2EE] overflow-hidden">
+          <img th:if="${user.cover != null and !user.cover.isEmpty()}" th:src="${user.cover}" class="w-full h-full object-cover" alt="Cover">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+        </div>
+
+        <!-- Profile Header Body -->
+        <div class="px-6 sm:px-10 pb-8">
+          <div class="relative flex flex-col sm:flex-row items-center sm:items-end justify-between gap-4 -mt-16 sm:-mt-20 mb-6">
+            
+            <!-- Avatar & Main Identifiers -->
+            <div class="flex flex-col sm:flex-row items-center sm:items-end gap-4 text-center sm:text-left">
+              <div class="relative">
+                <img th:src="${user.avatarUrl != null and !user.avatarUrl.isEmpty() ? user.avatarUrl : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200'}"
+                     class="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl border-4 border-white object-cover shadow-md bg-white" 
+                     th:alt="${user.fullName != null ? user.fullName : user.username}"
+                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200';">
+                <span class="absolute bottom-1 right-1 w-6 h-6 rounded-full bg-emerald-500 border-3 border-white shadow-xs" title="Đang hoạt động"></span>
+              </div>
+              
+              <div class="pb-1">
+                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1">
+                  <h1 class="text-2xl sm:text-3xl font-extrabold text-botanic-dark" 
+                      th:text="${user.fullName != null and !user.fullName.isEmpty() ? user.fullName : user.username}">Họ Và Tên Thành Viên</h1>
+                  
+                  <!-- Role Badges -->
+                  <span th:if="${user.role != null and user.role.name() == 'ADMIN'}" 
+                        class="px-3 py-1 rounded-full bg-rose-50 text-rose-700 text-xs font-bold border border-rose-200">
+                    👑 Quản trị viên
+                  </span>
+                  <span th:if="${user.role != null and (user.role.name() == 'MANAGER' or user.role.name() == 'VENDOR')}" 
+                        class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
+                    🏪 Chủ cửa hàng
+                  </span>
+                  <span th:if="${user.role != null and user.role.name() == 'STAFF'}" 
+                        class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-bold border border-amber-200">
+                    💼 Nhân viên tư vấn
+                  </span>
+                  <span th:if="${user.role != null and user.role.name() == 'SHIPPER'}" 
+                        class="px-3 py-1 rounded-full bg-sky-50 text-sky-700 text-xs font-bold border border-sky-200">
+                    🚚 Đối tác giao hàng
+                  </span>
+                  <span th:if="${user.role != null and user.role.name() == 'CUSTOMER'}" 
+                        class="px-3 py-1 rounded-full bg-botanic-subtle text-botanic-dark text-xs font-bold border border-[#EBDED4]">
+                    🌸 Khách hàng thân thiết
+                  </span>
+                </div>
+                
+                <p class="text-sm text-[#888] font-bold flex items-center justify-center sm:justify-start gap-1">
+                  <span>@</span><span th:text="${user.username}">username</span>
+                  <span class="text-[#CCC] mx-1">•</span>
+                  <span class="text-botanic-green flex items-center gap-1 font-semibold text-xs">
+                    <span class="material-symbols-outlined text-[15px]">verified_user</span>Tài khoản đã xác thực
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <!-- Back & Action CTA -->
+            <div class="flex items-center gap-2 shrink-0 pb-1">
+              <a th:href="@{/users}" 
+                 class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white hover:bg-botanic-subtle border border-[#E5D7CD] text-[#555] hover:text-botanic-dark text-xs font-bold transition-all shadow-xs">
+                <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+                <span>Danh sách thành viên</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Dynamic Metric Stats Cards: Tự động hiện Điểm cho KHÁCH HÀNG, hiện Chức vụ cho QUẢN LÝ / NHÂN VIÊN -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-[#F0E6DE]">
+            
+            <!-- Metric 1 -->
+            <!-- Dành cho Khách hàng: Điểm tích lũy -->
+            <div th:if="${user.role == null or user.role.name() == 'CUSTOMER'}" 
+                 class="p-4 rounded-2xl bg-[#FFF7F2] border border-[#EEDFD5] flex items-center gap-3.5 shadow-2xs">
+              <div class="w-12 h-12 rounded-xl bg-white text-amber-500 flex items-center justify-center text-2xl shadow-xs shrink-0">
+                ⭐
+              </div>
+              <div>
+                <span class="text-xs text-[#888] font-bold uppercase tracking-wider block">Điểm Thưởng Tích Lũy</span>
+                <span class="text-xl font-extrabold text-botanic-rose" 
+                      th:text="${user.point != null ? user.point + ' Điểm' : '0 Điểm'}">0 Điểm</span>
+              </div>
+            </div>
+
+            <!-- Dành cho Quản lý / Nhân sự: Chức vụ hệ thống (ẨN ĐIỂM TỰ ĐỘNG) -->
+            <div th:if="${user.role != null and user.role.name() != 'CUSTOMER'}" 
+                 class="p-4 rounded-2xl bg-[#E9F2EE] border border-[#CCE2D8] flex items-center gap-3.5 shadow-2xs">
+              <div class="w-12 h-12 rounded-xl bg-white text-botanic-green flex items-center justify-center text-2xl shadow-xs shrink-0">
+                🏢
+              </div>
+              <div>
+                <span class="text-xs text-botanic-green font-bold uppercase tracking-wider block">Vai Trò Công Tác</span>
+                <span class="text-lg font-extrabold text-botanic-dark" 
+                      th:text="${user.role.name() == 'ADMIN' ? 'Ban Quản Trị Hệ Thống' : (user.role.name() == 'MANAGER' or user.role.name() == 'VENDOR' ? 'Quản Lý Cửa Hàng' : (user.role.name() == 'STAFF' ? 'Nhân Viên Tư Vấn Hoa' : 'Đối Tác Giao Hàng'))}">Quản lý</span>
+              </div>
+            </div>
+
+            <!-- Metric 2 -->
+            <!-- Dành cho Khách hàng: Hạng thành viên -->
+            <div th:if="${user.role == null or user.role.name() == 'CUSTOMER'}" 
+                 class="p-4 rounded-2xl bg-[#F7EFE9] border border-[#EAE0D8] flex items-center gap-3.5 shadow-2xs">
+              <div class="w-12 h-12 rounded-xl bg-white text-botanic-green flex items-center justify-center text-2xl shadow-xs shrink-0">
+                🏆
+              </div>
+              <div>
+                <span class="text-xs text-[#888] font-bold uppercase tracking-wider block">Hạng Thành Viên</span>
+                <span class="text-xl font-extrabold text-botanic-dark" 
+                      th:text="${user.userLevel != null ? user.userLevel.name : 'Thành viên mới'}">Thành viên mới</span>
+              </div>
+            </div>
+
+            <!-- Dành cho Quản lý / Nhân sự: Trạng thái tài khoản -->
+            <div th:if="${user.role != null and user.role.name() != 'CUSTOMER'}" 
+                 class="p-4 rounded-2xl bg-[#FAF6F0] border border-[#EAE0D8] flex items-center gap-3.5 shadow-2xs">
+              <div class="w-12 h-12 rounded-xl bg-white text-emerald-600 flex items-center justify-center text-2xl shadow-xs shrink-0">
+                ✅
+              </div>
+              <div>
+                <span class="text-xs text-[#888] font-bold uppercase tracking-wider block">Tình Trạng Hoạt Động</span>
+                <span class="text-lg font-extrabold text-botanic-green">Đang công tác chính thức</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. PROFILE TABS & DETAILS -->
+      <div class="bg-white rounded-3xl border border-[#EBDED4] p-6 sm:p-8 shadow-card mb-10">
+        
+        <!-- Tabs Buttons -->
+        <div class="flex items-center gap-3 border-b border-[#F0E6DE] pb-4 mb-6">
+          <button id="tabBtnHome" onclick="switchTab('home')" 
+                  class="profile-tab-btn px-5 py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-[#264E43] text-white shadow-xs flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[17px]">home</span>
+            <span>Tổng Quan</span>
+          </button>
+          <button id="tabBtnAbout" onclick="switchTab('about')" 
+                  class="profile-tab-btn px-5 py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-[#FAF6F0] text-[#555] hover:bg-[#F2E7DC] hover:text-botanic-dark flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[17px]">info</span>
+            <span>Hồ Sơ &amp; Liên Hệ</span>
+          </button>
+        </div>
+
+        <!-- Tab 1: Home / Tổng quan -->
+        <div id="tabContentHome" class="space-y-6">
+          <div class="p-5 rounded-2xl bg-[#FFFBF8] border border-[#EEDFD5] text-center sm:text-left flex flex-col sm:flex-row items-center gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-[#E9F2EE] text-botanic-green flex items-center justify-center text-3xl shrink-0">
+              🌿
+            </div>
+            <div>
+              <h3 class="text-base sm:text-lg font-bold text-botanic-dark mb-1">
+                Chào mừng bạn ghé thăm trang cá nhân của <span class="text-botanic-rose" th:text="${user.fullName != null ? user.fullName : user.username}"></span>!
+              </h3>
+              <p class="text-xs sm:text-sm text-botanic-muted font-medium">
+                Thành viên tích cực trong cộng đồng chuỗi điện hoa nghệ thuật Hoa Tươi Sài Gòn (Bloom Flower Chain).
+              </p>
+            </div>
+          </div>
+
+          <!-- Store Card if manager has store -->
+          <div th:if="${user.store != null}" class="p-5 rounded-2xl bg-white border border-[#EBDED4] shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-xl bg-botanic-subtle text-botanic-rose flex items-center justify-center text-2xl shrink-0">
+                🏪
+              </div>
+              <div>
+                <span class="text-[11px] font-bold text-botanic-green uppercase tracking-wider block">Chi Nhánh Trực Thuộc Quản Lý</span>
+                <h4 class="font-extrabold text-base text-botanic-dark" th:text="${user.store.name}">Chi Nhánh Cửa Hàng</h4>
+                <p class="text-xs text-[#777] font-medium" th:text="${user.store.address}">Địa chỉ chi nhánh</p>
+              </div>
+            </div>
+            <a th:href="@{/stores/{id}(id=${user.store.id})}" 
+               class="px-5 py-2 rounded-full bg-[#264E43] hover:bg-[#1E433A] text-white text-xs font-bold transition-all shadow-xs shrink-0 flex items-center gap-1.5">
+              <span>Ghé Thăm Cửa Hàng</span>
+              <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Tab 2: About / Thông tin chi tiết -->
+        <div id="tabContentAbout" class="hidden">
+          <h4 class="font-bold text-base text-botanic-dark mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-[19px] text-botanic-rose">contact_page</span>
+            <span>Thông Tin Chi Tiết Thành Viên</span>
+          </h4>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-medium">
+            <div class="p-3.5 rounded-xl bg-[#FAF6F0] border border-[#EDE2D8]">
+              <span class="text-[#888] block text-[11px] font-bold uppercase mb-0.5">Họ và tên</span>
+              <span class="text-botanic-dark font-extrabold text-sm" 
+                    th:text="${user.fullName != null and !user.fullName.isEmpty() ? user.fullName : 'Chưa cập nhật'}">Họ và tên</span>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-[#FAF6F0] border border-[#EDE2D8]">
+              <span class="text-[#888] block text-[11px] font-bold uppercase mb-0.5">Tên đăng nhập (Username)</span>
+              <span class="text-botanic-dark font-extrabold text-sm" th:text="'@' + ${user.username}">@username</span>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-[#FAF6F0] border border-[#EDE2D8]">
+              <span class="text-[#888] block text-[11px] font-bold uppercase mb-0.5">Email liên hệ</span>
+              <span class="text-botanic-dark font-extrabold text-sm" 
+                    th:text="${user.email != null and !user.email.isEmpty() ? user.email : 'Bảo mật'}">email@gmail.com</span>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-[#FAF6F0] border border-[#EDE2D8]">
+              <span class="text-[#888] block text-[11px] font-bold uppercase mb-0.5">Số điện thoại</span>
+              <span class="text-botanic-dark font-extrabold text-sm" 
+                    th:text="${user.phone != null and !user.phone.isEmpty() ? user.phone : 'Chưa công khai'}">090 123 4567</span>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-[#FAF6F0] border border-[#EDE2D8] sm:col-span-2">
+              <span class="text-[#888] block text-[11px] font-bold uppercase mb-0.5">Địa chỉ khu vực</span>
+              <span class="text-botanic-dark font-bold text-xs" 
+                    th:text="${user.address != null and !user.address.isEmpty() ? user.address : 'TP. Hồ Chí Minh'}">Địa chỉ</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER: Đồng bộ hệ thống nhận diện -->
+  <footer class="w-full bg-[#FAF6F0] border-t border-[#EBDED4] text-botanic-dark pt-10 pb-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-10 pb-10 border-b border-[#EBDED4]">
+      
+      <!-- Col 1: Brand & Stores List -->
+      <div class="md:col-span-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-botanic-rose text-2xl">🌸</span>
+          <span class="font-bold text-xl text-botanic-dark tracking-wide">HOA TƯƠI SÀI GÒN</span>
+        </div>
+        <p class="text-xs sm:text-[13px] text-[#666] leading-relaxed mb-6 font-medium">
+          Hệ thống điện hoa cao cấp và thiết kế hoa nghệ thuật phong cách Pháp hiện đại. Trao gửi cảm xúc ngọt ngào, tinh tế qua từng đóa hoa tuyển chọn với cam kết tươi mới cùng dịch vụ giao hỏa tốc 60–90 phút toàn Sài Gòn.
+        </p>
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-bold text-[#444] flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[17px] text-botanic-green">store</span>Hệ Thống Chi Nhánh Cửa Hàng
+          </span>
+          <a class="text-xs text-botanic-rose font-bold hover:underline" th:href="@{/stores}">Xem tất cả →</a>
+        </div>
+        <div class="space-y-2.5 mb-4">
+          <!-- Chi nhánh 1 -->
+          <div class="p-3 rounded-xl bg-white border border-[#EBE1D8] text-xs flex items-center justify-between gap-3 shadow-2xs">
+            <div>
+              <div class="flex items-center gap-1.5 font-bold text-[#333] mb-0.5">
+                <span>🌸</span>Chi Nhánh Bến Thành (Quận 1)
+              </div>
+              <p class="text-[#777] text-[11px] font-medium">123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM</p>
+            </div>
+            <span class="px-2 py-1 rounded bg-[#E9F2EE] text-botanic-green font-bold text-[11px] shrink-0">028 1111 222</span>
+          </div>
+          <!-- Chi nhánh 2 -->
+          <div class="p-3 rounded-xl bg-white border border-[#EBE1D8] text-xs flex items-center justify-between gap-3 shadow-2xs">
+            <div>
+              <div class="flex items-center gap-1.5 font-bold text-[#333] mb-0.5">
+                <span>🌸</span>Chi Nhánh Phú Mỹ Hưng (Quận 7)
+              </div>
+              <p class="text-[#777] text-[11px] font-medium">456 Nguyễn Thị Thập, Tân Hưng, Quận 7, TP.HCM</p>
+            </div>
+            <span class="px-2 py-1 rounded bg-[#E9F2EE] text-botanic-green font-bold text-[11px] shrink-0">028 3333 444</span>
+          </div>
+          <!-- Chi nhánh 3 -->
+          <div class="p-3 rounded-xl bg-white border border-[#EBE1D8] text-xs flex items-center justify-between gap-3 shadow-2xs">
+            <div>
+              <div class="flex items-center gap-1.5 font-bold text-[#333] mb-0.5">
+                <span>🌸</span>Chi Nhánh Làng Đại Học (TP. Thủ Đức)
+              </div>
+              <p class="text-[#777] text-[11px] font-medium">1 Võ Văn Ngân, Linh Chiểu, TP. Thủ Đức, TP.HCM</p>
+            </div>
+            <span class="px-2 py-1 rounded bg-[#E9F2EE] text-botanic-green font-bold text-[11px] shrink-0">028 5555 666</span>
+          </div>
+        </div>
+        <p class="text-xs text-[#888] flex items-center gap-1.5 font-medium">
+          <span class="material-symbols-outlined text-[15px] text-botanic-rose">schedule</span>Mở cửa: 07:00 - 22:00 (Mỗi ngày, kể cả ngày lễ Tết)
+        </p>
+      </div>
+
+      <!-- Col 2: Khám Phá Hoa Tươi -->
+      <div class="md:col-span-2 md:col-start-7">
+        <h4 class="font-bold text-sm text-botanic-dark mb-4 tracking-wide">Khám Phá Hoa Tươi</h4>
+        <ul class="space-y-2.5 text-xs text-[#666] font-medium">
+          <li><a class="hover:text-botanic-rose transition-colors" th:href="@{/}">Hoa Bán Chạy Nhất</a></li>
+          <li><a class="hover:text-botanic-rose transition-colors" th:href="@{/}">Bộ Sưu Tập Mới Về</a></li>
+          <li><a class="hover:text-botanic-rose transition-colors" th:href="@{/}">Hoa Được Đánh Giá Cao</a></li>
+          <li><a class="hover:text-botanic-rose transition-colors" th:href="@{/stores}">Hệ Thống Chi Nhánh</a></li>
+        </ul>
+      </div>
+
+      <!-- Col 3: Chăm Sóc Khách Hàng -->
+      <div class="md:col-span-2">
+        <h4 class="font-bold text-sm text-botanic-dark mb-4 tracking-wide">Chăm Sóc Khách Hàng</h4>
+        <ul class="space-y-2.5 text-xs text-[#666] font-medium">
+          <li><a class="hover:text-botanic-rose transition-colors" href="#">Chính Sách Giao Hoa 60-90 Phút</a></li>
+          <li><a class="hover:text-botanic-rose transition-colors" href="#">Bảo Hành Độ Tươi 100%</a></li>
+          <li><a class="hover:text-botanic-rose transition-colors" href="#">In Thiệp &amp; Banner Miễn Phí</a></li>
+          <li><a class="hover:text-botanic-rose transition-colors" href="#">Hotline Đặt Gấp: 028 1111 222</a></li>
+        </ul>
+      </div>
+
+      <!-- Col 4: Liên Kết Tiện Ích -->
+      <div class="md:col-span-2">
+        <h4 class="font-bold text-sm text-botanic-dark mb-4 tracking-wide">Liên Kết Tiện Ích</h4>
+        <ul class="space-y-2.5 text-xs text-[#666] font-medium">
+          <li><a class="hover:text-botanic-rose transition-colors" th:href="@{/}">Trang Chủ</a></li>
+          <li><a class="hover:text-botanic-rose transition-colors" th:href="@{/following}">Bộ Sưu Tập Following</a></li>
+          <li><a class="hover:text-botanic-rose transition-colors" th:href="@{/customer/orders}">Lịch Sử Mua Hàng</a></li>
+          <li><a class="hover:text-botanic-rose transition-colors" th:href="@{/customer/wishlist}">Hoa Yêu Thích</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Bottom Copyright Bar -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 pt-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#888] font-medium">
+      <div>© 2026 HOA TƯƠI SÀI GÒN - Bản quyền thuộc về Chuỗi Cửa Hàng Hoa Tươi &amp; Điện Hoa Sài Gòn</div>
+      <div class="flex items-center gap-1 text-[#666] font-bold">
+        <span class="text-botanic-rose">🌸</span>100% Hoa Tươi Tuyển Chọn
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function switchTab(tabName) {
+      const btnHome = document.getElementById('tabBtnHome');
+      const btnAbout = document.getElementById('tabBtnAbout');
+      const contentHome = document.getElementById('tabContentHome');
+      const contentAbout = document.getElementById('tabContentAbout');
+
+      if (tabName === 'home') {
+        btnHome.classList.add('bg-[#264E43]', 'text-white', 'shadow-xs');
+        btnHome.classList.remove('bg-[#FAF6F0]', 'text-[#555]');
+        btnAbout.classList.remove('bg-[#264E43]', 'text-white', 'shadow-xs');
+        btnAbout.classList.add('bg-[#FAF6F0]', 'text-[#555]');
+
+        contentHome.classList.remove('hidden');
+        contentAbout.classList.add('hidden');
+      } else {
+        btnAbout.classList.add('bg-[#264E43]', 'text-white', 'shadow-xs');
+        btnAbout.classList.remove('bg-[#FAF6F0]', 'text-[#555]');
+        btnHome.classList.remove('bg-[#264E43]', 'text-white', 'shadow-xs');
+        btnHome.classList.add('bg-[#FAF6F0]', 'text-[#555]');
+
+        contentAbout.classList.remove('hidden');
+        contentHome.classList.add('hidden');
+      }
+    }
+  </script>
 </body>
 </html>

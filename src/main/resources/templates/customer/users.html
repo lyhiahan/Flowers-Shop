@@ -344,10 +344,36 @@
                   <span class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white shadow-xs" title="Thành viên hoạt động"></span>
                 </div>
                 
-                <!-- Point / Level Badge -->
-                <span class="px-2.5 py-1 rounded-full bg-botanic-subtle text-botanic-green text-[11px] font-bold flex items-center gap-1 border border-[#EBDED4]">
+                <!-- Point Badge for Customers ONLY (Hidden automatically for Staff / Manager / Shipper / Admin) -->
+                <span th:if="${u.role == null or u.role.name() == 'CUSTOMER'}" 
+                      class="px-2.5 py-1 rounded-full bg-botanic-subtle text-botanic-green text-[11px] font-bold flex items-center gap-1 border border-[#EBDED4]">
                   <span class="material-symbols-outlined text-[13px] text-amber-500">stars</span>
                   <span th:text="${u.point != null ? u.point + ' Điểm' : '0 Điểm'}">0 Điểm</span>
+                </span>
+                
+                <!-- Chức vụ huy hiệu cho Ban Quản Lý / Đối Tác / Nhân Sự -->
+                <span th:if="${u.role != null and (u.role.name() == 'MANAGER' or u.role.name() == 'VENDOR')}" 
+                      class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold flex items-center gap-1 border border-emerald-200">
+                  <span class="material-symbols-outlined text-[13px]">storefront</span>
+                  <span>Quản lý</span>
+                </span>
+
+                <span th:if="${u.role != null and u.role.name() == 'STAFF'}" 
+                      class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-[11px] font-bold flex items-center gap-1 border border-amber-200">
+                  <span class="material-symbols-outlined text-[13px]">badge</span>
+                  <span>Nhân viên</span>
+                </span>
+
+                <span th:if="${u.role != null and u.role.name() == 'SHIPPER'}" 
+                      class="px-2.5 py-1 rounded-full bg-sky-50 text-sky-700 text-[11px] font-bold flex items-center gap-1 border border-sky-200">
+                  <span class="material-symbols-outlined text-[13px]">local_shipping</span>
+                  <span>Giao hàng</span>
+                </span>
+
+                <span th:if="${u.role != null and u.role.name() == 'ADMIN'}" 
+                      class="px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 text-[11px] font-bold flex items-center gap-1 border border-rose-200">
+                  <span class="material-symbols-outlined text-[13px]">shield_person</span>
+                  <span>Quản trị</span>
                 </span>
               </div>
 
@@ -366,11 +392,17 @@
                   <span class="truncate" th:text="${u.email != null ? u.email : 'Email chưa công khai'}">user@gmail.com</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-[#E8DCD2] text-[11px] text-[#777]">
-                  <span class="flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[13px] text-botanic-green">verified_user</span>Đã xác thực
+                  <span class="flex items-center gap-1 text-botanic-green font-bold">
+                    <span class="material-symbols-outlined text-[14px]">verified_user</span>Đã xác thực
                   </span>
-                  <span class="font-semibold text-botanic-dark" 
-                        th:text="${u.userLevel != null ? u.userLevel.name : 'Thành viên'}">Hạng Bạc</span>
+                  <!-- Khách hàng: hiện Hạng thành viên -->
+                  <span th:if="${u.role == null or u.role.name() == 'CUSTOMER'}" 
+                        class="font-bold text-botanic-dark" 
+                        th:text="${u.userLevel != null ? u.userLevel.name : 'Thành viên mới'}">Thành viên mới</span>
+                  <!-- Quản lý / Nhân sự: hiện Vai trò chức danh -->
+                  <span th:if="${u.role != null and u.role.name() != 'CUSTOMER'}" 
+                        class="font-bold text-botanic-dark" 
+                        th:text="${u.role.name() == 'ADMIN' ? 'Ban điều hành' : (u.role.name() == 'MANAGER' or u.role.name() == 'VENDOR' ? 'Ban quản lý chi nhánh' : (u.role.name() == 'STAFF' ? 'Nhân sự trực ca' : 'Đối tác vận chuyển'))}">Ban quản lý</span>
                 </div>
               </div>
             </div>
