@@ -18,11 +18,13 @@ import java.util.List;
 public class UserPublicController {
 
     private final UserRepository userRepository;
+    private final com.finalproject.service.CartService cartService;
 
     @GetMapping
     public String listUsers(@RequestParam(value = "keyword", required = false) String keyword,
                             @RequestParam(value = "page", defaultValue = "0") int page,
-                            @RequestParam(value = "size", defaultValue = "3") int size,
+                            @RequestParam(value = "size", defaultValue = "6") int size,
+                            java.security.Principal principal,
                             Model model) {
         List<User> allUsers;
         if (keyword != null && !keyword.trim().isEmpty()) {
@@ -49,6 +51,11 @@ public class UserPublicController {
         model.addAttribute("totalUsers", totalUsers);
         model.addAttribute("hasPrevious", currentPage > 0);
         model.addAttribute("hasNext", currentPage < totalPages - 1);
+        if (principal != null) {
+            try {
+                model.addAttribute("cartItemCount", cartService.getCartItemCount(principal.getName()));
+            } catch (Exception ignored) {}
+        }
         return "customer/users";
     }
 
