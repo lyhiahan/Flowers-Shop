@@ -21,6 +21,8 @@ public class ManagerStoreController {
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
     private final com.finalproject.service.StoreAccessService storeAccess;
+    private final com.finalproject.repository.CommissionRepository commissionRepository;
+    private final com.finalproject.repository.StoreLevelRepository storeLevelRepository;
 
     @GetMapping
     public String listStores(Principal principal, Model model) {
@@ -39,34 +41,72 @@ public class ManagerStoreController {
     @GetMapping("/create")
     public String showCreateStoreForm(Model model) {
         model.addAttribute("store", new Store());
+        model.addAttribute("commissions", commissionRepository.findByIsDeletedFalse());
         return "manager/store-create";
     }
 
     @PostMapping("/create")
     public String createStore(Principal principal,
                               @ModelAttribute("store") Store store,
+                              @RequestParam(value = "commissionId", required = false) Long commissionId,
                               RedirectAttributes ra) {
-        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
-        store.setId(null);
-        store.setCreatedAt(java.time.LocalDateTime.now());
-        store.setEWallet(java.math.BigDecimal.ZERO);
-        store.setCommission(null);
-        store.setStoreLevel(null);
-        store.setPoint(0);
-        store.setOwner(user);
-        store.setStatus(true);
-        store.setIsOpen(true);
-        store.setRating(5.0);
-        storeRepository.save(store);
+        try {
+            User user = userRepository.findByUsername(principal.getName()).orElseThrow();
 
-        // Gán chi nhánh làm việc nếu chưa có
-        if (user.getStore() == null) {
-            user.setStore(store);
+            if (store.getName() == null || store.getName().trim().isEmpty()) {
+                ra.addFlashAttribute("errorMessage", "Vui lòng điền tên chi nhánh cửa hàng hoa!");
+                return "redirect:/manager/stores/create";
+            }
+            if (store.getPhone() == null || store.getPhone().trim().isEmpty()) {
+                ra.addFlashAttribute("errorMessage", "Vui lòng điền số điện thoại hotline chi nhánh!");
+                return "redirect:/manager/stores/create";
+            }
+            if (store.getAddress() == null || store.getAddress().trim().isEmpty()) {
+                ra.addFlashAttribute("errorMessage", "Vui lòng điền địa chỉ chi nhánh chi tiết!");
+                return "redirect:/manager/stores/create";
+            }
+
+            store.setId(null);
+            store.setCreatedAt(java.time.LocalDateTime.now());
+            store.setEWallet(java.math.BigDecimal.ZERO);
+
+            // Gán gói Commission đã chọn
+            if (commissionId != null) {
+                store.setCommission(commissionRepository.findById(commissionId).orElse(null));
+            } else {
+                // Nếu không chọn cụ thể, gán gói cơ bản đầu tiên
+                var defaultComm = commissionRepository.findByIsDeletedFalse().stream().findFirst().orElse(null);
+                store.setCommission(defaultComm);
+            }
+
+            // Gán hạng chi nhánh mặc định cơ sở
+            var defaultLevel = storeLevelRepository.findAll().stream()
+                    .filter(sl -> sl.getMinPoint() != null && sl.getMinPoint() == 0)
+                    .findFirst()
+                    .orElse(null);
+            store.setStoreLevel(defaultLevel);
+
+            store.setPoint(0);
+            store.setOwner(user);
+            store.setStatus(true);
+            store.setIsOpen(true);
+            store.setRating(5.0);
+            Store savedStore = storeRepository.save(store);
+
+            // Gán chi nhánh làm việc hiện tại cho user sang cửa hàng vừa tạo
+            user.setStore(savedStore);
+            if (user.getRole() == com.finalproject.enums.Role.CUSTOMER) {
+                user.setRole(com.finalproject.enums.Role.VENDOR);
+            }
             userRepository.save(user);
-        }
 
-        ra.addFlashAttribute("successMessage", "Tạo cửa hàng hoa [" + store.getName() + "] thành công!");
-        return "redirect:/manager/stores";
+            ra.addFlashAttribute("successMessage", "Tạo cửa hàng [" + savedStore.getName() + "] thành công!");
+            // Bước 10 của UC_017: Cửa hàng mới được tạo, chuyển đến trang Dashboard cửa hàng
+            return "redirect:/manager/dashboard";
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Tạo cửa hàng thất bại: " + ex.getMessage());
+            return "redirect:/manager/stores/create";
+        }
     }
 
     @GetMapping("/edit/{id}")

@@ -1039,12 +1039,13 @@
                                     </a>
                                 </li>
 
-                                <!-- Nút Kênh Quản lý (cho Manager) -->
-                                <li sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')" class="px-2 mb-2">
-                                    <a th:href="@{/manager/dashboard}" class="btn btn-sm btn-outline-primary w-100 fw-bold d-flex align-items-center justify-content-center gap-2"
+                                <!-- Nút Shop Manager / Kênh Quản lý cửa hàng (cho Manager / Vendor) -->
+                                <li sec:authorize="hasAnyRole('MANAGER', 'VENDOR') and !hasRole('ADMIN')" class="px-2 mb-2">
+                                    <a th:href="@{/manager/stores}" class="btn btn-sm btn-outline-primary w-100 fw-bold d-flex align-items-center justify-content-center gap-2"
+                                       id="navShopManagerDropdown"
                                        style="border-radius: 8px; padding: 6px 12px; font-size: 13.5px;">
                                         <i class="bi bi-shop-window"></i>
-                                        <span>Kênh quản lý chi nhánh</span>
+                                        <span>Shop Manager (Quản lý cửa hàng)</span>
                                     </a>
                                 </li>
 
@@ -1146,6 +1147,14 @@
                     <a th:href="@{/stores}" 
                        class="cat-nav-link">
                         <i class="bi bi-shop me-1 text-success"></i>Cửa hàng
+                    </a>
+
+                    <!-- 5. Shop Manager (Kênh bán dành cho Vendor / Manager / Admin) -->
+                    <a sec:authorize="hasAnyRole('MANAGER', 'VENDOR', 'ADMIN')" 
+                       th:href="@{/manager/stores}" 
+                       class="cat-nav-link fw-semibold" id="navShopManager"
+                       title="Chuyển đến trang quản lý các cửa hàng">
+                        <i class="bi bi-shop-window me-1 text-primary"></i>Shop Manager
                     </a>
                 </div>
             </div>

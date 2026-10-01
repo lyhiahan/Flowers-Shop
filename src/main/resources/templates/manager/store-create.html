@@ -52,49 +52,194 @@
                 <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Thêm chi nhánh cửa hàng mới vào mạng lưới phân phối hoa tươi.</p>
             </div>
 
-            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white" style="max-width: 700px; border: 1px solid #E2E7E2 !important; border-radius: 14px;">
-                <form th:action="@{/manager/stores/create}" th:object="${store}" method="post">
+            <!-- Flash alerts -->
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show py-2 small mb-3 shadow-sm rounded-3" role="alert" style="background-color: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2 !important;">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small mb-3 shadow-sm rounded-3" role="alert" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA;">
+                <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white" style="max-width: 720px; border: 1px solid #E2E7E2 !important; border-radius: 14px;">
+                <form th:action="@{/manager/stores/create}" th:object="${store}" method="post" id="createStoreForm">
+                    <!-- 1. Tên chi nhánh (Bắt buộc) -->
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold">Tên chi nhánh cửa hàng hoa:</label>
-                        <input type="text" th:field="*{name}" class="form-control" placeholder="VD: Chi nhánh Tân Bình" required>
+                        <label class="form-label small fw-semibold text-dark">
+                            Tên chi nhánh cửa hàng hoa: <span class="text-danger">(*)</span>
+                        </label>
+                        <input type="text" th:field="*{name}" id="inputStoreName" class="form-control" placeholder="VD: Tiệm Hoa Sài Gòn - CN Tân Bình" required
+                               oninvalid="this.setCustomValidity('Vui lòng điền tên chi nhánh cửa hàng hoa!')"
+                               oninput="this.setCustomValidity('')">
                     </div>
+
+                    <!-- 2. Hotline (Bắt buộc) -->
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold">Số điện thoại hotline chi nhánh:</label>
-                        <input type="text" th:field="*{phone}" class="form-control" placeholder="VD: 028 3333 444" required>
+                        <label class="form-label small fw-semibold text-dark">
+                            Số điện thoại hotline chi nhánh: <span class="text-danger">(*)</span>
+                        </label>
+                        <input type="text" th:field="*{phone}" id="inputStorePhone" class="form-control" placeholder="VD: 028 3333 444" required
+                               oninvalid="this.setCustomValidity('Vui lòng điền số điện thoại hotline chi nhánh!')"
+                               oninput="this.setCustomValidity('')">
                     </div>
+
+                    <!-- 3. Địa chỉ (Bắt buộc) -->
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold">Địa chỉ chi nhánh chi tiết:</label>
-                        <input type="text" th:field="*{address}" class="form-control" placeholder="VD: 456 Hoàng Văn Thụ, Phường 4, Quận Tân Bình, TP.HCM" required>
+                        <label class="form-label small fw-semibold text-dark">
+                            Địa chỉ chi nhánh chi tiết: <span class="text-danger">(*)</span>
+                        </label>
+                        <input type="text" th:field="*{address}" id="inputStoreAddress" class="form-control" placeholder="VD: 456 Hoàng Văn Thụ, Phường 4, Quận Tân Bình, TP.HCM" required
+                               oninvalid="this.setCustomValidity('Vui lòng điền địa chỉ chi nhánh chi tiết!')"
+                               oninput="this.setCustomValidity('')">
                     </div>
+
+                    <!-- 4. Chọn loại hình commission (Bước 6 theo UC_017) -->
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold">Giới thiệu ngắn về cửa hàng:</label>
-                        <textarea th:field="*{bio}" rows="3" class="form-control" placeholder="Cửa hàng hoa tươi chuyên bó hoa nghệ thuật, lẵng hoa khai trương..."></textarea>
+                        <label class="form-label small fw-semibold text-dark">
+                            Loại hình commission / Chiết khấu sàn: <span class="text-danger">(*)</span>
+                        </label>
+                        <select name="commissionId" id="selectCommission" class="form-select" required
+                                oninvalid="this.setCustomValidity('Vui lòng chọn loại hình commission!')"
+                                oninput="this.setCustomValidity('')">
+                            <option value="" disabled selected>-- Chọn loại hình commission phù hợp --</option>
+                            <option th:each="c : ${commissions}" th:value="${c.id}"
+                                    th:data-name="${c.name}"
+                                    th:data-cost="${c.cost}"
+                                    th:text="${c.name + ' (Tỷ lệ: ' + c.cost + '%)' + (c.description != null ? ' - ' + c.description : '')}">
+                            </option>
+                        </select>
+                        <div class="form-text small" style="font-size: 12px;">Chính sách hoa hồng hoặc chiết khấu trên mỗi đơn hàng được tạo qua hệ thống.</div>
                     </div>
+
+                    <!-- 5. Giới thiệu ngắn -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-dark">Giới thiệu ngắn về cửa hàng:</label>
+                        <textarea th:field="*{bio}" id="inputStoreBio" rows="3" class="form-control" placeholder="Cửa hàng hoa tươi chuyên bó hoa nghệ thuật, lẵng hoa khai trương..."></textarea>
+                    </div>
+
+                    <!-- 6. Ảnh đại diện & Ảnh bìa -->
                     <div class="row g-2 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label small fw-semibold">URL Ảnh đại diện (Avatar):</label>
+                            <label class="form-label small fw-semibold text-dark">URL Ảnh đại diện (Avatar):</label>
                             <input type="text" th:field="*{avatar}" class="form-control" placeholder="https://...">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small fw-semibold">URL Ảnh bìa (Cover):</label>
+                            <label class="form-label small fw-semibold text-dark">URL Ảnh bìa (Cover):</label>
                             <input type="text" th:field="*{cover}" class="form-control" placeholder="https://...">
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">URL Ảnh đặc trưng (Featured Images):</label>
+
+                    <!-- 7. Ảnh đặc trưng -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-semibold text-dark">URL Ảnh đặc trưng (Featured Images):</label>
                         <input type="text" th:field="*{featuredImages}" class="form-control" placeholder="https://...">
                     </div>
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary fw-bold shadow-sm" style="font-size: 15.5px; height: 44px; padding: 0 24px; border-radius: 10px; background-color: #20382E !important; border-color: #20382E !important;">
-                            Đăng ký chi nhánh
+
+                    <!-- Nút Submit (Bước 7 theo UC_017) -->
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button" id="btnSubmitStore" class="btn btn-primary fw-bold shadow-sm d-inline-flex align-items-center gap-2"
+                                onclick="handleClickSubmit(event)"
+                                style="font-size: 15.5px; height: 44px; padding: 0 24px; border-radius: 10px; background-color: #20382E !important; border-color: #20382E !important;">
+                            <i class="bi bi-check2-circle"></i> Submit
                         </button>
-                        <a th:href="@{/manager/stores}" class="btn btn-light fw-bold" style="height: 44px; line-height: 28px; padding: 0 20px; border-radius: 10px; border: 1px solid #D1E5DA;">Hủy</a>
+                        <a th:href="@{/manager/stores}" class="btn btn-light fw-bold"
+                           style="height: 44px; line-height: 28px; padding: 0 20px; border-radius: 10px; border: 1px solid #D1E5DA;">
+                            Hủy bỏ
+                        </a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<!-- ============================================================== -->
+<!-- MODAL: XÁC NHẬN YÊU CẦU TẠO CỬA HÀNG (Bước 8, 9, 9a theo UC_017) -->
+<!-- ============================================================== -->
+<div class="modal fade" id="confirmCreateStoreModal" tabindex="-1" aria-labelledby="confirmCreateStoreModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header text-white" style="background-color: #20382E; padding: 16px 22px;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-question-circle fs-5"></i>
+                    <h5 class="modal-title fw-bold mb-0 text-white" id="confirmCreateStoreModalLabel" style="font-size: 17px;">
+                        Xác Nhận Tạo Cửa Hàng
+                    </h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4" style="background-color: #FBFDFB;">
+                <p class="text-secondary small mb-3" style="font-size: 14.5px;">
+                    Bạn có chắc chắn muốn đăng ký và tạo cửa hàng mới với các thông tin đã nhập dưới đây?
+                </p>
+                <div class="p-3 bg-white rounded-3 border mb-2" style="font-size: 14px; line-height: 1.7;">
+                    <div><span class="text-muted">Cửa hàng:</span> <strong id="modalConfirmName" class="text-dark"></strong></div>
+                    <div><span class="text-muted">Hotline:</span> <strong id="modalConfirmPhone" class="text-dark"></strong></div>
+                    <div><span class="text-muted">Địa chỉ:</span> <span id="modalConfirmAddress" class="text-dark"></span></div>
+                    <div><span class="text-muted">Gói Commission:</span> <span id="modalConfirmCommission" class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1"></span></div>
+                </div>
+                <small class="text-muted fst-italic" style="font-size: 12.5px;">
+                    * Sau khi xác nhận, cửa hàng sẽ được khởi tạo và chuyển trực tiếp đến trang Quản lý Tổng quan (Dashboard).
+                </small>
+            </div>
+            <div class="modal-footer border-top px-4 py-3 bg-light d-flex justify-content-end gap-2">
+                <!-- 9a. Bấm nút Cancel -> 10a. Hủy thao tác -->
+                <button type="button" id="btnCancelCreate" class="btn btn-outline-secondary px-3" data-bs-dismiss="modal" style="border-radius: 8px;">
+                    Cancel
+                </button>
+                <!-- 9. Bấm nút Confirm -> 10. Tạo cửa hàng, chuyển sang Dashboard -->
+                <button type="button" id="btnConfirmCreate" class="btn btn-primary fw-bold px-4"
+                        onclick="handleConfirmCreate()"
+                        style="border-radius: 8px; background-color: #20382E !important; border-color: #20382E !important;">
+                    <i class="bi bi-check-lg me-1"></i> Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/form-validation.js}"></script>
+<script>
+    // Xử lý Bước 7: Bấm nút Submit -> Kiểm tra form -> Bước 8: Mở modal xác nhận
+    function handleClickSubmit(event) {
+        if (event) event.preventDefault();
+        const form = document.getElementById('createStoreForm');
+        if (!form) return;
+
+        // Kích hoạt HTML5 validation nếu có trường bắt buộc để trống
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        // Đổ dữ liệu vào Modal xác nhận
+        const nameVal = document.getElementById('inputStoreName')?.value || '';
+        const phoneVal = document.getElementById('inputStorePhone')?.value || '';
+        const addressVal = document.getElementById('inputStoreAddress')?.value || '';
+        const commSelect = document.getElementById('selectCommission');
+        const commText = commSelect && commSelect.selectedIndex >= 0 ? commSelect.options[commSelect.selectedIndex].text : '';
+
+        document.getElementById('modalConfirmName').textContent = nameVal;
+        document.getElementById('modalConfirmPhone').textContent = phoneVal;
+        document.getElementById('modalConfirmAddress').textContent = addressVal;
+        document.getElementById('modalConfirmCommission').textContent = commText || 'Chưa chọn';
+
+        // Hiển thị modal xác nhận (Bước 8 theo UC_017)
+        const confirmModal = new bootstrap.Modal(document.getElementById('confirmCreateStoreModal'));
+        confirmModal.show();
+    }
+
+    // Xử lý Bước 9: Bấm nút Confirm -> Gửi form -> Bước 10: Tạo cửa hàng và về Dashboard
+    function handleConfirmCreate() {
+        const btn = document.getElementById('btnConfirmCreate');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Đang tạo...';
+        }
+        document.getElementById('createStoreForm').submit();
+    }
+</script>
 </body>
 </html>
