@@ -20,10 +20,13 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendOtpEmail(String toEmail, String otpCode) {
-        // Luôn in mã OTP ra Console / Terminal để theo dõi và hỗ trợ kiểm thử
-        System.out.println("\n===============================================================");
-        System.out.println(">>> [MÃ XÁC THỰC OTP]: " + otpCode + " (Gửi đến: " + toEmail + ") <<<");
-        System.out.println("===============================================================\n");
+        // Luôn in mã OTP ra Console / Terminal Spring Tool để theo dõi và hỗ trợ kiểm thử
+        System.out.println("\n***************************************************************");
+        System.out.println("********** [SPRING TOOL CONSOLE - GỬI EMAIL OTP XÁC THỰC] **********");
+        System.out.println(">>> GỬI ĐẾN EMAIL : " + toEmail);
+        System.out.println(">>> MÃ OTP (6 SỐ): [ " + otpCode + " ]");
+        System.out.println(">>> HIỆU LỰC      : 5 PHÚT");
+        System.out.println("***************************************************************\n");
 
         // Nếu mật khẩu mail chưa được cấu hình hoặc là placeholder, không gửi qua SMTP để tránh lỗi xác thực
         if (mailPassword == null || mailPassword.isBlank() || mailPassword.contains("placeholder")) {

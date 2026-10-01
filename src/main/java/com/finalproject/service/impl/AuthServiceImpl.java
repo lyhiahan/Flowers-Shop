@@ -14,6 +14,7 @@ import com.finalproject.service.AuthService;
 import com.finalproject.service.EmailService;
 import com.finalproject.utils.OtpUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
@@ -221,8 +223,7 @@ public class AuthServiceImpl implements AuthService {
         if (otpRepository.countByUserIdAndCreatedAtAfter(user.getId(), LocalDateTime.now().minusMinutes(10)) >= 3) {
             throw new IllegalStateException("Vui lòng chờ 10 phút trước khi yêu cầu thêm mã OTP.");
         }
-        createAndSendOtp(user, OtpType.RESET_PASSWORD);
-        return "";
+        return createAndSendOtp(user, OtpType.RESET_PASSWORD);
     }
 
     @Override
@@ -286,6 +287,14 @@ public class AuthServiceImpl implements AuthService {
                 .isUsed(false)
                 .build();
         otpRepository.save(otp);
+
+        System.out.println("\n***************************************************************");
+        System.out.println("********** [SPRING TOOL CONSOLE - MÃ OTP " + type + "] **********");
+        System.out.println(">>> TÀI KHOẢN : " + user.getUsername());
+        System.out.println(">>> EMAIL     : " + user.getEmail());
+        System.out.println(">>> MÃ OTP    : [ " + code + " ]");
+        System.out.println(">>> HẾT HẠN   : " + otp.getExpiredAt());
+        System.out.println("***************************************************************\n");
 
         try {
             emailService.sendOtpEmail(user.getEmail(), code);

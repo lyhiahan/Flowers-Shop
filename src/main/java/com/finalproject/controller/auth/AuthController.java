@@ -144,14 +144,15 @@ public class AuthController {
                                        RedirectAttributes redirectAttributes,
                                        Model model) {
         try {
-            authService.forgotPassword(email);
+            String otpCode = authService.forgotPassword(email);
             redirectAttributes.addFlashAttribute("emailSent", true);
             redirectAttributes.addFlashAttribute("email", email.trim());
-            redirectAttributes.addFlashAttribute("successMessage", "Hệ thống đã xác thực email thành công! Đã gửi email yêu cầu tạo mật khẩu mới về email người dùng.");
+            redirectAttributes.addFlashAttribute("devOtpCode", otpCode);
+            redirectAttributes.addFlashAttribute("successMessage", "Hệ thống đã xác thực tài khoản thành công! Đã gửi mã OTP khôi phục mật khẩu.");
             return "redirect:/forgot-password?sent=true&email=" + java.net.URLEncoder.encode(email.trim(), java.nio.charset.StandardCharsets.UTF_8);
         } catch (Exception ex) {
             model.addAttribute("email", email);
-            model.addAttribute("errorMessage", ex.getMessage() + " (Mật khẩu mới không được tạo)");
+            model.addAttribute("errorMessage", ex.getMessage());
             return "auth/forgot-password";
         }
     }

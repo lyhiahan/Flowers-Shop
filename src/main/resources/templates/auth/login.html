@@ -68,7 +68,7 @@
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <label class="form-label small fw-semibold text-secondary mb-0">Mật khẩu</label>
-                                <a th:href="@{/forgot-password}" id="forgotPasswordLink" onclick="goToForgotPassword(event)" class="text-danger small text-decoration-none fw-semibold"><i class="bi bi-key me-1"></i>Quên mật khẩu? Gửi email</a>
+                                <a th:href="@{/forgot-password}" id="forgotPasswordLink" onclick="goToForgotPassword(event)" class="text-danger small text-decoration-none fw-semibold"><i class="bi bi-key me-1"></i>Quên mật khẩu?</a>
                             </div>
                             <div class="input-group">
                                 <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-lock"></i></span>
@@ -130,16 +130,7 @@
         e.preventDefault();
         const userInput = document.getElementById('usernameInput')?.value.trim();
         if (userInput) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '/forgot-password';
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'email';
-            input.value = userInput;
-            form.appendChild(input);
-            document.body.appendChild(form);
-            form.submit();
+            window.location.href = '/forgot-password?email=' + encodeURIComponent(userInput);
         } else {
             window.location.href = '/forgot-password';
         }
