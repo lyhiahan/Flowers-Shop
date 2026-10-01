@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -152,25 +152,25 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <!-- 2. Nhóm Tab kiểm duyệt cấp phép: Tất cả · Đã cấp phép · Bị cấm hoạt động -->
+        <!-- 2. Nhóm Tab kiểm duyệt cấp phép: Tất cả · Licensed stores · Unlicensed stores (Bước 2a1 theo UC_018) -->
         <div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
             <a th:href="@{/admin/stores(tab='ALL', keyword=${keyword})}"
                class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2"
-               th:classappend="${currentTab == 'ALL'} ? 'btn-dark' : 'btn-outline-secondary bg-white'"
+               th:classappend="${currentTab == 'ALL' or currentTab == null} ? 'btn-dark' : 'btn-outline-secondary bg-white'"
                style="font-size: 14px; font-weight: 600;">
-                Tất cả cửa hàng <span class="badge rounded-pill" th:classappend="${currentTab == 'ALL'} ? 'bg-light text-dark' : 'bg-secondary text-white'" th:text="${countAll != null ? countAll : (stores != null ? #lists.size(stores) : 0)}">3</span>
+                Tất cả cửa hàng <span class="badge rounded-pill" th:classappend="${currentTab == 'ALL' or currentTab == null} ? 'bg-light text-dark' : 'bg-secondary text-white'" th:text="${countAll != null ? countAll : (stores != null ? #lists.size(stores) : 0)}">3</span>
             </a>
-            <a th:href="@{/admin/stores(tab='APPROVED', keyword=${keyword})}"
+            <a th:href="@{/admin/stores(tab='LICENSED', keyword=${keyword})}"
                class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2"
-               th:classappend="${currentTab == 'APPROVED'} ? 'btn-success text-white' : 'btn-outline-secondary bg-white'"
+               th:classappend="${currentTab == 'LICENSED' or currentTab == 'APPROVED'} ? 'btn-success text-white' : 'btn-outline-secondary bg-white'"
                style="font-size: 14px; font-weight: 600;">
-                <i class="bi bi-patch-check-fill"></i> Đã cấp phép <span class="badge rounded-pill" th:classappend="${currentTab == 'APPROVED'} ? 'bg-white text-success' : 'bg-secondary text-white'" th:text="${countApproved != null ? countApproved : (stores != null ? #lists.size(stores) : 0)}">3</span>
+                <i class="bi bi-patch-check-fill"></i> Licensed stores (Đang hoạt động) <span class="badge rounded-pill" th:classappend="${currentTab == 'LICENSED' or currentTab == 'APPROVED'} ? 'bg-white text-success' : 'bg-secondary text-white'" th:text="${countApproved != null ? countApproved : 0}">3</span>
             </a>
-            <a th:href="@{/admin/stores(tab='BANNED', keyword=${keyword})}"
+            <a th:href="@{/admin/stores(tab='UNLICENSED', keyword=${keyword})}"
                class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2"
-               th:classappend="${currentTab == 'BANNED'} ? 'btn-danger text-white' : 'btn-outline-secondary bg-white'"
+               th:classappend="${currentTab == 'UNLICENSED' or currentTab == 'BANNED'} ? 'btn-danger text-white' : 'btn-outline-secondary bg-white'"
                style="font-size: 14px; font-weight: 600;">
-                <i class="bi bi-slash-circle-fill"></i> Bị cấm / Tạm ngưng <span class="badge rounded-pill" th:classappend="${currentTab == 'BANNED'} ? 'bg-white text-danger' : 'bg-secondary text-white'" th:text="${countBanned != null ? countBanned : 0}">0</span>
+                <i class="bi bi-slash-circle-fill"></i> Unlicensed stores (Bị cấm) <span class="badge rounded-pill" th:classappend="${currentTab == 'UNLICENSED' or currentTab == 'BANNED'} ? 'bg-white text-danger' : 'bg-secondary text-white'" th:text="${countBanned != null ? countBanned : 0}">0</span>
             </a>
         </div>
 
@@ -325,7 +325,7 @@
                                         <i class="bi bi-eye"></i> Chi tiết
                                     </button>
 
-                                    <!-- NÚT CẤP PHÉP (khi cửa hàng đang bị cấm) -->
+                                    <!-- NÚT LICENSE (CẤP PHÉP - Bước 6a theo UC_018) -->
                                     <button th:if="${s.status != null and !s.status}" 
                                             type="button"
                                             class="btn btn-sm btn-success d-inline-flex align-items-center gap-1 text-white shadow-sm"
@@ -333,10 +333,10 @@
                                             th:data-id="${s.id}"
                                             th:data-name="${s.name}"
                                             onclick="openConfirmModal(this.getAttribute('data-id'), this.getAttribute('data-name'), 'approve')">
-                                        <i class="bi bi-patch-check"></i> Cấp phép
+                                        <i class="bi bi-patch-check"></i> License (Cấp phép)
                                     </button>
 
-                                    <!-- NÚT CẤM CỬA HÀNG (khi cửa hàng đang hoạt động bình thường) -->
+                                    <!-- NÚT BAN (CẤM CỬA HÀNG - Bước 6a theo UC_018) -->
                                     <button th:if="${s.status == null or s.status}" 
                                             type="button"
                                             class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1"
@@ -345,7 +345,7 @@
                                             th:data-id="${s.id}"
                                             th:data-name="${s.name}"
                                             onclick="openConfirmModal(this.getAttribute('data-id'), this.getAttribute('data-name'), 'ban')">
-                                        <i class="bi bi-slash-circle"></i> Cấm cửa hàng
+                                        <i class="bi bi-slash-circle"></i> Ban (Cấm hoạt động)
                                     </button>
                                 </div>
                             </td>
@@ -382,16 +382,16 @@
                         </div>
                     </div>
                     <div class="modal-footer bg-white border-top-0 d-flex justify-content-end gap-2 p-3">
-                        <!-- Nút Hủy (Không chuyển đổi) -->
-                        <button type="button" class="btn btn-outline-secondary px-4 py-2 fw-bold" data-bs-dismiss="modal" style="border-radius: 10px; font-size: 14.5px;">
-                            <i class="bi bi-x-circle me-1"></i> Hủy (Không chuyển đổi)
+                        <!-- Nút Cancel (Bước 6b1 theo UC_018) -->
+                        <button type="button" class="btn btn-outline-secondary px-4 py-2 fw-bold" data-bs-dismiss="modal" id="btnCancelStatusModal" style="border-radius: 10px; font-size: 14.5px;">
+                            <i class="bi bi-x-circle me-1"></i> Cancel
                         </button>
                         <!-- Form thực hiện chuyển đổi -->
                         <form id="confirmActionForm" method="post" class="m-0">
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                            <!-- Nút Xác nhận (Tiếp tục thực hiện) -->
+                            <!-- Nút Confirm (Bước 6a1 theo UC_018) -->
                             <button type="submit" id="confirmSubmitBtn" class="btn px-4 py-2 fw-bold text-white shadow-sm" style="border-radius: 10px; font-size: 14.5px;">
-                                <i class="bi bi-check2-circle me-1"></i> Xác nhận (Tiếp tục thực hiện)
+                                <i class="bi bi-check2-circle me-1"></i> Confirm
                             </button>
                         </form>
                     </div>

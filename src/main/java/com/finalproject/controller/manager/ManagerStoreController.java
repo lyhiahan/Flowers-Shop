@@ -25,17 +25,51 @@ public class ManagerStoreController {
     private final com.finalproject.repository.StoreLevelRepository storeLevelRepository;
 
     @GetMapping
-    public String listStores(Principal principal, Model model) {
+    public String listStores(@RequestParam(value = "page", defaultValue = "0") int page,
+                             @RequestParam(value = "size", defaultValue = "6") int size,
+                             Principal principal, Model model) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         List<Store> ownedStores = storeRepository.findByOwnerId(user.getId());
-        java.util.Set<Store> allStores = new java.util.LinkedHashSet<>(ownedStores);
+        java.util.Set<Store> allStoresSet = new java.util.LinkedHashSet<>(ownedStores);
         if (user.getStore() != null) {
-            allStores.add(user.getStore());
+            allStoresSet.add(user.getStore());
         }
+        List<Store> allStores = new java.util.ArrayList<>(allStoresSet);
 
-        model.addAttribute("stores", new java.util.ArrayList<>(allStores));
+        // Phân trang danh sách cửa hàng (Bước 5 theo UC_018)
+        int totalElements = allStores.size();
+        int totalPages = totalElements > 0 ? (int) Math.ceil((double) totalElements / size) : 1;
+        if (page < 0) page = 0;
+        if (page >= totalPages && totalElements > 0) page = totalPages - 1;
+
+        int fromIndex = Math.min(page * size, totalElements);
+        int toIndex = Math.min(fromIndex + size, totalElements);
+        List<Store> pagedStores = allStores.subList(fromIndex, toIndex);
+
+        model.addAttribute("stores", pagedStores);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("totalElements", totalElements);
+        model.addAttribute("pageSize", size);
         model.addAttribute("currentUser", user);
         return "manager/stores";
+    }
+
+    /**
+     * Bước 6 theo UC_018: Chọn nút Go to dashboard để đến trang Dashboard cửa hàng tương ứng
+     */
+    @GetMapping({"/switch/{id}", "/go-dashboard/{id}"})
+    public String goToStoreDashboard(@PathVariable("id") Long id, Principal principal, RedirectAttributes ra) {
+        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
+        Store store = storeRepository.findById(id).orElseThrow();
+        storeAccess.requireStore(store);
+
+        // Chuyển sang chi nhánh tương ứng và lưu vào tài khoản
+        user.setStore(store);
+        userRepository.save(user);
+
+        ra.addFlashAttribute("successMessage", "Đã chuyển đến tổng quan cửa hàng: " + store.getName());
+        return "redirect:/manager/dashboard";
     }
 
     @GetMapping("/create")

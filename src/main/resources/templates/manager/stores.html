@@ -99,19 +99,61 @@
                             <div th:if="${s.bio != null}" class="fst-italic mt-2" style="color: #8C9990;"><i class="bi bi-info-circle me-1"></i><span th:text="${s.bio}"></span></div>
                         </div>
 
-                        <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center" style="border-color: #E2E7E2 !important;">
+                        <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2" style="border-color: #E2E7E2 !important;">
                             <div>
                                 <span class="small" style="color: #66736B;">Số dư ví: </span>
-                                <strong style="font-size: 18px; font-weight: 800; color: #A64060; white-space: nowrap;"
+                                <strong style="font-size: 17px; font-weight: 800; color: #A64060; white-space: nowrap;"
                                         th:text="${s.eWallet != null ? #numbers.formatDecimal(s.eWallet, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}"></strong>
                             </div>
-                            <a th:href="@{'/manager/stores/edit/' + ${s.id}}" class="btn btn-sm d-inline-flex align-items-center gap-1"
-                               style="height: 34px; padding: 0 14px; font-size: 14px; font-weight: 600; border-radius: 8px; border: 1px solid #D1E5DA; background-color: #FFFFFF; color: #20382E;">
-                                <i class="bi bi-pencil-square"></i> Chỉnh sửa
-                            </a>
+                            <div class="d-flex align-items-center gap-1.5">
+                                <!-- Bước 6 theo UC_018: Nút Go to dashboard để đến trang Dashboard cửa hàng tương ứng -->
+                                <a th:href="@{'/manager/stores/switch/' + ${s.id}}" 
+                                   class="btn btn-sm btn-success fw-bold d-inline-flex align-items-center gap-1 shadow-sm"
+                                   th:id="'btnGoDashboard_' + ${s.id}"
+                                   style="height: 34px; padding: 0 12px; font-size: 13.5px; border-radius: 8px; background-color: #2E7D32 !important; border-color: #2E7D32 !important;">
+                                    <i class="bi bi-speedometer2"></i> Go to dashboard
+                                </a>
+                                <!-- Nút Chỉnh sửa -->
+                                <a th:href="@{'/manager/stores/edit/' + ${s.id}}" class="btn btn-sm d-inline-flex align-items-center gap-1"
+                                   style="height: 34px; padding: 0 10px; font-size: 13.5px; font-weight: 600; border-radius: 8px; border: 1px solid #D1E5DA; background-color: #FFFFFF; color: #20382E;">
+                                    <i class="bi bi-pencil-square"></i> Sửa
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Bước 5 theo UC_018: Phân trang (Next, Previous, số trang) -->
+            <div th:if="${totalPages > 1}" class="d-flex justify-content-between align-items-center flex-wrap gap-3 mt-4 pt-3 border-top" style="border-color: #E2E7E2 !important;">
+                <div class="small text-muted" style="font-size: 14px;">
+                    Hiển thị <strong th:text="${(currentPage * pageSize) + 1}">1</strong> - 
+                    <strong th:text="${T(java.lang.Math).min((currentPage + 1) * pageSize, totalElements)}">6</strong>
+                    trên tổng số <strong th:text="${totalElements}">10</strong> cửa hàng
+                </div>
+                <nav aria-label="Stores pagination">
+                    <ul class="pagination pagination-sm mb-0">
+                        <!-- Nút Previous -->
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+                            <a class="page-link" th:href="@{/manager/stores(page=${currentPage - 1}, size=${pageSize})}" aria-label="Previous">
+                                <i class="bi bi-chevron-left me-1"></i> Previous
+                            </a>
+                        </li>
+
+                        <!-- Các số trang -->
+                        <li class="page-item" th:each="p : ${#numbers.sequence(1, totalPages)}"
+                            th:classappend="${currentPage == (p - 1)} ? 'active' : ''">
+                            <a class="page-link" th:href="@{/manager/stores(page=${p - 1}, size=${pageSize})}" th:text="${p}">1</a>
+                        </li>
+
+                        <!-- Nút Next -->
+                        <li class="page-item" th:classappend="${currentPage >= (totalPages - 1)} ? 'disabled' : ''">
+                            <a class="page-link" th:href="@{/manager/stores(page=${currentPage + 1}, size=${pageSize})}" aria-label="Next">
+                                Next <i class="bi bi-chevron-right ms-1"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>

@@ -18,6 +18,7 @@ public class AdminStoreController {
     private final StoreRepository storeRepository;
     private final com.finalproject.repository.StoreLevelRepository storeLevelRepository;
     private final com.finalproject.repository.CommissionRepository commissionRepository;
+    private final com.finalproject.repository.ProductRepository productRepository;
 
     @GetMapping
     public String listStores(@RequestParam(value = "keyword", required = false) String keyword,
@@ -32,10 +33,10 @@ public class AdminStoreController {
 
         List<Store> stores = allStores;
 
-        // Lọc theo tab (Tất cả, Đã cấp phép, Bị cấm)
-        if ("APPROVED".equalsIgnoreCase(tab)) {
+        // Lọc theo tab: ALL, LICENSED (APPROVED), UNLICENSED (BANNED) theo UC_018 Bước 2a1
+        if ("APPROVED".equalsIgnoreCase(tab) || "LICENSED".equalsIgnoreCase(tab)) {
             stores = stores.stream().filter(s -> Boolean.TRUE.equals(s.getStatus())).toList();
-        } else if ("BANNED".equalsIgnoreCase(tab)) {
+        } else if ("BANNED".equalsIgnoreCase(tab) || "UNLICENSED".equalsIgnoreCase(tab)) {
             stores = stores.stream().filter(s -> !Boolean.TRUE.equals(s.getStatus())).toList();
         }
 
@@ -92,31 +93,55 @@ public class AdminStoreController {
     }
 
     /**
-     * Cấp phép hoạt động kinh doanh cho cửa hàng trong hệ thống
+     * 6a. Cấp phép (License) hoạt động kinh doanh cho cửa hàng trong hệ thống
+     * 6a2. Cửa hàng và các sản phẩm của cửa hàng được cấp phép
      */
     @PostMapping("/approve/{id}")
     public String approveStore(@PathVariable("id") Long id, RedirectAttributes ra) {
         Store store = storeRepository.findById(id).orElseThrow();
         store.setStatus(true);
         storeRepository.save(store);
-        ra.addFlashAttribute("successMessage", "Đã CẤP PHÉP hoạt động cho cửa hàng [" + store.getName() + "]. Cửa hàng hiện đã có thể mở bán và tiếp nhận đơn hàng trên hệ thống.");
+
+        // Kích hoạt lại toàn bộ sản phẩm của cửa hàng
+        var products = productRepository.findByStoreIdOrderByCreatedAtDesc(id);
+        if (products != null && !products.isEmpty()) {
+            for (var p : products) {
+                p.setIsActive(true);
+                p.setIsSelling(true);
+            }
+            productRepository.saveAll(products);
+        }
+
+        ra.addFlashAttribute("successMessage", "Đã CẤP PHÉP (License) hoạt động cho cửa hàng [" + store.getName() + "]. Cửa hàng và tất cả sản phẩm đã được mở bán trên toàn hệ thống.");
         return "redirect:/admin/stores";
     }
 
     /**
-     * Cấm hoặc đình chỉ hoạt động cửa hàng trong hệ thống
+     * 6a. Cấm (Ban) hoặc đình chỉ hoạt động cửa hàng trong hệ thống
+     * 6a2. Cửa hàng và các sản phẩm của cửa hàng bị cấm
      */
     @PostMapping("/ban/{id}")
     public String banStore(@PathVariable("id") Long id, RedirectAttributes ra) {
         Store store = storeRepository.findById(id).orElseThrow();
         store.setStatus(false);
         storeRepository.save(store);
-        ra.addFlashAttribute("successMessage", "Đã CẤM / THU HỒI giấy phép hoạt động của cửa hàng [" + store.getName() + "]. Cửa hàng sẽ bị ngừng kinh doanh trên toàn hệ thống.");
+
+        // Vô hiệu hóa toàn bộ sản phẩm của cửa hàng
+        var products = productRepository.findByStoreIdOrderByCreatedAtDesc(id);
+        if (products != null && !products.isEmpty()) {
+            for (var p : products) {
+                p.setIsActive(false);
+                p.setIsSelling(false);
+            }
+            productRepository.saveAll(products);
+        }
+
+        ra.addFlashAttribute("successMessage", "Đã CẤM (Ban) hoạt động đối với cửa hàng [" + store.getName() + "]. Cửa hàng và toàn bộ sản phẩm liên quan đã bị ngừng kinh doanh trên toàn hệ thống.");
         return "redirect:/admin/stores";
     }
 
     /**
-     * Bật/tắt trạng thái (tương thích ngược)
+     * Bật/tắt trạng thái (tương thích ngược và đồng bộ sản phẩm)
      */
     @PostMapping("/toggle-status/{id}")
     public String toggleStoreStatus(@PathVariable("id") Long id, RedirectAttributes ra) {
@@ -125,10 +150,19 @@ public class AdminStoreController {
         store.setStatus(newStatus);
         storeRepository.save(store);
 
+        var products = productRepository.findByStoreIdOrderByCreatedAtDesc(id);
+        if (products != null && !products.isEmpty()) {
+            for (var p : products) {
+                p.setIsActive(newStatus);
+                p.setIsSelling(newStatus);
+            }
+            productRepository.saveAll(products);
+        }
+
         if (newStatus) {
-            ra.addFlashAttribute("successMessage", "Đã cấp phép mở lại cho cửa hàng [" + store.getName() + "]. Cửa hàng đã có thể tiếp tục nhận đơn hàng.");
+            ra.addFlashAttribute("successMessage", "Đã CẤP PHÉP (License) cho cửa hàng [" + store.getName() + "] và kích hoạt lại toàn bộ sản phẩm.");
         } else {
-            ra.addFlashAttribute("successMessage", "Đã cấm/tạm ngừng cửa hàng [" + store.getName() + "]. Cửa hàng sẽ không thể nhận đơn hàng mới.");
+            ra.addFlashAttribute("successMessage", "Đã CẤM (Ban) cửa hàng [" + store.getName() + "]. Cửa hàng và toàn bộ sản phẩm đã bị ngừng hoạt động.");
         }
         return "redirect:/admin/stores";
     }
