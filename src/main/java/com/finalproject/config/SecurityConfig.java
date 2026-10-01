@@ -41,7 +41,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.ignoringRequestMatchers("/ws/**"))
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/ws/**", "/customer/profile/send-password-otp", "/customer/send-password-otp"))
             .authorizeHttpRequests(auth -> auth
                 .dispatcherTypeMatchers(jakarta.servlet.DispatcherType.FORWARD, jakarta.servlet.DispatcherType.ERROR).permitAll()
                 .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")

@@ -4,6 +4,7 @@ import com.finalproject.entity.User;
 import com.finalproject.repository.UserRepository;
 import com.finalproject.service.CloudinaryService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,6 +17,7 @@ import java.security.Principal;
 @Controller
 @RequestMapping({"/customer/profile", "/customer"})
 @RequiredArgsConstructor
+@Slf4j
 public class ProfileController {
 
     private final UserRepository userRepository;
@@ -25,6 +27,8 @@ public class ProfileController {
     private final com.finalproject.repository.UserFollowStoreRepository followStoreRepository;
     private final com.finalproject.repository.StoreRepository storeRepository;
     private final com.finalproject.service.CartService cartService;
+    private final com.finalproject.repository.OtpVerificationRepository otpRepository;
+    private final com.finalproject.service.EmailService emailService;
 
     @GetMapping({"", "/profile"})
     public String viewProfile(Principal principal, Model model) {
@@ -64,18 +68,87 @@ public class ProfileController {
         return "redirect:/customer/profile";
     }
 
+    @PostMapping({"/send-password-otp", "/profile/send-password-otp"})
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<?> sendPasswordOtp(Principal principal, @RequestParam("email") String email) {
+        if (principal == null) {
+            return org.springframework.http.ResponseEntity.status(401).body(java.util.Map.of("success", false, "message", "Vui lòng đăng nhập!"));
+        }
+        User user = userRepository.findByUsername(principal.getName()).orElse(null);
+        if (user == null) {
+            return org.springframework.http.ResponseEntity.status(404).body(java.util.Map.of("success", false, "message", "Không tìm thấy người dùng!"));
+        }
+
+        if (email == null || email.trim().isEmpty() || !email.trim().equalsIgnoreCase(user.getEmail())) {
+            return org.springframework.http.ResponseEntity.badRequest().body(java.util.Map.of(
+                    "success", false,
+                    "message", "Email không khớp với email tài khoản của bạn (" + user.getEmail() + ")!"
+            ));
+        }
+
+        if (otpRepository.countByUserIdAndCreatedAtAfter(user.getId(), java.time.LocalDateTime.now().minusMinutes(10)) >= 5) {
+            return org.springframework.http.ResponseEntity.badRequest().body(java.util.Map.of(
+                    "success", false,
+                    "message", "Bạn đã yêu cầu gửi OTP quá nhiều lần. Vui lòng thử lại sau 10 phút!"
+            ));
+        }
+
+        String code = com.finalproject.utils.OtpUtil.generateOtp();
+        com.finalproject.entity.OtpVerification otp = com.finalproject.entity.OtpVerification.builder()
+                .user(user)
+                .code(code)
+                .type(com.finalproject.enums.OtpType.RESET_PASSWORD)
+                .expiredAt(java.time.LocalDateTime.now().plusMinutes(5))
+                .createdAt(java.time.LocalDateTime.now())
+                .isUsed(false)
+                .build();
+        otpRepository.save(otp);
+
+        try {
+            emailService.sendOtpEmail(user.getEmail(), code);
+        } catch (Exception ex) {
+            log.warn("Email send failed (SMTP): {}, fallback OTP: {}", ex.getMessage(), code);
+        }
+        log.info("[OTP ĐỔI MẬT KHẨU] User: {}, Email: {}, Mã OTP: {}", user.getUsername(), user.getEmail(), code);
+
+        return org.springframework.http.ResponseEntity.ok(java.util.Map.of(
+                "success", true,
+                "message", "Mã xác thực OTP đã được gửi đến: " + user.getEmail()
+        ));
+    }
+
     @PostMapping({"/change-password", "/profile/change-password"})
     public String changePassword(Principal principal,
                                  @RequestParam("oldPassword") String oldPassword,
                                  @RequestParam("newPassword") String newPassword,
+                                 @RequestParam(value = "otpCode", required = false) String otpCode,
                                  RedirectAttributes ra) {
+        if (principal == null) return "redirect:/login";
+        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
+
+        if (otpCode == null || otpCode.trim().length() != 6) {
+            ra.addFlashAttribute("errorMessage", "Vui lòng nhập đầy đủ mã OTP 6 chữ số đã gửi về email!");
+            return "redirect:/customer/profile?tab=password#tabPassword";
+        }
+
+        var otpOpt = otpRepository.findTopByUserIdAndCodeAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
+                user.getId(), otpCode.trim(), com.finalproject.enums.OtpType.RESET_PASSWORD);
+
+        if (otpOpt.isEmpty() || otpOpt.get().getExpiredAt().isBefore(java.time.LocalDateTime.now())) {
+            ra.addFlashAttribute("errorMessage", "Mã OTP không chính xác hoặc đã hết hạn (5 phút). Vui lòng nhấn gửi lại mã!");
+            return "redirect:/customer/profile?tab=password#tabPassword";
+        }
+
         try {
             userService.changePassword(principal.getName(), oldPassword, newPassword);
-            ra.addFlashAttribute("successMessage", "Đổi mật khẩu thành công!");
+            var otp = otpOpt.get();
+            otp.setIsUsed(true);
+            otpRepository.save(otp);
+            ra.addFlashAttribute("successMessage", "Đổi mật khẩu bảo mật thành công!");
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
-        return "redirect:/customer/profile";
+        return "redirect:/customer/profile?tab=password#tabPassword";
     }
 
     @PostMapping({"/address/add", "/profile/address/add"})
