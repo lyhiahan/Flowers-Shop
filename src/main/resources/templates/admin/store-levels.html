@@ -331,7 +331,7 @@
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
                             <form th:action="@{/admin/store-levels/reset-defaults}" method="post" class="m-0"
-                                  onsubmit="return confirm('Khôi phục về 3 hạng chuẩn (Tiêu chuẩn · Bạc · Vàng)?\nThao tác này sẽ đồng bộ lại tên và ngưỡng doanh số chuẩn (Tiêu chuẩn 0đ, Bạc 2.000.000đ, Vàng 10.000.000đ). Dữ liệu chi nhánh hiện tại vẫn được bảo toàn.');">
+                                  onsubmit="return confirm('Khôi phục về 3 hạng chuẩn: Tiêu chuẩn (0 ₫) · Cửa hàng uy tín (từ 10 triệu) · Cửa hàng xuất sắc (từ 30 triệu)?\nThao tác này sẽ đồng bộ lại tên và ngưỡng doanh số chuẩn. Dữ liệu chi nhánh hiện tại vẫn được bảo toàn.');">
                                 <button type="submit" class="dropdown-item py-2 small d-flex align-items-center gap-2 rounded-2 text-dark">
                                     <i class="bi bi-arrow-clockwise text-success"></i>
                                     <span>Nạp lại 3 hạng chuẩn</span>
@@ -401,10 +401,10 @@
                             <div>
                                 <button type="button" class="level-name-btn"
                                         data-bs-toggle="modal" th:data-bs-target="'#detailModal' + ${l.id}"
-                                        th:text="${l.name.toLowerCase().contains('tiêu chuẩn') ? 'Tiêu chuẩn' : (l.name.toLowerCase().contains('bạc') ? 'Bạc' : (l.name.toLowerCase().contains('vàng') ? 'Vàng' : l.name))}">
+                                        th:text="${l.name}">
                                     Tiêu chuẩn
                                 </button>
-                                <div th:if="${l.minPoint == 0}" class="mt-0.5">
+                                <div th:if="${l.minPoint == 0 or l.name.toLowerCase().contains('chuẩn')}" class="mt-0.5">
                                     <span class="badge bg-light text-secondary border" style="font-size: 11px; font-weight: 600; padding: 2px 7px;">Mặc định</span>
                                 </div>
                             </div>
@@ -414,26 +414,22 @@
                         <td>
                             <span th:if="${l.minPoint == 0}" class="text-muted">Mặc định</span>
                             <span th:if="${l.minPoint != null and l.minPoint > 0}" style="font-weight: 600; color: #24332C; white-space: nowrap;">
-                                Từ <span th:text="${#numbers.formatDecimal(l.minPoint * 10000, 0, 'COMMA', 0, 'POINT')}">2.000.000</span> ₫
+                                Từ <span th:text="${#numbers.formatDecimal(l.minPoint >= 100000 ? l.minPoint : l.minPoint * 10000, 0, 'COMMA', 0, 'POINT')}">10.000.000</span> ₫
                             </span>
                         </td>
 
                         <!-- 3. Thưởng tập thể / kỳ -->
                         <td>
                             <span th:if="${l.minPoint == 0}" class="text-muted">—</span>
-                            <span th:if="${l.name.toLowerCase().contains('bạc')}" class="reward-money">40.000 ₫</span>
-                            <span th:if="${l.name.toLowerCase().contains('vàng')}" class="reward-money">200.000 ₫</span>
-                            <span th:if="${l.minPoint > 0 and !l.name.toLowerCase().contains('bạc') and !l.name.toLowerCase().contains('vàng')}" class="reward-money" 
-                                  th:text="${#numbers.formatDecimal(l.minPoint * 200, 0, 'COMMA', 0, 'POINT')} + ' ₫'">40.000 ₫</span>
+                            <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('uy tín') or l.name.toLowerCase().contains('bạc') or l.minPoint < 20000000)}" class="reward-money">40.000 ₫</span>
+                            <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('xuất sắc') or l.name.toLowerCase().contains('vàng') or l.minPoint >= 20000000)}" class="reward-money">200.000 ₫</span>
                         </td>
 
                         <!-- 4. Ngân sách quảng cáo / kỳ -->
                         <td>
                             <span th:if="${l.minPoint == 0}" class="text-muted">—</span>
-                            <span th:if="${l.name.toLowerCase().contains('bạc')}" class="ad-budget-money">Tối đa 30.000 ₫</span>
-                            <span th:if="${l.name.toLowerCase().contains('vàng')}" class="ad-budget-money">Tối đa 150.000 ₫</span>
-                            <span th:if="${l.minPoint > 0 and !l.name.toLowerCase().contains('bạc') and !l.name.toLowerCase().contains('vàng')}" class="ad-budget-money" 
-                                  th:text="'Tối đa ' + ${#numbers.formatDecimal(l.minPoint * 150, 0, 'COMMA', 0, 'POINT')} + ' ₫'">Tối đa 30.000 ₫</span>
+                            <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('uy tín') or l.name.toLowerCase().contains('bạc') or l.minPoint < 20000000)}" class="ad-budget-money">Tối đa 30.000 ₫</span>
+                            <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('xuất sắc') or l.name.toLowerCase().contains('vàng') or l.minPoint >= 20000000)}" class="ad-budget-money">Tối đa 150.000 ₫</span>
                         </td>
 
                         <!-- 5. Chi nhánh (chỉ hiển thị con số 0, 1, 2) -->
@@ -586,17 +582,20 @@
                             <label class="form-label fw-bold text-dark small mb-1">
                                 Tên hạng chi nhánh: <span class="text-danger">*</span>
                             </label>
-                            <input type="text" name="name" class="form-control" placeholder="VD: Bạc, Vàng..." required style="height: 42px; border-radius: 8px;">
-                            <div class="form-text small" style="font-size: 12px;">Đồng nhất tên hạng ngắn gọn (Tiêu chuẩn, Bạc, Vàng)</div>
+                            <input type="text" name="name" class="form-control" placeholder="VD: Cửa hàng uy tín, Cửa hàng xuất sắc..." required style="height: 42px; border-radius: 8px;">
+                            <div class="form-text small" style="font-size: 12px;">Đồng nhất tên hạng (Tiêu chuẩn, Cửa hàng uy tín, Cửa hàng xuất sắc)</div>
                         </div>
 
                         <!-- 2. Ngưỡng doanh số tối thiểu -->
                         <div class="col-md-6">
                             <label class="form-label fw-bold text-dark small mb-1">
-                                Điểm tích lũy tối thiểu (Doanh số): <span class="text-danger">*</span>
+                                Doanh số tối thiểu đạt hạng (VNĐ): <span class="text-danger">*</span>
                             </label>
-                            <input type="number" name="minPoint" class="form-control" placeholder="VD: 200 (2.000.000 ₫), 1000 (10.000.000 ₫)..." min="0" required style="height: 42px; border-radius: 8px;">
-                            <div class="form-text small" style="font-size: 12px;">Quy đổi: 1 điểm = 10.000 ₫ doanh số (VD: 200 điểm = 2.000.000 ₫)</div>
+                            <div class="input-group">
+                                <input type="number" name="minPoint" class="form-control" placeholder="VD: 10000000 (10 triệu), 30000000 (30 triệu)..." min="0" step="500000" required style="height: 42px; border-radius: 8px 0 0 8px;">
+                                <span class="input-group-text bg-light text-muted small" style="border-radius: 0 8px 8px 0;">₫</span>
+                            </div>
+                            <div class="form-text small" style="font-size: 12px;">Nhập số tiền VNĐ (VD: 10000000 = 10 triệu; Hạng mặc định nhập 0)</div>
                         </div>
 
                         <!-- 3. Tiền thưởng tập thể -->
@@ -685,24 +684,22 @@
                         <div class="row g-2" style="font-size: 14px;">
                             <div class="col-md-4">
                                 <span class="text-muted">Doanh số tối thiểu:</span><br>
-                                <strong class="text-dark" th:text="${l.minPoint != null and l.minPoint > 0 ? 'Từ ' + #numbers.formatDecimal(l.minPoint * 10000, 0, 'COMMA', 0, 'POINT') + ' ₫' : 'Mặc định khi tạo chi nhánh'}">Mặc định</strong>
+                                <strong class="text-dark" th:text="${l.minPoint != null and l.minPoint > 0 ? 'Từ ' + #numbers.formatDecimal(l.minPoint >= 100000 ? l.minPoint : l.minPoint * 10000, 0, 'COMMA', 0, 'POINT') + ' ₫' : 'Mặc định khi tạo chi nhánh'}">Mặc định</strong>
                             </div>
                             <div class="col-md-4">
                                 <span class="text-muted">Tỷ lệ giao đúng giờ:</span><br>
                                 <strong class="text-dark">
                                     <span th:if="${l.minPoint == 0}">≥ 90%</span>
-                                    <span th:if="${l.name.toLowerCase().contains('bạc')}">≥ 95%</span>
-                                    <span th:if="${l.name.toLowerCase().contains('vàng')}">≥ 98%</span>
-                                    <span th:if="${l.minPoint > 0 and !l.name.toLowerCase().contains('bạc') and !l.name.toLowerCase().contains('vàng')}">≥ 95%</span>
+                                    <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('uy tín') or l.name.toLowerCase().contains('bạc') or l.minPoint < 20000000)}">≥ 95%</span>
+                                    <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('xuất sắc') or l.name.toLowerCase().contains('vàng') or l.minPoint >= 20000000)}">≥ 98%</span>
                                 </strong>
                             </div>
                             <div class="col-md-4">
                                 <span class="text-muted">Tỷ lệ hủy đơn tối đa:</span><br>
                                 <strong class="text-dark">
                                     <span th:if="${l.minPoint == 0}">≤ 5%</span>
-                                    <span th:if="${l.name.toLowerCase().contains('bạc')}">≤ 3%</span>
-                                    <span th:if="${l.name.toLowerCase().contains('vàng')}">≤ 1%</span>
-                                    <span th:if="${l.minPoint > 0 and !l.name.toLowerCase().contains('bạc') and !l.name.toLowerCase().contains('vàng')}">≤ 2%</span>
+                                    <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('uy tín') or l.name.toLowerCase().contains('bạc') or l.minPoint < 20000000)}">≤ 3%</span>
+                                    <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('xuất sắc') or l.name.toLowerCase().contains('vàng') or l.minPoint >= 20000000)}">≤ 1%</span>
                                 </strong>
                             </div>
                         </div>
@@ -717,9 +714,8 @@
                                 </div>
                                 <div class="fs-5 fw-bold text-dark mb-1">
                                     <span th:if="${l.minPoint == 0}">Chưa có thưởng</span>
-                                    <span th:if="${l.name.toLowerCase().contains('bạc')}">40.000 ₫/kỳ</span>
-                                    <span th:if="${l.name.toLowerCase().contains('vàng')}">200.000 ₫/kỳ</span>
-                                    <span th:if="${l.minPoint > 0 and !l.name.toLowerCase().contains('bạc') and !l.name.toLowerCase().contains('vàng')}" th:text="${#numbers.formatDecimal(l.minPoint * 200, 0, 'COMMA', 0, 'POINT')} + ' ₫/kỳ'">40.000 ₫/kỳ</span>
+                                    <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('uy tín') or l.name.toLowerCase().contains('bạc') or l.minPoint < 20000000)}">40.000 ₫/kỳ</span>
+                                    <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('xuất sắc') or l.name.toLowerCase().contains('vàng') or l.minPoint >= 20000000)}">200.000 ₫/kỳ</span>
                                 </div>
                                 <div class="small text-muted" style="font-size: 13px; line-height: 1.5;">
                                     Quỹ thưởng chung của cả chi nhánh (không phải mỗi cá nhân nhận số tiền đó). Quản lý lập đề xuất phân bổ theo đóng góp, Ban quản trị duyệt trước khi giải ngân.
@@ -734,9 +730,8 @@
                                 </div>
                                 <div class="fs-5 fw-bold text-dark mb-1">
                                     <span th:if="${l.minPoint == 0}">Hỗ trợ chung hệ thống</span>
-                                    <span th:if="${l.name.toLowerCase().contains('bạc')}">Tối đa 30.000 ₫/kỳ</span>
-                                    <span th:if="${l.name.toLowerCase().contains('vàng')}">Tối đa 150.000 ₫/kỳ</span>
-                                    <span th:if="${l.minPoint > 0 and !l.name.toLowerCase().contains('bạc') and !l.name.toLowerCase().contains('vàng')}" th:text="'Tối đa ' + ${#numbers.formatDecimal(l.minPoint * 150, 0, 'COMMA', 0, 'POINT')} + ' ₫/kỳ'">Tối đa 30.000 ₫/kỳ</span>
+                                    <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('uy tín') or l.name.toLowerCase().contains('bạc') or l.minPoint < 20000000)}">Tối đa 30.000 ₫/kỳ</span>
+                                    <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('xuất sắc') or l.name.toLowerCase().contains('vàng') or l.minPoint >= 20000000)}">Tối đa 150.000 ₫/kỳ</span>
                                 </div>
                                 <div class="small text-muted" style="font-size: 13px; line-height: 1.5;">
                                     Là mức chi tối đa cho các chiến dịch tiếp thị điểm bán trong tháng kế tiếp. Quyết toán theo chứng từ chi tiêu thực tế, không mặc nhiên chuyển thành tiền thưởng.
@@ -746,7 +741,7 @@
                     </div>
 
                     <!-- Thẻ quyền lợi bổ sung nếu có -->
-                    <div class="p-3 rounded-3 border bg-white mb-3" th:if="${l.name.toLowerCase().contains('vàng')}">
+                    <div class="p-3 rounded-3 border bg-white mb-3" th:if="${l.name.toLowerCase().contains('vàng') or l.name.toLowerCase().contains('xuất sắc')}">
                         <div class="fw-bold text-dark mb-1" style="font-size: 14px;">
                             <i class="bi bi-mortarboard-fill text-warning me-1"></i> Quyền lợi bổ sung:
                         </div>
@@ -777,12 +772,12 @@
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
                 <form th:action="@{'/admin/store-levels/update/' + ${l.id}}" method="post">
-                    <input type="hidden" name="discount" value="0">
+                    <input type="hidden" name="discount" th:value="${l.discount != null ? l.discount : 0}">
                     <div class="modal-header text-white" style="background-color: #20382E; padding: 18px 24px;">
                         <div class="d-flex align-items-center gap-2">
                             <i class="bi bi-pencil-square fs-5"></i>
                             <h5 class="modal-title fw-bold mb-0 text-white" style="font-size: 18px;">
-                                Chỉnh sửa: Hạng <span th:text="${l.name}">Bạc</span>
+                                Chỉnh sửa: Hạng <span th:text="${l.name}">Uy tín</span>
                             </h5>
                         </div>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -795,16 +790,22 @@
                                     Tên hạng chi nhánh: <span class="text-danger">*</span>
                                 </label>
                                 <input type="text" name="name" th:value="${l.name}" class="form-control" required style="height: 42px; border-radius: 8px;">
+                                <div class="form-text small" style="font-size: 12px;">VD: Tiêu chuẩn, Cửa hàng uy tín, Cửa hàng xuất sắc</div>
                             </div>
 
                             <!-- 2. Điểm tích lũy / Doanh số tối thiểu -->
                             <div class="col-md-6">
                                 <label class="form-label fw-bold text-dark small mb-1">
-                                    Điểm tích lũy tối thiểu (Doanh số): <span class="text-danger">*</span>
+                                    Doanh số tối thiểu đạt hạng (VNĐ): <span class="text-danger">*</span>
                                 </label>
-                                <input type="number" name="minPoint" th:value="${l.minPoint}" class="form-control" min="0" required style="height: 42px; border-radius: 8px;">
+                                <div class="input-group">
+                                    <input type="number" name="minPoint" 
+                                           th:value="${l.minPoint >= 100000 ? l.minPoint : (l.minPoint != null ? l.minPoint * 10000 : 0)}" 
+                                           class="form-control" min="0" step="500000" required style="height: 42px; border-radius: 8px 0 0 8px;">
+                                    <span class="input-group-text bg-light text-muted small" style="border-radius: 0 8px 8px 0;">₫</span>
+                                </div>
                                 <div class="form-text small" style="font-size: 12px;">
-                                    Tương đương: [[${#numbers.formatDecimal(l.minPoint * 10000, 0, 'COMMA', 0, 'POINT')}]] ₫ doanh số
+                                    VD: <code>10000000</code> (10 triệu), <code>30000000</code> (30 triệu). Hạng mặc định nhập <code>0</code>.
                                 </div>
                             </div>
 
@@ -814,12 +815,12 @@
                                     Tiền thưởng tập thể (₫/kỳ đạt hạng):
                                 </label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" 
-                                           th:value="${l.name.toLowerCase().contains('bạc') ? 40000 : (l.name.toLowerCase().contains('vàng') ? 200000 : (l.minPoint == 0 ? 0 : 40000))}"
-                                           min="0" step="10000" style="height: 42px; border-radius: 8px 0 0 8px;">
+                                    <input type="text" class="form-control bg-light" readonly
+                                           th:value="${l.minPoint == 0 ? '0 ₫' : (l.minPoint > 0 and (l.name.toLowerCase().contains('uy tín') or l.name.toLowerCase().contains('bạc') or l.minPoint < 20000000) ? '40.000 ₫' : '200.000 ₫')}"
+                                           style="height: 42px; border-radius: 8px 0 0 8px; font-weight: 600; color: #2E7D32;">
                                     <span class="input-group-text bg-light text-muted small" style="border-radius: 0 8px 8px 0;">₫/kỳ</span>
                                 </div>
-                                <div class="form-text small" style="font-size: 12px;">Quỹ thưởng chung của chi nhánh</div>
+                                <div class="form-text small" style="font-size: 12px;">Quỹ thưởng chung của chi nhánh (40k cho Uy tín, 200k cho Xuất sắc)</div>
                             </div>
 
                             <!-- 4. Ngân sách quảng cáo -->
@@ -828,17 +829,18 @@
                                     Ngân sách quảng cáo tối đa (₫/kỳ):
                                 </label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" 
-                                           th:value="${l.name.toLowerCase().contains('bạc') ? 30000 : (l.name.toLowerCase().contains('vàng') ? 150000 : (l.minPoint == 0 ? 0 : 30000))}"
-                                           min="0" step="10000" style="height: 42px; border-radius: 8px 0 0 8px;">
+                                    <input type="text" class="form-control bg-light" readonly
+                                           th:value="${l.minPoint == 0 ? '0 ₫' : (l.minPoint > 0 and (l.name.toLowerCase().contains('uy tín') or l.name.toLowerCase().contains('bạc') or l.minPoint < 20000000) ? 'Tối đa 30.000 ₫' : 'Tối đa 150.000 ₫')}"
+                                           style="height: 42px; border-radius: 8px 0 0 8px; font-weight: 600; color: #1D4ED8;">
                                     <span class="input-group-text bg-light text-muted small" style="border-radius: 0 8px 8px 0;">₫/kỳ</span>
                                 </div>
-                                <div class="form-text small" style="font-size: 12px;">Thanh toán theo chứng từ thực tế</div>
+                                <div class="form-text small" style="font-size: 12px;">Mức chi tối đa theo chứng từ (30k cho Uy tín, 150k cho Xuất sắc)</div>
                             </div>
 
                             <!-- 5. Trạng thái áp dụng -->
                             <div class="col-md-6">
                                 <label class="form-label fw-bold text-dark small mb-1">Trạng thái áp dụng:</label>
+                                <input th:if="${l.minPoint == 0}" type="hidden" name="isDeleted" value="false">
                                 <select name="isDeleted" class="form-select" style="height: 42px; border-radius: 8px;" th:disabled="${l.minPoint == 0}">
                                     <option value="false" th:selected="${l.isDeleted == null or !l.isDeleted}">Đang áp dụng</option>
                                     <option value="true" th:selected="${l.isDeleted != null and l.isDeleted}">Ngừng áp dụng</option>
@@ -849,9 +851,9 @@
                             <!-- 6. Tiêu chuẩn giao đúng giờ & tỷ lệ hủy -->
                             <div class="col-md-6">
                                 <label class="form-label fw-bold text-dark small mb-1">Tỷ lệ giao đúng giờ cam kết (%):</label>
-                                <input type="number" class="form-control" 
-                                       th:value="${l.name.toLowerCase().contains('vàng') ? 98 : 95}" 
-                                       min="0" max="100" style="height: 42px; border-radius: 8px;">
+                                <input type="text" class="form-control bg-light" readonly
+                                       th:value="${l.minPoint == 0 ? '≥ 90%' : (l.minPoint > 0 and (l.name.toLowerCase().contains('uy tín') or l.name.toLowerCase().contains('bạc') or l.minPoint < 20000000) ? '≥ 95%' : '≥ 98%')}" 
+                                       style="height: 42px; border-radius: 8px;">
                             </div>
                         </div>
                     </div>

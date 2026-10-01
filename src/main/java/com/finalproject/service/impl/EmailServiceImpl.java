@@ -41,7 +41,7 @@ public class EmailServiceImpl implements EmailService {
         try {
             mailSender.send(message);
             log.info("Đã gửi email OTP thành công tới: {}", toEmail);
-        } catch (org.springframework.mail.MailException ex) {
+        } catch (Exception ex) {
             log.warn("Không thể gửi email OTP qua SMTP đến {}: {}. Mã OTP là: {}", toEmail, ex.getMessage(), otpCode);
         }
     }

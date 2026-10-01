@@ -57,3 +57,14 @@ IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE name = N''Bình Hoa Nghệ Thu
     INSERT INTO dbo.categories (name, description) VALUES (N''Bình Hoa Nghệ Thuật Để Bàn'', N''Bình gốm, bình thủy tinh cắm hoa tươi trang trí phòng khách và văn phòng'');
 IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE name = N''Hộp Hoa & Giỏ Hoa Quà Tặng'')
     INSERT INTO dbo.categories (name, description) VALUES (N''Hộp Hoa & Giỏ Hoa Quà Tặng'', N''Hộp hoa mica, hộp tròn cao cấp và giỏ hoa tươi thiết kế độc đáo'');
+
+-- Chuẩn hóa tên và ngưỡng doanh số cho Hạng chi nhánh: Tiêu chuẩn (0đ), Cửa hàng uy tín (từ 10 triệu), Cửa hàng xuất sắc (từ 30 triệu)
+IF EXISTS (SELECT 1 FROM dbo.store_levels WHERE name LIKE N''%Bạc%'' OR name LIKE N''%Uy Tín%'')
+    UPDATE dbo.store_levels SET name = N''Cửa hàng uy tín'', min_point = 10000000, discount = 5 WHERE name LIKE N''%Bạc%'' OR name LIKE N''%Uy Tín%'';
+
+IF EXISTS (SELECT 1 FROM dbo.store_levels WHERE name LIKE N''%Vàng%'' OR name LIKE N''%Xuất Sắc%'')
+    UPDATE dbo.store_levels SET name = N''Cửa hàng xuất sắc'', min_point = 30000000, discount = 10 WHERE name LIKE N''%Vàng%'' OR name LIKE N''%Xuất Sắc%'';
+
+IF EXISTS (SELECT 1 FROM dbo.store_levels WHERE name LIKE N''%Chuẩn%'' OR min_point = 0)
+    UPDATE dbo.store_levels SET name = N''Tiêu chuẩn'', min_point = 0 WHERE name LIKE N''%Chuẩn%'' OR min_point = 0;
+

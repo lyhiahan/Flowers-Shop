@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng Ký Tài Khoản - Chuỗi Cửa Hàng Hoa Tươi</title>
     <!-- Google Fonts: Nunito & Bootstrap 5 & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,7 +15,9 @@
     <style>
         :root {
             --flower-primary: #e11d48;
+            --flower-primary-hover: #be123c;
             --flower-soft-pink: #fff1f2;
+            --flower-border: #fecdd3;
         }
         body {
             font-family: 'Nunito', sans-serif !important;
@@ -22,107 +25,251 @@
             min-height: 100vh;
             display: flex;
             align-items: center;
+            padding: 30px 12px;
         }
         button, input, select, textarea {
             font-family: 'Nunito', sans-serif !important;
         }
         .register-card {
             border: 1px solid #ffe4e6;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px -5px rgba(225, 29, 72, 0.1), 0 8px 10px -6px rgba(225, 29, 72, 0.1);
+            border-radius: 24px;
+            box-shadow: 0 12px 30px -6px rgba(225, 29, 72, 0.12), 0 8px 16px -6px rgba(225, 29, 72, 0.08);
+            background: #ffffff;
+        }
+        .form-control, .form-select {
+            border-radius: 10px;
+            padding: 0.6rem 0.85rem;
+            border-color: #e2e8f0;
+            font-size: 0.95rem;
+            transition: all 0.2s ease-in-out;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #f43f5e;
+            box-shadow: 0 0 0 0.2rem rgba(244, 63, 94, 0.15);
+        }
+        .input-group-text {
+            border-radius: 10px 0 0 10px;
+            border-color: #e2e8f0;
+            background-color: #f8fafc;
+            color: #64748b;
+        }
+        .input-group > .form-control {
+            border-radius: 0 10px 10px 0;
+        }
+        .input-group > .btn-toggle-pw {
+            border-radius: 0 10px 10px 0;
+            border-color: #e2e8f0;
+            background-color: #f8fafc;
+            color: #64748b;
+        }
+        .btn-register {
+            background-color: var(--flower-primary);
+            border-color: var(--flower-primary);
+            color: #ffffff;
+            transition: all 0.25s ease;
+        }
+        .btn-register:hover {
+            background-color: var(--flower-primary-hover);
+            border-color: var(--flower-primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(225, 29, 72, 0.3);
+        }
+        .brand-logo-img-lg {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+        .section-subtitle {
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+            color: #94a3b8;
+            margin-bottom: 0.5rem;
+        }
+        .alert-warning-custom {
+            background-color: #fffbeb;
+            border: 1px solid #fde68a;
+            color: #92400e;
         }
     </style>
 </head>
 <body>
-<div class="container py-5">
+<div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card register-card bg-white p-2">
-                <div class="card-body p-4">
+        <div class="col-12 col-md-10 col-lg-8 col-xl-7">
+            <div class="card register-card p-3 p-md-4">
+                <div class="card-body p-2 p-md-3">
                     <div class="text-center mb-4">
                         <a th:href="@{/}" class="d-inline-block mb-2">
                             <img th:src="@{/images/flower-logo.png}" alt="Hoa Tươi Sài Gòn" class="brand-logo-img-lg">
                         </a>
-                        <h3 class="font-serif fw-bold text-dark mb-1">HOA TƯƠI SÀI GÒN</h3>
+                        <h3 class="fw-bold text-dark mb-1" style="letter-spacing: -0.5px;">HOA TƯƠI SÀI GÒN</h3>
                         <p class="text-muted small">Đăng Ký Tài Khoản Khách Hàng</p>
                     </div>
 
-                    <!-- Thông báo lỗi (Exception Flow: 8b, 8b1) -->
-                    <div th:if="${errorMessage}" class="alert alert-danger py-2 small rounded-3" th:text="${errorMessage}"></div>
-                    <div th:if="${successMessage}" class="alert alert-success py-2 small rounded-3" th:text="${successMessage}"></div>
+                    <!-- Server Alert Messages -->
+                    <div th:if="${errorMessage}" class="alert alert-danger py-2 px-3 small rounded-3 mb-3 d-flex align-items-center" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill fs-5 me-2 flex-shrink-0"></i>
+                        <span th:text="${errorMessage}"></span>
+                    </div>
+                    <div th:if="${successMessage}" class="alert alert-success py-2 px-3 small rounded-3 mb-3 d-flex align-items-center" role="alert">
+                        <i class="bi bi-check-circle-fill fs-5 me-2 flex-shrink-0"></i>
+                        <span th:text="${successMessage}"></span>
+                    </div>
 
-                    <form id="registerForm" th:action="@{/register}" th:object="${registerRequest}" method="post">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label small fw-semibold text-secondary">Tên đăng nhập (*)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-person"></i></span>
-                                    <input type="text" id="usernameInput" th:field="*{username}" class="form-control border-start-0 ps-0"
+                    <!-- Client Alert Box: Hiển thị cảnh báo khi người dùng nhập sai/thiếu thông tin -->
+                    <div id="clientErrorAlert" class="alert alert-danger py-2 px-3 small rounded-3 mb-3 d-none" role="alert">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-exclamation-octagon-fill fs-5 me-2 flex-shrink-0 mt-1"></i>
+                            <div>
+                                <strong class="d-block mb-1">Cảnh báo: Vui lòng kiểm tra và sửa các thông tin sau:</strong>
+                                <ul id="clientErrorList" class="mb-0 ps-3"></ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="registerForm" th:action="@{/register}" th:object="${registerRequest}" method="post" novalidate>
+                        <!-- Thông tin tài khoản -->
+                        <div class="section-subtitle">Thông tin tài khoản đăng nhập</div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="usernameInput" class="form-label small fw-semibold text-secondary">
+                                    Tên đăng nhập <span class="text-danger">(*)</span>
+                                </label>
+                                <div class="input-group has-validation">
+                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                    <input type="text" id="usernameInput" th:field="*{username}" class="form-control"
                                            th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''"
-                                           placeholder="Từ 4-50 ký tự" required autofocus>
+                                           placeholder="Từ 4-50 ký tự, không dấu" required autofocus>
                                 </div>
-                                <div class="invalid-feedback d-block small" th:errors="*{username}"></div>
+                                <div id="usernameFeedback" class="invalid-feedback small" th:errors="*{username}">
+                                    Tên đăng nhập từ 4-50 ký tự, chỉ gồm chữ, số, dấu _ hoặc . (không chứa dấu cách).
+                                </div>
                             </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label small fw-semibold text-secondary">Mật khẩu (*)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-lock"></i></span>
-                                    <input type="password" id="passwordInput" th:field="*{password}" class="form-control border-start-0 ps-0"
+                            <div class="col-md-6">
+                                <label for="passwordInput" class="form-label small fw-semibold text-secondary">
+                                    Mật khẩu <span class="text-danger">(*)</span>
+                                </label>
+                                <div class="input-group has-validation">
+                                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                    <input type="password" id="passwordInput" th:field="*{password}" class="form-control"
                                            th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''"
                                            placeholder="Tối thiểu 6 ký tự" required>
+                                    <button class="btn btn-outline-secondary btn-toggle-pw" type="button" id="togglePasswordBtn" title="Hiện/ẩn mật khẩu">
+                                        <i class="bi bi-eye" id="togglePasswordIcon"></i>
+                                    </button>
                                 </div>
-                                <div class="invalid-feedback d-block small" th:errors="*{password}"></div>
+                                <div id="passwordFeedback" class="invalid-feedback small" th:errors="*{password}">
+                                    Mật khẩu phải từ 6 ký tự trở lên.
+                                </div>
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold text-secondary">Họ và tên (*)</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-card-heading"></i></span>
-                                <input type="text" id="fullNameInput" th:field="*{fullName}" class="form-control border-start-0 ps-0"
-                                       th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid' : ''"
-                                       placeholder="VD: Nguyễn Văn A" required>
+                        <!-- Thông tin cá nhân -->
+                        <div class="section-subtitle mt-4">Thông tin cá nhân & liên hệ</div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="fullNameInput" class="form-label small fw-semibold text-secondary">
+                                    Họ và tên <span class="text-danger">(*)</span>
+                                </label>
+                                <div class="input-group has-validation">
+                                    <span class="input-group-text"><i class="bi bi-card-heading"></i></span>
+                                    <input type="text" id="fullNameInput" th:field="*{fullName}" class="form-control"
+                                           th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid' : ''"
+                                           placeholder="VD: Nguyễn Văn A" required>
+                                </div>
+                                <div id="fullNameFeedback" class="invalid-feedback small" th:errors="*{fullName}">
+                                    Vui lòng nhập họ và tên của bạn (từ 2 ký tự trở lên).
+                                </div>
                             </div>
-                            <div class="invalid-feedback d-block small" th:errors="*{fullName}"></div>
-                        </div>
 
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold text-secondary">Email (*)</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
-                                <input type="email" id="emailInput" th:field="*{email}" class="form-control border-start-0 ps-0"
-                                       th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
-                                       placeholder="email@example.com" required>
-                            </div>
-                            <div class="invalid-feedback d-block small" th:errors="*{email}"></div>
-                            <div class="form-text text-muted small">Mã OTP kích hoạt tài khoản sẽ được gửi đến email này.</div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label small fw-semibold text-secondary">Số điện thoại (*)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-telephone"></i></span>
-                                    <input type="tel" id="phoneInput" th:field="*{phone}" class="form-control border-start-0 ps-0"
+                            <div class="col-md-6">
+                                <label for="phoneInput" class="form-label small fw-semibold text-secondary">
+                                    Số điện thoại <span class="text-danger">(*)</span>
+                                </label>
+                                <div class="input-group has-validation">
+                                    <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                    <input type="tel" id="phoneInput" th:field="*{phone}" class="form-control"
                                            th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid' : ''"
-                                           placeholder="VD: 0901234567"
-                                           pattern="^(0|\+?84)[35789][0-9]{8}$"
-                                           required>
+                                           placeholder="VD: 0912345678" required>
                                 </div>
-                                <div class="invalid-feedback d-block small" th:errors="*{phone}"></div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label small fw-semibold text-secondary">Địa chỉ</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-geo-alt"></i></span>
-                                    <input type="text" id="addressInput" th:field="*{address}" class="form-control border-start-0 ps-0" placeholder="Quận/Huyện, TP">
+                                <div id="phoneFeedback" class="invalid-feedback small" th:errors="*{phone}">
+                                    Số điện thoại gồm 10 chữ số chuẩn Việt Nam (bắt đầu bằng 03, 05, 07, 08, 09).
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Bước 5: Bấm nút Sign up (Đăng ký tài khoản) -->
-                        <button type="button" id="btnSignUp" class="btn btn-danger w-100 py-3 fw-bold rounded-pill shadow-sm mb-3">
+                        <div class="mb-3">
+                            <label for="emailInput" class="form-label small fw-semibold text-secondary">
+                                Email <span class="text-danger">(*)</span>
+                            </label>
+                            <div class="input-group has-validation">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input type="email" id="emailInput" th:field="*{email}" class="form-control"
+                                       th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+                                       placeholder="VD: email@example.com" required>
+                            </div>
+                            <div id="emailFeedback" class="invalid-feedback small" th:errors="*{email}">
+                                Email không đúng định dạng (VD: example@domain.com).
+                            </div>
+                            <div class="form-text text-muted small mt-1">
+                                <i class="bi bi-info-circle me-1"></i>Mã OTP kích hoạt tài khoản sẽ được gửi đến email này.
+                            </div>
+                        </div>
+
+                        <!-- Địa chỉ giao hàng với Tỉnh/Thành phố (64 tỉnh thành) & Quận/Huyện Dropdown -->
+                        <div class="section-subtitle mt-4">Địa chỉ giao nhận hoa</div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="provinceSelect" class="form-label small fw-semibold text-secondary">
+                                    Tỉnh / Thành phố <span class="text-danger">(*)</span>
+                                </label>
+                                <select id="provinceSelect" th:field="*{province}" class="form-select" required>
+                                    <option value="">-- Chọn Tỉnh / Thành phố --</option>
+                                </select>
+                                <div id="provinceFeedback" class="invalid-feedback small">
+                                    Vui lòng chọn Tỉnh / Thành phố.
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="districtSelect" class="form-label small fw-semibold text-secondary">
+                                    Quận / Huyện <span class="text-danger">(*)</span>
+                                </label>
+                                <select id="districtSelect" th:field="*{district}" class="form-select" disabled required>
+                                    <option value="">-- Chọn Quận / Huyện --</option>
+                                </select>
+                                <div id="districtFeedback" class="invalid-feedback small">
+                                    Vui lòng chọn Quận / Huyện.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="detailAddressInput" class="form-label small fw-semibold text-secondary">
+                                Địa chỉ chi tiết (Số nhà, tên đường, thôn/xã/phường)
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                                <input type="text" id="detailAddressInput" th:field="*{detailAddress}" class="form-control"
+                                       placeholder="VD: 123 Đường Hoa Hồng, Phường 1">
+                            </div>
+                        </div>
+
+                        <!-- Hidden Field to hold concatenated full address for compatibility -->
+                        <input type="hidden" id="addressInput" th:field="*{address}">
+
+                        <!-- Preview địa chỉ đầy đủ -->
+                        <div class="p-2 px-3 bg-light rounded-3 mb-4 small text-secondary border">
+                            <i class="bi bi-pin-map text-danger me-1"></i>
+                            <span class="fw-semibold">Địa chỉ hoàn chỉnh:</span>
+                            <span id="fullAddressPreview" class="text-dark ms-1 italic">Chưa chọn địa chỉ</span>
+                        </div>
+
+                        <!-- Nút Đăng ký -->
+                        <button type="button" id="btnSignUp" class="btn btn-register w-100 py-3 fw-bold rounded-pill shadow-sm mb-3">
                             🌸 Đăng ký tài khoản
                         </button>
                     </form>
@@ -139,49 +286,65 @@
     </div>
 </div>
 
-<!-- Bước 6: Hiển thị thông báo xác nhận thông tin đăng ký (Confirm Modal) -->
+<!-- Modal Xác Nhận Đăng Ký Tài Khoản -->
 <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 border-0 shadow">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold text-dark" id="confirmModalLabel">
-                    🌸 Thông Báo Xác Nhận Đăng Ký Tài Khoản
-                </h5>
+            <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-danger bg-opacity-10 p-2 me-2 text-danger d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="bi bi-shield-check fs-5"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark mb-0" id="confirmModalLabel">
+                            Xác Nhận Đăng Ký Tài Khoản
+                        </h5>
+                        <p class="text-muted small mb-0">Kiểm tra thông tin trước khi tạo tài khoản</p>
+                    </div>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body py-3">
-                <p class="text-secondary small mb-3">Vui lòng kiểm tra lại thông tin tài khoản của bạn trước khi xác nhận tạo tài khoản:</p>
+            <div class="modal-body py-3 px-4">
                 <div class="bg-light p-3 rounded-3 small">
-                    <div class="d-flex justify-content-between mb-2">
+                    <div class="d-flex justify-content-between py-1 border-bottom border-white">
                         <span class="text-muted">Tên đăng nhập:</span>
                         <strong id="confirmUsername" class="text-dark"></strong>
                     </div>
-                    <div class="d-flex justify-content-between mb-2">
+                    <div class="d-flex justify-content-between py-1 border-bottom border-white">
                         <span class="text-muted">Họ và tên:</span>
                         <strong id="confirmFullName" class="text-dark"></strong>
                     </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">Email:</span>
-                        <strong id="confirmEmail" class="text-dark"></strong>
+                    <div class="d-flex justify-content-between py-1 border-bottom border-white">
+                        <span class="text-muted">Email nhận OTP:</span>
+                        <strong id="confirmEmail" class="text-dark text-break"></strong>
                     </div>
-                    <div class="d-flex justify-content-between mb-2">
+                    <div class="d-flex justify-content-between py-1 border-bottom border-white">
                         <span class="text-muted">Số điện thoại:</span>
                         <strong id="confirmPhone" class="text-dark"></strong>
                     </div>
-                    <div class="d-flex justify-content-between">
-                        <span class="text-muted">Địa chỉ:</span>
-                        <strong id="confirmAddress" class="text-dark"></strong>
+                    <div class="d-flex justify-content-between py-1 border-bottom border-white">
+                        <span class="text-muted">Tỉnh / Thành phố:</span>
+                        <strong id="confirmProvince" class="text-dark"></strong>
+                    </div>
+                    <div class="d-flex justify-content-between py-1 border-bottom border-white">
+                        <span class="text-muted">Quận / Huyện:</span>
+                        <strong id="confirmDistrict" class="text-dark"></strong>
+                    </div>
+                    <div class="d-flex justify-content-between py-1">
+                        <span class="text-muted">Địa chỉ đầy đủ:</span>
+                        <strong id="confirmAddress" class="text-dark text-end ms-2 text-break"></strong>
                     </div>
                 </div>
+                <div class="alert alert-warning-custom py-2 px-3 small rounded-3 mt-3 mb-0">
+                    <i class="bi bi-info-circle me-1"></i> Mã kích hoạt OTP sẽ được gửi đến email đăng ký của bạn ngay sau khi xác nhận.
+                </div>
             </div>
-            <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
-                <!-- Nút màu trắng (bên trái): Hủy -->
+            <div class="modal-footer border-top-0 pt-0 pb-4 px-4 d-flex justify-content-end gap-2">
                 <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancel">
-                    Hủy
+                    Quay lại sửa
                 </button>
-                <!-- Nút màu đỏ (bên phải): Xác nhận -->
                 <button type="button" class="btn btn-danger rounded-pill px-4 fw-semibold" id="btnConfirm">
-                    Xác nhận
+                    Đồng ý xác nhận
                 </button>
             </div>
         </div>
@@ -190,45 +353,383 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Bước 5: Bấm vào nút Sign up -> Kiểm tra dữ liệu & Hiển thị thông báo xác nhận (Bước 6)
-    document.getElementById('btnSignUp').addEventListener('click', function() {
-        var form = document.getElementById('registerForm');
-        var phoneInput = document.getElementById('phoneInput');
-        var phoneVal = phoneInput.value.trim();
-        var vnPhoneRegex = /^(0|\+?84)[35789][0-9]{8}$/;
+    // Dữ liệu 63/64 Tỉnh / Thành phố Việt Nam và các Quận / Huyện tương ứng
+    const VIETNAM_LOCATIONS = {
+        "An Giang": ["TP. Long Xuyên", "TP. Châu Đốc", "Thị xã Tân Châu", "Thị xã Tịnh Biên", "Huyện An Phú", "Huyện Châu Phú", "Huyện Châu Thành", "Huyện Chợ Mới", "Huyện Phú Tân", "Huyện Thoại Sơn", "Huyện Tri Tôn"],
+        "Bà Rịa - Vũng Tàu": ["TP. Vũng Tàu", "TP. Bà Rịa", "Thị xã Phú Mỹ", "Huyện Châu Đức", "Huyện Côn Đảo", "Huyện Đất Đỏ", "Huyện Long Điền", "Huyện Xuyên Mộc"],
+        "Bạc Liêu": ["TP. Bạc Liêu", "Thị xã Giá Rai", "Huyện Đông Hải", "Huyện Hòa Bình", "Huyện Hồng Dân", "Huyện Phước Long", "Huyện Vĩnh Lợi"],
+        "Bắc Giang": ["TP. Bắc Giang", "Thị xã Việt Yên", "Huyện Hiệp Hòa", "Huyện Lạng Giang", "Huyện Lục Nam", "Huyện Lục Ngạn", "Huyện Sơn Động", "Huyện Tân Yên", "Huyện Yên Dũng", "Huyện Yên Thế"],
+        "Bắc Kạn": ["TP. Bắc Kạn", "Huyện Ba Bể", "Huyện Bạch Thông", "Huyện Chợ Đồn", "Huyện Chợ Mới", "Huyện Na Rì", "Huyện Ngân Sơn", "Huyện Pác Nặm"],
+        "Bắc Ninh": ["TP. Bắc Ninh", "TP. Từ Sơn", "Thị xã Quế Võ", "Thị xã Thuận Thành", "Huyện Gia Bình", "Huyện Lương Tài", "Huyện Tiên Du", "Huyện Yên Phong"],
+        "Bến Tre": ["TP. Bến Tre", "Huyện Ba Tri", "Huyện Bình Đại", "Huyện Châu Thành", "Huyện Chợ Lách", "Huyện Giồng Trôm", "Huyện Mỏ Cày Bắc", "Huyện Mỏ Cày Nam", "Huyện Thạnh Phú"],
+        "Bình Định": ["TP. Quy Nhơn", "Thị xã An Nhơn", "Thị xã Hoài Nhơn", "Huyện An Lão", "Huyện Hoài Ân", "Huyện Phù Cát", "Huyện Phù Mỹ", "Huyện Tây Sơn", "Huyện Tuy Phước", "Huyện Vân Canh", "Huyện Vĩnh Thạnh"],
+        "Bình Dương": ["TP. Thủ Dầu Một", "TP. Dĩ An", "TP. Thuận An", "TP. Tân Uyên", "TP. Bến Cát", "Huyện Bàu Bàng", "Huyện Bắc Tân Uyên", "Huyện Dầu Tiếng", "Huyện Phú Giáo"],
+        "Bình Phước": ["TP. Đồng Xoài", "Thị xã Bình Long", "Thị xã Phước Long", "Huyện Bù Đăng", "Huyện Bù Đốp", "Huyện Bù Gia Mập", "Huyện Chơn Thành", "Huyện Đồng Phú", "Huyện Hớn Quản", "Huyện Lộc Ninh", "Huyện Phú Riềng"],
+        "Bình Thuận": ["TP. Phan Thiết", "Thị xã La Gi", "Huyện Bắc Bình", "Huyện Đức Linh", "Huyện Hàm Tân", "Huyện Hàm Thuận Bắc", "Huyện Hàm Thuận Nam", "Huyện Phú Quý", "Huyện Tánh Linh", "Huyện Tuy Phong"],
+        "Cà Mau": ["TP. Cà Mau", "Huyện Cái Nước", "Huyện Đầm Dơi", "Huyện Năm Căn", "Huyện Ngọc Hiển", "Huyện Phú Tân", "Huyện Thới Bình", "Huyện Trần Văn Thời", "Huyện U Minh"],
+        "Cần Thơ": ["Quận Ninh Kiều", "Quận Bình Thủy", "Quận Cái Răng", "Quận Ô Môn", "Quận Thốt Nốt", "Huyện Cờ Đỏ", "Huyện Phong Điền", "Huyện Thới Lai", "Huyện Vĩnh Thạnh"],
+        "Cao Bằng": ["TP. Cao Bằng", "Huyện Bảo Lạc", "Huyện Bảo Lâm", "Huyện Hạ Lang", "Huyện Hà Quảng", "Huyện Hòa An", "Huyện Nguyên Bình", "Huyện Quảng Hòa", "Huyện Thạch An", "Huyện Trùng Khánh"],
+        "Đà Nẵng": ["Quận Hải Châu", "Quận Cẩm Lệ", "Quận Thanh Khê", "Quận Liên Chiểu", "Quận Ngũ Hành Sơn", "Quận Sơn Trà", "Huyện Hòa Vang", "Huyện Hoàng Sa"],
+        "Đắk Lắk": ["TP. Buôn Ma Thuột", "Thị xã Buôn Hồ", "Huyện Buôn Đôn", "Huyện Cư Kuin", "Huyện Cư M'gar", "Huyện Ea H'leo", "Huyện Ea Kar", "Huyện Ea Súp", "Huyện Krông Ana", "Huyện Krông Bông", "Huyện Krông Búk", "Huyện Krông Năng", "Huyện Krông Pắc", "Huyện Lắk", "Huyện M'Drắk"],
+        "Đắk Nông": ["TP. Gia Nghĩa", "Huyện Cư Jút", "Huyện Đắk Glong", "Huyện Đắk Mil", "Huyện Đắk R'lấp", "Huyện Đắk Song", "Huyện Krông Nô", "Huyện Tuy Đức"],
+        "Điện Biên": ["TP. Điện Biên Phủ", "Thị xã Mường Lay", "Huyện Điện Biên", "Huyện Điện Biên Đông", "Huyện Mường Ảng", "Huyện Mường Chà", "Huyện Mường Nhé", "Huyện Nậm Pồ", "Huyện Tủa Chùa", "Huyện Tuần Giáo"],
+        "Đồng Nai": ["TP. Biên Hòa", "TP. Long Khánh", "Huyện Cẩm Mỹ", "Huyện Định Quán", "Huyện Long Thành", "Huyện Nhơn Trạch", "Huyện Tân Phú", "Huyện Thống Nhất", "Huyện Trảng Bom", "Huyện Vĩnh Cửu", "Huyện Xuân Lộc"],
+        "Đồng Tháp": ["TP. Cao Lãnh", "TP. Sa Đéc", "TP. Hồng Ngự", "Huyện Cao Lãnh", "Huyện Châu Thành", "Huyện Hồng Ngự", "Huyện Lai Vung", "Huyện Lấp Vò", "Huyện Tam Nông", "Huyện Tân Hồng", "Huyện Thanh Bình", "Huyện Tháp Mười"],
+        "Gia Lai": ["TP. Pleiku", "Thị xã An Khê", "Thị xã Ayun Pa", "Huyện Chư Păh", "Huyện Chư Prông", "Huyện Chư Pưh", "Huyện Chư Sê", "Huyện Đắk Đoa", "Huyện Đắk Pơ", "Huyện Đức Cơ", "Huyện Ia Grai", "Huyện Ia Pa", "Huyện K'Bang", "Huyện Kông Chro", "Huyện Krông Pa", "Huyện Mang Yang", "Huyện Phú Thiện"],
+        "Hà Giang": ["TP. Hà Giang", "Huyện Bắc Mê", "Huyện Bắc Quang", "Huyện Đồng Văn", "Huyện Hoàng Su Phì", "Huyện Mèo Vạc", "Huyện Quản Bạ", "Huyện Quang Bình", "Huyện Vị Xuyên", "Huyện Xín Mần", "Huyện Yên Minh"],
+        "Hà Nam": ["TP. Phủ Lý", "Thị xã Duy Tiên", "Huyện Bình Lục", "Huyện Kim Bảng", "Huyện Lý Nhân", "Huyện Thanh Liêm"],
+        "Hà Nội": ["Quận Ba Đình", "Quận Hoàn Kiếm", "Quận Tây Hồ", "Quận Long Biên", "Quận Cầu Giấy", "Quận Đống Đa", "Quận Hai Bà Trưng", "Quận Hoàng Mai", "Quận Thanh Xuân", "Quận Nam Từ Liêm", "Quận Bắc Từ Liêm", "Quận Hà Đông", "Thị xã Sơn Tây", "Huyện Ba Vì", "Huyện Chương Mỹ", "Huyện Đan Phượng", "Huyện Đông Anh", "Huyện Gia Lâm", "Huyện Hoài Đức", "Huyện Mê Linh", "Huyện Mỹ Đức", "Huyện Phú Xuyên", "Huyện Phúc Thọ", "Huyện Quốc Oai", "Huyện Sóc Sơn", "Huyện Thạch Thất", "Huyện Thanh Oai", "Huyện Thanh Trì", "Huyện Thường Tín", "Huyện Ứng Hòa"],
+        "Hà Tĩnh": ["TP. Hà Tĩnh", "Thị xã Hồng Lĩnh", "Thị xã Kỳ Anh", "Huyện Cẩm Xuyên", "Huyện Can Lộc", "Huyện Đức Thọ", "Huyện Hương Khê", "Huyện Hương Sơn", "Huyện Kỳ Anh", "Huyện Lộc Hà", "Huyện Nghi Xuân", "Huyện Thạch Hà", "Huyện Vũ Quang"],
+        "Hải Dương": ["TP. Hải Dương", "TP. Chí Linh", "Thị xã Kinh Môn", "Huyện Bình Giang", "Huyện Cẩm Giàng", "Huyện Gia Lộc", "Huyện Kim Thành", "Huyện Nam Sách", "Huyện Ninh Giang", "Huyện Thanh Hà", "Huyện Thanh Miện", "Huyện Tứ Kỳ"],
+        "Hải Phòng": ["Quận Hồng Bàng", "Quận Ngô Quyền", "Quận Lê Chân", "Quận Hải An", "Quận Kiến An", "Quận Đồ Sơn", "Quận Dương Kinh", "Huyện An Dương", "Huyện An Lão", "Huyện Bạch Long Vĩ", "Huyện Cát Hải", "Huyện Kiến Thụy", "Huyện Thủy Nguyên", "Huyện Tiên Lãng", "Huyện Vĩnh Bảo"],
+        "Hậu Giang": ["TP. Vị Thanh", "TP. Ngã Bảy", "Thị xã Long Mỹ", "Huyện Châu Thành", "Huyện Châu Thành A", "Huyện Phụng Hiệp", "Huyện Vị Thủy", "Huyện Long Mỹ"],
+        "Hòa Bình": ["TP. Hòa Bình", "Huyện Cao Phong", "Huyện Đà Bắc", "Huyện Kim Bôi", "Huyện Lạc Sơn", "Huyện Lạc Thủy", "Huyện Lương Sơn", "Huyện Mai Châu", "Huyện Tân Lạc", "Huyện Yên Thủy"],
+        "Hưng Yên": ["TP. Hưng Yên", "Thị xã Mỹ Hào", "Huyện Ân Thi", "Huyện Khoái Châu", "Huyện Kim Động", "Huyện Phù Cừ", "Huyện Tiên Lữ", "Huyện Văn Giang", "Huyện Văn Lâm", "Huyện Yên Mỹ"],
+        "Khánh Hòa": ["TP. Nha Trang", "TP. Cam Ranh", "Thị xã Ninh Hòa", "Huyện Cam Lâm", "Huyện Diên Khánh", "Huyện Khánh Sơn", "Huyện Khánh Vĩnh", "Huyện Trường Sa", "Huyện Vạn Ninh"],
+        "Kiên Giang": ["TP. Rạch Giá", "TP. Hà Tiên", "TP. Phú Quốc", "Huyện An Biên", "Huyện An Minh", "Huyện Châu Thành", "Huyện Giang Thành", "Huyện Giồng Riềng", "Huyện Gò Quao", "Huyện Hòn Đất", "Huyện Kiên Hải", "Huyện Kiên Lương", "Huyện Tân Hiệp", "Huyện U Minh Thượng", "Huyện Vĩnh Thuận"],
+        "Kon Tum": ["TP. Kon Tum", "Huyện Đắk Glei", "Huyện Đắk Hà", "Huyện Đắk Tô", "Huyện Ia H'Drai", "Huyện Kon Plông", "Huyện Kon Rẫy", "Huyện Ngọc Hồi", "Huyện Sa Thầy", "Huyện Tu Mơ Rông"],
+        "Lai Châu": ["TP. Lai Châu", "Huyện Mường Tè", "Huyện Nậm Nhùn", "Huyện Phong Thổ", "Huyện Sìn Hồ", "Huyện Tam Đường", "Huyện Tân Uyên", "Huyện Than Uyên"],
+        "Lâm Đồng": ["TP. Đà Lạt", "TP. Bảo Lộc", "Huyện Bảo Lâm", "Huyện Cát Tiên", "Huyện Di Linh", "Huyện Đạ Huoai", "Huyện Đạ Tẻh", "Huyện Đam Rông", "Huyện Đơn Dương", "Huyện Đức Trọng", "Huyện Lạc Dương", "Huyện Lâm Hà"],
+        "Lạng Sơn": ["TP. Lạng Sơn", "Huyện Bắc Sơn", "Huyện Bình Gia", "Huyện Cao Lộc", "Huyện Chi Lăng", "Huyện Đình Lập", "Huyện Hữu Lũng", "Huyện Lộc Bình", "Huyện Tràng Định", "Huyện Văn Lãng", "Huyện Văn Quan"],
+        "Lào Cai": ["TP. Lào Cai", "Thị xã Sa Pa", "Huyện Bát Xát", "Huyện Bảo Thắng", "Huyện Bảo Yên", "Huyện Bắc Hà", "Huyện Mường Khương", "Huyện Si Ma Cai", "Huyện Văn Bàn"],
+        "Long An": ["TP. Tân An", "Thị xã Kiến Tường", "Huyện Bến Lức", "Huyện Cần Đước", "Huyện Cần Giuộc", "Huyện Châu Thành", "Huyện Đức Hòa", "Huyện Đức Huệ", "Huyện Mộc Hóa", "Huyện Tân Hưng", "Huyện Tân Thạnh", "Huyện Tân Trụ", "Huyện Thạnh Hóa", "Huyện Thủ Thừa", "Huyện Vĩnh Hưng"],
+        "Nam Định": ["TP. Nam Định", "Huyện Giao Thủy", "Huyện Hải Hậu", "Huyện Mỹ Lộc", "Huyện Nam Trực", "Huyện Nghĩa Hưng", "Huyện Trực Ninh", "Huyện Vụ Bản", "Huyện Xuân Trường", "Huyện Ý Yên"],
+        "Nghệ An": ["TP. Vinh", "Thị xã Cửa Lò", "Thị xã Hoàng Mai", "Thị xã Thái Hòa", "Huyện Anh Sơn", "Huyện Con Cuông", "Huyện Diễn Châu", "Huyện Đô Lương", "Huyện Hưng Nguyên", "Huyện Kỳ Sơn", "Huyện Nam Đàn", "Huyện Nghi Lộc", "Huyện Nghĩa Đàn", "Huyện Quế Phong", "Huyện Quỳ Châu", "Huyện Quỳ Hợp", "Huyện Quỳnh Lưu", "Huyện Tân Kỳ", "Huyện Thanh Chương", "Huyện Tương Dương", "Huyện Yên Thành"],
+        "Ninh Bình": ["TP. Ninh Bình", "TP. Tam Điệp", "Huyện Gia Viễn", "Huyện Hoa Lư", "Huyện Kim Sơn", "Huyện Nho Quan", "Huyện Yên Khánh", "Huyện Yên Mô"],
+        "Ninh Thuận": ["TP. Phan Rang - Tháp Chàm", "Huyện Bác Ái", "Huyện Ninh Hải", "Huyện Ninh Phước", "Huyện Ninh Sơn", "Huyện Thuận Bắc", "Huyện Thuận Nam"],
+        "Phú Thọ": ["TP. Việt Trì", "Thị xã Phú Thọ", "Huyện Cẩm Khê", "Huyện Đoan Hùng", "Huyện Hạ Hòa", "Huyện Lâm Thao", "Huyện Phù Ninh", "Huyện Tam Nông", "Huyện Tân Sơn", "Huyện Thanh Ba", "Huyện Thanh Sơn", "Huyện Thanh Thủy", "Huyện Yên Lập"],
+        "Phú Yên": ["TP. Tuy Hòa", "Thị xã Sông Cầu", "Thị xã Đông Hòa", "Huyện Đồng Xuân", "Huyện Phú Hòa", "Huyện Sơn Hòa", "Huyện Sông Hinh", "Huyện Tây Hòa", "Huyện Tuy An"],
+        "Quảng Bình": ["TP. Đồng Hới", "Thị xã Ba Đồn", "Huyện Bố Trạch", "Huyện Lệ Thủy", "Huyện Minh Hóa", "Huyện Quảng Ninh", "Huyện Quảng Trạch", "Huyện Tuyên Hóa"],
+        "Quảng Nam": ["TP. Tam Kỳ", "TP. Hội An", "Thị xã Điện Bàn", "Huyện Bắc Trà My", "Huyện Duy Xuyên", "Huyện Đại Lộc", "Huyện Đông Giang", "Huyện Hiệp Đức", "Huyện Nam Giang", "Huyện Nam Trà My", "Huyện Nông Sơn", "Huyện Núi Thành", "Huyện Phú Ninh", "Huyện Phước Sơn", "Huyện Quế Sơn", "Huyện Tây Giang", "Huyện Thăng Bình", "Huyện Tiên Phước"],
+        "Quảng Ngãi": ["TP. Quảng Ngãi", "Thị xã Đức Phổ", "Huyện Ba Tơ", "Huyện Bình Sơn", "Huyện Lý Sơn", "Huyện Minh Long", "Huyện Mộ Đức", "Huyện Nghĩa Hành", "Huyện Sơn Hà", "Huyện Sơn Tây", "Huyện Sơn Tịnh", "Huyện Trà Bồng", "Huyện Tư Nghĩa"],
+        "Quảng Ninh": ["TP. Hạ Long", "TP. Cẩm Phả", "TP. Móng Cái", "TP. Uông Bí", "Thị xã Đông Triều", "Thị xã Quảng Yên", "Huyện Ba Chẽ", "Huyện Bình Liêu", "Huyện Cô Tô", "Huyện Đầm Hà", "Huyện Hải Hà", "Huyện Tiên Yên", "Huyện Vân Đồn"],
+        "Quảng Trị": ["TP. Đông Hà", "Thị xã Quảng Trị", "Huyện Cam Lộ", "Huyện Cồn Cỏ", "Huyện Đakrông", "Huyện Gio Linh", "Huyện Hướng Hóa", "Huyện Hải Lăng", "Huyện Triệu Phong", "Huyện Vĩnh Linh"],
+        "Sóc Trăng": ["TP. Sóc Trăng", "Thị xã Ngã Năm", "Thị xã Vĩnh Châu", "Huyện Châu Thành", "Huyện Cù Lao Dung", "Huyện Kế Sách", "Huyện Long Phú", "Huyện Mỹ Tú", "Huyện Mỹ Xuyên", "Huyện Thạnh Trị", "Huyện Trần Đề"],
+        "Sơn La": ["TP. Sơn La", "Huyện Bắc Yên", "Huyện Mai Sơn", "Huyện Mộc Châu", "Huyện Mường La", "Huyện Phù Yên", "Huyện Quỳnh Nhai", "Huyện Sông Mã", "Huyện Sốp Cộp", "Huyện Thuận Châu", "Huyện Vân Hồ", "Huyện Yên Châu"],
+        "Tây Ninh": ["TP. Tây Ninh", "Thị xã Trảng Bàng", "Thị xã Hòa Thành", "Huyện Bến Cầu", "Huyện Châu Thành", "Huyện Dương Minh Châu", "Huyện Gò Dầu", "Huyện Tân Biên", "Huyện Tân Châu"],
+        "Thái Bình": ["TP. Thái Bình", "Huyện Đông Hưng", "Huyện Hưng Hà", "Huyện Kiến Xương", "Huyện Quỳnh Phụ", "Huyện Thái Thụy", "Huyện Tiền Hải", "Huyện Vũ Thư"],
+        "Thái Nguyên": ["TP. Thái Nguyên", "TP. Sông Công", "TP. Phổ Yên", "Huyện Đại Từ", "Huyện Định Hóa", "Huyện Đồng Hỷ", "Huyện Phú Bình", "Huyện Phú Lương", "Huyện Võ Nhai"],
+        "Thanh Hóa": ["TP. Thanh Hóa", "TP. Sầm Sơn", "Thị xã Bỉm Sơn", "Thị xã Nghi Sơn", "Huyện Bá Thước", "Huyện Cẩm Thủy", "Huyện Đông Sơn", "Huyện Hà Trung", "Huyện Hậu Lộc", "Huyện Hoằng Hóa", "Huyện Lang Chánh", "Huyện Mường Lát", "Huyện Nga Sơn", "Huyện Ngọc Lặc", "Huyện Như Thanh", "Huyện Như Xuân", "Huyện Nông Cống", "Huyện Quan Hóa", "Huyện Quan Sơn", "Huyện Quảng Xương", "Huyện Thạch Thành", "Huyện Thiệu Hóa", "Huyện Thọ Xuân", "Huyện Thường Xuân", "Huyện Triệu Sơn", "Huyện Vĩnh Lộc", "Huyện Yên Định"],
+        "Thừa Thiên Huế": ["TP. Huế", "Thị xã Hương Thủy", "Thị xã Hương Trà", "Huyện A Lưới", "Huyện Nam Đông", "Huyện Phong Điền", "Huyện Phú Lộc", "Huyện Phú Vang", "Huyện Quảng Điền"],
+        "Tiền Giang": ["TP. Mỹ Tho", "Thị xã Gò Công", "Thị xã Cai Lậy", "Huyện Cái Bè", "Huyện Cai Lậy", "Huyện Châu Thành", "Huyện Chợ Gạo", "Huyện Gò Công Đông", "Huyện Gò Công Tây", "Huyện Tân Phú Đông", "Huyện Tân Phước"],
+        "TP. Hồ Chí Minh": ["Quận 1", "Quận 3", "Quận 4", "Quận 5", "Quận 6", "Quận 7", "Quận 8", "Quận 10", "Quận 11", "Quận 12", "TP. Thủ Đức", "Quận Bình Tân", "Quận Bình Thạnh", "Quận Gò Vấp", "Quận Phú Nhuận", "Quận Tân Bình", "Quận Tân Phú", "Huyện Bình Chánh", "Huyện Cần Giờ", "Huyện Củ Chi", "Huyện Hóc Môn", "Huyện Nhà Bè"],
+        "Trà Vinh": ["TP. Trà Vinh", "Thị xã Duyên Hải", "Huyện Càng Long", "Huyện Cầu Kè", "Huyện Cầu Ngang", "Huyện Châu Thành", "Huyện Duyên Hải", "Huyện Tiểu Cần", "Huyện Trà Cú"],
+        "Tuyên Quang": ["TP. Tuyên Quang", "Huyện Chiêm Hóa", "Huyện Hàm Yên", "Huyện Lâm Bình", "Huyện Na Hang", "Huyện Sơn Dương", "Huyện Yên Sơn"],
+        "Vĩnh Long": ["TP. Vĩnh Long", "Thị xã Bình Minh", "Huyện Bình Tân", "Huyện Long Hồ", "Huyện Mang Thít", "Huyện Tam Bình", "Huyện Trà Ôn", "Huyện Vũng Liêm"],
+        "Vĩnh Phúc": ["TP. Vĩnh Yên", "TP. Phúc Yên", "Huyện Bình Xuyên", "Huyện Lập Thạch", "Huyện Sông Lô", "Huyện Tam Đảo", "Huyện Tam Dương", "Huyện Vĩnh Tường", "Huyện Yên Lạc"],
+        "Yên Bái": ["TP. Yên Bái", "Thị xã Nghĩa Lộ", "Huyện Lục Yên", "Huyện Mù Cang Chải", "Huyện Trạm Tấu", "Huyện Trấn Yên", "Huyện Văn Chấn", "Huyện Văn Yên", "Huyện Yên Bình"]
+    };
 
-        if (!form.checkValidity()) {
-            form.reportValidity();
+    // Khởi tạo các phần tử DOM
+    const provinceSelect = document.getElementById('provinceSelect');
+    const districtSelect = document.getElementById('districtSelect');
+    const detailAddressInput = document.getElementById('detailAddressInput');
+    const addressInput = document.getElementById('addressInput');
+    const fullAddressPreview = document.getElementById('fullAddressPreview');
+
+    const usernameInput = document.getElementById('usernameInput');
+    const passwordInput = document.getElementById('passwordInput');
+    const fullNameInput = document.getElementById('fullNameInput');
+    const emailInput = document.getElementById('emailInput');
+    const phoneInput = document.getElementById('phoneInput');
+
+    const clientErrorAlert = document.getElementById('clientErrorAlert');
+    const clientErrorList = document.getElementById('clientErrorList');
+
+    // Nạp danh sách 63 Tỉnh/Thành phố vào dropdown
+    function initProvinces() {
+        // Lấy danh sách tên tỉnh đã sắp xếp
+        const provinces = Object.keys(VIETNAM_LOCATIONS).sort((a, b) => a.localeCompare(b, 'vi'));
+        provinces.forEach(prov => {
+            const opt = document.createElement('option');
+            opt.value = prov;
+            opt.textContent = prov;
+            provinceSelect.appendChild(opt);
+        });
+
+        // Nếu form đã có giá trị từ server (ví dụ redirect lại do lỗi)
+        const currentProv = provinceSelect.getAttribute('value') || provinceSelect.value;
+        if (currentProv && VIETNAM_LOCATIONS[currentProv]) {
+            provinceSelect.value = currentProv;
+            loadDistricts(currentProv);
+        }
+    }
+
+    // Nạp danh sách Quận/Huyện dựa theo Tỉnh/Thành phố
+    function loadDistricts(selectedProvince, preservedDistrict = '') {
+        districtSelect.innerHTML = '<option value="">-- Chọn Quận / Huyện --</option>';
+        if (!selectedProvince || !VIETNAM_LOCATIONS[selectedProvince]) {
+            districtSelect.disabled = true;
+            updateFullAddress();
             return;
         }
 
-        if (!vnPhoneRegex.test(phoneVal)) {
-            phoneInput.setCustomValidity("Số điện thoại không đúng chuẩn Việt Nam (10 chữ số, bắt đầu bằng 03, 05, 07, 08, 09)!");
-            phoneInput.reportValidity();
-            return;
+        districtSelect.disabled = false;
+        const districts = VIETNAM_LOCATIONS[selectedProvince];
+        districts.forEach(dist => {
+            const opt = document.createElement('option');
+            opt.value = dist;
+            opt.textContent = dist;
+            if (preservedDistrict && dist === preservedDistrict) {
+                opt.selected = true;
+            }
+            districtSelect.appendChild(opt);
+        });
+        updateFullAddress();
+    }
+
+    // Cập nhật chuỗi địa chỉ đầy đủ vào hidden input & preview
+    function updateFullAddress() {
+        const prov = provinceSelect.value ? provinceSelect.value.trim() : '';
+        const dist = districtSelect.value ? districtSelect.value.trim() : '';
+        const detail = detailAddressInput.value ? detailAddressInput.value.trim() : '';
+
+        const parts = [];
+        if (detail) parts.push(detail);
+        if (dist) parts.push(dist);
+        if (prov) parts.push(prov);
+
+        const fullStr = parts.join(', ');
+        addressInput.value = fullStr;
+        fullAddressPreview.textContent = fullStr || 'Chưa chọn địa chỉ';
+    }
+
+    provinceSelect.addEventListener('change', function() {
+        loadDistricts(this.value);
+        validateProvince();
+        validateDistrict();
+    });
+
+    districtSelect.addEventListener('change', function() {
+        updateFullAddress();
+        validateDistrict();
+    });
+
+    detailAddressInput.addEventListener('input', function() {
+        updateFullAddress();
+    });
+
+    // Ẩn/Hiện mật khẩu
+    const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+    const togglePasswordIcon = document.getElementById('togglePasswordIcon');
+    if (togglePasswordBtn) {
+        togglePasswordBtn.addEventListener('click', function() {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                togglePasswordIcon.classList.remove('bi-eye');
+                togglePasswordIcon.classList.add('bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                togglePasswordIcon.classList.remove('bi-eye-slash');
+                togglePasswordIcon.classList.add('bi-eye');
+            }
+        });
+    }
+
+    // Các hàm kiểm tra validation logic cụ thể cho từng trường
+    const regexUsername = /^[a-zA-Z0-9_.]+$/;
+    const regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const regexPhone = /^(0|\+?84)[35789][0-9]{8}$/;
+
+    function setFieldState(input, isValid, feedbackEl, customMsg) {
+        if (isValid) {
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
         } else {
-            phoneInput.setCustomValidity("");
+            input.classList.remove('is-valid');
+            input.classList.add('is-invalid');
+            if (feedbackEl && customMsg) {
+                feedbackEl.textContent = customMsg;
+            }
+        }
+    }
+
+    function validateUsername() {
+        const val = usernameInput.value.trim();
+        const feedback = document.getElementById('usernameFeedback');
+        if (!val) {
+            setFieldState(usernameInput, false, feedback, 'Vui lòng nhập tên đăng nhập.');
+            return 'Tên đăng nhập không được để trống.';
+        }
+        if (val.length < 4 || val.length > 50) {
+            setFieldState(usernameInput, false, feedback, 'Tên đăng nhập phải có độ dài từ 4 đến 50 ký tự.');
+            return 'Tên đăng nhập phải từ 4 đến 50 ký tự.';
+        }
+        if (!regexUsername.test(val)) {
+            setFieldState(usernameInput, false, feedback, 'Tên đăng nhập không được chứa dấu tiếng Việt, khoảng trắng hoặc ký tự đặc biệt.');
+            return 'Tên đăng nhập chỉ gồm chữ cái, số, dấu gạch dưới hoặc dấu chấm (không dấu, không khoảng cách).';
+        }
+        setFieldState(usernameInput, true);
+        return null;
+    }
+
+    function validatePassword() {
+        const val = passwordInput.value;
+        const feedback = document.getElementById('passwordFeedback');
+        if (!val) {
+            setFieldState(passwordInput, false, feedback, 'Vui lòng nhập mật khẩu.');
+            return 'Mật khẩu không được để trống.';
+        }
+        if (val.length < 6) {
+            setFieldState(passwordInput, false, feedback, 'Mật khẩu phải từ 6 ký tự trở lên.');
+            return 'Mật khẩu phải tối thiểu 6 ký tự.';
+        }
+        setFieldState(passwordInput, true);
+        return null;
+    }
+
+    function validateFullName() {
+        const val = fullNameInput.value.trim();
+        const feedback = document.getElementById('fullNameFeedback');
+        if (!val) {
+            setFieldState(fullNameInput, false, feedback, 'Vui lòng nhập họ và tên của bạn.');
+            return 'Họ và tên không được để trống.';
+        }
+        if (val.length < 2) {
+            setFieldState(fullNameInput, false, feedback, 'Họ và tên phải có ít nhất 2 ký tự.');
+            return 'Họ và tên phải từ 2 ký tự trở lên.';
+        }
+        setFieldState(fullNameInput, true);
+        return null;
+    }
+
+    function validateEmail() {
+        const val = emailInput.value.trim();
+        const feedback = document.getElementById('emailFeedback');
+        if (!val) {
+            setFieldState(emailInput, false, feedback, 'Vui lòng nhập địa chỉ email.');
+            return 'Email không được để trống.';
+        }
+        if (!regexEmail.test(val)) {
+            setFieldState(emailInput, false, feedback, 'Email không đúng định dạng (VD: example@domain.com).');
+            return 'Email không đúng định dạng chuẩn (VD: ten@gmail.com).';
+        }
+        setFieldState(emailInput, true);
+        return null;
+    }
+
+    function validatePhone() {
+        const val = phoneInput.value.trim();
+        const feedback = document.getElementById('phoneFeedback');
+        if (!val) {
+            setFieldState(phoneInput, false, feedback, 'Vui lòng nhập số điện thoại.');
+            return 'Số điện thoại không được để trống.';
+        }
+        if (!regexPhone.test(val)) {
+            setFieldState(phoneInput, false, feedback, 'Số điện thoại gồm 10 chữ số chuẩn Việt Nam (bắt đầu bằng 03, 05, 07, 08, 09).');
+            return 'Số điện thoại không hợp lệ (cần 10 chữ số, thuộc các đầu mạng Việt Nam: 03x, 05x, 07x, 08x, 09x).';
+        }
+        setFieldState(phoneInput, true);
+        return null;
+    }
+
+    function validateProvince() {
+        const val = provinceSelect.value;
+        const feedback = document.getElementById('provinceFeedback');
+        if (!val) {
+            setFieldState(provinceSelect, false, feedback, 'Vui lòng chọn Tỉnh / Thành phố.');
+            return 'Vui lòng chọn Tỉnh / Thành phố.';
+        }
+        setFieldState(provinceSelect, true);
+        return null;
+    }
+
+    function validateDistrict() {
+        const val = districtSelect.value;
+        const feedback = document.getElementById('districtFeedback');
+        if (!val) {
+            setFieldState(districtSelect, false, feedback, 'Vui lòng chọn Quận / Huyện.');
+            return 'Vui lòng chọn Quận / Huyện.';
+        }
+        setFieldState(districtSelect, true);
+        return null;
+    }
+
+    // Sự kiện real-time validation khi người dùng gõ / rời ô input
+    usernameInput.addEventListener('input', validateUsername);
+    usernameInput.addEventListener('blur', validateUsername);
+
+    passwordInput.addEventListener('input', validatePassword);
+    passwordInput.addEventListener('blur', validatePassword);
+
+    fullNameInput.addEventListener('input', validateFullName);
+    fullNameInput.addEventListener('blur', validateFullName);
+
+    emailInput.addEventListener('input', validateEmail);
+    emailInput.addEventListener('blur', validateEmail);
+
+    phoneInput.addEventListener('input', validatePhone);
+    phoneInput.addEventListener('blur', validatePhone);
+
+    // Xử lý khi nhấn nút Đăng ký tài khoản (Bước 5)
+    document.getElementById('btnSignUp').addEventListener('click', function() {
+        const errors = [];
+
+        const errUser = validateUsername();
+        if (errUser) errors.push(errUser);
+
+        const errPass = validatePassword();
+        if (errPass) errors.push(errPass);
+
+        const errName = validateFullName();
+        if (errName) errors.push(errName);
+
+        const errEmail = validateEmail();
+        if (errEmail) errors.push(errEmail);
+
+        const errPhone = validatePhone();
+        if (errPhone) errors.push(errPhone);
+
+        const errProv = validateProvince();
+        if (errProv) errors.push(errProv);
+
+        const errDist = validateDistrict();
+        if (errDist) errors.push(errDist);
+
+        if (errors.length > 0) {
+            // Hiển thị cảnh báo lỗi chi tiết trên đầu trang
+            clientErrorList.innerHTML = '';
+            errors.forEach(err => {
+                const li = document.createElement('li');
+                li.textContent = err;
+                clientErrorList.appendChild(li);
+            });
+            clientErrorAlert.classList.remove('d-none');
+            // Cuộn mượt đến bảng cảnh báo
+            clientErrorAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
         }
 
-        // Đổ thông tin vào modal xác nhận
-        document.getElementById('confirmUsername').textContent = document.getElementById('usernameInput').value;
-        document.getElementById('confirmFullName').textContent = document.getElementById('fullNameInput').value;
-        document.getElementById('confirmEmail').textContent = document.getElementById('emailInput').value;
-        document.getElementById('confirmPhone').textContent = phoneVal;
-        document.getElementById('confirmAddress').textContent = document.getElementById('addressInput').value || '(Chưa điền)';
+        // Nếu hợp lệ: ẩn cảnh báo lỗi
+        clientErrorAlert.classList.add('d-none');
+        updateFullAddress();
 
-        // Bước 6: Hiển thị thông báo xác nhận
-        var modal = new bootstrap.Modal(document.getElementById('confirmModal'));
-        modal.show();
+        // Đổ thông tin vào Modal xác nhận (Bước 6)
+        document.getElementById('confirmUsername').textContent = usernameInput.value.trim();
+        document.getElementById('confirmFullName').textContent = fullNameInput.value.trim();
+        document.getElementById('confirmEmail').textContent = emailInput.value.trim();
+        document.getElementById('confirmPhone').textContent = phoneInput.value.trim();
+        document.getElementById('confirmProvince').textContent = provinceSelect.value;
+        document.getElementById('confirmDistrict').textContent = districtSelect.value;
+        document.getElementById('confirmAddress').textContent = addressInput.value || '(Chưa nhập)';
+
+        // Mở Modal xác nhận
+        const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+        confirmModal.show();
     });
 
-    document.getElementById('phoneInput').addEventListener('input', function() {
-        this.setCustomValidity("");
-    });
-
-    // Bước 7: Bấm nút Confirm -> Submit form lên server
+    // Bấm nút Đồng ý xác nhận trong modal (Bước 7)
     document.getElementById('btnConfirm').addEventListener('click', function() {
+        // Tắt nút để tránh submit đúp
+        this.disabled = true;
+        this.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Đang tạo tài khoản...';
         document.getElementById('registerForm').submit();
+    });
+
+    // Chạy khởi tạo danh sách 63 tỉnh thành khi trang tải xong
+    document.addEventListener('DOMContentLoaded', function() {
+        initProvinces();
+        updateFullAddress();
     });
 </script>
 </body>

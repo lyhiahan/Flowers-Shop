@@ -239,13 +239,37 @@ public class DataInitializer implements CommandLineRunner {
             userLevelRepository.save(UserLevel.builder().name("VIP Kim Cương").minPoint(1000).discount(new BigDecimal("10")).build());
         }
 
-        // Cấp bậc chi nhánh (Store Levels)
+        // Cấp bậc chi nhánh (Store Levels): Tiêu chuẩn (0đ), Cửa hàng uy tín (10tr), Cửa hàng xuất sắc (30tr)
         if (storeLevelRepository.count() == 0) {
-            storeLevelRepository.save(StoreLevel.builder().name("Chi Nhánh Tiêu Chuẩn").minPoint(0).discount(BigDecimal.ZERO).build());
-            storeLevelRepository.save(StoreLevel.builder().name("Chi Nhánh Bạc").minPoint(500).discount(new BigDecimal("5")).build());
-            storeLevelRepository.save(StoreLevel.builder().name("Chi Nhánh Vàng").minPoint(1500).discount(new BigDecimal("10")).build());
-            storeLevelRepository.save(StoreLevel.builder().name("Đối Tác Kim Cương").minPoint(3000).discount(new BigDecimal("15")).build());
+            storeLevelRepository.save(StoreLevel.builder().name("Tiêu chuẩn").minPoint(0).discount(BigDecimal.ZERO).isDeleted(false).build());
+            storeLevelRepository.save(StoreLevel.builder().name("Cửa hàng uy tín").minPoint(10000000).discount(new BigDecimal("5")).isDeleted(false).build());
+            storeLevelRepository.save(StoreLevel.builder().name("Cửa hàng xuất sắc").minPoint(30000000).discount(new BigDecimal("10")).isDeleted(false).build());
+        } else {
+            // Đồng bộ dữ liệu cũ nếu chưa chuẩn hóa
+            for (StoreLevel sl : storeLevelRepository.findAll()) {
+                String n = sl.getName().toLowerCase();
+                if (n.contains("chuẩn") || (sl.getMinPoint() != null && sl.getMinPoint() == 0)) {
+                    if (!sl.getName().equals("Tiêu chuẩn") || sl.getMinPoint() != 0) {
+                        sl.setName("Tiêu chuẩn");
+                        sl.setMinPoint(0);
+                        storeLevelRepository.save(sl);
+                    }
+                } else if (n.contains("bạc") || n.contains("uy tín")) {
+                    sl.setName("Cửa hàng uy tín");
+                    sl.setMinPoint(10000000);
+                    sl.setDiscount(new BigDecimal("5"));
+                    sl.setIsDeleted(false);
+                    storeLevelRepository.save(sl);
+                } else if (n.contains("vàng") || n.contains("xuất sắc")) {
+                    sl.setName("Cửa hàng xuất sắc");
+                    sl.setMinPoint(30000000);
+                    sl.setDiscount(new BigDecimal("10"));
+                    sl.setIsDeleted(false);
+                    storeLevelRepository.save(sl);
+                }
+            }
         }
+
 
         // Chính sách hoa hồng sàn (Commissions)
         if (commissionRepository.count() == 0) {

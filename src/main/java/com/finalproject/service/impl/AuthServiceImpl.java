@@ -51,6 +51,9 @@ public class AuthServiceImpl implements AuthService {
         request.setUsername(username);
         request.setEmail(email);
         request.setPhone(phone);
+        if (request.getAddress() == null || request.getAddress().trim().isEmpty()) {
+            request.setAddress(request.getFullAddress());
+        }
 
         // Kiểm tra trùng username, email hoặc số điện thoại trong Database
         if (userRepository.existsByUsername(username)) {
@@ -77,7 +80,11 @@ public class AuthServiceImpl implements AuthService {
         pendingRegistrations.put(request.getEmail().toLowerCase().trim(), pending);
 
         // 3. Gửi mã OTP xác thực qua email (và in ra console)
-        emailService.sendOtpEmail(request.getEmail(), code);
+        try {
+            emailService.sendOtpEmail(request.getEmail(), code);
+        } catch (Exception ex) {
+            log.warn("Không thể gửi email OTP qua SMTP đến {}: {}. Mã OTP dự phòng là: {}", request.getEmail(), ex.getMessage(), code);
+        }
         return code;
     }
 
@@ -178,7 +185,11 @@ public class AuthServiceImpl implements AuthService {
             pending.setExpiredAt(LocalDateTime.now().plusMinutes(5));
             pending.setResendCount(pending.getResendCount() + 1);
 
-            emailService.sendOtpEmail(email, newCode);
+            try {
+                emailService.sendOtpEmail(email, newCode);
+            } catch (Exception ex) {
+                log.warn("Không thể gửi email OTP qua SMTP đến {}: {}. Mã OTP là: {}", email, ex.getMessage(), newCode);
+            }
             return newCode;
         }
 
@@ -276,7 +287,11 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         otpRepository.save(otp);
 
-        emailService.sendOtpEmail(user.getEmail(), code);
+        try {
+            emailService.sendOtpEmail(user.getEmail(), code);
+        } catch (Exception ex) {
+            log.warn("Không thể gửi email OTP qua SMTP đến {}: {}. Mã OTP là: {}", user.getEmail(), ex.getMessage(), code);
+        }
         return code;
     }
 }

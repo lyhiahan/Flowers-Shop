@@ -585,107 +585,190 @@ public class AdminConfigController {
     // --- 6. Quản lý Hạng chi nhánh (StoreLevel) ---
     @GetMapping({"/store-levels", "/store-level", "/cap-do-cua-hang", "/hang-chi-nhanh"})
     public String listStoreLevels(Model model) {
-        model.addAttribute("levels", storeLevelRepository.findAll());
+        java.util.List<StoreLevel> sortedLevels = storeLevelRepository.findAll().stream()
+                .sorted(java.util.Comparator.comparing(sl -> sl.getMinPoint() != null ? sl.getMinPoint() : 0))
+                .toList();
+        model.addAttribute("levels", sortedLevels);
         model.addAttribute("stores", storeRepository.findAll());
         return "admin/store-levels";
     }
 
     @PostMapping("/store-levels/add")
     public String addStoreLevel(@RequestParam("name") String name,
-                                @RequestParam("minPoint") int minPoint,
+                                @RequestParam("minPoint") Integer minPoint,
                                 @RequestParam(value = "discount", required = false, defaultValue = "0") BigDecimal discount,
                                 RedirectAttributes ra) {
-        String cleanName = name != null ? name.trim() : "";
-        StoreLevel sl = StoreLevel.builder().name(cleanName).minPoint(minPoint)
-                .discount(discount != null ? discount : BigDecimal.ZERO)
-                .isDeleted(false).build();
-        storeLevelRepository.save(sl);
-        ra.addFlashAttribute("successMessage", "Thêm hạng chi nhánh [" + cleanName + "] thành công!");
+        try {
+            String cleanName = name != null ? name.trim() : "";
+            if (cleanName.isEmpty()) {
+                ra.addFlashAttribute("errorMessage", "Tên hạng chi nhánh không được để trống!");
+                return "redirect:/admin/store-levels";
+            }
+            boolean nameExists = storeLevelRepository.findAll().stream()
+                    .anyMatch(sl -> sl.getName().equalsIgnoreCase(cleanName));
+            if (nameExists) {
+                ra.addFlashAttribute("errorMessage", "Tên hạng [" + cleanName + "] đã tồn tại trong hệ thống!");
+                return "redirect:/admin/store-levels";
+            }
+            int pointVal = minPoint != null ? minPoint : 0;
+            boolean pointExists = storeLevelRepository.findAll().stream()
+                    .anyMatch(sl -> sl.getMinPoint() != null && sl.getMinPoint().equals(pointVal));
+            if (pointExists) {
+                ra.addFlashAttribute("errorMessage", "Điều kiện doanh số / điểm [" + pointVal + "] đã trùng với một hạng khác!");
+                return "redirect:/admin/store-levels";
+            }
+            StoreLevel sl = StoreLevel.builder().name(cleanName).minPoint(pointVal)
+                    .discount(discount != null ? discount : BigDecimal.ZERO)
+                    .isDeleted(false).build();
+            storeLevelRepository.save(sl);
+            ra.addFlashAttribute("successMessage", "Thêm hạng chi nhánh [" + cleanName + "] thành công!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Lỗi khi thêm hạng chi nhánh: " + e.getMessage());
+        }
         return "redirect:/admin/store-levels";
     }
 
-    @PostMapping("/store-levels/update/{id}")
+    @RequestMapping(value = "/store-levels/update/{id}", method = {RequestMethod.GET, RequestMethod.POST})
     public String updateStoreLevel(@PathVariable("id") Long id,
                                    @RequestParam("name") String name,
-                                   @RequestParam("minPoint") int minPoint,
+                                   @RequestParam("minPoint") Integer minPoint,
                                    @RequestParam(value = "discount", required = false, defaultValue = "0") BigDecimal discount,
                                    @RequestParam(value = "isDeleted", required = false) Boolean isDeleted,
                                    RedirectAttributes ra) {
-        StoreLevel sl = storeLevelRepository.findById(id).orElseThrow();
-        String cleanName = name != null ? name.trim() : sl.getName();
-        sl.setName(cleanName);
-        sl.setMinPoint(minPoint);
-        if (discount != null) {
-            sl.setDiscount(discount);
+        try {
+            StoreLevel sl = storeLevelRepository.findById(id).orElse(null);
+            if (sl == null) {
+                ra.addFlashAttribute("errorMessage", "Không tìm thấy hạng chi nhánh #" + id);
+                return "redirect:/admin/store-levels";
+            }
+            String cleanName = name != null ? name.trim() : sl.getName();
+            if (cleanName.isEmpty()) {
+                ra.addFlashAttribute("errorMessage", "Tên hạng không được để trống!");
+                return "redirect:/admin/store-levels";
+            }
+
+            // Kiểm tra trùng tên với hạng khác
+            boolean nameExists = storeLevelRepository.findAll().stream()
+                    .anyMatch(other -> !other.getId().equals(id) && other.getName().equalsIgnoreCase(cleanName));
+            if (nameExists) {
+                ra.addFlashAttribute("errorMessage", "Tên hạng [" + cleanName + "] đã tồn tại ở một hạng khác!");
+                return "redirect:/admin/store-levels";
+            }
+
+            // Kiểm tra trùng minPoint với hạng khác
+            int pointVal = minPoint != null ? minPoint : (sl.getMinPoint() != null ? sl.getMinPoint() : 0);
+            boolean pointExists = storeLevelRepository.findAll().stream()
+                    .anyMatch(other -> !other.getId().equals(id) && other.getMinPoint() != null && other.getMinPoint().equals(pointVal));
+            if (pointExists) {
+                ra.addFlashAttribute("errorMessage", "Điều kiện doanh số / điểm [" + pointVal + "] đã trùng với một hạng khác!");
+                return "redirect:/admin/store-levels";
+            }
+
+            sl.setName(cleanName);
+            sl.setMinPoint(pointVal);
+            if (discount != null) {
+                sl.setDiscount(discount);
+            }
+            if (isDeleted != null) {
+                if (sl.getMinPoint() != null && sl.getMinPoint() == 0) {
+                    sl.setIsDeleted(false);
+                } else {
+                    sl.setIsDeleted(isDeleted);
+                }
+            }
+            storeLevelRepository.save(sl);
+            ra.addFlashAttribute("successMessage", "Cập nhật hạng chi nhánh [" + cleanName + "] thành công!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Lỗi khi cập nhật hạng: " + e.getMessage());
         }
-        if (isDeleted != null) {
-            sl.setIsDeleted(isDeleted);
-        }
-        storeLevelRepository.save(sl);
-        ra.addFlashAttribute("successMessage", "Cập nhật hạng chi nhánh [" + cleanName + "] thành công!");
         return "redirect:/admin/store-levels";
     }
 
     @RequestMapping(value = "/store-levels/toggle/{id}", method = {RequestMethod.GET, RequestMethod.POST})
     public String toggleStoreLevel(@PathVariable("id") Long id, RedirectAttributes ra) {
-        StoreLevel sl = storeLevelRepository.findById(id).orElseThrow();
-        if (sl.getMinPoint() != null && sl.getMinPoint() == 0) {
-            ra.addFlashAttribute("errorMessage", "Hạng [" + sl.getName() + "] là hạng mặc định cơ sở của hệ thống, không thể ngừng áp dụng!");
-            return "redirect:/admin/store-levels";
+        try {
+            StoreLevel sl = storeLevelRepository.findById(id).orElseThrow();
+            if (sl.getMinPoint() != null && sl.getMinPoint() == 0) {
+                ra.addFlashAttribute("errorMessage", "Hạng [" + sl.getName() + "] là hạng mặc định cơ sở của hệ thống, không thể ngừng áp dụng!");
+                return "redirect:/admin/store-levels";
+            }
+            boolean newDeleted = !Boolean.TRUE.equals(sl.getIsDeleted());
+            sl.setIsDeleted(newDeleted);
+            storeLevelRepository.save(sl);
+            ra.addFlashAttribute("successMessage", "Đã chuyển trạng thái hạng [" + sl.getName() + "] sang [" + (newDeleted ? "Ngừng áp dụng" : "Đang áp dụng") + "]!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Lỗi chuyển trạng thái: " + e.getMessage());
         }
-        boolean newDeleted = !Boolean.TRUE.equals(sl.getIsDeleted());
-        sl.setIsDeleted(newDeleted);
-        storeLevelRepository.save(sl);
-        ra.addFlashAttribute("successMessage", "Đã chuyển trạng thái hạng [" + sl.getName() + "] sang [" + (newDeleted ? "Ngừng áp dụng" : "Đang áp dụng") + "]!");
         return "redirect:/admin/store-levels";
     }
 
     @RequestMapping(value = "/store-levels/delete/{id}", method = {RequestMethod.GET, RequestMethod.POST})
     public String deleteStoreLevel(@PathVariable("id") Long id, RedirectAttributes ra) {
-        StoreLevel sl = storeLevelRepository.findById(id).orElseThrow();
-        if (sl.getMinPoint() != null && sl.getMinPoint() == 0) {
-            ra.addFlashAttribute("errorMessage", "Hạng [" + sl.getName() + "] là hạng mặc định cơ sở của hệ thống, không thể xóa!");
-            return "redirect:/admin/store-levels";
-        }
-        long storeCount = storeRepository.findAll().stream()
-                .filter(s -> s.getStoreLevel() != null && s.getStoreLevel().getId().equals(id))
-                .count();
-        if (storeCount > 0) {
+        try {
+            StoreLevel sl = storeLevelRepository.findById(id).orElseThrow();
+            if (sl.getMinPoint() != null && sl.getMinPoint() == 0) {
+                ra.addFlashAttribute("errorMessage", "Hạng [" + sl.getName() + "] là hạng mặc định cơ sở của hệ thống, không thể xóa!");
+                return "redirect:/admin/store-levels";
+            }
+            long storeCount = storeRepository.findAll().stream()
+                    .filter(s -> s.getStoreLevel() != null && s.getStoreLevel().getId().equals(id))
+                    .count();
             sl.setIsDeleted(true);
             storeLevelRepository.save(sl);
-            ra.addFlashAttribute("successMessage", "Hạng [" + sl.getName() + "] đang có " + storeCount + " chi nhánh áp dụng. Hệ thống đã chuyển sang trạng thái [Ngừng áp dụng] để bảo toàn lịch sử kinh doanh.");
-        } else {
-            sl.setIsDeleted(true);
-            storeLevelRepository.save(sl);
-            ra.addFlashAttribute("successMessage", "Đã chuyển hạng chi nhánh [" + sl.getName() + "] sang trạng thái Ngừng áp dụng!");
+            if (storeCount > 0) {
+                ra.addFlashAttribute("successMessage", "Hạng [" + sl.getName() + "] đang có " + storeCount + " chi nhánh áp dụng. Hệ thống đã chuyển sang trạng thái [Ngừng áp dụng] để bảo toàn lịch sử.");
+            } else {
+                ra.addFlashAttribute("successMessage", "Đã chuyển hạng chi nhánh [" + sl.getName() + "] sang trạng thái Ngừng áp dụng!");
+            }
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Lỗi khi xóa hạng: " + e.getMessage());
         }
         return "redirect:/admin/store-levels";
     }
 
     @PostMapping("/store-levels/reset-defaults")
     public String resetDefaultStoreLevels(RedirectAttributes ra) {
-        record DefStoreLevel(String name, int minPoint, BigDecimal discount) {}
-        java.util.List<DefStoreLevel> defaults = java.util.List.of(
-            new DefStoreLevel("Tiêu chuẩn", 0, BigDecimal.ZERO),
-            new DefStoreLevel("Bạc", 200, new BigDecimal("5")),
-            new DefStoreLevel("Vàng", 1000, new BigDecimal("10"))
-        );
-        for (DefStoreLevel d : defaults) {
-            java.util.Optional<StoreLevel> existing = storeLevelRepository.findAll().stream()
-                .filter(sl -> sl.getName().equalsIgnoreCase(d.name()) || sl.getName().toLowerCase().contains(d.name().toLowerCase()))
-                .findFirst();
-            if (existing.isPresent()) {
-                StoreLevel sl = existing.get();
-                sl.setName(d.name());
-                sl.setMinPoint(d.minPoint());
-                sl.setDiscount(d.discount());
-                sl.setIsDeleted(false);
-                storeLevelRepository.save(sl);
-            } else {
-                storeLevelRepository.save(StoreLevel.builder().name(d.name()).minPoint(d.minPoint()).discount(d.discount()).isDeleted(false).build());
+        try {
+            record DefStoreLevel(String name, int minPoint, BigDecimal discount) {}
+            java.util.List<DefStoreLevel> defaults = java.util.List.of(
+                new DefStoreLevel("Tiêu chuẩn", 0, BigDecimal.ZERO),
+                new DefStoreLevel("Cửa hàng uy tín", 10000000, new BigDecimal("5")),
+                new DefStoreLevel("Cửa hàng xuất sắc", 30000000, new BigDecimal("10"))
+            );
+            java.util.List<StoreLevel> allLevels = storeLevelRepository.findAll();
+
+            for (int i = 0; i < defaults.size(); i++) {
+                DefStoreLevel d = defaults.get(i);
+                StoreLevel target = null;
+                for (StoreLevel sl : allLevels) {
+                    String n = sl.getName().toLowerCase();
+                    if (i == 0 && (n.contains("chuẩn") || (sl.getMinPoint() != null && sl.getMinPoint() == 0))) {
+                        target = sl; break;
+                    } else if (i == 1 && (n.contains("uy tín") || n.contains("bạc") || (sl.getMinPoint() != null && sl.getMinPoint() > 0 && sl.getMinPoint() < 20000000))) {
+                        target = sl; break;
+                    } else if (i == 2 && (n.contains("xuất sắc") || n.contains("vàng") || (sl.getMinPoint() != null && sl.getMinPoint() >= 20000000))) {
+                        target = sl; break;
+                    }
+                }
+                if (target != null) {
+                    target.setName(d.name());
+                    target.setMinPoint(d.minPoint());
+                    target.setDiscount(d.discount());
+                    target.setIsDeleted(false);
+                    storeLevelRepository.save(target);
+                } else {
+                    storeLevelRepository.save(StoreLevel.builder()
+                        .name(d.name())
+                        .minPoint(d.minPoint())
+                        .discount(d.discount())
+                        .isDeleted(false)
+                        .build());
+                }
             }
+            ra.addFlashAttribute("successMessage", "Khôi phục dữ liệu 3 hạng chuẩn: Tiêu chuẩn (0 ₫) · Cửa hàng uy tín (từ 10 triệu) · Cửa hàng xuất sắc (từ 30 triệu) thành công!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Lỗi khôi phục hạng chuẩn: " + e.getMessage());
         }
-        ra.addFlashAttribute("successMessage", "Khôi phục dữ liệu 3 hạng chi nhánh chuẩn (Tiêu chuẩn · Bạc · Vàng) thành công!");
         return "redirect:/admin/store-levels";
     }
 

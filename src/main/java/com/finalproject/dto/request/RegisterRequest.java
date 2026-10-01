@@ -36,5 +36,28 @@ public class RegisterRequest {
     @Pattern(regexp = "^(0|\\+?84)[35789][0-9]{8}$", message = "Số điện thoại không đúng chuẩn Việt Nam (10 chữ số, bắt đầu bằng 03, 05, 07, 08, 09)")
     private String phone;
 
+    private String province;
+
+    private String district;
+
+    private String detailAddress;
+
     private String address;
+
+    public String getFullAddress() {
+        if (address != null && !address.trim().isEmpty()) {
+            return address.trim();
+        }
+        StringBuilder sb = new StringBuilder();
+        if (detailAddress != null && !detailAddress.trim().isEmpty()) {
+            sb.append(detailAddress.trim()).append(", ");
+        }
+        if (district != null && !district.trim().isEmpty()) {
+            sb.append(district.trim()).append(", ");
+        }
+        if (province != null && !province.trim().isEmpty()) {
+            sb.append(province.trim());
+        }
+        return sb.toString();
+    }
 }

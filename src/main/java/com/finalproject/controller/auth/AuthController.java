@@ -53,6 +53,10 @@ public class AuthController {
                                  BindingResult bindingResult,
                                  RedirectAttributes redirectAttributes,
                                  Model model) {
+        if (request.getAddress() == null || request.getAddress().trim().isEmpty()) {
+            request.setAddress(request.getFullAddress());
+        }
+
         if (bindingResult.hasErrors()) {
             model.addAttribute("errorMessage", "Thông báo đăng ký thất bại: Vui lòng kiểm tra và hoàn thiện các trường thông tin bị thiếu hoặc không đúng định dạng!");
             return "auth/register";

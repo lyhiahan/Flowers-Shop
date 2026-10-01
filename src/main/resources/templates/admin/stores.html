@@ -495,11 +495,11 @@
                                             <span th:if="${s.storeLevel == null or s.storeLevel.minPoint == 0}">
                                                 <span class="badge bg-secondary-subtle text-secondary me-1">Chuẩn cơ sở</span> Cung ứng hàng ngày theo quy trình chuẩn của chuỗi.
                                             </span>
-                                            <span th:if="${s.storeLevel != null and s.storeLevel.minPoint > 0 and s.storeLevel.minPoint < 1000}">
-                                                <span class="badge bg-primary-subtle text-primary me-1">Ưu tiên điều phối</span> Tự động nhận đơn hàng gần nhất và hỗ trợ marketing nội bộ.
+                                            <span th:if="${s.storeLevel != null and s.storeLevel.minPoint > 0 and (s.storeLevel.name.toLowerCase().contains('uy tín') or s.storeLevel.name.toLowerCase().contains('bạc') or s.storeLevel.minPoint < 20000000)}">
+                                                <span class="badge bg-primary-subtle text-primary me-1">Cửa hàng uy tín</span> Đạt doanh số từ 10 triệu, ưu tiên nhận đơn gần nhất và hỗ trợ marketing.
                                             </span>
-                                            <span th:if="${s.storeLevel != null and s.storeLevel.minPoint >= 1000}">
-                                                <span class="badge bg-warning-subtle text-warning-emphasis me-1">Flagship chuỗi</span> Chi nhánh xuất sắc, ưu tiên ngân sách truyền thông và mở rộng khu vực.
+                                            <span th:if="${s.storeLevel != null and (s.storeLevel.name.toLowerCase().contains('xuất sắc') or s.storeLevel.name.toLowerCase().contains('vàng') or s.storeLevel.minPoint >= 20000000)}">
+                                                <span class="badge bg-warning-subtle text-warning-emphasis me-1">Cửa hàng xuất sắc</span> Đạt doanh số từ 30 triệu, thưởng tập thể 200k và ngân sách quảng cáo 150k.
                                             </span>
                                         </div>
                                     </div>
@@ -511,10 +511,10 @@
                                                 <div class="col-12">
                                                     <label class="form-label small fw-bold mb-1">Gán Hạng chi nhánh mới:</label>
                                                     <select name="storeLevelId" class="form-select form-select-sm">
-                                                        <option value="" th:selected="${s.storeLevel == null}">-- Tiêu chuẩn (0 điểm) --</option>
+                                                        <option value="" th:selected="${s.storeLevel == null}">-- Tiêu chuẩn (0 ₫) --</option>
                                                         <option th:each="lvl : ${storeLevels}" 
                                                                 th:value="${lvl.id}" 
-                                                                th:text="${lvl.name} + ' (Từ ' + ${lvl.minPoint} + ' điểm)'"
+                                                                th:text="${lvl.name} + ' (Từ ' + ${#numbers.formatDecimal(lvl.minPoint >= 100000 ? lvl.minPoint : lvl.minPoint * 10000, 0, 'COMMA', 0, 'POINT')} + ' ₫)'"
                                                                 th:selected="${s.storeLevel != null and s.storeLevel.id == lvl.id}">
                                                         </option>
                                                     </select>
