@@ -18,6 +18,10 @@ public class ProductImage {
     @Column(nullable = false)
     private String imageUrl;
 
+    /** public_id trên Cloudinary – dùng để xóa ảnh cũ khi thay/xóa sản phẩm */
+    @Column(name = "cloudinary_public_id", length = 255)
+    private String cloudinaryPublicId;
+
     @Builder.Default
     private Boolean isMain = false; // Đánh dấu ảnh đại diện
 }

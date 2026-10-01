@@ -192,15 +192,17 @@ public class ProductServiceImpl implements ProductService {
             boolean isFirst = true;
             for (MultipartFile file : form.getImageFiles()) {
                 if (!file.isEmpty()) {
-                    String imageUrl = cloudinaryService.uploadImage(file);
+                    CloudinaryService.UploadResult result = cloudinaryService.upload(file, "rental_shop_products");
+                    if (result == null) continue;
                     ProductImage productImage = ProductImage.builder()
                             .product(savedProduct)
-                            .imageUrl(imageUrl)
+                            .imageUrl(result.secureUrl())
+                            .cloudinaryPublicId(result.publicId())
                             .isMain(isFirst)
                             .build();
                     productImageRepository.save(productImage);
                     if (isFirst) {
-                        savedProduct.setImageUrl(imageUrl);
+                        savedProduct.setImageUrl(result.secureUrl());
                         productRepository.save(savedProduct);
                     }
                     isFirst = false;
@@ -227,6 +229,13 @@ public class ProductServiceImpl implements ProductService {
     public void deleteProduct(Long id) {
         if (!productRepository.existsById(id)) {
             throw new ResourceNotFoundException("Sản phẩm không tồn tại");
+        }
+        // Xóa ảnh cũ trên Cloudinary (best-effort)
+        List<ProductImage> images = productImageRepository.findByProductId(id);
+        for (ProductImage img : images) {
+            if (img.getCloudinaryPublicId() != null) {
+                cloudinaryService.delete(img.getCloudinaryPublicId());
+            }
         }
         productRepository.deleteById(id);
     }
