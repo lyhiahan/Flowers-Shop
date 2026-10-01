@@ -127,10 +127,16 @@ p, .product-desc, .product-short-specs, .accordion-body, .product-info, .lead, .
     font-weight: 400 !important;
 }
 /* Ô nhập */
-input, select, textarea, .form-control, .form-select, .header-search-input, .header-search-type, .qty-input {
+input, select, textarea, .form-control, .form-select, .header-search-input, .qty-input {
     font-family: var(--font-sans) !important;
     font-size: 17px !important;
     font-weight: 400 !important;
+}
+.header-search-type {
+    font-family: var(--font-sans) !important;
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+    color: #4A3E3D !important;
 }
 /* Nút bấm */
 .btn, .btn-primary, .btn-floral-primary, .btn-brand-hero, .btn-flower-add, .btn-add-cart, .btn-qty, .btn-qty-step, .account-pill-btn {
