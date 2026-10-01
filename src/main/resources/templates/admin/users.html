@@ -85,7 +85,7 @@
             <li><a th:href="@{/admin/deliveries}" class="nav-link"><i class="bi bi-truck"></i><span>Đơn vị vận chuyển</span></a></li>
             <li><a th:href="@{/admin/vouchers}" class="nav-link"><i class="bi bi-ticket-perforated"></i><span>Khuyến mãi</span></a></li>
             <li><a th:href="@{/admin/user-levels}" class="nav-link"><i class="bi bi-award"></i><span>Cấp bậc khách</span></a></li>
-            <li><a th:href="@{/admin/transactions}" class="nav-link"><i class="bi bi-journal-text"></i><span>Sổ cái</span></a></li>
+            <li><a th:href="@{/admin/transactions}" class="nav-link"><i class="bi bi-journal-text"></i><span>Lịch sử giao dịch</span></a></li>
             <li><a th:href="@{/}" class="nav-link" target="_blank" style="color: #9DB7AA;"><i class="bi bi-box-arrow-up-right"></i><span>Xem cửa hàng</span></a></li>
         </ul>
 
@@ -260,6 +260,18 @@
                                                     onclick="return confirm('Bạn có chắc muốn ' + this.getAttribute('data-action') + ' tài khoản [' + this.getAttribute('data-user') + ']?')">
                                                 <i class="bi" th:classappend="${u.isActive == null or u.isActive} ? 'bi-lock' : 'bi-unlock'"></i>
                                                 <span th:text="${u.isActive == null or u.isActive} ? 'Khóa' : 'Mở'"></span>
+                                            </button>
+                                        </form>
+
+                                        <!-- Xóa tài khoản -->
+                                        <form th:if="${(u.role == null or u.role.name() != 'ADMIN') and u.username != 'admin'}"
+                                              th:action="@{'/admin/users/delete/' + ${u.id}}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2.5 fw-semibold"
+                                                    th:data-user="${u.username}"
+                                                    th:data-email="${u.email}"
+                                                    title="Xóa tài khoản vĩnh viễn và giải phóng email"
+                                                    onclick="return confirm('CẢNH BÁO: Bạn có chắc chắn muốn XÓA VĨNH VIỄN tài khoản [' + this.getAttribute('data-user') + '] (' + this.getAttribute('data-email') + ')?\n\nHành động này sẽ giải phóng email để có thể sử dụng đăng ký lại.')">
+                                                <i class="bi bi-trash3 me-1"></i>Xóa
                                             </button>
                                         </form>
                                         <span th:if="${(u.role != null and u.role.name() == 'ADMIN') or u.username == 'admin'}" class="text-muted small px-2">—</span>

@@ -27,6 +27,11 @@ public class AdminUserController {
     private final StoreRepository storeRepository;
     private final RoleRequestRepository roleRequestRepository;
     private final RoleManagementService roleManagementService;
+    private final com.finalproject.repository.OrderRepository orderRepository;
+    private final com.finalproject.repository.CartRepository cartRepository;
+    private final com.finalproject.repository.CartItemRepository cartItemRepository;
+    @jakarta.persistence.PersistenceContext
+    private jakarta.persistence.EntityManager entityManager;
 
     @GetMapping
     public String listUsers(@RequestParam(value = "tab", required = false, defaultValue = "users") String tab,
@@ -147,6 +152,74 @@ public class AdminUserController {
             ra.addFlashAttribute("successMessage", "Đã thu hồi vai trò [" + role.name() + "] thành công! Tài khoản vẫn duy trì quyền Khách hàng hoạt động.");
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", "Lỗi thu hồi vai trò: " + ex.getMessage());
+        }
+        return "redirect:/admin/users?tab=users";
+    }
+
+    @PostMapping("/delete/{id}")
+    @org.springframework.transaction.annotation.Transactional
+    public String deleteUser(@PathVariable("id") Long id, Principal principal, RedirectAttributes ra) {
+        try {
+            User user = userRepository.findById(id).orElse(null);
+            if (user == null) {
+                ra.addFlashAttribute("errorMessage", "Không tìm thấy người dùng #" + id);
+                return "redirect:/admin/users?tab=users";
+            }
+
+            // 1. Chặn xóa admin tối cao hoặc chính mình
+            if ("admin".equalsIgnoreCase(user.getUsername()) || (user.getRole() != null && user.getRole() == Role.ADMIN)) {
+                ra.addFlashAttribute("errorMessage", "Không thể xóa tài khoản Quản trị viên tối cao!");
+                return "redirect:/admin/users?tab=users";
+            }
+            if (principal != null && principal.getName().equalsIgnoreCase(user.getUsername())) {
+                ra.addFlashAttribute("errorMessage", "Bạn không thể tự xóa tài khoản của chính mình khi đang đăng nhập!");
+                return "redirect:/admin/users?tab=users";
+            }
+
+            // 2. Chặn xóa nếu là chủ cửa hàng
+            if (!storeRepository.findByOwnerId(id).isEmpty()) {
+                ra.addFlashAttribute("errorMessage", "Không thể xóa: Người dùng đang là Chủ sở hữu chi nhánh/cửa hàng. Vui lòng chuyển giao hoặc xóa cửa hàng trước!");
+                return "redirect:/admin/users?tab=users";
+            }
+
+            // 3. Chặn xóa nếu đã có đơn hàng (để bảo toàn hóa đơn và kế toán)
+            boolean hasOrders = !orderRepository.findByUserIdOrderByCreatedAtDesc(id).isEmpty()
+                    || !orderRepository.findByShipperIdOrderByCreatedAtDesc(id).isEmpty();
+            if (hasOrders) {
+                ra.addFlashAttribute("errorMessage", "Tài khoản [" + user.getUsername() + "] đã phát sinh đơn hàng trong hệ thống. Nhằm bảo toàn chứng từ giao dịch, vui lòng sử dụng chức năng [Khóa] tài khoản thay vì xóa!");
+                return "redirect:/admin/users?tab=users";
+            }
+
+            String username = user.getUsername();
+            String email = user.getEmail();
+
+            // 4. Xóa giỏ hàng và các phụ thuộc
+            cartRepository.findByUserId(id).ifPresent(c -> {
+                if (c.getItems() != null && !c.getItems().isEmpty()) {
+                    cartItemRepository.deleteAll(c.getItems());
+                }
+                cartRepository.delete(c);
+            });
+
+            // Xóa các bảng phụ thuộc an toàn bằng native queries
+            entityManager.createNativeQuery("DELETE FROM user_roles WHERE user_id = :uid").setParameter("uid", id).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM user_addresses WHERE user_id = :uid").setParameter("uid", id).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM product_wishlists WHERE user_id = :uid").setParameter("uid", id).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM recently_viewed WHERE user_id = :uid").setParameter("uid", id).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM notifications WHERE user_id = :uid").setParameter("uid", id).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM role_requests WHERE user_id = :uid").setParameter("uid", id).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM role_audit_logs WHERE user_id = :uid").setParameter("uid", id).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM otp_verifications WHERE user_id = :uid").setParameter("uid", id).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM user_follow_store WHERE user_id = :uid").setParameter("uid", id).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM activity_logs WHERE user_id = :uid").setParameter("uid", id).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM reviews WHERE user_id = :uid").setParameter("uid", id).executeUpdate();
+
+            // Xóa người dùng khỏi database
+            userRepository.delete(user);
+
+            ra.addFlashAttribute("successMessage", "Đã xóa vĩnh viễn tài khoản [" + username + "] và giải phóng email [" + email + "] thành công! Bây giờ có thể dùng email này để đăng ký tài khoản mới.");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Lỗi khi xóa tài khoản: " + ex.getMessage());
         }
         return "redirect:/admin/users?tab=users";
     }

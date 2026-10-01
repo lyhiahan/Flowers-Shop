@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Sổ Cái Tài Chính & Dòng Tiền Hệ Thống - Quản Trị Hệ Thống Hoa Tươi</title>
+    <title>Lịch Sử Giao Dịch & Dòng Tiền Hệ Thống - Quản Trị Hệ Thống Hoa Tươi</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -100,7 +100,7 @@
             <li>
                 <a th:href="@{/admin/transactions}" class="nav-link active">
                     <i class="bi bi-journal-text"></i>
-                    <span>Sổ cái</span>
+                    <span>Lịch sử giao dịch</span>
                 </a>
             </li>
             <li>
@@ -123,7 +123,7 @@
     <div class="main-wrapper p-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h1 class="admin-page-title mb-1">📖 Sổ Cái Tài Chính & Nhật Ký Giao Dịch Toàn Hệ Thống</h1>
+                <h1 class="admin-page-title mb-1">📖 Quản Lý Dòng Tiền & Lịch Sử Giao Dịch</h1>
                 <p class="text-muted small mb-0">Theo dõi chi tiết dòng tiền thanh toán đơn hàng, hoàn cọc và rút tiền của các chi nhánh</p>
             </div>
         </div>
@@ -145,7 +145,7 @@
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(transactions)}">
-                            <td colspan="7" class="text-center py-5 text-muted">Chưa có giao dịch phát sinh nào trong sổ cái.</td>
+                            <td colspan="7" class="text-center py-5 text-muted">Chưa có giao dịch phát sinh nào trong lịch sử giao dịch.</td>
                         </tr>
                         <tr th:each="tx : ${transactions}">
                             <td class="ps-3 text-muted" th:text="'#' + ${tx.id}"></td>

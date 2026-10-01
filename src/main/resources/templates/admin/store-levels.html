@@ -192,6 +192,12 @@
             min-width: 175px;
             padding: 6px;
         }
+        /* Fix: Bootstrap dropdowns inside table-responsive get clipped.
+           Setting position:static on the dropdown wrapper lets Popper.js
+           position the menu relative to the viewport instead. */
+        .card-table-wrap .table-responsive {
+            overflow: visible !important;
+        }
     </style>
 </head>
 <body class="admin-body">
@@ -277,7 +283,7 @@
             <li>
                 <a th:href="@{/admin/transactions}" class="nav-link">
                     <i class="bi bi-journal-text"></i>
-                    <span>Sổ cái</span>
+                    <span>Lịch sử giao dịch</span>
                 </a>
             </li>
             <li>
@@ -376,13 +382,13 @@
                 <table class="table align-middle mb-0" id="storeLevelsTable">
                     <thead>
                     <tr>
-                        <th class="ps-4" style="width: 17%; min-width: 150px;">Hạng</th>
-                        <th style="width: 21%; min-width: 170px;">Điều kiện doanh số</th>
-                        <th style="width: 18%; min-width: 160px;">Thưởng tập thể / kỳ</th>
-                        <th style="width: 20%; min-width: 180px;">Ngân sách quảng cáo / kỳ</th>
-                        <th class="text-center" style="width: 8%; min-width: 80px;">Chi nhánh</th>
-                        <th class="text-center" style="width: 9%; min-width: 110px;">Trạng thái</th>
-                        <th class="text-end pe-4" style="width: 7%; min-width: 110px;">Thao tác</th>
+                        <th class="ps-4" style="width: 18%; min-width: 130px;">Hạng</th>
+                        <th style="width: 20%; min-width: 140px;">Điều kiện doanh số</th>
+                        <th style="width: 18%; min-width: 130px;">Thưởng tập thể / kỳ</th>
+                        <th style="width: 18%; min-width: 140px;">Ngân sách quảng cáo / kỳ</th>
+                        <th class="text-center" style="width: 8%; min-width: 70px;">Chi nhánh</th>
+                        <th class="text-center" style="width: 8%; min-width: 90px;">Trạng thái</th>
+                        <th class="text-end pe-3" style="width: 10%; min-width: 110px;">Thao tác</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -453,15 +459,16 @@
                         </td>
 
                         <!-- 7. Thao tác: Sửa · ⋯ dropdown -->
-                        <td class="text-end pe-4" style="white-space: nowrap;">
-                            <div class="d-inline-flex align-items-center gap-1.5">
-                                <!-- Nút Sửa -->
+                        <td class="text-end pe-3" style="white-space: nowrap;">
+                            <div class="d-inline-flex align-items-center gap-1">
+                                <!-- Nút Sửa trực tiếp chuẩn Bootstrap 5 -->
                                 <button type="button"
-                                        class="btn btn-sm btn-outline-secondary py-1 px-2.5 d-inline-flex align-items-center gap-1 shadow-sm"
-                                        data-bs-toggle="modal" th:data-bs-target="'#editLevelModal' + ${l.id}"
+                                        class="btn btn-sm btn-outline-secondary py-1 px-2 d-inline-flex align-items-center gap-1 shadow-sm"
+                                        data-bs-toggle="modal"
+                                        th:data-bs-target="'#editLevelModal' + ${l.id}"
                                         style="border-radius: 8px; font-size: 13.5px; font-weight: 600;"
                                         title="Chỉnh sửa thông số hạng">
-                                    <i class="bi bi-pencil"></i> Sửa
+                                    <i class="bi bi-pencil-square text-success"></i> Sửa
                                 </button>
 
                                 <!-- Dropdown ⋯ -->
@@ -469,7 +476,17 @@
                                     <button class="action-more-btn shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Thao tác khác">
                                         <i class="bi bi-three-dots"></i>
                                     </button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
+                                    <ul class="dropdown-menu dropdown-menu-end shadow">
+                                        <!-- Chỉnh sửa trong dropdown -->
+                                        <li>
+                                            <a class="dropdown-item py-2 small d-flex align-items-center gap-2 rounded-2 text-dark fw-semibold"
+                                               href="javascript:void(0)"
+                                               data-bs-toggle="modal"
+                                               th:data-bs-target="'#editLevelModal' + ${l.id}">
+                                                <i class="bi bi-pencil text-success"></i>
+                                                <span>Chỉnh sửa hạng</span>
+                                            </a>
+                                        </li>
                                         <!-- Xem chi tiết -->
                                         <li>
                                             <a class="dropdown-item py-2 small d-flex align-items-center gap-2 rounded-2 text-dark"
@@ -801,7 +818,7 @@
                                 <div class="input-group">
                                     <input type="number" name="minPoint" 
                                            th:value="${l.minPoint >= 100000 ? l.minPoint : (l.minPoint != null ? l.minPoint * 10000 : 0)}" 
-                                           class="form-control" min="0" step="500000" required style="height: 42px; border-radius: 8px 0 0 8px;">
+                                           class="form-control" min="0" step="1" required style="height: 42px; border-radius: 8px 0 0 8px;">
                                     <span class="input-group-text bg-light text-muted small" style="border-radius: 0 8px 8px 0;">₫</span>
                                 </div>
                                 <div class="form-text small" style="font-size: 12px;">
