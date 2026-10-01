@@ -1,19 +1,23 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${product.name + ' - Hoa Tươi Sài Gòn'}">Chi tiết sản phẩm - Hoa Tươi Sài Gòn</title>
-    <!-- Google Font Nunito & Bootstrap 5 & Icons -->
+    <!-- Google Font: Nunito, Plus Jakarta Sans, Playfair Display & Bootstrap 5 & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
     <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
     <style>
         :root {
+
             --flower-bg: #FFF0F3;          /* Nền trang: Kem */
             --flower-card-bg: #FFFCF8;     /* Nền nội dung: Trắng ngà */
             --flower-primary: #355447;     /* Tiêu đề và nút chính: Xanh lá */
@@ -36,43 +40,45 @@
             text-decoration: none !important;
         }
 
+
         body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: var(--flower-bg);
             color: var(--flower-text-main);
+
             font-size: 17.5px;
             font-weight: 400;
             line-height: 1.6;
             margin: 0;
             padding: 0;
+
         }
 
-        /* Vùng nội dung rộng tối đa 1.280 px, căn giữa */
-        .flower-detail-container {
-            max-width: 1280px;
+        .flower-container {
+            max-width: 1240px;
             margin-left: auto;
             margin-right: auto;
-            padding-left: 24px;
-            padding-right: 24px;
+            padding-left: 20px;
+            padding-right: 20px;
         }
 
-        /* Thanh thông tin phụ trên cùng: 15–16 px */
         .top-subbar {
             background-color: var(--flower-accent-bg);
             border-bottom: 1px solid var(--flower-border);
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 400;
             color: var(--flower-primary);
             padding: 8px 0;
         }
         .top-subbar a {
             color: var(--flower-primary);
+            text-decoration: none;
             transition: color 0.15s ease;
         }
         .top-subbar a:hover {
             color: var(--flower-primary-hover);
         }
 
-        /* Header chính */
         .header-main-bar {
             background-color: #ffffff;
             border-bottom: 1px solid var(--flower-border);
@@ -84,70 +90,30 @@
             color: var(--flower-text-heading);
             letter-spacing: 0.3px;
             line-height: 1;
+            text-decoration: none;
         }
 
-        /* 2. LIỀN MẠCH, KHÔNG KHUNG BAO LỚN: Ảnh và thông tin đặt trực tiếp trên nền sáng thống nhất */
-        .product-main-section {
-            background: transparent;
-            padding: 16px 0 32px 0;
-        }
-
-        .product-detail-layout {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 40px;
-            align-items: flex-start;
-        }
-
-        /* Cột ảnh: khoảng 55% */
-        .product-gallery-col {
-            flex: 0 0 calc(55% - 20px);
-            max-width: calc(55% - 20px);
-        }
-
-        /* Cột thông tin: khoảng 45% */
-        .product-info-col {
-            flex: 0 0 calc(45% - 20px);
-            max-width: calc(45% - 20px);
-        }
-
-        @media (max-width: 991px) {
-            .product-gallery-col, .product-info-col {
-                flex: 0 0 100%;
-                max-width: 100%;
-            }
-        }
-
-        /* Khung ảnh chính vuông, rộng tối đa 500–540 px, hiển thị trọn sản phẩm */
-        .product-image-frame {
-            max-width: 520px;
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            margin-left: 0;
-            margin-right: auto;
-            position: relative;
-            border-radius: 12px;
-            overflow: hidden;
-            background-color: #ffffff;
+        .detail-card {
+            background: #ffffff;
+            border-radius: 20px;
             border: 1px solid var(--flower-border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
         }
 
-        .product-main-photo {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            transition: opacity 0.2s ease;
+        .main-image-wrapper {
+            background: radial-gradient(circle, #fff1f2 0%, #f8fafc 100%);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid #f1f5f9;
         }
 
         .nav-angle-btn {
             background: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            width: 38px;
-            height: 38px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -158,25 +124,23 @@
         }
         .nav-angle-btn:hover {
             background: #ffffff;
-            transform: scale(1.05);
+            transform: scale(1.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
-        .thumbnail-strip {
-            max-width: 520px;
-            margin-left: 0;
-            margin-right: auto;
+        .active-thumb {
+            transform: scale(1.04);
+            border-color: var(--flower-primary) !important;
+            box-shadow: 0 4px 12px rgba(53, 84, 71, 0.25) !important;
         }
-
         .thumbnail-card {
-            transition: transform 0.15s ease;
+            transition: all 0.2s ease;
             cursor: pointer;
         }
         .thumbnail-card:hover {
             transform: translateY(-2px);
         }
-        .active-thumb {
-            border-color: var(--flower-primary) !important;
-        }
+
 
         /* 3. Thứ tự và phân cấp font bên phải chuẩn theo bảng quy định */
         /* 1. Tên sản phẩm trên trang chi tiết: 26–28 px | 700 — đậm | Xanh đậm #293B32 */
@@ -268,17 +232,21 @@
         }
 
         /* 5. Bộ chọn số lượng: cụm − 1 +, rộng 120–135px */
+
         .quantity-stepper {
-            width: 128px;
-            height: 48px;
-            border: 1px solid var(--flower-border);
+            width: 130px;
+            height: 44px;
+            border: 1.5px solid var(--flower-border);
             border-radius: 9999px;
             background-color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 2px 4px;
-            flex-shrink: 0;
+            transition: border-color 0.2s ease;
+        }
+        .quantity-stepper:focus-within {
+            border-color: var(--flower-primary);
         }
         .btn-qty-step {
             border: none;
@@ -291,15 +259,21 @@
             align-items: center;
             justify-content: center;
             font-size: 18px;
+            font-weight: 400;
+            line-height: 1;
+            transition: background-color 0.15s ease, color 0.15s ease;
             cursor: pointer;
-            transition: background-color 0.15s ease;
+            padding: 0;
         }
         .btn-qty-step:hover {
             background-color: var(--flower-bg);
             color: var(--flower-primary);
         }
+        .btn-qty-step:active {
+            background-color: #ede7de;
+        }
         .qty-input {
-            width: 42px !important;
+            width: 44px !important;
             border: none !important;
             background: transparent !important;
             box-shadow: none !important;
@@ -316,6 +290,7 @@
             -webkit-appearance: none;
             margin: 0;
         }
+
 
         /* Nút mua hàng: 17–18 px | 700 — đậm | Trắng trên nền xanh #355447 */
         .btn-flower-add {
@@ -350,6 +325,7 @@
             padding-top: 20px;
             font-size: 15.5px !important;
             font-weight: 400 !important;
+
             line-height: 1.55;
             color: #64748B !important;
         }
@@ -358,10 +334,15 @@
             font-weight: 600 !important;
         }
 
-        /* 7. Thao tác phụ: Yêu thích (15–16 px) */
-        .action-sub-row {
-            padding-top: 14px;
+        .product-summary-specs {
+            background-color: var(--flower-bg);
+            border: 1px solid var(--flower-border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            font-size: 17.5px;
+            line-height: 1.55;
         }
+
 
         /* 8. Tiêu đề mục: 20–22 px | 600 — đậm vừa | Xanh đậm #293B32 */
         .section-below-title, h2, h3, .section-title {
@@ -369,6 +350,7 @@
             font-weight: 600 !important;
             color: #293B32 !important;
             margin-bottom: 20px;
+
         }
 
         /* Nội dung mô tả: 17–18 px | 400 — thường | Xám đậm #475569 */
@@ -382,15 +364,15 @@
         .flower-accordion .accordion-item {
             background-color: #ffffff;
             border: 1px solid var(--flower-border);
-            border-radius: 12px !important;
+            border-radius: 14px !important;
             overflow: hidden;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
         .flower-accordion .accordion-button {
             background-color: #ffffff;
             color: var(--flower-primary);
-            font-size: 22px;
-            font-weight: 400 !important;
+            font-size: 21px;
+            font-weight: 600;
             padding: 16px 22px;
             box-shadow: none !important;
         }
@@ -402,68 +384,86 @@
         .flower-accordion .accordion-body {
             padding: 22px;
             font-size: 17.5px;
-            line-height: 1.55;
+            line-height: 1.6;
             color: var(--flower-text-main);
         }
     </style>
 </head>
 <body>
 
-    <!-- Thanh Header chính -->
+
+    <!-- Top Subbar -->
+    <div class="top-subbar">
+        <div class="flower-container d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-4">
+                <span><i class="bi bi-telephone me-1 text-danger"></i> Hotline: <strong class="text-dark">028 1111 222</strong></span>
+                <span><i class="bi bi-truck me-1 text-danger"></i> Giao nhanh 60–90 phút tại TP.HCM & Hà Nội</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <a th:href="@{/following}"><i class="bi bi-heart me-1 text-danger"></i> Đang theo dõi</a>
+                <span class="text-secondary opacity-50">|</span>
+                <a th:href="@{/stores}"><i class="bi bi-geo-alt me-1"></i> Hệ thống chi nhánh</a>
+                <span class="text-secondary opacity-50">|</span>
+                <a th:href="@{/customer/orders}"><i class="bi bi-receipt me-1"></i> Tra cứu đơn hàng</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+
     <header class="header-main-bar sticky-top">
-        <div class="flower-detail-container">
+        <div class="flower-container">
             <div class="d-flex align-items-center justify-content-between gap-3">
                 <!-- Logo -->
                 <a th:href="@{/}" class="brand-logo-text d-flex align-items-center gap-2">
+
                     <img th:src="@{/images/flower-logo.png}" alt="Logo Hoa Tươi Sài Gòn" class="brand-logo-img">
+
                     <span>HOA TƯƠI SÀI GÒN</span>
                 </a>
 
-                <!-- Ô tìm kiếm -->
+                <!-- Global Search -->
                 <div class="flex-grow-1 mx-lg-4 d-none d-md-block" style="max-width: 480px;">
-                    <form th:action="@{/}" method="get" class="d-flex align-items-center border rounded-pill px-3 py-1 bg-white" style="border-color: var(--flower-border) !important;">
-                        <i class="bi bi-search text-muted me-2" style="font-size: 14px;"></i>
-                        <input type="text" name="keyword" class="form-control border-0 shadow-none p-1" style="font-size: 15px;" placeholder="Tìm hoa tươi, theo dịp, màu sắc...">
-                        <button type="submit" class="btn btn-sm text-white rounded-pill px-3" style="background-color: var(--flower-primary); font-size: 14.5px;">Tìm hoa</button>
+                    <form th:action="@{/}" method="get" class="d-flex align-items-center border rounded-pill px-3 py-1 bg-white">
+                        <i class="bi bi-search text-muted me-2"></i>
+                        <input type="text" name="keyword" class="form-control border-0 shadow-none p-1" style="font-size: 14.5px;" placeholder="Tìm hoa tươi, theo dịp, màu sắc...">
+                        <button type="submit" class="btn btn-sm btn-danger rounded-pill px-3" style="background-color: var(--flower-primary);">Tìm hoa</button>
                     </form>
                 </div>
 
-                <!-- Giỏ hàng & Tài khoản -->
+                <!-- Right Menu: Cart & Account -->
                 <div class="d-flex align-items-center gap-2">
-                    <a th:href="@{/cart}" class="btn btn-light rounded-pill px-3 py-2 d-flex align-items-center gap-2 border position-relative" style="background:#ffffff; border-color: var(--flower-border) !important; font-size: 15px;">
-                        <i class="bi bi-bag-heart fs-5" style="color: var(--flower-accent);"></i>
-                        <span class="d-none d-sm-inline" style="color: var(--flower-text-main);">Giỏ hàng</span>
-                        <span th:if="${cartItemCount != null and cartItemCount > 0}" class="badge rounded-pill px-2 text-white" style="background-color: var(--flower-accent);" th:text="${cartItemCount}">0</span>
+                    <a th:href="@{/cart}" class="btn btn-light rounded-pill px-3 py-2 d-flex align-items-center gap-2 border position-relative" style="background:#ffffff; font-size:14px;">
+                        <i class="bi bi-bag-heart text-danger fs-5"></i>
+                        <span class="d-none d-sm-inline fw-semibold text-dark">Giỏ hàng</span>
+                        <span th:if="${cartItemCount != null and cartItemCount > 0}" class="badge bg-danger rounded-pill px-2" th:text="${cartItemCount}">0</span>
                     </a>
 
-                    <!-- Chưa đăng nhập -->
+                    <!-- Account: Not Authenticated -->
                     <div sec:authorize="!isAuthenticated()">
-                        <a th:href="@{/login}" class="btn rounded-pill py-2 px-3 text-white text-nowrap" style="background-color: var(--flower-primary); font-size: 15px;">
+                        <a th:href="@{/login}" class="btn btn-danger rounded-pill py-2 px-3 text-nowrap" style="background-color: var(--flower-primary); font-size:14px;">
                             <i class="bi bi-person me-1"></i> Đăng nhập
                         </a>
                     </div>
 
-                    <!-- Đã đăng nhập -->
+                    <!-- Account: Authenticated -->
                     <div sec:authorize="isAuthenticated()" class="dropdown">
-                        <button class="btn btn-light border rounded-pill px-3 py-2 dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background:#ffffff; border-color: var(--flower-border) !important; font-size: 15px;">
-                            <i class="bi bi-person-circle fs-5" style="color: var(--flower-accent);"></i>
-                            <span sec:authentication="name" style="color: var(--flower-text-main);">Tài khoản</span>
+                        <button class="btn btn-light border rounded-pill px-3 py-2 dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background:#ffffff; font-size:14px;">
+                            <i class="bi bi-person-circle text-danger fs-5"></i>
+                            <span class="fw-semibold text-dark" sec:authentication="name">Tài khoản</span>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 mt-2 py-2" style="min-width: 200px; font-size: 15px;">
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 mt-2 py-2" style="min-width: 200px;">
                             <li class="px-3 py-1 text-muted small border-bottom mb-1">
-                                Xin chào, <strong style="color: var(--flower-text-main);" sec:authentication="name"></strong>
+                                Xin chào, <strong class="text-dark" sec:authentication="name"></strong>
                             </li>
                             <li sec:authorize="hasRole('CUSTOMER')">
                                 <a class="dropdown-item py-2" th:href="@{/customer/profile}"><i class="bi bi-person me-2 text-secondary"></i> Hồ sơ của tôi</a>
                             </li>
                             <li sec:authorize="hasRole('CUSTOMER')">
-                                <a class="dropdown-item py-2" th:href="@{/customer/orders}"><i class="bi bi-box2-heart me-2 text-secondary"></i> Đơn hoa đã đặt</a>
-                            </li>
-                            <li sec:authorize="hasRole('CUSTOMER')">
                                 <a class="dropdown-item py-2" th:href="@{/following}"><i class="bi bi-heart me-2 text-danger"></i> Đang theo dõi</a>
                             </li>
                             <li sec:authorize="hasRole('CUSTOMER')">
-                                <a class="dropdown-item py-2" th:href="@{/customer/profile/wishlist}"><i class="bi bi-heart me-2" style="color: var(--flower-accent);"></i> Hoa yêu thích</a>
+                                <a class="dropdown-item py-2" th:href="@{/customer/orders}"><i class="bi bi-box2-heart me-2 text-secondary"></i> Đơn hoa đã đặt</a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
@@ -478,83 +478,80 @@
         </div>
     </header>
 
-    <main class="flower-detail-container py-3">
-        <!-- Đường dẫn Breadcrumb: 15–16 px -->
+    <main class="flower-container py-4">
+        <!-- Breadcrumb -->
         <nav aria-label="breadcrumb" class="mb-3">
-            <ol class="breadcrumb mb-0" style="font-size: 15px;">
-                <li class="breadcrumb-item"><a th:href="@{/}" class="text-muted">Trang chủ</a></li>
-                <li class="breadcrumb-item"><a th:href="@{/(categoryId=${product.category != null ? product.category.id : 0})}" class="text-muted" th:text="${product.category != null ? product.category.name : 'Hoa tươi'}">Hoa tươi</a></li>
-                <li class="breadcrumb-item active" style="color: var(--flower-accent);" aria-current="page" th:text="${product.name}">Tên hoa</li>
+            <ol class="breadcrumb mb-0" style="font-size: 13.5px;">
+                <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none text-muted">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/(categoryId=${product.category != null ? product.category.id : 0})}" class="text-decoration-none text-muted" th:text="${product.category != null ? product.category.name : 'Hoa tươi'}">Hoa tươi</a></li>
+                <li class="breadcrumb-item active text-danger" aria-current="page" th:text="${product.name}">Tên hoa</li>
             </ol>
         </nav>
 
-        <!-- Thông báo thao tác giỏ hàng -->
-        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-3 mb-4 py-2 px-3" style="font-size: 15.5px;" role="alert">
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-3 mb-4 py-2 px-3 small" role="alert">
             <i class="bi bi-check-circle-fill me-1 text-success"></i> <span th:text="${successMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show rounded-3 mb-4 py-2 px-3" style="font-size: 15.5px;" role="alert">
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show rounded-3 mb-4 py-2 px-3 small" role="alert">
             <i class="bi bi-exclamation-triangle-fill me-1 text-danger"></i> <span th:text="${errorMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <!-- 2. LIỀN MẠCH, KHÔNG KHUNG BAO LỚN: Ảnh và thông tin đặt trực tiếp trên một nền sáng thống nhất -->
-        <section class="product-main-section mb-4">
-            <div class="product-detail-layout">
-                
-                <!-- CỘT TRÁI: HÌNH ẢNH SẢN PHẨM (~55% CHIỀU RỘNG, KHUNG VUÔNG MAX 520PX) -->
-                <div class="product-gallery-col">
-                    <!-- Khung ảnh chính vuông -->
-                    <div class="product-image-frame mb-3">
-                        <!-- Chỉ hiện nhãn đổi góc khi có NHIỀU ảnh -->
-                        <span th:if="${images != null and #lists.size(images) > 1}" id="angleBadge"
-                              class="position-absolute top-0 start-0 m-3 badge bg-dark bg-opacity-75 text-white px-3 py-2 rounded-pill"
-                              style="font-size: 13.5px; z-index: 4;">
-                            📷 Góc 1: Ảnh chính diện
+        <!-- Product Main Card -->
+        <div class="card detail-card p-4 p-md-5 mb-5">
+            <div class="row g-5">
+                <!-- Gallery: Real Photos & Multi-Angle -->
+                <div class="col-lg-6">
+                    <div class="main-image-wrapper mb-3 text-center shadow-sm">
+                        <!-- Angle Badge -->
+                        <span id="angleBadge" class="position-absolute top-0 start-0 m-3 badge bg-dark bg-opacity-75 text-white px-3 py-2 rounded-pill shadow-sm" style="backdrop-filter: blur(4px); font-size: 0.85rem; z-index: 4;">
+                            📷 Góc 1: Ảnh Chính Diện
                         </span>
 
-                        <!-- Chỉ hiện nút mũi tên chuyển ảnh khi có NHIỀU ảnh -->
-                        <button th:if="${images != null and #lists.size(images) > 1}" type="button"
-                                class="nav-angle-btn position-absolute top-50 start-0 translate-middle-y ms-3"
-                                onclick="prevImage()" title="Xem góc trước">
+                        <!-- Left & Right Arrow Buttons -->
+                        <button type="button" class="nav-angle-btn position-absolute top-50 start-0 translate-middle-y ms-3" onclick="prevImage()" title="Xem góc trước">
                             <i class="bi bi-chevron-left text-dark fs-5"></i>
                         </button>
-                        <button th:if="${images != null and #lists.size(images) > 1}" type="button"
-                                class="nav-angle-btn position-absolute top-50 end-0 translate-middle-y me-3"
-                                onclick="nextImage()" title="Xem góc tiếp theo">
+                        <button type="button" class="nav-angle-btn position-absolute top-50 end-0 translate-middle-y me-3" onclick="nextImage()" title="Xem góc tiếp theo">
                             <i class="bi bi-chevron-right text-dark fs-5"></i>
                         </button>
 
-                        <!-- Ảnh chính: hiển thị trọn vẹn, không kéo méo, màu thực tế -->
                         <img id="mainImage"
                              th:src="${product.imageUrl != null ? product.imageUrl : 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=800'}"
-                             class="product-main-photo" alt="Hình ảnh sản phẩm">
+                             class="img-fluid w-100" style="max-height: 480px; object-fit: cover; transition: opacity 0.25s ease;" alt="Flower detail">
                     </div>
 
-                    <!-- Chỉ hiện ảnh nhỏ thu nhỏ bên dưới khi có NHIỀU ảnh -->
-                    <div th:if="${images != null and #lists.size(images) > 1}" class="thumbnail-strip mb-3">
+                    <!-- Thumbnails -->
+                    <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="text-muted small" style="font-size: 13.5px;">
-                                <i class="bi bi-camera me-1"></i> Các góc chụp thực tế (<span th:text="${#lists.size(images)}"></span> góc)
-                            </span>
-                            <span class="text-muted small" style="font-size: 13.5px;">Bấm ảnh để xem lớn</span>
+                            <small class="text-muted fw-bold">
+                                <i class="bi bi-camera-fill me-1 text-danger"></i> Các góc chụp thực tế (<span th:text="${!#lists.isEmpty(images) ? #lists.size(images) : 1}">4</span> góc):
+                            </small>
+                            <small class="text-secondary opacity-75">Bấm góc để đổi ảnh xem chi tiết</small>
                         </div>
 
-                        <div class="d-flex gap-2 overflow-auto pb-1" id="thumbnailGallery">
+                        <div class="d-flex gap-2 overflow-auto pb-2" id="thumbnailGallery">
                             <div th:each="img, iterStat : ${images}" class="thumbnail-card text-center" style="flex: 0 0 auto;"
                                  th:attr="data-index=${iterStat.index}, data-src=${img.imageUrl}"
                                  onclick="selectImage(this)">
                                 <img th:src="${img.imageUrl}"
                                      th:classappend="${iterStat.index == 0} ? 'active-thumb' : 'border-light-subtle'"
-                                     class="rounded-3 border border-2 thumbnail-img"
-                                     width="78" height="78" style="object-fit: cover;">
-                                <div class="text-muted mt-1 angle-caption" style="font-size: 12.5px;"
+                                     class="rounded-3 border border-2 thumbnail-img shadow-sm"
+                                     width="82" height="82" style="object-fit: cover;">
+                                <div class="small fw-semibold text-muted mt-1 angle-caption" style="font-size: 0.75rem;"
                                      th:text="${iterStat.index == 0 ? 'Chính diện' : (iterStat.index == 1 ? 'Cận cảnh' : (iterStat.index == 2 ? 'Góc nghiêng' : 'Bài trí'))}">
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Quality Commitment Note -->
+                    <div class="p-3 bg-light rounded-3 text-secondary small d-flex align-items-center gap-2 border">
+                        <i class="bi bi-stars text-warning fs-5"></i>
+                        <span><strong>100% Ảnh hoa thật:</strong> Bạn có thể bấm các ảnh thu nhỏ hoặc 2 nút mũi tên để xem hoa trọn vẹn từ nhiều góc chụp thực tế tại chi nhánh.</span>
+                    </div>
                 </div>
+
 
                 <!-- CỘT PHẢI: THÔNG TIN (~45% CHIỀU RỘNG, THỨ TỰ CHUẨN XÁC) -->
                 <div class="product-info-col">
@@ -587,8 +584,30 @@
                         <span class="text-muted" style="font-size: 14px;">·</span>
                         <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2 py-1" style="font-size: 13.5px;">
                             <i class="bi bi-people-fill me-1"></i><span id="followerCount" class="fw-bold" th:text="${followerCount != null ? followerCount : 0}">0</span> theo dõi
+
                         </span>
+
+                        <!-- Nút Theo dõi đặt ngay bên phải số người theo dõi -->
+                        <form sec:authorize="hasRole('CUSTOMER')" 
+                              th:action="@{/customer/following/toggle/{id}(id=${product.id})}" 
+                              method="post" 
+                              class="m-0 d-inline-block ms-1" 
+                              onsubmit="toggleDetailFollowAjax(event, this)">
+                            <button type="submit" id="btnDetailFollow" 
+                                    class="btn rounded-pill px-3 py-1 fw-medium d-inline-flex align-items-center gap-1.5 transition-all shadow-xs"
+                                    th:style="${isFollowed} ? 'background-color: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5; font-size: 13px;' : 'background-color: #FFF1F2; color: #E11D48; border: 1px solid #FECDD3; font-size: 13px;'">
+                                <i class="bi" th:classappend="${isFollowed} ? 'bi-check-circle-fill' : 'bi-plus-circle'" style="font-size: 14px;"></i>
+                                <span th:text="${isFollowed} ? 'Đang theo dõi' : 'Theo dõi'">Theo dõi</span>
+                            </button>
+                        </form>
+                        <a sec:authorize="!hasRole('CUSTOMER')" th:href="@{/login}" 
+                           class="btn rounded-pill px-3 py-1 fw-medium d-inline-flex align-items-center gap-1.5 shadow-xs ms-1"
+                           style="background-color: #FFF1F2; color: #E11D48; border: 1px solid #FECDD3; font-size: 13px;">
+                            <i class="bi bi-plus-circle" style="font-size: 14px;"></i>
+                            <span>Theo dõi</span>
+                        </a>
                     </div>
+
 
                     <!-- 3. THÔNG TIN CHÍNH: Loại hoa · Kiểu dáng · Màu sắc · Thành phần · Kích thước (Bảng 2 cột đơn giản, đầy đủ 100% cho mọi sản phẩm) -->
                     <div class="flower-info-table mb-4">
@@ -634,37 +653,27 @@
                     <!-- Khi đã đăng nhập với vai trò Khách hàng (CUSTOMER) -->
                     <form sec:authorize="hasRole('CUSTOMER')" action="/cart/add" method="post" class="mb-3">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
                         <input type="hidden" name="productId" th:value="${product.id}">
                         <input type="hidden" name="storeId" th:value="${product.store != null ? product.store.id : 1}">
                         <input type="hidden" name="orderType" value="BUY">
 
-                        <div class="d-flex flex-wrap align-items-center gap-3">
-                            <!-- Bộ chọn số lượng (cụm − 1 +, rộng khoảng 128px) -->
-                            <div th:if="${product.isSelling != null and product.isSelling and (product.isActive == null or product.isActive)}" class="quantity-stepper">
-                                <button class="btn-qty-step" type="button" onclick="changeQty(-1)" aria-label="Giảm số lượng">
-                                    <i class="bi bi-dash"></i>
-                                </button>
-                                <input type="number" id="detailQtyInput" name="quantity" value="1" min="1" max="99" class="qty-input" readonly>
-                                <button class="btn-qty-step" type="button" onclick="changeQty(1)" aria-label="Tăng số lượng">
-                                    <i class="bi bi-plus"></i>
-                                </button>
-                            </div>
-
-                            <!-- Nút Thêm vào giỏ hàng: Chiếm phần lớn chiều rộng, cao 48–52 px -->
-                            <div class="flex-grow-1" style="min-width: 200px;">
-                                <!-- Còn hàng -->
-                                <button th:if="${product.isSelling != null and product.isSelling and (product.isActive == null or product.isActive)}"
-                                        type="submit" class="btn btn-flower-add w-100">
-                                    <i class="bi bi-bag-plus me-2"></i> Thêm vào giỏ hàng
-                                </button>
-                                <!-- Hết hàng -->
-                                <button th:unless="${product.isSelling != null and product.isSelling and (product.isActive == null or product.isActive)}"
-                                        type="button" class="btn btn-flower-add btn-flower-disabled w-100" disabled>
-                                    Tạm hết hàng
-                                </button>
-                            </div>
+                        <div class="quantity-stepper m-0">
+                            <button class="btn-qty-step" type="button" onclick="changeQty(-1)" aria-label="Giảm số lượng">
+                                <i class="bi bi-dash"></i>
+                            </button>
+                            <input type="number" id="detailQtyInput" name="quantity" value="1" min="1" max="99" 
+                                   class="qty-input" readonly>
+                            <button class="btn-qty-step" type="button" onclick="changeQty(1)" aria-label="Tăng số lượng">
+                                <i class="bi bi-plus"></i>
+                            </button>
                         </div>
+
+                        <button type="submit" class="btn btn-flower-add flex-grow-1 d-inline-flex align-items-center justify-content-center">
+                            <i class="bi bi-bag-plus me-2"></i> Thêm vào giỏ hàng
+                        </button>
                     </form>
+
 
                     <!-- Khi chưa đăng nhập (Khách vãng lai) -->
                     <div sec:authorize="!hasRole('CUSTOMER')" class="mb-3">
@@ -682,12 +691,14 @@
                         <div class="d-flex align-items-baseline gap-2 mb-2">
                             <i class="bi bi-truck text-secondary" style="font-size: 16px;"></i>
                             <span><strong style="color: var(--flower-text-main);">Giao hàng:</strong> Hỏa tốc 60–90 phút nội thành, đóng gói cẩn thận giữ hoa tươi nguyên.</span>
+
                         </div>
-                        <div class="d-flex align-items-baseline gap-2">
-                            <i class="bi bi-card-text text-secondary" style="font-size: 16px;"></i>
-                            <span><strong style="color: var(--flower-text-main);">Thiệp tặng:</strong> Miễn phí thiệp chúc mừng cao cấp hoặc banner chữ thiết kế theo yêu cầu.</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-card-text fs-6" style="color: var(--flower-primary);"></i>
+                            <span><strong>Thiệp tặng:</strong> Miễn phí thiệp chúc mừng cao cấp hoặc banner chữ thiết kế theo yêu cầu.</span>
                         </div>
                     </div>
+
 
                     <!-- 7. THAO TÁC PHỤ: Nút Theo dõi & Yêu thích (đặt tinh tế phía dưới) -->
                     <div class="action-sub-row d-flex align-items-center gap-2 flex-wrap pt-2">
@@ -727,9 +738,10 @@
                         </a>
                     </div>
 
+
                 </div>
             </div>
-        </section>
+
 
         <!-- 8. NỘI DUNG BÊN DƯỚI: BỐN MỤC CỐ ĐỊNH, TIÊU ĐỀ 22–24 PX, KHÔNG LẶP MÔ TẢ -->
         <section class="border-top pt-4 mt-2">
@@ -817,30 +829,31 @@
                                     <span class="flower-info-label">Mô tả sản phẩm</span>
                                     <span class="flower-info-value" th:text="${product.description}">Mô tả chi tiết sản phẩm</span>
                                 </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mục 3: Cách chăm sóc -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingCare">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCare" aria-expanded="false" aria-controls="collapseCare">
+                                <i class="bi bi-droplet-half me-2" style="color: var(--flower-primary);"></i>
+                                <span class="fw-semibold">Cách chăm sóc</span>
+                            </button>
+                        </h2>
+                        <div id="collapseCare" class="accordion-collapse collapse" aria-labelledby="headingCare" data-bs-parent="#flowerDetailAccordion">
+                            <div class="accordion-body">
+                                <ul class="mb-0 ps-3 d-flex flex-column gap-2">
+                                    <li><strong>Cắt vát gốc hoa:</strong> Dùng kéo bén cắt xéo gốc cành 45° khoảng 1–2cm trước khi cắm vào bình nước sạch để hoa hút nước tốt nhất.</li>
+                                    <li><strong>Thay nước định kỳ:</strong> Thay nước mát sạch mỗi 1–2 ngày và hòa thêm gói dưỡng hoa tặng kèm. Rửa sạch phần gốc cành khi thay nước.</li>
+                                    <li><strong>Vị trí đặt hoa:</strong> Trưng bày nơi thoáng mát (20–25°C), tránh ánh nắng gắt chiếu trực tiếp, tránh gió điều hòa phả thẳng và tránh đặt cạnh hoa quả chín.</li>
+                                </ul>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- MỤC 2: LƯU Ý VỀ HOA (Khác biệt tự nhiên và chính sách thay thế) -->
-                <div class="accordion-item">
-                    <h3 class="accordion-header" id="headingSeason">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSeason" aria-expanded="false" aria-controls="collapseSeason">
-                            <i class="bi bi-arrow-repeat me-2" style="color: var(--flower-primary);"></i>
-                            <span>Lưu ý về hoa</span>
-                        </button>
-                    </h3>
-                    <div id="collapseSeason" class="accordion-collapse collapse" aria-labelledby="headingSeason" data-bs-parent="#flowerDetailAccordion">
-                        <div class="accordion-body">
-                            <p class="mb-2">
-                                Hoa tươi là sản phẩm nông nghiệp tự nhiên, độ nở và sắc độ cánh hoa có thể có độ chênh nhẹ tùy theo thời tiết mỗi ngày nhưng luôn đảm bảo độ tươi mới và thẩm mỹ cao nhất.
-                            </p>
-                            <p class="mb-0">
-                                Trong trường hợp một số loại hoa phụ hoặc hoa chính tạm thời khan hiếm, tiệm sẽ <strong>chủ động gọi điện trao đổi trước với bạn</strong> để đề xuất loại hoa thay thế có giá trị tương đương hoặc cao hơn, giữ đúng tone màu và phom dáng.
-                            </p>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- MỤC 3: CÁCH CHĂM SÓC (Đúng với bó hoa, hoa cắm bình hoặc chậu cây) -->
                 <div class="accordion-item">
@@ -969,30 +982,190 @@
                     </div>
                 </div>
 
+
             </div>
-        </section>
+        </div>
+
+        <!-- Đánh giá khách hàng -->
+        <div id="review-section" class="card detail-card p-4 p-md-5 mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="fw-semibold mb-1" style="font-size: 22px; color: var(--flower-text-heading);">⭐ Đánh giá khách hàng</h3>
+                    <p class="text-muted small mb-0">Đánh giá thực tế từ khách hàng đã đặt hoa tại hệ thống</p>
+                </div>
+            </div>
+
+            <!-- Case 1: Unauthenticated -->
+            <div sec:authorize="!isAuthenticated()" class="p-4 bg-light rounded-4 border mb-4 text-center">
+                <div class="fs-2 mb-2">🌸</div>
+                <h6 class="fw-bold mb-2">Đánh Giá Sản Phẩm</h6>
+                <p class="text-muted small mb-3">
+                    Chức năng đánh giá chỉ dành cho khách hàng <strong>đã đặt hàng và nhận được hoa thành công</strong>.<br>
+                    Vui lòng đăng nhập bằng tài khoản mua hàng để thực hiện đánh giá.
+                </p>
+                <a th:href="@{/login}" class="btn btn-outline-danger btn-sm rounded-pill px-4 fw-semibold">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Đăng Nhập
+                </a>
+            </div>
+
+            <!-- Case 2: Not yet eligible -->
+            <div sec:authorize="isAuthenticated()" th:if="${canReview != true}" class="p-4 bg-light rounded-4 border mb-4 text-center">
+                <div class="fs-2 mb-2">📦</div>
+                <h6 class="fw-bold text-dark mb-2">Chưa Thể Đánh Giá Mẫu Hoa Này</h6>
+                <p class="text-muted small mb-0" style="max-width: 600px; margin: 0 auto;">
+                    Chức năng đánh giá sản phẩm chỉ được thực hiện <strong>khi và chỉ khi khách hàng đã đặt hàng và nhận được hàng thành công</strong> (Đơn hàng ở trạng thái Đã Giao hoặc Hoàn Tất).
+                </p>
+            </div>
+
+            <!-- Case 3: Eligible Reviewer -->
+            <div sec:authorize="isAuthenticated()" th:if="${canReview == true}" class="p-4 bg-white border border-success-subtle rounded-4 shadow-sm mb-4">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill small fw-semibold">
+                        <i class="bi bi-patch-check-fill me-1"></i> Đã Mua & Nhận Hàng Thành Công
+                    </span>
+                    <h6 class="fw-bold mb-0 text-dark">Viết Đánh Giá Sản Phẩm (Tối thiểu 50 ký tự)</h6>
+                </div>
+                <form th:action="@{/product/{id}/review(id=${product.id})}" method="post" onsubmit="return validateReviewLength();">
+                    <input type="hidden" name="orderId" th:value="${eligibleOrderId}">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">Chấm sao (*)</label>
+                            <select name="rating" class="form-select" required>
+                                <option value="5" selected>⭐⭐⭐⭐⭐ (5 sao - Tuyệt vời)</option>
+                                <option value="4">⭐⭐⭐⭐ (4 sao - Rất tốt)</option>
+                                <option value="3">⭐⭐⭐ (3 sao - Bình thường)</option>
+                                <option value="2">⭐⭐ (2 sao - Tạm được)</option>
+                                <option value="1">⭐ (1 sao - Thất vọng)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-9">
+                            <label class="form-label small fw-semibold">Đường dẫn hình ảnh đính kèm (nếu có)</label>
+                            <input type="url" name="imageUrl" class="form-control" placeholder="https://example.com/flower-review.jpg">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label small fw-semibold mb-0">Nội dung bình luận & trải nghiệm (* Tối thiểu 50 ký tự)</label>
+                            <small id="charCounter" class="text-muted fw-bold">0 / 50 ký tự</small>
+                        </div>
+                        <textarea id="reviewContent" name="content" rows="3" class="form-control"
+                                  required placeholder="Hãy chia sẻ cảm nhận chi tiết của bạn về độ tươi của hoa, cách đóng gói, thiệp mừng và thái độ phục vụ của shipper (tối thiểu 50 ký tự)..."
+                                  oninput="updateCharCount()"></textarea>
+                        <div id="reviewWarning" class="text-danger small mt-1 d-none">⚠️ Nội dung bình luận chưa đủ 50 ký tự! Vui lòng viết thêm cảm nhận.</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-flower-add rounded-pill px-4">Gửi Đánh Giá</button>
+                </form>
+            </div>
+
+            <!-- Reviews List -->
+            <div th:if="${#lists.isEmpty(reviews)}" class="text-center py-4 text-muted">
+                <i class="bi bi-chat-heart fs-1 text-secondary opacity-50"></i>
+                <p class="mt-2 mb-0">Chưa có đánh giá nào cho mẫu hoa này. Hãy là người đầu tiên trải nghiệm và để lại nhận xét!</p>
+            </div>
+
+            <div th:if="${!#lists.isEmpty(reviews)}" class="d-flex flex-column gap-3">
+                <div th:each="r : ${reviews}" class="p-3 border rounded-3 bg-white">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <img th:src="${r.user.avatarUrl != null ? r.user.avatarUrl : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=50'}"
+                                 class="rounded-circle border" width="40" height="40" style="object-fit: cover;">
+                            <div>
+                                <strong class="d-block text-dark small" th:text="${r.user.fullName}">Tên khách hàng</strong>
+                                <small class="text-muted" style="font-size: 12px;" th:text="${#temporals.format(r.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</small>
+                            </div>
+                        </div>
+                        <div class="text-warning small">
+                            <span th:each="i : ${#numbers.sequence(1, r.rating)}">⭐</span>
+                        </div>
+                    </div>
+                    <p class="text-dark small mb-2 ps-1" th:text="${r.content}"></p>
+                    <div th:if="${r.imageUrl != null and !r.imageUrl.isEmpty()}" class="ps-1">
+                        <img th:src="${r.imageUrl}" class="rounded-3 border" width="120" height="120" style="object-fit: cover;">
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="border-top py-4 mt-5" style="background-color: #ffffff; border-color: var(--flower-border) !important;">
-        <div class="flower-detail-container text-center text-muted" style="font-size: 15px;">
-            <p class="mb-1 d-inline-flex align-items-center justify-content-center gap-2" style="color: var(--flower-primary);"><img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img-sm"> HOA TƯƠI SÀI GÒN - Hệ thống cửa hàng hoa tươi cao cấp toàn quốc</p>
-            <p class="mb-0">Hotline hỗ trợ & đặt hoa: <strong style="color: var(--flower-accent);">028 1111 222</strong> · Giờ làm việc: 07:00 - 21:00 hàng ngày</p>
+    <!-- ==============================================
+         FOOTER CHUẨN ĐỒNG BỘ THEO MẪU (BOTANICAL ATELIER)
+         ============================================== -->
+    <footer class="w-full border-top pt-4 pb-3 mt-12" style="background-color: #FAF4F0 !important; border-top: 1px solid #EBDED4 !important; font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif !important; color: #4A3E3D !important; width: 100%;">
+        <div style="max-width: 1240px; margin: 0 auto; padding-left: 20px; padding-right: 20px;">
+            <!-- Hàng trên: 2 Cột thông tin -->
+            <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 24px; padding-bottom: 24px;">
+                <!-- Cột 1: Thương hiệu & Liên hệ -->
+                <div style="flex: 1 1 320px; max-width: 480px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+                        <span style="font-size: 22px; line-height: 1;">🌸</span>
+                        <span style="font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 700; color: #C84357; letter-spacing: 0.5px;">HOA TƯƠI SÀI GÒN</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; color: #555555;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; line-height: 1;">call</span>
+                            <span>Hotline: <strong style="color: #222222; font-weight: 700;">028 1111 222 - 0909 888 777</strong></span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; line-height: 1;">mail</span>
+                            <span>Email: <a href="mailto:atelier@hoatuoisaigon.vn" style="color: #555555; text-decoration: none;">atelier@hoatuoisaigon.vn</a></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột 2: Hệ thống Atelier & Chi nhánh -->
+                <div style="flex: 1 1 360px; max-width: 560px;">
+                    <h4 style="font-size: 13px; font-weight: 800; color: #264E43; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; margin-top: 2px;">HỆ THỐNG ATELIER &amp; CHI NHÁNH</h4>
+                    <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; color: #555555;">
+                        <div style="display: flex; align-items: flex-start; gap: 8px;">
+                            <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
+                            <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Q.1:</strong> 123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM</span>
+                        </div>
+                        <div style="display: flex; align-items: flex-start; gap: 8px;">
+                            <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
+                            <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Q.7:</strong> 456 Nguyễn Thị Thập, Tân Hưng, Quận 7, TP.HCM</span>
+                        </div>
+                        <div style="display: flex; align-items: flex-start; gap: 8px;">
+                            <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
+                            <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Thủ Đức:</strong> 1 Võ Văn Ngân, Linh Chiểu, TP. Thủ Đức, TP.HCM</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hàng dưới: Bản quyền + Cam kết chất lượng & Giao hàng -->
+            <div style="border-top: 1px solid #EBDED4; padding-top: 16px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; font-size: 12.5px; color: #777777;">
+                <div>
+                    <span>© 2026 HOA TƯƠI SÀI GÒN .</span>
+                </div>
+                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
+                    <span style="display: inline-flex; align-items: center; gap: 5px; color: #333333; font-weight: 600;">
+                        <span style="color: #C84357;">🌸</span> 100% Hoa Tươi Nhập Khẩu &amp; Đà Lạt
+                    </span>
+                    <span style="color: #D8CBC2;">•</span>
+                    <span style="display: inline-flex; align-items: center; gap: 4px; color: #666666;">
+                        <span class="material-symbols-outlined" style="font-size: 15px; color: #264E43; line-height: 1;">schedule</span> Giao hỏa tốc 60–90 phút
+                    </span>
+                </div>
+            </div>
+        </div>
+    </footer>
         </div>
     </footer>
 
     <script>
         let currentIndex = 0;
         const angleTitles = [
-            "Góc 1: Ảnh chính diện",
-            "Góc 2: Cận cảnh cánh hoa",
-            "Góc 3: Góc nghiêng chi tiết",
-            "Góc 4: Không gian bài trí"
+            "Góc 1: Ảnh Chính Diện",
+            "Góc 2: Cận Cảnh Cánh Hoa",
+            "Góc 3: Góc Nghiêng Chi Tiết",
+            "Góc 4: Không Gian Bài Trí"
         ];
 
         function selectImage(cardEl) {
             const src = cardEl.getAttribute('data-src');
-            const idx = parseInt(cardEl.getAttribute('data-index') || '0', 10);
+            const idx = parseInt(cardEl.getAttribute('data-index') || '0');
             currentIndex = idx;
 
             const mainImg = document.getElementById('mainImage');
@@ -1014,7 +1187,7 @@
                 const cap = c.querySelector('.angle-caption');
                 if (img) img.classList.remove('active-thumb');
                 if (cap) {
-                    cap.classList.remove('text-dark', 'fw-bold');
+                    cap.classList.remove('text-danger', 'fw-bold');
                     cap.classList.add('text-muted');
                 }
             });
@@ -1024,7 +1197,7 @@
             if (activeImg) activeImg.classList.add('active-thumb');
             if (activeCap) {
                 activeCap.classList.remove('text-muted');
-                activeCap.classList.add('text-dark', 'fw-bold');
+                activeCap.classList.add('text-danger', 'fw-bold');
             }
         }
 
@@ -1072,17 +1245,91 @@
             val = Math.max(1, Math.min(99, val + delta));
             input.value = val;
         }
-
-        // Tự động mở accordion đánh giá nếu có URL hash #review-section hoặc #headingReviews
-        document.addEventListener('DOMContentLoaded', function () {
-            if (window.location.hash === '#review-section' || window.location.hash === '#headingReviews') {
-                const collapseReviews = document.getElementById('collapseReviews');
-                if (collapseReviews) {
-                    const bsCollapse = new bootstrap.Collapse(collapseReviews, { toggle: true });
-                }
-            }
-        });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Floating Toast Notification (Không giật trang, không cuộn lên đầu) -->
+    <div id="detailActionToast" style="position: fixed; top: 90px; right: 24px; z-index: 9999; display: none; background: #264E43; color: #ffffff; padding: 12px 22px; border-radius: 50px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); font-weight: bold; font-size: 14px; align-items: center; gap: 8px;">
+        <i class="bi bi-check-circle-fill" style="color: #a7f3d0; font-size: 18px;"></i>
+        <span id="detailActionToastMsg">Thông báo</span>
+    </div>
+
+    <script>
+        let detailToastTimer = null;
+        function showDetailToast(msg) {
+            const toast = document.getElementById('detailActionToast');
+            const toastMsg = document.getElementById('detailActionToastMsg');
+            if (!toast || !toastMsg) return;
+            toastMsg.textContent = msg;
+            toast.style.display = 'inline-flex';
+            
+            if (detailToastTimer) clearTimeout(detailToastTimer);
+            detailToastTimer = setTimeout(() => {
+                toast.style.display = 'none';
+            }, 2500);
+        }
+
+        function toggleDetailFollowAjax(event, formEl) {
+            if (event) event.preventDefault();
+            const btn = formEl.querySelector('button');
+            const url = formEl.getAttribute('action');
+            const csrfInput = formEl.querySelector('input[name="_csrf"]');
+            const csrfToken = csrfInput ? csrfInput.value : '';
+            
+            const headers = {
+                'X-Requested-With': 'XMLHttpRequest'
+            };
+            if (csrfToken) {
+                headers['X-CSRF-TOKEN'] = csrfToken;
+            }
+
+            fetch(url, {
+                method: 'POST',
+                headers: headers,
+                body: new FormData(formEl)
+            })
+            .then(res => {
+                if (res.status === 401 || res.status === 403) {
+                    window.location.href = '/login';
+                    return null;
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (!data) return;
+                showDetailToast(data.message || (data.liked ? 'Đã theo dõi sản phẩm thành công!' : 'Đã hủy theo dõi sản phẩm!'));
+                if (btn) {
+                    const icon = btn.querySelector('i');
+                    const textSpan = btn.querySelector('span');
+                    if (data.liked) {
+                        btn.style.backgroundColor = '#FEE2E2';
+                        btn.style.color = '#DC2626';
+                        btn.style.borderColor = '#FCA5A5';
+                        if (icon) icon.className = 'bi bi-check-circle-fill';
+                        if (textSpan) textSpan.textContent = 'Đang theo dõi';
+                    } else {
+                        btn.style.backgroundColor = '#FFF1F2';
+                        btn.style.color = '#E11D48';
+                        btn.style.borderColor = '#FECDD3';
+                        if (icon) icon.className = 'bi bi-plus-circle';
+                        if (textSpan) textSpan.textContent = 'Theo dõi';
+                    }
+                }
+                const countBadge = document.getElementById('detailFollowerCount');
+                if (countBadge) {
+                    let currentCount = parseInt(countBadge.textContent, 10) || 0;
+                    if (data.liked) {
+                        countBadge.textContent = currentCount + 1;
+                    } else {
+                        countBadge.textContent = Math.max(0, currentCount - 1);
+                    }
+                }
+            })
+            .catch(err => {
+                console.error('Lỗi theo dõi:', err);
+                formEl.submit();
+            });
+        }
+    </script>
 </body>
 </html>

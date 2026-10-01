@@ -4,6 +4,7 @@ import com.finalproject.entity.User;
 import com.finalproject.repository.UserRepository;
 import com.finalproject.service.CloudinaryService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,6 +17,7 @@ import java.security.Principal;
 @Controller
 @RequestMapping({"/customer/profile", "/customer"})
 @RequiredArgsConstructor
+@Slf4j
 public class ProfileController {
 
     private final UserRepository userRepository;
@@ -25,6 +27,9 @@ public class ProfileController {
     private final com.finalproject.repository.UserFollowStoreRepository followStoreRepository;
     private final com.finalproject.repository.StoreRepository storeRepository;
     private final com.finalproject.service.RoleManagementService roleManagementService;
+    private final com.finalproject.service.CartService cartService;
+    private final com.finalproject.repository.OtpVerificationRepository otpRepository;
+    private final com.finalproject.service.EmailService emailService;
 
     @GetMapping({"", "/profile"})
     public String viewProfile(@RequestParam(value = "tab", required = false) String activeTab,
@@ -42,6 +47,7 @@ public class ProfileController {
         model.addAttribute("roleRequests", roleReqs);
         model.addAttribute("hasApprovedUnactivated", hasApprovedUnactivated);
         model.addAttribute("availableStores", storeRepository.findAll());
+        model.addAttribute("stores", storeRepository.findByStatusTrue());
         model.addAttribute("activeTab", activeTab != null ? activeTab : "info");
         return "customer/profile";
     }
@@ -136,18 +142,87 @@ public class ProfileController {
         return "redirect:/customer/profile";
     }
 
+    @PostMapping({"/send-password-otp", "/profile/send-password-otp"})
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<?> sendPasswordOtp(Principal principal, @RequestParam("email") String email) {
+        if (principal == null) {
+            return org.springframework.http.ResponseEntity.status(401).body(java.util.Map.of("success", false, "message", "Vui lòng đăng nhập!"));
+        }
+        User user = userRepository.findByUsername(principal.getName()).orElse(null);
+        if (user == null) {
+            return org.springframework.http.ResponseEntity.status(404).body(java.util.Map.of("success", false, "message", "Không tìm thấy người dùng!"));
+        }
+
+        if (email == null || email.trim().isEmpty() || !email.trim().equalsIgnoreCase(user.getEmail())) {
+            return org.springframework.http.ResponseEntity.badRequest().body(java.util.Map.of(
+                    "success", false,
+                    "message", "Email không khớp với email tài khoản của bạn (" + user.getEmail() + ")!"
+            ));
+        }
+
+        if (otpRepository.countByUserIdAndCreatedAtAfter(user.getId(), java.time.LocalDateTime.now().minusMinutes(10)) >= 5) {
+            return org.springframework.http.ResponseEntity.badRequest().body(java.util.Map.of(
+                    "success", false,
+                    "message", "Bạn đã yêu cầu gửi OTP quá nhiều lần. Vui lòng thử lại sau 10 phút!"
+            ));
+        }
+
+        String code = com.finalproject.utils.OtpUtil.generateOtp();
+        com.finalproject.entity.OtpVerification otp = com.finalproject.entity.OtpVerification.builder()
+                .user(user)
+                .code(code)
+                .type(com.finalproject.enums.OtpType.RESET_PASSWORD)
+                .expiredAt(java.time.LocalDateTime.now().plusMinutes(5))
+                .createdAt(java.time.LocalDateTime.now())
+                .isUsed(false)
+                .build();
+        otpRepository.save(otp);
+
+        try {
+            emailService.sendOtpEmail(user.getEmail(), code);
+        } catch (Exception ex) {
+            log.warn("Email send failed (SMTP): {}, fallback OTP: {}", ex.getMessage(), code);
+        }
+        log.info("[OTP ĐỔI MẬT KHẨU] User: {}, Email: {}, Mã OTP: {}", user.getUsername(), user.getEmail(), code);
+
+        return org.springframework.http.ResponseEntity.ok(java.util.Map.of(
+                "success", true,
+                "message", "Mã xác thực OTP đã được gửi đến: " + user.getEmail()
+        ));
+    }
+
     @PostMapping({"/change-password", "/profile/change-password"})
     public String changePassword(Principal principal,
                                  @RequestParam("oldPassword") String oldPassword,
                                  @RequestParam("newPassword") String newPassword,
+                                 @RequestParam(value = "otpCode", required = false) String otpCode,
                                  RedirectAttributes ra) {
+        if (principal == null) return "redirect:/login";
+        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
+
+        if (otpCode == null || otpCode.trim().length() != 6) {
+            ra.addFlashAttribute("errorMessage", "Vui lòng nhập đầy đủ mã OTP 6 chữ số đã gửi về email!");
+            return "redirect:/customer/profile?tab=password#tabPassword";
+        }
+
+        var otpOpt = otpRepository.findTopByUserIdAndCodeAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
+                user.getId(), otpCode.trim(), com.finalproject.enums.OtpType.RESET_PASSWORD);
+
+        if (otpOpt.isEmpty() || otpOpt.get().getExpiredAt().isBefore(java.time.LocalDateTime.now())) {
+            ra.addFlashAttribute("errorMessage", "Mã OTP không chính xác hoặc đã hết hạn (5 phút). Vui lòng nhấn gửi lại mã!");
+            return "redirect:/customer/profile?tab=password#tabPassword";
+        }
+
         try {
             userService.changePassword(principal.getName(), oldPassword, newPassword);
-            ra.addFlashAttribute("successMessage", "Đổi mật khẩu thành công!");
+            var otp = otpOpt.get();
+            otp.setIsUsed(true);
+            otpRepository.save(otp);
+            ra.addFlashAttribute("successMessage", "Đổi mật khẩu bảo mật thành công!");
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
-        return "redirect:/customer/profile";
+        return "redirect:/customer/profile?tab=password#tabPassword";
     }
 
     @PostMapping({"/address/add", "/profile/address/add"})
@@ -213,6 +288,7 @@ public class ProfileController {
     public String viewWishlist(Principal principal, Model model) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         model.addAttribute("wishlist", productService.getWishlist(user.getId()));
+        model.addAttribute("stores", storeRepository.findByStatusTrue());
         return "customer/wishlist";
     }
 
@@ -229,18 +305,39 @@ public class ProfileController {
         model.addAttribute("followedProducts", followedProducts);
         model.addAttribute("followedStores", followedStores);
         model.addAttribute("activeTab", tab != null ? tab : "products");
+        try {
+            model.addAttribute("cartItemCount", cartService.getCartItemCount(principal.getName()));
+        } catch (Exception ignored) {}
         return "customer/following";
     }
 
     // UC_015 Step 2 & 3: Chọn nút Follow/Following -> Theo dõi hoặc hủy theo dõi
     @PostMapping({"/wishlist/toggle/{productId}", "/profile/wishlist/toggle/{productId}", "/following/toggle/{productId}", "/following/product/{productId}", "/products/{productId}/follow"})
-    public String toggleWishlist(Principal principal, @PathVariable("productId") Long productId,
+    public Object toggleWishlist(Principal principal, @PathVariable("productId") Long productId,
                                  @RequestHeader(value = "Referer", required = false) String referer,
+                                 @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
                                  RedirectAttributes ra) {
-        if (principal == null) return "redirect:/login";
+        if (principal == null) {
+            if ("XMLHttpRequest".equalsIgnoreCase(requestedWith)) {
+                return org.springframework.http.ResponseEntity.status(401).body(java.util.Map.of("success", false, "message", "Vui lòng đăng nhập để lưu sản phẩm!"));
+            }
+            return "redirect:/login";
+        }
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         boolean liked = productService.toggleWishlist(user.getId(), productId);
-        ra.addFlashAttribute("successMessage", liked ? "Đã theo dõi sản phẩm thành công! (Following)" : "Đã hủy theo dõi sản phẩm (Unfollow)!");
+        String message = liked ? "Đã theo dõi sản phẩm thành công!" : "Đã hủy theo dõi sản phẩm!";
+
+        if ("XMLHttpRequest".equalsIgnoreCase(requestedWith)) {
+            int remainingCount = productService.getWishlist(user.getId()).size();
+            return org.springframework.http.ResponseEntity.ok(java.util.Map.of(
+                    "success", true,
+                    "liked", liked,
+                    "remainingCount", remainingCount,
+                    "message", message
+            ));
+        }
+
+        ra.addFlashAttribute("successMessage", message);
         return referer != null ? "redirect:" + referer : "redirect:/customer/following";
     }
 
@@ -248,6 +345,9 @@ public class ProfileController {
     public String viewRecentlyViewed(Principal principal, Model model) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         model.addAttribute("recentProducts", productService.getRecentlyViewed(user.getId()));
+        try {
+            model.addAttribute("cartItemCount", cartService.getCartItemCount(principal.getName()));
+        } catch (Exception ignored) {}
         return "customer/recently-viewed";
     }
 
@@ -256,6 +356,9 @@ public class ProfileController {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         var follows = followStoreRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
         model.addAttribute("followedStores", follows.stream().map(com.finalproject.entity.UserFollowStore::getStore).toList());
+        try {
+            model.addAttribute("cartItemCount", cartService.getCartItemCount(principal.getName()));
+        } catch (Exception ignored) {}
         return "customer/followed-stores";
     }
 

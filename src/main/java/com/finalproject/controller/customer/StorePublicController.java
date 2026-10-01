@@ -121,23 +121,41 @@ public class StorePublicController {
 
     // UC_015: Toggle Follow / Unfollow Store
     @PostMapping("/{id}/follow")
-    public String toggleFollowStorePublic(Principal principal, @PathVariable("id") Long storeId,
+    public Object toggleFollowStorePublic(Principal principal, @PathVariable("id") Long storeId,
                                           @RequestHeader(value = "Referer", required = false) String referer,
+                                          @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
                                           RedirectAttributes ra) {
-        if (principal == null) return "redirect:/login";
+        if (principal == null) {
+            if ("XMLHttpRequest".equalsIgnoreCase(requestedWith)) {
+                return org.springframework.http.ResponseEntity.status(401).body(java.util.Map.of("success", false, "message", "Vui lòng đăng nhập!"));
+            }
+            return "redirect:/login";
+        }
         var user = userRepository.findByUsername(principal.getName()).orElse(null);
         if (user == null) return "redirect:/login";
         var existing = followStoreRepository.findByUserIdAndStoreId(user.getId(), storeId);
+        boolean followed;
+        String message;
         if (existing.isPresent()) {
             followStoreRepository.delete(existing.get());
-            ra.addFlashAttribute("successMessage", "Đã hủy theo dõi cửa hàng thành công! (Unfollowed)");
+            followed = false;
+            message = "Đã hủy theo dõi cửa hàng thành công!";
         } else {
             var store = storeRepository.findById(storeId).orElse(null);
             if (store != null) {
                 followStoreRepository.save(com.finalproject.entity.UserFollowStore.builder().user(user).store(store).build());
-                ra.addFlashAttribute("successMessage", "Đã theo dõi cửa hàng thành công! (Following)");
             }
+            followed = true;
+            message = "Đã theo dõi cửa hàng thành công!";
         }
+        if ("XMLHttpRequest".equalsIgnoreCase(requestedWith)) {
+            return org.springframework.http.ResponseEntity.ok(java.util.Map.of(
+                    "success", true,
+                    "followed", followed,
+                    "message", message
+            ));
+        }
+        ra.addFlashAttribute("successMessage", message);
         return referer != null ? "redirect:" + referer : "redirect:/stores/" + storeId;
     }
 }
