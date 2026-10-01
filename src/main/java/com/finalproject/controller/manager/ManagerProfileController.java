@@ -1,0 +1,365 @@
+package com.finalproject.controller.manager;
+
+import com.finalproject.entity.Store;
+import com.finalproject.entity.User;
+import com.finalproject.repository.StoreRepository;
+import com.finalproject.repository.UserRepository;
+import com.finalproject.service.CloudinaryService;
+import com.finalproject.service.StoreAccessService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * Controller thực hiện Use Case UC_019: Quản lý thông tin của cửa hàng (Store Management – Profile)
+ */
+@Controller
+@RequestMapping({"/manager/profile", "/manager/stores/profile", "/vendor/profile"})
+@RequiredArgsConstructor
+@Slf4j
+public class ManagerProfileController {
+
+    private final StoreRepository storeRepository;
+    private final UserRepository userRepository;
+    private final StoreAccessService storeAccess;
+    private final CloudinaryService cloudinaryService;
+
+    /**
+     * Bước 6 & 7: Vào trang quản lý thông tin cửa hàng từ sidebar
+     */
+    @GetMapping
+    public String showStoreProfile(Principal principal, Model model) {
+        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
+        Store store = getActiveStore(user);
+        if (store == null) {
+            return "redirect:/manager/stores";
+        }
+        storeAccess.requireStore(store);
+
+        List<String> featuredImages = parseFeaturedImages(store.getFeaturedImages());
+
+        model.addAttribute("store", store);
+        model.addAttribute("featuredImages", featuredImages);
+        model.addAttribute("activeMenu", "profile");
+        model.addAttribute("currentUser", user);
+        return "manager/profile";
+    }
+
+    /**
+     * Main Flow - Bước 8, 9, 10: Cập nhật ảnh đại diện cửa hàng qua nút hình camera
+     * Exception 10f, 10f1: Hình ảnh không hợp lệ -> thông báo thất bại
+     */
+    @PostMapping("/avatar")
+    public String updateAvatar(Principal principal,
+                               @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile,
+                               @RequestParam(value = "avatarUrl", required = false) String avatarUrl,
+                               RedirectAttributes ra) {
+        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
+        Store store = getActiveStore(user);
+        if (store == null) return "redirect:/manager/stores";
+        storeAccess.requireManager(store);
+
+        try {
+            String newUrl = null;
+            if (avatarFile != null && !avatarFile.isEmpty()) {
+                if (!isValidImageFile(avatarFile)) {
+                    ra.addFlashAttribute("errorMessage", "Hình ảnh không hợp lệ! Vui lòng chọn tệp hình ảnh định dạng JPG, PNG, WEBP hoặc GIF.");
+                    return "redirect:/manager/profile";
+                }
+                newUrl = cloudinaryService.uploadImage(avatarFile);
+            } else if (avatarUrl != null && !avatarUrl.trim().isEmpty()) {
+                if (!isValidImageUrl(avatarUrl)) {
+                    ra.addFlashAttribute("errorMessage", "Hình ảnh không hợp lệ! Vui lòng nhập đường dẫn hình ảnh trực tuyến hợp lệ.");
+                    return "redirect:/manager/profile";
+                }
+                newUrl = avatarUrl.trim();
+            } else {
+                ra.addFlashAttribute("errorMessage", "Hình ảnh không hợp lệ! Vui lòng chọn một tệp ảnh đại diện mới.");
+                return "redirect:/manager/profile";
+            }
+
+            store.setAvatar(newUrl);
+            storeRepository.save(store);
+            ra.addFlashAttribute("successMessage", "Ảnh đại diện cửa hàng đã được cập nhật thành công!");
+        } catch (Exception ex) {
+            log.error("Lỗi cập nhật ảnh đại diện", ex);
+            ra.addFlashAttribute("errorMessage", "Thông báo cập nhật thất bại: " + ex.getMessage());
+        }
+
+        return "redirect:/manager/profile";
+    }
+
+    /**
+     * Alternative Flow - Bước 8a, 9a, 10a: Cập nhật ảnh bìa (Cover Photo)
+     * Exception 10f, 10f1: Hình ảnh không hợp lệ -> thông báo thất bại
+     */
+    @PostMapping("/cover")
+    public String updateCover(Principal principal,
+                              @RequestParam(value = "coverFile", required = false) MultipartFile coverFile,
+                              @RequestParam(value = "coverUrl", required = false) String coverUrl,
+                              RedirectAttributes ra) {
+        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
+        Store store = getActiveStore(user);
+        if (store == null) return "redirect:/manager/stores";
+        storeAccess.requireManager(store);
+
+        try {
+            String newUrl = null;
+            if (coverFile != null && !coverFile.isEmpty()) {
+                if (!isValidImageFile(coverFile)) {
+                    ra.addFlashAttribute("errorMessage", "Hình ảnh không hợp lệ! Vui lòng chọn tệp hình ảnh định dạng JPG, PNG, WEBP hoặc GIF.");
+                    return "redirect:/manager/profile";
+                }
+                newUrl = cloudinaryService.uploadImage(coverFile);
+            } else if (coverUrl != null && !coverUrl.trim().isEmpty()) {
+                if (!isValidImageUrl(coverUrl)) {
+                    ra.addFlashAttribute("errorMessage", "Hình ảnh không hợp lệ! Vui lòng nhập đường dẫn hình ảnh trực tuyến hợp lệ.");
+                    return "redirect:/manager/profile";
+                }
+                newUrl = coverUrl.trim();
+            } else {
+                ra.addFlashAttribute("errorMessage", "Hình ảnh không hợp lệ! Vui lòng chọn một tệp ảnh bìa mới.");
+                return "redirect:/manager/profile";
+            }
+
+            store.setCover(newUrl);
+            storeRepository.save(store);
+            ra.addFlashAttribute("successMessage", "Ảnh bìa cửa hàng đã được cập nhật thành công!");
+        } catch (Exception ex) {
+            log.error("Lỗi cập nhật ảnh bìa", ex);
+            ra.addFlashAttribute("errorMessage", "Thông báo cập nhật thất bại: " + ex.getMessage());
+        }
+
+        return "redirect:/manager/profile";
+    }
+
+    /**
+     * Alternative Flow - Bước 8b, 9b, 9b1, 9b2, 10b: Thêm ảnh đặc trưng mới (New Featured Image)
+     */
+    @PostMapping("/featured/add")
+    public String addFeaturedImage(Principal principal,
+                                   @RequestParam(value = "featuredFile", required = false) MultipartFile featuredFile,
+                                   @RequestParam(value = "imageUrl", required = false) String imageUrl,
+                                   RedirectAttributes ra) {
+        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
+        Store store = getActiveStore(user);
+        if (store == null) return "redirect:/manager/stores";
+        storeAccess.requireManager(store);
+
+        try {
+            String newUrl = null;
+            if (featuredFile != null && !featuredFile.isEmpty()) {
+                if (!isValidImageFile(featuredFile)) {
+                    ra.addFlashAttribute("errorMessage", "Hình ảnh không hợp lệ! Vui lòng chọn tệp hình ảnh định dạng JPG, PNG, WEBP hoặc GIF.");
+                    return "redirect:/manager/profile";
+                }
+                newUrl = cloudinaryService.uploadImage(featuredFile);
+            } else if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+                if (!isValidImageUrl(imageUrl)) {
+                    ra.addFlashAttribute("errorMessage", "Hình ảnh không hợp lệ! Vui lòng nhập đường dẫn hình ảnh trực tuyến hợp lệ.");
+                    return "redirect:/manager/profile";
+                }
+                newUrl = imageUrl.trim();
+            } else {
+                ra.addFlashAttribute("errorMessage", "Hình ảnh không hợp lệ! Vui lòng chọn tệp hoặc nhập link ảnh đặc trưng.");
+                return "redirect:/manager/profile";
+            }
+
+            List<String> list = parseFeaturedImages(store.getFeaturedImages());
+            list.add(newUrl);
+            store.setFeaturedImages(joinFeaturedImages(list));
+            storeRepository.save(store);
+
+            ra.addFlashAttribute("successMessage", "Ảnh đặc trưng mới đã được thêm thành công!");
+        } catch (Exception ex) {
+            log.error("Lỗi thêm ảnh đặc trưng", ex);
+            ra.addFlashAttribute("errorMessage", "Thông báo cập nhật thất bại: " + ex.getMessage());
+        }
+
+        return "redirect:/manager/profile";
+    }
+
+    /**
+     * Alternative Flow - Bước 8c: Chọn nút Edit trên ảnh đặc trưng
+     */
+    @PostMapping("/featured/edit")
+    public String editFeaturedImage(Principal principal,
+                                    @RequestParam("index") int index,
+                                    @RequestParam(value = "editFile", required = false) MultipartFile editFile,
+                                    @RequestParam(value = "editUrl", required = false) String editUrl,
+                                    RedirectAttributes ra) {
+        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
+        Store store = getActiveStore(user);
+        if (store == null) return "redirect:/manager/stores";
+        storeAccess.requireManager(store);
+
+        try {
+            List<String> list = parseFeaturedImages(store.getFeaturedImages());
+            if (index < 0 || index >= list.size()) {
+                ra.addFlashAttribute("errorMessage", "Không tìm thấy ảnh đặc trưng cần chỉnh sửa!");
+                return "redirect:/manager/profile";
+            }
+
+            String updatedUrl = null;
+            if (editFile != null && !editFile.isEmpty()) {
+                if (!isValidImageFile(editFile)) {
+                    ra.addFlashAttribute("errorMessage", "Hình ảnh không hợp lệ! Vui lòng chọn tệp hình ảnh định dạng JPG, PNG, WEBP hoặc GIF.");
+                    return "redirect:/manager/profile";
+                }
+                updatedUrl = cloudinaryService.uploadImage(editFile);
+            } else if (editUrl != null && !editUrl.trim().isEmpty()) {
+                if (!isValidImageUrl(editUrl)) {
+                    ra.addFlashAttribute("errorMessage", "Hình ảnh không hợp lệ! Vui lòng nhập đường dẫn hình ảnh hợp lệ.");
+                    return "redirect:/manager/profile";
+                }
+                updatedUrl = editUrl.trim();
+            } else {
+                ra.addFlashAttribute("errorMessage", "Hình ảnh không hợp lệ! Vui lòng chọn ảnh mới để thay thế.");
+                return "redirect:/manager/profile";
+            }
+
+            list.set(index, updatedUrl);
+            store.setFeaturedImages(joinFeaturedImages(list));
+            storeRepository.save(store);
+
+            ra.addFlashAttribute("successMessage", "Ảnh đặc trưng đã được cập nhật thành công!");
+        } catch (Exception ex) {
+            log.error("Lỗi sửa ảnh đặc trưng", ex);
+            ra.addFlashAttribute("errorMessage", "Thông báo cập nhật thất bại: " + ex.getMessage());
+        }
+
+        return "redirect:/manager/profile";
+    }
+
+    /**
+     * Alternative Flow - Bước 8d, 9d, 10d: Xóa ảnh đặc trưng
+     */
+    @PostMapping("/featured/delete")
+    public String deleteFeaturedImage(Principal principal,
+                                      @RequestParam("index") int index,
+                                      RedirectAttributes ra) {
+        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
+        Store store = getActiveStore(user);
+        if (store == null) return "redirect:/manager/stores";
+        storeAccess.requireManager(store);
+
+        try {
+            List<String> list = parseFeaturedImages(store.getFeaturedImages());
+            if (index >= 0 && index < list.size()) {
+                list.remove(index);
+                store.setFeaturedImages(joinFeaturedImages(list));
+                storeRepository.save(store);
+                ra.addFlashAttribute("successMessage", "Ảnh đặc trưng xóa thành công!");
+            } else {
+                ra.addFlashAttribute("errorMessage", "Không tìm thấy ảnh đặc trưng cần xóa!");
+            }
+        } catch (Exception ex) {
+            log.error("Lỗi xóa ảnh đặc trưng", ex);
+            ra.addFlashAttribute("errorMessage", "Thông báo cập nhật thất bại: " + ex.getMessage());
+        }
+
+        return "redirect:/manager/profile";
+    }
+
+    /**
+     * Alternative Flow - Bước 8e, 9e, 9e1, 9e2, 9e3, 10e: Tùy chỉnh thông tin cửa hàng (name, bio, ...)
+     */
+    @PostMapping("/info")
+    public String updateStoreInfo(Principal principal,
+                                  @RequestParam("name") String name,
+                                  @RequestParam(value = "bio", required = false) String bio,
+                                  @RequestParam(value = "phone", required = false) String phone,
+                                  @RequestParam(value = "address", required = false) String address,
+                                  @RequestParam(value = "isOpen", defaultValue = "false") boolean isOpen,
+                                  RedirectAttributes ra) {
+        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
+        Store store = getActiveStore(user);
+        if (store == null) return "redirect:/manager/stores";
+        storeAccess.requireManager(store);
+
+        if (name == null || name.trim().isEmpty()) {
+            ra.addFlashAttribute("errorMessage", "Vui lòng điền tên cửa hàng!");
+            return "redirect:/manager/profile";
+        }
+
+        try {
+            store.setName(name.trim());
+            store.setBio(bio != null ? bio.trim() : null);
+            if (phone != null) store.setPhone(phone.trim());
+            if (address != null) store.setAddress(address.trim());
+            store.setIsOpen(isOpen);
+
+            storeRepository.save(store);
+            ra.addFlashAttribute("successMessage", "Thông báo cập nhật thành công: Thông tin cửa hàng đã được lưu!");
+        } catch (Exception ex) {
+            log.error("Lỗi cập nhật thông tin cửa hàng", ex);
+            ra.addFlashAttribute("errorMessage", "Thông báo cập nhật thất bại: " + ex.getMessage());
+        }
+
+        return "redirect:/manager/profile";
+    }
+
+    private Store getActiveStore(User user) {
+        if (user.getStore() != null) {
+            return user.getStore();
+        }
+        List<Store> owned = storeRepository.findByOwnerId(user.getId());
+        if (!owned.isEmpty()) {
+            Store first = owned.get(0);
+            user.setStore(first);
+            userRepository.save(user);
+            return first;
+        }
+        return null;
+    }
+
+    private boolean isValidImageFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) return false;
+        String contentType = file.getContentType();
+        String filename = file.getOriginalFilename();
+        if (filename != null && filename.contains(".")) {
+            String ext = filename.substring(filename.lastIndexOf(".")).toLowerCase();
+            if (ext.matches("\\.(jpg|jpeg|png|webp|gif|bmp|svg)$")) {
+                return true;
+            }
+        }
+        return contentType != null && contentType.startsWith("image/");
+    }
+
+    private boolean isValidImageUrl(String url) {
+        if (url == null || url.trim().isEmpty()) return false;
+        String u = url.trim().toLowerCase();
+        return (u.startsWith("http://") || u.startsWith("https://") || u.startsWith("/upload/") || u.startsWith("/images/"));
+    }
+
+    private List<String> parseFeaturedImages(String raw) {
+        if (raw == null || raw.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+        String[] parts = raw.split("[,\\r\\n]+");
+        List<String> list = new ArrayList<>();
+        for (String p : parts) {
+            String trimmed = p.trim();
+            if (!trimmed.isEmpty()) {
+                list.add(trimmed);
+            }
+        }
+        return list;
+    }
+
+    private String joinFeaturedImages(List<String> list) {
+        if (list == null || list.isEmpty()) {
+            return "";
+        }
+        return String.join(",", list);
+    }
+}
