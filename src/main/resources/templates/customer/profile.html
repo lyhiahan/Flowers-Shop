@@ -202,7 +202,7 @@
             <div class="relative flex items-center border-r border-[#E2D7D1] pr-1">
               <select id="searchScopeSelect"
                 class="bg-transparent text-[13px] text-[#2D2424] font-bold pl-1 pr-4 py-0.5 focus:outline-none cursor-pointer appearance-none transition-all"
-                onchange="this.style.width = this.value === 'users' ? '115px' : (this.value === 'stores' ? '98px' : '96px')"
+                onchange="this.style.width = this.value === 'users' ? '115px' : (this.value === 'stores' ? '103px' : '96px')"
                 style="width: 96px;">
                 <option value="products" selected>🌸 Mẫu hoa</option>
                 <option value="stores">🏬 Cửa hàng</option>
@@ -305,6 +305,7 @@
           <div class="relative h-36 bg-[#EFE7E2] overflow-hidden group">
             <img id="coverPreviewImg"
               th:src="${user.cover != null and !#strings.isEmpty(user.cover) ? user.cover : 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=1200'}"
+              onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=1200';"
               alt="Cover Photo"
               class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
             <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
@@ -335,6 +336,7 @@
               <div class="w-24 h-24 rounded-full ring-4 ring-white shadow-md overflow-hidden bg-[#FAF7F5] mx-auto">
                 <img id="avatarPreviewImg"
                   th:src="${user.avatarUrl != null and !#strings.isEmpty(user.avatarUrl) ? user.avatarUrl : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200'}"
+                  onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200';"
                   alt="Avatar" class="w-full h-full object-cover">
               </div>
               <button type="button"

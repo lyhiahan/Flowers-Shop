@@ -15,8 +15,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
         Path uploadDir = Paths.get("upload");
         String uploadPath = uploadDir.toFile().getAbsolutePath();
 
-        // Cấu hình phục vụ file tĩnh từ thư mục /upload/** cả từ file hệ thống và từ classpath static
+        // Cấu hình phục vụ file tĩnh từ DUY NHẤT thư mục vật lý upload/ ở gốc dự án
         registry.addResourceHandler("/upload/**")
-                .addResourceLocations("file:" + uploadPath + "/", "classpath:/static/upload/");
+                .addResourceLocations("file:" + uploadPath + "/");
     }
 }
