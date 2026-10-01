@@ -340,6 +340,73 @@ public class DataInitializer implements CommandLineRunner {
                         .description("Chậu hoa lan hồ điệp cao cấp trưng Tết, biếu sếp, mừng tân gia")
                         .build()));
 
+        // Khởi tạo các danh mục con (Subcategories) có parent_id liên kết với danh mục cha
+        Category subBoSinhNhat = categoryRepository.findByName("Bó Hoa Sinh Nhật")
+                .orElseGet(() -> categoryRepository.save(Category.builder()
+                        .name("Bó Hoa Sinh Nhật")
+                        .description("Các mẫu bó hoa tươi rực rỡ chúc mừng sinh nhật")
+                        .parent(catSinhNhat)
+                        .build()));
+        if (subBoSinhNhat.getParent() == null) {
+            subBoSinhNhat.setParent(catSinhNhat);
+            categoryRepository.save(subBoSinhNhat);
+        }
+
+        Category subLangSinhNhat = categoryRepository.findByName("Lẵng Hoa Sinh Nhật")
+                .orElseGet(() -> categoryRepository.save(Category.builder()
+                        .name("Lẵng Hoa Sinh Nhật")
+                        .description("Lẵng hoa để bàn chúc mừng sinh nhật sang trọng")
+                        .parent(catSinhNhat)
+                        .build()));
+        if (subLangSinhNhat.getParent() == null) {
+            subLangSinhNhat.setParent(catSinhNhat);
+            categoryRepository.save(subLangSinhNhat);
+        }
+
+        Category subBoHongDo = categoryRepository.findByName("Bó Hoa Hồng Đỏ")
+                .orElseGet(() -> categoryRepository.save(Category.builder()
+                        .name("Bó Hoa Hồng Đỏ")
+                        .description("Bó hoa hồng đỏ nhập khẩu quyến rũ trao gửi tình yêu")
+                        .parent(catTinhYeu)
+                        .build()));
+        if (subBoHongDo.getParent() == null) {
+            subBoHongDo.setParent(catTinhYeu);
+            categoryRepository.save(subBoHongDo);
+        }
+
+        Category subBoBabyTrang = categoryRepository.findByName("Bó Hoa Baby Trắng")
+                .orElseGet(() -> categoryRepository.save(Category.builder()
+                        .name("Bó Hoa Baby Trắng")
+                        .description("Bó hoa baby trắng tinh khôi, nhẹ nhàng lãng mạn")
+                        .parent(catTinhYeu)
+                        .build()));
+        if (subBoBabyTrang.getParent() == null) {
+            subBoBabyTrang.setParent(catTinhYeu);
+            categoryRepository.save(subBoBabyTrang);
+        }
+
+        Category subKeKhaiTruong = categoryRepository.findByName("Kệ Hoa Khai Trương")
+                .orElseGet(() -> categoryRepository.save(Category.builder()
+                        .name("Kệ Hoa Khai Trương")
+                        .description("Kệ hoa chúc mừng khai trương hồng phát sang trọng")
+                        .parent(catKhaiTruong)
+                        .build()));
+        if (subKeKhaiTruong.getParent() == null) {
+            subKeKhaiTruong.setParent(catKhaiTruong);
+            categoryRepository.save(subKeKhaiTruong);
+        }
+
+        Category subLanTrang = categoryRepository.findByName("Chậu Lan Hồ Điệp Trắng")
+                .orElseGet(() -> categoryRepository.save(Category.builder()
+                        .name("Chậu Lan Hồ Điệp Trắng")
+                        .description("Chậu lan hồ điệp trắng đại diện cho sự thanh cao, sang trọng")
+                        .parent(catLanHoDiep)
+                        .build()));
+        if (subLanTrang.getParent() == null) {
+            subLanTrang.setParent(catLanHoDiep);
+            categoryRepository.save(subLanTrang);
+        }
+
         // Tự động dọn dẹp và hợp nhất các danh mục trùng lặp liên quan đến "Tình Yêu" / "Valentine"
         java.util.List<Category> allLoveCats = categoryRepository.findAll().stream()
                 .filter(c -> c.getName() != null && (c.getName().contains("Tình Yêu") || c.getName().contains("Valentine")))

@@ -1058,7 +1058,7 @@
                         <span>Danh mục hoa</span>
                     </button>
 
-                    <a th:href="@{/products#product-catalog}" 
+                    <a th:href="@{/products} + '#product-catalog'" 
                        class="cat-nav-link"
                        th:classappend="${categoryId == null or categoryId == 0} ? 'active' : ''">
                         Tất cả
@@ -1066,7 +1066,7 @@
                     <!-- Sinh nhật (1 mục duy nhất) -->
                     <th:block th:with="catSinhNhat=${categories != null ? categories.?[name.contains('Sinh Nhật')] : null}">
                         <a th:if="${catSinhNhat != null and !#lists.isEmpty(catSinhNhat)}"
-                           th:href="@{/products#product-catalog(categoryId=${catSinhNhat[0].id})}" 
+                           th:href="@{/products(categoryId=${catSinhNhat[0].id})} + '#product-catalog'" 
                            class="cat-nav-link"
                            th:classappend="${categoryId != null and categoryId == catSinhNhat[0].id} ? 'active' : ''">
                             Sinh nhật
@@ -1075,7 +1075,7 @@
                     <!-- Tình yêu (1 mục duy nhất, không lặp lại) -->
                     <th:block th:with="catTinhYeu=${categories != null ? categories.?[name.contains('Tình Yêu') or name.contains('Valentine')] : null}">
                         <a th:if="${catTinhYeu != null and !#lists.isEmpty(catTinhYeu)}"
-                           th:href="@{/products#product-catalog(categoryId=${catTinhYeu[0].id})}" 
+                           th:href="@{/products(categoryId=${catTinhYeu[0].id})} + '#product-catalog'" 
                            class="cat-nav-link"
                            th:classappend="${categoryId != null and categoryId == catTinhYeu[0].id} ? 'active' : ''">
                             Tình yêu
@@ -1084,7 +1084,7 @@
                     <!-- Khai trương (1 mục duy nhất) -->
                     <th:block th:with="catKhaiTruong=${categories != null ? categories.?[name.contains('Khai Trương')] : null}">
                         <a th:if="${catKhaiTruong != null and !#lists.isEmpty(catKhaiTruong)}"
-                           th:href="@{/products#product-catalog(categoryId=${catKhaiTruong[0].id})}" 
+                           th:href="@{/products(categoryId=${catKhaiTruong[0].id})} + '#product-catalog'" 
                            class="cat-nav-link"
                            th:classappend="${categoryId != null and categoryId == catKhaiTruong[0].id} ? 'active' : ''">
                             Khai trương
@@ -1099,7 +1099,7 @@
                             <th:block th:each="cat : ${categories}">
                                 <li th:if="${!cat.name.contains('Sinh Nhật') and !cat.name.contains('Tình Yêu') and !cat.name.contains('Valentine') and !cat.name.contains('Khai Trương')}">
                                     <a class="dropdown-item py-2 px-3 small" 
-                                       th:href="@{/products#product-catalog(categoryId=${cat.id})}"
+                                       th:href="@{/products(categoryId=${cat.id})} + '#product-catalog'"
                                        th:classappend="${categoryId != null and categoryId == cat.id} ? 'fw-bold' : ''"
                                        th:style="${categoryId != null and categoryId == cat.id} ? 'color: var(--flower-accent) !important;' : ''"
                                        th:text="${cat.name}">
@@ -1149,37 +1149,37 @@
                 <!-- Tab 1: Kiểu dáng (Mặc định mở) -->
                 <div class="mega-tab-pane active" id="paneKieuDang" role="tabpanel">
                     <div class="mega-catalog-grid">
-                        <a th:href="@{/products#product-catalog(keyword='Bó hoa')}" class="mega-cat-card" data-name="bó hoa bo hoa" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(keyword='Bó hoa')} + '#product-catalog'" class="mega-cat-card" data-name="bó hoa bo hoa" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=200&h=200&fit=crop&q=80" alt="Bó hoa" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Bó hoa</span>
                         </a>
-                        <a th:href="@{/products#product-catalog(keyword='Giỏ hoa')}" class="mega-cat-card" data-name="giỏ hoa gio hoa" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(keyword='Giỏ hoa')} + '#product-catalog'" class="mega-cat-card" data-name="giỏ hoa gio hoa" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=200&h=200&fit=crop&q=80" alt="Giỏ hoa" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Giỏ hoa</span>
                         </a>
-                        <a th:href="@{/products#product-catalog(keyword='Hộp hoa')}" class="mega-cat-card" data-name="hộp hoa hop hoa" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(keyword='Hộp hoa')} + '#product-catalog'" class="mega-cat-card" data-name="hộp hoa hop hoa" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?w=200&h=200&fit=crop&q=80" alt="Hộp hoa" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Hộp hoa</span>
                         </a>
-                        <a th:href="@{/products#product-catalog(keyword='Bình hoa')}" class="mega-cat-card" data-name="bình hoa binh hoa" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(keyword='Bình hoa')} + '#product-catalog'" class="mega-cat-card" data-name="bình hoa binh hoa" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=200&h=200&fit=crop&q=80" alt="Bình hoa" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Bình hoa</span>
                         </a>
-                        <a th:href="@{/products#product-catalog(keyword='Chậu hoa')}" class="mega-cat-card" data-name="chậu hoa chau hoa" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(keyword='Chậu hoa')} + '#product-catalog'" class="mega-cat-card" data-name="chậu hoa chau hoa" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=200&h=200&fit=crop&q=80" alt="Chậu hoa" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Chậu hoa</span>
                         </a>
-                        <a th:href="@{/products#product-catalog(keyword='Kệ hoa')}" class="mega-cat-card" data-name="kệ hoa ke hoa" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(keyword='Kệ hoa')} + '#product-catalog'" class="mega-cat-card" data-name="kệ hoa ke hoa" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1591886960571-74d43a9d4166?w=200&h=200&fit=crop&q=80" alt="Kệ hoa" loading="lazy">
                             </div>
@@ -1191,49 +1191,49 @@
                 <!-- Tab 2: Loại hoa -->
                 <div class="mega-tab-pane" id="paneLoaiHoa" role="tabpanel">
                     <div class="mega-catalog-grid">
-                        <a th:href="@{/products#product-catalog(keyword='Hoa hồng')}" class="mega-cat-card" data-name="hoa hồng hoa hong rose" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(keyword='Hoa hồng')} + '#product-catalog'" class="mega-cat-card" data-name="hoa hồng hoa hong rose" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200&h=200&fit=crop&q=80" alt="Hoa hồng" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Hoa hồng</span>
                         </a>
-                        <a th:href="@{/products#product-catalog(keyword='Tulip')}" class="mega-cat-card" data-name="hoa tulip" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(keyword='Tulip')} + '#product-catalog'" class="mega-cat-card" data-name="hoa tulip" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1520763185298-1b434c919102?w=200&h=200&fit=crop&q=80" alt="Hoa tulip" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Tulip</span>
                         </a>
-                        <a th:href="@{/products#product-catalog(keyword='Hướng dương')}" class="mega-cat-card" data-name="hoa hướng dương huong duong sunflower" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(keyword='Hướng dương')} + '#product-catalog'" class="mega-cat-card" data-name="hoa hướng dương huong duong sunflower" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=200&h=200&fit=crop&q=80" alt="Hoa hướng dương" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Hướng dương</span>
                         </a>
-                        <a th:href="@{/products#product-catalog(keyword='Cẩm tú cầu')}" class="mega-cat-card" data-name="hoa cẩm tú cầu cam tu cau hydrangea" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(keyword='Cẩm tú cầu')} + '#product-catalog'" class="mega-cat-card" data-name="hoa cẩm tú cầu cam tu cau hydrangea" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1508610048659-a06b669e3321?w=200&h=200&fit=crop&q=80" alt="Cẩm tú cầu" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Cẩm tú cầu</span>
                         </a>
-                        <a th:href="@{/products#product-catalog(keyword='Lan hồ điệp')}" class="mega-cat-card" data-name="lan hồ điệp lan ho diep orchid" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(keyword='Lan hồ điệp')} + '#product-catalog'" class="mega-cat-card" data-name="lan hồ điệp lan ho diep orchid" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?w=200&h=200&fit=crop&q=80" alt="Lan hồ điệp" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Lan hồ điệp</span>
                         </a>
-                        <a th:href="@{/products#product-catalog(keyword='Baby')}" class="mega-cat-card" data-name="hoa baby bi" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(keyword='Baby')} + '#product-catalog'" class="mega-cat-card" data-name="hoa baby bi" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1563245372-f21724e3856d?w=200&h=200&fit=crop&q=80" alt="Hoa baby" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Hoa baby</span>
                         </a>
-                        <a th:href="@{/products#product-catalog(keyword='Hoa sen')}" class="mega-cat-card" data-name="hoa sen lotus" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(keyword='Hoa sen')} + '#product-catalog'" class="mega-cat-card" data-name="hoa sen lotus" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1606041008023-472dfb5e530f?w=200&h=200&fit=crop&q=80" alt="Hoa sen" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Hoa sen</span>
                         </a>
-                        <a th:href="@{/products#product-catalog(keyword='Cúc mẫu đơn')}" class="mega-cat-card" data-name="cúc mẫu đơn cuc mau don peony" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(keyword='Cúc mẫu đơn')} + '#product-catalog'" class="mega-cat-card" data-name="cúc mẫu đơn cuc mau don peony" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1567696911980-2eed69a46042?w=200&h=200&fit=crop&q=80" alt="Cúc mẫu đơn" loading="lazy">
                             </div>
@@ -1245,49 +1245,49 @@
                 <!-- Tab 3: Dịp tặng -->
                 <div class="mega-tab-pane" id="paneDipTang" role="tabpanel">
                     <div class="mega-catalog-grid">
-                        <a th:href="@{/products#product-catalog(keyword='Sinh nhật')}" class="mega-cat-card" data-name="sinh nhật sinh nhat birthday" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(keyword='Sinh nhật')} + '#product-catalog'" class="mega-cat-card" data-name="sinh nhật sinh nhat birthday" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1513151233558-d860c5398176?w=200&h=200&fit=crop&q=80" alt="Sinh nhật" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Sinh nhật</span>
                         </a>
-                        <a th:href="@{/products#product-catalog(keyword='Tình yêu')}" class="mega-cat-card" data-name="tình yêu tinh yeu valentine lãng mạn" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(keyword='Tình yêu')} + '#product-catalog'" class="mega-cat-card" data-name="tình yêu tinh yeu valentine lãng mạn" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=200&h=200&fit=crop&q=80" alt="Tình yêu" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Tình yêu</span>
                         </a>
-                        <a th:href="@{/products#product-catalog(keyword='Khai trương')}" class="mega-cat-card" data-name="khai trương khai truong opening" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(keyword='Khai trương')} + '#product-catalog'" class="mega-cat-card" data-name="khai trương khai truong opening" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1546842931-886c185b4c8c?w=200&h=200&fit=crop&q=80" alt="Khai trương" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Khai trương</span>
                         </a>
-                        <a th:href="@{/products#product-catalog(keyword='Kỷ niệm')}" class="mega-cat-card" data-name="kỷ niệm ky niem anniversary" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(keyword='Kỷ niệm')} + '#product-catalog'" class="mega-cat-card" data-name="kỷ niệm ky niem anniversary" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=200&h=200&fit=crop&q=80" alt="Kỷ niệm" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Kỷ niệm</span>
                         </a>
-                        <a th:href="@{/products#product-catalog(keyword='Tốt nghiệp')}" class="mega-cat-card" data-name="tốt nghiệp tot nghiep graduation" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(keyword='Tốt nghiệp')} + '#product-catalog'" class="mega-cat-card" data-name="tốt nghiệp tot nghiep graduation" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=200&h=200&fit=crop&q=80" alt="Tốt nghiệp" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Tốt nghiệp</span>
                         </a>
-                        <a th:href="@{/products#product-catalog(keyword='Chúc mừng')}" class="mega-cat-card" data-name="chúc mừng chuc mung congratulations" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(keyword='Chúc mừng')} + '#product-catalog'" class="mega-cat-card" data-name="chúc mừng chuc mung congratulations" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1533616688419-b7a585564566?w=200&h=200&fit=crop&q=80" alt="Chúc mừng" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Chúc mừng</span>
                         </a>
-                        <a th:href="@{/products#product-catalog(keyword='Cảm ơn')}" class="mega-cat-card" data-name="cảm ơn cam on thank you" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(keyword='Cảm ơn')} + '#product-catalog'" class="mega-cat-card" data-name="cảm ơn cam on thank you" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=200&h=200&fit=crop&q=80" alt="Cảm ơn" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Cảm ơn</span>
                         </a>
-                        <a th:href="@{/products#product-catalog(keyword='Chia buồn')}" class="mega-cat-card" data-name="chia buồn chia buon tang le vieng" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(keyword='Chia buồn')} + '#product-catalog'" class="mega-cat-card" data-name="chia buồn chia buon tang le vieng" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1507290439931-a861b5a38200?w=200&h=200&fit=crop&q=80" alt="Chia buồn" loading="lazy">
                             </div>
@@ -1302,7 +1302,7 @@
                 <span class="text-muted small d-none d-sm-inline">
                     Khám phá hàng trăm thiết kế hoa tươi tinh tế được cắm mới mỗi ngày
                 </span>
-                <a th:href="@{/products#product-catalog}" class="mega-footer-link" onclick="closeFlowerMegaMenu()">
+                <a th:href="@{/products} + '#product-catalog'" class="mega-footer-link" onclick="closeFlowerMegaMenu()">
                     <span>Xem tất cả sản phẩm</span>
                     <i class="bi bi-arrow-right"></i>
                 </a>
@@ -1352,6 +1352,40 @@
             </div>
         </section>
 
+        <!-- MỤC DISCOVER: KHÁM PHÁ DANH MỤC HOA TƯƠI (Theo yêu cầu 2a) -->
+        <section id="discover" class="mb-5" aria-label="Discover - Khám phá danh mục">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <span class="badge rounded-pill px-3 py-1 mb-1 text-uppercase fw-bold" style="background-color: var(--flower-sub-bg); color: var(--flower-accent); font-size: 13px; letter-spacing: 0.5px;">
+                        <i class="bi bi-compass me-1"></i> Khám phá danh mục
+                    </span>
+                    <h2 class="section-title mb-0" style="font-size: 26px; font-weight: 700; color: var(--flower-primary);">
+                        Discover Categories
+                    </h2>
+                </div>
+                <a th:href="@{/products} + '#product-catalog'" class="text-decoration-none fw-semibold small" style="color: var(--flower-accent);">
+                    Xem tất cả mẫu hoa <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Lưới danh mục gốc trong phần Discover (Rubric 2a) -->
+            <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
+                <div class="col" th:each="cat : ${discoverCategories}">
+                    <a th:href="@{/products(categoryId=${cat.id})} + '#product-catalog'" 
+                       class="card h-100 text-center p-3 text-decoration-none border rounded-4 shadow-sm discover-cat-card"
+                       th:classappend="${selectedCategory != null and (selectedCategory.id == cat.id or (parentCategory != null and parentCategory.id == cat.id))} ? 'border-danger bg-white shadow' : ''"
+                       style="background-color: var(--flower-surface); transition: all 0.2s ease;">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" 
+                             style="width: 58px; height: 58px; background-color: var(--flower-sub-bg); color: var(--flower-accent); font-size: 24px;">
+                            <i th:class="${cat.name.contains('Sinh Nhật') ? 'bi bi-cake2' : (cat.name.contains('Tình Yêu') or cat.name.contains('Valentine') ? 'bi bi-heart' : (cat.name.contains('Khai Trương') ? 'bi bi-shop' : (cat.name.contains('Lan') ? 'bi bi-flower1' : (cat.name.contains('Cưới') ? 'bi bi-gem' : (cat.name.contains('Bình') ? 'bi bi-cup-straw' : 'bi bi-flower2')))))}"></i>
+                        </div>
+                        <h6 class="fw-bold mb-1 text-truncate" style="font-size: 15px; color: var(--flower-primary);" th:text="${cat.name}" th:title="${cat.name}"></h6>
+                        <span class="text-muted" style="font-size: 12px;">Khám phá ngay &rarr;</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
         <!-- MỤC 1: HOA BÁN CHẠY (Top hoa bán chạy - Đổi tiêu đề ngắn gọn, bỏ dòng đã bán > 10 và nhãn lặp) -->
         <div th:if="${guestFeaturedProducts != null and !#lists.isEmpty(guestFeaturedProducts)}" class="mb-5">
             <div class="mb-3">
@@ -1389,48 +1423,91 @@
 
         <!-- MỤC 2: TABS TOP 20 & BỘ LỌC TÌM KIẾM, DANH MỤC, PHÂN TRANG CHO KHÁCH HÀNG -->
         <div id="product-catalog" class="card filter-card p-4 mb-4" style="scroll-margin-top: 85px;">
-            <!-- Breadcrumb điều hướng quay lại danh mục cha / trang chủ -->
+            <!-- Breadcrumb điều hướng quay lại danh mục cha / trang chủ (Rubric 3-5c) -->
             <nav aria-label="breadcrumb" class="mb-3" th:if="${selectedCategory != null or (keyword != null and !keyword.isEmpty())}">
-                <ol class="breadcrumb bg-light p-2 rounded-3 small mb-0">
-                    <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none fw-semibold" style="color: var(--flower-primary);"><i class="bi bi-house-door me-1"></i>Trang Chủ (Home)</a></li>
-                    <li class="breadcrumb-item"><a th:href="@{/products#product-catalog}" class="text-secondary text-decoration-none">Khám phá</a></li>
+                <ol class="breadcrumb bg-light p-2 px-3 rounded-3 small mb-0 align-items-center">
+                    <li class="breadcrumb-item">
+                        <a th:href="@{/}" class="text-decoration-none fw-semibold" style="color: var(--flower-primary);">
+                            <i class="bi bi-house-door me-1"></i>Trang Chủ (Home)
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a th:href="@{/#discover}" class="text-secondary text-decoration-none">
+                            Discover
+                        </a>
+                    </li>
                     <!-- Category cha nếu có (3-5c. Chọn category cha ở breadcrumb để quay lại) -->
                     <li th:if="${parentCategory != null}" class="breadcrumb-item">
-                        <a th:href="@{/products#product-catalog(categoryId=${parentCategory.id})}" class="text-decoration-none fw-semibold" style="color: var(--flower-primary);" th:text="${parentCategory.name}" id="breadcrumbParentCategory"></a>
+                        <a th:href="@{/products(categoryId=${parentCategory.id})} + '#product-catalog'" 
+                           class="text-decoration-none fw-bold" 
+                           style="color: var(--flower-accent);" 
+                           th:text="${parentCategory.name}" 
+                           id="breadcrumbParentCategory"
+                           title="Bấm để quay lại danh mục cha"></a>
                     </li>
+                    <!-- Category đang chọn -->
                     <li th:if="${selectedCategory != null}" class="breadcrumb-item active fw-bold text-dark" th:text="${selectedCategory.name}"></li>
                     <li th:if="${keyword != null and !keyword.isEmpty()}" class="breadcrumb-item active fw-semibold" style="color: var(--flower-accent);" th:text="'Từ khóa: &quot;' + ${keyword} + '&quot;'"></li>
                 </ol>
             </nav>
 
-            <!-- Danh mục con khi chọn danh mục cha -->
-            <div th:if="${selectedCategory != null and not #lists.isEmpty(subCategories)}" class="d-flex flex-wrap gap-2 mb-3">
-                <a th:each="sub : ${subCategories}" 
-                   th:href="@{/products#product-catalog(categoryId=${sub.id})}" 
-                   class="btn btn-sm rounded-pill px-3 py-1"
-                   th:classappend="${selectedCategory.id == sub.id} ? 'btn-flower-accent text-white' : 'btn-outline-secondary'"
-                   th:text="${sub.name}">
-                </a>
+            <!-- Banner hiển thị Category đã chọn và danh sách Category con (Rubric 3-5a & 3-5b) -->
+            <div th:if="${selectedCategory != null}" class="p-3 mb-4 rounded-4 border bg-white shadow-sm">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge rounded-circle p-2 d-inline-flex align-items-center justify-content-center" style="background-color: var(--flower-sub-bg); color: var(--flower-accent); width: 38px; height: 38px;">
+                            <i class="bi bi-grid-fill fs-6"></i>
+                        </span>
+                        <div>
+                            <h4 class="fw-bold mb-0" style="color: var(--flower-primary); font-size: 20px;">
+                                <span th:text="${selectedCategory.name}"></span>
+                                <span th:if="${parentCategory != null}" class="text-muted fw-normal fs-6">
+                                    (thuộc danh mục: <a th:href="@{/products(categoryId=${parentCategory.id})} + '#product-catalog'" class="text-decoration-none fw-semibold" style="color: var(--flower-accent);" th:text="${parentCategory.name}"></a>)
+                                </span>
+                            </h4>
+                            <p class="text-muted small mb-0" th:text="${selectedCategory.description != null ? selectedCategory.description : 'Danh sách sản phẩm thuộc danh mục ' + selectedCategory.name}"></p>
+                        </div>
+                    </div>
+                    <span class="badge px-3 py-2 rounded-pill bg-light text-secondary border">
+                        <span th:text="${totalItems != null ? totalItems : 0}">0</span> sản phẩm
+                    </span>
+                </div>
+
+                <!-- Danh sách Category con (Rubric 3-5a & 3-5b) -->
+                <div th:if="${not #lists.isEmpty(subCategories)}" class="pt-2 border-top mt-2">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="small fw-bold text-secondary flex-shrink-0">
+                            <i class="bi bi-diagram-3 me-1"></i> Danh mục con:
+                        </span>
+                        <a th:each="sub : ${subCategories}" 
+                           th:href="@{/products(categoryId=${sub.id})} + '#product-catalog'" 
+                           class="btn btn-sm rounded-pill px-3 py-1 sub-category-btn"
+                           th:classappend="${selectedCategory.id == sub.id} ? 'btn-flower-accent text-white fw-bold shadow-sm' : 'btn-outline-secondary'"
+                           th:text="${sub.name}"
+                           th:id="'sub-category-' + ${sub.id}">
+                        </a>
+                    </div>
+                </div>
             </div>
 
             <!-- Tabs Top 20 theo Rubric (Mới nhất, Bán chạy nhất, Đánh giá cao) -->
             <div class="d-flex flex-wrap gap-2 mb-3 pb-3 border-bottom">
-                <a th:href="@{/#product-catalog(categoryId=${categoryId}, keyword=${keyword}, sort=${sort})}" 
+                <a th:href="@{/products(categoryId=${categoryId}, keyword=${keyword}, sort=${sort})} + '#product-catalog'" 
                    class="btn btn-sm rounded-pill px-3 fw-semibold"
                    th:classappend="${tab == null or tab == ''} ? 'btn-flower-primary text-white' : 'btn-light text-secondary border'">
                     Tất Cả Mẫu Hoa
                 </a>
-                <a th:href="@{/#product-catalog(tab='newest', categoryId=${categoryId})}" 
+                <a th:href="@{/products(tab='newest', categoryId=${categoryId})} + '#product-catalog'" 
                    class="btn btn-sm rounded-pill px-3 fw-semibold"
                    th:classappend="${tab == 'newest'} ? 'btn-flower-primary text-white' : 'btn-light text-secondary border'">
                     Mới nhất
                 </a>
-                <a th:href="@{/#product-catalog(tab='bestseller', categoryId=${categoryId})}" 
+                <a th:href="@{/products(tab='bestseller', categoryId=${categoryId})} + '#product-catalog'" 
                    class="btn btn-sm rounded-pill px-3 fw-semibold"
                    th:classappend="${tab == 'bestseller'} ? 'btn-flower-primary text-white' : 'btn-light text-secondary border'">
                     Bán chạy
                 </a>
-                <a th:href="@{/#product-catalog(tab='toprated', categoryId=${categoryId})}" 
+                <a th:href="@{/products(tab='toprated', categoryId=${categoryId})} + '#product-catalog'" 
                    class="btn btn-sm rounded-pill px-3 fw-semibold"
                    th:classappend="${tab == 'toprated'} ? 'btn-flower-primary text-white' : 'btn-light text-secondary border'">
                     Đánh giá cao
@@ -1520,7 +1597,7 @@
                         <button class="btn btn-flower-primary btn-sm rounded-pill px-3 fw-semibold w-100" type="submit" id="btnApplyFilter">
                             <i class="bi bi-funnel-fill me-1"></i> Lọc
                         </button>
-                        <a th:href="@{/products#product-catalog}" class="btn btn-outline-secondary rounded-pill px-3 btn-sm" id="btnResetFilter" title="Xóa bộ lọc">
+                        <a th:href="@{/products} + '#product-catalog'" class="btn btn-outline-secondary rounded-pill px-3 btn-sm" id="btnResetFilter" title="Xóa bộ lọc">
                             <i class="bi bi-arrow-counterclockwise"></i>
                         </a>
                     </div>
@@ -1541,7 +1618,7 @@
                     </div>
                     <div class="d-flex flex-wrap gap-2">
                         <!-- Nút Tất Cả -->
-                        <a th:href="@{/products#product-catalog(keyword=${keyword}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, size=${size})}" 
+                        <a th:href="@{/products(keyword=${keyword}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, size=${size})} + '#product-catalog'" 
                            class="category-pill"
                            th:classappend="${categoryId == null or categoryId == 0} ? 'active' : ''">
                             Tất Cả Mẫu Hoa
@@ -1549,7 +1626,7 @@
 
                         <!-- Danh sách các danh mục hoa -->
                         <a th:each="cat : ${categories}" 
-                           th:href="@{/products#product-catalog(categoryId=${cat.id}, keyword=${keyword}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, size=${size})}" 
+                           th:href="@{/products(categoryId=${cat.id}, keyword=${keyword}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, size=${size})} + '#product-catalog'" 
                            class="category-pill"
                            th:classappend="${categoryId != null and (categoryId == cat.id or (parentCategory != null and parentCategory.id == cat.id))} ? 'active' : ''"
                            th:text="${cat.name}">
@@ -1565,15 +1642,15 @@
             <span class="text-muted">Đang lọc theo:</span>
             <span th:if="${keyword != null and !keyword.isEmpty()}" class="badge badge-flower-accent p-2">
                 Từ khóa: "<span th:text="${keyword}"></span>"
-                <a th:href="@{/#product-catalog(categoryId=${categoryId}, sort=${sort}, size=${size})}" class="ms-1 text-decoration-none" style="color: var(--flower-accent);">×</a>
+                <a th:href="@{/products(categoryId=${categoryId}, sort=${sort}, size=${size})} + '#product-catalog'" class="ms-1 text-decoration-none" style="color: var(--flower-accent);">×</a>
             </span>
             <span th:if="${categoryId != null and categoryId > 0}" class="badge badge-flower-accent p-2">
                 <span th:each="c : ${categories}" th:if="${c.id == categoryId}" th:text="'Danh mục: ' + ${c.name}"></span>
-                <a th:href="@{/#product-catalog(keyword=${keyword}, sort=${sort}, size=${size})}" class="ms-1 text-decoration-none" style="color: var(--flower-accent);">×</a>
+                <a th:href="@{/products(keyword=${keyword}, sort=${sort}, size=${size})} + '#product-catalog'" class="ms-1 text-decoration-none" style="color: var(--flower-accent);">×</a>
             </span>
             <span th:if="${sort == 'price_asc'}" class="badge bg-light text-dark border p-2">Giá: Thấp → Cao</span>
             <span th:if="${sort == 'price_desc'}" class="badge bg-light text-dark border p-2">Giá: Cao → Thấp</span>
-            <a th:href="@{/#product-catalog}" class="small ms-2 text-decoration-none fw-semibold" style="color: var(--flower-accent);">Xóa tất cả</a>
+            <a th:href="@{/products} + '#product-catalog'" class="small ms-2 text-decoration-none fw-semibold" style="color: var(--flower-accent);">Xóa tất cả</a>
         </div>
 
         <!-- Khi không tìm thấy sản phẩm nào -->
@@ -1650,7 +1727,7 @@
                     <!-- Nút Trang Trước (<) -->
                     <li class="page-item" th:classappend="${currentPage <= 1} ? 'disabled' : ''">
                         <a class="page-link page-nav-arrow" id="btnPrevPage" 
-                           th:href="@{/products#product-catalog(page=${currentPage - 1}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}" 
+                           th:href="@{/products(page=${currentPage - 1}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
                            title="Trang trước" aria-label="Previous">
                             <i class="bi bi-chevron-left"></i>
                         </a>
@@ -1662,7 +1739,7 @@
                             class="page-item" 
                             th:classappend="${i == currentPage} ? 'active' : ''">
                             <a class="page-link" 
-                               th:href="@{/products#product-catalog(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}" 
+                               th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
                                th:text="${i}">1</a>
                         </li>
                     </th:block>
@@ -1675,12 +1752,12 @@
                                 class="page-item" 
                                 th:classappend="${i == currentPage} ? 'active' : ''">
                                 <a class="page-link" 
-                                   th:href="@{/products#product-catalog(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}" 
+                                   th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
                                    th:text="${i}">1</a>
                             </li>
                             <li class="page-item">
                                 <a class="page-link page-ellipsis" 
-                                   th:href="@{/products#product-catalog(page=6, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}" 
+                                   th:href="@{/products(page=6, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
                                    title="Xem thêm các trang tiếp theo">...</a>
                             </li>
                         </th:block>
@@ -1689,14 +1766,14 @@
                         <th:block th:if="${currentPage >= totalPages - 3}">
                             <li class="page-item">
                                 <a class="page-link page-ellipsis" 
-                                   th:href="@{/products#product-catalog(page=${totalPages - 5}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}" 
+                                   th:href="@{/products(page=${totalPages - 5}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
                                    title="Xem các trang trước">...</a>
                             </li>
                             <li th:each="i : ${#numbers.sequence(totalPages - 4, totalPages)}" 
                                 class="page-item" 
                                 th:classappend="${i == currentPage} ? 'active' : ''">
                                 <a class="page-link" 
-                                   th:href="@{/products#product-catalog(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}" 
+                                   th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
                                    th:text="${i}">1</a>
                             </li>
                         </th:block>
@@ -1705,18 +1782,18 @@
                         <th:block th:if="${currentPage > 4 and currentPage < totalPages - 3}">
                             <li class="page-item">
                                 <a class="page-link page-ellipsis" 
-                                   th:href="@{/products#product-catalog(page=${currentPage - 3}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}">...</a>
+                                   th:href="@{/products(page=${currentPage - 3}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'">...</a>
                             </li>
                             <li th:each="i : ${#numbers.sequence(currentPage - 2, currentPage + 2)}" 
                                 class="page-item" 
                                 th:classappend="${i == currentPage} ? 'active' : ''">
                                 <a class="page-link" 
-                                   th:href="@{/products#product-catalog(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}" 
+                                   th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
                                    th:text="${i}">1</a>
                             </li>
                             <li class="page-item">
                                 <a class="page-link page-ellipsis" 
-                                   th:href="@{/products#product-catalog(page=${currentPage + 3}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}">...</a>
+                                   th:href="@{/products(page=${currentPage + 3}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'">...</a>
                             </li>
                         </th:block>
                     </th:block>
@@ -1724,7 +1801,7 @@
                     <!-- Nút Trang Sau (>) -->
                     <li class="page-item" th:classappend="${currentPage >= totalPages} ? 'disabled' : ''">
                         <a class="page-link page-nav-arrow" id="btnNextPage" 
-                           th:href="@{/products#product-catalog(page=${currentPage + 1}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})}" 
+                           th:href="@{/products(page=${currentPage + 1}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
                            title="Trang sau" aria-label="Next">
                             <i class="bi bi-chevron-right"></i>
                         </a>

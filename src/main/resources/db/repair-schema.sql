@@ -58,6 +58,51 @@ IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE name = N''Bình Hoa Nghệ Thu
 IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE name = N''Hộp Hoa & Giỏ Hoa Quà Tặng'')
     INSERT INTO dbo.categories (name, description) VALUES (N''Hộp Hoa & Giỏ Hoa Quà Tặng'', N''Hộp hoa mica, hộp tròn cao cấp và giỏ hoa tươi thiết kế độc đáo'');
 
+-- Thêm các danh mục con (Subcategories) có liên kết parent_id theo chuẩn phân cấp
+IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE name = N''Bó Hoa Sinh Nhật'')
+    INSERT INTO dbo.categories (name, description, parent_id) 
+    SELECT N''Bó Hoa Sinh Nhật'', N''Các mẫu bó hoa tươi rực rỡ chúc mừng sinh nhật'', id FROM dbo.categories WHERE name = N''Hoa Sinh Nhật'';
+
+IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE name = N''Lẵng Hoa Sinh Nhật'')
+    INSERT INTO dbo.categories (name, description, parent_id) 
+    SELECT N''Lẵng Hoa Sinh Nhật'', N''Lẵng hoa để bàn chúc mừng sinh nhật sang trọng'', id FROM dbo.categories WHERE name = N''Hoa Sinh Nhật'';
+
+IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE name = N''Bó Hoa Hồng Đỏ'')
+    INSERT INTO dbo.categories (name, description, parent_id) 
+    SELECT N''Bó Hoa Hồng Đỏ'', N''Bó hoa hồng đỏ nhập khẩu quyến rũ trao gửi tình yêu'', id FROM dbo.categories WHERE name = N''Hoa Tình Yêu & Valentine'';
+
+IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE name = N''Bó Hoa Baby Trắng'')
+    INSERT INTO dbo.categories (name, description, parent_id) 
+    SELECT N''Bó Hoa Baby Trắng'', N''Bó hoa baby trắng tinh khôi, nhẹ nhàng lãng mạn'', id FROM dbo.categories WHERE name = N''Hoa Tình Yêu & Valentine'';
+
+IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE name = N''Kệ Hoa Khai Trương'')
+    INSERT INTO dbo.categories (name, description, parent_id) 
+    SELECT N''Kệ Hoa Khai Trương'', N''Kệ hoa chúc mừng khai trương hồng phát sang trọng'', id FROM dbo.categories WHERE name = N''Hoa Khai Trương'';
+
+IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE name = N''Lẵng Hoa Khai Trương Để Bàn'')
+    INSERT INTO dbo.categories (name, description, parent_id) 
+    SELECT N''Lẵng Hoa Khai Trương Để Bàn'', N''Lẵng hoa để bàn quầy lễ tân khai trương'', id FROM dbo.categories WHERE name = N''Hoa Khai Trương'';
+
+IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE name = N''Chậu Lan Hồ Điệp Trắng'')
+    INSERT INTO dbo.categories (name, description, parent_id) 
+    SELECT N''Chậu Lan Hồ Điệp Trắng'', N''Chậu lan hồ điệp trắng đại diện cho sự thanh cao, sang trọng'', id FROM dbo.categories WHERE name = N''Lan Hồ Điệp Sang Trọng'';
+
+IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE name = N''Chậu Lan Hồ Điệp Vàng'')
+    INSERT INTO dbo.categories (name, description, parent_id) 
+    SELECT N''Chậu Lan Hồ Điệp Vàng'', N''Lan hồ điệp vàng mang lại tài lộc và phú quý'', id FROM dbo.categories WHERE name = N''Lan Hồ Điệp Sang Trọng'';
+
+-- Đảm bảo parent_id được thiết lập chuẩn xác
+UPDATE c SET c.parent_id = p.id FROM dbo.categories c, dbo.categories p WHERE c.name IN (N''Bó Hoa Sinh Nhật'', N''Lẵng Hoa Sinh Nhật'') AND p.name = N''Hoa Sinh Nhật'' AND (c.parent_id IS NULL OR c.parent_id <> p.id);
+UPDATE c SET c.parent_id = p.id FROM dbo.categories c, dbo.categories p WHERE c.name IN (N''Bó Hoa Hồng Đỏ'', N''Bó Hoa Baby Trắng'') AND p.name = N''Hoa Tình Yêu & Valentine'' AND (c.parent_id IS NULL OR c.parent_id <> p.id);
+UPDATE c SET c.parent_id = p.id FROM dbo.categories c, dbo.categories p WHERE c.name IN (N''Kệ Hoa Khai Trương'', N''Lẵng Hoa Khai Trương Để Bàn'') AND p.name = N''Hoa Khai Trương'' AND (c.parent_id IS NULL OR c.parent_id <> p.id);
+UPDATE c SET c.parent_id = p.id FROM dbo.categories c, dbo.categories p WHERE c.name IN (N''Chậu Lan Hồ Điệp Trắng'', N''Chậu Lan Hồ Điệp Vàng'') AND p.name = N''Lan Hồ Điệp Sang Trọng'' AND (c.parent_id IS NULL OR c.parent_id <> p.id);
+
+-- Gán một số sản phẩm vào danh mục con để khi bấm danh mục con có sản phẩm tương ứng hiển thị ngay
+UPDATE dbo.products SET category_id = (SELECT TOP 1 id FROM dbo.categories WHERE name = N''Bó Hoa Hồng Đỏ'') WHERE name LIKE N''%Hồng Đỏ%'' OR name LIKE N''%Ecuador%'';
+UPDATE dbo.products SET category_id = (SELECT TOP 1 id FROM dbo.categories WHERE name = N''Bó Hoa Sinh Nhật'') WHERE name LIKE N''%Sinh Nhật%'' OR name LIKE N''%Bó Hoa%'';
+UPDATE dbo.products SET category_id = (SELECT TOP 1 id FROM dbo.categories WHERE name = N''Kệ Hoa Khai Trương'') WHERE name LIKE N''%Khai Trương%'' OR name LIKE N''%Kệ Hoa%'';
+UPDATE dbo.products SET category_id = (SELECT TOP 1 id FROM dbo.categories WHERE name = N''Chậu Lan Hồ Điệp Trắng'') WHERE name LIKE N''%Lan Hồ Điệp%'';
+
 -- Chuẩn hóa tên và ngưỡng doanh số cho Hạng chi nhánh: Tiêu chuẩn (0đ), Cửa hàng uy tín (từ 10 triệu), Cửa hàng xuất sắc (từ 30 triệu)
 IF EXISTS (SELECT 1 FROM dbo.store_levels WHERE name LIKE N''%Bạc%'' OR name LIKE N''%Uy Tín%'')
     UPDATE dbo.store_levels SET name = N''Cửa hàng uy tín'', min_point = 10000000, discount = 5 WHERE name LIKE N''%Bạc%'' OR name LIKE N''%Uy Tín%'';
