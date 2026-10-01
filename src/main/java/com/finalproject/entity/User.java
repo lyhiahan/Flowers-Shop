@@ -33,8 +33,16 @@ public class User {
 
     private String avatarUrl;
 
+    /** public_id trên Cloudinary của avatar – dùng để xóa ảnh cũ */
+    @Column(name = "avatar_public_id", length = 255)
+    private String avatarPublicId;
+
     @Column(length = 500)
     private String cover;
+
+    /** public_id trên Cloudinary của cover – dùng để xóa ảnh cũ */
+    @Column(name = "cover_public_id", length = 255)
+    private String coverPublicId;
 
     @Builder.Default
     private Integer point = 0;

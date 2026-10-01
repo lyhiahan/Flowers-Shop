@@ -33,8 +33,16 @@ public class Store {
     @Column(length = 500)
     private String avatar;
 
+    /** public_id trên Cloudinary của avatar cửa hàng */
+    @Column(name = "avatar_public_id", length = 255)
+    private String avatarPublicId;
+
     @Column(length = 500)
     private String cover;
+
+    /** public_id trên Cloudinary của cover cửa hàng */
+    @Column(name = "cover_public_id", length = 255)
+    private String coverPublicId;
 
     @Column(name = "featured_images", columnDefinition = "NVARCHAR(MAX)")
     private String featuredImages;
