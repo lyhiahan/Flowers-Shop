@@ -503,156 +503,69 @@
   </div>
 
   <!-- ==============================================
-       FOOTER (HỆ THỐNG CHI NHÁNH CHUẨN ĐỒNG BỘ)
+       FOOTER CHUẨN ĐỒNG BỘ THEO MẪU (BOTANICAL ATELIER)
        ============================================== -->
-  <footer class="w-full bg-[#FAF7F5] border-t border-[#EAE1DC] text-on-surface mt-space-xl pt-space-xl pb-space-lg">
-    <div class="max-w-7xl mx-auto px-4 md:px-margin-desktop grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-space-lg mb-space-xl">
-      <!-- Cột 1 & 2: Thương hiệu & Hệ Thống Chi Nhánh Cửa Hàng -->
-      <div class="lg:col-span-2 space-y-space-md pr-space-lg">
-        <div class="flex items-center gap-2">
-          <span class="text-2xl text-secondary">🌸</span>
-          <span class="font-extrabold text-[20px] text-[#2D2424]">HOA TƯƠI SÀI GÒN</span>
-        </div>
-        <p class="font-body-md text-body-md text-on-surface-variant">
-          Hệ thống điện hoa cao cấp và thiết kế hoa nghệ thuật phong cách Pháp hiện đại. Trao gửi cảm xúc ngọt ngào, tinh tế qua từng đóa hoa tuyển chọn với cam kết tươi mới cùng dịch vụ giao hỏa tốc 60–90 phút toàn Sài Gòn.
-        </p>
-
-        <!-- Khối Hệ Thống Chi Nhánh Cửa Hàng -->
-        <div class="space-y-2.5 font-body-sm text-body-sm text-on-surface-variant">
-          <div class="flex items-center justify-between pb-1 border-b border-[#EAE1DC]">
-            <span class="font-bold text-[14.5px] text-[#264E43] flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-[18px]">storefront</span>
-              Hệ Thống Chi Nhánh Cửa Hàng
-            </span>
-            <a th:href="@{/stores}" class="text-[12px] text-secondary hover:underline flex items-center gap-0.5 font-semibold">
-              Xem tất cả <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
-            </a>
+  <footer class="w-full border-top pt-4 pb-3 mt-12" style="background-color: #FAF4F0 !important; border-top: 1px solid #EBDED4 !important; font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif !important; color: #4A3E3D !important; width: 100%;">
+    <div style="max-width: 1240px; margin: 0 auto; padding-left: 20px; padding-right: 20px;">
+      
+      <!-- Hàng trên: 2 Cột thông tin -->
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 24px; padding-bottom: 24px;">
+        
+        <!-- Cột 1: Thương hiệu & Liên hệ -->
+        <div style="flex: 1 1 320px; max-width: 480px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+            <span style="font-size: 22px; line-height: 1;">🌸</span>
+            <span style="font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 700; color: #C84357; letter-spacing: 0.5px;">HOA TƯƠI SÀI GÒN</span>
           </div>
-
-          <!-- Danh sách chi nhánh từ CSDL nếu có -->
-          <div th:if="${stores != null and !#lists.isEmpty(stores)}" class="space-y-2">
-            <div th:each="s : ${stores}" class="p-2 rounded-lg bg-[#FAF7F5] border border-[#EAE1DC]/80 hover:border-[#264E43]/40 transition-colors">
-              <div class="flex items-center justify-between">
-                <a th:href="@{/stores/{id}(id=${s.id})}" class="font-bold text-[13px] text-[#2D2424] hover:text-[#264E43] flex items-center gap-1">
-                  <span class="text-secondary text-[14px]">🌸</span>
-                  <span th:text="${s.name}">Tên Chi Nhánh</span>
-                </a>
-                <span class="text-[11px] text-[#264E43] font-bold px-2 py-0.5 rounded-full bg-[#E9F3EE]">Hotline: <span th:text="${s.phone != null ? s.phone : '0281111222'}">0281111222</span></span>
-              </div>
-              <p class="text-[12px] text-[#6E6464] flex items-start gap-1 mt-1">
-                <span class="material-symbols-outlined text-[15px] text-[#7E726D] shrink-0 mt-0.5">location_on</span>
-                <span th:text="${s.address}">Địa chỉ chi nhánh</span>
-              </p>
+          <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; color: #555555;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; line-height: 1;">call</span>
+              <span>Hotline 24/7: <strong style="color: #222222; font-weight: 700;">028 1111 222 - 0909 888 777</strong></span>
             </div>
-          </div>
-
-          <!-- Danh sách chi nhánh cố định chuẩn hệ thống (fallback) -->
-          <div th:if="${stores == null or #lists.isEmpty(stores)}" class="space-y-2">
-            <!-- Chi nhánh 1 -->
-            <div class="p-2 rounded-lg bg-[#FAF7F5] border border-[#EAE1DC]/80">
-              <div class="flex items-center justify-between">
-                <span class="font-bold text-[13px] text-[#2D2424] flex items-center gap-1">
-                  <span class="text-secondary text-[14px]">🌸</span>
-                  Chi Nhánh Bến Thành (Quận 1)
-                </span>
-                <span class="text-[11px] text-[#264E43] font-bold px-2 py-0.5 rounded-full bg-[#E9F3EE]">Hotline: 0281111222</span>
-              </div>
-              <p class="text-[12px] text-[#6E6464] flex items-start gap-1 mt-1">
-                <span class="material-symbols-outlined text-[15px] text-[#7E726D] shrink-0 mt-0.5">location_on</span>
-                <span>123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM</span>
-              </p>
-            </div>
-
-            <!-- Chi nhánh 2 -->
-            <div class="p-2 rounded-lg bg-[#FAF7F5] border border-[#EAE1DC]/80">
-              <div class="flex items-center justify-between">
-                <span class="font-bold text-[13px] text-[#2D2424] flex items-center gap-1">
-                  <span class="text-secondary text-[14px]">🌸</span>
-                  Chi Nhánh Phú Mỹ Hưng (Quận 7)
-                </span>
-                <span class="text-[11px] text-[#264E43] font-bold px-2 py-0.5 rounded-full bg-[#E9F3EE]">Hotline: 0283333444</span>
-              </div>
-              <p class="text-[12px] text-[#6E6464] flex items-start gap-1 mt-1">
-                <span class="material-symbols-outlined text-[15px] text-[#7E726D] shrink-0 mt-0.5">location_on</span>
-                <span>456 Nguyễn Lương Bằng, Phường Tân Phú, Quận 7, TP.HCM</span>
-              </p>
-            </div>
-
-            <!-- Chi nhánh 3 -->
-            <div class="p-2 rounded-lg bg-[#FAF7F5] border border-[#EAE1DC]/80">
-              <div class="flex items-center justify-between">
-                <span class="font-bold text-[13px] text-[#2D2424] flex items-center gap-1">
-                  <span class="text-secondary text-[14px]">🌸</span>
-                  Chi Nhánh Thảo Điền (TP. Thủ Đức)
-                </span>
-                <span class="text-[11px] text-[#264E43] font-bold px-2 py-0.5 rounded-full bg-[#E9F3EE]">Hotline: 0285555666</span>
-              </div>
-              <p class="text-[12px] text-[#6E6464] flex items-start gap-1 mt-1">
-                <span class="material-symbols-outlined text-[15px] text-[#7E726D] shrink-0 mt-0.5">location_on</span>
-                <span>789 Xuân Thủy, Phường Thảo Điền, TP. Thủ Đức, TP.HCM</span>
-              </p>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; line-height: 1;">mail</span>
+              <span>Email: <a href="mailto:atelier@hoatuoisaigon.vn" style="color: #555555; text-decoration: none;">atelier@hoatuoisaigon.vn</a></span>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Cột 3: Về chúng tôi -->
-      <div>
-        <h4 class="font-bold text-[15px] text-[#2D2424] mb-space-md">Về Chúng Tôi</h4>
-        <ul class="space-y-space-sm font-body-sm text-[13px] text-on-surface-variant">
-          <li><a class="hover:text-primary transition-colors" th:href="@{/}">Câu chuyện thương hiệu</a></li>
-          <li><a class="hover:text-primary transition-colors" th:href="@{/stores}">Hệ thống cửa hàng</a></li>
-          <li><a class="hover:text-primary transition-colors" th:href="@{/following}">Bộ sưu tập Following</a></li>
-          <li><a class="hover:text-primary transition-colors" th:href="@{/customer/profile/wishlist}">Hoa tươi yêu thích</a></li>
-          <li><a class="hover:text-primary transition-colors" th:href="@{/customer/orders}">Lịch sử đặt hoa</a></li>
-        </ul>
-      </div>
-
-      <!-- Cột 4: Chính sách & Cam kết -->
-      <div>
-        <h4 class="font-bold text-[15px] text-[#2D2424] mb-space-md">Chính Sách &amp; Hỗ Trợ</h4>
-        <ul class="space-y-space-sm font-body-sm text-[13px] text-on-surface-variant">
-          <li><a class="hover:text-primary transition-colors" href="#">Cam kết hoa tươi 3 ngày</a></li>
-          <li><a class="hover:text-primary transition-colors" href="#">Giao nhanh 60–90 phút</a></li>
-          <li><a class="hover:text-primary transition-colors" href="#">Chính sách đổi trả &amp; hoàn tiền</a></li>
-          <li><a class="hover:text-primary transition-colors" href="#">Hướng dẫn dưỡng hoa tại nhà</a></li>
-          <li><a class="hover:text-primary transition-colors" href="#">Bảo mật thông tin khách hàng</a></li>
-        </ul>
-      </div>
-
-      <!-- Cột 5: Giờ mở cửa & Hỗ trợ -->
-      <div>
-        <h4 class="font-bold text-[15px] text-[#2D2424] mb-space-md">Liên Hệ &amp; Giờ Mở Cửa</h4>
-        <div class="space-y-space-sm font-body-sm text-[13px] text-on-surface-variant">
-          <p class="flex items-center gap-1.5 font-bold text-[#1E453E]">
-            <span class="material-symbols-outlined text-[18px]">phone_in_talk</span>
-            <span>Hotline: 028 1111 222</span>
-          </p>
-          <p class="flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-[16px]">mail</span>
-            <span>support@hoatuoisaigon.vn</span>
-          </p>
-          <p class="flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-[16px]">schedule</span>
-            <span>07:00 – 22:00 (Cả CN &amp; Lễ)</span>
-          </p>
-          <div class="pt-2">
-            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#E9F3EE] text-[#1E453E] text-[11px] font-bold">
-              <span class="text-[12px]">🌿</span> 100% Hoa Đà Lạt Tuyển Chọn
-            </span>
+        <!-- Cột 2: Hệ thống Atelier & Chi nhánh -->
+        <div style="flex: 1 1 360px; max-width: 560px;">
+          <h4 style="font-size: 13px; font-weight: 800; color: #264E43; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; margin-top: 2px;">HỆ THỐNG ATELIER &amp; CHI NHÁNH</h4>
+          <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; color: #555555;">
+            <div style="display: flex; align-items: flex-start; gap: 8px;">
+              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
+              <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Q.1:</strong> 42 Lê Lợi, P. Bến Thành, Quận 1</span>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 8px;">
+              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
+              <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Q.7:</strong> 105 Tôn Dật Tiên, Phú Mỹ Hưng</span>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 8px;">
+              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
+              <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Thủ Đức:</strong> 215 Võ Văn Ngân, TP. Thủ Đức</span>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Bottom copyright -->
-    <div class="max-w-7xl mx-auto px-4 md:px-margin-desktop pt-space-md border-t border-[#EAE1DC] flex flex-col sm:flex-row items-center justify-between gap-2 text-[12px] text-[#7E726D]">
-      <p>© 2026 HOA TƯƠI SÀI GÒN - Chuỗi Cửa Hàng Hoa Tươi &amp; Điện Hoa Nghệ Thuật Toàn Thành Phố.</p>
-      <div class="flex items-center gap-4">
-        <span>Giao Hỏa Tốc Toàn TP.HCM</span>
-        <span>•</span>
-        <span>Cam Kết Tươi Đẹp Như Ảnh</span>
       </div>
+
+      <!-- Hàng dưới: Bản quyền + Cam kết chất lượng & Giao hàng -->
+      <div style="border-top: 1px solid #EBDED4; padding-top: 16px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; font-size: 12.5px; color: #777777;">
+        <div>
+          <span>© 2026 HOA TƯƠI SÀI GÒN .</span>
+        </div>
+        <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <span style="display: inline-flex; align-items: center; gap: 5px; color: #333333; font-weight: 600;">
+            <span style="color: #C84357;">🌸</span> 100% Hoa Tươi Nhập Khẩu &amp; Đà Lạt
+          </span>
+          <span style="color: #D8CBC2;">•</span>
+          <span style="display: inline-flex; align-items: center; gap: 4px; color: #666666;">
+            <span class="material-symbols-outlined" style="font-size: 15px; color: #264E43; line-height: 1;">schedule</span> Giao hỏa tốc 60–90 phút
+          </span>
+        </div>
+      </div>
+
     </div>
   </footer>
 
