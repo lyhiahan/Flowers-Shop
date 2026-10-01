@@ -125,6 +125,7 @@ public class AuthServiceImpl implements AuthService {
                     .isActive(true)
                     .createdDate(LocalDate.now())
                     .build();
+            user.addRole(Role.CUSTOMER);
             userRepository.save(user);
 
             // Khởi tạo giỏ hàng cho tài khoản vừa được kích hoạt

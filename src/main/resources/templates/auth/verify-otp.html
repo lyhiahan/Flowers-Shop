@@ -59,6 +59,7 @@
                     </div>
 
                     <form th:action="@{/verify-otp}" method="post">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <input type="hidden" name="email" th:value="${email}">
                         <div class="mb-3">
                             <label class="form-label text-center w-100 fw-semibold text-secondary small">Nhập mã OTP (Hiệu lực trong 5 phút)</label>
@@ -71,6 +72,7 @@
                     </form>
 
                     <form th:action="@{/resend-otp}" method="post" class="text-center mb-2">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <input type="hidden" name="email" th:value="${email}">
                         <button type="submit" class="btn btn-link text-decoration-none small text-danger fw-semibold">
                             <i class="bi bi-arrow-repeat me-1"></i> Chưa nhận được mã? Gửi lại OTP

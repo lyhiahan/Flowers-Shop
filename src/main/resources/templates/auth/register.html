@@ -130,6 +130,7 @@
                     </div>
 
                     <form id="registerForm" th:action="@{/register}" th:object="${registerRequest}" method="post" novalidate>
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <!-- Thông tin tài khoản -->
                         <div class="section-subtitle">Thông tin tài khoản đăng nhập</div>
                         <div class="row g-3 mb-3">
