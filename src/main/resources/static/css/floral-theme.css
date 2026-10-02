@@ -41,6 +41,43 @@
     --font-serif: 'Nunito', Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+.brand-logo-img, .brand-logo-img-sm {
+    width: 36px !important;
+    height: 36px !important;
+    max-width: 36px !important;
+    max-height: 36px !important;
+    object-fit: contain !important;
+    display: inline-block !important;
+}
+.brand-logo-img-lg {
+    width: 54px !important;
+    height: 54px !important;
+    max-width: 54px !important;
+    max-height: 54px !important;
+    object-fit: contain !important;
+    display: inline-block !important;
+}
+
+/* Material Symbols Icon Support */
+.material-symbols-outlined,
+span.material-symbols-outlined,
+i.material-symbols-outlined,
+button .material-symbols-outlined {
+    font-family: 'Material Symbols Outlined' !important;
+    font-weight: normal !important;
+    font-style: normal !important;
+    font-size: 18px;
+    line-height: 1;
+    display: inline-block;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    vertical-align: middle;
+}
+
 /* ==========================================================================
    QUY CHUẨN TYPOGRAPHY CHUẨN THEO BẢNG QUY ĐỊNH (Font Nunito)
    - Tiêu đề trang:                     30–32 px | 700 (đậm)      | Xanh đậm #293B32

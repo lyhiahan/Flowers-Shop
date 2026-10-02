@@ -56,10 +56,33 @@
         }
 
         /* Toàn bộ giao diện dùng font Nunito: mềm mại, bo tròn đều */
-        body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, p, span, a, label, strong, div {
+        body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, p, a, label, strong, div {
             font-family: 'Nunito', Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
             font-style: normal !important;
             text-decoration: none !important;
+        }
+        span:not(.material-symbols-outlined):not([class*="bi-"]) {
+            font-family: 'Nunito', Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        }
+
+        .material-symbols-outlined,
+        span.material-symbols-outlined,
+        i.material-symbols-outlined,
+        button .material-symbols-outlined,
+        .header-search-type-icon {
+            font-family: 'Material Symbols Outlined' !important;
+            font-weight: normal !important;
+            font-style: normal !important;
+            font-size: 18px;
+            line-height: 1;
+            display: inline-block;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+            -webkit-font-smoothing: antialiased;
+            vertical-align: middle;
         }
 
         body {
@@ -1110,7 +1133,7 @@
                                 <input type="text" id="headerSearchInput" name="keyword" th:value="${keyword}"
                                     class="form-control header-search-input shadow-none flex-grow-1"
                                     placeholder="Tìm hoa hồng, cửa hàng hoặc người dùng...">
-                                <button class="btn header-search-btn d-flex align-items-center gap-1 flex-shrink-0"
+                                <button class="btn header-search-btn d-flex align-items-center gap-1.5 flex-shrink-0"
                                     type="submit" id="btnHeaderSearch" title="Tìm kiếm">
                                     <i class="bi bi-search" style="font-size: 14px;"></i>
                                     <span class="d-none d-sm-inline">Tìm</span>
