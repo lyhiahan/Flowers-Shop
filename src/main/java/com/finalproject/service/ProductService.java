@@ -15,6 +15,9 @@ public interface ProductService {
     // Guest: Trên 10 sản phẩm bán chạy nhất sắp xếp giảm dần
     List<Product> getGuestFeaturedProducts();
 
+    // Trang chủ: Tối đa 8 sản phẩm bán chạy nhất (dựa trên đơn hoàn thành 30 ngày gần nhất hoặc số lượng bán thực tế)
+    List<Product> getTop8BestSellingProducts();
+
     // Top 20 theo các tiêu chí
     List<Product> getTop20Newest();
     List<Product> getTop20BestSelling();

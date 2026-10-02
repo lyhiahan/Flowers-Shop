@@ -1548,28 +1548,99 @@ public class AdminConfigController {
         return "redirect:/admin/styles/" + styleId + "/values";
     }
 
-    @PostMapping("/styles/reset-defaults")
-    public String resetDefaultStyles(RedirectAttributes ra) {
-        java.util.List<String> defaultStyles = java.util.List.of(
-            "Kiểu Dáng Cắm (Bó hoa, Giỏ hoa, Hộp hoa, Bình hoa, Kệ hoa, Chậu hoa)",
-            "Tone Màu Thiết Kế (Pastel ngọt ngào, Tone Đỏ nồng cháy, Tone Vàng tài lộc, Tone Trắng tinh khôi)",
-            "Phong Cách Thiết Kế (Hàn Quốc hiện đại, Vintage cổ điển, Châu Âu quý phái, Tối giản Minimalist)",
-            "Kích Cỡ Thiết Kế (Size S Nhỏ xinh, Size M Tiêu chuẩn, Size L Sang trọng, Size VIP Khổng lồ)",
-            "Loại Hoa Chủ Đạo (Hoa Hồng, Hoa Hướng Dương, Lan Hồ Điệp, Cẩm Tú Cầu, Hoa Tulip, Hoa Baby)"
-        );
-        for (String name : defaultStyles) {
-            java.util.Optional<Style> existing = styleRepository.findAll().stream()
-                .filter(s -> s.getName().equalsIgnoreCase(name))
-                .findFirst();
-            if (existing.isPresent()) {
-                Style s = existing.get();
-                s.setIsDeleted(false);
-                styleRepository.save(s);
-            } else {
-                styleRepository.save(Style.builder().name(name).isDeleted(false).build());
+    /**
+     * Bổ sung thuộc tính mặc định: Đồng bộ an toàn 4 nhóm thuộc tính cốt lõi và các giá trị chuẩn
+     * Tuyệt đối không xóa hay ghi đè dữ liệu người dùng đã tạo
+     */
+    @PostMapping({"/styles/seed-defaults", "/styles/reset-defaults"})
+    public String seedDefaultStyles(RedirectAttributes ra) {
+        try {
+            // 1. Chuẩn hóa tên cũ sang tên mới thống nhất
+            styleRepository.findAll().forEach(s -> {
+                String n = s.getName().trim();
+                if (n.equalsIgnoreCase("Tone màu hoa") || n.equalsIgnoreCase("Tone màu thiết kế")) {
+                    s.setName("Màu sắc");
+                    s.setIsDeleted(false);
+                    styleRepository.save(s);
+                } else if (n.equalsIgnoreCase("Kiểu dáng cắm") || n.equalsIgnoreCase("Kiểu dáng hoa")) {
+                    s.setName("Kiểu dáng");
+                    s.setIsDeleted(false);
+                    styleRepository.save(s);
+                } else if (n.equalsIgnoreCase("Kích cỡ bó hoa") || n.equalsIgnoreCase("Kích cỡ thiết kế")) {
+                    s.setName("Kích cỡ");
+                    s.setIsDeleted(false);
+                    styleRepository.save(s);
+                }
+            });
+
+            // 2. Định nghĩa 4 nhóm chính và các nhóm bổ sung cùng giá trị mẫu
+            java.util.Map<String, java.util.List<String>> defaultGroups = new java.util.LinkedHashMap<>();
+            defaultGroups.put("Loại hoa", java.util.List.of(
+                    "Hướng dương", "Hoa hồng", "Tulip", "Cẩm tú cầu", "Lan hồ điệp", "Calla Lily", "Hoa Baby"
+            ));
+            defaultGroups.put("Kiểu dáng", java.util.List.of(
+                    "Bó hoa", "Giỏ hoa", "Bình hoa", "Hộp hoa", "Chậu hoa", "Kệ hoa"
+            ));
+            defaultGroups.put("Màu sắc", java.util.List.of(
+                    "Vàng", "Hồng", "Trắng", "Đỏ", "Tím", "Xanh", "Cam"
+            ));
+            defaultGroups.put("Dịp tặng", java.util.List.of(
+                    "Sinh nhật", "Tốt nghiệp", "Khai trương", "Tình yêu", "Chúc mừng", "Đám cưới", "Chia buồn"
+            ));
+            defaultGroups.put("Phong cách thiết kế", java.util.List.of(
+                    "Hàn Quốc hiện đại", "Vintage cổ điển", "Tối giản Minimalist", "Châu Âu sang trọng"
+            ));
+            defaultGroups.put("Kích cỡ", java.util.List.of(
+                    "Size S (Nhỏ)", "Size M (Vừa)", "Size L (Lớn)"
+            ));
+
+            int addedGroups = 0;
+            int addedValues = 0;
+
+            for (java.util.Map.Entry<String, java.util.List<String>> entry : defaultGroups.entrySet()) {
+                String groupName = entry.getKey();
+                java.util.List<String> values = entry.getValue();
+
+                java.util.Optional<Style> existingStyleOpt = styleRepository.findAll().stream()
+                        .filter(s -> s.getName().equalsIgnoreCase(groupName))
+                        .findFirst();
+
+                Style style;
+                if (existingStyleOpt.isPresent()) {
+                    style = existingStyleOpt.get();
+                    if (Boolean.TRUE.equals(style.getIsDeleted())) {
+                        style.setIsDeleted(false);
+                        styleRepository.save(style);
+                    }
+                } else {
+                    style = styleRepository.save(Style.builder()
+                            .name(groupName)
+                            .isDeleted(false)
+                            .build());
+                    addedGroups++;
+                }
+
+                java.util.List<StyleValue> existingValues = styleValueRepository.findByStyleId(style.getId());
+                java.util.Set<String> existingNames = existingValues.stream()
+                        .map(v -> v.getName().toLowerCase().trim())
+                        .collect(java.util.stream.Collectors.toSet());
+
+                for (String valName : values) {
+                    if (!existingNames.contains(valName.toLowerCase().trim())) {
+                        styleValueRepository.save(StyleValue.builder()
+                                .name(valName)
+                                .style(style)
+                                .isDeleted(false)
+                                .build());
+                        addedValues++;
+                    }
+                }
             }
+
+            ra.addFlashAttribute("successMessage", "Đã bổ sung thuộc tính mặc định thành công! (" + addedGroups + " nhóm mới, " + addedValues + " giá trị mới). Toàn bộ dữ liệu bạn đã tạo vẫn được giữ nguyên an toàn.");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Không thể bổ sung thuộc tính: " + ex.getMessage());
         }
-        ra.addFlashAttribute("successMessage", "Khôi phục toàn bộ danh sách thuộc tính sản phẩm mẫu thành công!");
         return "redirect:/admin/styles";
     }
 }

@@ -13,7 +13,7 @@ public class Style {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(nullable = false, unique = true, length = 100, columnDefinition = "NVARCHAR(100)")
     private String name; // Màu sắc, Dịp tặng, Phong cách cắm, Kích thước
 
     @ManyToOne(fetch = FetchType.LAZY)

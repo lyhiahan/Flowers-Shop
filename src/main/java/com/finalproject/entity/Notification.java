@@ -16,10 +16,10 @@ public class Notification {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false, length = 200)
+    @Column(nullable = false, length = 200, columnDefinition = "NVARCHAR(200)")
     private String title;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "NVARCHAR(MAX)")
     private String content;
 
     @Column(length = 50)

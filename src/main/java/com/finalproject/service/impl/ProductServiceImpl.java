@@ -27,6 +27,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductWishlistRepository wishlistRepository;
     private final RecentlyViewedRepository recentlyViewedRepository;
     private final UserRepository userRepository;
+    private final OrderDetailRepository orderDetailRepository;
 
     @Override
     public List<Product> getAllProducts() {
@@ -41,12 +42,46 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Product> getGuestFeaturedProducts() {
-        List<Product> featured = productRepository.findGuestFeaturedProducts();
-        if (featured.isEmpty()) {
-            // Fallback nếu dữ liệu mẫu chưa có sold >= 10: lấy tất cả sắp xếp theo giá hoặc ID
-            return productRepository.findAll();
+        return getTop8BestSellingProducts();
+    }
+
+    @Override
+    public List<Product> getTop8BestSellingProducts() {
+        java.time.LocalDateTime thirtyDaysAgo = java.time.LocalDateTime.now().minusDays(30);
+        List<Long> topProductIds = orderDetailRepository.findTopSellingProductIdsSince(
+                thirtyDaysAgo, org.springframework.data.domain.PageRequest.of(0, 8));
+
+        List<Product> result = new java.util.ArrayList<>();
+        if (topProductIds != null && !topProductIds.isEmpty()) {
+            List<Product> productsFromOrders = productRepository.findAllById(topProductIds);
+            java.util.Map<Long, Product> productMap = productsFromOrders.stream()
+                    .filter(p -> Boolean.TRUE.equals(p.getIsActive()) && Boolean.TRUE.equals(p.getIsSelling()))
+                    .collect(java.util.stream.Collectors.toMap(Product::getId, java.util.function.Function.identity()));
+            for (Long id : topProductIds) {
+                Product p = productMap.get(id);
+                if (p != null) {
+                    result.add(p);
+                }
+            }
         }
-        return featured;
+
+        // Bổ sung từ top sản phẩm có số lượng bán cao nhất (p.sold > 0) nếu trong 30 ngày chưa đủ 8 sản phẩm
+        if (result.size() < 8) {
+            java.util.Set<Long> existingIds = result.stream().map(Product::getId).collect(java.util.stream.Collectors.toSet());
+            List<Product> additional = productRepository.findTopBestSellers(org.springframework.data.domain.PageRequest.of(0, 16));
+            for (Product p : additional) {
+                if (!existingIds.contains(p.getId())) {
+                    result.add(p);
+                    existingIds.add(p.getId());
+                    if (result.size() >= 8) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Tối đa 8 sản phẩm, chỉ hiển thị số lượng thực tế phù hợp, không lặp sản phẩm
+        return result.stream().limit(8).collect(java.util.stream.Collectors.toList());
     }
 
     @Override

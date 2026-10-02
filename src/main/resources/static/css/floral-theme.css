@@ -195,6 +195,7 @@ p, .product-desc, .product-description, .product-short-specs, .accordion-body, .
     background-color: var(--brand-green-hover) !important;
     color: #ffffff !important;
     transform: translateY(-1px);
+}
 
 /* 4. Nội dung, thông tin sản phẩm: 18 px, 400 */
 body {

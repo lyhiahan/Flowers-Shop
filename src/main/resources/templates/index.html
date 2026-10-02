@@ -94,11 +94,201 @@
         }
 
         .flower-container {
-            max-width: 1280px;
-            margin-left: auto;
-            margin-right: auto;
-            padding-left: 20px;
-            padding-right: 20px;
+            max-width: 1280px !important;
+            width: 100% !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+            padding-left: 24px !important;
+            padding-right: 24px !important;
+            box-sizing: border-box !important;
+        }
+
+        @media (max-width: 768px) {
+            .flower-container {
+                padding-left: 16px !important;
+                padding-right: 16px !important;
+            }
+        }
+
+        /* Lưới sản phẩm chuẩn quy tắc: 4 cột trên màn hình lớn, giảm còn 3 hoặc 2 khi thiếu chỗ */
+        /* Khoảng cách giữa các thẻ 20-24px, tính trong chiều rộng lưới, không gây tràn viền */
+        .product-grid {
+            display: grid !important;
+            grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+            gap: 24px !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
+        }
+
+        @media (max-width: 1100px) {
+            .product-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                gap: 20px !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .product-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 16px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .product-grid {
+                grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+                gap: 16px !important;
+            }
+        }
+
+        /* Dòng bộ lọc nhanh: Hàng 1 - chứa các nút dropdown và sắp xếp */
+        .product-filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px 10px;
+            flex-wrap: wrap;
+            width: 100%;
+            box-sizing: border-box;
+            padding-bottom: 8px;
+        }
+
+                /* Hàng 2 - "Đang lọc": inline nhẹ, không khung bao */
+        .active-filters-container {
+            width: 100%;
+            padding: 4px 0 6px 0;
+            background: transparent;
+            border: none;
+            margin-top: 2px;
+        }
+        .active-filters-title {
+            color: #888;
+            font-size: 13px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .filter-active-tag, .filter-pill-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: #FDF2F4;
+            color: #9B2C47;
+            border: 1px solid #F5C6CB;
+            font-size: 13.5px;
+            font-weight: 500;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+        .filter-active-tag strong, .filter-pill-tag strong {
+            color: #7A1E35;
+            font-weight: 700;
+        }
+        .filter-active-tag a, .filter-pill-tag a, .filter-pill-close {
+            color: #9B2C47 !important;
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1;
+            text-decoration: none;
+            padding-left: 2px;
+            transition: transform 0.15s ease, color 0.15s ease;
+            display: inline-block;
+        }
+        .filter-active-tag a:hover, .filter-pill-tag a:hover, .filter-pill-close:hover {
+            color: #5C1123 !important;
+            transform: scale(1.2);
+        }
+
+                .filter-drop-btn {
+            background-color: #FFFFFF;
+            border: 1px solid #E2DDD8;
+            color: #4A5568;
+            font-size: 13.5px;
+            font-weight: 500;
+            padding: 0 16px;
+            height: 40px;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+        .filter-drop-btn:hover {
+            border-color: #355447;
+            color: #355447;
+            background-color: #F6F9F8;
+        }
+                .filter-drop-btn.active-filter-btn {
+            background-color: #FEF2F4 !important;
+            border-color: #F5C6CB !important;
+            color: #A64060 !important;
+            font-weight: 600 !important;
+        }
+                .filter-drop-btn.active-filter-btn:hover {
+            background-color: #FCE8EC !important;
+            color: #832742 !important;
+        }
+
+        /* Chỉ hiện một mũi tên ▾ duy nhất - ẩn mũi tên mặc định của Bootstrap */
+        .filter-drop-btn.dropdown-toggle::after {
+            display: none !important;
+        }
+
+        .btn-clear-all-filter {
+            color: #9B2C47;
+            font-weight: 700;
+            font-size: 13.5px;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            cursor: pointer;
+            padding: 3px 6px;
+            transition: color 0.15s ease;
+            white-space: nowrap;
+            background: none;
+            border: none;
+        }
+        .btn-clear-all-filter:hover {
+            color: #5C1123;
+        }
+
+        .drawer-filter-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: #F8FAF9;
+            border: 1px solid #E2E7E2;
+            color: #4A5568;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+        .drawer-filter-chip:hover {
+            background-color: #EBF3EE;
+            border-color: #20382E;
+            color: #20382E;
+        }
+        .drawer-filter-chip.active {
+            background-color: #FDF2F4 !important;
+            border-color: #F5C6CB !important;
+            color: #9B2C47 !important;
+            font-weight: 700 !important;
+        }
+        .color-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
         }
 
         /* Thông tin phụ: 16 px, 400 */
@@ -383,8 +573,10 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
             background-color: rgba(30, 42, 36, 0.35);
             z-index: 1018;
             opacity: 0;
@@ -810,6 +1002,10 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            box-sizing: border-box !important;
         }
 
         .flower-card:hover {
@@ -818,12 +1014,12 @@
             border-color: var(--flower-border-hover);
         }
 
-        /* Khung ảnh vuông, tỷ lệ 1:1, khoảng 280-300px mỗi cạnh trên máy tính */
+        /* Khung ảnh vuông, tỷ lệ 1:1, rộng bằng thẻ, không kéo giãn */
         .flower-card-img {
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            object-fit: cover;
-            display: block;
+            width: 100% !important;
+            aspect-ratio: 1 / 1 !important;
+            object-fit: cover !important;
+            display: block !important;
             transition: transform 0.3s ease;
         }
 
@@ -831,27 +1027,31 @@
             transform: scale(1.02);
         }
 
-        .flower-card-body {
-            padding: 14px 16px 16px;
+                .flower-card-body {
+            padding: 12px 14px 14px;
             display: flex;
             flex-direction: column;
             flex-grow: 1;
+            min-width: 0 !important;
+            box-sizing: border-box !important;
         }
 
-        /* Tên sản phẩm trên thẻ: 18 px, 600, Xanh đậm #293B32, tối đa 2 dòng */
-
+        /* Tên sản phẩm trên thẻ: 18 px, 600, Xanh đậm #293B32, tối đa 2 dòng, tự xuống dòng không làm thẻ nở ngang */
         .flower-card-title {
-            font-size: 18px !important;
-            font-weight: 600 !important;
-            color: var(--flower-text-main) !important;
+            font-size: 15px !important;
+            font-weight: 650 !important;
+            color: #2D3B35 !important;
             line-height: 1.35;
             text-transform: none;
             margin-bottom: 8px;
+            word-break: break-word !important;
+            overflow-wrap: break-word !important;
+            white-space: normal !important;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            min-height: 48px;
+            min-height: 44px;
             text-decoration: none !important;
             transition: color 0.15s ease;
         }
@@ -1029,14 +1229,17 @@
 
         .custom-pagination .page-nav-arrow {
             color: var(--flower-text-muted);
-            font-size: 15px;
-            font-weight: 400;
+            font-size: 14px;
+            font-weight: 600;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 28px;
-            height: 28px;
-            transition: color 0.15s ease;
+            min-width: 64px;
+            height: 32px;
+            padding: 0 10px;
+            border-radius: 6px;
+            transition: color 0.15s ease, background-color 0.15s ease;
+            white-space: nowrap;
         }
 
         .custom-pagination .page-nav-arrow:hover:not(.disabled) {
@@ -1135,7 +1338,7 @@
                                     placeholder="Tìm hoa hồng, cửa hàng hoặc người dùng...">
                                 <button class="btn header-search-btn d-flex align-items-center gap-1.5 flex-shrink-0"
                                     type="submit" id="btnHeaderSearch" title="Tìm kiếm">
-                                    <i class="bi bi-search" style="font-size: 14px;"></i>
+                                    <i class="bi bi-search" style="font-size: 16px; color: #6B7280;"></i>
                                     <span class="d-none d-sm-inline">Tìm</span>
                                 </button>
                             </div>
@@ -1364,37 +1567,37 @@
                 <!-- Tab 1: Kiểu dáng (Mặc định mở) -->
                 <div class="mega-tab-pane active" id="paneKieuDang" role="tabpanel">
                     <div class="mega-catalog-grid">
-                        <a th:href="@{/products(keyword='Bó hoa')} + '#product-catalog'" class="mega-cat-card" data-name="bó hoa bo hoa" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(flowerStyle='Bó hoa')} + '#product-catalog'" class="mega-cat-card" data-name="bó hoa bo hoa" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=200&h=200&fit=crop&q=80" alt="Bó hoa" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Bó hoa</span>
                         </a>
-                        <a th:href="@{/products(keyword='Giỏ hoa')} + '#product-catalog'" class="mega-cat-card" data-name="giỏ hoa gio hoa" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(flowerStyle='Giỏ hoa')} + '#product-catalog'" class="mega-cat-card" data-name="giỏ hoa gio hoa" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=200&h=200&fit=crop&q=80" alt="Giỏ hoa" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Giỏ hoa</span>
                         </a>
-                        <a th:href="@{/products(keyword='Hộp hoa')} + '#product-catalog'" class="mega-cat-card" data-name="hộp hoa hop hoa" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(flowerStyle='Hộp hoa')} + '#product-catalog'" class="mega-cat-card" data-name="hộp hoa hop hoa" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?w=200&h=200&fit=crop&q=80" alt="Hộp hoa" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Hộp hoa</span>
                         </a>
-                        <a th:href="@{/products(keyword='Bình hoa')} + '#product-catalog'" class="mega-cat-card" data-name="bình hoa binh hoa" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(flowerStyle='Bình hoa')} + '#product-catalog'" class="mega-cat-card" data-name="bình hoa binh hoa" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=200&h=200&fit=crop&q=80" alt="Bình hoa" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Bình hoa</span>
                         </a>
-                        <a th:href="@{/products(keyword='Chậu hoa')} + '#product-catalog'" class="mega-cat-card" data-name="chậu hoa chau hoa" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(flowerStyle='Chậu hoa')} + '#product-catalog'" class="mega-cat-card" data-name="chậu hoa chau hoa" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=200&h=200&fit=crop&q=80" alt="Chậu hoa" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Chậu hoa</span>
                         </a>
-                        <a th:href="@{/products(keyword='Kệ hoa')} + '#product-catalog'" class="mega-cat-card" data-name="kệ hoa ke hoa" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(flowerStyle='Kệ hoa')} + '#product-catalog'" class="mega-cat-card" data-name="kệ hoa ke hoa" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1591886960571-74d43a9d4166?w=200&h=200&fit=crop&q=80" alt="Kệ hoa" loading="lazy">
                             </div>
@@ -1406,49 +1609,49 @@
                 <!-- Tab 2: Loại hoa -->
                 <div class="mega-tab-pane" id="paneLoaiHoa" role="tabpanel">
                     <div class="mega-catalog-grid">
-                        <a th:href="@{/products(keyword='Hoa hồng')} + '#product-catalog'" class="mega-cat-card" data-name="hoa hồng hoa hong rose" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(flowerType='Hoa hồng')} + '#product-catalog'" class="mega-cat-card" data-name="hoa hồng hoa hong rose" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200&h=200&fit=crop&q=80" alt="Hoa hồng" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Hoa hồng</span>
                         </a>
-                        <a th:href="@{/products(keyword='Tulip')} + '#product-catalog'" class="mega-cat-card" data-name="hoa tulip" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(flowerType='Tulip')} + '#product-catalog'" class="mega-cat-card" data-name="hoa tulip" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
-                                <img src="https://images.unsplash.com/photo-1520763185298-1b434c919102?w=200&h=200&fit=crop&q=80" alt="Hoa tulip" loading="lazy">
+                                <img src="https://images.unsplash.com/photo-1520763185298-1b434c919102?w=200&h=200&fit=crop&q=80" alt="Tulip" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Tulip</span>
                         </a>
-                        <a th:href="@{/products(keyword='Hướng dương')} + '#product-catalog'" class="mega-cat-card" data-name="hoa hướng dương huong duong sunflower" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(flowerType='Hướng dương')} + '#product-catalog'" class="mega-cat-card" data-name="hoa hướng dương huong duong sunflower" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
-                                <img src="https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=200&h=200&fit=crop&q=80" alt="Hoa hướng dương" loading="lazy">
+                                <img src="https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=200&h=200&fit=crop&q=80" alt="Hướng dương" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Hướng dương</span>
                         </a>
-                        <a th:href="@{/products(keyword='Cẩm tú cầu')} + '#product-catalog'" class="mega-cat-card" data-name="hoa cẩm tú cầu cam tu cau hydrangea" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(flowerType='Cẩm tú cầu')} + '#product-catalog'" class="mega-cat-card" data-name="hoa cẩm tú cầu cam tu cau hydrangea" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1508610048659-a06b669e3321?w=200&h=200&fit=crop&q=80" alt="Cẩm tú cầu" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Cẩm tú cầu</span>
                         </a>
-                        <a th:href="@{/products(keyword='Lan hồ điệp')} + '#product-catalog'" class="mega-cat-card" data-name="lan hồ điệp lan ho diep orchid" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(flowerType='Lan hồ điệp')} + '#product-catalog'" class="mega-cat-card" data-name="lan hồ điệp lan ho diep orchid" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?w=200&h=200&fit=crop&q=80" alt="Lan hồ điệp" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Lan hồ điệp</span>
                         </a>
-                        <a th:href="@{/products(keyword='Baby')} + '#product-catalog'" class="mega-cat-card" data-name="hoa baby bi" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(flowerType='Baby')} + '#product-catalog'" class="mega-cat-card" data-name="hoa baby bi" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1563245372-f21724e3856d?w=200&h=200&fit=crop&q=80" alt="Hoa baby" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Hoa baby</span>
                         </a>
-                        <a th:href="@{/products(keyword='Hoa sen')} + '#product-catalog'" class="mega-cat-card" data-name="hoa sen lotus" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(flowerType='Hoa sen')} + '#product-catalog'" class="mega-cat-card" data-name="hoa sen lotus" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1606041008023-472dfb5e530f?w=200&h=200&fit=crop&q=80" alt="Hoa sen" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Hoa sen</span>
                         </a>
-                        <a th:href="@{/products(keyword='Cúc mẫu đơn')} + '#product-catalog'" class="mega-cat-card" data-name="cúc mẫu đơn cuc mau don peony" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(flowerType='Cúc')} + '#product-catalog'" class="mega-cat-card" data-name="cúc mẫu đơn cuc mau don peony" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1567696911980-2eed69a46042?w=200&h=200&fit=crop&q=80" alt="Cúc mẫu đơn" loading="lazy">
                             </div>
@@ -1460,49 +1663,49 @@
                 <!-- Tab 3: Dịp tặng -->
                 <div class="mega-tab-pane" id="paneDipTang" role="tabpanel">
                     <div class="mega-catalog-grid">
-                        <a th:href="@{/products(keyword='Sinh nhật')} + '#product-catalog'" class="mega-cat-card" data-name="sinh nhật sinh nhat birthday" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(flowerOccasion='Sinh nhật')} + '#product-catalog'" class="mega-cat-card" data-name="sinh nhật sinh nhat birthday" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1513151233558-d860c5398176?w=200&h=200&fit=crop&q=80" alt="Sinh nhật" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Sinh nhật</span>
                         </a>
-                        <a th:href="@{/products(keyword='Tình yêu')} + '#product-catalog'" class="mega-cat-card" data-name="tình yêu tinh yeu valentine lãng mạn" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(flowerOccasion='Tình yêu')} + '#product-catalog'" class="mega-cat-card" data-name="tình yêu tinh yeu valentine lãng mạn" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=200&h=200&fit=crop&q=80" alt="Tình yêu" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Tình yêu</span>
                         </a>
-                        <a th:href="@{/products(keyword='Khai trương')} + '#product-catalog'" class="mega-cat-card" data-name="khai trương khai truong opening" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(flowerOccasion='Khai trương')} + '#product-catalog'" class="mega-cat-card" data-name="khai trương khai truong opening" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1546842931-886c185b4c8c?w=200&h=200&fit=crop&q=80" alt="Khai trương" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Khai trương</span>
                         </a>
-                        <a th:href="@{/products(keyword='Kỷ niệm')} + '#product-catalog'" class="mega-cat-card" data-name="kỷ niệm ky niem anniversary" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(flowerOccasion='Kỷ niệm')} + '#product-catalog'" class="mega-cat-card" data-name="kỷ niệm ky niem anniversary" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=200&h=200&fit=crop&q=80" alt="Kỷ niệm" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Kỷ niệm</span>
                         </a>
-                        <a th:href="@{/products(keyword='Tốt nghiệp')} + '#product-catalog'" class="mega-cat-card" data-name="tốt nghiệp tot nghiep graduation" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(flowerOccasion='Tốt nghiệp')} + '#product-catalog'" class="mega-cat-card" data-name="tốt nghiệp tot nghiep graduation" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=200&h=200&fit=crop&q=80" alt="Tốt nghiệp" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Tốt nghiệp</span>
                         </a>
-                        <a th:href="@{/products(keyword='Chúc mừng')} + '#product-catalog'" class="mega-cat-card" data-name="chúc mừng chuc mung congratulations" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(flowerOccasion='Chúc mừng')} + '#product-catalog'" class="mega-cat-card" data-name="chúc mừng chuc mung congratulations" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1533616688419-b7a585564566?w=200&h=200&fit=crop&q=80" alt="Chúc mừng" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Chúc mừng</span>
                         </a>
-                        <a th:href="@{/products(keyword='Cảm ơn')} + '#product-catalog'" class="mega-cat-card" data-name="cảm ơn cam on thank you" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(flowerOccasion='Cảm ơn')} + '#product-catalog'" class="mega-cat-card" data-name="cảm ơn cam on thank you" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=200&h=200&fit=crop&q=80" alt="Cảm ơn" loading="lazy">
                             </div>
                             <span class="mega-cat-name">Cảm ơn</span>
                         </a>
-                        <a th:href="@{/products(keyword='Chia buồn')} + '#product-catalog'" class="mega-cat-card" data-name="chia buồn chia buon tang le vieng" onclick="closeFlowerMegaMenu()">
+                        <a th:href="@{/products(flowerOccasion='Chia buồn')} + '#product-catalog'" class="mega-cat-card" data-name="chia buồn chia buon tang le vieng" onclick="closeFlowerMegaMenu()">
                             <div class="mega-cat-thumb">
                                 <img src="https://images.unsplash.com/photo-1507290439931-a861b5a38200?w=200&h=200&fit=crop&q=80" alt="Chia buồn" loading="lazy">
                             </div>
@@ -1542,7 +1745,7 @@
         </div>
 
         <!-- BANNER THƯƠNG HIỆU HOA TƯƠI ẤM ÁP (Cách thanh danh mục 24px, cách Hoa bán chạy 40px) -->
-        <section class="brand-hero-banner" aria-label="Giới thiệu thương hiệu Hoa Tươi Sài Gòn">
+        <section th:if="${hasActiveFilter != true}" class="brand-hero-banner" aria-label="Giới thiệu thương hiệu Hoa Tươi Sài Gòn">
             <div class="brand-hero-content">
                 <div class="brand-hero-badge">HOA TƯƠI SÀI GÒN</div>
                 <h1 class="brand-hero-title">
@@ -1568,7 +1771,7 @@
         </section>
 
         <!-- MỤC DƯỚI BANNER: BẠN MUỐN CHỌN KIỂU HOA NÀO? (6 Kiểu dáng trực quan) -->
-        <section id="discover" class="mb-5 p-4 rounded-4 shadow-sm" style="background-color: #FAF7F2; border: 1px solid #ECE5D8;" aria-label="Chọn kiểu hoa">
+        <section th:if="${hasActiveFilter != true}" id="discover" class="mb-5 p-4 rounded-4 shadow-sm" style="background-color: #FAF7F2; border: 1px solid #ECE5D8;" aria-label="Chọn kiểu hoa">
             <style>
                 .cat-card-item {
                     background-color: #FFFFFF !important;
@@ -1629,7 +1832,7 @@
                     <h2 class="section-title mb-1" style="font-size: 24px; font-weight: 800; color: #20382E;">
                         Bạn muốn chọn kiểu hoa nào?
                     </h2>
-                    <p class="text-muted small mb-0" style="font-size: 14px;">
+                    <p class="text-muted mb-0" style="font-size: 14px; margin-top: 2px; color: #6B7280;">
                         Lựa chọn thiết kế hoa tươi phù hợp với không gian trưng bày và phong cách trao gửi
                     </p>
                 </div>
@@ -1642,7 +1845,7 @@
             <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
                 <!-- 1. Bó hoa -->
                 <div class="col">
-                    <a th:href="@{/products(keyword='Bó hoa')} + '#product-catalog'" class="cat-card-item" title="Bó hoa tươi gói giấy cao cấp">
+                    <a th:href="@{/products(flowerStyle='Bó hoa')} + '#product-catalog'" class="cat-card-item" title="Bó hoa tươi gói giấy cao cấp">
                         <div class="cat-icon-circle">
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M12 4a2.5 2.5 0 0 0-2.5 2.5c0 1.2.7 2.2 1.7 2.5H12l.8-.2a2.5 2.5 0 0 0-.8-4.8z"/>
@@ -1660,7 +1863,7 @@
 
                 <!-- 2. Giỏ hoa -->
                 <div class="col">
-                    <a th:href="@{/products(keyword='Giỏ hoa')} + '#product-catalog'" class="cat-card-item" title="Giỏ hoa có quai xách thanh lịch">
+                    <a th:href="@{/products(flowerStyle='Giỏ hoa')} + '#product-catalog'" class="cat-card-item" title="Giỏ hoa có quai xách thanh lịch">
                         <div class="cat-icon-circle">
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
@@ -1677,7 +1880,7 @@
 
                 <!-- 3. Hộp hoa -->
                 <div class="col">
-                    <a th:href="@{/products(keyword='Hộp hoa')} + '#product-catalog'" class="cat-card-item" title="Hộp hoa quà tặng sang trọng">
+                    <a th:href="@{/products(flowerStyle='Hộp hoa')} + '#product-catalog'" class="cat-card-item" title="Hộp hoa quà tặng sang trọng">
                         <div class="cat-icon-circle">
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                 <rect x="5" y="11" width="14" height="10" rx="2"/>
@@ -1694,7 +1897,7 @@
 
                 <!-- 4. Bình hoa (Bình cắm hoa trang nhã, không dùng ly uống nước) -->
                 <div class="col">
-                    <a th:href="@{/products(keyword='Bình hoa')} + '#product-catalog'" class="cat-card-item" title="Bình hoa gốm cắm hoa nghệ thuật">
+                    <a th:href="@{/products(flowerStyle='Bình hoa')} + '#product-catalog'" class="cat-card-item" title="Bình hoa gốm cắm hoa nghệ thuật">
                         <div class="cat-icon-circle">
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                 <ellipse cx="12" cy="10" rx="3.5" ry="1"/>
@@ -1712,7 +1915,7 @@
 
                 <!-- 5. Chậu hoa -->
                 <div class="col">
-                    <a th:href="@{/products(keyword='Chậu hoa')} + '#product-catalog'" class="cat-card-item" title="Chậu cây hoa tươi trưng bày">
+                    <a th:href="@{/products(flowerStyle='Chậu hoa')} + '#product-catalog'" class="cat-card-item" title="Chậu cây hoa tươi trưng bày">
                         <div class="cat-icon-circle">
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M7 14h10"/>
@@ -1729,7 +1932,7 @@
 
                 <!-- 6. Kệ hoa -->
                 <div class="col">
-                    <a th:href="@{/products(keyword='Kệ hoa')} + '#product-catalog'" class="cat-card-item" title="Kệ hoa khai trương chúc mừng">
+                    <a th:href="@{/products(flowerStyle='Kệ hoa')} + '#product-catalog'" class="cat-card-item" title="Kệ hoa khai trương chúc mừng">
                         <div class="cat-icon-circle">
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="8" r="4.5"/>
@@ -1746,88 +1949,103 @@
             </div>
         </section>
 
-        <!-- MỤC 1: HOA BÁN CHẠY (Top hoa bán chạy - Đổi tiêu đề ngắn gọn, bỏ dòng đã bán > 10 và nhãn lặp) -->
-        <div th:if="${guestFeaturedProducts != null and !#lists.isEmpty(guestFeaturedProducts)}" class="mb-5" id="best-seller" style="scroll-margin-top: 85px;">
-            <div class="mb-3">
-                <h2 class="section-title">Hoa bán chạy</h2>
+        <!-- MỤC 1: HOA BÁN CHẠY (1 hàng 4 sản phẩm bán chạy nhất, "Xem tất cả →" để xem thêm) -->
+        <div th:if="${hasActiveFilter != true and guestFeaturedProducts != null and !#lists.isEmpty(guestFeaturedProducts)}" class="mb-5" id="best-seller" style="scroll-margin-top: 85px;">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h2 class="section-title mb-0" style="margin-bottom: 0 !important;">Hoa bán chạy</h2>
+                <a th:href="@{/products(tab='bestseller')} + '#product-catalog'" 
+                   class="d-inline-flex align-items-center gap-1 fw-bold text-decoration-none" 
+                   style="color: var(--flower-accent); font-size: 15px; transition: color 0.15s ease;"
+                   title="Xem tất cả mẫu hoa bán chạy nhất">
+                    <span>Xem tất cả</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
             </div>
 
-            <!-- Lưới sản phẩm: 4 sản phẩm mỗi hàng trên máy tính, 2 trên điện thoại, khoảng cách 24px (g-4) -->
-            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
-                <div class="col" th:each="fp : ${guestFeaturedProducts}">
-                    <a th:href="@{/product/{id}(id=${fp.id})}" class="text-decoration-none">
-                        <div class="card flower-card h-100">
-                            <!-- Ảnh sản phẩm: tỷ lệ 1:1, bo góc đồng đều, bỏ nhãn 'Đã bán ...' trên ảnh -->
-                            <div class="overflow-hidden">
-                                <img th:src="${fp.imageUrl != null ? fp.imageUrl : 'https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=800'}"
-                                    class="card-img-top flower-card-img" th:alt="${fp.name}"
-                                    onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800&amp;q=80';">
-                            </div>
-                            <div class="flower-card-body">
-                                <!-- Tên sản phẩm: tối đa 2 dòng -->
-                                <h3 class="flower-card-title" th:title="${fp.name}" th:text="${fp.name}"></h3>
-                                <!-- Giá và đánh giá có vị trí thống nhất -->
-                                <div class="flower-card-meta">
-                                    <span class="flower-price"
-                                        th:text="${#numbers.formatDecimal(fp.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
-                                    <span class="flower-rating">
-                                        <i class="bi bi-star-fill star-gold"></i>
-                                        <span th:text="${fp.rating != null ? fp.rating : '5.0'}"></span>
-                                    </span>
-                                </div>
+            <!-- Lưới sản phẩm: 4 cột, chỉ hiển thị 4 sản phẩm đầu tiên (1 hàng) -->
+            <div class="product-grid">
+                <th:block th:each="fp, stat : ${guestFeaturedProducts}">
+                    <div th:if="${stat.count <= 4}" class="card flower-card h-100">
+                    <a th:href="@{/product/{id}(id=${fp.id})}" class="text-decoration-none d-flex flex-column h-100">
+                        <!-- Ảnh sản phẩm: tỷ lệ 1:1, bo góc đồng đều -->
+                        <div class="overflow-hidden">
+                            <img th:src="${fp.imageUrl != null ? fp.imageUrl : 'https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=800'}"
+                                class="card-img-top flower-card-img" th:alt="${fp.name}"
+                                onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1490750967868-88df5691cc63?w=800&q=80';">
+                        </div>
+                        <div class="flower-card-body">
+                            <!-- Tên sản phẩm: tối đa 2 dòng -->
+                            <h3 class="flower-card-title" th:title="${fp.name}" th:text="${fp.name}"></h3>
+                            <!-- Giá và đánh giá có vị trí thống nhất -->
+                            <div class="flower-card-meta">
+                                <span class="flower-price"
+                                    th:text="${#numbers.formatDecimal(fp.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+                                <span class="flower-rating">
+                                    <i class="bi bi-star-fill star-gold"></i>
+                                    <span th:text="${fp.rating != null ? fp.rating : '5.0'}"></span>
+                                </span>
                             </div>
                         </div>
                     </a>
-                </div>
+                    </div>
+                </th:block>
             </div>
         </div>
 
-        <!-- MỤC 2: TABS TOP 20 & BỘ LỌC TÌM KIẾM, DANH MỤC, PHÂN TRANG CHO KHÁCH HÀNG -->
-        <div id="product-catalog" class="card filter-card p-4 mb-4" style="scroll-margin-top: 85px;">
+        <!-- MỤC 2: BỘ LỌC TÌM KIẾM, DANH MỤC, PHÂN LOẠI & LƯỚI SẢN PHẨM KHÔNG TRÀN VIỀN -->
+        <div id="product-catalog" class="mb-4" style="background: transparent; scroll-margin-top: 85px;">
 
-            <!-- Breadcrumb điều hướng quay lại danh mục cha / trang chủ (Rubric 3-5c) -->
-            <nav aria-label="breadcrumb" class="mb-3" th:if="${selectedCategory != null or (keyword != null and !keyword.isEmpty())}">
-                <ol class="breadcrumb bg-light p-2 px-3 rounded-3 small mb-0 align-items-center">
+            <!-- Breadcrumb điều hướng danh mục và tìm kiếm -->
+            <nav aria-label="breadcrumb" class="mb-3" th:if="${hasActiveFilter or selectedCategory != null}">
+                <ol class="breadcrumb mb-0 align-items-center px-1" style="font-size: 13.5px;">
                     <li class="breadcrumb-item">
-                        <a th:href="@{/}" class="text-decoration-none fw-semibold" style="color: var(--flower-primary);">
-                            <i class="bi bi-house-door me-1"></i>Trang Chủ (Home)
+                        <a th:href="@{/}" class="text-decoration-none" style="color: var(--flower-primary); font-weight: 600;">
+                            <i class="bi bi-house-door me-1"></i>Trang chủ
                         </a>
                     </li>
-                    <li class="breadcrumb-item">
-                        <a th:href="@{/#discover}" class="text-secondary text-decoration-none">
-                            Discover
-                        </a>
-                    </li>
-                    <!-- Category cha nếu có (3-5c. Chọn category cha ở breadcrumb để quay lại) -->
-                    <li th:if="${parentCategory != null}" class="breadcrumb-item">
-                        <a th:href="@{/products(categoryId=${parentCategory.id})} + '#product-catalog'" 
-                           class="text-decoration-none fw-bold" 
-                           style="color: var(--flower-accent);" 
-                           th:text="${parentCategory.name}" 
-                           id="breadcrumbParentCategory"
-                           title="Bấm để quay lại danh mục cha"></a>
-                    </li>
-                    <!-- Category đang chọn -->
-                    <li th:if="${selectedCategory != null}" class="breadcrumb-item active fw-bold text-dark" th:text="${selectedCategory.name}"></li>
-                    <li th:if="${keyword != null and !keyword.isEmpty()}" class="breadcrumb-item active fw-semibold" style="color: var(--flower-accent);" th:text="'Từ khóa: &quot;' + ${keyword} + '&quot;'"></li>
+                    <!-- Nếu có từ khóa tìm kiếm -->
+                    <th:block th:if="${keyword != null and !keyword.isEmpty()}">
+                        <li class="breadcrumb-item">
+                            <a th:href="@{/products}" class="text-decoration-none" style="color: var(--flower-text-muted);">Tìm kiếm</a>
+                        </li>
+                        <li class="breadcrumb-item active fw-bold" style="color: var(--flower-primary);" 
+                            th:text="'&quot;' + ${keyword} + '&quot;'"></li>
+                    </th:block>
+                    <!-- Nếu vào bằng danh mục hoặc danh mục cha / con -->
+                    <th:block th:if="${keyword == null or keyword.isEmpty()}">
+                        <li th:if="${parentCategory != null}" class="breadcrumb-item">
+                            <a th:href="@{/products(categoryId=${parentCategory.id})} + '#product-catalog'" 
+                               class="text-decoration-none fw-semibold" 
+                               style="color: var(--flower-accent);" 
+                               th:text="${parentCategory.name}" 
+                               id="breadcrumbParentCategory"></a>
+                        </li>
+                        <li th:if="${selectedCategory != null}" class="breadcrumb-item active fw-bold" 
+                            style="color: var(--flower-primary);" th:text="${selectedCategory.name}"></li>
+                        <li th:if="${selectedCategory == null and flowerStyle != null and !flowerStyle.isEmpty()}" 
+                            class="breadcrumb-item active fw-bold" style="color: var(--flower-primary);" th:text="${flowerStyle}"></li>
+                        <li th:if="${selectedCategory == null and flowerStyle == null and tab == 'bestseller'}" 
+                            class="breadcrumb-item active fw-bold" style="color: var(--flower-primary);">Hoa bán chạy nhất</li>
+                        <li th:if="${selectedCategory == null and flowerStyle == null and flowerOccasion != null and !flowerOccasion.isEmpty()}" 
+                            class="breadcrumb-item active fw-bold" style="color: var(--flower-primary);" th:text="${flowerOccasion}"></li>
+                        <li th:if="${selectedCategory == null and flowerStyle == null and flowerType != null and !flowerType.isEmpty()}" 
+                            class="breadcrumb-item active fw-bold" style="color: var(--flower-primary);" th:text="${flowerType}"></li>
+                    </th:block>
                 </ol>
             </nav>
 
             <!-- Banner hiển thị Category đã chọn và danh sách Category con (Rubric 3-5a & 3-5b) -->
-            <div th:if="${selectedCategory != null}" class="p-3 mb-4 rounded-4 border bg-white shadow-sm">
+            <div th:if="${selectedCategory != null}" class="mb-2 pb-2">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
                     <div class="d-flex align-items-center gap-2">
-                        <span class="badge rounded-circle p-2 d-inline-flex align-items-center justify-content-center" style="background-color: var(--flower-sub-bg); color: var(--flower-accent); width: 38px; height: 38px;">
-                            <i class="bi bi-grid-fill fs-6"></i>
-                        </span>
                         <div>
-                            <h4 class="fw-bold mb-0" style="color: var(--flower-primary); font-size: 20px;">
+                            <h4 class="fw-bold mb-0" style="color: var(--flower-primary); font-size: 22px; font-family: Nunito, sans-serif; font-weight: 800;">
                                 <span th:text="${selectedCategory.name}"></span>
                                 <span th:if="${parentCategory != null}" class="text-muted fw-normal fs-6">
                                     (thuộc danh mục: <a th:href="@{/products(categoryId=${parentCategory.id})} + '#product-catalog'" class="text-decoration-none fw-semibold" style="color: var(--flower-accent);" th:text="${parentCategory.name}"></a>)
                                 </span>
                             </h4>
-                            <p class="text-muted small mb-0" th:text="${selectedCategory.description != null ? selectedCategory.description : 'Danh sách sản phẩm thuộc danh mục ' + selectedCategory.name}"></p>
+                            <p class="text-muted mb-0" style="font-size: 14px; margin-top: 2px;" th:text="${selectedCategory.description != null ? selectedCategory.description : 'Danh sách sản phẩm thuộc danh mục ' + selectedCategory.name}"></p>
                         </div>
                     </div>
                     <span class="badge px-3 py-2 rounded-pill bg-light text-secondary border">
@@ -1838,78 +2056,241 @@
                 <!-- Danh sách Category con (Rubric 3-5a & 3-5b) -->
                 <div th:if="${not #lists.isEmpty(subCategories)}" class="pt-2 border-top mt-2">
                     <div class="d-flex align-items-center gap-2 flex-wrap">
-                        <span class="small fw-bold text-secondary flex-shrink-0">
-                            <i class="bi bi-diagram-3 me-1"></i> Danh mục con:
-                        </span>
+                        
                         <a th:each="sub : ${subCategories}" 
                            th:href="@{/products(categoryId=${sub.id})} + '#product-catalog'" 
-                           class="btn btn-sm rounded-pill px-3 py-1 sub-category-btn"
+                           class="btn btn-sm rounded-pill px-3 sub-category-btn" style="height: 34px; font-size: 13px; display: inline-flex; align-items: center;"
                            th:classappend="${selectedCategory.id == sub.id} ? 'btn-flower-accent text-white fw-bold shadow-sm' : 'btn-outline-secondary'"
                            th:text="${sub.name}"
                            th:id="'sub-category-' + ${sub.id}">
                         </a>
                     </div>
-
                 </div>
             </div>
 
-            <!-- Tabs Top 20 theo Rubric (Mới nhất, Bán chạy nhất, Đánh giá cao) -->
-            <div class="d-flex flex-wrap gap-2 mb-3 pb-3 border-bottom">
-
-                <a th:href="@{/products(categoryId=${categoryId}, keyword=${keyword}, sort=${sort})} + '#product-catalog'" 
-                   class="btn btn-sm rounded-pill px-3 fw-semibold"
-                   th:classappend="${tab == null or tab == ''} ? 'btn-flower-primary text-white' : 'btn-light text-secondary border'">
-                    Tất Cả Mẫu Hoa
-                </a>
-                <a th:href="@{/products(tab='newest', categoryId=${categoryId})} + '#product-catalog'" 
-                   class="btn btn-sm rounded-pill px-3 fw-semibold"
-                   th:classappend="${tab == 'newest'} ? 'btn-flower-primary text-white' : 'btn-light text-secondary border'">
-                    Mới nhất
-                </a>
-                <a th:href="@{/products(tab='bestseller', categoryId=${categoryId})} + '#product-catalog'" 
-                   class="btn btn-sm rounded-pill px-3 fw-semibold"
-                   th:classappend="${tab == 'bestseller'} ? 'btn-flower-primary text-white' : 'btn-light text-secondary border'">
-                    Bán chạy
-                </a>
-                <a th:href="@{/products(tab='toprated', categoryId=${categoryId})} + '#product-catalog'" 
-                   class="btn btn-sm rounded-pill px-3 fw-semibold"
-                   th:classappend="${tab == 'toprated'} ? 'btn-flower-primary text-white' : 'btn-light text-secondary border'">
-
-                    Đánh giá cao
-                </a>
+            <!-- TIÊU ĐỀ KHU VỰC VÀ SỐ KẾT QUẢ -->
+            <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
+                <div>
+                    <h2 class="fw-bold mb-1" style="font-size: 28px; color: var(--flower-primary); letter-spacing: -0.4px; font-family: Nunito, sans-serif; font-weight: 800;" th:text="${activeFilterTitle}">Danh Sách Mẫu Hoa</h2>
+                    <div class="text-secondary" style="font-size: 16px; color: #6B7280;">
+                        Tìm thấy <strong style="color: #355447; font-size: 16px; font-weight: 800;" th:text="${totalItems != null ? totalItems : 0}">0</strong> sản phẩm
+                        <span th:if="${totalPages != null and totalPages > 1}" class="text-muted">
+                            &mdash; trang <span th:text="${currentPage}">1</span>/<span th:text="${totalPages}">1</span>
+                        </span>
+                    </div>
+                </div>
             </div>
 
-            <div class="d-flex justify-content-between align-items-center mb-0">
-                <button
-                    class="btn btn-light btn-sm rounded-pill px-3 py-2 fw-semibold border d-inline-flex align-items-center gap-2 text-secondary"
-                    type="button" data-bs-toggle="collapse" data-bs-target="#allFiltersCollapse"
-                    th:aria-expanded="${(minPrice != null) or (maxPrice != null) or (minRating != null)} ? 'true' : 'false'"
-                    id="btnAllFilters">
-                    <i class="bi bi-sliders" style="color: var(--flower-primary);"></i>
+            <!-- DÒNG CÁC NÚT LỌC ĐA THUỘC TÍNH: [Tất cả bộ lọc] [Kiểu dáng ▾] [Loại hoa ▾] [Màu sắc ▾] [Dịp tặng ▾] [Giá ▾]       [Sắp xếp ▾] -->
+            <div class="product-filter-bar mb-2 d-flex flex-wrap align-items-center gap-2">
+
+                <!-- 0. Nút Tất cả bộ lọc: Mở bảng bên phải màn hình (Offcanvas) -->
+                <button class="filter-drop-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#allFiltersOffcanvas" aria-controls="allFiltersOffcanvas"
+                        style="background-color: #20382E; color: #FFFFFF; border-color: #20382E; font-weight: 700;">
+                    <i class="bi bi-sliders me-1"></i>
                     <span>Tất cả bộ lọc</span>
-                    <i class="bi bi-chevron-down filter-chevron ms-1"></i>
                 </button>
-                <div class="text-secondary small">
-                    Tìm thấy <strong style="color: var(--flower-accent);" th:text="${totalItems}">0</strong> mẫu hoa
+
+                <!-- 1. Kiểu dáng Dropdown: Đổi nhãn thành "Kiểu dáng: [Tên]" khi đã chọn -->
+                <div class="dropdown">
+                    <button class="filter-drop-btn dropdown-toggle" th:classappend="${flowerStyle != null and !flowerStyle.isEmpty()} ? ' active-filter-btn' : ''" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span th:text="${flowerStyle != null and !flowerStyle.isEmpty()} ? 'Kiểu dáng: ' + ${flowerStyle} : 'Kiểu dáng'">Kiểu dáng</span>
+                        <i class="bi bi-chevron-down ms-1" style="font-size: 11px;"></i>
+                    </button>
+                    <ul class="dropdown-menu shadow-sm border-0 rounded-3">
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerStyle == 'Bó hoa'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle == 'Bó hoa' ? null : 'Bó hoa'}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'">Bó hoa</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerStyle == 'Giỏ hoa'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle == 'Giỏ hoa' ? null : 'Giỏ hoa'}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'">Giỏ hoa</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerStyle == 'Hộp hoa'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle == 'Hộp hoa' ? null : 'Hộp hoa'}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'">Hộp hoa</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerStyle == 'Bình hoa'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle == 'Bình hoa' ? null : 'Bình hoa'}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'">Bình hoa</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerStyle == 'Chậu hoa'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle == 'Chậu hoa' ? null : 'Chậu hoa'}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'">Chậu hoa</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerStyle == 'Kệ hoa'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle == 'Kệ hoa' ? null : 'Kệ hoa'}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'">Kệ hoa</a></li>
+                    </ul>
                 </div>
+
+                <!-- 2. Loại hoa Dropdown: Đổi nhãn thành "Loại hoa: [Tên]" khi đã chọn -->
+                <div class="dropdown">
+                    <button class="filter-drop-btn dropdown-toggle" th:classappend="${flowerType != null and !flowerType.isEmpty()} ? ' active-filter-btn' : ''" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span th:text="${flowerType != null and !flowerType.isEmpty()} ? 'Loại hoa: ' + ${flowerType} : 'Loại hoa'">Loại hoa</span>
+                        <i class="bi bi-chevron-down ms-1" style="font-size: 11px;"></i>
+                    </button>
+                    <ul class="dropdown-menu shadow-sm border-0 rounded-3">
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerType == 'Hoa hồng'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType == 'Hoa hồng' ? null : 'Hoa hồng'}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'">Hoa hồng</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerType == 'Tulip'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType == 'Tulip' ? null : 'Tulip'}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'">Hoa Tulip</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerType == 'Hướng dương'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType == 'Hướng dương' ? null : 'Hướng dương'}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'">Hướng dương</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerType == 'Cẩm tú cầu'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType == 'Cẩm tú cầu' ? null : 'Cẩm tú cầu'}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'">Cẩm tú cầu</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerType == 'Lan hồ điệp'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType == 'Lan hồ điệp' ? null : 'Lan hồ điệp'}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'">Lan hồ điệp</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerType == 'Calla Lily'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType == 'Calla Lily' ? null : 'Calla Lily'}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'">Calla Lily (Hoa Rum)</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerType == 'Baby'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType == 'Baby' ? null : 'Baby'}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'">Hoa Baby</a></li>
+                    </ul>
+                </div>
+
+                <!-- 3. Màu sắc Dropdown: Đổi nhãn thành "Màu sắc: [Tên]" khi đã chọn -->
+                <div class="dropdown">
+                    <button class="filter-drop-btn dropdown-toggle" th:classappend="${flowerColor != null and !flowerColor.isEmpty()} ? ' active-filter-btn' : ''" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span th:text="${flowerColor != null and !flowerColor.isEmpty()} ? 'Màu sắc: ' + ${flowerColor} : 'Màu sắc'">Màu sắc</span>
+                        <i class="bi bi-chevron-down ms-1" style="font-size: 11px;"></i>
+                    </button>
+                    <ul class="dropdown-menu shadow-sm border-0 rounded-3">
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerColor == 'Đỏ'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor == 'Đỏ' ? null : 'Đỏ'}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"><span class="d-inline-block rounded-circle me-1" style="width:10px;height:10px;background:#e53e3e;"></span> Đỏ</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerColor == 'Hồng'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor == 'Hồng' ? null : 'Hồng'}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"><span class="d-inline-block rounded-circle me-1" style="width:10px;height:10px;background:#ed64a6;"></span> Hồng</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerColor == 'Vàng'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor == 'Vàng' ? null : 'Vàng'}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"><span class="d-inline-block rounded-circle me-1" style="width:10px;height:10px;background:#ecc94b;"></span> Vàng</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerColor == 'Trắng'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor == 'Trắng' ? null : 'Trắng'}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"><span class="d-inline-block rounded-circle me-1 border" style="width:10px;height:10px;background:#ffffff;"></span> Trắng</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerColor == 'Tím'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor == 'Tím' ? null : 'Tím'}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"><span class="d-inline-block rounded-circle me-1" style="width:10px;height:10px;background:#9f7aea;"></span> Tím</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerColor == 'Xanh'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor == 'Xanh' ? null : 'Xanh'}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"><span class="d-inline-block rounded-circle me-1" style="width:10px;height:10px;background:#4299e1;"></span> Xanh</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerColor == 'Cam'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor == 'Cam' ? null : 'Cam'}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"><span class="d-inline-block rounded-circle me-1" style="width:10px;height:10px;background:#ed8936;"></span> Cam</a></li>
+                    </ul>
+                </div>
+
+                <!-- 4. Dịp tặng Dropdown: Đổi nhãn thành "Dịp tặng: [Tên]" khi đã chọn -->
+                <div class="dropdown">
+                    <button class="filter-drop-btn dropdown-toggle" th:classappend="${flowerOccasion != null and !flowerOccasion.isEmpty()} ? ' active-filter-btn' : ''" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span th:text="${flowerOccasion != null and !flowerOccasion.isEmpty()} ? 'Dịp tặng: ' + ${flowerOccasion} : 'Dịp tặng'">Dịp tặng</span>
+                        <i class="bi bi-chevron-down ms-1" style="font-size: 11px;"></i>
+                    </button>
+                    <ul class="dropdown-menu shadow-sm border-0 rounded-3">
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerOccasion == 'Sinh nhật'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion == 'Sinh nhật' ? null : 'Sinh nhật'}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'">Sinh nhật</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerOccasion == 'Tình yêu'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion == 'Tình yêu' ? null : 'Tình yêu'}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'">Tình yêu & Valentine</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerOccasion == 'Khai trương'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion == 'Khai trương' ? null : 'Khai trương'}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'">Khai trương</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerOccasion == 'Chúc mừng'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion == 'Chúc mừng' ? null : 'Chúc mừng'}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'">Chúc mừng</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerOccasion == 'Đám cưới'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion == 'Đám cưới' ? null : 'Đám cưới'}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'">Đám cưới / Hoa cưới</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${flowerOccasion == 'Chia buồn'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion == 'Chia buồn' ? null : 'Chia buồn'}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'">Chia buồn & Tang lễ</a></li>
+                    </ul>
+                </div>
+
+                <!-- 5. Giá Dropdown: Đổi nhãn thành "Giá: [Khoảng]" khi đã chọn -->
+                <div class="dropdown">
+                    <button class="filter-drop-btn dropdown-toggle" th:classappend="${minPrice != null or maxPrice != null} ? ' active-filter-btn' : ''" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span th:if="${minPrice == null and maxPrice == null}">Giá</span>
+                        <span th:if="${minPrice == null and maxPrice != null and maxPrice <= 500000}">Giá: Dưới 500k</span>
+                        <span th:if="${minPrice != null and minPrice == 500000 and maxPrice != null and maxPrice == 1000000}">Giá: 500k - 1tr</span>
+                        <span th:if="${minPrice != null and minPrice == 1000000 and maxPrice != null and maxPrice == 2000000}">Giá: 1tr - 2tr</span>
+                        <span th:if="${minPrice != null and minPrice >= 2000000 and maxPrice == null}">Giá: Trên 2tr</span>
+                        <span th:if="${(minPrice != null or maxPrice != null) and !(minPrice == null and maxPrice <= 500000) and !(minPrice == 500000 and maxPrice == 1000000) and !(minPrice == 1000000 and maxPrice == 2000000) and !(minPrice >= 2000000 and maxPrice == null)}" 
+                              th:text="'Giá: ' + (${minPrice != null ? #numbers.formatDecimal(minPrice, 0, 'COMMA', 0, 'POINT') : '0'} + ' - ' + (${maxPrice != null ? #numbers.formatDecimal(maxPrice, 0, 'COMMA', 0, 'POINT')} : '...'))">Giá: ...</span>
+                        <i class="bi bi-chevron-down ms-1" style="font-size: 11px;"></i>
+                    </button>
+                    <ul class="dropdown-menu shadow-sm border-0 rounded-3">
+                        <li><a class="dropdown-item py-2" th:classappend="${minPrice == null and maxPrice != null and maxPrice == 500000} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, maxPrice=${minPrice == null and maxPrice == 500000 ? null : 500000}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'">Dưới 500.000 đ</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${minPrice != null and minPrice == 500000 and maxPrice != null and maxPrice == 1000000} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice == 500000 and maxPrice == 1000000 ? null : 500000}, maxPrice=${minPrice == 500000 and maxPrice == 1000000 ? null : 1000000}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'">500.000 đ - 1.000.000 đ</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${minPrice != null and minPrice == 1000000 and maxPrice != null and maxPrice == 2000000} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice == 1000000 and maxPrice == 2000000 ? null : 1000000}, maxPrice=${minPrice == 1000000 and maxPrice == 2000000 ? null : 2000000}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'">1.000.000 đ - 2.000.000 đ</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${minPrice != null and minPrice == 2000000 and maxPrice == null} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice == 2000000 and maxPrice == null ? null : 2000000}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'">Trên 2.000.000 đ</a></li>
+                    </ul>
+                </div>
+
+                <!-- 6. Sắp xếp Dropdown -->
+                <div class="dropdown ms-sm-auto">
+                    <button class="filter-drop-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-arrow-down-up me-1"></i>
+                        <span th:if="${sort == null or sort == 'default'}">Sắp xếp: Mới nhất</span>
+                        <span th:if="${sort == 'price_asc'}">Giá: Thấp → Cao</span>
+                        <span th:if="${sort == 'price_desc'}">Giá: Cao → Thấp</span>
+                        <span th:if="${sort == 'sold_desc'}">Bán chạy nhất</span>
+                        <span th:if="${sort == 'rating_desc'}">Đánh giá cao nhất</span>
+                        <i class="bi bi-chevron-down ms-1" style="font-size: 11px;"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3">
+                        <li><a class="dropdown-item py-2" th:classappend="${sort == null or sort == 'default'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort='default')} + '#product-catalog'">Mới nhất / Nổi bật</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${sort == 'price_asc'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort='price_asc')} + '#product-catalog'">Giá: Thấp → Cao</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${sort == 'price_desc'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort='price_desc')} + '#product-catalog'">Giá: Cao → Thấp</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${sort == 'sold_desc'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort='sold_desc')} + '#product-catalog'">Bán chạy nhất</a></li>
+                        <li><a class="dropdown-item py-2" th:classappend="${sort == 'rating_desc'} ? ' fw-bold active' : ''" th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort='rating_desc')} + '#product-catalog'">Đánh giá cao nhất</a></li>
+                    </ul>
+                </div>
+
             </div>
 
+            <!-- HÀNG "ĐANG LỌC": Nằm trên một hàng riêng biệt bên dưới các nút lọc, trong ô nền hồng nhạt -->
+            <div th:if="${hasActiveFilter}" class="active-filters-container d-flex flex-wrap align-items-center gap-2">
+                <span class="active-filters-title">Đang lọc:</span>
 
-            <!-- Mặc định ẩn bộ lọc, chỉ hiển thị khi người dùng bấm nút All filters -->
-            <div class="collapse pt-3" id="allFiltersCollapse"
+                <!-- 1. Từ khóa: ... × -->
+                <span th:if="${keyword != null and !keyword.isEmpty()}" class="filter-pill-tag">
+                    Từ khóa: <strong th:text="${keyword}">hoa hướng dương</strong>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'" 
+                       class="filter-pill-close" title="Xóa từ khóa tìm kiếm">×</a>
+                </span>
+
+                <!-- 2. Kiểu dáng: Bó hoa × -->
+                <span th:if="${flowerStyle != null and !flowerStyle.isEmpty()}" class="filter-pill-tag">
+                    Kiểu dáng: <strong th:text="${flowerStyle}">Bó hoa</strong>
+                    <a th:href="@{/products(flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'" 
+                       class="filter-pill-close" title="Bỏ lọc kiểu dáng">×</a>
+                </span>
+
+                <!-- 3. Loại hoa: Hướng dương × -->
+                <span th:if="${flowerType != null and !flowerType.isEmpty()}" class="filter-pill-tag">
+                    Loại hoa: <strong th:text="${flowerType}">Hướng dương</strong>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'" 
+                       class="filter-pill-close" title="Bỏ lọc loại hoa">×</a>
+                </span>
+
+                <!-- 4. Màu sắc: Vàng × -->
+                <span th:if="${flowerColor != null and !flowerColor.isEmpty()}" class="filter-pill-tag">
+                    Màu sắc: <strong th:text="${flowerColor}">Vàng</strong>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'" 
+                       class="filter-pill-close" title="Bỏ lọc màu sắc">×</a>
+                </span>
+
+                <!-- 5. Dịp tặng: Sinh nhật × -->
+                <span th:if="${flowerOccasion != null and !flowerOccasion.isEmpty()}" class="filter-pill-tag">
+                    Dịp tặng: <strong th:text="${flowerOccasion}">Sinh nhật</strong>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'" 
+                       class="filter-pill-close" title="Bỏ lọc dịp tặng">×</a>
+                </span>
+
+                <!-- 6. Giá × -->
+                <span th:if="${minPrice != null or maxPrice != null}" class="filter-pill-tag">
+                    Giá:
+                    <strong th:if="${minPrice != null and maxPrice != null}" th:text="${#numbers.formatDecimal(minPrice, 0, 'COMMA', 0, 'POINT')} + ' - ' + ${#numbers.formatDecimal(maxPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                    <strong th:if="${minPrice != null and maxPrice == null}" th:text="'Trên ' + ${#numbers.formatDecimal(minPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                    <strong th:if="${minPrice == null and maxPrice != null}" th:text="'Dưới ' + ${#numbers.formatDecimal(maxPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'" 
+                       class="filter-pill-close" title="Bỏ lọc khoảng giá">×</a>
+                </span>
+
+                <!-- 7. Đánh giá sao × -->
+                <span th:if="${minRating != null}" class="filter-pill-tag">
+                    Đánh giá: <strong th:text="'Từ ' + ${minRating} + ' sao'"></strong>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, tab=${tab}, sort=${sort})} + '#product-catalog'" 
+                       class="filter-pill-close" title="Bỏ lọc đánh giá">×</a>
+                </span>
+
+                <!-- 8. Phân loại: Bán chạy nhất × -->
+                <span th:if="${tab == 'bestseller'}" class="filter-pill-tag">
+                    Phân loại: <strong>Bán chạy nhất</strong>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, sort=${sort})} + '#product-catalog'" 
+                       class="filter-pill-close" title="Bỏ lọc bán chạy">×</a>
+                </span>
+
+                <!-- Nút Xóa bộ lọc (Giữ nguyên keyword và categoryId) -->
+                <a th:href="@{/products(keyword=${keyword}, categoryId=${categoryId}, sort=${sort})} + '#product-catalog'" 
+                   class="btn-clear-all-filter ms-auto" 
+                   title="Xóa các điều kiện lọc hiện tại (giữ từ khóa &amp; danh mục)">
+                    Xóa bộ lọc
+                </a>
+            </div>
+
+            <!-- ĐƯỜNG PHÂN CÁCH TRƯỚC DANH SÁCH SẢN PHẨM -->
+            <hr class="my-3" style="border-color: #E2E7E2; opacity: 0.8;">
+
+            <!-- BẢNG BỘ LỌC TÌM KIẾM CHI TIẾT (COLLAPSE NÂNG CAO) -->
+            <div class="collapse pt-2 mb-3" id="allFiltersCollapse"
                 th:classappend="${(minPrice != null) or (maxPrice != null) or (minRating != null)} ? 'show' : ''">
-                <!-- Form Tìm kiếm & Sắp xếp & Lọc -->
                 <form id="filterForm" th:action="@{/products#product-catalog}" method="get">
                     <input type="hidden" name="categoryId" th:value="${categoryId}">
+                    <input type="hidden" name="flowerStyle" th:value="${flowerStyle}">
+                    <input type="hidden" name="flowerType" th:value="${flowerType}">
+                    <input type="hidden" name="flowerColor" th:value="${flowerColor}">
+                    <input type="hidden" name="flowerOccasion" th:value="${flowerOccasion}">
                     <input type="hidden" name="tab" th:value="${tab}">
                     <input type="hidden" name="size" th:value="${size}">
-                    <input type="hidden" name="page" value="1"> <!-- Reset về trang 1 khi đổi bộ lọc -->
+                    <input type="hidden" name="page" value="1">
 
                     <div class="row g-3 align-items-end">
                         <!-- Ô tìm kiếm từ khóa -->
-                        <div class="col-lg-3 col-md-6">
+                        <div class="col-lg-4 col-md-6">
                             <label class="form-label small fw-semibold text-secondary mb-1">
-                                <i class="bi bi-search me-1" style="color: var(--flower-primary);"></i>Từ khóa:
+                                <i class="bi bi-search me-1" style="color: var(--flower-primary);"></i>Tìm theo tên:
                             </label>
                             <input type="text" name="keyword" th:value="${keyword}"
                                 class="form-control form-control-sm rounded-pill ps-3"
@@ -1917,10 +2298,9 @@
                         </div>
 
                         <!-- Lọc theo khoảng giá -->
-                        <div class="col-lg-3 col-md-6">
+                        <div class="col-lg-4 col-md-6">
                             <label class="form-label small fw-semibold text-secondary mb-1">
-                                <i class="bi bi-cash-coin me-1" style="color: var(--flower-primary);"></i>Khoảng giá
-                                (VNĐ):
+                                <i class="bi bi-cash-coin me-1" style="color: var(--flower-primary);"></i>Khoảng giá (VNĐ):
                             </label>
                             <div class="input-group input-group-sm">
                                 <input type="number" name="minPrice" th:value="${minPrice}"
@@ -1938,159 +2318,48 @@
                             </label>
                             <select name="minRating" class="form-select form-select-sm rounded-pill ps-3">
                                 <option value="" th:selected="${minRating == null}">Tất cả sao</option>
-                                <option value="5.0" th:selected="${minRating != null and minRating == 5.0}">★★★★★ 5 sao
-                                </option>
-                                <option value="4.0" th:selected="${minRating != null and minRating == 4.0}">★ Từ 4 sao
-                                    trở lên</option>
-                                <option value="3.0" th:selected="${minRating != null and minRating == 3.0}">★ Từ 3 sao
-                                    trở lên</option>
-                            </select>
-                        </div>
-
-                        <!-- Dropdown Sắp xếp theo giá / bán chạy -->
-                        <div class="col-lg-2 col-md-6">
-                            <label class="form-label small fw-semibold text-secondary mb-1">
-                                <i class="bi bi-arrow-down-up me-1" style="color: var(--flower-primary);"></i>Sắp xếp:
-                            </label>
-                            <select name="sort" class="form-select form-select-sm rounded-pill ps-3">
-                                <option value="default" th:selected="${sort == null or sort == 'default'}">Mới nhất /
-                                    Nổi bật</option>
-                                <option value="price_asc" th:selected="${sort == 'price_asc'}">Giá: Thấp → Cao</option>
-                                <option value="price_desc" th:selected="${sort == 'price_desc'}">Giá: Cao → Thấp
-                                </option>
-                                <option value="sold_desc" th:selected="${sort == 'sold_desc'}">Bán chạy nhất</option>
-                                <option value="rating_desc" th:selected="${sort == 'rating_desc'}">Đánh giá cao nhất
-                                </option>
-                                <option value="name_asc" th:selected="${sort == 'name_asc'}">Tên: A → Z</option>
+                                <option value="5.0" th:selected="${minRating != null and minRating == 5.0}">★★★★★ 5 sao</option>
+                                <option value="4.0" th:selected="${minRating != null and minRating == 4.0}">★ Từ 4 sao trở lên</option>
+                                <option value="3.0" th:selected="${minRating != null and minRating == 3.0}">★ Từ 3 sao trở lên</option>
                             </select>
                         </div>
 
                         <!-- Nút thao tác -->
-                        <div class="col-lg-2 col-md-12 d-flex gap-2">
-                            <button class="btn btn-flower-primary btn-sm rounded-pill px-3 fw-semibold w-100"
-                                type="submit" id="btnApplyFilter">
+                        <div class="col-lg-2 col-md-6 d-flex gap-2">
+                            <button class="btn btn-flower-primary btn-sm rounded-pill px-3 fw-semibold w-100" type="submit" id="btnApplyFilter">
                                 <i class="bi bi-funnel-fill me-1"></i> Lọc
                             </button>
-                            <a th:href="@{/products#product-catalog}"
-                                class="btn btn-outline-secondary rounded-pill px-3 btn-sm" id="btnResetFilter"
-                                title="Xóa bộ lọc">
+                            <a th:href="@{/products} + '#product-catalog'" class="btn btn-outline-secondary rounded-pill px-3 btn-sm" id="btnResetFilter" title="Xóa bộ lọc">
                                 <i class="bi bi-arrow-counterclockwise"></i>
                             </a>
                         </div>
                     </div>
-
-
-                    <!-- Lọc theo đánh giá tối thiểu -->
-                    <div class="col-lg-2 col-md-6">
-                        <label class="form-label small fw-semibold text-secondary mb-1">
-                            <i class="bi bi-star-fill text-warning me-1"></i>Đánh giá:
-                        </label>
-                        <select name="minRating" class="form-select form-select-sm rounded-pill ps-3">
-                            <option value="" th:selected="${minRating == null}">Tất cả sao</option>
-                            <option value="5.0" th:selected="${minRating != null and minRating == 5.0}">★★★★★ 5 sao</option>
-                            <option value="4.0" th:selected="${minRating != null and minRating == 4.0}">★ Từ 4 sao trở lên</option>
-                            <option value="3.0" th:selected="${minRating != null and minRating == 3.0}">★ Từ 3 sao trở lên</option>
-                        </select>
-                    </div>
-
-                    <!-- Dropdown Sắp xếp theo giá / bán chạy -->
-                    <div class="col-lg-2 col-md-6">
-                        <label class="form-label small fw-semibold text-secondary mb-1">
-                            <i class="bi bi-arrow-down-up me-1" style="color: var(--flower-primary);"></i>Sắp xếp:
-                        </label>
-                        <select name="sort" class="form-select form-select-sm rounded-pill ps-3">
-                            <option value="default" th:selected="${sort == null or sort == 'default'}">Mới nhất / Nổi bật</option>
-                            <option value="price_asc" th:selected="${sort == 'price_asc'}">Giá: Thấp → Cao</option>
-                            <option value="price_desc" th:selected="${sort == 'price_desc'}">Giá: Cao → Thấp</option>
-                            <option value="sold_desc" th:selected="${sort == 'sold_desc'}">Bán chạy nhất</option>
-                            <option value="rating_desc" th:selected="${sort == 'rating_desc'}">Đánh giá cao nhất</option>
-                            <option value="name_asc" th:selected="${sort == 'name_asc'}">Tên: A → Z</option>
-                        </select>
-                    </div>
-
-                    <!-- Nút thao tác -->
-                    <div class="col-lg-2 col-md-12 d-flex gap-2">
-                        <button class="btn btn-flower-primary btn-sm rounded-pill px-3 fw-semibold w-100" type="submit" id="btnApplyFilter">
-                            <i class="bi bi-funnel-fill me-1"></i> Lọc
-                        </button>
-                        <a th:href="@{/products} + '#product-catalog'" class="btn btn-outline-secondary rounded-pill px-3 btn-sm" id="btnResetFilter" title="Xóa bộ lọc">
-                            <i class="bi bi-arrow-counterclockwise"></i>
-                        </a>
-                    </div>
-                </div>
-
                 </form>
-
-                <hr class="my-3 border-light-subtle">
-
-                <!-- Thanh lọc theo Danh mục hoa (Category Pills) -->
-                <div>
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <span class="small fw-semibold text-secondary">
-                            <i class="bi bi-grid me-1" style="color: var(--flower-primary);"></i>Phân loại danh mục:
-                        </span>
-                        <span class="small text-muted">
-                            Tìm thấy <strong style="color: var(--flower-accent);" th:text="${totalItems}"></strong> mẫu
-                            hoa
-                        </span>
-                    </div>
-                    <div class="d-flex flex-wrap gap-2">
-                        <!-- Nút Tất Cả -->
-
-                        <a th:href="@{/products(keyword=${keyword}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, size=${size})} + '#product-catalog'" 
-                           class="category-pill"
-                           th:classappend="${categoryId == null or categoryId == 0} ? 'active' : ''">
-
-                            Tất Cả Mẫu Hoa
-                        </a>
-
-                        <!-- Danh sách các danh mục hoa -->
-
-                        <a th:each="cat : ${categories}" 
-                           th:href="@{/products(categoryId=${cat.id}, keyword=${keyword}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, size=${size})} + '#product-catalog'" 
-                           class="category-pill"
-                           th:classappend="${categoryId != null and (categoryId == cat.id or (parentCategory != null and parentCategory.id == cat.id))} ? 'active' : ''"
-                           th:text="${cat.name}">
-
-                        </a>
-                    </div>
-                </div>
-            </div> <!-- Đóng allFiltersCollapse -->
-        </div>
-
-        <!-- Thông báo bộ lọc đang áp dụng -->
-        <div th:if="${(keyword != null and !keyword.isEmpty()) or (categoryId != null and categoryId > 0) or (sort != null and sort != 'default')}"
-            class="d-flex align-items-center gap-2 mb-3 flex-wrap small">
-            <span class="text-muted">Đang lọc theo:</span>
-            <span th:if="${keyword != null and !keyword.isEmpty()}" class="badge badge-flower-accent p-2">
-                Từ khóa: "<span th:text="${keyword}"></span>"
-
-                <a th:href="@{/products(categoryId=${categoryId}, sort=${sort}, size=${size})} + '#product-catalog'" class="ms-1 text-decoration-none" style="color: var(--flower-accent);">×</a>
-            </span>
-            <span th:if="${categoryId != null and categoryId > 0}" class="badge badge-flower-accent p-2">
-                <span th:each="c : ${categories}" th:if="${c.id == categoryId}" th:text="'Danh mục: ' + ${c.name}"></span>
-                <a th:href="@{/products(keyword=${keyword}, sort=${sort}, size=${size})} + '#product-catalog'" class="ms-1 text-decoration-none" style="color: var(--flower-accent);">×</a>
-            </span>
-            <span th:if="${sort == 'price_asc'}" class="badge bg-light text-dark border p-2">Giá: Thấp → Cao</span>
-            <span th:if="${sort == 'price_desc'}" class="badge bg-light text-dark border p-2">Giá: Cao → Thấp</span>
-            <a th:href="@{/products} + '#product-catalog'" class="small ms-2 text-decoration-none fw-semibold" style="color: var(--flower-accent);">Xóa tất cả</a>
-
-        </div>
-
-        <!-- Khi không tìm thấy sản phẩm nào -->
-        <div th:if="${#lists.isEmpty(products)}" class="card filter-card p-5 text-center my-4">
-            <div class="fs-1 mb-2"><i class="bi bi-search text-muted"></i></div>
-            <h4 class="font-serif fw-bold" style="color: var(--flower-primary);">Không tìm thấy mẫu hoa phù hợp</h4>
-            <p class="text-muted small">Vui lòng thử tìm với từ khóa khác hoặc bấm xem tất cả danh mục hoa tươi.</p>
-            <div>
-                <a th:href="@{/}" class="btn btn-flower-primary rounded-pill px-4 mt-2">Xem Toàn Bộ Mẫu Hoa</a>
             </div>
-        </div>
 
-        <!-- Lưới sản phẩm hoa tươi: 4 sản phẩm/hàng máy tính, 2 trên điện thoại, khoảng cách 24px (g-4) -->
-        <div th:if="${not #lists.isEmpty(products)}" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
-            <div class="col" th:each="p : ${products}">
-                <div class="card flower-card h-100 position-relative">
+            <!-- Khi không tìm thấy sản phẩm nào: vẫn giữ bộ lọc để khách điều chỉnh -->
+            <div th:if="${#lists.isEmpty(products)}" class="py-5 text-center my-4">
+                <div style="font-size: 3.5rem; margin-bottom: 12px;">🌸</div>
+                <h4 class="fw-bold mb-2" style="color: var(--flower-primary);">Không tìm thấy mẫu hoa phù hợp</h4>
+                <p class="text-muted mb-4" style="font-size: 14.5px;">
+                    Không có sản phẩm nào khớp với điều kiện lọc hiện tại.<br>
+                    Hãy thử điều chỉnh bộ lọc hoặc xóa bớt điều kiện.
+                </p>
+                <div class="d-flex align-items-center justify-content-center gap-3 flex-wrap">
+                    <a th:if="${hasActiveFilter}" 
+                       th:href="@{/products(keyword=${keyword}, categoryId=${categoryId})} + '#product-catalog'" 
+                       class="btn btn-outline-secondary rounded-pill px-4 fw-semibold">
+                        <i class="bi bi-x-circle me-1"></i>Xóa bộ lọc
+                    </a>
+                    <a th:href="@{/products}" class="btn btn-flower-primary rounded-pill px-4 fw-semibold">
+                        <i class="bi bi-grid me-1"></i>Xem tất cả mẫu hoa
+                    </a>
+                </div>
+            </div>
+
+            <!-- LƯỚI SẢN PHẨM CHUẨN: 4 cột máy tính, 3 tablet, 2 mobile, 1 điện thoại nhỏ, khoảng cách 24px/16px trong lưới không tràn viền -->
+            <div th:if="${not #lists.isEmpty(products)}" class="product-grid">
+                <div class="card flower-card h-100 position-relative" th:each="p : ${products}">
                     <!-- UC_015 Alternative 1a: Nút Follow/Following ở một thẻ sản phẩm (Nút theo dõi nhanh) -->
                     <form sec:authorize="hasRole('CUSTOMER')"
                         th:action="@{/customer/following/toggle/{productId}(productId=${p.id})}" method="post"
@@ -2110,24 +2379,24 @@
                         <i class="bi bi-heart"></i>
                     </a>
 
-                    <!-- Ảnh đại diện sản phẩm (Tỷ lệ 1:1, không có nhãn 'Đã bán') -->
+                    <!-- Ảnh đại diện sản phẩm (Tỷ lệ 1:1, không kéo giãn) -->
                     <div class="overflow-hidden">
                         <a th:href="@{/product/{id}(id=${p.id})}">
                             <img th:src="${p.imageUrl != null ? p.imageUrl : 'https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=800'}"
                                 class="card-img-top flower-card-img" th:alt="${p.name}"
-                                onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800&amp;q=80';">
+                                onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1490750967868-88df5691cc63?w=800&q=80';">
                         </a>
                     </div>
 
                     <div class="flower-card-body">
-                        <!-- Tên sản phẩm: tối đa 2 dòng -->
+                        <!-- Tên sản phẩm: tối đa 2 dòng, tự xuống hàng không làm bè ngang thẻ -->
                         <a th:href="@{/product/{id}(id=${p.id})}" class="flower-card-title text-decoration-none"
                             th:title="${p.name}" th:text="${p.name}"></a>
 
                         <!-- Giá và đánh giá có vị trí thống nhất -->
                         <div class="flower-card-meta">
                             <span class="flower-price"
-                                th:text="${#numbers.formatDecimal(p.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                                th:text="${#numbers.formatDecimal(p.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
                             <span class="flower-rating">
                                 <i class="bi bi-star-fill star-gold"></i>
                                 <span th:text="${p.rating != null ? p.rating : '5.0'}"></span>
@@ -2161,14 +2430,12 @@
         <div th:if="${totalPages > 1}" class="custom-pagination-container">
             <nav aria-label="Product Pagination">
                 <ul class="custom-pagination">
-                    <!-- Nút Trang Trước (<) -->
+                    <!-- Nút Trang Trước (‹ Trước) -->
                     <li class="page-item" th:classappend="${currentPage <= 1} ? 'disabled' : ''">
-
                         <a class="page-link page-nav-arrow" id="btnPrevPage" 
-                           th:href="@{/products(page=${currentPage - 1}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
+                           th:href="@{/products(page=${currentPage - 1}, keyword=${keyword}, categoryId=${categoryId}, tab=${tab}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size}, flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion})} + '#product-catalog'" 
                            title="Trang trước" aria-label="Previous">
-
-                            <i class="bi bi-chevron-left"></i>
+                            ‹ Trước
                         </a>
                     </li>
 
@@ -2176,11 +2443,9 @@
                     <th:block th:if="${totalPages <= 5}">
                         <li th:each="i : ${#numbers.sequence(1, totalPages)}" class="page-item"
                             th:classappend="${i == currentPage} ? 'active' : ''">
-
                             <a class="page-link" 
-                               th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
+                               th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, tab=${tab}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size}, flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion})} + '#product-catalog'" 
                                th:text="${i}">1</a>
-
                         </li>
                     </th:block>
 
@@ -2190,69 +2455,57 @@
                         <th:block th:if="${currentPage <= 4}">
                             <li th:each="i : ${#numbers.sequence(1, 5)}" class="page-item"
                                 th:classappend="${i == currentPage} ? 'active' : ''">
-
                                 <a class="page-link" 
-                                   th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
+                                   th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, tab=${tab}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size}, flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion})} + '#product-catalog'" 
                                    th:text="${i}">1</a>
                             </li>
                             <li class="page-item">
                                 <a class="page-link page-ellipsis" 
-                                   th:href="@{/products(page=6, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
+                                   th:href="@{/products(page=6, keyword=${keyword}, categoryId=${categoryId}, tab=${tab}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size}, flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion})} + '#product-catalog'" 
                                    title="Xem thêm các trang tiếp theo">...</a>
-
                             </li>
                         </th:block>
 
                         <!-- Khi ở các trang cuối (currentPage >= totalPages - 3): Hiển thị ... (totalPages-4)..totalPages -->
                         <th:block th:if="${currentPage >= totalPages - 3}">
                             <li class="page-item">
-
                                 <a class="page-link page-ellipsis" 
-                                   th:href="@{/products(page=${totalPages - 5}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
+                                   th:href="@{/products(page=${totalPages - 5}, keyword=${keyword}, categoryId=${categoryId}, tab=${tab}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size}, flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion})} + '#product-catalog'" 
                                    title="Xem các trang trước">...</a>
-
                             </li>
                             <li th:each="i : ${#numbers.sequence(totalPages - 4, totalPages)}" class="page-item"
                                 th:classappend="${i == currentPage} ? 'active' : ''">
-
                                 <a class="page-link" 
-                                   th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
+                                   th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, tab=${tab}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size}, flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion})} + '#product-catalog'" 
                                    th:text="${i}">1</a>
-
                             </li>
                         </th:block>
 
                         <!-- Khi ở các trang ở giữa: ... (currentPage-2)..currentPage..(currentPage+2) ... -->
                         <th:block th:if="${currentPage > 4 and currentPage < totalPages - 3}">
                             <li class="page-item">
-
                                 <a class="page-link page-ellipsis" 
-                                   th:href="@{/products(page=${currentPage - 3}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'">...</a>
-
+                                   th:href="@{/products(page=${currentPage - 3}, keyword=${keyword}, categoryId=${categoryId}, tab=${tab}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size}, flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion})} + '#product-catalog'">...</a>
                             </li>
                             <li th:each="i : ${#numbers.sequence(currentPage - 2, currentPage + 2)}" class="page-item"
                                 th:classappend="${i == currentPage} ? 'active' : ''">
-
                                 <a class="page-link" 
-                                   th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
+                                   th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, tab=${tab}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size}, flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion})} + '#product-catalog'" 
                                    th:text="${i}">1</a>
                             </li>
                             <li class="page-item">
                                 <a class="page-link page-ellipsis" 
-                                   th:href="@{/products(page=${currentPage + 3}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'">...</a>
-
+                                   th:href="@{/products(page=${currentPage + 3}, keyword=${keyword}, categoryId=${categoryId}, tab=${tab}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size}, flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion})} + '#product-catalog'">...</a>
                             </li>
                         </th:block>
                     </th:block>
 
-                    <!-- Nút Trang Sau (>) -->
+                    <!-- Nút Trang Sau (Sau ›) -->
                     <li class="page-item" th:classappend="${currentPage >= totalPages} ? 'disabled' : ''">
-
                         <a class="page-link page-nav-arrow" id="btnNextPage" 
-                           th:href="@{/products(page=${currentPage + 1}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
+                           th:href="@{/products(page=${currentPage + 1}, keyword=${keyword}, categoryId=${categoryId}, tab=${tab}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size}, flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion})} + '#product-catalog'" 
                            title="Trang sau" aria-label="Next">
-
-                            <i class="bi bi-chevron-right"></i>
+                            Sau ›
                         </a>
                     </li>
                 </ul>
@@ -2672,6 +2925,182 @@
                 });
         }
     </script>
+    <!-- ========================================================
+         OFFCANVAS DRAWER: TẤT CẢ BỘ LỌC (UC_005)
+         Mở bảng bên phải màn hình: Kiểu dáng, Loại hoa, Màu sắc, Dịp tặng, Giá
+         ======================================================== -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="allFiltersOffcanvas" aria-labelledby="allFiltersOffcanvasLabel" style="width: 420px; max-width: 90vw;">
+        <div class="offcanvas-header border-bottom py-3 px-4" style="background-color: #FAF7F2;">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-sliders" style="font-size: 18px; color: #20382E !important;"></i>
+                <h5 class="offcanvas-title fw-bold mb-0" id="allFiltersOffcanvasLabel" style="color: #20382E; font-size: 18px;">Tất cả bộ lọc</h5>
+            </div>
+            <button type="button" class="btn-close text-reset shadow-none" data-bs-dismiss="offcanvas" aria-label="Đóng"></button>
+        </div>
+        <div class="offcanvas-body p-4" style="overflow-y: auto;">
+            <!-- Nhóm 1: Kiểu dáng (Bó hoa, Giỏ hoa, Hộp hoa, Bình hoa, Chậu hoa, Kệ hoa...) -->
+            <div class="mb-4">
+                <div class="fw-bold mb-2 text-dark d-flex align-items-center justify-content-between" style="font-size: 15px;">
+                    <span>Kiểu dáng</span>
+                    <span th:if="${flowerStyle != null and !flowerStyle.isEmpty()}" class="small text-muted" th:text="${flowerStyle}"></span>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a th:href="@{/products(flowerStyle=${flowerStyle == 'Bó hoa' ? null : 'Bó hoa'}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerStyle == 'Bó hoa'} ? ' active' : ''">Bó hoa</a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle == 'Giỏ hoa' ? null : 'Giỏ hoa'}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerStyle == 'Giỏ hoa'} ? ' active' : ''">Giỏ hoa</a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle == 'Hộp hoa' ? null : 'Hộp hoa'}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerStyle == 'Hộp hoa'} ? ' active' : ''">Hộp hoa</a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle == 'Bình hoa' ? null : 'Bình hoa'}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerStyle == 'Bình hoa'} ? ' active' : ''">Bình hoa</a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle == 'Chậu hoa' ? null : 'Chậu hoa'}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerStyle == 'Chậu hoa'} ? ' active' : ''">Chậu hoa</a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle == 'Kệ hoa' ? null : 'Kệ hoa'}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerStyle == 'Kệ hoa'} ? ' active' : ''">Kệ hoa</a>
+                </div>
+            </div>
+
+            <!-- Nhóm 2: Loại hoa (Hướng dương, Hồng, Tulip, Cẩm tú cầu, Lan hồ điệp, Calla Lily, Baby...) -->
+            <div class="mb-4">
+                <div class="fw-bold mb-2 text-dark d-flex align-items-center justify-content-between" style="font-size: 15px;">
+                    <span>Loại hoa</span>
+                    <span th:if="${flowerType != null and !flowerType.isEmpty()}" class="small text-muted" th:text="${flowerType}"></span>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType == 'Hướng dương' ? null : 'Hướng dương'}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerType == 'Hướng dương'} ? ' active' : ''">Hướng dương</a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType == 'Hoa hồng' ? null : 'Hoa hồng'}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerType == 'Hoa hồng'} ? ' active' : ''">Hoa hồng</a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType == 'Tulip' ? null : 'Tulip'}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerType == 'Tulip'} ? ' active' : ''">Tulip</a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType == 'Cẩm tú cầu' ? null : 'Cẩm tú cầu'}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerType == 'Cẩm tú cầu'} ? ' active' : ''">Cẩm tú cầu</a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType == 'Lan hồ điệp' ? null : 'Lan hồ điệp'}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerType == 'Lan hồ điệp'} ? ' active' : ''">Lan hồ điệp</a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType == 'Calla Lily' ? null : 'Calla Lily'}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerType == 'Calla Lily'} ? ' active' : ''">Calla Lily</a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType == 'Baby' ? null : 'Baby'}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerType == 'Baby'} ? ' active' : ''">Hoa Baby</a>
+                </div>
+            </div>
+
+            <!-- Nhóm 3: Màu sắc (Tên màu kèm chấm màu: Đỏ, Hồng, Vàng, Trắng, Tím, Xanh, Cam) -->
+            <div class="mb-4">
+                <div class="fw-bold mb-2 text-dark d-flex align-items-center justify-content-between" style="font-size: 15px;">
+                    <span>Màu sắc</span>
+                    <span th:if="${flowerColor != null and !flowerColor.isEmpty()}" class="small text-muted" th:text="${flowerColor}"></span>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor == 'Đỏ' ? null : 'Đỏ'}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerColor == 'Đỏ'} ? ' active' : ''">
+                        <span class="color-dot" style="background-color: #E53E3E;"></span> Đỏ
+                    </a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor == 'Hồng' ? null : 'Hồng'}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerColor == 'Hồng'} ? ' active' : ''">
+                        <span class="color-dot" style="background-color: #ED64A6;"></span> Hồng
+                    </a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor == 'Vàng' ? null : 'Vàng'}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerColor == 'Vàng'} ? ' active' : ''">
+                        <span class="color-dot" style="background-color: #ECC94B;"></span> Vàng
+                    </a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor == 'Trắng' ? null : 'Trắng'}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerColor == 'Trắng'} ? ' active' : ''">
+                        <span class="color-dot border" style="background-color: #FFFFFF;"></span> Trắng
+                    </a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor == 'Tím' ? null : 'Tím'}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerColor == 'Tím'} ? ' active' : ''">
+                        <span class="color-dot" style="background-color: #9F7AEA;"></span> Tím
+                    </a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor == 'Xanh' ? null : 'Xanh'}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerColor == 'Xanh'} ? ' active' : ''">
+                        <span class="color-dot" style="background-color: #4299E1;"></span> Xanh
+                    </a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor == 'Cam' ? null : 'Cam'}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerColor == 'Cam'} ? ' active' : ''">
+                        <span class="color-dot" style="background-color: #ED8936;"></span> Cam
+                    </a>
+                </div>
+            </div>
+
+            <!-- Nhóm 4: Dịp tặng (Sinh nhật, Tốt nghiệp, Khai trương, Tình yêu, Chúc mừng, Đám cưới, Chia buồn...) -->
+            <div class="mb-4">
+                <div class="fw-bold mb-2 text-dark d-flex align-items-center justify-content-between" style="font-size: 15px;">
+                    <span>Dịp tặng</span>
+                    <span th:if="${flowerOccasion != null and !flowerOccasion.isEmpty()}" class="small text-muted" th:text="${flowerOccasion}"></span>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion == 'Sinh nhật' ? null : 'Sinh nhật'}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerOccasion == 'Sinh nhật'} ? ' active' : ''">Sinh nhật</a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion == 'Tốt nghiệp' ? null : 'Tốt nghiệp'}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerOccasion == 'Tốt nghiệp'} ? ' active' : ''">Tốt nghiệp</a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion == 'Khai trương' ? null : 'Khai trương'}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerOccasion == 'Khai trương'} ? ' active' : ''">Khai trương</a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion == 'Tình yêu' ? null : 'Tình yêu'}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerOccasion == 'Tình yêu'} ? ' active' : ''">Tình yêu</a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion == 'Chúc mừng' ? null : 'Chúc mừng'}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerOccasion == 'Chúc mừng'} ? ' active' : ''">Chúc mừng</a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion == 'Đám cưới' ? null : 'Đám cưới'}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerOccasion == 'Đám cưới'} ? ' active' : ''">Đám cưới</a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion == 'Chia buồn' ? null : 'Chia buồn'}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${flowerOccasion == 'Chia buồn'} ? ' active' : ''">Chia buồn</a>
+                </div>
+            </div>
+
+            <!-- Nhóm 5: Giá (Khoảng giá có sẵn hoặc nhập từ - đến) -->
+            <div class="mb-3">
+                <div class="fw-bold mb-2 text-dark" style="font-size: 15px;">Khoảng giá</div>
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, maxPrice=${maxPrice == 500000 and minPrice == null ? null : 500000}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${minPrice == null and maxPrice == 500000} ? ' active' : ''">Dưới 500.000 đ</a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice == 500000 and maxPrice == 1000000 ? null : 500000}, maxPrice=${minPrice == 500000 and maxPrice == 1000000 ? null : 1000000}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${minPrice == 500000 and maxPrice == 1000000} ? ' active' : ''">500.000 - 1.000.000 đ</a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice == 1000000 and maxPrice == 2000000 ? null : 1000000}, maxPrice=${minPrice == 1000000 and maxPrice == 2000000 ? null : 2000000}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${minPrice == 1000000 and maxPrice == 2000000} ? ' active' : ''">1.000.000 - 2.000.000 đ</a>
+                    <a th:href="@{/products(flowerStyle=${flowerStyle}, flowerType=${flowerType}, flowerColor=${flowerColor}, flowerOccasion=${flowerOccasion}, categoryId=${categoryId}, keyword=${keyword}, minPrice=${minPrice == 2000000 and maxPrice == null ? null : 2000000}, minRating=${minRating}, tab=${tab}, sort=${sort})} + '#product-catalog'"
+                       class="drawer-filter-chip" th:classappend="${minPrice == 2000000 and maxPrice == null} ? ' active' : ''">Trên 2.000.000 đ</a>
+                </div>
+
+                <div class="small fw-semibold text-secondary mb-1">Hoặc nhập khoảng giá (VNĐ):</div>
+                <form th:action="@{/products#product-catalog}" method="get" class="row g-2 align-items-center">
+                    <input type="hidden" name="flowerStyle" th:value="${flowerStyle}">
+                    <input type="hidden" name="flowerType" th:value="${flowerType}">
+                    <input type="hidden" name="flowerColor" th:value="${flowerColor}">
+                    <input type="hidden" name="flowerOccasion" th:value="${flowerOccasion}">
+                    <input type="hidden" name="categoryId" th:value="${categoryId}">
+                    <input type="hidden" name="keyword" th:value="${keyword}">
+                    <input type="hidden" name="tab" th:value="${tab}">
+                    <input type="hidden" name="sort" th:value="${sort}">
+                    <div class="col-5">
+                        <input type="number" name="minPrice" th:value="${minPrice}" class="form-control form-control-sm rounded-pill px-3" placeholder="Từ (đ)">
+                    </div>
+                    <div class="col-2 text-center text-muted small">—</div>
+                    <div class="col-5">
+                        <input type="number" name="maxPrice" th:value="${maxPrice}" class="form-control form-control-sm rounded-pill px-3" placeholder="Đến (đ)">
+                    </div>
+                    <div class="col-12 mt-2">
+                        <button type="submit" class="btn btn-sm btn-outline-secondary w-100 rounded-pill fw-semibold">
+                            Áp dụng khoảng giá
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- Footer cuối bảng (sticky): Đặt lại bộ lọc & Xem kết quả -->
+        <div class="offcanvas-footer border-top bg-white d-flex align-items-center justify-content-between gap-3"
+             style="padding: 14px 20px; position: sticky; bottom: 0; z-index: 5; box-shadow: 0 -4px 16px rgba(41,59,50,0.08);">
+            <a th:href="@{/products(keyword=${keyword}, categoryId=${categoryId})} + '#product-catalog'" 
+               class="btn btn-outline-secondary rounded-pill px-3 py-2 fw-semibold flex-1" 
+               data-bs-dismiss="offcanvas"
+               style="font-size: 14px; flex: 1;">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>Đặt lại bộ lọc
+            </a>
+            <button type="button" class="btn rounded-pill px-3 py-2 fw-bold text-white flex-1" 
+                    data-bs-dismiss="offcanvas" 
+                    style="background-color: #20382E; font-size: 14px; flex: 1;">
+                <i class="bi bi-check2 me-1"></i>Xem <span th:text="${totalItems != null ? totalItems : 0}">0</span> kết quả
+            </button>
+        </div>
+    </div>
 </body>
 
 </html>
