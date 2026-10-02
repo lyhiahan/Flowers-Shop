@@ -26,6 +26,7 @@ public class AdminDashboardController {
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
+    private final RoleRequestRepository roleRequestRepository;
     private final com.finalproject.service.AnalyticsService analyticsService;
 
     @GetMapping({"", "/dashboard"})
@@ -39,8 +40,10 @@ public class AdminDashboardController {
             User admin = userRepository.findByUsername(principal.getName()).orElse(null);
 
             long totalProducts = productRepository.count();
+            long pendingProducts = productRepository.findAll().stream().filter(p -> Boolean.FALSE.equals(p.getIsActive())).count();
             long totalCategories = categoryRepository.count();
             long totalStores = storeRepository.count();
+            long activeStores = storeRepository.countByStatus(true);
             long totalUsers = userRepository.count();
             long totalCustomers = userRepository.countByRole(Role.CUSTOMER);
             long totalManagers = userRepository.countByRole(Role.MANAGER);
@@ -52,9 +55,14 @@ public class AdminDashboardController {
             long rentingOrders = orderRepository.countByStatus(OrderStatus.RENTING);
             long completedOrders = orderRepository.countByStatus(OrderStatus.COMPLETED);
 
+            // Việc cần xử lý: Yêu cầu cấp vai trò, sản phẩm chờ duyệt
+            long pendingRoleRequestsCount = roleRequestRepository.countByStatus(com.finalproject.enums.RoleRequestStatus.PENDING);
+            List<com.finalproject.entity.RoleRequest> pendingRoleRequests = roleRequestRepository.findByStatusOrderByCreatedAtDesc(com.finalproject.enums.RoleRequestStatus.PENDING);
+            List<com.finalproject.entity.Product> pendingApprovalProducts = productRepository.findAll().stream().filter(p -> Boolean.FALSE.equals(p.getIsActive())).limit(10).toList();
+
             List<Order> recentOrders;
             try {
-                recentOrders = orderRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"))).getContent();
+                recentOrders = orderRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 10, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"))).getContent();
             } catch (Exception e) {
                 recentOrders = orderRepository.findTop10ByOrderByCreatedAtDesc();
             }
@@ -110,11 +118,16 @@ public class AdminDashboardController {
             model.addAttribute("timeframe", timeframe);
             model.addAttribute("userChartType", userChartType != null ? userChartType.toLowerCase() : "line");
             model.addAttribute("storeChartType", storeChartType != null ? storeChartType.toLowerCase() : "bar");
-            model.addAttribute("totalProducts", totalProducts);
-            model.addAttribute("totalProductsCount", totalProducts);
-            model.addAttribute("totalCategories", totalCategories);
             model.addAttribute("totalStores", totalStores);
             model.addAttribute("totalStoresCount", totalStores);
+            model.addAttribute("activeStores", activeStores);
+            model.addAttribute("totalProducts", totalProducts);
+            model.addAttribute("totalProductsCount", totalProducts);
+            model.addAttribute("pendingProducts", pendingProducts);
+            model.addAttribute("pendingRoleRequestsCount", pendingRoleRequestsCount);
+            model.addAttribute("pendingRoleRequests", pendingRoleRequests);
+            model.addAttribute("pendingApprovalProducts", pendingApprovalProducts);
+            model.addAttribute("totalCategories", totalCategories);
             model.addAttribute("totalUsers", totalUsers);
             model.addAttribute("totalUsersCount", totalUsers);
             model.addAttribute("totalCustomers", totalCustomers);

@@ -24,25 +24,25 @@
         <!-- Sidebar: Bước 6 theo UC_022: Chọn Orders trên thanh sidebar -->
         <div class="col-md-2 p-3 sidebar">
             <div class="d-flex align-items-center gap-2 mb-4 px-2">
-                <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img me-1">
+                <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img me-1" style="width: 36px; height: 36px; object-fit: contain; flex-shrink: 0;">
                 <div>
-                    <h6 class="font-serif fw-bold text-white mb-0">CỬA HÀNG HOA</h6>
+                    <h6 class="font-serif fw-bold text-white mb-0">TIỆM HOA TƯƠI</h6>
                     <small class="text-secondary" th:text="${store != null ? store.name : 'Chi nhánh'}"></small>
                 </div>
             </div>
             <nav class="d-flex flex-column gap-1">
                 <a th:href="@{/manager/dashboard}"><i class="bi bi-speedometer2"></i> Tổng Quan Chi Nhánh</a>
                 <!-- BƯỚC 6 THEO UC_022: Chọn Orders trên thanh sidebar -->
-                <a th:href="@{/manager/orders}" class="active" id="sidebarOrders"><i class="bi bi-bag-check-fill"></i> Orders (Quản Lý Đơn Hàng)</a>
+                <a th:href="@{/manager/orders}" class="active" id="sidebarOrders"><i class="bi bi-bag-check-fill"></i> Quản Lý Đơn Hàng</a>
                 <a th:href="@{/manager/products}"><i class="bi bi-flower1"></i> Kho Mẫu Hoa</a>
-                <a th:href="@{/manager/staff}"><i class="bi bi-people"></i> Staffs (Nhân Viên)</a>
-                <a th:href="@{/manager/wallet}" id="sidebarGdCoins"><i class="bi bi-coin"></i> GD Coins (Ví Cửa Hàng)</a>
-                <a th:href="@{/manager/vouchers}"><i class="bi bi-ticket-perforated-fill"></i> Khuyến Mãi Shop</a>
+                <a th:href="@{/manager/staff}" id="sidebarStaffs"><i class="bi bi-people"></i> Quản Lý Nhân Viên</a>
+                <a th:href="@{/manager/wallet}" id="sidebarGdCoins"><i class="bi bi-coin"></i> Ví Cửa Hàng</a>
+                <a th:href="@{/manager/vouchers}"><i class="bi bi-ticket-perforated-fill"></i> Chương Trình Khuyến Mãi</a>
                 <a th:href="@{/manager/analytics}"><i class="bi bi-graph-up-arrow"></i> Báo Cáo Doanh Thu</a>
                 <a th:href="@{/manager/stores}"><i class="bi bi-shop"></i> Danh Sách Cửa Hàng</a>
-                <a th:href="@{/manager/profile}" id="sidebarProfile"><i class="bi bi-person-badge"></i> Profile</a>
+                <a th:href="@{/manager/profile}" id="sidebarProfile"><i class="bi bi-person-badge"></i> Thông Tin Cửa Hàng</a>
                 <hr class="border-secondary my-2">
-                <a th:href="@{/}"><i class="bi bi-house-door"></i> Xem Website Khách</a>
+                <a th:href="@{/}" target="_blank"><i class="bi bi-house-door"></i> Xem Trang Bán Hàng</a>
                 <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#signOutModal" class="text-danger"><i class="bi bi-box-arrow-right"></i> Đăng Xuất</a>
             </nav>
         </div>

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
@@ -118,6 +118,31 @@
             color: var(--flower-primary);
             letter-spacing: 0.5px;
             line-height: 1;
+        }
+
+        .brand-logo-img {
+            width: 42px !important;
+            height: 42px !important;
+            max-width: 42px !important;
+            max-height: 42px !important;
+            object-fit: contain !important;
+            flex-shrink: 0 !important;
+            display: inline-block !important;
+        }
+
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined' !important;
+            font-weight: normal;
+            font-style: normal;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
         }
 
         .brand-logo-icon {
@@ -1053,21 +1078,6 @@
     <!-- Header: Dòng chính (Logo, Tìm Kiếm, Giỏ Hàng, Tài Khoản cùng hàng) + Danh Mục Gọn -->
     <header class="sticky-top shadow-sm" style="z-index: 1020;">
 
-        <!-- Dòng phụ nhỏ: Hotline + Giao hàng + Following + Cửa hàng + Người dùng -->
-        <div class="top-subbar">
-            <div class="container flower-container d-flex justify-content-between align-items-center">
-                <span class="d-none d-sm-inline"><i class="bi bi-flower1 me-1"></i>Chuỗi Cửa Hàng Hoa Tươi & Điện Hoa
-                    Sài Gòn</span>
-                <div class="d-flex align-items-center gap-3 ms-auto">
-                    <span class="d-none d-md-inline"><i class="bi bi-telephone me-1"></i>028 1111 222</span>
-                    <span class="d-none d-lg-inline"><i class="bi bi-clock me-1"></i>Giao nhanh 60–90 phút</span>
-                    <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/following}"><i
-                            class="bi bi-bookmark-heart me-1"></i>Following</a>
-                    <a th:href="@{/stores}"><i class="bi bi-shop me-1"></i>Hệ thống cửa hàng</a>
-                    <a th:href="@{/users}"><i class="bi bi-people me-1"></i>Người dùng</a>
-                </div>
-            </div>
-        </div>
 
 
         <!-- Dòng chính: Logo, Ô Tìm Kiếm, Giỏ Hàng & Tài Khoản TRÊN CÙNG MỘT HÀNG -->
@@ -1077,7 +1087,7 @@
                     <!-- Logo -->
                     <div class="col-lg-3 col-md-3 col-6">
                         <a class="d-flex align-items-center text-decoration-none gap-2" th:href="@{/}">
-                            <img th:src="@{/images/flower-logo.png}" alt="Hoa Tươi Sài Gòn" class="brand-logo-img">
+                            <img th:src="@{/images/flower-logo.png}" alt="Hoa Tươi Sài Gòn" class="brand-logo-img" style="width: 42px; height: 42px; object-fit: contain; flex-shrink: 0;">
                             <span class="brand-logo-text">HOA TƯƠI SÀI GÒN</span>
                         </a>
                     </div>
@@ -1095,14 +1105,14 @@
                                         <option value="stores">🏬 Cửa hàng</option>
                                         <option value="users">👥 Người dùng</option>
                                     </select>
-                                    <span class="material-symbols-outlined header-search-type-icon">expand_more</span>
+                                    <i class="bi bi-chevron-down header-search-type-icon" style="font-size: 11px;"></i>
                                 </div>
                                 <input type="text" id="headerSearchInput" name="keyword" th:value="${keyword}"
                                     class="form-control header-search-input shadow-none flex-grow-1"
                                     placeholder="Tìm hoa hồng, cửa hàng hoặc người dùng...">
                                 <button class="btn header-search-btn d-flex align-items-center gap-1 flex-shrink-0"
                                     type="submit" id="btnHeaderSearch" title="Tìm kiếm">
-                                    <span class="material-symbols-outlined" style="font-size: 16px;">search</span>
+                                    <i class="bi bi-search" style="font-size: 14px;"></i>
                                     <span class="d-none d-sm-inline">Tìm</span>
                                 </button>
                             </div>
@@ -1169,13 +1179,13 @@
                                     </a>
                                 </li>
 
-                                <!-- Nút Shop Manager / Kênh Quản lý cửa hàng (cho Manager / Vendor) -->
+                                <!-- Nút Kênh Quản lý cửa hàng (cho Manager / Vendor) -->
                                 <li sec:authorize="hasAnyRole('MANAGER', 'VENDOR') and !hasRole('ADMIN')" class="px-2 mb-2">
                                     <a th:href="@{/manager/stores}" class="btn btn-sm btn-outline-primary w-100 fw-bold d-flex align-items-center justify-content-center gap-2"
                                        id="navShopManagerDropdown"
                                        style="border-radius: 8px; padding: 6px 12px; font-size: 13.5px;">
                                         <i class="bi bi-shop-window"></i>
-                                        <span>Shop Manager (Quản lý cửa hàng)</span>
+                                        <span>Quản lý cửa hàng</span>
                                     </a>
                                 </li>
 
@@ -1284,12 +1294,12 @@
                         <i class="bi bi-shop me-1 text-success"></i>Cửa hàng
                     </a>
 
-                    <!-- 5. Shop Manager (Kênh bán dành cho Vendor / Manager / Admin) -->
+                    <!-- 5. Kênh bán dành cho Vendor / Manager / Admin -->
                     <a sec:authorize="hasAnyRole('MANAGER', 'VENDOR', 'ADMIN')" 
                        th:href="@{/manager/stores}" 
                        class="cat-nav-link fw-semibold" id="navShopManager"
                        title="Chuyển đến trang quản lý các cửa hàng">
-                        <i class="bi bi-shop-window me-1 text-primary"></i>Shop Manager
+                        <i class="bi bi-shop-window me-1 text-primary"></i>Quản lý cửa hàng
                     </a>
                 </div>
             </div>

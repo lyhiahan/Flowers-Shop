@@ -392,28 +392,34 @@ input, select, textarea, .form-control, .form-select, .header-search-input, .qty
 
 /* Unified Brand Logo Styles */
 .brand-logo-img {
-    height: 38px;
-    width: 38px;
-    object-fit: contain;
-    display: inline-block;
+    height: 38px !important;
+    width: 38px !important;
+    max-height: 38px !important;
+    max-width: 38px !important;
+    object-fit: contain !important;
+    display: inline-block !important;
     vertical-align: middle;
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.06));
     transition: transform 0.2s ease;
 }
 
 .brand-logo-img-sm {
-    height: 28px;
-    width: 28px;
-    object-fit: contain;
-    display: inline-block;
+    height: 28px !important;
+    width: 28px !important;
+    max-height: 28px !important;
+    max-width: 28px !important;
+    object-fit: contain !important;
+    display: inline-block !important;
     vertical-align: middle;
 }
 
 .brand-logo-img-lg {
-    height: 64px;
-    width: 64px;
-    object-fit: contain;
-    display: inline-block;
+    height: 64px !important;
+    width: 64px !important;
+    max-height: 64px !important;
+    max-width: 64px !important;
+    object-fit: contain !important;
+    display: inline-block !important;
     vertical-align: middle;
     filter: drop-shadow(0 4px 8px rgba(0,0,0,0.08));
 }
@@ -856,26 +862,101 @@ body.admin-body {
     padding: 12px 14px !important;
 }
 
-.admin-body .main-wrapper {
-    background-color: #FFF0F3 !important;
-    min-height: 100vh;
-}
-
 /* ==========================================================================
-   MÀU NỀN HỒNG PASTEL NHẸ CHO TOÀN BỘ TRANG WEB & TẤT CẢ CÁC ROLE
-   (Customer, Guest, Admin, Manager, Staff, Shipper)
+   BỘ GIAO DIỆN CHUẨN ĐỒNG BỘ: ADMIN & VENDOR / MANAGER
+   - Nền trang:       Xám kem #F6F7F4
+   - Sidebar:         Xanh đậm #20382E, rộng 255px
+   - Mục chọn:        Nền xanh #355447, chữ trắng đậm, viền xanh ngọc #6EE7B7
+   - Nút chính:       Xanh #355447
+   - Thẻ nội dung:    Trắng #FFFFFF, bo góc 12px, viền #E2E7E2, bóng nhẹ
+   - Font:            Nunito (tiêu đề 28px/800, tiêu đề khối 20px/700, nội dung 16px)
+   - Số liệu:         30-32px/800; doanh thu màu hồng trầm #A64060
    ========================================================================== */
-html,
-body,
 body.admin-body,
 body.manager-body,
-body.staff-body,
-body.shipper-body,
-body.customer-body,
-.main-wrapper,
 .admin-body .main-wrapper,
-main {
-    background-color: #FFF0F3 !important;
+.manager-body .main-wrapper {
+    background-color: #F6F7F4 !important;
+    font-family: 'Nunito', Arial, sans-serif !important;
+    color: #24332C !important;
+}
+
+/* Sidebar đồng bộ */
+.sidebar, .admin-sidebar, .manager-sidebar {
+    width: 255px !important;
+    background-color: #20382E !important;
+    min-height: 100vh !important;
+    box-shadow: 2px 0 12px rgba(32, 56, 46, 0.08) !important;
+}
+
+.sidebar .nav-link, .admin-sidebar .nav-link, .sidebar a {
+    font-family: 'Nunito', Arial, sans-serif !important;
+    color: #D1DCD5 !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    padding: 10px 14px !important;
+    border-radius: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    text-decoration: none !important;
+    transition: all 0.18s ease !important;
+}
+
+.sidebar .nav-link:hover, .admin-sidebar .nav-link:hover, .sidebar a:hover {
+    color: #FFFFFF !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.sidebar .nav-link.active, .admin-sidebar .nav-link.active, .sidebar a.active {
+    background-color: #355447 !important;
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+    border-left: 3px solid #6EE7B7 !important;
+    box-shadow: none !important;
+}
+
+/* Thẻ nội dung chuẩn */
+.card, .card-floral, .kpi-card {
+    background-color: #FFFFFF !important;
+    border: 1px solid #E2E7E2 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Nút chính xanh #355447 */
+.btn-primary, .btn-brand, .btn-filter-active {
+    background-color: #355447 !important;
+    border-color: #355447 !important;
+    color: #FFFFFF !important;
+}
+.btn-primary:hover, .btn-brand:hover, .btn-filter-active:hover {
+    background-color: #284136 !important;
+    border-color: #284136 !important;
+    color: #FFFFFF !important;
+}
+
+/* Tiêu đề & Font chuẩn */
+h1.admin-title, h1.page-title, .h1-title {
+    font-size: 28px !important;
+    font-weight: 800 !important;
+    color: #20382E !important;
+}
+h2.section-title, h3.section-title, .h2-title {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    color: #20382E !important;
+}
+
+/* Số liệu thống kê chuẩn */
+.stat-number, .kpi-number {
+    font-size: 32px !important;
+    font-weight: 800 !important;
+    line-height: 1.15 !important;
+    letter-spacing: -0.5px !important;
+}
+.stat-revenue, .kpi-revenue {
+    color: #A64060 !important;
 }
 
 
