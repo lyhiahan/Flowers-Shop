@@ -41,6 +41,10 @@
     --font-serif: 'Nunito', Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+body {
+    background-color: var(--flower-bg, #FFF0F3) !important;
+}
+
 .brand-logo-img, .brand-logo-img-sm {
     width: 36px !important;
     height: 36px !important;
