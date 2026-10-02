@@ -18,10 +18,21 @@
     <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
     <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
 
+    <!-- Khôi phục vị trí cuộn ngay lập tức để không bị nhảy trang -->
+    <script>
+        (function () {
+            var savedPos = sessionStorage.getItem('cartScrollPos');
+            if (savedPos !== null) {
+                window.scrollTo(0, parseInt(savedPos));
+            }
+        })();
+    </script>
+
     <style>
         :root {
+            /* Đồng bộ 100% màu nền và bảng màu với trang chủ */
             --flower-bg: #FFF0F3;
-            --flower-surface: #FFFFFF;
+            --flower-surface: #FFFCF8;
             --flower-primary: #355447;
             --flower-primary-hover: #284136;
             --flower-accent: #A64060;
@@ -30,7 +41,7 @@
             --flower-accent-badge: #FFF0EE;
             --flower-text-main: #293B32;
             --flower-text-muted: #64748B;
-            --flower-border: #EBDED4;
+            --flower-border: #E7DED4;
             --flower-border-subtle: #F3E5E0;
             --flower-teal: #0D7A68;
             --flower-teal-light: #E6F4F1;
@@ -38,7 +49,7 @@
 
         body {
             font-family: 'Nunito', Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-            background-color: var(--flower-bg);
+            background-color: var(--flower-bg) !important;
             color: var(--flower-text-main);
             font-size: 16px;
             line-height: 1.6;
@@ -58,9 +69,9 @@
             padding-right: 20px;
         }
 
-        /* Header Bar */
+        /* Header Bar - đồng bộ nền trắng ngà trang chủ */
         .header-main-bar {
-            background-color: #FFFFFF;
+            background-color: var(--flower-surface);
             border-bottom: 1px solid var(--flower-border);
             padding: 12px 0;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
@@ -912,7 +923,7 @@
 
                                     <!-- Bộ nút tăng giảm số lượng & Nút Xóa -->
                                     <div class="controls-row">
-                                        <form th:action="@{'/cart/update-quantity/' + ${item.id}}" method="post" class="d-inline m-0">
+                                        <form th:id="'qty_form_' + ${item.id}" th:action="@{'/cart/update-quantity/' + ${item.id}}" method="post" class="d-inline m-0">
                                             <div class="quantity-counter-pill">
                                                 <button type="button" class="qty-btn-minus" th:data-item-id="${item.id}" onclick="changeQty(this.getAttribute('data-item-id'), -1)">−</button>
                                                 <input type="number" 
@@ -921,13 +932,14 @@
                                                        th:value="${item.quantity}" 
                                                        min="1" max="99" 
                                                        class="qty-field"
-                                                       onchange="this.form.submit()">
+                                                       th:data-item-id="${item.id}"
+                                                       onchange="handleQtyInputChange(this, this.getAttribute('data-item-id'))">
                                                 <button type="button" class="qty-btn-plus" th:data-item-id="${item.id}" onclick="changeQty(this.getAttribute('data-item-id'), 1)">+</button>
                                             </div>
                                         </form>
 
                                         <form th:action="@{'/cart/remove/' + ${item.id}}" method="post" class="d-inline m-0">
-                                            <button type="submit" class="btn-delete-item" title="Xóa mẫu hoa này khỏi giỏ" onclick="return confirm('Bạn muốn xóa mẫu hoa này khỏi giỏ?')">
+                                            <button type="submit" class="btn-delete-item" title="Xóa mẫu hoa này khỏi giỏ" onclick="sessionStorage.setItem('cartScrollPos', window.scrollY); return confirm('Bạn muốn xóa mẫu hoa này khỏi giỏ?')">
                                                 <i class="bi bi-trash3"></i>
                                             </button>
                                         </form>
@@ -1032,7 +1044,7 @@
                                 </div>
 
                                 <div class="controls-row">
-                                    <form th:action="@{'/cart/update-quantity/' + ${item.id}}" method="post" class="d-inline m-0">
+                                    <form th:id="'qty_form_' + ${item.id}" th:action="@{'/cart/update-quantity/' + ${item.id}}" method="post" class="d-inline m-0">
                                         <div class="quantity-counter-pill">
                                             <button type="button" class="qty-btn-minus" th:data-item-id="${item.id}" onclick="changeQty(this.getAttribute('data-item-id'), -1)">−</button>
                                             <input type="number" 
@@ -1041,13 +1053,14 @@
                                                    th:value="${item.quantity}" 
                                                    min="1" max="99" 
                                                    class="qty-field"
-                                                   onchange="this.form.submit()">
+                                                   th:data-item-id="${item.id}"
+                                                   onchange="handleQtyInputChange(this, this.getAttribute('data-item-id'))">
                                             <button type="button" class="qty-btn-plus" th:data-item-id="${item.id}" onclick="changeQty(this.getAttribute('data-item-id'), 1)">+</button>
                                         </div>
                                     </form>
 
                                     <form th:action="@{'/cart/remove/' + ${item.id}}" method="post" class="d-inline m-0">
-                                        <button type="submit" class="btn-delete-item" title="Xóa mẫu hoa này khỏi giỏ" onclick="return confirm('Bạn muốn xóa mẫu hoa này khỏi giỏ?')">
+                                        <button type="submit" class="btn-delete-item" title="Xóa mẫu hoa này khỏi giỏ" onclick="sessionStorage.setItem('cartScrollPos', window.scrollY); return confirm('Bạn muốn xóa mẫu hoa này khỏi giỏ?')">
                                             <i class="bi bi-trash3"></i>
                                         </button>
                                     </form>
@@ -1165,7 +1178,7 @@
         </div>
     </div>
 
-    <!-- Footer Chuẩn Atelier -->
+    <!-- Footer Chuẩn Atelier đồng bộ 100% với giao diện chính (Trang chủ) -->
     <footer class="w-full border-top pt-4 pb-3 mt-5" style="background-color: #FAF4F0 !important; border-top: 1px solid #EBDED4 !important; font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif !important; color: #4A3E3D !important; width: 100%;">
         <div class="flower-container">
             <!-- Hàng trên: 2 Cột thông tin -->
@@ -1208,7 +1221,7 @@
                 </div>
             </div>
 
-            <!-- Hàng dưới -->
+            <!-- Hàng dưới: Bản quyền + Cam kết chất lượng & Giao hàng -->
             <div style="border-top: 1px solid #EBDED4; padding-top: 16px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; font-size: 12.5px; color: #777777;">
                 <div>
                     <span>© 2026 HOA TƯƠI SÀI GÒN .</span>
@@ -1230,6 +1243,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+        // Cập nhật số lượng bằng AJAX mượt mà, không giật và không bao giờ bị nhảy trang
         function changeQty(itemId, delta) {
             var input = document.getElementById('qty_' + itemId);
             if (!input) return;
@@ -1237,8 +1251,92 @@
             var newVal = current + delta;
             if (newVal < 1) newVal = 1;
             if (newVal > 99) newVal = 99;
+            if (newVal === current) return;
             input.value = newVal;
-            input.form.submit();
+
+            updateCartItemQuantity(itemId, newVal);
+        }
+
+        function handleQtyInputChange(input, itemId) {
+            var val = parseInt(input.value) || 1;
+            if (val < 1) val = 1;
+            if (val > 99) val = 99;
+            input.value = val;
+            updateCartItemQuantity(itemId, val);
+        }
+
+        function updateCartItemQuantity(itemId, quantity) {
+            var row = document.getElementById('row_' + itemId);
+            var form = document.getElementById('qty_form_' + itemId) || (row ? row.querySelector('form[action*="/cart/update-quantity/"]') : null);
+            if (!form) return;
+
+            // Lưu vị trí cuộn phòng khi tải lại
+            sessionStorage.setItem('cartScrollPos', window.scrollY);
+
+            if (row) {
+                row.style.transition = 'opacity 0.15s ease';
+                row.style.opacity = '0.5';
+            }
+
+            var formData = new FormData(form);
+            formData.set('quantity', quantity);
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(function(res) {
+                return res.text();
+            })
+            .then(function(html) {
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(html, 'text/html');
+
+                var newRow = doc.getElementById('row_' + itemId);
+                if (newRow && row) {
+                    // Giữ nguyên trạng thái checkbox đã tích
+                    var oldCb = row.querySelector('.item-check');
+                    var isChecked = oldCb ? oldCb.checked : true;
+
+                    row.innerHTML = newRow.innerHTML;
+
+                    // Cập nhật data-attributes
+                    row.setAttribute('data-quantity', newRow.getAttribute('data-quantity'));
+                    row.setAttribute('data-subtotal', newRow.getAttribute('data-subtotal'));
+                    row.setAttribute('data-deposit', newRow.getAttribute('data-deposit'));
+                    row.setAttribute('data-total', newRow.getAttribute('data-total'));
+
+                    var newCb = row.querySelector('.item-check');
+                    if (newCb) newCb.checked = isChecked;
+
+                    row.style.opacity = '1';
+                    updateSummary();
+                    sessionStorage.removeItem('cartScrollPos');
+                } else {
+                    var newMain = doc.querySelector('main.flower-container');
+                    var curMain = document.querySelector('main.flower-container');
+                    if (newMain && curMain) {
+                        var checkedMap = {};
+                        document.querySelectorAll('.item-check').forEach(function(cb) {
+                            checkedMap[cb.value] = cb.checked;
+                        });
+                        curMain.innerHTML = newMain.innerHTML;
+                        document.querySelectorAll('.item-check').forEach(function(cb) {
+                            if (checkedMap[cb.value] !== undefined) {
+                                cb.checked = checkedMap[cb.value];
+                            }
+                        });
+                        updateSummary();
+                        sessionStorage.removeItem('cartScrollPos');
+                    } else {
+                        window.location.reload();
+                    }
+                }
+            })
+            .catch(function(err) {
+                console.error('Lỗi fetch số lượng, fallback form.submit:', err);
+                form.submit();
+            });
         }
 
         function toggleSelectAll(master) {
@@ -1393,6 +1491,11 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
+            var savedPos = sessionStorage.getItem('cartScrollPos');
+            if (savedPos !== null) {
+                window.scrollTo(0, parseInt(savedPos));
+                sessionStorage.removeItem('cartScrollPos');
+            }
             updateSummary();
         });
     </script>
