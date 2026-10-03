@@ -47,9 +47,9 @@ public class AdminTransactionController {
             Pageable pageable = PageRequest.of(Math.max(0, page), size, Sort.by(Sort.Direction.DESC, "createdAt", "id"));
             Page<Transaction> transactionPage;
             if (keyword != null && !keyword.trim().isEmpty()) {
-                transactionPage = transactionRepository.findByDescriptionContainingIgnoreCaseOrderByCreatedAtDesc(keyword.trim(), pageable);
+                transactionPage = transactionRepository.findByDescriptionContainingIgnoreCase(keyword.trim(), pageable);
             } else {
-                transactionPage = transactionRepository.findAllByOrderByCreatedAtDesc(pageable);
+                transactionPage = transactionRepository.findAll(pageable);
             }
             model.addAttribute("transactionPage", transactionPage);
             model.addAttribute("transactions", transactionPage.getContent());

@@ -24,6 +24,10 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
+import java.util.Collections;
+
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 public class HomeController {
@@ -39,10 +43,10 @@ public class HomeController {
     public String index(
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "categoryId", required = false) Long categoryId,
-            @RequestParam(value = "flowerStyle", required = false) String flowerStyle,
-            @RequestParam(value = "flowerType", required = false) String flowerType,
-            @RequestParam(value = "flowerColor", required = false) String flowerColor,
-            @RequestParam(value = "flowerOccasion", required = false) String flowerOccasion,
+            @RequestParam(value = "flowerStyle", required = false) List<String> flowerStyle,
+            @RequestParam(value = "flowerType", required = false) List<String> flowerType,
+            @RequestParam(value = "flowerColor", required = false) List<String> flowerColor,
+            @RequestParam(value = "flowerOccasion", required = false) List<String> flowerOccasion,
             @RequestParam(value = "tab", required = false) String tab,
             @RequestParam(value = "sort", required = false, defaultValue = "default") String sort,
             @RequestParam(value = "minPrice", required = false) BigDecimal minPrice,
@@ -75,10 +79,10 @@ public class HomeController {
 
             // Trim các tham số tìm kiếm & lọc trước khi dùng (phải đặt trước sort để tránh NPE)
             String trimmedKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
-            String trimmedStyle = (flowerStyle != null && !flowerStyle.trim().isEmpty()) ? flowerStyle.trim() : null;
-            String trimmedType = (flowerType != null && !flowerType.trim().isEmpty()) ? flowerType.trim() : null;
-            String trimmedColor = (flowerColor != null && !flowerColor.trim().isEmpty()) ? flowerColor.trim() : null;
-            String trimmedOccasion = (flowerOccasion != null && !flowerOccasion.trim().isEmpty()) ? flowerOccasion.trim() : null;
+            List<String> cleanStyles = sanitizeFilterList(flowerStyle);
+            List<String> cleanTypes = sanitizeFilterList(flowerType);
+            List<String> cleanColors = sanitizeFilterList(flowerColor);
+            List<String> cleanOccasions = sanitizeFilterList(flowerOccasion);
 
             // 1. Sắp xếp (Sorting)
             Sort sortObj;
@@ -155,10 +159,10 @@ public class HomeController {
                     maxPrice,
                     minRating,
                     storeId,
-                    trimmedStyle,
-                    trimmedType,
-                    trimmedColor,
-                    trimmedOccasion
+                    cleanStyles,
+                    cleanTypes,
+                    cleanColors,
+                    cleanOccasions
             );
             Page<Product> productPage = productRepository.findAll(spec, pageable);
 
@@ -172,20 +176,20 @@ public class HomeController {
                 activeFilterTitle = "Hoa mới nhất";
             } else if ("toprated".equalsIgnoreCase(tab)) {
                 activeFilterTitle = "Hoa đánh giá cao";
-            } else if (trimmedStyle != null) {
-                activeFilterTitle = trimmedStyle;
+            } else if (!cleanStyles.isEmpty()) {
+                activeFilterTitle = String.join(", ", cleanStyles);
             } else if (selectedCategory != null) {
                 activeFilterTitle = selectedCategory.getName();
-            } else if (trimmedType != null) {
-                activeFilterTitle = trimmedType;
-            } else if (trimmedOccasion != null) {
-                activeFilterTitle = "Hoa " + trimmedOccasion;
+            } else if (!cleanTypes.isEmpty()) {
+                activeFilterTitle = String.join(", ", cleanTypes);
+            } else if (!cleanOccasions.isEmpty()) {
+                activeFilterTitle = "Hoa " + String.join(", ", cleanOccasions);
             }
 
-            boolean hasActiveFilter = (trimmedStyle != null)
-                    || (trimmedType != null)
-                    || (trimmedColor != null)
-                    || (trimmedOccasion != null)
+            boolean hasActiveFilter = (!cleanStyles.isEmpty())
+                    || (!cleanTypes.isEmpty())
+                    || (!cleanColors.isEmpty())
+                    || (!cleanOccasions.isEmpty())
                     || (categoryId != null && categoryId > 0)
                     || (trimmedKeyword != null)
                     || (minPrice != null)
@@ -201,10 +205,14 @@ public class HomeController {
             model.addAttribute("totalItems", productPage.getTotalElements());
 
             model.addAttribute("keyword", trimmedKeyword);
-            model.addAttribute("flowerStyle", trimmedStyle);
-            model.addAttribute("flowerType", trimmedType);
-            model.addAttribute("flowerColor", trimmedColor);
-            model.addAttribute("flowerOccasion", trimmedOccasion);
+            model.addAttribute("flowerStyles", cleanStyles);
+            model.addAttribute("flowerTypes", cleanTypes);
+            model.addAttribute("flowerColors", cleanColors);
+            model.addAttribute("flowerOccasions", cleanOccasions);
+            model.addAttribute("flowerStyle", cleanStyles.isEmpty() ? null : String.join(", ", cleanStyles));
+            model.addAttribute("flowerType", cleanTypes.isEmpty() ? null : String.join(", ", cleanTypes));
+            model.addAttribute("flowerColor", cleanColors.isEmpty() ? null : String.join(", ", cleanColors));
+            model.addAttribute("flowerOccasion", cleanOccasions.isEmpty() ? null : String.join(", ", cleanOccasions));
             model.addAttribute("activeFilterTitle", activeFilterTitle);
             model.addAttribute("hasActiveFilter", hasActiveFilter);
 
@@ -239,9 +247,34 @@ public class HomeController {
 
             return "index";
         } catch (Throwable t) {
-            t.printStackTrace();
-            throw t;
+            log.error("Lỗi khi tải danh sách sản phẩm", t);
+            model.addAttribute("loadError", "Không thể tải danh sách mẫu hoa vào lúc này. Vui lòng tải lại trang hoặc thử lại sau.");
+            model.addAttribute("products", Collections.emptyList());
+            model.addAttribute("totalItems", 0L);
+            model.addAttribute("totalPages", 0);
+            model.addAttribute("currentPage", 1);
+            model.addAttribute("hasActiveFilter", false);
+            model.addAttribute("activeFilterTitle", "Danh Sách Mẫu Hoa");
+            return "index";
         }
+    }
+
+    private List<String> sanitizeFilterList(List<String> rawList) {
+        if (rawList == null || rawList.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<String> result = new ArrayList<>();
+        for (String item : rawList) {
+            if (item != null) {
+                for (String sub : item.split(",")) {
+                    String trimmed = sub.trim();
+                    if (!trimmed.isEmpty() && !result.contains(trimmed)) {
+                        result.add(trimmed);
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     @GetMapping("/following")

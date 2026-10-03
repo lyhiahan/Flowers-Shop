@@ -166,14 +166,14 @@ public class AdminOrderManagementController {
         }
 
         // BƯỚC 8 THEO UC_029: Kiểm tra nếu đơn hàng đã bàn giao cho đơn vị vận chuyển
-        boolean isHandedOverToDelivery = (order.getStatus() == OrderStatus.DELIVERING || order.getStatus() == OrderStatus.PICKED_UP);
+        boolean isHandedOverToDelivery = order.getStatus() != null && (order.getStatus() == OrderStatus.DELIVERING || order.getStatus() == OrderStatus.PICKED_UP);
 
         List<StatusOption> availableStatuses = new ArrayList<>();
         if (isHandedOverToDelivery) {
             availableStatuses.add(new StatusOption(OrderStatus.DELIVERED.name(), "📦 Đã giao hàng thành công (DELIVERED)"));
             availableStatuses.add(new StatusOption(OrderStatus.COMPLETED.name(), "🎉 Hoàn tất đơn hàng (COMPLETED)"));
             availableStatuses.add(new StatusOption(OrderStatus.CANCELLED.name(), "❌ Hủy đơn hàng (CANCELLED)"));
-        } else {
+        } else if (order.getStatus() != null) {
             switch (order.getStatus()) {
                 case PENDING -> {
                     availableStatuses.add(new StatusOption(OrderStatus.CONFIRMED.name(), "✅ Tiếp nhận đơn hàng (CONFIRMED)"));

@@ -49,4 +49,22 @@ public class ProductForm {
 
     // Cờ xác nhận bán lỗ có chủ đích khi Admin chọn [YES] trên cảnh báo Modal
     private boolean confirmSellAtLoss = false;
+
+    // Cửa hàng hoặc phạm vi áp dụng (null = Toàn hệ thống)
+    private Long storeId;
+
+    // Trạng thái kinh doanh / Trạng thái bán
+    private Boolean isSelling = true;
+
+    // Trạng thái cấp phép / hoạt động
+    private Boolean isActive = true;
+
+    // Ảnh chính hiện tại (dùng để xem trước khi chỉnh sửa)
+    private String imageUrl;
+
+    // Số lượng đã bán (chỉ đọc, tính từ đơn hàng)
+    private Integer sold = 0;
+
+    // Đường dẫn quay lại sau khi lưu / hủy để giữ nguyên bộ lọc và phân trang
+    private String returnUrl;
 }

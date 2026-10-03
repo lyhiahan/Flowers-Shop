@@ -20,7 +20,7 @@ public class Style {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @Column(name = "is_deleted", nullable = false)
+    @Column(name = "is_deleted")
     @Builder.Default
     private Boolean isDeleted = false;
 
