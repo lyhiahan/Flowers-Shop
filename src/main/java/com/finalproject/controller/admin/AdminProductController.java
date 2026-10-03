@@ -1,6 +1,7 @@
 package com.finalproject.controller.admin;
 
 import com.finalproject.dto.request.ProductForm;
+import com.finalproject.entity.Category;
 import com.finalproject.entity.Product;
 import com.finalproject.entity.Store;
 import com.finalproject.repository.CategoryRepository;

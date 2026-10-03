@@ -10,8 +10,5 @@ public enum OrderStatus {
     COMPLETED,  // Giao hoa hoàn tất
     CANCELLED,  // Đã hủy đơn
     REFUND_REQUESTED,
-    REFUNDED,   // Trả hàng - Hoàn tiền
-    RENTING,    // Đang thuê phụ kiện/cổng hoa
-    RETURNED,   // Đã hoàn trả phụ kiện
-    OVERDUE     // Quá hạn hoàn trả
+    REFUNDED    // Trả hàng - Hoàn tiền
 }

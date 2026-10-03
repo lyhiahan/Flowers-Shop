@@ -364,20 +364,4 @@ public class OrderServiceImpl implements OrderService {
         }
         workflow.cancelByCustomer(username, orderId);
     }
-
-    @Override
-    @Transactional
-    public void scanAndMarkOverdueOrders() {
-        LocalDate today = LocalDate.now();
-        List<Order> overdueOrders = orderRepository.findOverdueOrders(OrderStatus.RENTING, today);
-
-        for (Order order : overdueOrders) {
-            order.setStatus(OrderStatus.OVERDUE);
-            orderRepository.save(order);
-
-            // Bắn WebSocket thông báo đến nhân viên chi nhánh
-            messagingTemplate.convertAndSend("/topic/store/" + order.getPickupStore().getId() + "/orders",
-                    "Đơn thuê #" + order.getId() + " của khách " + order.getUser().getFullName() + " đã QUÁ HẠN!");
-        }
-    }
 }

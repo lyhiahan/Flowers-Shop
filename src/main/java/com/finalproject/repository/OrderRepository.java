@@ -20,11 +20,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByPickupStoreIdAndCreatedAtBetweenOrderByCreatedAtDesc(Long storeId, java.time.LocalDateTime start, java.time.LocalDateTime end);
     List<Order> findByPickupStoreIdAndStatus(Long storeId, OrderStatus status);
 
-    // Tìm các đơn hàng thuê quá hạn (RENTING mà có sản phẩm hết hạn trước ngày hiện tại)
-    @Query("SELECT DISTINCT o FROM Order o JOIN o.orderDetails od " +
-           "WHERE o.status = :status AND od.rentEndDate < :today")
-    List<Order> findOverdueOrders(@Param("status") OrderStatus status, @Param("today") LocalDate today);
-
     long countByStatus(OrderStatus status);
     List<Order> findTop10ByOrderByCreatedAtDesc();
 

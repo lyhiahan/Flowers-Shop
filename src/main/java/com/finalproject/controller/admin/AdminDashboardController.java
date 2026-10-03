@@ -52,7 +52,7 @@ public class AdminDashboardController {
 
             long totalOrders = orderRepository.count();
             long pendingOrders = orderRepository.countByStatus(OrderStatus.PENDING);
-            long rentingOrders = orderRepository.countByStatus(OrderStatus.RENTING);
+            long rentingOrders = 0L;
             long completedOrders = orderRepository.countByStatus(OrderStatus.COMPLETED);
 
             // Việc cần xử lý: Yêu cầu cấp vai trò, sản phẩm chờ duyệt

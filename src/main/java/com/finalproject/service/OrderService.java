@@ -29,5 +29,4 @@ public interface OrderService {
     void assignShipper(Long orderId, Long shipperId);
     void cancelOrder(String username, Long orderId);
     void requestRefund(String username, Long orderId);
-    void scanAndMarkOverdueOrders(); // Cho Scheduler quét định kỳ
 }

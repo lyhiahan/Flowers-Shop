@@ -18,14 +18,14 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
            "FROM OrderDetail od " +
            "WHERE od.order.user.id = :userId " +
            "AND od.product.id = :productId " +
-           "AND od.order.status IN (com.finalproject.enums.OrderStatus.DELIVERED, com.finalproject.enums.OrderStatus.COMPLETED, com.finalproject.enums.OrderStatus.RETURNED)")
+           "AND od.order.status IN (com.finalproject.enums.OrderStatus.DELIVERED, com.finalproject.enums.OrderStatus.COMPLETED)")
     boolean hasPurchasedAndReceived(@Param("userId") Long userId, @Param("productId") Long productId);
 
     @Query("SELECT od.order.id " +
            "FROM OrderDetail od " +
            "WHERE od.order.user.id = :userId " +
            "AND od.product.id = :productId " +
-           "AND od.order.status IN (com.finalproject.enums.OrderStatus.DELIVERED, com.finalproject.enums.OrderStatus.COMPLETED, com.finalproject.enums.OrderStatus.RETURNED) " +
+           "AND od.order.status IN (com.finalproject.enums.OrderStatus.DELIVERED, com.finalproject.enums.OrderStatus.COMPLETED) " +
            "ORDER BY od.order.createdAt DESC")
     List<Long> findReceivedOrderIdsByProduct(@Param("userId") Long userId, @Param("productId") Long productId);
 

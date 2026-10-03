@@ -720,9 +720,9 @@
                                         <span class="badge badge-status" 
                                               th:classappend="${o.status.name() == 'PENDING' ? 'bg-secondary' : 
                                                               (o.status.name() == 'CONFIRMED' ? 'bg-info text-dark' : 
-                                                              (o.status.name() == 'RENTING' ? 'bg-warning text-dark' : 
-                                                              (o.status.name() == 'OVERDUE' ? 'bg-danger' : 
-                                                              (o.status.name() == 'COMPLETED' ? 'bg-success' : 'bg-dark'))))}"
+                                                              (o.status.name() == 'PREPARING' ? 'bg-primary' : 
+                                                              (o.status.name() == 'DELIVERING' ? 'bg-warning text-dark' : 
+                                                              (o.status.name() == 'DELIVERED' or o.status.name() == 'COMPLETED' ? 'bg-success' : 'bg-dark'))))}"
                                               th:text="${o.status}"></span>
                                     </td>
                                     <td class="text-muted small" th:text="${#temporals.format(o.createdAt, 'dd/MM HH:mm')}"></td>

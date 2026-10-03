@@ -41,8 +41,7 @@ public class ManagerOrderController {
             OrderStatus.CONFIRMED,
             OrderStatus.PREPARING,
             OrderStatus.PICKED_UP,
-            OrderStatus.DELIVERING,
-            OrderStatus.RENTING
+            OrderStatus.DELIVERING
     );
 
     private static final Set<OrderStatus> PROCESSED_STATUSES = Set.of(
@@ -50,9 +49,7 @@ public class ManagerOrderController {
             OrderStatus.COMPLETED,
             OrderStatus.CANCELLED,
             OrderStatus.REFUND_REQUESTED,
-            OrderStatus.REFUNDED,
-            OrderStatus.RETURNED,
-            OrderStatus.OVERDUE
+            OrderStatus.REFUNDED
     );
 
     @Data

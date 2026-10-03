@@ -441,14 +441,6 @@
               class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#E9F3EE] text-[#1E453E] border border-[#264E43]/30 font-bold text-[12px]">
               <span class="material-symbols-outlined text-[14px]">verified</span> Giao Hoa Thành Công
             </span>
-            <span th:if="${o.status.name() == 'RENTING'}"
-              class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] border border-[#F59E0B]/30 font-bold text-[12px]">
-              <span class="material-symbols-outlined text-[14px]">festival</span> Đang Sử Dụng Khung
-            </span>
-            <span th:if="${o.status.name() == 'RETURNED'}"
-              class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#E9F3EE] text-[#1E453E] border border-[#264E43]/30 font-bold text-[12px]">
-              <span class="material-symbols-outlined text-[14px]">inventory_2</span> Đã Trả Khung (Hoàn Cọc)
-            </span>
             <span th:if="${o.status.name() == 'REFUND_REQUESTED'}"
               class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] border border-[#F59E0B]/30 font-bold text-[12px]">
               <span class="material-symbols-outlined text-[14px]">currency_exchange</span> Chờ hoàn tiền

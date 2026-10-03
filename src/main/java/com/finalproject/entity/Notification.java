@@ -23,7 +23,7 @@ public class Notification {
     private String content;
 
     @Column(length = 50)
-    private String type; // ORDER_UPDATE, OVERDUE_REMINDER, PROMOTION
+    private String type; // ORDER_UPDATE, PROMOTION, SYSTEM_ALERT
 
     private Long relatedOrderId;
 
