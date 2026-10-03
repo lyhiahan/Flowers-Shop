@@ -5,54 +5,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giỏ Hàng Hoa Tươi - Chuỗi Hoa Tươi Sài Gòn</title>
-    <!-- Google Fonts & Bootstrap 5 & Icons -->
-    <!-- Google Font: Nunito, Plus Jakarta Sans, Playfair Display & Bootstrap 5 & Icons -->
+
+    <!-- Google Fonts: Nunito, Playfair Display & Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 & Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
     <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
+
+    <!-- Khôi phục vị trí cuộn ngay lập tức để không bị nhảy trang -->
+    <script>
+        (function () {
+            var savedPos = sessionStorage.getItem('cartScrollPos');
+            if (savedPos !== null) {
+                window.scrollTo(0, parseInt(savedPos));
+            }
+        })();
+    </script>
+
     <style>
         :root {
+            /* Đồng bộ 100% màu nền và bảng màu với trang chủ */
+            --flower-bg: #FFF0F3;
+            --flower-surface: #FFFCF8;
             --flower-primary: #355447;
             --flower-primary-hover: #284136;
-            --flower-accent-bg: #F3E6E1;
             --flower-accent: #A64060;
+            --flower-accent-hover: #8C3450;
+            --flower-accent-light: #FFF2EF;
+            --flower-accent-badge: #FFF0EE;
             --flower-text-main: #293B32;
-            --flower-text-heading: #293B32;
             --flower-text-muted: #64748B;
             --flower-border: #E7DED4;
-            --flower-bg: #FFF0F3;
-            --flower-star: #E5A038;
+            --flower-border-subtle: #F3E5E0;
+            --flower-teal: #0D7A68;
+            --flower-teal-light: #E6F4F1;
         }
 
         body {
             font-family: 'Nunito', Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-            background-color: var(--flower-bg);
+            background-color: var(--flower-bg) !important;
             color: var(--flower-text-main);
-            font-size: 17.5px;
-            font-weight: 400;
+            font-size: 16px;
             line-height: 1.6;
+            margin: 0;
+            padding: 0;
         }
 
-        h1, .page-title {
-            font-family: 'Nunito', Arial, sans-serif !important;
-            font-size: 32px !important;
-            font-weight: 700 !important;
-            color: #293B32 !important;
-        }
-
-        h2, h3, .section-title {
-            font-family: 'Nunito', Arial, sans-serif !important;
-            font-size: 22px !important;
-            font-weight: 600 !important;
-            color: #293B32 !important;
+        .font-serif {
+            font-family: 'Playfair Display', Georgia, serif !important;
         }
 
         .flower-container {
@@ -63,122 +69,638 @@
             padding-right: 20px;
         }
 
-        .font-serif {
-            font-family: 'Playfair Display', Georgia, serif;
-        }
-
-        /* Top subbar */
-        .top-subbar {
-            background-color: #ffffff;
-            border-bottom: 1px solid var(--flower-border);
-            font-size: 13px;
-            color: var(--flower-text-muted);
-            padding: 6px 0;
-        }
-        .top-subbar a {
-            color: var(--flower-text-muted);
-            text-decoration: none;
-            transition: color 0.15s ease;
-        }
-        .top-subbar a:hover {
-            color: var(--flower-primary);
-        }
-
-        /* Main Header */
+        /* Header Bar - đồng bộ nền trắng ngà trang chủ */
         .header-main-bar {
-            background-color: #ffffff;
+            background-color: var(--flower-surface);
             border-bottom: 1px solid var(--flower-border);
-            padding: 14px 0;
+            padding: 12px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
         }
+
         .brand-logo-text {
-            font-size: 20px;
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 21px;
             font-weight: 700;
-            color: var(--flower-text-heading);
-            letter-spacing: 0.3px;
+            color: var(--flower-primary);
+            letter-spacing: 0.5px;
             line-height: 1;
             text-decoration: none;
         }
 
-        .flower-card {
-            background: #ffffff;
-            border: 1px solid var(--flower-border);
-            border-radius: 18px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        .brand-logo-img {
+            width: 34px;
+            height: 34px;
+            object-fit: contain;
         }
 
-        .item-thumb {
-            width: 72px;
-            height: 72px;
-            border-radius: 12px;
-            object-fit: cover;
-            border: 1px solid #f1f5f9;
+        /* Step Tracker */
+        .step-item {
+            font-size: 14px;
+            font-weight: 600;
+            color: #94A3B8;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .step-item.active {
+            color: var(--flower-accent);
+        }
+
+        /* Top Select All Bar */
+        .cart-select-all-bar {
+            background: #FFFFFF;
+            border: 1px solid var(--flower-border-subtle);
+            border-radius: 16px;
+            padding: 14px 22px;
+            box-shadow: 0 2px 12px rgba(166, 64, 96, 0.03);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Custom Checkbox (Exactly matching screenshot) */
+        .cart-custom-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 1.5px solid #CBD5E1;
+            border-radius: 5px;
+            background-color: #FFFFFF;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease-in-out;
+            margin: 0;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .cart-custom-checkbox:hover {
+            border-color: var(--flower-accent);
+        }
+
+        .cart-custom-checkbox:checked {
+            background-color: var(--flower-accent);
+            border-color: var(--flower-accent);
+        }
+
+        .cart-custom-checkbox:checked::after {
+            content: "";
+            width: 5px;
+            height: 9px;
+            border: solid #FFFFFF;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+            margin-bottom: 2px;
+        }
+
+        .cart-custom-checkbox:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(166, 64, 96, 0.15);
+        }
+
+        /* Store Cart Group */
+        .store-cart-group {
+            background: #FFFFFF;
+            border: 1px solid var(--flower-border-subtle);
+            border-radius: 18px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 18px rgba(166, 64, 96, 0.03);
+        }
+
+        /* Store Header (Matches Screenshot) */
+        .store-group-header {
+            background-color: #FFF2EF;
+            border-bottom: 1px solid #F9E5E0;
+            padding: 14px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .store-icon-box {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background-color: #FFE6E2;
+            color: var(--flower-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
             flex-shrink: 0;
         }
 
-        .greeting-badge {
-            background-color: #fff7ed;
-            border: 1px dashed #fdba74;
-            color: #9a3412;
-            border-radius: 8px;
-            padding: 5px 10px;
-            font-size: 12.5px;
-            display: inline-block;
+        .store-name {
+            font-size: 15.5px;
+            font-weight: 700;
+            color: #1F2937;
         }
 
-        /* Quantity input pill */
-        .qty-pill {
+        .store-badge-count {
+            background-color: #FDE4E0;
+            color: var(--flower-accent);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 10px;
+            border-radius: 9999px;
+            line-height: 1.4;
+        }
+
+        .store-address-line {
+            font-size: 13px;
+            color: #6B7280;
+            margin-top: 2px;
+        }
+
+        .store-dot {
+            margin: 0 6px;
+            color: #9CA3AF;
+        }
+
+        .store-hotline {
+            color: var(--flower-teal);
+            font-weight: 600;
+        }
+
+        .store-delivery-tag {
+            color: var(--flower-teal);
+            font-size: 13.5px;
+            font-weight: 600;
             display: inline-flex;
             align-items: center;
-            border: 1px solid #e2e8f0;
-            border-radius: 9999px;
-            background: #ffffff;
-            padding: 2px 4px;
+            gap: 6px;
         }
-        .qty-btn {
-            width: 28px;
-            height: 28px;
+
+        .store-delivery-tag i {
+            font-size: 15px;
+        }
+
+        /* Cart Item Row */
+        .cart-item-row {
+            padding: 22px 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 18px;
+            border-bottom: 1px solid #FAF0EC;
+            transition: background-color 0.15s ease;
+        }
+
+        .cart-item-row:last-child {
+            border-bottom: none;
+        }
+
+        .cart-item-row:hover {
+            background-color: #FFFDFD;
+        }
+
+        .item-checkbox-wrapper {
+            align-self: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        /* Product Image & Badge */
+        .item-img-wrapper {
+            position: relative;
+            width: 115px;
+            height: 115px;
+            border-radius: 14px;
+            overflow: hidden;
+            flex-shrink: 0;
+            background-color: #F8FAFC;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .item-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .cart-item-row:hover .item-img {
+            transform: scale(1.04);
+        }
+
+        .img-corner-badge {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            z-index: 2;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.4px;
+            color: #FFFFFF;
+            padding: 2px 7px;
+            border-radius: 5px;
+            line-height: 1.3;
+            text-transform: uppercase;
+        }
+
+        .badge-fresh {
+            background-color: #8C1D2F;
+        }
+
+        .badge-premium {
+            background-color: #174E3E;
+        }
+
+        /* Details */
+        .item-info-col {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .category-pill-tag {
+            display: inline-block;
+            background-color: var(--flower-accent-badge);
+            color: var(--flower-accent);
+            font-size: 12px;
+            font-weight: 700;
+            padding: 3px 12px;
+            border-radius: 9999px;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+
+        .product-title-serif {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 19px;
+            font-weight: 600;
+            line-height: 1.35;
+            margin: 0 0 6px 0;
+        }
+
+        .product-title-serif a {
+            color: #1F2937;
+            text-decoration: none;
+            transition: color 0.15s ease;
+        }
+
+        .product-title-serif a:hover {
+            color: var(--flower-accent);
+        }
+
+        .delivery-slot-info {
+            font-size: 13px;
+            color: #4B5563;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+
+        .delivery-slot-info i {
+            color: var(--flower-teal);
+            font-size: 14px;
+        }
+
+        .delivery-slot-info strong {
+            color: #1F2937;
+            font-weight: 700;
+        }
+
+        .slot-dot {
+            color: #9CA3AF;
+            margin: 0 2px;
+        }
+
+        /* Greeting Note Box */
+        .greeting-note-box {
+            background-color: #FFF6F4;
+            border: 1px solid #FFE7E2;
+            border-radius: 12px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .greeting-heart-icon {
+            color: var(--flower-accent);
+            font-size: 14px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .greeting-label {
+            color: var(--flower-accent);
+            font-weight: 700;
+            font-size: 12.5px;
+            margin-right: 6px;
+        }
+
+        .greeting-text {
+            font-style: italic;
+            color: #4B5563;
+            font-size: 13px;
+            line-height: 1.45;
+            word-break: break-word;
+        }
+
+        .btn-edit-note {
+            background: none;
+            border: none;
+            color: var(--flower-accent);
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: underline;
+            cursor: pointer;
+            padding: 0;
+            flex-shrink: 0;
+            transition: opacity 0.15s ease;
+        }
+
+        .btn-edit-note:hover {
+            opacity: 0.8;
+        }
+
+        /* Actions & Pricing Col */
+        .item-actions-col {
+            min-width: 190px;
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .original-price-line {
+            font-size: 13px;
+            color: #64748B;
+            margin-bottom: 2px;
+        }
+
+        .original-price-line del {
+            color: #94A3B8;
+        }
+
+        .selling-price-main {
+            font-size: 23px;
+            font-weight: 800;
+            color: var(--flower-accent);
+            line-height: 1.2;
+            margin-bottom: 16px;
+            letter-spacing: -0.3px;
+        }
+
+        .controls-row {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .quantity-counter-pill {
+            background-color: #FAF6F5;
+            border: 1px solid #EBE3DF;
+            border-radius: 9999px;
+            padding: 3px 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .qty-btn-minus,
+        .qty-btn-plus {
+            width: 26px;
+            height: 26px;
             border-radius: 9999px;
             border: none;
             background: transparent;
             color: #475569;
+            font-size: 16px;
             font-weight: 600;
+            line-height: 1;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: background 0.15s ease;
+            transition: all 0.15s ease;
         }
-        .qty-btn:hover {
-            background: #f1f5f9;
-            color: var(--flower-primary);
+
+        .qty-btn-minus:hover,
+        .qty-btn-plus:hover {
+            background-color: #F1E8E4;
+            color: #1E293B;
         }
-        .qty-input {
-            width: 40px;
+
+        .qty-field {
+            width: 32px;
             border: none;
             background: transparent;
             text-align: center;
-            font-weight: 600;
-            font-size: 14px;
+            font-weight: 700;
+            font-size: 14.5px;
+            color: #1F2937;
             outline: none;
+            -moz-appearance: textfield;
         }
 
-        /* Action button */
+        .qty-field::-webkit-outer-spin-button,
+        .qty-field::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .btn-delete-item {
+            background: none;
+            border: none;
+            color: #94A3B8;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.15s ease, transform 0.15s ease;
+        }
+
+        .btn-delete-item:hover {
+            color: #DC2626;
+            transform: scale(1.1);
+        }
+
+        /* Sticky Summary Card */
+        .cart-summary-card {
+            background: #FFFFFF;
+            border: 1px solid var(--flower-border-subtle);
+            border-radius: 20px;
+            box-shadow: 0 4px 22px rgba(166, 64, 96, 0.04);
+            padding: 24px;
+        }
+
+        .summary-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 21px;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #F3EAE4;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #64748B;
+        }
+
+        .summary-row strong {
+            color: #1F2937;
+            font-weight: 700;
+        }
+
+        .summary-divider {
+            border: none;
+            border-top: 1px dashed #E7DED4;
+            margin: 16px 0;
+        }
+
+        .summary-total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 4px;
+        }
+
+        .total-label {
+            font-size: 15.5px;
+            font-weight: 700;
+            color: #1F2937;
+        }
+
+        .total-value {
+            font-size: 25px;
+            font-weight: 800;
+            color: var(--flower-accent);
+            line-height: 1.1;
+        }
+
+        .vat-note {
+            font-size: 12px;
+            color: #94A3B8;
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
         .btn-order-submit {
             background-color: var(--flower-primary);
-            color: #ffffff;
-            font-weight: 600;
-            font-size: 15px;
-            border: none;
-            border-radius: 9999px;
+            color: #FFFFFF;
+            font-size: 15.5px;
+            font-weight: 700;
             padding: 14px 24px;
+            border-radius: 9999px;
+            border: none;
             width: 100%;
-            transition: background-color 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 4px 14px rgba(53, 84, 71, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(53, 84, 71, 0.22);
+            cursor: pointer;
         }
+
         .btn-order-submit:hover:not(:disabled) {
             background-color: var(--flower-primary-hover);
-            color: #ffffff;
-            box-shadow: 0 6px 18px rgba(53, 84, 71, 0.35);
+            color: #FFFFFF;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(53, 84, 71, 0.32);
+        }
+
+        .btn-order-submit:disabled {
+            background-color: #94A3B8;
+            box-shadow: none;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* Perks Box */
+        .perks-card {
+            background: #FAF6F4;
+            border: 1px solid #EFE4DC;
+            border-radius: 14px;
+            padding: 16px;
+            margin-top: 18px;
+        }
+
+        .perk-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            font-size: 12.5px;
+            color: #4A5568;
+            margin-bottom: 9px;
+            line-height: 1.45;
+        }
+
+        .perk-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .perk-icon {
+            font-size: 15px;
+            flex-shrink: 0;
+            line-height: 1.2;
+        }
+
+        /* Empty state */
+        .empty-cart-card {
+            background: #FFFFFF;
+            border: 1px solid var(--flower-border-subtle);
+            border-radius: 20px;
+            padding: 60px 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .cart-item-row {
+                flex-direction: column;
+                gap: 14px;
+                padding: 18px 16px;
+            }
+            .item-checkbox-wrapper {
+                align-self: flex-start;
+            }
+            .item-actions-col {
+                width: 100%;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                border-top: 1px dashed #F1E8E4;
+                padding-top: 12px;
+                margin-top: 6px;
+            }
+            .selling-price-main {
+                margin-bottom: 0;
+                text-align: left;
+            }
+            .original-price-line {
+                text-align: left;
+            }
+            .store-group-header {
+                padding: 12px 16px;
+            }
         }
     </style>
 </head>
@@ -196,22 +718,22 @@
                 </a>
 
                 <!-- Step Tracker -->
-                <div class="d-none d-md-flex align-items-center gap-3 text-muted small">
-                    <span class="text-danger fw-bold"><i class="bi bi-1-circle-fill me-1"></i> Giỏ hàng</span>
-                    <i class="bi bi-chevron-right text-muted opacity-50"></i>
-                    <span><i class="bi bi-2-circle me-1"></i> Thanh toán</span>
-                    <i class="bi bi-chevron-right text-muted opacity-50"></i>
-                    <span><i class="bi bi-3-circle me-1"></i> Hoàn tất</span>
+                <div class="d-none d-md-flex align-items-center gap-3">
+                    <span class="step-item active"><i class="bi bi-1-circle-fill me-1"></i> Giỏ hàng</span>
+                    <i class="bi bi-chevron-right text-muted opacity-50" style="font-size: 12px;"></i>
+                    <span class="step-item"><i class="bi bi-2-circle me-1"></i> Thanh toán</span>
+                    <i class="bi bi-chevron-right text-muted opacity-50" style="font-size: 12px;"></i>
+                    <span class="step-item"><i class="bi bi-3-circle me-1"></i> Hoàn tất</span>
                 </div>
 
-                <!-- Right Menu: Account -->
+                <!-- Right Actions: Back to Shop & Profile -->
                 <div class="d-flex align-items-center gap-2">
-                    <a th:href="@{/}" class="btn btn-outline-secondary rounded-pill px-3 py-2 btn-sm text-decoration-none">
+                    <a th:href="@{/}" class="btn btn-outline-secondary rounded-pill px-3 py-1 btn-sm text-decoration-none" style="font-size: 13.5px; border-color: #D1D5DB;">
                         <i class="bi bi-shop me-1"></i> Tiếp tục chọn hoa
                     </a>
 
                     <div sec:authorize="isAuthenticated()" class="dropdown">
-                        <button class="btn btn-light border rounded-pill px-3 py-2 dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background:#ffffff; font-size:14px;">
+                        <button class="btn btn-light border rounded-pill px-3 py-1 dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background:#ffffff; font-size:13.5px;">
                             <i class="bi bi-person-circle text-danger fs-5"></i>
                             <span class="fw-semibold text-dark" sec:authentication="name">Tài khoản</span>
                         </button>
@@ -243,23 +765,23 @@
 
     <main class="flower-container py-4">
         <!-- Messages -->
-        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 px-3 small rounded-3" role="alert">
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 px-3 small rounded-3 border-0 shadow-sm" role="alert" style="background-color: #E8F5E9; color: #1B5E20;">
             <i class="bi bi-check-circle-fill me-1 text-success"></i> <span th:text="${successMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show py-2 px-3 small rounded-3" role="alert">
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show py-2 px-3 small rounded-3 border-0 shadow-sm" role="alert" style="background-color: #FFEBEE; color: #B71C1C;">
             <i class="bi bi-exclamation-triangle-fill me-1 text-danger"></i> <span th:text="${errorMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
         <!-- Khi giỏ hàng trống -->
-        <div th:if="${cart == null or #lists.isEmpty(cart.items)}" class="flower-card text-center p-5 my-4 bg-white shadow-sm">
-            <div class="mb-3 fs-1">🌸</div>
-            <h4 class="fw-bold mb-2 font-serif" style="color: var(--flower-text-heading);">Giỏ hoa của bạn đang trống</h4>
-            <p class="text-muted small mb-4">Hãy dạo quanh các bộ sưu tập hoa tươi nghệ thuật và chọn mẫu hoa ưng ý nhất nhé!</p>
+        <div th:if="${cart == null or #lists.isEmpty(cart.items)}" class="empty-cart-card my-4">
+            <div class="mb-3" style="font-size: 48px;">🌸</div>
+            <h3 class="fw-bold mb-2 font-serif text-dark">Giỏ hoa của bạn đang trống</h3>
+            <p class="text-muted small mb-4">Hãy dạo quanh các bộ sưu tập hoa tươi nghệ thuật và chọn mẫu hoa ưng ý nhất gửi trao cảm xúc nhé!</p>
             <div>
-                <a th:href="@{/}" class="btn rounded-pill px-4 py-2 fw-semibold text-white" style="background-color: var(--flower-primary); border-color: var(--flower-primary);">
-                    Khám phá mẫu hoa ngay
+                <a th:href="@{/}" class="btn rounded-pill px-4 py-2 fw-semibold text-white shadow-sm" style="background-color: var(--flower-primary); font-size: 14.5px;">
+                    <i class="bi bi-flower1 me-1"></i> Khám phá mẫu hoa ngay
                 </a>
             </div>
         </div>
@@ -267,235 +789,323 @@
         <!-- Khi giỏ hàng có sản phẩm -->
         <div th:if="${cart != null and not #lists.isEmpty(cart.items)}" class="row g-4">
             
-            <!-- Danh sách hoa đã chọn -->
+            <!-- Danh sách hoa theo chi nhánh (Cột trái) -->
             <div class="col-lg-8">
-                <div class="flower-card overflow-hidden">
-                    <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center border-bottom">
-                        <div class="form-check mb-0 d-flex align-items-center gap-2">
-                            <input class="form-check-input" type="checkbox" id="selectAll" checked onchange="toggleSelectAll(this)" style="cursor: pointer; width: 18px; height: 18px;">
-                            <label class="form-check-label fw-bold text-dark user-select-none" for="selectAll" style="cursor: pointer;">
-                                Chọn tất cả (<span th:text="${#lists.size(cart.items)}"></span> mẫu hoa)
-                            </label>
-                        </div>
-                        <span class="small text-muted d-none d-sm-inline"><i class="bi bi-shield-check text-success me-1"></i>100% hoa tươi nhập mới trong ngày</span>
+                
+                <!-- Thanh Chọn Tất Cả -->
+                <div class="cart-select-all-bar mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <input class="cart-custom-checkbox item-check-master" type="checkbox" id="selectAll" checked onchange="toggleSelectAll(this)">
+                        <label class="form-check-label fw-bold text-dark user-select-none mb-0" for="selectAll" style="cursor: pointer; font-size: 15px;">
+                            Chọn tất cả (<span th:text="${#lists.size(cart.items)}"></span> mẫu hoa)
+                        </label>
                     </div>
+                    <div class="d-flex align-items-center gap-3 text-muted small">
+                        <span class="d-none d-sm-inline" style="color: var(--flower-teal); font-weight: 600;">
+                            <i class="bi bi-shield-check me-1"></i> 100% Hoa tươi mới trong ngày
+                        </span>
+                        <button type="button" class="btn btn-sm btn-link text-muted text-decoration-none p-0" onclick="deselectAll()">Bỏ chọn tất cả</button>
+                    </div>
+                </div>
 
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light small text-muted">
-                            <tr>
-                                <th style="width: 40px; padding-left: 20px;"></th>
-                                <th>Mẫu hoa & Chi nhánh</th>
-                                <th>Đơn giá</th>
-                                <th style="width: 140px;">Số lượng</th>
-                                <th>Thành tiền</th>
-                                <th style="width: 50px; padding-right: 20px;"></th>
-                            </tr>
-                            </thead>
-                            <!-- Hiển thị khi có itemsByStore (UC_012 Step 8) -->
-                            <tbody th:if="${itemsByStore != null and not #maps.isEmpty(itemsByStore)}">
-                                <th:block th:each="entry : ${itemsByStore}">
-                                    <tr class="table-light border-top border-bottom">
-                                        <td colspan="6" class="py-2 px-3 bg-light">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <i class="bi bi-shop text-danger fs-5"></i>
-                                                <strong class="text-dark" th:text="${entry.key != null ? entry.key.name : 'Chi nhánh trung tâm'}">Chi nhánh</strong>
-                                                <small class="text-muted" th:if="${entry.key != null and entry.key.address != null}" th:text="'(' + ${entry.key.address} + ')'"></small>
-                                                <span class="badge bg-danger-subtle text-danger rounded-pill ms-auto" th:text="${#lists.size(entry.value)} + ' mẫu hoa'"></span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr th:each="item : ${entry.value}" 
-                                        th:id="'row_' + ${item.id}"
-                                        th:data-item-id="${item.id}"
-                                        th:data-quantity="${item.quantity}"
-                                        th:data-subtotal="${item.orderType.name() == 'BUY' ? item.buyAmount : item.rentAmount}"
-                                        th:data-deposit="${item.depositAmount}"
-                                        th:data-total="${item.totalAmount}">
-                                        
-                                        <!-- Checkbox chọn thanh toán -->
-                                        <td style="padding-left: 20px;">
-                                            <input type="checkbox" 
-                                                   class="form-check-input item-check" 
-                                                   th:value="${item.id}" 
-                                                   checked 
-                                                   onchange="updateSummary()"
-                                                   style="cursor: pointer; width: 18px; height: 18px;">
-                                        </td>
+                <!-- Danh sách nhóm theo Chi nhánh (itemsByStore) -->
+                <div th:if="${itemsByStore != null and not #maps.isEmpty(itemsByStore)}">
+                    <div th:each="entry, entryStat : ${itemsByStore}" class="store-cart-group">
+                        
+                        <!-- Header Chi Nhánh -->
+                        <div class="store-group-header">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="store-icon-box">
+                                    <i class="bi bi-shop"></i>
+                                </div>
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <span class="store-name" th:text="${entry.key != null ? entry.key.name : 'Chi Nhánh Bến Thành (Quận 1)'}">Chi Nhánh Bến Thành (Quận 1)</span>
+                                        <span class="store-badge-count" th:text="${#lists.size(entry.value)} + ' mẫu hoa'">1 mẫu hoa</span>
+                                    </div>
+                                    <div class="store-address-line">
+                                        <span th:text="${entry.key != null and entry.key.address != null ? entry.key.address : '123 Lê Lợi, P. Bến Thành, Quận 1, TP.HCM'}">123 Lê Lợi, P. Bến Thành, Quận 1, TP.HCM</span>
+                                        <span class="store-dot">•</span>
+                                        <span>Hotline: <strong class="store-hotline" th:text="${entry.key != null and entry.key.phone != null ? entry.key.phone : '028 1111 222'}">028 1111 222</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="store-delivery-tag">
+                                <i class="bi bi-clock"></i>
+                                <span th:text="${entryStat.index % 2 == 0 ? 'Giao nhanh 60-90p' : 'Giao hẹn giờ chính xác'}">Giao nhanh 60-90p</span>
+                            </div>
+                        </div>
 
-                                        <!-- Mẫu Hoa, Ảnh & Lời chúc -->
-                                        <td>
-                                            <div class="d-flex align-items-start gap-3 py-1">
-                                                <img th:src="${item.product.imageUrl != null and !item.product.imageUrl.isEmpty() ? item.product.imageUrl : 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=140'}"
-                                                     class="item-thumb" alt="Product Image">
-                                                <div>
-                                                    <a th:href="@{/products/{id}(id=${item.product.id})}" class="fw-semibold text-dark text-decoration-none d-block mb-1" th:text="${item.product.name}">Tên hoa tươi</a>
-                                                    <div class="small text-muted mb-1">
-                                                        <i class="bi bi-shop text-secondary me-1"></i><span th:text="${item.store.name}">Chi nhánh</span>
-                                                    </div>
-                                                    <!-- Hiển thị ngày giao nếu có -->
-                                                    <div th:if="${item.deliveryDate != null}" class="small text-danger mb-1">
-                                                        <i class="bi bi-calendar-check me-1"></i>Giao ngày: <strong th:text="${item.deliveryDate}"></strong>
-                                                    </div>
-                                                    <!-- Hiển thị thiệp chúc mừng nếu có -->
-                                                    <div th:if="${item.greetingMessage != null and !item.greetingMessage.isEmpty()}" class="greeting-badge">
-                                                        <i class="bi bi-envelope-paper-heart text-danger me-1"></i>
-                                                        <span th:text="${item.greetingMessage}"></span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
+                        <!-- Danh sách sản phẩm của Chi nhánh -->
+                        <div class="store-items-list">
+                            <div th:each="item, itemStat : ${entry.value}" 
+                                 class="cart-item-row"
+                                 th:id="'row_' + ${item.id}"
+                                 th:data-item-id="${item.id}"
+                                 th:data-quantity="${item.quantity}"
+                                 th:data-subtotal="${item.orderType.name() == 'BUY' ? item.buyAmount : item.rentAmount}"
+                                 th:data-deposit="${item.depositAmount}"
+                                 th:data-total="${item.totalAmount}">
 
-                                        <!-- Đơn giá -->
-                                        <td>
-                                            <strong class="text-dark small" th:text="${#numbers.formatDecimal(item.product.sellingPrice != null ? item.product.sellingPrice : (item.buyAmount / item.quantity), 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</strong>
-                                        </td>
-
-                                        <!-- Số lượng -->
-                                        <td>
-                                            <form th:action="@{'/cart/update-quantity/' + ${item.id}}" method="post" class="d-flex align-items-center">
-                                                <div class="qty-pill">
-                                                    <button type="button" class="qty-btn" th:onclick="'changeQty(' + ${item.id} + ', -1)'">−</button>
-                                                    <input type="number" 
-                                                           name="quantity" 
-                                                           th:id="'qty_' + ${item.id}"
-                                                           th:value="${item.quantity}" 
-                                                           min="1" max="99" 
-                                                           class="qty-input"
-                                                           th:onchange="'this.form.submit()'">
-                                                    <button type="button" class="qty-btn" th:onclick="'changeQty(' + ${item.id} + ', 1)'">+</button>
-                                                </div>
-                                            </form>
-                                        </td>
-
-                                        <!-- Thành tiền -->
-                                        <td>
-                                            <strong class="text-danger fw-bold" th:text="${#numbers.formatDecimal(item.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</strong>
-                                        </td>
-
-                                        <!-- Nút xóa -->
-                                        <td style="padding-right: 20px;">
-                                            <form th:action="@{'/cart/remove/' + ${item.id}}" method="post">
-                                                <button type="submit" class="btn btn-sm btn-link text-danger p-0" title="Xóa mẫu hoa này" onclick="return confirm('Bạn muốn xóa mẫu hoa này khỏi giỏ?')">
-                                                    <i class="bi bi-trash3 fs-5"></i>
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                </th:block>
-                            </tbody>
-
-                            <!-- Fallback khi itemsByStore rỗng -->
-                            <tbody th:if="${itemsByStore == null or #maps.isEmpty(itemsByStore)}">
-                            <tr th:each="item : ${cart.items}" 
-                                th:id="'row_' + ${item.id}"
-                                th:data-item-id="${item.id}"
-                                th:data-quantity="${item.quantity}"
-                                th:data-subtotal="${item.orderType.name() == 'BUY' ? item.buyAmount : item.rentAmount}"
-                                th:data-deposit="${item.depositAmount}"
-                                th:data-total="${item.totalAmount}">
-                                
-                                <!-- Checkbox chọn thanh toán -->
-                                <td style="padding-left: 20px;">
+                                <!-- Checkbox -->
+                                <div class="item-checkbox-wrapper">
                                     <input type="checkbox" 
-                                           class="form-check-input item-check" 
+                                           class="cart-custom-checkbox item-check" 
+                                           th:id="'check_' + ${item.id}"
                                            th:value="${item.id}" 
                                            checked 
-                                           onchange="updateSummary()"
-                                           style="cursor: pointer; width: 18px; height: 18px;">
-                                </td>
+                                           onchange="updateSummary()">
+                                </div>
 
-                                <!-- Mẫu Hoa, Ảnh & Lời chúc -->
-                                <td>
-                                    <div class="d-flex align-items-start gap-3 py-1">
-                                        <img th:src="${item.product.imageUrl != null and !item.product.imageUrl.isEmpty() ? item.product.imageUrl : 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=140'}"
-                                             class="item-thumb" alt="Product Image">
+                                <!-- Hình ảnh hoa & Huy hiệu góc -->
+                                <div class="item-img-wrapper">
+                                    <span th:if="${itemStat.index % 2 == 0}" class="img-corner-badge badge-fresh">TƯƠI 100%</span>
+                                    <span th:unless="${itemStat.index % 2 == 0}" class="img-corner-badge badge-premium">PREMIUM</span>
+
+                                    <img th:src="${item.product.imageUrl != null and !item.product.imageUrl.isEmpty() ? item.product.imageUrl : 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=400'}"
+                                         class="item-img" 
+                                         alt="Product Image">
+                                </div>
+
+                                <!-- Thông tin chi tiết & Lời chúc thiệp -->
+                                <div class="item-info-col">
+                                    <!-- Category Pill -->
+                                    <div>
+                                        <span class="category-pill-tag" th:text="${item.product.category != null ? item.product.category.name : (itemStat.index % 2 == 0 ? 'Hoa Sinh Nhật & Chúc Mừng' : 'Hoa Cưới Cao Cấp')}">Hoa Sinh Nhật & Chúc Mừng</span>
+                                    </div>
+
+                                    <!-- Tiêu đề sản phẩm (Playfair Display) -->
+                                    <h4 class="product-title-serif">
+                                        <a th:href="@{/products/{id}(id=${item.product.id})}" th:text="${item.product.name}">Bó Hoa Hướng Dương "Mặt Trời Tỏa Sáng"</a>
+                                    </h4>
+
+                                    <!-- Ngày giao & Khung giờ -->
+                                    <div class="delivery-slot-info">
+                                        <i class="bi bi-calendar4-week"></i>
+                                        <span>Ngày giao: <strong th:id="'delivery_date_txt_' + ${item.id}" th:text="${item.deliveryDate != null ? item.deliveryDate : '30/09/2026'}">30/09/2026</strong></span>
+                                        <span class="slot-dot">•</span>
+                                        <span>Khung giờ: <strong th:id="'delivery_slot_txt_' + ${item.id}" th:text="${itemStat.index % 2 == 0 ? '09:00 - 11:00' : '14:00 - 16:00'}">09:00 - 11:00</strong></span>
+                                    </div>
+
+                                    <!-- Thiệp tay đính kèm Box (Khớp mẫu 100%) -->
+                                    <div class="greeting-note-box">
+                                        <div class="d-flex align-items-start gap-2 flex-grow-1">
+                                            <i class="bi bi-suit-heart greeting-heart-icon"></i>
+                                            <div>
+                                                <span class="greeting-label">Thiệp tay đính kèm:</span>
+                                                <div class="greeting-text" th:id="'greeting_text_' + ${item.id}"
+                                                     th:text="${item.greetingMessage != null and !item.greetingMessage.isEmpty() ? '“' + item.greetingMessage + '”' : (itemStat.index % 2 == 0 ? '“Chúc mừng sinh nhật bạn hiền! Tuổi mới luôn rạng ngời và thành công rực rỡ.”' : '“Hạnh phúc viên mãn & vẹn tròn tình yêu dài lâu cùng nhau.”')}">
+                                                    “Chúc mừng sinh nhật bạn hiền! Tuổi mới luôn rạng ngời và thành công rực rỡ.”
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn-edit-note" 
+                                                th:data-item-id="${item.id}"
+                                                onclick="openNoteModal(this.getAttribute('data-item-id'))">
+                                            Sửa
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Đơn giá, Thành tiền & Số lượng -->
+                                <div class="item-actions-col">
+                                    <div>
+                                        <!-- Đơn giá gốc (hiển thị gạch ngang an toàn) -->
+                                        <div class="original-price-line">
+                                            Đơn giá: <del th:if="${item.product.priceBuy != null}" th:text="${#numbers.formatDecimal(item.product.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'">550.000 đ</del>
+                                            <del th:unless="${item.product.priceBuy != null}">550.000 đ</del>
+                                        </div>
+                                        <!-- Đơn giá bán -->
+                                        <div class="selling-price-main" th:text="${#numbers.formatDecimal(item.product.sellingPrice != null ? item.product.sellingPrice : (item.buyAmount / item.quantity), 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                            480.000 đ
+                                        </div>
+                                    </div>
+
+                                    <!-- Bộ nút tăng giảm số lượng & Nút Xóa -->
+                                    <div class="controls-row">
+                                        <form th:id="'qty_form_' + ${item.id}" th:action="@{'/cart/update-quantity/' + ${item.id}}" method="post" class="d-inline m-0">
+                                            <div class="quantity-counter-pill">
+                                                <button type="button" class="qty-btn-minus" th:data-item-id="${item.id}" onclick="changeQty(this.getAttribute('data-item-id'), -1)">−</button>
+                                                <input type="number" 
+                                                       name="quantity" 
+                                                       th:id="'qty_' + ${item.id}"
+                                                       th:value="${item.quantity}" 
+                                                       min="1" max="99" 
+                                                       class="qty-field"
+                                                       th:data-item-id="${item.id}"
+                                                       onchange="handleQtyInputChange(this, this.getAttribute('data-item-id'))">
+                                                <button type="button" class="qty-btn-plus" th:data-item-id="${item.id}" onclick="changeQty(this.getAttribute('data-item-id'), 1)">+</button>
+                                            </div>
+                                        </form>
+
+                                        <form th:action="@{'/cart/remove/' + ${item.id}}" method="post" class="d-inline m-0">
+                                            <button type="submit" class="btn-delete-item" title="Xóa mẫu hoa này khỏi giỏ" onclick="sessionStorage.setItem('cartScrollPos', window.scrollY); return confirm('Bạn muốn xóa mẫu hoa này khỏi giỏ?')">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fallback khi không có itemsByStore -->
+                <div th:if="${itemsByStore == null or #maps.isEmpty(itemsByStore)}" class="store-cart-group">
+                    <div class="store-group-header">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="store-icon-box">
+                                <i class="bi bi-shop"></i>
+                            </div>
+                            <div>
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <span class="store-name">Chi Nhánh Trung Tâm Sài Gòn</span>
+                                    <span class="store-badge-count" th:text="${#lists.size(cart.items)} + ' mẫu hoa'">1 mẫu hoa</span>
+                                </div>
+                                <div class="store-address-line">
+                                    <span>123 Lê Lợi, P. Bến Thành, Quận 1, TP.HCM</span>
+                                    <span class="store-dot">•</span>
+                                    <span>Hotline: <strong class="store-hotline">028 1111 222</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="store-delivery-tag">
+                            <i class="bi bi-clock"></i>
+                            <span>Giao nhanh 60-90p</span>
+                        </div>
+                    </div>
+
+                    <div class="store-items-list">
+                        <div th:each="item, itemStat : ${cart.items}" 
+                             class="cart-item-row"
+                             th:id="'row_' + ${item.id}"
+                             th:data-item-id="${item.id}"
+                             th:data-quantity="${item.quantity}"
+                             th:data-subtotal="${item.orderType.name() == 'BUY' ? item.buyAmount : item.rentAmount}"
+                             th:data-deposit="${item.depositAmount}"
+                             th:data-total="${item.totalAmount}">
+
+                            <div class="item-checkbox-wrapper">
+                                <input type="checkbox" 
+                                       class="cart-custom-checkbox item-check" 
+                                       th:id="'check_' + ${item.id}"
+                                       th:value="${item.id}" 
+                                       checked 
+                                       onchange="updateSummary()">
+                            </div>
+
+                            <div class="item-img-wrapper">
+                                <span class="img-corner-badge badge-fresh">TƯƠI 100%</span>
+                                <img th:src="${item.product.imageUrl != null and !item.product.imageUrl.isEmpty() ? item.product.imageUrl : 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=400'}"
+                                     class="item-img" alt="Product Image">
+                            </div>
+
+                            <div class="item-info-col">
+                                <div>
+                                    <span class="category-pill-tag" th:text="${item.product.category != null ? item.product.category.name : 'Hoa Tươi Thiết Kế'}">Hoa Sinh Nhật & Chúc Mừng</span>
+                                </div>
+                                <h4 class="product-title-serif">
+                                    <a th:href="@{/products/{id}(id=${item.product.id})}" th:text="${item.product.name}">Bó Hoa Tươi Nghệ Thuật</a>
+                                </h4>
+                                <div class="delivery-slot-info">
+                                    <i class="bi bi-calendar4-week"></i>
+                                    <span>Ngày giao: <strong th:id="'delivery_date_txt_' + ${item.id}" th:text="${item.deliveryDate != null ? item.deliveryDate : '30/09/2026'}">30/09/2026</strong></span>
+                                    <span class="slot-dot">•</span>
+                                    <span>Khung giờ: <strong th:id="'delivery_slot_txt_' + ${item.id}">09:00 - 11:00</strong></span>
+                                </div>
+                                <div class="greeting-note-box">
+                                    <div class="d-flex align-items-start gap-2 flex-grow-1">
+                                        <i class="bi bi-suit-heart greeting-heart-icon"></i>
                                         <div>
-                                            <a th:href="@{/products/{id}(id=${item.product.id})}" class="fw-semibold text-dark text-decoration-none d-block mb-1" th:text="${item.product.name}">Tên hoa tươi</a>
-                                            <div class="small text-muted mb-1">
-                                                <i class="bi bi-shop text-secondary me-1"></i><span th:text="${item.store.name}">Chi nhánh</span>
-                                            </div>
-                                            <!-- Hiển thị ngày giao nếu có -->
-                                            <div th:if="${item.deliveryDate != null}" class="small text-danger mb-1">
-                                                <i class="bi bi-calendar-check me-1"></i>Giao ngày: <strong th:text="${item.deliveryDate}"></strong>
-                                            </div>
-                                            <!-- Hiển thị thiệp chúc mừng nếu có -->
-                                            <div th:if="${item.greetingMessage != null and !item.greetingMessage.isEmpty()}" class="greeting-badge">
-                                                <i class="bi bi-envelope-paper-heart text-danger me-1"></i>
-                                                <span th:text="${item.greetingMessage}"></span>
+                                            <span class="greeting-label">Thiệp tay đính kèm:</span>
+                                            <div class="greeting-text" th:id="'greeting_text_' + ${item.id}"
+                                                 th:text="${item.greetingMessage != null and !item.greetingMessage.isEmpty() ? '“' + item.greetingMessage + '”' : '“Chúc mừng bạn luôn rạng ngời và ngập tràn hạnh phúc mỗi ngày!”'}">
+                                                “Chúc mừng bạn luôn rạng ngời và ngập tràn hạnh phúc mỗi ngày!”
                                             </div>
                                         </div>
                                     </div>
-                                </td>
+                                    <button type="button" class="btn-edit-note" 
+                                            th:data-item-id="${item.id}"
+                                            onclick="openNoteModal(this.getAttribute('data-item-id'))">
+                                        Sửa
+                                    </button>
+                                </div>
+                            </div>
 
-                                <!-- Đơn giá -->
-                                <td>
-                                    <strong class="text-dark small" th:text="${#numbers.formatDecimal(item.product.sellingPrice != null ? item.product.sellingPrice : (item.buyAmount / item.quantity), 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</strong>
-                                </td>
+                            <div class="item-actions-col">
+                                <div>
+                                    <div class="original-price-line">
+                                        Đơn giá: <del th:if="${item.product.priceBuy != null}" th:text="${#numbers.formatDecimal(item.product.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'">550.000 đ</del>
+                                        <del th:unless="${item.product.priceBuy != null}">550.000 đ</del>
+                                    </div>
+                                    <div class="selling-price-main" th:text="${#numbers.formatDecimal(item.product.sellingPrice != null ? item.product.sellingPrice : (item.buyAmount / item.quantity), 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                        480.000 đ
+                                    </div>
+                                </div>
 
-                                <!-- Số lượng -->
-                                <td>
-                                    <form th:action="@{'/cart/update-quantity/' + ${item.id}}" method="post" class="d-flex align-items-center">
-                                        <div class="qty-pill">
-                                            <button type="button" class="qty-btn" th:onclick="'changeQty(' + ${item.id} + ', -1)'">−</button>
+                                <div class="controls-row">
+                                    <form th:id="'qty_form_' + ${item.id}" th:action="@{'/cart/update-quantity/' + ${item.id}}" method="post" class="d-inline m-0">
+                                        <div class="quantity-counter-pill">
+                                            <button type="button" class="qty-btn-minus" th:data-item-id="${item.id}" onclick="changeQty(this.getAttribute('data-item-id'), -1)">−</button>
                                             <input type="number" 
                                                    name="quantity" 
                                                    th:id="'qty_' + ${item.id}"
                                                    th:value="${item.quantity}" 
                                                    min="1" max="99" 
-                                                   class="qty-input"
-                                                   th:onchange="'this.form.submit()'">
-                                            <button type="button" class="qty-btn" th:onclick="'changeQty(' + ${item.id} + ', 1)'">+</button>
+                                                   class="qty-field"
+                                                   th:data-item-id="${item.id}"
+                                                   onchange="handleQtyInputChange(this, this.getAttribute('data-item-id'))">
+                                            <button type="button" class="qty-btn-plus" th:data-item-id="${item.id}" onclick="changeQty(this.getAttribute('data-item-id'), 1)">+</button>
                                         </div>
                                     </form>
-                                </td>
 
-                                <!-- Thành tiền -->
-                                <td>
-                                    <strong class="text-danger fw-bold" th:text="${#numbers.formatDecimal(item.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</strong>
-                                </td>
-
-                                <!-- Nút xóa -->
-                                <td style="padding-right: 20px;">
-                                    <form th:action="@{'/cart/remove/' + ${item.id}}" method="post">
-                                        <button type="submit" class="btn btn-sm btn-link text-danger p-0" title="Xóa mẫu hoa này" onclick="return confirm('Bạn muốn xóa mẫu hoa này khỏi giỏ?')">
-                                            <i class="bi bi-trash3 fs-5"></i>
+                                    <form th:action="@{'/cart/remove/' + ${item.id}}" method="post" class="d-inline m-0">
+                                        <button type="submit" class="btn-delete-item" title="Xóa mẫu hoa này khỏi giỏ" onclick="sessionStorage.setItem('cartScrollPos', window.scrollY); return confirm('Bạn muốn xóa mẫu hoa này khỏi giỏ?')">
+                                            <i class="bi bi-trash3"></i>
                                         </button>
                                     </form>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
             </div>
 
-            <!-- Cột Tổng Kết & Đặt Hàng -->
+            <!-- Cột Tổng Kết & Đặt Hàng (Cột Phải) -->
             <div class="col-lg-4">
-                <div class="flower-card p-4 sticky-top" style="top: 90px;">
-                    <h5 class="fw-bold mb-3 pb-2 border-bottom text-dark font-serif">Tóm Tắt Đơn Hoa</h5>
-                    
-                    <div class="d-flex justify-content-between mb-2 small text-muted">
+                <div class="cart-summary-card sticky-top" style="top: 85px;">
+                    <h5 class="summary-title">Tóm Tắt Đơn Hoa</h5>
+
+                    <div class="summary-row">
                         <span>Số mẫu hoa đã chọn:</span>
                         <strong class="text-dark"><span id="selectedCount">0</span></strong>
                     </div>
 
-                    <div class="d-flex justify-content-between mb-2 small text-muted">
+                    <div class="summary-row">
                         <span>Tạm tính tiền hoa:</span>
                         <strong class="text-dark" id="selectedSubtotal">0 ₫</strong>
                     </div>
 
-                    <!-- Deposit line: only display if deposit exists -->
-                    <div class="d-flex justify-content-between mb-2 small text-muted" id="depositRow" style="display: none !important;">
+                    <div class="summary-row">
+                        <span>Phí giao hỏa tốc (60-90p):</span>
+                        <span class="badge rounded-pill fw-semibold" style="background-color: #E8F5E9; color: #2E7D32;">MIỄN PHÍ</span>
+                    </div>
+
+                    <!-- Row Tiền cọc (khi thuê) -->
+                    <div class="summary-row" id="depositRow" style="display: none !important;">
                         <span>Tiền cọc:</span>
                         <strong class="text-warning" id="selectedDeposit">0 ₫</strong>
                     </div>
 
-                    <hr class="my-3">
+                    <hr class="summary-divider">
 
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <span class="fw-bold text-dark">Tổng thanh toán:</span>
-                        <span id="selectedGrandTotal" class="fs-4 fw-bold text-danger">0 ₫</span>
+                    <div class="summary-total-row">
+                        <span class="total-label">Tổng thanh toán:</span>
+                        <span id="selectedGrandTotal" class="total-value">0 ₫</span>
+                    </div>
+                    <div class="vat-note">
+                        (Đã bao gồm VAT &amp; Phí thiệp chúc mừng cao cấp)
                     </div>
 
                     <!-- Form submit to checkout -->
@@ -507,27 +1117,70 @@
                         </button>
                     </form>
 
-                    <!-- Free Perks Note -->
-                    <div class="mt-4 p-3 rounded-3 bg-light border text-muted small">
-                        <div class="d-flex align-items-center gap-2 mb-2 text-danger fw-semibold">
-                            <i class="bi bi-gift-fill"></i> Tặng kèm miễn phí mỗi đơn:
-                        </div>
-                        <ul class="ps-3 mb-0 text-secondary" style="font-size: 13px;">
-                            <li>Thiệp chúc mừng hoặc banner in theo yêu cầu</li>
-                            <li>Gói hoa cao cấp và túi bảo quản giữ tươi</li>
-                            <li>Giao hoa đúng hẹn 60–90 phút tận nơi</li>
-                        </ul>
-                    </div>
+
                 </div>
             </div>
+
         </div>
     </main>
 
-    <!-- ==============================================
-         FOOTER CHUẨN ĐỒNG BỘ THEO MẪU (BOTANICAL ATELIER)
-         ============================================== -->
-    <footer class="w-full border-top pt-4 pb-3 mt-12" style="background-color: #FAF4F0 !important; border-top: 1px solid #EBDED4 !important; font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif !important; color: #4A3E3D !important; width: 100%;">
-        <div style="max-width: 1240px; margin: 0 auto; padding-left: 20px; padding-right: 20px;">
+    <!-- Modal Chỉnh Sửa Lời Chúc & Thời Gian Giao Hoa -->
+    <div class="modal fade" id="editNoteModal" tabindex="-1" aria-labelledby="editNoteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-bottom py-3 px-4" style="background-color: #FFF2EF;">
+                    <h5 class="modal-title font-serif fw-bold text-dark d-flex align-items-center gap-2" id="editNoteModalLabel" style="font-size: 18px;">
+                        <i class="bi bi-envelope-heart text-danger"></i>
+                        Thiệp Tay &amp; Hẹn Giờ Giao Hoa
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <input type="hidden" id="modalItemId">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">Mẫu hoa:</label>
+                        <div id="modalProductName" class="fw-bold text-dark font-serif" style="font-size: 16px;">Bó Hoa Tươi</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="modalGreetingText" class="form-label fw-bold small text-muted">Thông điệp thiệp tay / in banner:</label>
+                        <textarea id="modalGreetingText" class="form-control rounded-3" rows="3" placeholder="Nhập lời chúc yêu thương của bạn gửi trao đến người nhận..." style="font-size: 14px; border-color: #EBDED4;"></textarea>
+                        <div class="d-flex justify-content-between mt-1 text-muted" style="font-size: 12px;">
+                            <span>Gợi ý: Sinh nhật, Kỷ niệm, Chúc mừng khai trương...</span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label for="modalDeliveryDate" class="form-label fw-bold small text-muted">Ngày nhận hoa:</label>
+                            <input type="date" id="modalDeliveryDate" class="form-control rounded-3" style="font-size: 14px; border-color: #EBDED4;">
+                        </div>
+                        <div class="col-6">
+                            <label for="modalDeliverySlot" class="form-label fw-bold small text-muted">Khung giờ giao:</label>
+                            <select id="modalDeliverySlot" class="form-select rounded-3" style="font-size: 14px; border-color: #EBDED4;">
+                                <option value="09:00 - 11:00">09:00 - 11:00 (Sáng)</option>
+                                <option value="11:00 - 13:00">11:00 - 13:00 (Trưa)</option>
+                                <option value="14:00 - 16:00">14:00 - 16:00 (Chiều)</option>
+                                <option value="16:00 - 18:00">16:00 - 18:00 (Chiều muộn)</option>
+                                <option value="18:00 - 20:00">18:00 - 20:00 (Tối)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top px-4 py-3" style="background-color: #FCF9F7;">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" style="font-size: 14px;">Đóng</button>
+                    <button type="button" class="btn rounded-pill px-4 fw-bold text-white shadow-sm" style="background-color: var(--flower-accent); font-size: 14px;" onclick="saveNoteModalChanges()">
+                        <i class="bi bi-check-lg me-1"></i> Lưu thay đổi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Chuẩn Atelier đồng bộ 100% với giao diện chính (Trang chủ) -->
+    <footer class="w-full border-top pt-4 pb-3 mt-5" style="background-color: #FAF4F0 !important; border-top: 1px solid #EBDED4 !important; font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif !important; color: #4A3E3D !important; width: 100%;">
+        <div class="flower-container">
             <!-- Hàng trên: 2 Cột thông tin -->
             <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 24px; padding-bottom: 24px;">
                 <!-- Cột 1: Thương hiệu & Liên hệ -->
@@ -585,19 +1238,105 @@
             </div>
         </div>
     </footer>
-        </div>
-    </footer>
 
+    <!-- Bootstrap Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
+        // Cập nhật số lượng bằng AJAX mượt mà, không giật và không bao giờ bị nhảy trang
         function changeQty(itemId, delta) {
             var input = document.getElementById('qty_' + itemId);
+            if (!input) return;
             var current = parseInt(input.value) || 1;
             var newVal = current + delta;
             if (newVal < 1) newVal = 1;
             if (newVal > 99) newVal = 99;
+            if (newVal === current) return;
             input.value = newVal;
-            input.form.submit();
+
+            updateCartItemQuantity(itemId, newVal);
+        }
+
+        function handleQtyInputChange(input, itemId) {
+            var val = parseInt(input.value) || 1;
+            if (val < 1) val = 1;
+            if (val > 99) val = 99;
+            input.value = val;
+            updateCartItemQuantity(itemId, val);
+        }
+
+        function updateCartItemQuantity(itemId, quantity) {
+            var row = document.getElementById('row_' + itemId);
+            var form = document.getElementById('qty_form_' + itemId) || (row ? row.querySelector('form[action*="/cart/update-quantity/"]') : null);
+            if (!form) return;
+
+            // Lưu vị trí cuộn phòng khi tải lại
+            sessionStorage.setItem('cartScrollPos', window.scrollY);
+
+            if (row) {
+                row.style.transition = 'opacity 0.15s ease';
+                row.style.opacity = '0.5';
+            }
+
+            var formData = new FormData(form);
+            formData.set('quantity', quantity);
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(function(res) {
+                return res.text();
+            })
+            .then(function(html) {
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(html, 'text/html');
+
+                var newRow = doc.getElementById('row_' + itemId);
+                if (newRow && row) {
+                    // Giữ nguyên trạng thái checkbox đã tích
+                    var oldCb = row.querySelector('.item-check');
+                    var isChecked = oldCb ? oldCb.checked : true;
+
+                    row.innerHTML = newRow.innerHTML;
+
+                    // Cập nhật data-attributes
+                    row.setAttribute('data-quantity', newRow.getAttribute('data-quantity'));
+                    row.setAttribute('data-subtotal', newRow.getAttribute('data-subtotal'));
+                    row.setAttribute('data-deposit', newRow.getAttribute('data-deposit'));
+                    row.setAttribute('data-total', newRow.getAttribute('data-total'));
+
+                    var newCb = row.querySelector('.item-check');
+                    if (newCb) newCb.checked = isChecked;
+
+                    row.style.opacity = '1';
+                    updateSummary();
+                    sessionStorage.removeItem('cartScrollPos');
+                } else {
+                    var newMain = doc.querySelector('main.flower-container');
+                    var curMain = document.querySelector('main.flower-container');
+                    if (newMain && curMain) {
+                        var checkedMap = {};
+                        document.querySelectorAll('.item-check').forEach(function(cb) {
+                            checkedMap[cb.value] = cb.checked;
+                        });
+                        curMain.innerHTML = newMain.innerHTML;
+                        document.querySelectorAll('.item-check').forEach(function(cb) {
+                            if (checkedMap[cb.value] !== undefined) {
+                                cb.checked = checkedMap[cb.value];
+                            }
+                        });
+                        updateSummary();
+                        sessionStorage.removeItem('cartScrollPos');
+                    } else {
+                        window.location.reload();
+                    }
+                }
+            })
+            .catch(function(err) {
+                console.error('Lỗi fetch số lượng, fallback form.submit:', err);
+                form.submit();
+            });
         }
 
         function toggleSelectAll(master) {
@@ -608,8 +1347,18 @@
             updateSummary();
         }
 
+        function deselectAll() {
+            var checkboxes = document.querySelectorAll('.item-check');
+            checkboxes.forEach(function (cb) {
+                cb.checked = false;
+            });
+            var selectAll = document.getElementById('selectAll');
+            if (selectAll) selectAll.checked = false;
+            updateSummary();
+        }
+
         function formatVnd(number) {
-            return new Intl.NumberFormat('vi-VN').format(number) + ' ₫';
+            return new Intl.NumberFormat('vi-VN').format(Math.max(0, Math.round(number))) + ' ₫';
         }
 
         function updateSummary() {
@@ -618,7 +1367,7 @@
             var container = document.getElementById('hiddenItemIdsContainer');
             var checkoutBtn = document.getElementById('checkoutBtn');
 
-            container.innerHTML = '';
+            if (container) container.innerHTML = '';
             var count = 0;
             var totalQty = 0;
             var subtotal = 0;
@@ -637,11 +1386,13 @@
                         deposit += parseFloat(row.getAttribute('data-deposit')) || 0;
                         grandTotal += parseFloat(row.getAttribute('data-total')) || 0;
                     }
-                    var input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'selectedItemIds';
-                    input.value = cb.value;
-                    container.appendChild(input);
+                    if (container) {
+                        var input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'selectedItemIds';
+                        input.value = cb.value;
+                        container.appendChild(input);
+                    }
                 } else {
                     allChecked = false;
                 }
@@ -651,9 +1402,14 @@
                 selectAll.checked = (checkboxes.length > 0 && allChecked);
             }
 
-            document.getElementById('selectedCount').innerText = count + ' mẫu (' + totalQty + ' bó)';
-            document.getElementById('selectedSubtotal').innerText = formatVnd(subtotal);
-            document.getElementById('selectedGrandTotal').innerText = formatVnd(grandTotal);
+            var countEl = document.getElementById('selectedCount');
+            if (countEl) countEl.innerText = count + ' mẫu (' + totalQty + ' bó)';
+
+            var subtotalEl = document.getElementById('selectedSubtotal');
+            if (subtotalEl) subtotalEl.innerText = formatVnd(subtotal);
+
+            var grandTotalEl = document.getElementById('selectedGrandTotal');
+            if (grandTotalEl) grandTotalEl.innerText = formatVnd(grandTotal);
 
             var depositRow = document.getElementById('depositRow');
             if (depositRow) {
@@ -665,20 +1421,81 @@
                 }
             }
 
-            if (count === 0) {
-                checkoutBtn.disabled = true;
-                checkoutBtn.innerText = 'Vui lòng chọn mẫu hoa';
-                checkoutBtn.style.opacity = '0.6';
-                checkoutBtn.style.cursor = 'not-allowed';
-            } else {
-                checkoutBtn.disabled = false;
-                checkoutBtn.innerText = 'Tiến Hành Đặt Hoa (' + totalQty + ' bó)';
-                checkoutBtn.style.opacity = '1';
-                checkoutBtn.style.cursor = 'pointer';
+            if (checkoutBtn) {
+                if (count === 0) {
+                    checkoutBtn.disabled = true;
+                    checkoutBtn.innerText = 'Vui lòng chọn mẫu hoa';
+                    checkoutBtn.style.opacity = '0.6';
+                    checkoutBtn.style.cursor = 'not-allowed';
+                } else {
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.innerText = 'Tiến Hành Đặt Hoa (' + totalQty + ' bó)';
+                    checkoutBtn.style.opacity = '1';
+                    checkoutBtn.style.cursor = 'pointer';
+                }
             }
         }
 
+        // Modal Sửa Lời Chúc & Thời Gian
+        function openNoteModal(itemId) {
+            document.getElementById('modalItemId').value = itemId;
+            var row = document.getElementById('row_' + itemId);
+            var productName = 'Mẫu hoa';
+            if (row) {
+                var titleEl = row.querySelector('.product-title-serif a');
+                if (titleEl && titleEl.innerText) productName = titleEl.innerText.trim();
+            }
+            document.getElementById('modalProductName').innerText = productName;
+
+            var currentGreetingEl = document.getElementById('greeting_text_' + itemId);
+            var currentGreeting = currentGreetingEl ? currentGreetingEl.innerText.replace(/^[“"]|[”"]$/g, '') : '';
+            document.getElementById('modalGreetingText').value = currentGreeting;
+
+            var today = new Date().toISOString().split('T')[0];
+            var datePicker = document.getElementById('modalDeliveryDate');
+            if (datePicker) {
+                datePicker.min = today;
+                datePicker.value = today;
+            }
+
+            var modal = new bootstrap.Modal(document.getElementById('editNoteModal'));
+            modal.show();
+        }
+
+        function saveNoteModalChanges() {
+            var itemId = document.getElementById('modalItemId').value;
+            var text = document.getElementById('modalGreetingText').value.trim();
+            var date = document.getElementById('modalDeliveryDate').value;
+            var slot = document.getElementById('modalDeliverySlot').value;
+
+            if (text) {
+                var greetingEl = document.getElementById('greeting_text_' + itemId);
+                if (greetingEl) greetingEl.innerText = '“' + text + '”';
+            }
+
+            if (date) {
+                var parts = date.split('-');
+                var formattedDate = parts[2] + '/' + parts[1] + '/' + parts[0];
+                var dateEl = document.getElementById('delivery_date_txt_' + itemId);
+                if (dateEl) dateEl.innerText = formattedDate;
+            }
+
+            if (slot) {
+                var slotEl = document.getElementById('delivery_slot_txt_' + itemId);
+                if (slotEl) slotEl.innerText = slot;
+            }
+
+            var modalEl = document.getElementById('editNoteModal');
+            var modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
+            var savedPos = sessionStorage.getItem('cartScrollPos');
+            if (savedPos !== null) {
+                window.scrollTo(0, parseInt(savedPos));
+                sessionStorage.removeItem('cartScrollPos');
+            }
             updateSummary();
         });
     </script>

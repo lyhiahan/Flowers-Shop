@@ -18,10 +18,14 @@
       html, body {
         margin: 0;
         padding: 0;
+        background-color: #FFF0F3 !important;
         font-family: 'Nunito', sans-serif;
         -webkit-font-smoothing: antialiased;
       }
-      body { overscroll-behavior: none; }
+      body {
+        overscroll-behavior: none;
+        background-color: #FFF0F3 !important;
+      }
       main > :first-child { margin-top: 0 !important; }
       main > :last-child { margin-bottom: 0 !important; }
       * {
@@ -52,7 +56,7 @@
       theme: {
         extend: {
           colors: {
-            "botanic-bg": "#FAF6F0",
+            "botanic-bg": "#FFF0F3",
             "botanic-subtle": "#F7EFE9",
             "botanic-border": "#EBDED4",
             "botanic-card": "#FFFFFF",
@@ -82,7 +86,7 @@
   </script>
 </head>
 
-<body class="bg-[#FAF6F0] font-sans text-botanic-dark antialiased selection:bg-botanic-rose-soft selection:text-botanic-rose">
+<body class="bg-[#FFF0F3] font-sans text-botanic-dark antialiased selection:bg-botanic-rose-soft selection:text-botanic-rose">
 
   <!-- 1. THANH TIỆN ÍCH TRÊN CÙNG (Top Utility Bar) -->
   <div class="bg-[#F7EFE9] border-b border-[#EBDED4] text-[13px] text-[#555555] py-2 px-4 sm:px-8">
