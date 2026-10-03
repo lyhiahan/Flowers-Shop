@@ -16,10 +16,12 @@ public class Product {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
+    @org.hibernate.annotations.Nationalized
     @Column(nullable = false, length = 200)
     private String name;
 
-    @Column(columnDefinition = "TEXT")
+    @org.hibernate.annotations.Nationalized
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
     @Column(nullable = false)

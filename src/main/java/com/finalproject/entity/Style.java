@@ -13,6 +13,7 @@ public class Style {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @org.hibernate.annotations.Nationalized
     @Column(nullable = false, unique = true, length = 100)
     private String name; // Màu sắc, Dịp tặng, Phong cách cắm, Kích thước
 

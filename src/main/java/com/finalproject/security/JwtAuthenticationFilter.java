@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  * 3. Tải user từ DB, kiểm tra isActive (tài khoản bị khóa → 401 dù token chưa hết hạn).
  * 4. Đặt Authentication vào SecurityContext.
  */
-@Component
+// @Component (Vô hiệu hóa filter này vì đã chuyển toàn bộ sang Session-based authentication)
 @RequiredArgsConstructor
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {

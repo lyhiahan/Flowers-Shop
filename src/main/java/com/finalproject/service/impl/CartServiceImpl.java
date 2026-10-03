@@ -20,6 +20,7 @@ public class CartServiceImpl implements CartService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final StoreRepository storeRepository;
+    private final StoreInventoryRepository inventories;
 
     @Override
     public Cart getCartByUsername(String username) {
@@ -50,6 +51,7 @@ public class CartServiceImpl implements CartService {
                 .orElseGet(() -> storeRepository.findAll().stream().findFirst().orElseThrow(() -> new ResourceNotFoundException("Chi nhánh không tồn tại")));
 
         int addQty = (request.getQuantity() != null && request.getQuantity() > 0) ? request.getQuantity() : 1;
+        requireAvailableStock(cart, product, store, null, addQty);
         java.time.LocalDate startDate = request.getRentStartDate();
         java.time.LocalDate endDate = request.getRentEndDate();
 
@@ -133,6 +135,7 @@ public class CartServiceImpl implements CartService {
             cartItemRepository.flush();
         } else {
             if (quantity > 10000) throw new IllegalArgumentException("Số lượng không hợp lệ.");
+            requireAvailableStock(cart, item.getProduct(), item.getStore(), item.getId(), quantity);
             item.setQuantity(quantity);
             cartItemRepository.save(item);
         }
@@ -170,6 +173,20 @@ public class CartServiceImpl implements CartService {
         cartItemRepository.deleteByCartId(cart.getId());
         cartItemRepository.flush();
     }
+    private void requireAvailableStock(Cart cart, Product product, Store store, Long excludedItemId, int quantity) {
+        int available = inventories.findByStoreIdAndProductId(store.getId(), product.getId())
+                .map(stock -> Math.max(0, stock.getQuantity())).orElse(0);
+        long requested = quantity;
+        for (CartItem line : cart.getItems()) {
+            if (!java.util.Objects.equals(line.getId(), excludedItemId)
+                    && line.getProduct().getId().equals(product.getId()) && line.getStore().getId().equals(store.getId())) {
+                requested += line.getQuantity();
+            }
+        }
+        if (requested > available) throw new IllegalArgumentException("Chi nhánh chỉ còn " + available
+                + " mẫu " + product.getName() + ". Số lượng trong giỏ không được vượt quá tồn kho.");
+    }
+
     private Cart getCartForUpdate(String username) {
         User user = userRepository.findByUsername(username).orElseThrow();
         Cart cart = cartRepository.findLockedByUserId(user.getId())

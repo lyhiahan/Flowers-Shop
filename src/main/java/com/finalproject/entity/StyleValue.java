@@ -12,6 +12,7 @@ public class StyleValue {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @org.hibernate.annotations.Nationalized
     @Column(nullable = false, length = 32)
     private String name; // Đỏ, Hồng Pastel, Khai Trương, Bó Lớn
 

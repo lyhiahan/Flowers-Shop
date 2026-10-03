@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
     <title>Kênh Nhân Viên Giao Hàng - Chuỗi Cửa Hàng Hoa Tươi</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -23,6 +24,9 @@
             </a>
             <div class="d-flex align-items-center gap-3">
                 <span class="text-white-50 small">Tài xế: <strong class="text-white" th:text="${shipper.fullName}"></strong></span>
+                <a th:href="@{/notifications}" class="btn btn-outline-light btn-sm rounded-pill px-3" title="Thông báo đơn giao">
+                    <i class="bi bi-bell-fill"></i>
+                </a>
                 <a th:href="@{/}" class="btn btn-outline-light btn-sm rounded-pill px-3">Trang Chủ</a>
                 <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit"   class="btn btn-outline-danger btn-sm rounded-pill px-3">Đăng Xuất</button></form>
             </div>
@@ -145,9 +149,37 @@
                     <!-- COD Amount & Action Buttons -->
                     <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
                         <div>
-                            <small class="text-muted d-block">Tiền thu hộ (COD):</small>
-                            <strong th:if="${o.paymentMethod == 'COD'}" class="text-danger fs-5 fw-bold" th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
-                            <span th:if="${o.paymentMethod != 'COD' and o.paymentStatus == 'PAID'}" class="badge bg-success-subtle text-success">Đã thanh toán</span><span th:if="${o.paymentMethod != 'COD' and o.paymentStatus != 'PAID'}" class="badge bg-warning text-dark">Chưa xác nhận thanh toán</span>
+                            <small class="text-muted d-block mb-1">Thu tiền khi giao hoa:</small>
+                            <!-- MoMo -->
+                            <div th:if="${o.paymentMethod == 'MOMO'}">
+                                <span th:if="${o.paymentStatus == 'PAID'}" class="badge rounded-pill text-white px-2.5 py-1" style="background-color: #D82D8B;">
+                                    <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo" style="height: 12px; width: 12px; vertical-align: -1px;" class="me-1">
+                                    ĐÃ THANH TOÁN MOMO
+                                </span>
+                                <span th:unless="${o.paymentStatus == 'PAID'}" class="badge bg-warning text-dark rounded-pill px-2.5 py-1">
+                                    MoMo: Chờ khách thanh toán
+                                </span>
+                                <div th:if="${o.paymentStatus == 'PAID'}" class="small text-success fw-bold mt-1">
+                                    0 ₫ (Không thu tiền)
+                                </div>
+                            </div>
+                            <!-- Bank Transfer / VietQR -->
+                            <div th:if="${o.paymentMethod == 'BANK_TRANSFER'}">
+                                <span th:if="${o.paymentStatus == 'PAID'}" class="badge bg-success rounded-pill px-2.5 py-1">
+                                    ĐÃ CHUYỂN KHOẢN (VietQR)
+                                </span>
+                                <span th:unless="${o.paymentStatus == 'PAID'}" class="badge bg-warning text-dark rounded-pill px-2.5 py-1">
+                                    Chờ xác nhận CK
+                                </span>
+                                <div th:if="${o.paymentStatus == 'PAID'}" class="small text-success fw-bold mt-1">
+                                    0 ₫ (Không thu tiền)
+                                </div>
+                            </div>
+                            <!-- COD -->
+                            <div th:if="${o.paymentMethod == null or o.paymentMethod == 'COD'}">
+                                <span class="badge bg-danger rounded-pill px-2.5 py-1 mb-1">CẦN THU TIỀN MẶT</span>
+                                <strong class="text-danger fs-5 fw-bold d-block" th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                            </div>
                         </div>
                         <div>
                             <form th:if="${o.status.name() == 'PICKED_UP'}" th:action="@{/shipper/orders/update-status/{id}(id=${o.id})}" method="post">

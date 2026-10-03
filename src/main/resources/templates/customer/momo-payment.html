@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh Toán Bằng Ví MoMo - Hoa Tươi Sài Gòn</title>
+    <!-- Google Fonts & Bootstrap 5 & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
+    <style>
+        :root {
+            --momo-pink: #A50064;
+            --momo-pink-light: #D82D8B;
+            --momo-bg: #FFF0F6;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #F8F9FA;
+            color: #2D3748;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .momo-box {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(165, 0, 100, 0.08);
+            border: 1px solid rgba(165, 0, 100, 0.15);
+            max-width: 880px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .momo-header {
+            background: linear-gradient(135deg, var(--momo-pink) 0%, var(--momo-pink-light) 100%);
+            color: #ffffff;
+            padding: 24px 32px;
+        }
+        .momo-logo-badge {
+            width: 54px;
+            height: 54px;
+            background: #ffffff;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .qr-card {
+            background: #ffffff;
+            border: 2px dashed rgba(165, 0, 100, 0.3);
+            border-radius: 20px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .qr-card:hover {
+            border-color: var(--momo-pink);
+            box-shadow: 0 10px 25px rgba(165, 0, 100, 0.1);
+        }
+        .qr-img {
+            width: 230px;
+            height: 230px;
+            border-radius: 12px;
+            object-fit: contain;
+        }
+        .btn-momo-primary {
+            background: linear-gradient(135deg, var(--momo-pink) 0%, var(--momo-pink-light) 100%);
+            color: #ffffff;
+            border: none;
+            font-weight: 700;
+            padding: 12px 24px;
+            border-radius: 9999px;
+            box-shadow: 0 4px 12px rgba(165, 0, 100, 0.25);
+            transition: all 0.2s;
+        }
+        .btn-momo-primary:hover {
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(165, 0, 100, 0.35);
+        }
+        .countdown-badge {
+            background: var(--momo-bg);
+            color: var(--momo-pink);
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="momo-box">
+    <!-- Header -->
+    <div class="momo-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="momo-logo-badge">
+                <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo" style="width: 38px; height: 38px;">
+            </div>
+            <div>
+                <h4 class="fw-bold mb-0 text-white">Cổng Thanh Toán MoMo Pay</h4>
+                <small class="text-white-50">Chuỗi Cửa Hàng Hoa Tươi & Điện Hoa Sài Gòn</small>
+            </div>
+        </div>
+        <div class="text-end">
+            <div class="countdown-badge">
+                <i class="bi bi-clock-history"></i>
+                <span id="countdown">14:59</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Body -->
+    <div class="p-4 p-md-5">
+        <div class="row g-4 align-items-center">
+            <!-- Cột trái: QR Code -->
+            <div class="col-md-5 text-center">
+                <div class="qr-card">
+                    <img th:src="'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' + ${#strings.replace(momoQrData, ' ', '%20')}" 
+                         class="qr-img shadow-sm mb-3" alt="MoMo QR Code">
+                    <div class="fw-bold text-dark fs-6">Quét mã để thanh toán</div>
+                    <small class="text-muted d-block mt-1">Sử dụng <strong>App MoMo</strong> hoặc Camera điện thoại để quét mã</small>
+                </div>
+            </div>
+
+            <!-- Cột phải: Thông tin đơn hàng & Hành động -->
+            <div class="col-md-7 ps-md-4">
+                <div class="border-bottom pb-3 mb-3">
+                    <span class="badge bg-light text-secondary border mb-2">Đơn hàng #<span th:text="${order.id}"></span></span>
+                    <h5 class="fw-bold text-dark mb-1">Thanh toán hoa tươi qua Ví MoMo</h5>
+                    <div class="text-muted small">Cửa hàng phục vụ: <strong th:text="${order.pickupStore != null ? order.pickupStore.name : 'Chi nhánh trung tâm'}"></strong></div>
+                </div>
+
+                <div class="bg-light p-3 rounded-4 mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-secondary small">Người nhận hoa:</span>
+                        <strong class="text-dark small" th:text="${order.recipientName}"></strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-secondary small">Số điện thoại:</span>
+                        <span class="fw-bold text-dark small" th:text="${order.recipientPhone}"></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-secondary small">Địa chỉ nhận:</span>
+                        <span class="text-dark small text-end" style="max-width: 250px;" th:text="${order.recipientAddress}"></span>
+                    </div>
+                    <div class="d-flex justify-content-between pt-2 border-top">
+                        <span class="fw-bold text-dark">Tổng tiền thanh toán:</span>
+                        <span class="fs-4 fw-bold" style="color: var(--momo-pink);" 
+                              th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+                    </div>
+                </div>
+
+                <!-- Các nút hành động -->
+                <div class="d-flex flex-column gap-2">
+                    <!-- Nút mô phỏng thanh toán thành công (Dành cho việc kiểm thử / demo chấm điểm) -->
+                    <a th:href="@{/checkout/momo/callback(orderId=${order.id}, resultCode=0, transId='MOMO_SIM_' + ${order.id})}" 
+                       class="btn btn-momo-primary w-100 d-flex align-items-center justify-content-center gap-2">
+                        <i class="bi bi-check-circle-fill"></i> Xác Nhận Thanh Toán MoMo Thành Công
+                    </a>
+
+                    <!-- Nút hủy thanh toán -->
+                    <div class="d-flex gap-2 mt-1">
+                        <a th:href="@{/checkout/momo/callback(orderId=${order.id}, resultCode=1006, message='Người dùng hủy thanh toán')}" 
+                           class="btn btn-outline-secondary w-50 rounded-pill small py-2">
+                            <i class="bi bi-x-circle me-1"></i> Hủy Giao Dịch
+                        </a>
+                        <a th:href="@{/customer/orders}" class="btn btn-light w-50 rounded-pill small py-2 border">
+                            <i class="bi bi-arrow-left me-1"></i> Để Thanh Toán Sau
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Đồng hồ đếm ngược 15 phút
+    let duration = 15 * 60;
+    const display = document.querySelector('#countdown');
+    const timer = setInterval(function () {
+        let minutes = parseInt(duration / 60, 10);
+        let seconds = parseInt(duration % 60, 10);
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+        display.textContent = minutes + ":" + seconds;
+        if (--duration < 0) {
+            clearInterval(timer);
+            alert("Đã hết thời gian thanh toán MoMo cho phiên này.");
+            window.location.href = "/customer/orders";
+        }
+    }, 1000);
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

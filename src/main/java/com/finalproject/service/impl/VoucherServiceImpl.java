@@ -76,7 +76,8 @@ public class VoucherServiceImpl implements VoucherService {
         }
 
         // Ràng buộc bảo toàn: Đảm bảo khi áp mã giảm giá thì đơn hàng không bị giảm thấp hơn giá nhập gốc
-        if (minAllowedAmount != null && minAllowedAmount.compareTo(BigDecimal.ZERO) > 0) {
+        if (!"FREE_SHIP".equalsIgnoreCase(voucher.getDiscountType())
+                && minAllowedAmount != null && minAllowedAmount.compareTo(BigDecimal.ZERO) > 0) {
             BigDecimal maxAllowedDiscount = orderAmount.subtract(minAllowedAmount).max(BigDecimal.ZERO);
             if (discount.compareTo(maxAllowedDiscount) > 0) {
                 discount = maxAllowedDiscount;

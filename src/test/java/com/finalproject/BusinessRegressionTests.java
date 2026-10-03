@@ -37,6 +37,7 @@ class BusinessRegressionTests {
     @Autowired ProductRepository products;
     @Autowired StoreInventoryRepository inventory;
     @Autowired CartRepository carts;
+    @Autowired CartService cartService;
     @Autowired CartItemRepository items;
     @Autowired OrderRepository orders;
     @Autowired PaymentRepository payments;
@@ -53,6 +54,11 @@ class BusinessRegressionTests {
     @Autowired PasswordEncoder encoder;
     @Autowired EntityManager em;
     @Autowired MockMvc mvc;
+    @Autowired DeliveryRepository deliveries;
+    @Autowired ProductWishlistRepository wishlists;
+    @Autowired UserFollowStoreRepository follows;
+    @Autowired UserAddressRepository addresses;
+    @Autowired RoleRequestRepository roleRequests;
     Store store, otherStore;
     User customer, manager, shipper, outsider;
     Product product;
@@ -305,6 +311,158 @@ class BusinessRegressionTests {
         }
         assertThat(otp.getFailedAttempts()).isEqualTo(5);
         assertThatThrownBy(() -> auth.resetPassword(customer.getEmail(), "123456", "newpassword")).hasMessageContaining("bị khóa");
+    }
+
+    @Test void quoteAndOrderUseTheSameShippingPriceWithoutMutatingCart() {
+        Delivery delivery = deliveries.save(Delivery.builder().name("Quote delivery").price(new BigDecimal("30000")).build());
+        CheckoutQuote quote = orderService.quote(customer.getUsername(), List.of(item.getId()), "Quận 1", null, "DELIVERY", null, delivery.getId());
+        assertThat(quote.subtotal()).isEqualByComparingTo("160000");
+        assertThat(quote.shippingFee()).isEqualByComparingTo("30000");
+        assertThat(quote.total()).isEqualByComparingTo("190000");
+        assertThat(items.findById(item.getId())).isPresent();
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(10);
+        Order order = orderService.checkout(customer.getUsername(), List.of(item.getId()), PaymentMethod.COD,
+                "Khách", "0900000000", "Quận 1", null, null, LocalDate.now(), "DELIVERY", null, delivery.getId()).get(0);
+        assertThat(order.getTotalAmount()).isEqualByComparingTo(quote.total());
+        assertThat(order.getShippingFee()).isEqualByComparingTo(quote.shippingFee());
+        assertThat(order.getDeliveryUnitId()).isEqualTo(delivery.getId());
+        delivery.setPrice(new BigDecimal("99000"));
+        deliveries.save(delivery);
+        assertThat(order.getShippingFee()).isEqualByComparingTo("30000");
+    }
+
+    @Test void freeShippingVoucherAlsoWorksWhenProductHasNoMargin() {
+        product.setImportPrice(product.getSellingPrice());
+        products.save(product);
+        Delivery delivery = deliveries.save(Delivery.builder().name("Free ship delivery").price(new BigDecimal("30000")).build());
+        Voucher voucher = vouchers.save(Voucher.builder().code("SHIPQUOTE").name("Free shipping").discountType("FREE_SHIP")
+                .discountValue(BigDecimal.ZERO).startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(1)).build());
+        CheckoutQuote quote = orderService.quote(customer.getUsername(), List.of(item.getId()), "Quận 1", voucher.getCode(), "DELIVERY", null, delivery.getId());
+        assertThat(quote.discount()).isEqualByComparingTo("30000");
+        assertThat(quote.total()).isEqualByComparingTo("160000");
+        assertThat(voucher.getUsedCount()).isZero();
+        Order order = orderService.checkout(customer.getUsername(), List.of(item.getId()), PaymentMethod.COD,
+                "Khách", "0900000000", "Quận 1", null, voucher.getCode(), LocalDate.now(), "DELIVERY", null, delivery.getId()).get(0);
+        assertThat(order.getTotalAmount()).isEqualByComparingTo(quote.total());
+        assertThat(order.getDiscountAmount()).isEqualByComparingTo(quote.discount());
+        assertThat(voucher.getUsedCount()).isEqualTo(1);
+    }
+
+    @Test void quoteRejectsInactiveDeliveryAndWrongBranchVoucherButPickupHasNoShipping() {
+        Delivery delivery = deliveries.save(Delivery.builder().name("Inactive quote delivery").isActive(false).price(new BigDecimal("30000")).build());
+        assertThatThrownBy(() -> orderService.quote(customer.getUsername(), List.of(item.getId()), "Quận 1", null, "DELIVERY", null, delivery.getId()))
+                .hasMessageContaining("không khả dụng");
+        CheckoutQuote pickup = orderService.quote(customer.getUsername(), List.of(item.getId()), null, null, "PICKUP", store.getId(), delivery.getId());
+        assertThat(pickup.shippingFee()).isEqualByComparingTo(BigDecimal.ZERO);
+        vouchers.save(Voucher.builder().code("QUOTEOTHER").name("Other branch").store(otherStore).discountType("FIXED_AMOUNT")
+                .discountValue(BigDecimal.TEN).startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(1)).build());
+        assertThatThrownBy(() -> orderService.quote(customer.getUsername(), List.of(item.getId()), null, "QUOTEOTHER", "PICKUP", store.getId(), null))
+                .hasMessageContaining("chi nhánh");
+    }
+
+    @Test void quoteEndpointRequiresCsrfAndDeliverySelection() throws Exception {
+        Delivery delivery = deliveries.save(Delivery.builder().name("Endpoint delivery").price(new BigDecimal("30000")).build());
+        mvc.perform(post("/checkout/quote").with(user(customer.getUsername()).roles("CUSTOMER")))
+                .andExpect(status().isForbidden());
+        mvc.perform(post("/checkout/quote").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf()))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").exists());
+        mvc.perform(post("/checkout/quote").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf())
+                        .param("selectedItemIds", item.getId().toString()).param("deliveryUnitId", delivery.getId().toString()).param("recipientAddress", "Quận 1"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.total").value(190000));
+    }
+
+    @Test void repairedPagesRenderWithRealModelsAndRetainPaymentActions() throws Exception {
+        wishlists.save(ProductWishlist.builder().user(customer).product(product).build());
+        follows.save(UserFollowStore.builder().user(customer).store(store).build());
+        addresses.save(UserAddress.builder().user(customer).recipientName("Người nhận").phone("0900000000").addressDetail("Quận 1").isDefault(true).build());
+        roleRequests.save(RoleRequest.builder().user(customer).targetRole(Role.MANAGER).status(RoleRequestStatus.PENDING).targetStore(store).phone("0900000000").build());
+        for (String route : List.of("/", "/customer/profile", "/customer/profile?tab=password", "/customer/profile?tab=roles",
+                "/customer/profile/wishlist", "/customer/profile/recently-viewed", "/customer/profile/followed-stores",
+                "/users", "/users/" + customer.getId(), "/products/" + product.getId(), "/stores", "/stores/" + store.getId(),
+                "/checkout", "/customer/orders", "/customer/following", "/notifications")) {
+            String html = mvc.perform(get(route).with(user(customer.getUsername()).roles("CUSTOMER")))
+                    .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("viewport")))
+                    .andReturn().getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+            java.nio.file.Path output = java.nio.file.Path.of("target/frontend-smoke", route.replaceAll("[^a-zA-Z0-9]", "_") + ".html");
+            java.nio.file.Files.createDirectories(output.getParent());
+            java.nio.file.Files.writeString(output, html);
+        }
+        Order order = checkout(PaymentMethod.MOMO);
+        mvc.perform(get("/customer/orders").with(user(customer.getUsername()).roles("CUSTOMER")))
+                .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("/checkout/momo/" + order.getId())));
+        mvc.perform(get("/customer/orders/detail/" + order.getId()).with(user(customer.getUsername()).roles("CUSTOMER")))
+                .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("Phí giao hàng")));
+    }
+
+    @Test void productVietnameseTextSurvivesDatabaseReloadAndHtmlRendering() throws Exception {
+        String name = "Bó Hoa Hướng Dương Tốt Nghiệp Khát Vọng Việt";
+        String description = "Hộp hoa hồng, thiên thần ngọt ngào — đủ dấu ă â ê ô ơ ư đ và ạ ệ ộ ợ ự.";
+        product.setName(name);
+        product.setDescription(description);
+        products.saveAndFlush(product);
+        Long id = product.getId();
+        em.clear();
+        Product loaded = products.findById(id).orElseThrow();
+        assertThat(loaded.getName()).isEqualTo(name);
+        assertThat(loaded.getDescription()).isEqualTo(description);
+        mvc.perform(get("/products/" + id).with(user(customer.getUsername()).roles("CUSTOMER")))
+                .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString(name)))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(description)));
+    }
+
+    @Test void deliveryFallsBackToAStoreWithStockAndQuoteMatchesCheckout() {
+        inventory.deleteAll();
+        inventory.saveAndFlush(StoreInventory.builder().store(otherStore).product(product).quantity(5).build());
+        CheckoutQuote quote = orderService.quote(customer.getUsername(), List.of(item.getId()), "Quận 1", null, "DELIVERY", null, null);
+        assertThat(quote.storeId()).isEqualTo(otherStore.getId());
+        assertThatThrownBy(() -> orderService.quote(customer.getUsername(), List.of(item.getId()), null, null, "PICKUP", store.getId(), null))
+                .hasMessageContaining("không có hàng");
+        Order placed = orderService.checkout(customer.getUsername(), List.of(item.getId()), PaymentMethod.COD,
+                "Khách", "0900000000", "Quận 1", null, null, LocalDate.now(), "DELIVERY", null, null).get(0);
+        assertThat(placed.getPickupStore().getId()).isEqualTo(quote.storeId());
+        assertThat(inventory.findByStoreIdAndProductId(otherStore.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(3);
+    }
+
+    @Test void deliveryRequiresCombinedStockForDuplicateProductLines() {
+        item.setQuantity(6);
+        items.saveAndFlush(CartItem.builder().cart(cart).store(store).product(product).quantity(6).orderType(OrderType.BUY).build());
+        assertThatThrownBy(() -> orderService.quote(customer.getUsername(), null, "Quận 1", null, "DELIVERY", null, null))
+                .hasMessageContaining("tồn kho");
+    }
+
+    @Test void cartAndProductShowRealStockAndServerRejectsExcessQuantity() throws Exception {
+        mvc.perform(get("/cart").with(user(customer.getUsername()).roles("CUSTOMER")))
+                .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("Còn 10 mẫu tại chi nhánh")));
+        mvc.perform(get("/products/" + product.getId()).with(user(customer.getUsername()).roles("CUSTOMER")))
+                .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("Còn 10 mẫu tại chi nhánh")));
+        assertThatThrownBy(() -> cartService.updateQuantity(customer.getUsername(), item.getId(), 11)).hasMessageContaining("tồn kho");
+        var request = new com.finalproject.dto.request.AddToCartRequest();
+        request.setProductId(product.getId()); request.setStoreId(store.getId()); request.setQuantity(9);
+        assertThatThrownBy(() -> cartService.addToCart(customer.getUsername(), request)).hasMessageContaining("tồn kho");
+        assertThat(item.getQuantity()).isEqualTo(2);
+    }
+
+    @Test void demoStoreLookupHandlesDuplicateNamesWithoutDeletingStores() {
+        Store duplicate = stores.saveAndFlush(Store.builder().name(store.getName()).address("Other address").build());
+        assertThat(stores.findFirstByNameOrderByIdAsc(store.getName()).orElseThrow().getId()).isEqualTo(store.getId());
+        assertThat(stores.existsById(duplicate.getId())).isTrue();
+    }
+
+    @Test void adminTransactionsHaveStableOrderAndValidatePageSize() throws Exception {
+        LocalDateTime timestamp = LocalDateTime.of(2099, 1, 1, 0, 0);
+        Transaction first = transactions.saveAndFlush(Transaction.builder().user(customer).amount(BigDecimal.ONE)
+                .description("Unicode transaction test").createdAt(timestamp).build());
+        Transaction second = transactions.saveAndFlush(Transaction.builder().user(customer).amount(BigDecimal.TEN)
+                .description("Unicode transaction test").createdAt(timestamp).build());
+        var page = transactions.findAllByOrderByCreatedAtDescIdDesc(org.springframework.data.domain.PageRequest.of(0, 2));
+        assertThat(page.getContent()).extracting(Transaction::getId).containsExactly(second.getId(), first.getId());
+        var filtered = transactions.findByDescriptionContainingIgnoreCaseOrderByCreatedAtDescIdDesc(
+                "unicode transaction test", org.springframework.data.domain.PageRequest.of(0, 2));
+        assertThat(filtered.getContent()).extracting(Transaction::getId).containsExactly(second.getId(), first.getId());
+        for (String suffix : List.of("?size=0", "?size=1000", "?keyword=unicode%20transaction%20test")) {
+            mvc.perform(get("/admin/transactions" + suffix).with(user("admin-test").roles("ADMIN")))
+                    .andExpect(status().isOk()).andExpect(model().attributeDoesNotExist("dataLoadError"));
+        }
     }
 
     @Test void checkoutRejectsAnotherStoresVoucher() {

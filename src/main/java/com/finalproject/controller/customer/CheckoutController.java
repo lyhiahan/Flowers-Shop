@@ -33,6 +33,7 @@ public class CheckoutController {
     private final com.finalproject.repository.DeliveryRepository deliveryRepository;
     private final com.finalproject.service.UserService userService;
     private final com.finalproject.service.VoucherService voucherService;
+    private final com.finalproject.service.MomoService momoService;
 
     @GetMapping
     public String showCheckoutPage(
@@ -81,7 +82,8 @@ public class CheckoutController {
         model.addAttribute("addresses", customer != null ? userService.getUserAddresses(customer.getId()) : List.of());
         model.addAttribute("vouchers", voucherService.getAvailableVouchers(null));
         model.addAttribute("stores", storeRepository.findByStatusTrue());
-        model.addAttribute("deliveries", deliveryRepository.findAll());
+        model.addAttribute("deliveries", deliveryRepository.findAll().stream()
+                .filter(d -> Boolean.TRUE.equals(d.getIsActive()) && !Boolean.TRUE.equals(d.getIsDeleted())).toList());
         model.addAttribute("checkoutItems", checkoutItems);
         model.addAttribute("subtotalRentAndBuy", subtotalRentAndBuy);
         model.addAttribute("totalDeposit", totalDeposit);
@@ -104,15 +106,48 @@ public class CheckoutController {
             @RequestParam(value = "deliveryDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate deliveryDate,
             @RequestParam(value = "shippingMethod", required = false, defaultValue = "DELIVERY") String shippingMethod,
             @RequestParam(value = "pickupStoreId", required = false) Long pickupStoreId,
+            @RequestParam(value = "deliveryUnitId", required = false) Long deliveryUnitId,
+            jakarta.servlet.http.HttpServletRequest request,
             RedirectAttributes redirectAttributes) {
 
         try {
-            orderService.checkout(principal.getName(), selectedItemIds, paymentMethod, recipientName, recipientPhone, recipientAddress, greetingMessage, voucherCode, deliveryDate, shippingMethod, pickupStoreId);
+            validateDeliverySelection(shippingMethod, deliveryUnitId);
+            List<com.finalproject.entity.Order> createdOrders = orderService.checkout(principal.getName(), selectedItemIds, paymentMethod, recipientName, recipientPhone, recipientAddress, greetingMessage, voucherCode, deliveryDate, shippingMethod, pickupStoreId, deliveryUnitId);
+            if (paymentMethod == PaymentMethod.MOMO && createdOrders != null && !createdOrders.isEmpty()) {
+                com.finalproject.entity.Order firstOrder = createdOrders.get(0);
+                String momoUrl = momoService.createPaymentUrl(firstOrder, request);
+                return "redirect:" + momoUrl;
+            }
             redirectAttributes.addFlashAttribute("successMessage", "🌸 Đặt hoa thành công! Đơn hàng của bạn đã được chuyển đến chi nhánh cắm hoa để chuẩn bị.");
             return "redirect:/customer/orders";
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
             return "redirect:/cart";
+        }
+    }
+
+    @PostMapping("/quote")
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<?> quote(Principal principal,
+            @RequestParam(value = "selectedItemIds", required = false) List<Long> selectedItemIds,
+            @RequestParam(value = "recipientAddress", required = false) String recipientAddress,
+            @RequestParam(value = "voucherCode", required = false) String voucherCode,
+            @RequestParam(value = "shippingMethod", defaultValue = "DELIVERY") String shippingMethod,
+            @RequestParam(value = "pickupStoreId", required = false) Long pickupStoreId,
+            @RequestParam(value = "deliveryUnitId", required = false) Long deliveryUnitId) {
+        try {
+            validateDeliverySelection(shippingMethod, deliveryUnitId);
+            return org.springframework.http.ResponseEntity.ok(orderService.quote(principal.getName(), selectedItemIds,
+                    recipientAddress, voucherCode, shippingMethod, pickupStoreId, deliveryUnitId));
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            return org.springframework.http.ResponseEntity.badRequest().body(java.util.Map.of("message", ex.getMessage()));
+        }
+    }
+
+    private void validateDeliverySelection(String shippingMethod, Long deliveryUnitId) {
+        if ("DELIVERY".equals(shippingMethod) && deliveryUnitId == null && deliveryRepository.findAll().stream()
+                .anyMatch(d -> Boolean.TRUE.equals(d.getIsActive()) && !Boolean.TRUE.equals(d.getIsDeleted()))) {
+            throw new IllegalArgumentException("Vui lòng chọn đơn vị giao hàng.");
         }
     }
 }

@@ -14,9 +14,11 @@ public class Store {
     @Version
     private Long version;
 
+    @org.hibernate.annotations.Nationalized
     @Column(nullable = false, length = 150)
     private String name;
 
+    @org.hibernate.annotations.Nationalized
     @Column(nullable = false, length = 255)
     private String address;
 
@@ -27,6 +29,7 @@ public class Store {
     @JoinColumn(name = "owner_id")
     private User owner;
 
+    @org.hibernate.annotations.Nationalized
     @Column(length = 1000)
     private String bio;
 

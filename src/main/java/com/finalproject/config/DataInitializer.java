@@ -36,8 +36,8 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // 1. Tạo hoặc cập nhật 3 chi nhánh mẫu sang tiếng Việt thuần
-        Store storeA = storeRepository.findByName("Chi Nhánh Bến Thành (Quận 1)")
-                .orElseGet(() -> storeRepository.findByName("Bloom Flower - Chi Nhánh Bến Thành (Quận 1)")
+        Store storeA = storeRepository.findFirstByNameOrderByIdAsc("Chi Nhánh Bến Thành (Quận 1)")
+                .orElseGet(() -> storeRepository.findFirstByNameOrderByIdAsc("Bloom Flower - Chi Nhánh Bến Thành (Quận 1)")
                         .map(s -> {
                             s.setName("Chi Nhánh Bến Thành (Quận 1)");
                             return storeRepository.save(s);
@@ -52,8 +52,8 @@ public class DataInitializer implements CommandLineRunner {
                                 .eWallet(new BigDecimal("15500000"))
                                 .build())));
 
-        Store storeB = storeRepository.findByName("Chi Nhánh Phú Mỹ Hưng (Quận 7)")
-                .orElseGet(() -> storeRepository.findByName("Bloom Flower - Chi Nhánh Phú Mỹ Hưng (Quận 7)")
+        Store storeB = storeRepository.findFirstByNameOrderByIdAsc("Chi Nhánh Phú Mỹ Hưng (Quận 7)")
+                .orElseGet(() -> storeRepository.findFirstByNameOrderByIdAsc("Bloom Flower - Chi Nhánh Phú Mỹ Hưng (Quận 7)")
                         .map(s -> {
                             s.setName("Chi Nhánh Phú Mỹ Hưng (Quận 7)");
                             return storeRepository.save(s);
@@ -68,8 +68,8 @@ public class DataInitializer implements CommandLineRunner {
                                 .eWallet(new BigDecimal("8200000"))
                                 .build())));
 
-        Store storeC = storeRepository.findByName("Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
-                .orElseGet(() -> storeRepository.findByName("Bloom Flower - Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
+        Store storeC = storeRepository.findFirstByNameOrderByIdAsc("Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
+                .orElseGet(() -> storeRepository.findFirstByNameOrderByIdAsc("Bloom Flower - Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
                         .map(s -> {
                             s.setName("Chi Nhánh Làng Đại Học (TP. Thủ Đức)");
                             return storeRepository.save(s);

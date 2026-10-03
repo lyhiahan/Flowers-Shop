@@ -1,6 +1,7 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thanh Toán - Chuỗi Cửa Hàng Hoa Tươi Sài Gòn</title>
@@ -376,7 +377,7 @@
             </a>
         </div>
 
-        <form th:action="@{/checkout}" method="post" id="checkoutForm">
+        <form th:action="@{/checkout}" method="post" id="checkoutForm" th:data-quote-url="@{/checkout/quote}">
             <!-- CSRF Token -->
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
@@ -536,7 +537,23 @@
                                 </div>
                             </div>
 
-                            <!-- Lựa chọn 2: Chuyển khoản ngân hàng (VietQR) -->
+                            <!-- Lựa chọn 2: Ví điện tử MoMo -->
+                            <div class="payment-card-option" id="payOptionMomo" onclick="selectPayment('pay_momo')">
+                                <div class="form-check mb-0 d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <input class="form-check-input" type="radio" name="paymentMethod" id="pay_momo" value="MOMO" onchange="updatePaymentStyle()">
+                                        <label class="form-check-label fw-bold text-dark ps-2" for="pay_momo" style="cursor: pointer;">
+                                            Ví điện tử MoMo (Quét mã QR / App MoMo)
+                                        </label>
+                                    </div>
+                                    <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo" style="height: 24px; width: 24px;">
+                                </div>
+                                <div class="payment-desc d-none" id="desc_pay_momo">
+                                    Thanh toán nhanh chóng, an toàn qua ứng dụng MoMo hoặc quét mã QR MoMo Pay tức thì.
+                                </div>
+                            </div>
+
+                            <!-- Lựa chọn 3: Chuyển khoản ngân hàng (VietQR) -->
                             <div class="payment-card-option" id="payOptionBank" onclick="selectPayment('pay_bank')">
                                 <div class="form-check mb-0">
                                     <input class="form-check-input" type="radio" name="paymentMethod" id="pay_bank" value="BANK_TRANSFER" onchange="updatePaymentStyle()">
@@ -608,7 +625,7 @@
                                     <!-- Dropdown chọn mã phù hợp -->
                                     <div th:if="${!#lists.isEmpty(vouchers)}" class="mt-2">
                                         <label class="small text-muted mb-1" style="font-size: 13px;">Chọn mã phù hợp:</label>
-                                        <select class="form-select form-select-sm bg-light" onchange="if(this.value) document.getElementById('voucherInput').value = this.value;">
+                                        <select class="form-select form-select-sm bg-light" onchange="document.getElementById('voucherInput').value = this.value; updateCheckoutTotal();">
                                             <option value="">-- Danh sách mã có thể dùng --</option>
                                             <option th:each="v : ${vouchers}" 
                                                     th:value="${v.code}" 
@@ -625,7 +642,7 @@
                             <div class="checkout-card-body p-4">
                                 <div class="summary-row">
                                     <span>Tiền hàng:</span>
-                                    <span class="summary-val" th:text="${#numbers.formatDecimal(subtotalRentAndBuy, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
+                                    <span id="displaySubtotal" class="summary-val" th:text="${#numbers.formatDecimal(subtotalRentAndBuy, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
                                 </div>
                                 <div class="summary-row" th:if="${totalDeposit != null and totalDeposit > 0}">
                                     <span>Tiền cọc:</span>
@@ -635,10 +652,7 @@
                                     <span>Phí giao hàng:</span>
                                     <span class="summary-val text-primary" id="displayShippingFee">Miễn phí</span>
                                 </div>
-                                <div class="summary-row" th:if="${discountAmount != null and discountAmount > 0}">
-                                    <span>Giảm giá:</span>
-                                    <span class="summary-val text-danger" th:text="'-' + ${#numbers.formatDecimal(discountAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">-0 ₫</span>
-                                </div>
+                                <div class="summary-row"><span>Giảm giá:</span><span id="displayDiscount" class="summary-val text-danger">-0 ₫</span></div><p id="quoteStatus" class="small text-danger" role="status" aria-live="polite"></p>
 
                                 <div class="grand-total-row">
                                     <span class="grand-total-label">Tổng thanh toán:</span>
@@ -669,67 +683,7 @@
     <!-- ==============================================
          FOOTER CHUẨN ĐỒNG BỘ THEO MẪU (BOTANICAL ATELIER)
          ============================================== -->
-    <footer class="w-full border-top pt-4 pb-3 mt-12" style="background-color: #FAF4F0 !important; border-top: 1px solid #EBDED4 !important; font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif !important; color: #4A3E3D !important; width: 100%;">
-        <div style="max-width: 1240px; margin: 0 auto; padding-left: 20px; padding-right: 20px;">
-            <!-- Hàng trên: 2 Cột thông tin -->
-            <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 24px; padding-bottom: 24px;">
-                <!-- Cột 1: Thương hiệu & Liên hệ -->
-                <div style="flex: 1 1 320px; max-width: 480px;">
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
-                        <span style="font-size: 22px; line-height: 1;">🌸</span>
-                        <span style="font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 700; color: #C84357; letter-spacing: 0.5px;">HOA TƯƠI SÀI GÒN</span>
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; color: #555555;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; line-height: 1;">call</span>
-                            <span>Hotline: <strong style="color: #222222; font-weight: 700;">028 1111 222 - 0909 888 777</strong></span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; line-height: 1;">mail</span>
-                            <span>Email: <a href="mailto:atelier@hoatuoisaigon.vn" style="color: #555555; text-decoration: none;">atelier@hoatuoisaigon.vn</a></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Cột 2: Hệ thống Atelier & Chi nhánh -->
-                <div style="flex: 1 1 360px; max-width: 560px;">
-                    <h4 style="font-size: 13px; font-weight: 800; color: #264E43; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; margin-top: 2px;">HỆ THỐNG ATELIER &amp; CHI NHÁNH</h4>
-                    <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; color: #555555;">
-                        <div style="display: flex; align-items: flex-start; gap: 8px;">
-                            <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
-                            <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Q.1:</strong> 123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM</span>
-                        </div>
-                        <div style="display: flex; align-items: flex-start; gap: 8px;">
-                            <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
-                            <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Q.7:</strong> 456 Nguyễn Thị Thập, Tân Hưng, Quận 7, TP.HCM</span>
-                        </div>
-                        <div style="display: flex; align-items: flex-start; gap: 8px;">
-                            <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
-                            <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Thủ Đức:</strong> 1 Võ Văn Ngân, Linh Chiểu, TP. Thủ Đức, TP.HCM</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Hàng dưới: Bản quyền + Cam kết chất lượng & Giao hàng -->
-            <div style="border-top: 1px solid #EBDED4; padding-top: 16px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; font-size: 12.5px; color: #777777;">
-                <div>
-                    <span>© 2026 HOA TƯƠI SÀI GÒN .</span>
-                </div>
-                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
-                    <span style="display: inline-flex; align-items: center; gap: 5px; color: #333333; font-weight: 600;">
-                        <span style="color: #C84357;">🌸</span> 100% Hoa Tươi Nhập Khẩu &amp; Đà Lạt
-                    </span>
-                    <span style="color: #D8CBC2;">•</span>
-                    <span style="display: inline-flex; align-items: center; gap: 4px; color: #666666;">
-                        <span class="material-symbols-outlined" style="font-size: 15px; color: #264E43; line-height: 1;">schedule</span> Giao hỏa tốc 60–90 phút
-                    </span>
-                </div>
-            </div>
-        </div>
-    </footer>
-        </div>
-    </footer>
+    <footer th:replace="~{fragments/floral :: footer}"></footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -742,6 +696,7 @@
                 if (nameInp) nameInp.value = opt.getAttribute('data-name') || '';
                 if (phoneInp) phoneInp.value = opt.getAttribute('data-phone') || '';
                 if (addrInp) addrInp.value = opt.getAttribute('data-address') || '';
+                updateCheckoutTotal();
             }
         }
 
@@ -781,65 +736,37 @@
         }
 
         function updatePaymentStyle() {
-            const isCod = document.getElementById('pay_cod').checked;
+            const isCod = document.getElementById('pay_cod') && document.getElementById('pay_cod').checked;
+            const isMomo = document.getElementById('pay_momo') && document.getElementById('pay_momo').checked;
+            const isBank = document.getElementById('pay_bank') && document.getElementById('pay_bank').checked;
+
             const optCod = document.getElementById('payOptionCod');
+            const optMomo = document.getElementById('payOptionMomo');
             const optBank = document.getElementById('payOptionBank');
+
             const descCod = document.getElementById('desc_pay_cod');
+            const descMomo = document.getElementById('desc_pay_momo');
             const descBank = document.getElementById('desc_pay_bank');
 
-            if (isCod) {
-                if (optCod) optCod.classList.add('active');
-                if (optBank) optBank.classList.remove('active');
-                if (descCod) descCod.classList.remove('d-none');
-                if (descBank) descBank.classList.add('d-none');
-            } else {
-                if (optCod) optCod.classList.remove('active');
-                if (optBank) optBank.classList.add('active');
-                if (descCod) descCod.classList.add('d-none');
-                if (descBank) descBank.classList.remove('d-none');
-            }
-        }
+            if (optCod) optCod.classList.toggle('active', !!isCod);
+            if (optMomo) optMomo.classList.toggle('active', !!isMomo);
+            if (optBank) optBank.classList.toggle('active', !!isBank);
 
-        function updateCheckoutTotal() {
-            const isPickupElem = document.getElementById('methodPickup');
-            const isPickup = isPickupElem ? isPickupElem.checked : false;
-            const deliverySelect = document.getElementById('deliveryUnitSelect');
-            const shippingFeeRow = document.getElementById('shippingFeeRow');
-            const displayShippingFee = document.getElementById('displayShippingFee');
-            const displayGrandTotal = document.getElementById('displayGrandTotal');
-
-            if (!displayGrandTotal) return;
-
-            const baseTotal = parseFloat(displayGrandTotal.getAttribute('data-base-total')) || 0;
-            let shippingFee = 0;
-
-            if (isPickup) {
-                if (shippingFeeRow) shippingFeeRow.style.setProperty('display', 'none', 'important');
-                shippingFee = 0;
-            } else {
-                if (shippingFeeRow) shippingFeeRow.style.removeProperty('display');
-                if (deliverySelect && deliverySelect.selectedOptions && deliverySelect.selectedOptions.length > 0) {
-                    shippingFee = parseFloat(deliverySelect.selectedOptions[0].getAttribute('data-price')) || 0;
-                } else {
-                    shippingFee = 0;
-                }
-                if (displayShippingFee) {
-                    displayShippingFee.innerText = shippingFee > 0 ? (new Intl.NumberFormat('vi-VN').format(shippingFee) + ' ₫') : 'Miễn phí';
-                }
-            }
-
-            const finalTotal = baseTotal + shippingFee;
-            displayGrandTotal.innerText = new Intl.NumberFormat('vi-VN').format(finalTotal) + ' ₫';
+            if (descCod) descCod.classList.toggle('d-none', !isCod);
+            if (descMomo) descMomo.classList.toggle('d-none', !isMomo);
+            if (descBank) descBank.classList.toggle('d-none', !isBank);
         }
 
         document.addEventListener('DOMContentLoaded', function() {
             const dateInput = document.querySelector('input[name="deliveryDate"]');
             if (dateInput && !dateInput.value) {
-                dateInput.value = new Date().toISOString().split('T')[0];
+                const today = new Date();
+                dateInput.value = [today.getFullYear(), String(today.getMonth()+1).padStart(2,'0'), String(today.getDate()).padStart(2,'0')].join('-');
             }
             updatePaymentStyle();
             updateCheckoutTotal();
         });
     </script>
+<script th:src="@{/js/checkout-quote.js}"></script>
 </body>
 </html>

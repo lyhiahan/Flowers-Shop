@@ -1,6 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
+
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <title>Following - Bộ Sưu Tầm Đang Theo Dõi - HOA TƯƠI SÀI GÒN</title>
@@ -596,14 +597,19 @@
       document.querySelectorAll('.follow-product-form').forEach(form => {
         form.addEventListener('submit', function(e) {
           e.preventDefault();
+          if (form.dataset.pending) return;
+          form.dataset.pending = 'true';
+          const btn = form.querySelector('button');
+          if (btn) btn.disabled = true;
           const productId = form.getAttribute('data-product-id');
           const card = document.getElementById('product-card-' + productId);
 
           fetch(form.action, {
             method: 'POST',
+            body: new FormData(form),
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
           })
-          .then(res => res.json())
+          .then(res => { if (!res.ok || res.redirected) throw new Error('Không cập nhật được theo dõi.'); return res.json(); })
           .then(data => {
             showToast(data.message || 'Đã hủy theo dõi mẫu hoa!');
             if (card) {
@@ -622,8 +628,8 @@
           })
           .catch(err => {
             console.error('Unfollow error:', err);
-            form.submit();
-          });
+            showToast('Chưa xác nhận được kết quả. Vui lòng tải lại trang trước khi thử lại.');
+          }).finally(() => { delete form.dataset.pending; if (btn) btn.disabled = false; });
         });
       });
 
@@ -631,14 +637,19 @@
       document.querySelectorAll('.follow-store-form').forEach(form => {
         form.addEventListener('submit', function(e) {
           e.preventDefault();
+          if (form.dataset.pending) return;
+          form.dataset.pending = 'true';
+          const btn = form.querySelector('button');
+          if (btn) btn.disabled = true;
           const storeId = form.getAttribute('data-store-id');
           const card = document.getElementById('store-card-' + storeId);
 
           fetch(form.action, {
             method: 'POST',
+            body: new FormData(form),
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
           })
-          .then(res => res.json())
+          .then(res => { if (!res.ok || res.redirected) throw new Error('Không cập nhật được theo dõi.'); return res.json(); })
           .then(data => {
             showToast(data.message || 'Đã hủy theo dõi chi nhánh cửa hàng!');
             if (card) {
@@ -657,8 +668,8 @@
           })
           .catch(err => {
             console.error('Unfollow error:', err);
-            form.submit();
-          });
+            showToast('Chưa xác nhận được kết quả. Vui lòng tải lại trang trước khi thử lại.');
+          }).finally(() => { delete form.dataset.pending; if (btn) btn.disabled = false; });
         });
       });
     });

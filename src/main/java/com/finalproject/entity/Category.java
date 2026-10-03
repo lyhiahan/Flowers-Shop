@@ -11,10 +11,12 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @org.hibernate.annotations.Nationalized
     @Column(nullable = false, unique = true, length = 100)
     private String name;
 
-    @Column(columnDefinition = "TEXT")
+    @org.hibernate.annotations.Nationalized
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)

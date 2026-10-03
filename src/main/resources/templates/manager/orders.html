@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
     <title>Quản Lý Đơn Đặt Hoa - Kênh Cửa Hàng</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -40,6 +41,7 @@
                 <a th:href="@{/manager/vouchers}"><i class="bi bi-ticket-perforated-fill"></i> Khuyến Mãi Shop</a>
                 <a th:href="@{/manager/analytics}"><i class="bi bi-graph-up-arrow"></i> Báo Cáo Doanh Thu</a>
                 <a th:href="@{/manager/stores}"><i class="bi bi-shop"></i> Danh Sách Cửa Hàng</a>
+                <a th:href="@{/notifications}" id="sidebarNotifications"><i class="bi bi-bell-fill"></i> Thông Báo Hệ Thống</a>
                 <a th:href="@{/manager/profile}" id="sidebarProfile"><i class="bi bi-person-badge"></i> Profile</a>
                 <hr class="border-secondary my-2">
                 <a th:href="@{/}"><i class="bi bi-house-door"></i> Xem Website Khách</a>
@@ -59,6 +61,12 @@
                         </span>
                     </div>
                     <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Theo dõi tiến độ cắm hoa, điều phối giao hàng và cập nhật trạng thái đơn hàng của chi nhánh.</p>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <a th:href="@{/notifications}" class="btn btn-sm btn-outline-success rounded-pill px-3 shadow-sm d-flex align-items-center gap-1.5" style="border-color: #20382E; color: #20382E;">
+                        <i class="bi bi-bell-fill"></i>
+                        <span>Thông Báo</span>
+                    </a>
                 </div>
             </div>
 
@@ -182,7 +190,22 @@
                                          th:text="${o.totalAmount != null ? #numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">
                                         650.000 ₫
                                     </div>
-                                    <div style="font-size: 12.5px; color: #66736B; margin-top: 1px;" th:text="${o.paymentMethod == 'COD' ? 'Thanh toán khi nhận' : (o.paymentMethod == 'VNPAY' ? 'VNPAY' : (o.paymentMethod == 'WALLET' ? 'Ví điện tử' : o.paymentMethod))}">COD</div>
+                                    <div class="mt-1">
+                                        <span th:if="${o.paymentMethod == 'MOMO'}" 
+                                              class="badge rounded-pill text-white px-2 py-1" 
+                                              th:style="${o.paymentStatus == 'PAID'} ? 'background-color: #059669;' : 'background-color: #D82D8B;'"
+                                              th:text="${o.paymentStatus == 'PAID' ? 'MoMo: Đã thanh toán' : 'MoMo: Chờ thanh toán'}">
+                                        </span>
+                                        <span th:if="${o.paymentMethod == 'BANK_TRANSFER'}" 
+                                              class="badge rounded-pill text-white px-2 py-1" 
+                                              th:classappend="${o.paymentStatus == 'PAID' ? 'bg-success' : 'bg-primary'}"
+                                              th:text="${o.paymentStatus == 'PAID' ? 'VietQR: Đã nhận' : 'VietQR: Chờ chuyển'}">
+                                        </span>
+                                        <span th:if="${o.paymentMethod == 'COD'}" 
+                                              class="badge bg-secondary rounded-pill text-white px-2 py-1">
+                                            COD: Thu tiền mặt
+                                        </span>
+                                    </div>
                                 </td>
 
                                 <!-- 5. Lịch nhận hoa -->

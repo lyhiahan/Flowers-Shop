@@ -20,6 +20,7 @@ public class CartController {
 
     private final CartService cartService;
     private final OrderService orderService;
+    private final com.finalproject.repository.StoreInventoryRepository inventories;
 
     @GetMapping
     public String showCart(Principal principal, Model model) {
@@ -35,6 +36,16 @@ public class CartController {
             }
         }
         model.addAttribute("itemsByStore", itemsByStore);
+        java.util.Map<Long, Integer> stockByItem = new java.util.LinkedHashMap<>();
+        if (cart != null && cart.getItems() != null) {
+            for (var item : cart.getItems()) {
+                int stock = item.getStore() == null ? 0 : inventories
+                        .findByStoreIdAndProductId(item.getStore().getId(), item.getProduct().getId())
+                        .map(inv -> Math.max(0, inv.getQuantity())).orElse(0);
+                stockByItem.put(item.getId(), stock);
+            }
+        }
+        model.addAttribute("stockByItem", stockByItem);
         model.addAttribute("paymentMethods", PaymentMethod.values());
         return "customer/cart";
     }

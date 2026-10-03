@@ -1,6 +1,7 @@
 ﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
+<title>Hoa Tươi Sài Gòn</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Google Font: Nunito, Plus Jakarta Sans, Playfair Display & Bootstrap 5 & Icons -->
@@ -427,7 +428,7 @@
                     <form th:action="@{/}" method="get" class="d-flex align-items-center border rounded-pill px-3 py-1 bg-white">
                         <i class="bi bi-search text-muted me-2"></i>
                         <input type="text" name="keyword" class="form-control border-0 shadow-none p-1" style="font-size: 14.5px;" placeholder="Tìm hoa tươi, theo dịp, màu sắc...">
-                        <button type="submit" class="btn btn-sm btn-danger rounded-pill px-3" style="background-color: var(--flower-primary);">Tìm hoa</button>
+                        <button type="submit" class="btn btn-sm btn-danger rounded-pill px-3 text-nowrap flex-shrink-0" style="background-color: var(--flower-primary);">Tìm hoa</button>
                     </form>
                 </div>
 
@@ -518,6 +519,7 @@
 
                         <img id="mainImage"
                              th:src="${product.imageUrl != null ? product.imageUrl : 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=800'}"
+                             onerror="this.onerror=null; this.src='/images/flower-logo.png';"
                              class="img-fluid w-100" style="max-height: 480px; object-fit: cover; transition: opacity 0.25s ease;" alt="Flower detail">
                     </div>
 
@@ -535,6 +537,7 @@
                                  th:attr="data-index=${iterStat.index}, data-src=${img.imageUrl}"
                                  onclick="selectImage(this)">
                                 <img th:src="${img.imageUrl}"
+                                     onerror="this.onerror=null; this.src='/images/flower-logo.png';" alt="Góc chụp sản phẩm"
                                      th:classappend="${iterStat.index == 0} ? 'active-thumb' : 'border-light-subtle'"
                                      class="rounded-3 border border-2 thumbnail-img shadow-sm"
                                      width="82" height="82" style="object-fit: cover;">
@@ -649,6 +652,11 @@
 
                     <!-- 4. PHIÊN BẢN NẾU CÓ: Một phiên bản thì KHÔNG hiện bộ chọn kích cỡ -->
 
+                    <p id="productStock" class="small mb-3" th:classappend="${availableStock > 0 ? 'text-success' : 'text-danger'}">
+                        <i class="bi bi-box-seam me-1"></i>
+                        <span th:text="${availableStock > 0 ? 'Còn ' + availableStock + ' mẫu tại chi nhánh' : 'Hết hàng tại chi nhánh'}"></span>
+                        <span th:if="${product.store != null}" th:text="${product.store.name}"></span>
+                    </p>
                     <!-- 5. MUA HÀNG: Đặt số lượng và nút thêm vào giỏ cùng một hàng -->
                     <!-- Khi đã đăng nhập với vai trò Khách hàng (CUSTOMER) -->
                     <form sec:authorize="hasRole('CUSTOMER')" action="/cart/add" method="post" class="mb-3">
@@ -662,14 +670,14 @@
                             <button class="btn-qty-step" type="button" onclick="changeQty(-1)" aria-label="Giảm số lượng">
                                 <i class="bi bi-dash"></i>
                             </button>
-                            <input type="number" id="detailQtyInput" name="quantity" value="1" min="1" max="99" 
+                            <input type="number" id="detailQtyInput" name="quantity" value="1" min="1" th:max="${availableStock}" th:disabled="${availableStock == 0}"
                                    class="qty-input" readonly>
                             <button class="btn-qty-step" type="button" onclick="changeQty(1)" aria-label="Tăng số lượng">
                                 <i class="bi bi-plus"></i>
                             </button>
                         </div>
 
-                        <button type="submit" class="btn btn-flower-add flex-grow-1 d-inline-flex align-items-center justify-content-center">
+                        <button type="submit" th:disabled="${availableStock == 0}" class="btn btn-flower-add flex-grow-1 d-inline-flex align-items-center justify-content-center">
                             <i class="bi bi-bag-plus me-2"></i> Thêm vào giỏ hàng
                         </button>
                     </form>
@@ -856,131 +864,10 @@
 
 
                 <!-- MỤC 3: CÁCH CHĂM SÓC (Đúng với bó hoa, hoa cắm bình hoặc chậu cây) -->
-                <div class="accordion-item">
-                    <h3 class="accordion-header" id="headingCare">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCare" aria-expanded="false" aria-controls="collapseCare">
-                            <i class="bi bi-droplet-half me-2" style="color: var(--flower-primary);"></i>
-                            <span>Cách chăm sóc</span>
-                        </button>
-                    </h3>
-                    <div id="collapseCare" class="accordion-collapse collapse" aria-labelledby="headingCare" data-bs-parent="#flowerDetailAccordion">
-                        <div class="accordion-body">
-                            <ul class="mb-0 ps-3 d-flex flex-column gap-2">
-                                <li><strong>Đối với bó hoa cắm bình:</strong> Dùng kéo bén cắt xéo gốc cành 45° khoảng 1–2 cm trước khi cắm vào bình nước sạch có pha gói dưỡng hoa, thay nước mới mỗi 1–2 ngày.</li>
-                                <li><strong>Đối với giỏ hoa / hộp hoa:</strong> Châm thêm một lượng nước mát vừa đủ vào phần xốp giữ ẩm (foam) mỗi ngày một lần để hoa luôn hút đủ nước.</li>
-                                <li><strong>Đối với chậu cây / lan hồ điệp:</strong> Tưới ẩm vừa phải vào phần giá thể hoặc gốc 4–5 ngày một lần, tránh để đọng nước lên đài hoa.</li>
-                                <li><strong>Vị trí trưng bày:</strong> Đặt nơi thoáng mát (20–25°C), tránh ánh nắng gay gắt chiếu trực tiếp, tránh luồng gió điều hòa phả thẳng và xa hoa quả chín.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+                
 
                 <!-- MỤC 4: ĐÁNH GIÁ KHÁCH HÀNG (Nội dung thực tế, trạng thái rõ ràng khi chưa có đánh giá) -->
-                <div class="accordion-item" id="review-section">
-                    <h3 class="accordion-header" id="headingReviews">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReviews" aria-expanded="false" aria-controls="collapseReviews">
-                            <i class="bi bi-star me-2" style="color: var(--flower-primary);"></i>
-                            <span>Đánh giá khách hàng</span>
-                        </button>
-                    </h3>
-                    <div id="collapseReviews" class="accordion-collapse collapse" aria-labelledby="headingReviews" data-bs-parent="#flowerDetailAccordion">
-                        <div class="accordion-body">
-                            
-                            <!-- Trạng thái: Chưa đăng nhập -->
-                            <div sec:authorize="!isAuthenticated()" class="p-4 rounded-3 border mb-4 text-center" style="background-color: var(--flower-bg); border-color: var(--flower-border) !important;">
-                                <div class="fs-3 mb-2">🌸</div>
-                                <h4 class="mb-2" style="font-size: 18px; font-weight: 600; color: var(--flower-primary);">Đánh giá sản phẩm</h4>
-                                <p class="text-muted mb-3" style="font-size: 15.5px;">
-                                    Chức năng đánh giá chỉ dành cho khách hàng đã đặt hàng và nhận hoa thành công.<br>
-                                    Vui lòng đăng nhập bằng tài khoản mua hàng để thực hiện đánh giá.
-                                </p>
-                                <a th:href="@{/login}" class="btn rounded-pill px-4 text-white" style="background-color: var(--flower-primary); font-size: 15px;">
-                                    <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
-                                </a>
-                            </div>
-
-                            <!-- Trạng thái: Đã đăng nhập nhưng chưa đủ điều kiện đánh giá -->
-                            <div sec:authorize="isAuthenticated()" th:if="${canReview != true}" class="p-4 rounded-3 border mb-4 text-center" style="background-color: var(--flower-bg); border-color: var(--flower-border) !important;">
-                                <div class="fs-3 mb-2">📦</div>
-                                <h4 class="mb-2" style="font-size: 18px; font-weight: 600; color: var(--flower-text-main);">Chưa thể đánh giá mẫu hoa này</h4>
-                                <p class="text-muted mb-0" style="max-width: 600px; margin: 0 auto; font-size: 15.5px;">
-                                    Chức năng đánh giá sản phẩm chỉ được thực hiện khi và chỉ khi khách hàng đã đặt hàng và nhận được hàng thành công (đơn hàng ở trạng thái Đã giao hoặc Hoàn tất).
-                                </p>
-                            </div>
-
-                            <!-- Form đánh giá: Khi đủ điều kiện mua và nhận hàng thành công -->
-                            <div sec:authorize="isAuthenticated()" th:if="${canReview == true}" class="p-4 border rounded-3 mb-4" style="background-color: #ffffff; border-color: var(--flower-border) !important;">
-                                <div class="d-flex align-items-center gap-2 mb-3">
-                                    <span class="badge px-3 py-2 rounded-pill fw-normal" style="background-color: var(--flower-accent-bg); color: var(--flower-accent); font-size: 14.5px;">
-                                        <i class="bi bi-patch-check-fill me-1"></i> Đã mua & nhận hàng thành công
-                                    </span>
-                                    <h4 class="mb-0" style="font-size: 17.5px; font-weight: 600; color: var(--flower-text-main);">Viết đánh giá sản phẩm (Tối thiểu 50 ký tự)</h4>
-                                </div>
-                                <form th:action="@{/product/{id}/review(id=${product.id})}" method="post" onsubmit="return validateReviewLength();">
-                                    <input type="hidden" name="orderId" th:value="${eligibleOrderId}">
-                                    <div class="row g-3 mb-3">
-                                        <div class="col-md-4">
-                                            <label class="form-label small fw-medium">Chấm sao (*)</label>
-                                            <select name="rating" class="form-select" style="font-size: 15px;" required>
-                                                <option value="5" selected>⭐⭐⭐⭐⭐ (5 sao - Tuyệt vời)</option>
-                                                <option value="4">⭐⭐⭐⭐ (4 sao - Rất tốt)</option>
-                                                <option value="3">⭐⭐⭐ (3 sao - Bình thường)</option>
-                                                <option value="2">⭐⭐ (2 sao - Tạm được)</option>
-                                                <option value="1">⭐ (1 sao - Thất vọng)</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-8">
-                                            <label class="form-label small fw-medium">Đường dẫn hình ảnh thực tế (nếu có)</label>
-                                            <input type="url" name="imageUrl" class="form-control" style="font-size: 15px;" placeholder="https://example.com/flower-review.jpg">
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <label class="form-label small fw-medium mb-0">Cảm nhận chi tiết (* Tối thiểu 50 ký tự)</label>
-                                            <small id="charCounter" class="text-muted fw-bold">0 / 50 ký tự</small>
-                                        </div>
-                                        <textarea id="reviewContent" name="content" rows="3" class="form-control" style="font-size: 15px;"
-                                                  required placeholder="Hãy chia sẻ trải nghiệm về độ tươi của hoa, cách cắm, thiệp và thái độ phục vụ khi giao hàng (tối thiểu 50 ký tự)..."
-                                                  oninput="updateCharCount()"></textarea>
-                                        <div id="reviewWarning" class="text-danger small mt-1 d-none">⚠️ Nội dung bình luận chưa đủ 50 ký tự! Vui lòng viết thêm cảm nhận.</div>
-                                    </div>
-
-                                    <button type="submit" class="btn btn-flower-add px-4">Gửi đánh giá</button>
-                                </form>
-                            </div>
-
-                            <!-- Danh sách đánh giá thực tế hoặc thông báo chưa có đánh giá -->
-                            <div th:if="${#lists.isEmpty(reviews)}" class="text-center py-4 text-muted">
-                                <i class="bi bi-chat-heart fs-2 opacity-50" style="color: var(--flower-accent);"></i>
-                                <p class="mt-2 mb-0" style="font-size: 16px;">Chưa có đánh giá nào cho mẫu hoa này. Hãy là người đầu tiên trải nghiệm và chia sẻ cảm nhận!</p>
-                            </div>
-
-                            <div th:if="${!#lists.isEmpty(reviews)}" class="d-flex flex-column gap-3">
-                                <div th:each="r : ${reviews}" class="p-3 border rounded-3 bg-white" style="border-color: var(--flower-border) !important;">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <img th:src="${r.user != null and r.user.avatarUrl != null ? r.user.avatarUrl : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=50'}"
-                                                 class="rounded-circle border" width="38" height="38" style="object-fit: cover;">
-                                            <div>
-                                                <strong class="d-block text-dark small" th:text="${r.user != null ? (r.user.fullName != null ? r.user.fullName : r.user.username) : 'Khách hàng'}">Tên khách hàng</strong>
-                                                <small class="text-muted" style="font-size: 12.5px;" th:text="${r.createdAt != null ? #temporals.format(r.createdAt, 'dd/MM/yyyy HH:mm') : ''}">01/01/2026</small>
-                                            </div>
-                                        </div>
-                                        <div class="text-warning small">
-                                            <span th:each="i : ${#numbers.sequence(1, (r.rating != null and r.rating > 0) ? (r.rating > 5 ? 5 : r.rating) : 5)}">⭐</span>
-                                        </div>
-                                    </div>
-                                    <p class="text-dark small mb-2 ps-1" style="font-size: 15.5px; line-height: 1.5;" th:text="${r.content}"></p>
-                                    <div th:if="${r.imageUrl != null and !r.imageUrl.isEmpty()}" class="ps-1">
-                                        <img th:src="${r.imageUrl}" class="rounded-3 border" width="120" height="120" style="object-fit: cover;">
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
+                
 
 
             </div>
@@ -1092,67 +979,7 @@
     <!-- ==============================================
          FOOTER CHUẨN ĐỒNG BỘ THEO MẪU (BOTANICAL ATELIER)
          ============================================== -->
-    <footer class="w-full border-top pt-4 pb-3 mt-12" style="background-color: #FAF4F0 !important; border-top: 1px solid #EBDED4 !important; font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif !important; color: #4A3E3D !important; width: 100%;">
-        <div style="max-width: 1240px; margin: 0 auto; padding-left: 20px; padding-right: 20px;">
-            <!-- Hàng trên: 2 Cột thông tin -->
-            <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 24px; padding-bottom: 24px;">
-                <!-- Cột 1: Thương hiệu & Liên hệ -->
-                <div style="flex: 1 1 320px; max-width: 480px;">
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
-                        <span style="font-size: 22px; line-height: 1;">🌸</span>
-                        <span style="font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 700; color: #C84357; letter-spacing: 0.5px;">HOA TƯƠI SÀI GÒN</span>
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; color: #555555;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; line-height: 1;">call</span>
-                            <span>Hotline: <strong style="color: #222222; font-weight: 700;">028 1111 222 - 0909 888 777</strong></span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; line-height: 1;">mail</span>
-                            <span>Email: <a href="mailto:atelier@hoatuoisaigon.vn" style="color: #555555; text-decoration: none;">atelier@hoatuoisaigon.vn</a></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Cột 2: Hệ thống Atelier & Chi nhánh -->
-                <div style="flex: 1 1 360px; max-width: 560px;">
-                    <h4 style="font-size: 13px; font-weight: 800; color: #264E43; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; margin-top: 2px;">HỆ THỐNG ATELIER &amp; CHI NHÁNH</h4>
-                    <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; color: #555555;">
-                        <div style="display: flex; align-items: flex-start; gap: 8px;">
-                            <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
-                            <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Q.1:</strong> 123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM</span>
-                        </div>
-                        <div style="display: flex; align-items: flex-start; gap: 8px;">
-                            <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
-                            <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Q.7:</strong> 456 Nguyễn Thị Thập, Tân Hưng, Quận 7, TP.HCM</span>
-                        </div>
-                        <div style="display: flex; align-items: flex-start; gap: 8px;">
-                            <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
-                            <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Thủ Đức:</strong> 1 Võ Văn Ngân, Linh Chiểu, TP. Thủ Đức, TP.HCM</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Hàng dưới: Bản quyền + Cam kết chất lượng & Giao hàng -->
-            <div style="border-top: 1px solid #EBDED4; padding-top: 16px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; font-size: 12.5px; color: #777777;">
-                <div>
-                    <span>© 2026 HOA TƯƠI SÀI GÒN .</span>
-                </div>
-                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
-                    <span style="display: inline-flex; align-items: center; gap: 5px; color: #333333; font-weight: 600;">
-                        <span style="color: #C84357;">🌸</span> 100% Hoa Tươi Nhập Khẩu &amp; Đà Lạt
-                    </span>
-                    <span style="color: #D8CBC2;">•</span>
-                    <span style="display: inline-flex; align-items: center; gap: 4px; color: #666666;">
-                        <span class="material-symbols-outlined" style="font-size: 15px; color: #264E43; line-height: 1;">schedule</span> Giao hỏa tốc 60–90 phút
-                    </span>
-                </div>
-            </div>
-        </div>
-    </footer>
-        </div>
-    </footer>
+    <footer th:replace="~{fragments/floral :: footer}"></footer>
 
     <script>
         let currentIndex = 0;
@@ -1242,7 +1069,8 @@
             const input = document.getElementById('detailQtyInput');
             if (!input) return;
             let val = parseInt(input.value, 10) || 1;
-            val = Math.max(1, Math.min(99, val + delta));
+            if (input.disabled) return;
+            val = Math.max(1, Math.min(parseInt(input.max, 10) || 1, val + delta));
             input.value = val;
         }
     </script>
@@ -1272,6 +1100,9 @@
         function toggleDetailFollowAjax(event, formEl) {
             if (event) event.preventDefault();
             const btn = formEl.querySelector('button');
+            if (formEl.dataset.pending) return;
+            formEl.dataset.pending = 'true';
+            if (btn) btn.disabled = true;
             const url = formEl.getAttribute('action');
             const csrfInput = formEl.querySelector('input[name="_csrf"]');
             const csrfToken = csrfInput ? csrfInput.value : '';
@@ -1293,7 +1124,8 @@
                     window.location.href = '/login';
                     return null;
                 }
-                return res.json();
+                if (!res.ok || res.redirected) throw new Error('Không cập nhật được theo dõi. Vui lòng kiểm tra đăng nhập rồi tải lại trang.');
+                    return res.json();
             })
             .then(data => {
                 if (!data) return;
@@ -1327,8 +1159,8 @@
             })
             .catch(err => {
                 console.error('Lỗi theo dõi:', err);
-                formEl.submit();
-            });
+                showDetailToast('Chưa xác nhận được kết quả. Vui lòng tải lại trang trước khi thử lại.');
+            }).finally(() => { delete formEl.dataset.pending; if (btn) btn.disabled = false; });
         }
     </script>
 </body>

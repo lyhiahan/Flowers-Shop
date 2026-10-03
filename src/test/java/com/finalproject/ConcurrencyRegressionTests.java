@@ -78,6 +78,7 @@ class ConcurrencyRegressionTests {
             jdbc.update("delete from products where id=?", f.productId());
             jdbc.update("delete from categories where id=?", f.categoryId());
             for (Long id : f.userIds()) {
+                jdbc.update("delete from notifications where user_id=?", id);
                 jdbc.update("delete from otp_verifications where user_id=?", id);
                 jdbc.update("delete from users where id=?", id);
             }

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
     <title>Quản Lý Loại Sản Phẩm - Quản Trị Hệ Thống Hoa Tươi</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -220,8 +221,8 @@
         <!-- Bảng danh sách Loại Sản Phẩm: MÃ | TÊN LOẠI SẢN PHẨM | MÔ TẢ DANH MỤC | TRẠNG THÁI | THAO TÁC -->
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white" style="border: 1px solid #E2E7E2 !important; border-radius: 14px;">
             <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table id="categoriesTable" class="table table-admin-categories align-middle mb-0">
+                <div class="table-responsive" tabindex="0" aria-label="Bảng dữ liệu, cuộn ngang để xem các cột">
+                    <table id="categoriesTable" class="table table-admin-categories align-middle mb-0" style="min-width: 1100px;">
                         <thead>
                         <tr>
                             <th class="ps-4" style="width: 80px; border-top-left-radius: 14px;">MÃ</th>
@@ -397,6 +398,8 @@
             <div class="modal-footer bg-white border-top-0 d-flex justify-content-end p-3">
                 <button type="button" class="btn btn-secondary px-4 py-2 fw-semibold" data-bs-dismiss="modal" style="border-radius: 8px;">Đóng</button>
             </div>
+</div>
+</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
