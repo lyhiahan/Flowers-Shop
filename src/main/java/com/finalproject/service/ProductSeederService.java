@@ -72,7 +72,7 @@ public class ProductSeederService {
                 "Hoa Tình Yêu & Valentine", "Quận 1",
                 "Bó hoa hồng đỏ nhập khẩu Ecuador size bông cực lớn, cánh dày nhung mịn, kết hợp lá bạc Dollar sang trọng biểu tượng tình yêu vĩnh cửu bất diệt.",
                 new BigDecimal("1200000"), new BigDecimal("700000"), new BigDecimal("150000"), new BigDecimal("500000"),
-                "https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=800",
+                "https://images.unsplash.com/photo-1562690868-60bbe7293e94?w=800&q=80",
                 85, 4.9
             ),
             new ProductTemplate(
@@ -96,7 +96,7 @@ public class ProductSeederService {
                 "Hộp Hoa & Giỏ Hoa Quà Tặng", "Quận 1",
                 "Giỏ hoa thiết kế phối hoa đồng tiền, hướng dương và hoa hồng cam lãng mạn mang đến tài lộc khởi sắc cho chi nhánh mới.",
                 new BigDecimal("950000"), new BigDecimal("550000"), new BigDecimal("120000"), new BigDecimal("400000"),
-                "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800&q=80",
+                "https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?w=800&q=80",
                 58, 4.9
             ),
             new ProductTemplate(
@@ -170,7 +170,7 @@ public class ProductSeederService {
                 "Hoa Sinh Nhật", "Quận 7",
                 "Giỏ mây cắm hoa hồng kem dâu, cẩm chướng và hoa baby bồng bềnh thích hợp tặng mẹ, chị gái hoặc người thương.",
                 new BigDecimal("720000"), new BigDecimal("400000"), new BigDecimal("90000"), new BigDecimal("300000"),
-                "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800&q=80",
+                "https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?w=800&q=80",
                 88, 4.9
             ),
             new ProductTemplate(
@@ -244,7 +244,7 @@ public class ProductSeederService {
                 "Hộp Hoa & Giỏ Hoa Quà Tặng", "Thủ Đức",
                 "Giỏ gỗ cắm hoa đồng tiền hồng pastel, cẩm chướng và hoa sao tím tri ân thầy cô giáo và chúc mừng bạn bè.",
                 new BigDecimal("550000"), new BigDecimal("290000"), new BigDecimal("70000"), new BigDecimal("220000"),
-                "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800&q=80",
+                "https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?w=800&q=80",
                 82, 4.8
             ),
             new ProductTemplate(
@@ -276,7 +276,7 @@ public class ProductSeederService {
                 "Hoa Tình Yêu & Valentine", "Thủ Đức",
                 "Bó hoa hồng đỏ gói giấy đen nhám viền vàng phong cách lãng mạn giúp các bạn sinh viên tỏ tình thành công.",
                 new BigDecimal("580000"), new BigDecimal("300000"), new BigDecimal("75000"), new BigDecimal("250000"),
-                "https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=800",
+                "https://images.unsplash.com/photo-1562690868-60bbe7293e94?w=800&q=80",
                 76, 4.9
             ),
             new ProductTemplate(
@@ -349,7 +349,7 @@ public class ProductSeederService {
         );
 
         for (DefCat d : defaults9) {
-            Category cat = categoryRepository.findByName(d.name())
+            Category cat = categoryRepository.findFirstByName(d.name())
                 .orElseGet(() -> categoryRepository.save(Category.builder()
                     .name(d.name())
                     .description(d.desc())

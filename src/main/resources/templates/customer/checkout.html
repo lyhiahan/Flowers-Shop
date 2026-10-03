@@ -568,8 +568,9 @@
                             <div class="checkout-card-body p-3">
                                 <div class="product-line-item" th:each="item : ${checkoutItems}">
                                     <!-- Ảnh nhỏ sản phẩm -->
-                                    <img th:src="${item.product.imageUrl != null ? item.product.imageUrl : 'https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=800'}" 
-                                         class="product-line-img" th:alt="${item.product.name}">
+                                    <img th:src="${item.product.imageUrl != null ? item.product.imageUrl : 'https://images.unsplash.com/photo-1562690868-60bbe7293e94?w=800&q=80'}" 
+                                         class="product-line-img" th:alt="${item.product.name}"
+                                         onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?w=800&q=80';">
                                     
                                     <!-- Thông tin sản phẩm -->
                                     <div class="product-line-info">

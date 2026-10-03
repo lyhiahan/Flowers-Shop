@@ -135,10 +135,9 @@
     </style>
 </head>
 <body>
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar Navigation: Bước 6 theo UC_020: Chọn Staffs trên thanh sidebar -->
-        <div class="col-md-2 p-3 sidebar">
+<div class="d-flex" style="min-height: 100vh;">
+    <!-- Sidebar Navigation: Bước 6 theo UC_020: Chọn Staffs trên thanh sidebar -->
+    <div class="sidebar d-flex flex-column flex-shrink-0 p-3" style="width: 260px; min-height: 100vh;">
             <div class="d-flex align-items-center gap-2 mb-4 px-2">
                 <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img me-1" style="height: 38px;">
                 <div>
@@ -187,8 +186,8 @@
             </nav>
         </div>
 
-        <!-- Main Content: Bước 7 - Chuyển đến trang quản lý nhân viên cửa hàng -->
-        <div class="col-md-10 p-4">
+    <!-- Main Content: Bước 7 - Chuyển đến trang quản lý nhân viên cửa hàng -->
+    <div class="flex-grow-1 p-4" style="min-width: 0; background: var(--bg-page);">
             <!-- Toast / Alert Flash Messages -->
             <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-3 mb-4" role="alert" style="background-color: #E8F5E9; color: #1B5E20;">
                 <i class="bi bi-check-circle-fill me-2 fs-5"></i>
@@ -417,7 +416,6 @@
             </div>
         </div>
     </div>
-</div>
 
 <!-- ================= MODALS CHO USE CASE UC_020 ================= -->
 

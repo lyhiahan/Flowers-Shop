@@ -37,8 +37,8 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // 1. Tạo hoặc cập nhật 3 chi nhánh mẫu sang tiếng Việt thuần
-        Store storeA = storeRepository.findByName("Chi Nhánh Bến Thành (Quận 1)")
-                .orElseGet(() -> storeRepository.findByName("Bloom Flower - Chi Nhánh Bến Thành (Quận 1)")
+        Store storeA = storeRepository.findFirstByNameOrderByIdAsc("Chi Nhánh Bến Thành (Quận 1)")
+                .orElseGet(() -> storeRepository.findFirstByNameOrderByIdAsc("Bloom Flower - Chi Nhánh Bến Thành (Quận 1)")
                         .map(s -> {
                             s.setName("Chi Nhánh Bến Thành (Quận 1)");
                             return storeRepository.save(s);
@@ -53,8 +53,8 @@ public class DataInitializer implements CommandLineRunner {
                                 .eWallet(new BigDecimal("15500000"))
                                 .build())));
 
-        Store storeB = storeRepository.findByName("Chi Nhánh Phú Mỹ Hưng (Quận 7)")
-                .orElseGet(() -> storeRepository.findByName("Bloom Flower - Chi Nhánh Phú Mỹ Hưng (Quận 7)")
+        Store storeB = storeRepository.findFirstByNameOrderByIdAsc("Chi Nhánh Phú Mỹ Hưng (Quận 7)")
+                .orElseGet(() -> storeRepository.findFirstByNameOrderByIdAsc("Bloom Flower - Chi Nhánh Phú Mỹ Hưng (Quận 7)")
                         .map(s -> {
                             s.setName("Chi Nhánh Phú Mỹ Hưng (Quận 7)");
                             return storeRepository.save(s);
@@ -69,8 +69,8 @@ public class DataInitializer implements CommandLineRunner {
                                 .eWallet(new BigDecimal("8200000"))
                                 .build())));
 
-        Store storeC = storeRepository.findByName("Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
-                .orElseGet(() -> storeRepository.findByName("Bloom Flower - Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
+        Store storeC = storeRepository.findFirstByNameOrderByIdAsc("Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
+                .orElseGet(() -> storeRepository.findFirstByNameOrderByIdAsc("Bloom Flower - Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
                         .map(s -> {
                             s.setName("Chi Nhánh Làng Đại Học (TP. Thủ Đức)");
                             return storeRepository.save(s);
@@ -312,32 +312,32 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         // 6. Danh mục hoa tươi
-        Category catSinhNhat = categoryRepository.findByName("Hoa Sinh Nhật")
+        Category catSinhNhat = categoryRepository.findFirstByName("Hoa Sinh Nhật")
                 .orElseGet(() -> categoryRepository.save(Category.builder()
                         .name("Hoa Sinh Nhật")
                         .description("Các mẫu bó hoa, lẵng hoa chúc mừng sinh nhật ngọt ngào, ý nghĩa")
                         .build()));
 
-        Category catKhaiTruong = categoryRepository.findByName("Hoa Khai Trương")
+        Category catKhaiTruong = categoryRepository.findFirstByName("Hoa Khai Trương")
                 .orElseGet(() -> categoryRepository.save(Category.builder()
                         .name("Hoa Khai Trương")
                         .description("Kệ hoa, lẵng hoa khai trương sang trọng phát tài phát lộc")
                         .build()));
 
-        Category catTinhYeu = categoryRepository.findByName("Hoa Tình Yêu & Valentine")
+        Category catTinhYeu = categoryRepository.findFirstByName("Hoa Tình Yêu & Valentine")
                 .orElseGet(() -> categoryRepository.save(Category.builder()
                         .name("Hoa Tình Yêu & Valentine")
                         .description("Hoa hồng đỏ Ecuador, hoa baby trắng lãng mạn tỏ tình")
                         .build()));
 
-        Category catLanHoDiep = categoryRepository.findByName("Lan Hồ Điệp Sang Trọng")
+        Category catLanHoDiep = categoryRepository.findFirstByName("Lan Hồ Điệp Sang Trọng")
                 .orElseGet(() -> categoryRepository.save(Category.builder()
                         .name("Lan Hồ Điệp Sang Trọng")
                         .description("Chậu hoa lan hồ điệp cao cấp trưng Tết, biếu sếp, mừng tân gia")
                         .build()));
 
         // Khởi tạo các danh mục con (Subcategories) có parent_id liên kết với danh mục cha
-        Category subBoSinhNhat = categoryRepository.findByName("Bó Hoa Sinh Nhật")
+        Category subBoSinhNhat = categoryRepository.findFirstByName("Bó Hoa Sinh Nhật")
                 .orElseGet(() -> categoryRepository.save(Category.builder()
                         .name("Bó Hoa Sinh Nhật")
                         .description("Các mẫu bó hoa tươi rực rỡ chúc mừng sinh nhật")
@@ -348,7 +348,7 @@ public class DataInitializer implements CommandLineRunner {
             categoryRepository.save(subBoSinhNhat);
         }
 
-        Category subLangSinhNhat = categoryRepository.findByName("Lẵng Hoa Sinh Nhật")
+        Category subLangSinhNhat = categoryRepository.findFirstByName("Lẵng Hoa Sinh Nhật")
                 .orElseGet(() -> categoryRepository.save(Category.builder()
                         .name("Lẵng Hoa Sinh Nhật")
                         .description("Lẵng hoa để bàn chúc mừng sinh nhật sang trọng")
@@ -359,7 +359,7 @@ public class DataInitializer implements CommandLineRunner {
             categoryRepository.save(subLangSinhNhat);
         }
 
-        Category subBoHongDo = categoryRepository.findByName("Bó Hoa Hồng Đỏ")
+        Category subBoHongDo = categoryRepository.findFirstByName("Bó Hoa Hồng Đỏ")
                 .orElseGet(() -> categoryRepository.save(Category.builder()
                         .name("Bó Hoa Hồng Đỏ")
                         .description("Bó hoa hồng đỏ nhập khẩu quyến rũ trao gửi tình yêu")
@@ -370,7 +370,7 @@ public class DataInitializer implements CommandLineRunner {
             categoryRepository.save(subBoHongDo);
         }
 
-        Category subBoBabyTrang = categoryRepository.findByName("Bó Hoa Baby Trắng")
+        Category subBoBabyTrang = categoryRepository.findFirstByName("Bó Hoa Baby Trắng")
                 .orElseGet(() -> categoryRepository.save(Category.builder()
                         .name("Bó Hoa Baby Trắng")
                         .description("Bó hoa baby trắng tinh khôi, nhẹ nhàng lãng mạn")
@@ -381,7 +381,7 @@ public class DataInitializer implements CommandLineRunner {
             categoryRepository.save(subBoBabyTrang);
         }
 
-        Category subKeKhaiTruong = categoryRepository.findByName("Kệ Hoa Khai Trương")
+        Category subKeKhaiTruong = categoryRepository.findFirstByName("Kệ Hoa Khai Trương")
                 .orElseGet(() -> categoryRepository.save(Category.builder()
                         .name("Kệ Hoa Khai Trương")
                         .description("Kệ hoa chúc mừng khai trương hồng phát sang trọng")
@@ -392,7 +392,7 @@ public class DataInitializer implements CommandLineRunner {
             categoryRepository.save(subKeKhaiTruong);
         }
 
-        Category subLanTrang = categoryRepository.findByName("Chậu Lan Hồ Điệp Trắng")
+        Category subLanTrang = categoryRepository.findFirstByName("Chậu Lan Hồ Điệp Trắng")
                 .orElseGet(() -> categoryRepository.save(Category.builder()
                         .name("Chậu Lan Hồ Điệp Trắng")
                         .description("Chậu lan hồ điệp trắng đại diện cho sự thanh cao, sang trọng")
@@ -436,7 +436,7 @@ public class DataInitializer implements CommandLineRunner {
                     .importPrice(new BigDecimal("700000"))
                     .priceRentPerDay(new BigDecimal("150000"))
                     .depositFee(new BigDecimal("500000"))
-                    .imageUrl("https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=800")
+                    .imageUrl("https://images.unsplash.com/photo-1562690868-60bbe7293e94?w=800&q=80")
                     .sold(85)
                     .rating(4.9)
                     .isActive(true)
@@ -579,26 +579,21 @@ public class DataInitializer implements CommandLineRunner {
             // Sửa ảnh sản phẩm bị lỗi hoặc không khớp loài hoa
             String nameLower = p.getName() != null ? p.getName().toLowerCase() : "";
             String currentImg = p.getImageUrl();
-            if (currentImg == null || currentImg.trim().isEmpty() || currentImg.contains("placeholder") || currentImg.contains("via.placeholder")) {
-                p.setImageUrl("https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800&q=80");
+            if (currentImg == null || currentImg.trim().isEmpty() || currentImg.contains("placeholder") || currentImg.contains("via.placeholder") || currentImg.contains("1548094878")) {
+                if (nameLower.contains("hồng đỏ") || nameLower.contains("ecuador")) {
+                    p.setImageUrl("https://images.unsplash.com/photo-1562690868-60bbe7293e94?w=800&q=80");
+                } else if (nameLower.contains("tana") || nameLower.contains("cúc")) {
+                    p.setImageUrl("https://images.unsplash.com/photo-1606041008023-472dfb5e530f?w=800&q=80");
+                } else if (nameLower.contains("hướng dương")) {
+                    p.setImageUrl("https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=800&q=80");
+                } else if (nameLower.contains("hồ điệp")) {
+                    p.setImageUrl("https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?w=800&q=80");
+                } else {
+                    p.setImageUrl("https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?w=800&q=80");
+                }
                 changed = true;
-            } else if (nameLower.contains("hướng dương") && !currentImg.contains("photo-1597848212624")) {
-                p.setImageUrl("https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=800&q=80");
-                changed = true;
-            } else if (nameLower.contains("hồ điệp") && !currentImg.contains("photo-1525310072745")) {
-                p.setImageUrl("https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?w=800&q=80");
-                changed = true;
-            } else if ((nameLower.contains("hồng đỏ") || nameLower.contains("ecuador")) && !currentImg.contains("photo-1548094878")) {
-                p.setImageUrl("https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=800");
-                changed = true;
-            } else if ((nameLower.contains("hoa cưới") || nameLower.contains("cô dâu") || nameLower.contains("trắng")) && !currentImg.contains("photo-1533616688419")) {
-                p.setImageUrl("https://images.unsplash.com/photo-1533616688419-b7a585564566?w=800&q=80");
-                changed = true;
-            } else if (nameLower.contains("khai trương") && !currentImg.contains("photo-1526047932273")) {
-                p.setImageUrl("https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=800&q=80");
-                changed = true;
-            } else if ((nameLower.contains("sinh nhật") || nameLower.contains("pastel") || nameLower.contains("thiên thần")) && !currentImg.contains("photo-1561181286")) {
-                p.setImageUrl("https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=800&q=80");
+            } else if ((nameLower.contains("tana") || nameLower.contains("cúc")) && currentImg.contains("photo-1561181286")) {
+                p.setImageUrl("https://images.unsplash.com/photo-1606041008023-472dfb5e530f?w=800&q=80");
                 changed = true;
             }
 

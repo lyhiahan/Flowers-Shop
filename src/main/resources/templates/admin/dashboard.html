@@ -447,6 +447,9 @@
                                     <button type="button" class="btn-chart-toggle" id="revLineBtn" onclick="toggleChartType('revenue', 'line')">
                                         <i class="bi bi-graph-up me-1"></i>Đường
                                     </button>
+                                    <button type="button" class="btn-chart-toggle" id="revPieBtn" onclick="toggleChartType('revenue', 'pie')">
+                                        <i class="bi bi-pie-chart me-1"></i>Tròn
+                                    </button>
                                 </div>
                             </div>
 
@@ -548,6 +551,9 @@
                                     <button type="button" class="btn-chart-toggle" id="userBarBtn" onclick="toggleChartType('users', 'bar')">
                                         <i class="bi bi-bar-chart-line me-1"></i>Cột
                                     </button>
+                                    <button type="button" class="btn-chart-toggle" id="userPieBtn" onclick="toggleChartType('users', 'pie')">
+                                        <i class="bi bi-pie-chart me-1"></i>Tròn
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -559,35 +565,114 @@
                     </div>
                 </div>
 
-                <!-- Cột Cửa Hàng Có Doanh Số / Điểm Tốt (col-lg-5) -->
+                <!-- UC_025 Bước 5: Cột Top người dùng điểm cao nhất hệ thống (col-lg-5) -->
+                <div class="col-lg-5">
+                    <div class="card border-0 bg-white p-4 h-100 d-flex flex-column" id="topPointUsersCard" style="border: 1px solid #E2E7E2 !important; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #E2E7E2 !important;">
+                            <div>
+                                <h3 class="admin-section-title mb-0" style="font-size: 20px !important; font-weight: 700; color: #20382E;">
+                                    <i class="bi bi-trophy-fill text-warning me-1"></i>Top người dùng điểm cao nhất
+                                </h3>
+                                <small class="text-muted">Thành viên tích cực và có đóng góp lớn nhất</small>
+                            </div>
+                            <a th:href="@{/admin/users}" class="text-decoration-none fw-bold small" style="color: #355447;">Tất cả →</a>
+                        </div>
+
+                        <div class="flex-grow-1 overflow-auto" style="max-height: 270px;">
+                            <div th:if="${#lists.isEmpty(topPointUsers)}" class="text-center py-4 text-muted small">
+                                Chưa có dữ liệu điểm tích lũy thành viên.
+                            </div>
+                            <div th:each="u, iter : ${topPointUsers}" th:if="${iter.index < 5}" class="d-flex align-items-center justify-content-between p-2 mb-2 rounded-3 border bg-light" style="border-color: #E2E7E2 !important;">
+                                <div class="d-flex align-items-center gap-2 text-truncate me-2">
+                                    <span class="badge rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                                          th:classappend="${iter.index == 0 ? 'bg-warning text-dark' : (iter.index == 1 ? 'bg-secondary text-white' : (iter.index == 2 ? 'bg-danger text-white' : 'bg-light text-dark border'))}"
+                                          style="width: 26px; height: 26px; font-size: 12px;" th:text="${iter.index + 1}">1</span>
+                                    <div class="text-truncate">
+                                        <strong class="text-dark d-block text-truncate" style="font-size: 14px;" th:text="${u.fullName != null ? u.fullName : u.username}">Tên người dùng</strong>
+                                        <small class="text-muted d-block text-truncate" style="font-size: 12px;">
+                                            <span class="badge bg-secondary-subtle text-secondary" style="font-size: 10.5px;" th:text="${u.role}">CUSTOMER</span>
+                                            <span th:text="${u.email}">email@domain.com</span>
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="text-end flex-shrink-0">
+                                    <span class="badge" style="background-color: #E8F5E9; color: #1B5E20; border: 1px solid #A5D6A7; font-size: 12px; font-weight: 700;">
+                                        <i class="bi bi-star-fill text-warning me-1"></i><span th:text="${u.point != null ? u.point : 0}">0</span> đ
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. UC_026: KHU VỰC THỐNG KÊ CỬA HÀNG MỚI & TOP CỬA HÀNG ĐIỂM CAO NHẤT -->
+            <div class="row g-4 mb-4 align-items-stretch" id="storesChartSection">
+                <!-- Cột Biểu Đồ Cửa Hàng Mới (col-lg-7) -->
+                <div class="col-lg-7">
+                    <div class="card border-0 bg-white p-4 h-100 d-flex flex-column justify-content-between" id="newStoreChartCard" style="border: 1px solid #E2E7E2 !important; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                        <div>
+                            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+                                <div>
+                                    <h3 class="admin-section-title mb-0" style="font-size: 20px !important; font-weight: 700; color: #20382E;">
+                                        <i class="bi bi-shop-window me-2" style="color: #355447;"></i>Chi nhánh & Cửa hàng mới
+                                    </h3>
+                                    <small class="text-muted">Tốc độ mở rộng và gia nhập mạng lưới phân phối hoa tươi</small>
+                                </div>
+                                <div class="chart-toggle-group" id="storeChartTypeGroup">
+                                    <button type="button" class="btn-chart-toggle active" id="storeBarBtn" onclick="toggleChartType('stores', 'bar')">
+                                        <i class="bi bi-bar-chart-line me-1"></i>Cột
+                                    </button>
+                                    <button type="button" class="btn-chart-toggle" id="storeLineBtn" onclick="toggleChartType('stores', 'line')">
+                                        <i class="bi bi-graph-up me-1"></i>Đường
+                                    </button>
+                                    <button type="button" class="btn-chart-toggle" id="storePieBtn" onclick="toggleChartType('stores', 'pie')">
+                                        <i class="bi bi-pie-chart me-1"></i>Tròn
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Canvas biểu đồ cửa hàng mới (UC_026) -->
+                        <div style="height: 270px; position: relative;">
+                            <canvas id="adminStoresChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- UC_026 Bước 5: Cột Top cửa hàng điểm cao nhất hệ thống (col-lg-5) -->
                 <div class="col-lg-5">
                     <div class="card border-0 bg-white p-4 h-100 d-flex flex-column" id="topPointStoresCard" style="border: 1px solid #E2E7E2 !important; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
                         <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #E2E7E2 !important;">
                             <div>
                                 <h3 class="admin-section-title mb-0" style="font-size: 20px !important; font-weight: 700; color: #20382E;">
-                                    <i class="bi bi-shop me-1" style="color: #355447;"></i>Cửa hàng có doanh số cao
+                                    <i class="bi bi-award-fill text-warning me-1"></i>Top cửa hàng điểm cao nhất
                                 </h3>
-                                <small class="text-muted">Các chi nhánh và đối tác hoạt động nổi bật</small>
+                                <small class="text-muted">Chi nhánh tiêu biểu đạt cấp bậc và điểm tích lũy dẫn đầu</small>
                             </div>
                             <a th:href="@{/admin/stores}" class="text-decoration-none fw-bold small" style="color: #355447;">Tất cả →</a>
                         </div>
 
                         <div class="flex-grow-1 overflow-auto" style="max-height: 270px;">
-                            <div th:if="${#lists.isEmpty(stores)}" class="text-center py-4 text-muted small">
+                            <div th:if="${#lists.isEmpty(topPointStores)}" class="text-center py-4 text-muted small">
                                 Chưa có cửa hàng nào trong hệ thống.
                             </div>
-                            <div th:each="st, iter : ${stores}" th:if="${iter.index < 5}" class="d-flex align-items-center justify-content-between p-2 mb-2 rounded-3 border bg-light" style="border-color: #E2E7E2 !important;">
+                            <div th:each="st, iter : ${topPointStores}" th:if="${iter.index < 5}" class="d-flex align-items-center justify-content-between p-2 mb-2 rounded-3 border bg-light" style="border-color: #E2E7E2 !important;">
                                 <div class="d-flex align-items-center gap-2 text-truncate me-2">
                                     <span class="badge rounded-circle d-flex align-items-center justify-content-center fw-bold"
                                           th:classappend="${iter.index == 0 ? 'bg-warning text-dark' : (iter.index == 1 ? 'bg-secondary text-white' : (iter.index == 2 ? 'bg-danger text-white' : 'bg-light text-dark border'))}"
                                           style="width: 26px; height: 26px; font-size: 12px;" th:text="${iter.index + 1}">1</span>
                                     <div class="text-truncate">
                                         <strong class="text-dark d-block text-truncate" style="font-size: 14px;" th:text="${st.name}">Cửa hàng Hoa Tươi</strong>
-                                        <small class="text-muted d-block text-truncate" style="font-size: 12px;" th:text="${st.address != null ? st.address : 'Chi nhánh trực thuộc'}">Địa chỉ</small>
+                                        <small class="text-muted d-block text-truncate" style="font-size: 12px;">
+                                            <span th:text="${st.address != null ? st.address : 'Chi nhánh trực thuộc'}">Địa chỉ</span>
+                                        </small>
                                     </div>
                                 </div>
                                 <div class="text-end flex-shrink-0">
-                                    <span class="badge" th:classappend="${st.status ? 'bg-success' : 'bg-secondary'}" th:text="${st.status ? 'Hoạt động' : 'Tạm ngưng'}">Hoạt động</span>
+                                    <span class="badge" style="background-color: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; font-size: 12px; font-weight: 700;">
+                                        <i class="bi bi-star-fill text-warning me-1"></i><span th:text="${st.point != null ? st.point : 0}">0</span> đ
+                                    </span>
                                 </div>
                             </div>
                         </div>

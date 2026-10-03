@@ -15,6 +15,8 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
     List<Store> findByStatusTrue();
     org.springframework.data.domain.Page<Store> findByStatusTrue(org.springframework.data.domain.Pageable pageable);
     List<Store> findByOwnerId(Long ownerId);
+    Optional<Store> findFirstByName(String name);
+    Optional<Store> findFirstByNameOrderByIdAsc(String name);
     Optional<Store> findByName(String name);
     long countByStatus(Boolean status);
 

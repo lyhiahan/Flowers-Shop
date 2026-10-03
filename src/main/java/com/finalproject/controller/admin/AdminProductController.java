@@ -148,6 +148,7 @@ public class AdminProductController {
             List<Store> stores = storeRepository.findAll();
 
             model.addAttribute("products", pagedProducts);
+            model.addAttribute("categories", categoryRepository.findAll());
             model.addAttribute("stores", stores);
             model.addAttribute("countAll", countAll);
             model.addAttribute("countApproved", countApproved);
@@ -245,6 +246,37 @@ public class AdminProductController {
         } else {
             ra.addFlashAttribute("successMessage", "Đã tạm ngừng bán sản phẩm [" + product.getName() + "].");
         }
+        return "redirect:/admin/products-manage";
+    }
+
+    /**
+     * Cập nhật thông tin và hình ảnh sản phẩm (Dành cho Admin)
+     */
+    @PostMapping("/update/{id}")
+    public String updateProduct(@PathVariable("id") Long id,
+                                @RequestParam("name") String name,
+                                @RequestParam("categoryId") Long categoryId,
+                                @RequestParam("priceBuy") java.math.BigDecimal priceBuy,
+                                @RequestParam(value = "promotionalPrice", required = false) java.math.BigDecimal promotionalPrice,
+                                @RequestParam(value = "importPrice", required = false) java.math.BigDecimal importPrice,
+                                @RequestParam(value = "imageUrl", required = false) String imageUrl,
+                                @RequestParam(value = "description", required = false) String description,
+                                RedirectAttributes ra) {
+        Product p = productRepository.findById(id).orElseThrow();
+        Category cat = categoryRepository.findById(categoryId).orElseThrow();
+        p.setName(name);
+        p.setCategory(cat);
+        p.setPriceBuy(priceBuy);
+        p.setPromotionalPrice(promotionalPrice != null ? promotionalPrice : priceBuy);
+        if (importPrice != null) {
+            p.setImportPrice(importPrice);
+        }
+        if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+            p.setImageUrl(imageUrl.trim());
+        }
+        p.setDescription(description);
+        productRepository.save(p);
+        ra.addFlashAttribute("successMessage", "Cập nhật thông tin sản phẩm [" + name + "] thành công!");
         return "redirect:/admin/products-manage";
     }
 

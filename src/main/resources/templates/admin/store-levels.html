@@ -915,8 +915,8 @@
                                     <small class="text-muted" th:text="${s.phone != null ? s.phone : (s.owner != null ? s.owner.phone : '')}">0901234567</small>
                                 </td>
                                 <td class="pe-4 text-center">
-                                    <span th:if="${s.isActive != null and s.isActive}" class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 11px;">Hoạt động</span>
-                                    <span th:if="${s.isActive == null or !s.isActive}" class="badge bg-secondary-subtle text-secondary" style="font-size: 11px;">Tạm đóng</span>
+                                    <span th:if="${s.status != null and s.status}" class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 11px;">Hoạt động</span>
+                                    <span th:if="${s.status == null or !s.status}" class="badge bg-secondary-subtle text-secondary" style="font-size: 11px;">Tạm đóng</span>
                                 </td>
                             </tr>
                             </tbody>

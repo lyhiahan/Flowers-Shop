@@ -18,10 +18,9 @@
     </style>
 </head>
 <body>
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-2 p-3 sidebar">
+<div class="d-flex" style="min-height: 100vh;">
+    <!-- Sidebar -->
+    <div class="sidebar d-flex flex-column flex-shrink-0 p-3" style="width: 260px; min-height: 100vh;">
             <div class="d-flex align-items-center gap-2 mb-4 px-2">
                 <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img me-1" style="width: 36px; height: 36px; object-fit: contain; flex-shrink: 0;">
                 <div>
@@ -46,8 +45,8 @@
             </nav>
         </div>
 
-        <!-- Main Content -->
-        <div class="col-md-10 p-4">
+    <!-- Main Content -->
+    <div class="flex-grow-1 p-4" style="min-width: 0; background: var(--bg-page);">
             <!-- 1. Header: Rút gọn tiêu đề, nút 44px #20382E -->
             <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                 <div>
@@ -75,6 +74,28 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
 
+            <!-- BƯỚC 8 UC_021: Tabs Selling products & Stored products -->
+            <ul class="nav nav-pills gap-2 mb-3" id="productFilterTabs">
+                <li class="nav-item">
+                    <button type="button" class="nav-link active px-3 py-2 fw-bold" id="tabAllProducts" onclick="filterProducts('all')"
+                            style="border-radius: 10px; font-size: 14.5px;">
+                        Tất cả (<span th:text="${#lists.size(products)}">0</span>)
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="nav-link px-3 py-2 fw-bold text-dark" id="tabSellingProducts" onclick="filterProducts('selling')"
+                            style="border-radius: 10px; font-size: 14.5px; background-color: #E8F5E9;">
+                        <i class="bi bi-bag-check-fill me-1 text-success"></i>Selling products (Đang bán)
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="nav-link px-3 py-2 fw-bold text-dark" id="tabStoredProducts" onclick="filterProducts('stored')"
+                            style="border-radius: 10px; font-size: 14.5px; background-color: #F1F5F9;">
+                        <i class="bi bi-archive-fill me-1 text-secondary"></i>Stored products (Đang lưu trữ)
+                    </button>
+                </li>
+            </ul>
+
             <!-- Product Table: Chuẩn hóa cột, tiêu đề #E5EEE8 đậm 800, Mã riêng, ảnh 64x64px -->
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
                 <div class="card-body p-0">
@@ -99,7 +120,7 @@
                                     Chưa có mẫu hoa nào trong danh mục. Hãy thêm mẫu mới!
                                 </td>
                             </tr>
-                            <tr th:each="p : ${products}">
+                            <tr th:each="p : ${products}" class="product-item-row" th:data-status="${p.isSelling == null or p.isSelling ? 'selling' : 'stored'}">
                                 <!-- 1. Mã -->
                                 <td class="ps-4" style="white-space: nowrap;">
                                     <span class="badge" style="background-color: #F0F6F2; color: #20382E; font-weight: 700; font-size: 13.5px; border: 1px solid #D1E5DA; padding: 5px 9px; border-radius: 6px;" th:text="'#' + ${p.id}">#1</span>
@@ -109,7 +130,7 @@
                                 <td>
                                     <div class="d-flex align-items-center gap-3">
                                         <img th:src="${p.imageUrl != null and !p.imageUrl.isEmpty() ? p.imageUrl : 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=300'}"
-                                             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=300';"
+                                             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?w=300';"
                                              style="width: 64px; height: 64px; object-fit: cover; border-radius: 8px; flex-shrink: 0; border: 1px solid #E2E7E2;" 
                                              alt="Ảnh hoa">
                                         <div>
@@ -235,7 +256,6 @@
             </div>
         </div>
     </div>
-</div>
 
 <!-- Modal Thêm Mẫu Hoa -->
 <div class="modal fade" id="addProductModal" tabindex="-1">
@@ -291,29 +311,29 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Modal Xác Nhận Đăng Xuất (Sign Out Modal) -->
-    <div class="modal fade" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
-            <div class="modal-content rounded-4 border-0 shadow">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title font-serif fw-bold text-dark" id="signOutModalLabel">
-                        🌸 Xác Nhận Đăng Xuất
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body py-3 text-secondary">
-                    Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?
-                </div>
-                <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancelSignOut">
-                        Hủy Bỏ
-                    </button>
-                    <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit"   class="btn btn-danger rounded-pill px-4 fw-semibold" id="btnConfirmSignOut">
-                        Xác Nhận Đăng Xuất
-                    </button></form>
-                </div>
-            </div>
-        </div>
-    </div>
+<script>
+    function filterProducts(type) {
+        const rows = document.querySelectorAll('.product-item-row');
+        rows.forEach(row => {
+            const status = row.getAttribute('data-status');
+            if (type === 'all') {
+                row.style.display = '';
+            } else if (type === status) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Cập nhật trạng thái active của tabs
+        document.getElementById('tabAllProducts').classList.toggle('active', type === 'all');
+        document.getElementById('tabSellingProducts').classList.toggle('active', type === 'selling');
+        document.getElementById('tabStoredProducts').classList.toggle('active', type === 'stored');
+
+        document.getElementById('tabAllProducts').style.color = type === 'all' ? '#ffffff' : '#20382E';
+        document.getElementById('tabSellingProducts').style.color = type === 'selling' ? '#ffffff' : '#20382E';
+        document.getElementById('tabStoredProducts').style.color = type === 'stored' ? '#ffffff' : '#20382E';
+    }
+</script>
 </body>
 </html>

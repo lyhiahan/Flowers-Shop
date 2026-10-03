@@ -19,10 +19,9 @@
     </style>
 </head>
 <body>
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-2 p-3 sidebar">
+<div class="d-flex" style="min-height: 100vh;">
+    <!-- Sidebar -->
+    <div class="sidebar d-flex flex-column flex-shrink-0 p-3" style="width: 260px; min-height: 100vh;">
             <div class="d-flex align-items-center gap-2 mb-4 px-2">
                 <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img me-1" style="width: 36px; height: 36px; object-fit: contain; flex-shrink: 0;">
                 <div>
@@ -47,8 +46,8 @@
             </nav>
         </div>
 
-        <!-- Main Content -->
-        <div class="col-md-10 p-4">
+    <!-- Main Content -->
+    <div class="flex-grow-1 p-4" style="min-width: 0; background: var(--bg-page);">
             <!-- 1. Header: Rút gọn tiêu đề chuẩn hóa -->
             <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                 <div>
@@ -107,7 +106,6 @@
             </div>
         </div>
     </div>
-</div>
 
 <script th:inline="javascript">
     /*<![CDATA[*/

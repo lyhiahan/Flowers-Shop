@@ -262,8 +262,8 @@
                             <!-- 2. Sản phẩm: Ảnh 64x64px, Tên đậm 17px, Danh mục xám nhỏ -->
                             <td>
                                 <div class="d-flex align-items-center gap-3 py-1">
-                                    <img th:src="${p.imageUrl != null and !p.imageUrl.isEmpty() ? p.imageUrl : 'https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=150'}"
-                                         onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=150';"
+                                    <img th:src="${p.imageUrl != null and !p.imageUrl.isEmpty() ? p.imageUrl : 'https://images.unsplash.com/photo-1562690868-60bbe7293e94?w=150'}"
+                                         onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?w=150';"
                                          alt="Hoa" 
                                          class="product-thumb-img shadow-sm"
                                          style="width: 64px; height: 64px; border-radius: 8px; object-fit: cover; flex-shrink: 0; border: 1px solid #E2E7E2;">
@@ -339,6 +339,13 @@
                                             data-bs-toggle="modal" th:data-bs-target="'#productDetailModal' + ${p.id}"
                                             style="height: 34px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px; border: 1px solid #D1E5DA; background-color: #FFFFFF; color: #20382E; white-space: nowrap;">
                                         <i class="bi bi-eye"></i> Chi tiết
+                                    </button>
+
+                                    <!-- Nút Sửa (Admin) -->
+                                    <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-1"
+                                            data-bs-toggle="modal" th:data-bs-target="'#editProductModalAdmin' + ${p.id}"
+                                            style="height: 34px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px; border: 1px solid #D1E5DA; background-color: #FFFFFF; color: #20382E; white-space: nowrap;">
+                                        <i class="bi bi-pencil"></i> Sửa
                                     </button>
 
                                     <!-- NÚT CHO PHÉP (khi sản phẩm đang bị cấm HOẶC đang chờ duyệt) -->
@@ -430,8 +437,8 @@
                         <div class="row g-4">
                             <!-- Ảnh lớn -->
                             <div class="col-12 col-md-4 text-center">
-                                <img th:src="${p.imageUrl != null and !p.imageUrl.isEmpty() ? p.imageUrl : 'https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=500'}"
-                                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=500';"
+                                <img th:src="${p.imageUrl != null and !p.imageUrl.isEmpty() ? p.imageUrl : 'https://images.unsplash.com/photo-1562690868-60bbe7293e94?w=500'}"
+                                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?w=500';"
                                      class="img-fluid rounded-3 shadow-sm border" style="width: 220px; height: 220px; object-fit: cover;" alt="Hoa">
                                 <div class="mt-2">
                                     <span class="badge" style="background-color: #FEF3C7; color: #92400E; font-size: 14px; font-weight: 700; padding: 6px 12px; border: 1px solid #FDE68A;">
@@ -497,6 +504,64 @@
                         </a>
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" style="border-radius: 8px;">Đóng</button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Chỉnh Sửa Sản Phẩm Dành Cho Quản Trị Viên (Admin) -->
+        <div th:each="p : ${products}" class="modal fade text-start" th:id="'editProductModalAdmin' + ${p.id}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 14px; overflow: hidden;">
+                    <form th:action="@{'/admin/products-manage/update/' + ${p.id}}" method="post">
+                        <div class="modal-header text-white" style="background-color: #20382E; border-bottom: none; padding: 18px 24px;">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-pencil-square fs-5 text-warning"></i>
+                                <h5 class="modal-title fw-bold mb-0 text-white" style="font-size: 18px;">Chỉnh sửa sản phẩm: #<span th:text="${p.id}">1</span></h5>
+                            </div>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4" style="background-color: #FBFDFB;">
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label fw-bold text-dark small">Tên sản phẩm <span class="text-danger">*</span></label>
+                                    <input type="text" name="name" class="form-control" th:value="${p.name}" required style="border-radius: 8px;">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold text-dark small">Danh mục <span class="text-danger">*</span></label>
+                                    <select name="categoryId" class="form-select" required style="border-radius: 8px;">
+                                        <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}" th:selected="${p.category != null and p.category.id == c.id}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-bold text-dark small">Link hình ảnh (URL) <span class="text-danger">*</span></label>
+                                    <input type="url" name="imageUrl" class="form-control" th:value="${p.imageUrl}" required style="border-radius: 8px;" placeholder="https://images.unsplash.com/...">
+                                    <div class="form-text small text-muted">Có thể dán link ảnh từ Unsplash, Imgur hoặc link ảnh hợp lệ bất kỳ.</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold text-dark small">Giá bán niêm yết (VNĐ) <span class="text-danger">*</span></label>
+                                    <input type="number" name="priceBuy" step="1000" min="0" class="form-control" th:value="${p.priceBuy}" required style="border-radius: 8px;">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold text-dark small">Giá khuyến mãi (VNĐ)</label>
+                                    <input type="number" name="promotionalPrice" step="1000" min="0" class="form-control" th:value="${p.promotionalPrice}" style="border-radius: 8px;">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold text-dark small">Giá vốn nhập (VNĐ)</label>
+                                    <input type="number" name="importPrice" step="1000" min="0" class="form-control" th:value="${p.importPrice}" style="border-radius: 8px;">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-bold text-dark small">Mô tả sản phẩm</label>
+                                    <textarea name="description" class="form-control" rows="3" style="border-radius: 8px;" th:text="${p.description}"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-light p-3 d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" style="border-radius: 8px;">Hủy bỏ</button>
+                            <button type="submit" class="btn btn-primary btn-sm px-4 text-white" style="background-color: #20382E; border: none; border-radius: 8px; font-weight: 600;">
+                                <i class="bi bi-check2-circle me-1"></i> Lưu thay đổi
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

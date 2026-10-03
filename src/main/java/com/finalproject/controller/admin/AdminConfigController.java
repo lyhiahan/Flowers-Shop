@@ -220,7 +220,7 @@ public class AdminConfigController {
             new DefCat("Hộp Hoa & Giỏ Hoa Quà Tặng", "Hộp hoa mica, hộp tròn cao cấp và giỏ hoa tươi thiết kế độc đáo")
         );
         for (DefCat d : defaults) {
-            java.util.Optional<Category> existing = categoryRepository.findByName(d.name());
+            java.util.Optional<Category> existing = categoryRepository.findFirstByName(d.name());
             if (existing.isEmpty()) {
                 categoryRepository.save(Category.builder().name(d.name()).description(d.desc()).isDeleted(false).build());
             } else if (Boolean.TRUE.equals(existing.get().getIsDeleted())) {
