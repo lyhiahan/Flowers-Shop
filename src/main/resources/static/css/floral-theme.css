@@ -158,6 +158,7 @@ p, .product-desc, .product-description, .product-short-specs, .accordion-body, .
     background-color: var(--brand-green-hover) !important;
     color: #ffffff !important;
     transform: translateY(-1px);
+}
 
 /* 4. Nội dung, thông tin sản phẩm: 18 px, 400 */
 body {
@@ -390,10 +391,26 @@ input, select, textarea, .form-control, .form-select, .header-search-input, .qty
     color: var(--text-muted);
 }
 
+/* Material Symbols protection against font-family overrides */
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined' !important;
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+}
+
 /* Unified Brand Logo Styles */
 .brand-logo-img {
     height: 38px;
     width: 38px;
+    max-height: 38px;
+    max-width: 38px;
     object-fit: contain;
     display: inline-block;
     vertical-align: middle;
