@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
@@ -536,7 +536,23 @@
                                 </div>
                             </div>
 
-                            <!-- Lựa chọn 2: Chuyển khoản ngân hàng (VietQR) -->
+                            <!-- Lựa chọn 2: Ví điện tử MoMo -->
+                            <div class="payment-card-option" id="payOptionMomo" onclick="selectPayment('pay_momo')">
+                                <div class="form-check mb-0 d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <input class="form-check-input" type="radio" name="paymentMethod" id="pay_momo" value="MOMO" onchange="updatePaymentStyle()">
+                                        <label class="form-check-label fw-bold text-dark ps-2" for="pay_momo" style="cursor: pointer;">
+                                            Ví điện tử MoMo (Quét mã QR / App MoMo)
+                                        </label>
+                                    </div>
+                                    <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo" style="height: 24px; width: 24px;">
+                                </div>
+                                <div class="payment-desc d-none" id="desc_pay_momo">
+                                    Thanh toán nhanh chóng, an toàn qua ứng dụng MoMo hoặc quét mã QR MoMo Pay tức thì.
+                                </div>
+                            </div>
+
+                            <!-- Lựa chọn 3: Chuyển khoản ngân hàng (VietQR) -->
                             <div class="payment-card-option" id="payOptionBank" onclick="selectPayment('pay_bank')">
                                 <div class="form-check mb-0">
                                     <input class="form-check-input" type="radio" name="paymentMethod" id="pay_bank" value="BANK_TRANSFER" onchange="updatePaymentStyle()">
@@ -781,23 +797,25 @@
         }
 
         function updatePaymentStyle() {
-            const isCod = document.getElementById('pay_cod').checked;
+            const isCod = document.getElementById('pay_cod') && document.getElementById('pay_cod').checked;
+            const isMomo = document.getElementById('pay_momo') && document.getElementById('pay_momo').checked;
+            const isBank = document.getElementById('pay_bank') && document.getElementById('pay_bank').checked;
+
             const optCod = document.getElementById('payOptionCod');
+            const optMomo = document.getElementById('payOptionMomo');
             const optBank = document.getElementById('payOptionBank');
+
             const descCod = document.getElementById('desc_pay_cod');
+            const descMomo = document.getElementById('desc_pay_momo');
             const descBank = document.getElementById('desc_pay_bank');
 
-            if (isCod) {
-                if (optCod) optCod.classList.add('active');
-                if (optBank) optBank.classList.remove('active');
-                if (descCod) descCod.classList.remove('d-none');
-                if (descBank) descBank.classList.add('d-none');
-            } else {
-                if (optCod) optCod.classList.remove('active');
-                if (optBank) optBank.classList.add('active');
-                if (descCod) descCod.classList.add('d-none');
-                if (descBank) descBank.classList.remove('d-none');
-            }
+            if (optCod) optCod.classList.toggle('active', !!isCod);
+            if (optMomo) optMomo.classList.toggle('active', !!isMomo);
+            if (optBank) optBank.classList.toggle('active', !!isBank);
+
+            if (descCod) descCod.classList.toggle('d-none', !isCod);
+            if (descMomo) descMomo.classList.toggle('d-none', !isMomo);
+            if (descBank) descBank.classList.toggle('d-none', !isBank);
         }
 
         function updateCheckoutTotal() {

@@ -29,7 +29,7 @@ public class JwtTokenProvider {
     private final long accessTokenExpirationMs;
 
     public JwtTokenProvider(
-            @Value("${app.jwt.secret}") String secret,
+            @Value("${app.jwt.secret:defaultSecretKeyForFlowerShopApplicationMustBeAtLeast32BytesLong}") String secret,
             @Value("${app.jwt.access-token-expiration-ms:900000}") long accessTokenExpirationMs) {
 
         // Đảm bảo key đủ dài cho HS256 (≥ 32 bytes). Pad nếu cần, nhưng log cảnh báo.

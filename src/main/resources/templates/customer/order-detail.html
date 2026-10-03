@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
@@ -70,6 +70,9 @@
             <div class="d-flex align-items-center gap-2">
                 <a th:href="@{/customer/orders}" class="btn btn-sm btn-outline-danger rounded-pill px-3">
                     <i class="bi bi-clock-history me-1"></i> Đơn Hoa Của Tôi
+                </a>
+                <a th:href="@{/notifications}" class="btn btn-sm btn-outline-danger rounded-pill px-3" title="Thông báo">
+                    <i class="bi bi-bell-fill"></i>
                 </a>
                 <a th:href="@{/customer/profile}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
                     <i class="bi bi-person-circle me-1"></i> Tài Khoản
@@ -148,7 +151,18 @@
                             <div class="mb-1"><strong>Chi nhánh xử lý:</strong> <span th:text="${order.pickupStore.name}"></span></div>
                             <div class="mb-1"><strong>Địa chỉ shop:</strong> <span class="small text-muted" th:text="${order.pickupStore.address}"></span></div>
                             <div class="mb-1"><strong>Thời gian đặt:</strong> <span th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></span></div>
-                            <div class="mb-1"><strong>Phương thức thanh toán:</strong> <span class="badge bg-white text-dark border" th:text="${order.paymentMethod}"></span></div>
+                            <div class="mb-1"><strong>Phương thức thanh toán:</strong> 
+                                <span th:if="${order.paymentMethod == 'MOMO'}" class="badge rounded-pill text-white px-2 py-1 ms-1" style="background-color: #D82D8B;">
+                                    <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo" style="height: 14px; width: 14px; vertical-align: -2px;" class="me-1">
+                                    <span th:text="${order.paymentStatus == 'PAID' ? 'Ví MoMo - Đã thanh toán' : 'Ví MoMo - Chờ thanh toán'}"></span>
+                                </span>
+                                <span th:if="${order.paymentMethod == 'BANK_TRANSFER'}" class="badge bg-primary rounded-pill px-2 py-1 ms-1">
+                                    <span th:text="${order.paymentStatus == 'PAID' ? 'VietQR - Đã chuyển khoản' : 'VietQR - Chờ chuyển khoản'}"></span>
+                                </span>
+                                <span th:if="${order.paymentMethod == 'COD'}" class="badge bg-secondary rounded-pill px-2 py-1 ms-1">
+                                    <span>COD (Tiền mặt khi nhận hoa)</span>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -219,14 +233,25 @@
                         <i class="bi bi-arrow-left me-1"></i> Back to Purchase History
                     </a>
 
-                    <!-- Nút ký hiệu cấm để hủy đơn hàng (UC_011 Alternative 7a) -->
-                    <button th:if="${order.isCancellable()}" type="button" 
-                            class="btn btn-outline-danger rounded-pill px-4 fw-semibold" 
-                            title="Hủy đơn hàng"
-                            data-bs-toggle="modal" 
-                            th:data-bs-target="'#confirmCancelOrderModal_' + ${order.id}">
-                        <i class="bi bi-slash-circle me-1"></i> Hủy Đơn Hàng
-                    </button>
+                    <div class="d-flex align-items-center gap-2">
+                        <!-- Nút thanh toán MoMo nếu chưa thanh toán và đơn chưa hủy -->
+                        <a th:if="${order.paymentMethod == 'MOMO' and order.paymentStatus != 'PAID' and order.status.name() != 'CANCELLED'}"
+                           th:href="@{'/checkout/momo/' + ${order.id}}" 
+                           class="btn rounded-pill px-4 text-white fw-bold shadow-sm" 
+                           style="background-color: #D82D8B;"
+                           title="Thanh toán ngay bằng MoMo">
+                            <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo" style="height: 18px; width: 18px; vertical-align: -2px;" class="me-1"> Thanh Toán MoMo
+                        </a>
+
+                        <!-- Nút ký hiệu cấm để hủy đơn hàng (UC_011 Alternative 7a) -->
+                        <button th:if="${order.isCancellable()}" type="button" 
+                                class="btn btn-outline-danger rounded-pill px-4 fw-semibold" 
+                                title="Hủy đơn hàng"
+                                data-bs-toggle="modal" 
+                                th:data-bs-target="'#confirmCancelOrderModal_' + ${order.id}">
+                            <i class="bi bi-slash-circle me-1"></i> Hủy Đơn Hàng
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
@@ -1127,6 +1127,11 @@
                                 th:text="${cartItemCount}">0</span>
                         </a>
 
+                        <!-- Chuông thông báo -->
+                        <a sec:authorize="isAuthenticated()" th:href="@{/notifications}" class="header-cart-link" title="Thông báo hệ thống">
+                            <i class="bi bi-bell"></i>
+                        </a>
+
                         <!-- Dropdown Tài khoản Tinh Gọn -->
                         <div sec:authorize="isAuthenticated()" class="dropdown">
                             <button class="account-pill-btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
@@ -1201,6 +1206,14 @@
                                     <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/customer/orders}">
                                         <i class="bi bi-bag-check text-secondary"></i>
                                         <span>Đơn hàng của tôi</span>
+                                    </a>
+                                </li>
+
+                                <!-- Thông báo của tôi -->
+                                <li>
+                                    <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/notifications}">
+                                        <i class="bi bi-bell text-secondary"></i>
+                                        <span>Thông báo của tôi</span>
                                     </a>
                                 </li>
 

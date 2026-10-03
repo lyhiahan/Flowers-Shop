@@ -35,6 +35,7 @@ public class OrderServiceImpl implements OrderService {
     private final SimpMessagingTemplate messagingTemplate;
     private final com.finalproject.service.VoucherService voucherService;
     private final TransactionRepository transactionRepository;
+    private final com.finalproject.service.NotificationService notificationService;
 
     @Override
     @Transactional
@@ -69,7 +70,7 @@ public class OrderServiceImpl implements OrderService {
     public List<Order> checkout(String username, List<Long> selectedCartItemIds, PaymentMethod paymentMethod,
                                  String recipientName, String recipientPhone, String recipientAddress, String greetingMessage, String voucherCode,
                                  java.time.LocalDate deliveryDate, String shippingMethod, Long pickupStoreId) {
-        if (paymentMethod != PaymentMethod.COD && paymentMethod != PaymentMethod.BANK_TRANSFER) {
+        if (paymentMethod != PaymentMethod.COD && paymentMethod != PaymentMethod.BANK_TRANSFER && paymentMethod != PaymentMethod.MOMO) {
             throw new IllegalArgumentException("Phương thức thanh toán chưa được hỗ trợ.");
         }
         if (!"PICKUP".equals(shippingMethod) && !"DELIVERY".equals(shippingMethod)) {
@@ -220,6 +221,20 @@ public class OrderServiceImpl implements OrderService {
 
         createdOrders.add(savedOrder);
 
+        // Gửi thông báo đến tài khoản khách hàng và chủ chi nhánh
+        try {
+            notificationService.sendNotification(user,
+                    "🌸 Đặt hoa thành công!",
+                    "Đơn hoa #" + savedOrder.getId() + " trị giá " + String.format("%,d", finalAmount.longValue()) + " đ đã được tạo thành công. Tiệm hoa đang tiến hành chuẩn bị.",
+                    "ORDER_CREATED", savedOrder.getId());
+            notificationService.sendNotificationToStoreManagers(assignedStore.getId(),
+                    "🔔 Đơn hoa mới #" + savedOrder.getId(),
+                    "Có đơn hoa mới từ khách " + finalRecipientName + " (" + finalRecipientPhone + "). Tổng: " + String.format("%,d", finalAmount.longValue()) + " đ.",
+                    "ORDER_NEW", savedOrder.getId());
+        } catch (Exception ex) {
+            org.slf4j.LoggerFactory.getLogger(OrderServiceImpl.class).warn("Không gửi được notification: {}", ex.getMessage());
+        }
+
         org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
                 new org.springframework.transaction.support.TransactionSynchronization() {
                     @Override
@@ -346,6 +361,20 @@ public class OrderServiceImpl implements OrderService {
             order.setStatus(OrderStatus.PICKED_UP);
         }
         orderRepository.save(order);
+
+        // Gửi thông báo cho tài xế và khách hàng
+        try {
+            notificationService.sendNotification(shipper,
+                    "🛵 Nhận đơn giao hoa #" + order.getId(),
+                    "Bạn được phân công giao đơn hoa #" + order.getId() + " đến: " + order.getRecipientAddress() + " (Khách: " + order.getRecipientName() + " - " + order.getRecipientPhone() + ").",
+                    "ORDER_ASSIGNED", order.getId());
+            notificationService.sendNotification(order.getUser(),
+                    "🚚 Đơn hoa #" + order.getId() + " đã có tài xế",
+                    "Đơn hoa của bạn đã được bàn giao cho tài xế " + shipper.getFullName() + " (" + shipper.getPhone() + ") để đi giao.",
+                    "ORDER_ASSIGNED", order.getId());
+        } catch (Exception ex) {
+            org.slf4j.LoggerFactory.getLogger(OrderServiceImpl.class).warn("Không gửi được notification gán shipper: {}", ex.getMessage());
+        }
     }
 
     @Override

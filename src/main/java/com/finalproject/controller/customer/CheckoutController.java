@@ -33,6 +33,7 @@ public class CheckoutController {
     private final com.finalproject.repository.DeliveryRepository deliveryRepository;
     private final com.finalproject.service.UserService userService;
     private final com.finalproject.service.VoucherService voucherService;
+    private final com.finalproject.service.MomoService momoService;
 
     @GetMapping
     public String showCheckoutPage(
@@ -104,10 +105,16 @@ public class CheckoutController {
             @RequestParam(value = "deliveryDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate deliveryDate,
             @RequestParam(value = "shippingMethod", required = false, defaultValue = "DELIVERY") String shippingMethod,
             @RequestParam(value = "pickupStoreId", required = false) Long pickupStoreId,
+            jakarta.servlet.http.HttpServletRequest request,
             RedirectAttributes redirectAttributes) {
 
         try {
-            orderService.checkout(principal.getName(), selectedItemIds, paymentMethod, recipientName, recipientPhone, recipientAddress, greetingMessage, voucherCode, deliveryDate, shippingMethod, pickupStoreId);
+            List<com.finalproject.entity.Order> createdOrders = orderService.checkout(principal.getName(), selectedItemIds, paymentMethod, recipientName, recipientPhone, recipientAddress, greetingMessage, voucherCode, deliveryDate, shippingMethod, pickupStoreId);
+            if (paymentMethod == PaymentMethod.MOMO && createdOrders != null && !createdOrders.isEmpty()) {
+                com.finalproject.entity.Order firstOrder = createdOrders.get(0);
+                String momoUrl = momoService.createPaymentUrl(firstOrder, request);
+                return "redirect:" + momoUrl;
+            }
             redirectAttributes.addFlashAttribute("successMessage", "🌸 Đặt hoa thành công! Đơn hàng của bạn đã được chuyển đến chi nhánh cắm hoa để chuẩn bị.");
             return "redirect:/customer/orders";
         } catch (Exception ex) {

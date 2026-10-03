@@ -21,6 +21,7 @@ public class OrderWorkflowService {
     private final TransactionRepository transactions;
     private final StoreAccessService access;
     private final jakarta.persistence.EntityManager entityManager;
+    private final NotificationService notificationService;
 
     public Order lockedOrder(Long id) {
         return orders.findLockedById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng."));
@@ -66,7 +67,9 @@ public class OrderWorkflowService {
             creditIncome(order);
         }
         order.setStatus(next);
-        return orders.save(order);
+        Order saved = orders.save(order);
+        notifyOrderStatusChange(saved, previous, next);
+        return saved;
     }
 
     @Transactional
@@ -82,17 +85,32 @@ public class OrderWorkflowService {
         }
         markPaid(order);
         orders.save(order);
+        try {
+            notificationService.sendNotification(order.getUser(),
+                    "💳 Đã nhận tiền chuyển khoản!",
+                    "Chi nhánh đã xác nhận nhận đủ tiền chuyển khoản cho đơn hoa #" + order.getId() + ".",
+                    "PAYMENT_SUCCESS", order.getId());
+        } catch (Exception ignored) {}
     }
 
     private void markPaid(Order order) {
         if ("PAID".equals(order.getPaymentStatus())) return;
         var records = payments.findByOrderId(order.getId());
-        if (records.size() != 1 || records.get(0).getStatus() != PaymentStatus.PENDING) {
-            throw new IllegalStateException("Bản ghi thanh toán không hợp lệ, cần đối soát.");
+        Payment payment;
+        if (!records.isEmpty()) {
+            payment = records.get(0);
+            payment.setStatus(PaymentStatus.SUCCESS);
+            payment.setPaidAt(LocalDateTime.now());
+        } else {
+            payment = Payment.builder()
+                    .order(order)
+                    .method("MOMO".equalsIgnoreCase(order.getPaymentMethod()) ? PaymentMethod.MOMO : 
+                            ("BANK_TRANSFER".equalsIgnoreCase(order.getPaymentMethod()) ? PaymentMethod.BANK_TRANSFER : PaymentMethod.COD))
+                    .amount(order.getTotalAmount())
+                    .status(PaymentStatus.SUCCESS)
+                    .paidAt(LocalDateTime.now())
+                    .build();
         }
-        Payment payment = records.get(0);
-        payment.setStatus(PaymentStatus.SUCCESS);
-        payment.setPaidAt(LocalDateTime.now());
         payments.save(payment);
         order.setPaymentStatus("PAID");
     }
@@ -199,5 +217,74 @@ public class OrderWorkflowService {
             payments.save(payment);
         });
         order.setPaymentStatus("REFUNDED");
+    }
+
+    private void notifyOrderStatusChange(Order order, OrderStatus prev, OrderStatus next) {
+        if (order == null || order.getUser() == null || next == null) return;
+        try {
+            Long orderId = order.getId();
+            switch (next) {
+                case CONFIRMED -> {
+                    notificationService.sendNotification(order.getUser(),
+                            "✅ Đơn hoa #" + orderId + " đã được xác nhận",
+                            "Chi nhánh " + (order.getPickupStore() != null ? order.getPickupStore().getName() : "") + " đã tiếp nhận đơn của bạn.",
+                            "ORDER_CONFIRMED", orderId);
+                }
+                case PREPARING -> {
+                    notificationService.sendNotification(order.getUser(),
+                            "🌺 Đang cắm hoa đơn #" + orderId,
+                            "Nghệ nhân tiệm hoa đang tuyển chọn hoa tươi mới và tiến hành cắm hoa cho bạn.",
+                            "ORDER_PREPARING", orderId);
+                }
+                case DELIVERING -> {
+                    String shipperInfo = order.getShipper() != null ? (" cùng tài xế " + order.getShipper().getFullName()) : "";
+                    notificationService.sendNotification(order.getUser(),
+                            "🚀 Đơn hoa #" + orderId + " đang được giao",
+                            "Đơn hoa của bạn đang trên đường vận chuyển" + shipperInfo + ". Vui lòng để ý điện thoại nhé!",
+                            "ORDER_DELIVERING", orderId);
+                }
+                case DELIVERED, COMPLETED -> {
+                    notificationService.sendNotification(order.getUser(),
+                            "🎉 Giao hoa thành công đơn #" + orderId,
+                            "Đơn hoa đã được giao đến nơi! Cảm ơn bạn đã lựa chọn tiệm hoa. Hãy để lại đánh giá cảm nhận nhé.",
+                            "ORDER_DELIVERED", orderId);
+                    if (order.getPickupStore() != null) {
+                        notificationService.sendNotificationToStoreManagers(order.getPickupStore().getId(),
+                                "✨ Đơn hoa #" + orderId + " đã hoàn tất",
+                                "Đơn hoa #" + orderId + " đã giao thành công tới người nhận.",
+                                "ORDER_COMPLETED", orderId);
+                    }
+                }
+                case CANCELLED -> {
+                    notificationService.sendNotification(order.getUser(),
+                            "❌ Đơn hoa #" + orderId + " đã bị hủy",
+                            "Đơn hàng #" + orderId + " đã được hủy thành công.",
+                            "ORDER_CANCELLED", orderId);
+                    if (order.getPickupStore() != null) {
+                        notificationService.sendNotificationToStoreManagers(order.getPickupStore().getId(),
+                                "⚠️ Đơn hoa #" + orderId + " đã bị hủy",
+                                "Đơn hoa #" + orderId + " đã bị hủy bởi người dùng hoặc hệ thống.",
+                                "ORDER_CANCELLED", orderId);
+                    }
+                }
+                case REFUND_REQUESTED -> {
+                    if (order.getPickupStore() != null) {
+                        notificationService.sendNotificationToStoreManagers(order.getPickupStore().getId(),
+                                "📩 Yêu cầu hoàn tiền đơn #" + orderId,
+                                "Khách hàng " + order.getUser().getFullName() + " vừa gửi yêu cầu Trả hàng / Hoàn tiền cho đơn #" + orderId + ".",
+                                "REFUND_REQUESTED", orderId);
+                    }
+                }
+                case REFUNDED -> {
+                    notificationService.sendNotification(order.getUser(),
+                            "💰 Hoàn tiền thành công đơn #" + orderId,
+                            "Yêu cầu hoàn tiền cho đơn hoa #" + orderId + " đã được cửa hàng xử lý hoàn tất.",
+                            "REFUND_COMPLETED", orderId);
+                }
+                default -> {}
+            }
+        } catch (Exception ex) {
+            org.slf4j.LoggerFactory.getLogger(OrderWorkflowService.class).warn("Không gửi được notification trạng thái: {}", ex.getMessage());
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
@@ -37,6 +37,9 @@
                 </a>
                 <a th:href="@{/customer/orders}" class="btn btn-sm btn-danger rounded-pill px-3 active">
                     <i class="bi bi-clock-history me-1"></i> Đơn Hoa Của Tôi
+                </a>
+                <a th:href="@{/notifications}" class="btn btn-sm btn-outline-danger rounded-pill px-3" title="Thông báo đơn hàng">
+                    <i class="bi bi-bell-fill"></i>
                 </a>
                 <a th:href="@{/}" class="btn btn-sm btn-outline-dark rounded-pill px-3">
                     <i class="bi bi-shop me-1"></i> Cửa Hàng
@@ -94,6 +97,17 @@
                         <span class="badge bg-danger ms-2">HOA TƯƠI</span>
                         <span class="text-muted small ms-3">
                             <i class="bi bi-calendar-check me-1"></i><span th:text="${#temporals.format(o.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                        </span>
+                        <!-- MoMo / Payment Method Badge -->
+                        <span th:if="${o.paymentMethod == 'MOMO'}" class="badge rounded-pill text-white ms-2" style="background-color: #D82D8B;">
+                            <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo" style="height: 12px; width: 12px; vertical-align: -1px;" class="me-1">
+                            <span th:text="${o.paymentStatus == 'PAID' ? 'MoMo: Đã thanh toán' : 'MoMo: Chờ thanh toán'}"></span>
+                        </span>
+                        <span th:if="${o.paymentMethod == 'BANK_TRANSFER'}" class="badge bg-primary rounded-pill text-white ms-2">
+                            <span th:text="${o.paymentStatus == 'PAID' ? 'VietQR: Đã thanh toán' : 'VietQR: Chờ chuyển khoản'}"></span>
+                        </span>
+                        <span th:if="${o.paymentMethod == 'COD'}" class="badge bg-secondary rounded-pill text-white ms-2">
+                            <span>COD: Tiền mặt</span>
                         </span>
                     </div>
                     <div>
@@ -204,6 +218,15 @@
                             </div>
                         </div>
                         <div class="d-flex align-items-center gap-2">
+                            <!-- Nút thanh toán MoMo nếu chưa thanh toán và đơn chưa hủy -->
+                            <a th:if="${o.paymentMethod == 'MOMO' and o.paymentStatus != 'PAID' and o.status.name() != 'CANCELLED'}"
+                               th:href="@{'/checkout/momo/' + ${o.id}}" 
+                               class="btn btn-sm rounded-pill px-3 text-white fw-bold shadow-sm" 
+                               style="background-color: #D82D8B;"
+                               title="Thanh toán ngay bằng MoMo">
+                                <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo" style="height: 16px; width: 16px; vertical-align: -2px;" class="me-1"> Thanh Toán MoMo
+                            </a>
+
                             <!-- Nút ký hiệu chữ i để xem chi tiết (UC_011 Step 7) -->
                             <a th:href="@{'/customer/orders/detail/' + ${o.id}}" class="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-sm" title="Xem chi tiết đơn hàng">
                                 <i class="bi bi-info-circle me-1"></i> Chi Tiết
