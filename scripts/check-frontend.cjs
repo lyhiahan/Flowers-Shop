@@ -26,7 +26,7 @@ for (const file of fs.readdirSync(root, { recursive: true }).filter(f => f.endsW
         }
         if (depth > 0) fail(file, 'Unclosed ' + tag + ': ' + depth);
     }
-    if (/<head\b/.test(source) && !source.includes('fragments/floral :: head') && !source.includes('fragments/store-ui :: head') && !source.includes('fragments/manager-layout :: assets') && !/name="viewport"/.test(source)) fail(file, 'Missing viewport');
+    if (/<head\b/.test(source) && !source.includes('fragments/floral :: head') && !source.includes('fragments/store-ui :: head') && !/name="viewport"/.test(source)) fail(file, 'Missing viewport');
 }
 for (const file of fs.readdirSync('src/main/resources/static/js').filter(f => f.endsWith('.js'))) {
     try { new vm.Script(fs.readFileSync('src/main/resources/static/js/' + file, 'utf8'), { filename: file }); }

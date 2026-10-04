@@ -68,43 +68,6 @@ class StoreUseCaseAuditTests {
                 .isActive(true).isSelling(selling).build());
     }
 
-    @Test void everyManagerScreenRendersSharedNavigationAndActiveSection() throws Exception {
-        Product flower = product("Layout flower", true);
-        Order order = orders.save(Order.builder().user(owner).pickupStore(store)
-                .orderType(com.finalproject.enums.OrderType.BUY).status(com.finalproject.enums.OrderStatus.PENDING)
-                .totalAmount(BigDecimal.TEN).createdAt(java.time.LocalDateTime.now()).build());
-        var routes = new java.util.LinkedHashMap<String, String>();
-        routes.put("/manager/dashboard", "sidebarDashboard");
-        routes.put("/manager/analytics", "sidebarAnalytics");
-        routes.put("/manager/orders", "sidebarOrders");
-        routes.put("/manager/orders/" + order.getId(), "sidebarOrders");
-        routes.put("/manager/products", "sidebarProducts");
-        routes.put("/manager/products/create", "sidebarProducts");
-        routes.put("/manager/products/edit/" + flower.getId(), "sidebarProducts");
-        routes.put("/manager/staff", "sidebarStaffs");
-        routes.put("/manager/wallet", "sidebarGdCoins");
-        routes.put("/manager/vouchers", "sidebarVouchers");
-        routes.put("/manager/profile", "sidebarProfile");
-        routes.put("/manager/stores", "sidebarStores");
-        routes.put("/manager/stores/create", "sidebarStores");
-        routes.put("/manager/stores/edit/" + store.getId(), "sidebarStores");
-        for (var route : routes.entrySet()) {
-            String html = mvc.perform(get(route.getKey()).with(user(owner.getUsername()).roles("VENDOR")))
-                    .andExpect(status().isOk()).andExpect(model().attribute("managerStore", store))
-                    .andReturn().getResponse().getContentAsString();
-            assertThat(html).as(route.getKey()).contains("/css/manager-layout.css", "/js/manager-layout.js", "Audit flower shop");
-            for (String id : List.of("managerSidebar", "managerMain", "signOutModal", "managerMenuToggle",
-                    "sidebarDashboard", "sidebarOrders", "sidebarProducts", "sidebarStaffs", "sidebarGdCoins",
-                    "sidebarVouchers", "sidebarAnalytics", "sidebarStores", "sidebarProfile", "sidebarNotifications")) {
-                assertThat(html.split("id=\"" + id + "\"", -1).length - 1).as(route.getKey() + " " + id).isEqualTo(1);
-            }
-            assertThat(html.split("aria-current=\"page\"", -1).length - 1).as(route.getKey() + " active link").isEqualTo(1);
-            int linkStart = html.indexOf("id=\"" + route.getValue() + "\"");
-            assertThat(html.substring(linkStart, html.indexOf('>', linkStart))).contains("aria-current=\"page\"");
-            assertThat(html).contains("action=\"/logout\"", "name=\"_csrf\"");
-        }
-    }
-
     @Test void uc017CreatesStoreWithSelectedCommission() throws Exception {
         mvc.perform(post("/manager/stores/create").with(user(owner.getUsername()).roles("VENDOR")).with(csrf())
                 .param("name", "New audit shop").param("phone", "0901234567").param("address", "123 Test street")

@@ -1,29 +1,59 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-<title>Khuyến Mãi & Voucher - Chuỗi Cửa Hàng Hoa Tươi</title>
-<th:block th:replace="~{fragments/manager-layout :: assets}"></th:block>
-<style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>Khuyến Mãi & Voucher - Chuỗi Cửa Hàng Hoa Tươi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
+    <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
+    <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-page); color: var(--text-main); }
         .font-serif { font-family: 'Playfair Display', Georgia, serif; }
-
-
-
-
+        .sidebar { background: #1C2D24; min-height: 100vh; color: #E3ECE7; }
+        .sidebar a { color: #A9BCB3; text-decoration: none; padding: 10px 16px; border-radius: 10px; display: flex; align-items: center; gap: 10px; font-weight: 500; transition: all 0.2s ease; }
+        .sidebar a:hover { background: rgba(255, 255, 255, 0.08); color: #ffffff; }
+        .sidebar a.active { background: var(--brand-green); color: #ffffff; font-weight: 600; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
     </style>
-<link rel="stylesheet" th:href="@{/css/manager-layout.css}">
 </head>
-<body class="manager-page">
-<header th:replace="~{fragments/manager-layout :: mobileHeader}"></header>
-<div class="manager-layout">
-    <aside th:replace="~{fragments/manager-layout :: sidebar('vouchers')}"></aside>
-    <main id="managerMain" class="manager-main">
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 p-3 sidebar">
+            <div class="d-flex align-items-center gap-2 mb-4 px-2">
+                <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img me-1" style="width: 36px; height: 36px; object-fit: contain; flex-shrink: 0;">
+                <div>
+                    <h6 class="font-serif fw-bold text-white mb-0">TIỆM HOA TƯƠI</h6>
+                    <small class="text-secondary" th:text="${store != null ? store.name : 'Chi nhánh'}"></small>
+                </div>
+            </div>
+            <nav class="d-flex flex-column gap-1">
+                <a th:href="@{/manager/dashboard}"><i class="bi bi-speedometer2"></i> Tổng Quan Chi Nhánh</a>
+                <a th:href="@{/manager/orders}" id="sidebarOrders"><i class="bi bi-bag-check"></i> Quản Lý Đơn Hàng</a>
+                <a th:href="@{/manager/products}"><i class="bi bi-flower1"></i> Kho Mẫu Hoa</a>
+                <a th:href="@{/manager/staff}" id="sidebarStaffs"><i class="bi bi-people"></i> Quản Lý Nhân Viên</a>
+                <a th:href="@{/manager/wallet}" id="sidebarGdCoins"><i class="bi bi-coin"></i> Ví Cửa Hàng</a>
+                <a th:href="@{/manager/vouchers}" class="active"><i class="bi bi-ticket-perforated"></i> Chương Trình Khuyến Mãi</a>
+                <a th:href="@{/manager/analytics}"><i class="bi bi-graph-up-arrow"></i> Báo Cáo Doanh Thu</a>
+                <a th:href="@{/manager/stores}"><i class="bi bi-shop"></i> Danh Sách Cửa Hàng</a>
+                <!-- BƯỚC 6 THEO UC_019: Chọn Profile trên thanh sidebar -->
+                <a th:href="@{/manager/profile}" id="sidebarProfile"><i class="bi bi-person-badge"></i> Thông Tin Cửa Hàng</a>
+                <hr class="border-secondary my-2">
+                <a th:href="@{/}" target="_blank"><i class="bi bi-house-door"></i> Xem Trang Bán Hàng</a>
+                <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit" class="text-danger" style="background:none;border:none;padding:10px 16px;width:100%;text-align:left;display:flex;align-items:center;gap:10px;font-weight:600;"><i class="bi bi-box-arrow-right"></i> Đăng Xuất</button></form>
+            </nav>
+        </div>
 
+        <!-- Main Content -->
+        <div class="col-md-10 p-4">
             <!-- 1. Header: Rút gọn tiêu đề chuẩn hóa -->
             <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                 <div>
                     <div class="d-flex align-items-center gap-3">
-                        <h1 class="admin-page-title mb-0">Khuyến mãi cửa hàng</h1>
+                        <h1 class="admin-page-title mb-0" style="font-size: 28px !important; font-weight: 800; color: #20382E;">Khuyến mãi cửa hàng</h1>
                         <span class="badge rounded-pill" style="background-color: #E5EEE8; color: #20382E; border: 1px solid #D1E5DA; font-size: 14.5px; font-weight: 700; padding: 6px 14px;">
                             <span th:text="${#lists.size(vouchers)}">0</span> mã
                         </span>
@@ -53,13 +83,13 @@
                         <table class="table table-manager-vouchers align-middle mb-0">
                             <thead style="background-color: #E5EEE8 !important;">
                             <tr style="background-color: #E5EEE8 !important;">
-                                <th class="ps-4 fw-bold" style="white-space: nowrap !important; min-width: 140px;">Mã voucher</th>
-                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 200px;">Tên chương trình</th>
-                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 150px;">Mức giảm</th>
-                                <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 130px;">Đơn tối thiểu</th>
-                                <th class="text-center fw-bold" style="white-space: nowrap !important; min-width: 120px;">Đã dùng</th>
-                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 170px;">Hiệu lực</th>
-                                <th class="text-end pe-4 fw-bold" style="white-space: nowrap !important; min-width: 120px;">Thao tác</th>
+                                <th class="ps-4 fw-bold" style="white-space: nowrap !important; min-width: 140px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Mã voucher</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 200px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Tên chương trình</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 150px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Mức giảm</th>
+                                <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 130px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Đơn tối thiểu</th>
+                                <th class="text-center fw-bold" style="white-space: nowrap !important; min-width: 120px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Đã dùng</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 170px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Hiệu lực</th>
+                                <th class="text-end pe-4 fw-bold" style="white-space: nowrap !important; min-width: 120px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Thao tác</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -104,13 +134,13 @@
 
                                 <!-- 7. Trạng thái -->
                                 <td class="text-center" style="white-space: nowrap;">
-                                    <span th:if="${v.isActive != null and v.isActive}"
-                                          class="badge rounded-pill px-3 py-1"
+                                    <span th:if="${v.isActive != null and v.isActive}" 
+                                          class="badge rounded-pill px-3 py-1" 
                                           style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; font-size: 12px; font-weight: 700;">
                                         Đang bật
                                     </span>
-                                    <span th:if="${v.isActive == null or !v.isActive}"
-                                          class="badge rounded-pill px-3 py-1"
+                                    <span th:if="${v.isActive == null or !v.isActive}" 
+                                          class="badge rounded-pill px-3 py-1" 
                                           style="background-color: #F1F5F2; color: #708076; border: 1px solid #D5DDD7; font-size: 12px; font-weight: 700;">
                                         Đã tắt
                                     </span>
@@ -152,9 +182,11 @@
                     </div>
                 </div>
             </div>
-
-    </main>
+        </div>
+    </div>
 </div>
+
+<!-- Modal Tạo Voucher Mới Cho Chi Nhánh -->
 <div class="modal fade" id="addVoucherModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content rounded-4 border-0 shadow">
@@ -176,7 +208,7 @@
                     <div class="row g-3">
                         <div class="col-md-5">
                             <label class="form-label fw-bold text-dark small mb-1">Mã khuyến mãi <span class="text-danger">*</span></label>
-                            <input type="text" name="code" id="add_code" class="form-control text-uppercase fw-bold"
+                            <input type="text" name="code" id="add_code" class="form-control text-uppercase fw-bold" 
                                    placeholder="VD: SHOP2026, FLOWERSHOP" required minlength="3" maxlength="30"
                                    pattern="^[A-Za-z0-9_-]{3,30}$"
                                    oninput="this.value = this.value.toUpperCase().replace(/\s+/g, '');"
@@ -186,14 +218,14 @@
 
                         <div class="col-md-7">
                             <label class="form-label fw-bold text-dark small mb-1">Tên chương trình ưu đãi <span class="text-danger">*</span></label>
-                            <input type="text" name="name" id="add_name" class="form-control"
+                            <input type="text" name="name" id="add_name" class="form-control" 
                                    placeholder="VD: Tri Ân Khách Quen - Giảm 10% Bó Hoa Tươi" required minlength="3" maxlength="150"
                                    style="border-radius: 8px;">
                         </div>
 
                         <div class="col-md-4">
                             <label class="form-label fw-bold text-dark small mb-1">Loại hình giảm giá <span class="text-danger">*</span></label>
-                            <select name="discountType" id="add_discountType" class="form-select fw-semibold"
+                            <select name="discountType" id="add_discountType" class="form-select fw-semibold" 
                                     onchange="handleDiscountTypeChange('add')" required style="border-radius: 8px;">
                                 <option value="PERCENT">Giảm theo tỷ lệ %</option>
                                 <option value="FIXED_AMOUNT">Giảm số tiền cố định (₫)</option>
@@ -203,41 +235,41 @@
 
                         <div class="col-md-4">
                             <label class="form-label fw-bold text-dark small mb-1">
-                                Mức giảm <span class="text-danger">*</span>
+                                Mức giảm <span class="text-danger">*</span> 
                                 <span id="add_discountValueLabel" class="text-primary small">(%)</span>
                             </label>
-                            <input type="number" name="discountValue" id="add_discountValue" class="form-control fw-bold"
+                            <input type="number" name="discountValue" id="add_discountValue" class="form-control fw-bold" 
                                    placeholder="VD: 10" required min="1" max="100" step="1" style="border-radius: 8px;">
                             <div id="add_discountValueHint" class="form-text small" style="font-size: 12px;">Từ 1% đến 100%.</div>
                         </div>
 
                         <div class="col-md-4" id="add_maxDiscountAmountGroup">
                             <label class="form-label fw-bold text-dark small mb-1">Mức giảm tối đa <span class="text-muted fw-normal">(Tùy chọn)</span></label>
-                            <input type="number" name="maxDiscountAmount" id="add_maxDiscountAmount" class="form-control"
+                            <input type="number" name="maxDiscountAmount" id="add_maxDiscountAmount" class="form-control" 
                                    placeholder="VD: 50000 (₫)" min="0" step="1000" style="border-radius: 8px;">
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold text-dark small mb-1">Đơn tối thiểu (₫) <span class="text-danger">*</span></label>
-                            <input type="number" name="minOrderValue" id="add_minOrderValue" class="form-control"
+                            <input type="number" name="minOrderValue" id="add_minOrderValue" class="form-control" 
                                    value="0" min="0" step="1000" required style="border-radius: 8px;">
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold text-dark small mb-1">Số lượng phát hành <span class="text-danger">*</span></label>
-                            <input type="number" name="quantity" id="add_quantity" class="form-control"
+                            <input type="number" name="quantity" id="add_quantity" class="form-control" 
                                    value="100" min="1" step="1" required style="border-radius: 8px;">
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold text-dark small mb-1">Ngày bắt đầu <span class="text-danger">*</span></label>
-                            <input type="date" name="startDate" id="add_startDate" class="form-control"
+                            <input type="date" name="startDate" id="add_startDate" class="form-control" 
                                    required onchange="syncDateConstraints('add')" style="border-radius: 8px;">
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold text-dark small mb-1">Ngày kết thúc <span class="text-danger">*</span></label>
-                            <input type="date" name="endDate" id="add_endDate" class="form-control"
+                            <input type="date" name="endDate" id="add_endDate" class="form-control" 
                                    required style="border-radius: 8px;">
                         </div>
                     </div>
@@ -252,11 +284,13 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Sửa Voucher Cho Từng Mục Trong Danh Sách -->
 <div th:each="v : ${vouchers}" class="modal fade" th:id="'editVoucherModal' + ${v.id}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content rounded-4 border-0 shadow">
-            <form th:action="@{'/manager/vouchers/update/' + ${v.id}}" method="post"
-                  th:id="'editVoucherForm' + ${v.id}"
+            <form th:action="@{'/manager/vouchers/update/' + ${v.id}}" method="post" 
+                  th:id="'editVoucherForm' + ${v.id}" 
                   th:onsubmit="'return validateVoucherForm(\'edit_' + ${v.id} + '\');'">
                 <div class="modal-header border-bottom px-4 pt-4 pb-3" style="background-color: #F8FAF9; border-color: #E2E7E2 !important;">
                     <div>
@@ -275,7 +309,7 @@
                     <div class="row g-3">
                         <div class="col-md-8">
                             <label class="form-label fw-bold text-dark small mb-1">Tên chương trình ưu đãi <span class="text-danger">*</span></label>
-                            <input type="text" name="name" th:id="'edit_' + ${v.id} + '_name'" class="form-control"
+                            <input type="text" name="name" th:id="'edit_' + ${v.id} + '_name'" class="form-control" 
                                    th:value="${v.name}" required minlength="3" maxlength="150" style="border-radius: 8px;">
                         </div>
 
@@ -289,7 +323,7 @@
 
                         <div class="col-md-4">
                             <label class="form-label fw-bold text-dark small mb-1">Loại hình giảm giá <span class="text-danger">*</span></label>
-                            <select name="discountType" th:id="'edit_' + ${v.id} + '_discountType'" class="form-select fw-semibold"
+                            <select name="discountType" th:id="'edit_' + ${v.id} + '_discountType'" class="form-select fw-semibold" 
                                     th:onchange="'handleDiscountTypeChange(\'edit_' + ${v.id} + '\')'" required style="border-radius: 8px;">
                                 <option value="PERCENT" th:selected="${v.discountType == 'PERCENT'}">Giảm theo tỷ lệ %</option>
                                 <option value="FIXED_AMOUNT" th:selected="${v.discountType == 'FIXED_AMOUNT'}">Giảm số tiền cố định (₫)</option>
@@ -299,24 +333,24 @@
 
                         <div class="col-md-4">
                             <label class="form-label fw-bold text-dark small mb-1">
-                                Mức giảm <span class="text-danger">*</span>
+                                Mức giảm <span class="text-danger">*</span> 
                                 <span th:id="'edit_' + ${v.id} + '_discountValueLabel'" class="text-primary small"
                                       th:text="${v.discountType == 'PERCENT' ? '(%)' : '(₫)'}">(%)</span>
                             </label>
-                            <input type="number" name="discountValue" th:id="'edit_' + ${v.id} + '_discountValue'" class="form-control fw-bold"
+                            <input type="number" name="discountValue" th:id="'edit_' + ${v.id} + '_discountValue'" class="form-control fw-bold" 
                                    th:value="${v.discountValue}" required min="1" step="1" style="border-radius: 8px;">
                         </div>
 
                         <div class="col-md-4" th:id="'edit_' + ${v.id} + '_maxDiscountAmountGroup'"
                              th:style="${v.discountType == 'PERCENT' ? 'display: block;' : 'display: none;'}">
                             <label class="form-label fw-bold text-dark small mb-1">Mức giảm tối đa <span class="text-muted fw-normal">(Tùy chọn)</span></label>
-                            <input type="number" name="maxDiscountAmount" th:id="'edit_' + ${v.id} + '_maxDiscountAmount'" class="form-control"
+                            <input type="number" name="maxDiscountAmount" th:id="'edit_' + ${v.id} + '_maxDiscountAmount'" class="form-control" 
                                    th:value="${v.maxDiscountAmount}" min="0" step="1000" style="border-radius: 8px;">
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold text-dark small mb-1">Đơn tối thiểu (₫) <span class="text-danger">*</span></label>
-                            <input type="number" name="minOrderValue" th:id="'edit_' + ${v.id} + '_minOrderValue'" class="form-control"
+                            <input type="number" name="minOrderValue" th:id="'edit_' + ${v.id} + '_minOrderValue'" class="form-control" 
                                    th:value="${v.minOrderValue != null ? v.minOrderValue : 0}" min="0" step="1000" required style="border-radius: 8px;">
                         </div>
 
@@ -325,20 +359,20 @@
                                 Số lượng phát hành <span class="text-danger">*</span>
                                 <span class="text-muted small" th:text="'(Đã dùng: ' + ${v.usedCount} + ')'"></span>
                             </label>
-                            <input type="number" name="quantity" th:id="'edit_' + ${v.id} + '_quantity'" class="form-control"
+                            <input type="number" name="quantity" th:id="'edit_' + ${v.id} + '_quantity'" class="form-control" 
                                    th:value="${v.quantity}" th:min="${v.usedCount}" step="1" required style="border-radius: 8px;">
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold text-dark small mb-1">Ngày bắt đầu <span class="text-danger">*</span></label>
-                            <input type="date" name="startDate" th:id="'edit_' + ${v.id} + '_startDate'" class="form-control"
+                            <input type="date" name="startDate" th:id="'edit_' + ${v.id} + '_startDate'" class="form-control" 
                                    th:value="${v.startDate}" required
                                    th:onchange="'syncDateConstraints(\'edit_' + ${v.id} + '\')'" style="border-radius: 8px;">
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold text-dark small mb-1">Ngày kết thúc <span class="text-danger">*</span></label>
-                            <input type="date" name="endDate" th:id="'edit_' + ${v.id} + '_endDate'" class="form-control"
+                            <input type="date" name="endDate" th:id="'edit_' + ${v.id} + '_endDate'" class="form-control" 
                                    th:value="${v.endDate}" required style="border-radius: 8px;">
                         </div>
                     </div>
@@ -353,7 +387,9 @@
         </div>
     </div>
 </div>
-<th:block th:replace="~{fragments/manager-layout :: footer}"></th:block>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const today = new Date().toISOString().split('T')[0];

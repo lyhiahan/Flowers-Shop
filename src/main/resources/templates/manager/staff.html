@@ -1,9 +1,21 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-<title th:text="${store != null ? store.name + ' - Quản Lý Nhân Viên' : 'Quản Lý Nhân Viên'}">Quản Lý Nhân Viên - Quản Lý Tiệm Hoa</title>
-<th:block th:replace="~{fragments/manager-layout :: assets}"></th:block>
-<style>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${store != null ? store.name + ' - Quản Lý Nhân Viên' : 'Quản Lý Nhân Viên'}">Quản Lý Nhân Viên - Quản Lý Tiệm Hoa</title>
+    <!-- Google Fonts: Nunito -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5.3 & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
+    <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
+
+    <style>
         :root {
             --bg-page: #FFF0F3;
             --surface-card: #FFFFFF;
@@ -28,13 +40,37 @@
         }
 
         /* Sidebar Styling */
+        .sidebar {
+            background: #1C2D24;
+            min-height: 100vh;
+            color: #E3ECE7;
+            box-shadow: 2px 0 16px rgba(28, 45, 36, 0.08);
+        }
 
+        .sidebar a {
+            color: #A9BCB3;
+            text-decoration: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.2s ease;
+        }
 
+        .sidebar a:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #FFFFFF;
+        }
 
-
-
-
-
+        .sidebar a.active {
+            background: var(--brand-green);
+            color: #FFFFFF;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
 
         /* Custom Tabs */
         .nav-tabs-custom {
@@ -98,14 +134,62 @@
             background: #F4F8F5;
         }
     </style>
-<link rel="stylesheet" th:href="@{/css/manager-layout.css}">
 </head>
-<body class="manager-page">
-<header th:replace="~{fragments/manager-layout :: mobileHeader}"></header>
-<div class="manager-layout">
-    <aside th:replace="~{fragments/manager-layout :: sidebar('staff')}"></aside>
-    <main id="managerMain" class="manager-main">
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation: Bước 6 theo UC_020: Chọn Staffs trên thanh sidebar -->
+        <div class="col-md-2 p-3 sidebar">
+            <div class="d-flex align-items-center gap-2 mb-4 px-2">
+                <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img me-1" style="height: 38px;">
+                <div>
+                    <h6 class="fw-bold text-white mb-0" style="letter-spacing: 0.5px; font-size: 16px;">TIỆM HOA TƯƠI</h6>
+                    <small style="color: #9DB7AA; font-size: 13px;" th:text="${store != null ? store.name : 'Chi nhánh'}">Chi nhánh</small>
+                </div>
+            </div>
 
+            <!-- Navigation Links -->
+            <nav class="d-flex flex-column gap-1">
+                <a th:href="@{/manager/dashboard}">
+                    <i class="bi bi-speedometer2"></i> Tổng Quan Chi Nhánh
+                </a>
+                <a th:href="@{/manager/orders}" id="sidebarOrders">
+                    <i class="bi bi-bag-check"></i> Quản Lý Đơn Hàng
+                </a>
+                <a th:href="@{/manager/products}">
+                    <i class="bi bi-flower1"></i> Kho Mẫu Hoa
+                </a>
+                <!-- BƯỚC 6 THEO UC_020: Chọn Staffs trên thanh sidebar -->
+                <a th:href="@{/manager/staff}" class="active" id="sidebarStaffs">
+                    <i class="bi bi-people"></i> Quản Lý Nhân Viên
+                </a>
+                <a th:href="@{/manager/wallet}" id="sidebarGdCoins">
+                    <i class="bi bi-coin"></i> Ví Cửa Hàng
+                </a>
+                <a th:href="@{/manager/vouchers}">
+                    <i class="bi bi-ticket-perforated"></i> Chương Trình Khuyến Mãi
+                </a>
+                <a th:href="@{/manager/analytics}">
+                    <i class="bi bi-graph-up-arrow"></i> Báo Cáo Doanh Thu
+                </a>
+                <a th:href="@{/manager/stores}">
+                    <i class="bi bi-shop"></i> Danh Sách Cửa Hàng
+                </a>
+                <a th:href="@{/manager/profile}" id="sidebarProfile">
+                    <i class="bi bi-person-badge"></i> Thông Tin Cửa Hàng
+                </a>
+                <hr class="border-secondary my-2">
+                <a th:href="@{/}" target="_blank">
+                    <i class="bi bi-house-door"></i> Xem Trang Bán Hàng
+                </a>
+                <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#signOutModal" class="text-danger fw-bold">
+                    <i class="bi bi-box-arrow-right me-1"></i> Đăng Xuất
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content: Bước 7 - Chuyển đến trang quản lý nhân viên cửa hàng -->
+        <div class="col-md-10 p-4">
             <!-- Toast / Alert Flash Messages -->
             <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-3 mb-4" role="alert" style="background-color: #E8F5E9; color: #1B5E20;">
                 <i class="bi bi-check-circle-fill me-2 fs-5"></i>
@@ -122,7 +206,7 @@
             <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                 <div>
                     <div class="d-flex align-items-center gap-3">
-                        <h1 class="admin-page-title mb-0">
+                        <h1 class="admin-page-title mb-0" style="font-size: 28px !important; font-weight: 800; color: #20382E;">
                             <i class="bi bi-people-fill me-2"></i>Quản Lý Nhân Sự Cửa Hàng
                         </h1>
                         <span class="badge rounded-pill" style="background-color: #E5EEE8; color: #20382E; border: 1px solid #D1E5DA; font-size: 14.5px; font-weight: 700; padding: 6px 14px;">
@@ -152,7 +236,7 @@
             </div>
 
             <!-- BƯỚC 8 & 10: Tabs Chọn Shop owner hoặc Shop staffs -->
-            <form th:if="${isOwner}" method="get" action="/manager/staff" class="d-flex gap-2 mb-3"><input name="candidateKeyword" th:value="${candidateKeyword}" class="form-control" placeholder="Tìm ứng viên theo tên hoặc username"><button type="submit" class="btn btn-outline-success">Tìm ứng viên</button><a th:if="${candidatePage > 0}" th:href="@{/manager/staff(candidateKeyword=${candidateKeyword},candidatePage=${candidatePage - 1})}">Trang trước</a><span th:text="${(candidatePage + 1) + '/' + candidatePages}"></span><a th:if="${candidatePage + 1 < candidatePages}" th:href="@{/manager/staff(candidateKeyword=${candidateKeyword},candidatePage=${candidatePage + 1})}">Trang sau</a></form><p th:if="${isOwner}" class="small text-muted">Sau khi tìm, bấm Add staff để chọn ứng viên. Chọn vai trò PARTNER cho tài khoản Vendor/Manager; STAFF cho nhân viên.</p>
+            <form th:if="${isOwner}" method="get" action="/manager/staff" class="d-flex gap-2 mb-3"><input name="candidateKeyword" th:value="${candidateKeyword}" class="form-control" placeholder="Tìm ứng viên theo tên hoặc username"><button type="submit" class="btn btn-outline-success">Tìm ứng viên</button><a th:if="${candidatePage > 0}" th:href="@{/manager/staff(candidateKeyword=${candidateKeyword},candidatePage=${candidatePage - 1})}">Previous</a><span th:text="${(candidatePage + 1) + '/' + candidatePages}"></span><a th:if="${candidatePage + 1 < candidatePages}" th:href="@{/manager/staff(candidateKeyword=${candidateKeyword},candidatePage=${candidatePage + 1})}">Next</a></form><p th:if="${isOwner}" class="small text-muted">Sau khi tìm, bấm Add staff để chọn ứng viên. Chọn vai trò PARTNER cho tài khoản Vendor/Manager; STAFF cho nhân viên.</p>
             <ul class="nav nav-tabs nav-tabs-custom mb-4" id="staffTabs" role="tablist">
                 <!-- Bước 10: Chọn Shop staffs -->
                 <li class="nav-item" role="presentation">
@@ -180,13 +264,13 @@
                                 <table class="table align-middle mb-0" id="tableShopStaffs">
                                     <thead style="background-color: #E5EEE8 !important;">
                                     <tr>
-                                        <th class="ps-4 fw-bold" style="width: 80px;">Mã</th>
-                                        <th class="fw-bold" style="min-width: 220px;">Nhân viên</th>
-                                        <th class="fw-bold" style="min-width: 140px;">Vai trò</th>
-                                        <th class="fw-bold" style="min-width: 140px;">Số điện thoại</th>
-                                        <th class="fw-bold" style="min-width: 180px;">Email</th>
+                                        <th class="ps-4 fw-bold" style="width: 80px; color: #20382E; font-weight: 800; font-size: 15px;">Mã</th>
+                                        <th class="fw-bold" style="min-width: 220px; color: #20382E; font-weight: 800; font-size: 15px;">Nhân viên</th>
+                                        <th class="fw-bold" style="min-width: 140px; color: #20382E; font-weight: 800; font-size: 15px;">Vai trò</th>
+                                        <th class="fw-bold" style="min-width: 140px; color: #20382E; font-weight: 800; font-size: 15px;">Số điện thoại</th>
+                                        <th class="fw-bold" style="min-width: 180px; color: #20382E; font-weight: 800; font-size: 15px;">Email</th>
                                         <!-- Thao tác: Nút Delete tồn tại nếu người quản lý là chủ cửa hàng (13-15a) -->
-                                        <th th:if="${isOwner}" class="text-end pe-4 fw-bold" style="min-width: 120px;">Thao tác</th>
+                                        <th th:if="${isOwner}" class="text-end pe-4 fw-bold" style="min-width: 120px; color: #20382E; font-weight: 800; font-size: 15px;">Thao tác</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -251,8 +335,8 @@
                         <!-- Bước 12 theo UC_020: Phân trang (Next, Previous, hoặc số trang bất kỳ) -->
                         <div th:if="${totalPages > 1}" class="card-footer bg-white border-top p-3 d-flex justify-content-between align-items-center flex-wrap gap-2" style="border-color: #E2E7E2 !important;">
                             <div class="small text-muted" style="font-size: 14px;">
-                                Hiển thị <strong th:text="${(currentPage * pageSize) + 1}">1</strong> -
-                                <strong th:text="${T(java.lang.Math).min((currentPage + 1) * pageSize, totalStaffCount)}">6</strong>
+                                Hiển thị <strong th:text="${(currentPage * pageSize) + 1}">1</strong> - 
+                                <strong th:text="${T(java.lang.Math).min((currentPage + 1) * pageSize, totalStaffCount)}">6</strong> 
                                 trên tổng số <strong th:text="${totalStaffCount}">10</strong> nhân viên
                             </div>
                             <nav aria-label="Staff navigation">
@@ -260,7 +344,7 @@
                                     <!-- Nút Previous -->
                                     <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
                                         <a class="page-link" th:href="@{/manager/staff(tab='staffs', page=${currentPage - 1}, size=${pageSize})}" aria-label="Previous">
-                                            <i class="bi bi-chevron-left me-1"></i> Trang trước
+                                            <i class="bi bi-chevron-left me-1"></i> Previous
                                         </a>
                                     </li>
 
@@ -273,7 +357,7 @@
                                     <!-- Nút Next -->
                                     <li class="page-item" th:classappend="${currentPage >= (totalPages - 1)} ? 'disabled' : ''">
                                         <a class="page-link" th:href="@{/manager/staff(tab='staffs', page=${currentPage + 1}, size=${pageSize})}" aria-label="Next">
-                                            Trang sau <i class="bi bi-chevron-right ms-1"></i>
+                                            Next <i class="bi bi-chevron-right ms-1"></i>
                                         </a>
                                     </li>
                                 </ul>
@@ -331,9 +415,13 @@
                     </div>
                 </div>
             </div>
-
-    </main>
+        </div>
+    </div>
 </div>
+
+<!-- ================= MODALS CHO USE CASE UC_020 ================= -->
+
+<!-- BƯỚC 14: Hiển thị form thêm nhân viên -->
 <div class="modal fade" id="addStaffModal" tabindex="-1" aria-labelledby="addStaffModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content rounded-4 border-0 shadow">
@@ -408,16 +496,18 @@
 
                 <div class="modal-footer border-top-0 pt-0">
                     <!-- Bước 17c, 18c: Bấm nút Cancel -> Hủy thao tác -->
-                    <button type="button" class="btn btn-outline-secondary px-4 py-2 fw-bold" data-bs-dismiss="modal" id="btnCancelAddStaff" style="border-radius: 8px;">Hủy</button>
+                    <button type="button" class="btn btn-outline-secondary px-4 py-2 fw-bold" data-bs-dismiss="modal" id="btnCancelAddStaff" style="border-radius: 8px;">Cancel</button>
                     <!-- Bước 16: Bấm nút Submit -->
                     <button type="button" class="btn btn-success px-4 py-2 fw-bold shadow-sm" id="btnSubmitAddStaff" onclick="triggerConfirmAddStaff()" style="border-radius: 8px; background-color: #2E7D32; border-color: #2E7D32;">
-                        <i class="bi bi-check2-circle me-1"></i> Lưu thông tin
+                        <i class="bi bi-check2-circle me-1"></i> Submit
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<!-- BƯỚC 17: Bấm nút Confirm thêm nhân viên -->
 <div class="modal fade" id="confirmAddStaffModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content border-0 shadow rounded-4 text-center p-3">
@@ -428,15 +518,17 @@
             </div>
             <div class="d-flex justify-content-center gap-2 pb-2">
                 <!-- Bước 17c: Bấm nút Cancel -->
-                <button type="button" class="btn btn-outline-secondary btn-sm px-3 fw-bold" data-bs-dismiss="modal" id="btnCancelConfirmAddStaff">Hủy</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm px-3 fw-bold" data-bs-dismiss="modal" id="btnCancelConfirmAddStaff">Cancel</button>
                 <!-- Bước 17: Bấm nút Confirm -->
                 <button type="button" class="btn btn-success btn-sm px-3 fw-bold" id="btnConfirmAddStaff" onclick="document.getElementById('formAddStaff').submit();">
-                    Xác nhận
+                    Confirm
                 </button>
             </div>
         </div>
     </div>
 </div>
+
+<!-- ALTERNATIVE 13-15a: Modal xác nhận Delete nhân viên -->
 <div class="modal fade" id="confirmDeleteStaffModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content border-0 shadow rounded-4 text-center p-3">
@@ -449,16 +541,18 @@
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <div class="d-flex justify-content-center gap-2 pb-2">
                     <!-- Bước 17c: Bấm nút Cancel -->
-                    <button type="button" class="btn btn-outline-secondary btn-sm px-3 fw-bold" data-bs-dismiss="modal" id="btnCancelDeleteStaff">Hủy</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-3 fw-bold" data-bs-dismiss="modal" id="btnCancelDeleteStaff">Cancel</button>
                     <!-- Bước 17: Bấm nút Confirm -->
                     <button type="submit" class="btn btn-danger btn-sm px-3 fw-bold" id="btnConfirmDeleteStaff">
-                        Xác nhận
+                        Confirm
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<!-- ALTERNATIVE 13-15b: Modal xác nhận Out this shop (dành cho đối tác) -->
 <div class="modal fade" id="confirmOutShopModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content border-0 shadow rounded-4 text-center p-3">
@@ -471,17 +565,39 @@
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <div class="d-flex justify-content-center gap-2 pb-2">
                     <!-- Bước 17c: Bấm nút Cancel -->
-                    <button type="button" class="btn btn-outline-secondary btn-sm px-3 fw-bold" data-bs-dismiss="modal" id="btnCancelOutShop">Hủy</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-3 fw-bold" data-bs-dismiss="modal" id="btnCancelOutShop">Cancel</button>
                     <!-- Bước 17: Bấm nút Confirm -->
                     <button type="submit" class="btn btn-warning btn-sm px-3 fw-bold text-dark" id="btnConfirmOutShop">
-                        Xác nhận
+                        Confirm
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-<th:block th:replace="~{fragments/manager-layout :: footer}"></th:block>
+
+<!-- Modal Đăng Xuất -->
+<div class="modal fade" id="signOutModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content rounded-4 border-0 shadow p-3 text-center">
+            <div class="modal-body">
+                <i class="bi bi-box-arrow-right text-danger" style="font-size: 40px;"></i>
+                <h6 class="fw-bold mt-2">Xác Nhận Đăng Xuất</h6>
+                <p class="text-muted small mb-0">Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?</p>
+            </div>
+            <div class="d-flex justify-content-center gap-2 pb-2">
+                <button type="button" class="btn btn-outline-secondary btn-sm px-3 fw-bold" data-bs-dismiss="modal">Hủy</button>
+                <form th:action="@{/logout}" method="post" class="d-inline m-0">
+                    <button type="submit" class="btn btn-danger btn-sm px-3 fw-bold">Đăng Xuất</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5.3 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
     // Bước 16: Bấm nút Submit -> Mở modal yêu cầu xác nhận (Bước 17)
     function triggerConfirmAddStaff() {
