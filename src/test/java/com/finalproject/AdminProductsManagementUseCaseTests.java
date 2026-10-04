@@ -51,7 +51,14 @@ class AdminProductsManagementUseCaseTests {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private com.finalproject.repository.StoreRepository storeRepository;
+
+    @Autowired
+    private com.finalproject.repository.StoreInventoryRepository storeInventoryRepository;
+
     private User admin;
+    private com.finalproject.entity.Store store1;
     private Category category;
     private Product licensedProduct1;
     private Product licensedProduct2;
@@ -116,6 +123,14 @@ class AdminProductsManagementUseCaseTests {
                 .createdAt(LocalDateTime.now())
                 .build());
 
+        store1 = storeRepository.save(com.finalproject.entity.Store.builder()
+                .name("Chi nhánh Bến Thành UC28")
+                .address("123 Lê Lợi, Quận 1")
+                .phone("0901234567")
+                .status(true)
+                .isOpen(true)
+                .build());
+
         // Sản phẩm chưa được cấp phép hoặc bị cấm (Unlicensed / Banned)
         unlicensedProduct1 = productRepository.save(Product.builder()
                 .name("Hoa Ngoại Nhập Bị Cấm UC28")
@@ -129,6 +144,17 @@ class AdminProductsManagementUseCaseTests {
                 .isSelling(false)
                 .createdAt(LocalDateTime.now())
                 .build());
+
+        // Thiết lập tồn kho minh họa:
+        // licensedProduct1: 24 bó (Còn hàng)
+        // licensedProduct2: 3 lẵng (Sắp hết)
+        // unlicensedProduct1: 0 bó (Hết hàng)
+        storeInventoryRepository.save(com.finalproject.entity.StoreInventory.builder()
+                .store(store1).product(licensedProduct1).quantity(24).build());
+        storeInventoryRepository.save(com.finalproject.entity.StoreInventory.builder()
+                .store(store1).product(licensedProduct2).quantity(3).build());
+        storeInventoryRepository.save(com.finalproject.entity.StoreInventory.builder()
+                .store(store1).product(unlicensedProduct1).quantity(0).build());
     }
 
     /**
@@ -353,5 +379,74 @@ class AdminProductsManagementUseCaseTests {
         mockMvc.perform(get("/admin/products-manage"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(not(containsString("Bó Hoa Hồng Đỏ Cấp Phép UC28"))));
+    }
+
+    /**
+     * Kiểm thử cột Tồn kho / Tổng tồn kho: Hiển thị đúng số lượng, đúng đơn vị (bó, lẵng...), nhãn Sắp hết / Hết hàng
+     * và modal chi tiết kho từng chi nhánh.
+     */
+    @Test
+    @WithMockUser(username = "admin_uc28", roles = {"ADMIN"})
+    void testInventoryColumn_DisplaysStockQuantityWithCorrectUnitAndModalTrigger() throws Exception {
+        mockMvc.perform(get("/admin/products-manage"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Tổng tồn kho")))
+                // Còn hàng: 24 bó
+                .andExpect(content().string(containsString("24 bó")))
+                // Sắp hết (<= 5): 3 lẵng · Sắp hết
+                .andExpect(content().string(containsString("3 lẵng · Sắp hết")))
+                // Hết hàng (<= 0): 0 bó · Hết hàng
+                .andExpect(content().string(containsString("0 bó · Hết hàng")))
+                // Modal chi tiết tồn kho chi nhánh
+                .andExpect(content().string(containsString("id=\"inventoryModal" + licensedProduct1.getId() + "\"")))
+                .andExpect(content().string(containsString("Chi nhánh Bến Thành UC28")))
+                .andExpect(content().string(containsString("Tồn thực tế")))
+                .andExpect(content().string(containsString("Đang giữ")))
+                .andExpect(content().string(containsString("Có thể bán")));
+    }
+
+    /**
+     * Kiểm thử bộ lọc Tồn kho (Tất cả / Còn hàng / Sắp hết / Hết hàng)
+     */
+    @Test
+    @WithMockUser(username = "admin_uc28", roles = {"ADMIN"})
+    void testInventoryFilter_ByStockStatus() throws Exception {
+        // Lọc Sắp hết: Chỉ xuất hiện licensedProduct2 (3 lẵng)
+        mockMvc.perform(get("/admin/products-manage")
+                        .param("stockStatus", "LOW_STOCK"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Lẵng Hoa Lan Hồ Điệp Cấp Phép UC28")))
+                .andExpect(content().string(not(containsString("Bó Hoa Hồng Đỏ Cấp Phép UC28"))))
+                .andExpect(content().string(not(containsString("Hoa Ngoại Nhập Bị Cấm UC28"))));
+
+        // Lọc Hết hàng: Chỉ xuất hiện unlicensedProduct1 (0 bó)
+        mockMvc.perform(get("/admin/products-manage")
+                        .param("stockStatus", "OUT_OF_STOCK"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Hoa Ngoại Nhập Bị Cấm UC28")))
+                .andExpect(content().string(not(containsString("Bó Hoa Hồng Đỏ Cấp Phép UC28"))))
+                .andExpect(content().string(not(containsString("Lẵng Hoa Lan Hồ Điệp Cấp Phép UC28"))));
+
+        // Lọc Còn hàng: Chỉ xuất hiện licensedProduct1 (24 bó)
+        mockMvc.perform(get("/admin/products-manage")
+                        .param("stockStatus", "IN_STOCK"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Bó Hoa Hồng Đỏ Cấp Phép UC28")))
+                .andExpect(content().string(not(containsString("Lẵng Hoa Lan Hồ Điệp Cấp Phép UC28"))))
+                .andExpect(content().string(not(containsString("Hoa Ngoại Nhập Bị Cấm UC28"))));
+    }
+
+    /**
+     * Kiểm thử khi Admin lọc theo một chi nhánh cụ thể: Cột đổi tiêu đề thành "Tồn kho"
+     */
+    @Test
+    @WithMockUser(username = "admin_uc28", roles = {"ADMIN"})
+    void testInventoryFilter_ByStoreId_ChangesColumnTitleToTonKho() throws Exception {
+        mockMvc.perform(get("/admin/products-manage")
+                        .param("storeId", store1.getId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("stockColumnTitle", "Tồn kho"))
+                .andExpect(content().string(containsString("Tồn kho")))
+                .andExpect(content().string(containsString("Chi nhánh Bến Thành UC28")));
     }
 }

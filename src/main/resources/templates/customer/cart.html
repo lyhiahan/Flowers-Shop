@@ -244,10 +244,6 @@
 
     <main class="flower-container py-4">
         <!-- Messages -->
-        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 px-3 small rounded-3" role="alert">
-            <i class="bi bi-check-circle-fill me-1 text-success"></i> <span th:text="${successMessage}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
         <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show py-2 px-3 small rounded-3" role="alert">
             <i class="bi bi-exclamation-triangle-fill me-1 text-danger"></i> <span th:text="${errorMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -275,7 +271,7 @@
                         <div class="form-check mb-0 d-flex align-items-center gap-2">
                             <input class="form-check-input" type="checkbox" id="selectAll" checked onchange="toggleSelectAll(this)" style="cursor: pointer; width: 18px; height: 18px;">
                             <label class="form-check-label fw-bold text-dark user-select-none" for="selectAll" style="cursor: pointer;">
-                                Chọn tất cả (<span th:text="${#lists.size(cart.items)}">0</span> mục sản phẩm &middot; Tổng số lượng: <span th:text="${totalQuantity != null ? totalQuantity : #lists.size(cart.items)}">0</span>)
+                                Chọn tất cả (<span id="cartRowCount" th:text="${#lists.size(cart.items)}">0</span> mục sản phẩm &middot; Tổng số lượng: <span id="cartTotalQty" th:text="${totalQuantity != null ? totalQuantity : #lists.size(cart.items)}">0</span>)
                             </label>
                         </div>
                         <span class="small text-muted d-none d-sm-inline"><i class="bi bi-shield-check text-success me-1"></i>100% hoa tươi nhập mới trong ngày</span>
@@ -370,7 +366,7 @@
 
                                         <!-- Số lượng -->
                                         <td>
-                                            <form th:action="@{'/cart/update-quantity/' + ${item.id}}" method="post" class="d-flex align-items-center">
+                                            <form th:action="@{'/cart/update-quantity/' + ${item.id}}" method="post" class="d-flex align-items-center" th:onsubmit="'updateQty(' + ${item.id} + '); return false;'">
                                                 <div class="qty-pill">
                                                     <button type="button" class="qty-btn" th:disabled="${isOutOfStock}" th:onclick="'changeQty(' + ${item.id} + ', -1)'">−</button>
                                                     <input type="number" 
@@ -380,15 +376,16 @@
                                                            min="1" th:max="${stock > 0 ? stock : 1}" 
                                                            class="qty-input"
                                                            th:disabled="${isOutOfStock}"
-                                                           th:onchange="'this.form.submit()'">
+                                                           th:onchange="'updateQty(' + ${item.id} + ')'">
                                                     <button type="button" class="qty-btn" th:disabled="${isOutOfStock or stock <= item.quantity}" th:onclick="'changeQty(' + ${item.id} + ', 1)'">+</button>
                                                 </div>
                                             </form>
+                                            <div class="small text-danger mt-1" th:id="'err_' + ${item.id}" role="alert"></div>
                                         </td>
 
                                         <!-- Thành tiền -->
                                         <td>
-                                            <strong class="text-danger fw-bold" th:text="${#numbers.formatDecimal(item.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</strong>
+                                            <strong class="text-danger fw-bold" th:id="'amount_' + ${item.id}" th:text="${#numbers.formatDecimal(item.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</strong>
                                         </td>
 
                                         <!-- Nút xóa -->
@@ -471,7 +468,7 @@
 
                                 <!-- Số lượng -->
                                 <td>
-                                    <form th:action="@{'/cart/update-quantity/' + ${item.id}}" method="post" class="d-flex align-items-center">
+                                    <form th:action="@{'/cart/update-quantity/' + ${item.id}}" method="post" class="d-flex align-items-center" th:onsubmit="'updateQty(' + ${item.id} + '); return false;'">
                                         <div class="qty-pill">
                                             <button type="button" class="qty-btn" th:disabled="${isOutOfStock}" th:onclick="'changeQty(' + ${item.id} + ', -1)'">−</button>
                                             <input type="number" 
@@ -481,15 +478,16 @@
                                                    min="1" th:max="${stock > 0 ? stock : 1}" 
                                                    class="qty-input"
                                                    th:disabled="${isOutOfStock}"
-                                                   th:onchange="'this.form.submit()'">
+                                                   th:onchange="'updateQty(' + ${item.id} + ')'">
                                             <button type="button" class="qty-btn" th:disabled="${isOutOfStock or stock <= item.quantity}" th:onclick="'changeQty(' + ${item.id} + ', 1)'">+</button>
                                         </div>
                                     </form>
+                                    <div class="small text-danger mt-1" th:id="'err_' + ${item.id}" role="alert"></div>
                                 </td>
 
                                 <!-- Thành tiền -->
                                 <td>
-                                    <strong class="text-danger fw-bold" th:text="${#numbers.formatDecimal(item.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</strong>
+                                    <strong class="text-danger fw-bold" th:id="'amount_' + ${item.id}" th:text="${#numbers.formatDecimal(item.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</strong>
                                 </td>
 
                                 <!-- Nút xóa -->
@@ -670,7 +668,7 @@
     </div>
 
     <!-- Modal Thông Báo Hệ Thống / Cảnh Báo Đưa Ra Màn Hình -->
-    <div class="modal fade" id="systemAlertModal" tabindex="-1" aria-labelledby="systemAlertModalLabel" aria-hidden="true" th:if="${errorMessage != null or successMessage != null}">
+    <div class="modal fade" id="systemAlertModal" tabindex="-1" aria-labelledby="systemAlertModalLabel" aria-hidden="true" th:if="${errorMessage != null}">
         <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
             <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="border-radius: 16px;">
                 <div class="modal-header py-3 px-4 border-0" 
@@ -737,7 +735,6 @@
         }
 
         function changeQty(itemId, delta) {
-            sessionStorage.setItem('cart_scroll_pos', window.scrollY);
             var input = document.getElementById('qty_' + itemId);
             var current = parseInt(input.value) || 1;
             var newVal = current + delta;
@@ -745,7 +742,118 @@
             var maxQty = parseInt(input.max, 10) || 1;
             if (newVal > maxQty) newVal = maxQty;
             input.value = newVal;
-            input.form.submit();
+            updateQty(itemId);
+        }
+
+        var qtyBusy = {};
+
+        function csrfToken() {
+            var el = document.querySelector('#modalDeleteCartForm input[name="_csrf"]');
+            return el ? el.value : '';
+        }
+
+        function setRowBusy(itemId, busy) {
+            var row = document.getElementById('row_' + itemId);
+            if (!row) return;
+            row.querySelectorAll('.qty-btn, .qty-input').forEach(function (el) {
+                el.disabled = busy;
+            });
+        }
+
+        function showRowError(itemId, msg) {
+            var el = document.getElementById('err_' + itemId);
+            if (el) el.textContent = msg || '';
+        }
+
+        // Áp dụng dữ liệu đã lưu từ máy chủ lên giao diện (số lượng, thành tiền, tổng, huy hiệu giỏ)
+        function applyCartState(state) {
+            (state.items || []).forEach(function (it) {
+                var row = document.getElementById('row_' + it.id);
+                if (!row) return;
+                row.setAttribute('data-quantity', it.quantity);
+                row.setAttribute('data-subtotal', it.subtotal || 0);
+                row.setAttribute('data-deposit', it.deposit || 0);
+                row.setAttribute('data-total', it.total || 0);
+                var input = document.getElementById('qty_' + it.id);
+                if (input) input.value = it.quantity;
+                var amount = document.getElementById('amount_' + it.id);
+                if (amount) amount.innerText = formatVnd(it.total || 0);
+                var btns = row.querySelectorAll('.qty-btn');
+                if (btns.length === 2) {
+                    btns[0].disabled = false;
+                    btns[1].disabled = it.stock <= it.quantity;
+                }
+            });
+            var rc = document.getElementById('cartRowCount');
+            if (rc) rc.innerText = state.rowCount;
+            var tq = document.getElementById('cartTotalQty');
+            if (tq) tq.innerText = state.count;
+            document.querySelectorAll('.cart-badge-pill').forEach(function (b) {
+                b.textContent = state.count;
+            });
+            updateSummary();
+        }
+
+        function syncCartState(itemId) {
+            return fetch('/cart/state', { headers: { 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' })
+                .then(function (r) { return r.json(); })
+                .then(applyCartState);
+        }
+
+        function updateQty(itemId) {
+            if (qtyBusy[itemId]) return;
+            var input = document.getElementById('qty_' + itemId);
+            var row = document.getElementById('row_' + itemId);
+            var savedQty = parseInt(row.getAttribute('data-quantity'), 10) || 1;
+            var newVal = parseInt(input.value, 10);
+            showRowError(itemId, '');
+            if (isNaN(newVal) || newVal < 1) {
+                input.value = savedQty;
+                showRowError(itemId, 'Số lượng tối thiểu là 1. Để bỏ sản phẩm, hãy dùng nút Xóa.');
+                return;
+            }
+            if (newVal === savedQty) return;
+            qtyBusy[itemId] = true;
+            setRowBusy(itemId, true);
+            var body = new URLSearchParams();
+            body.append('quantity', newVal);
+            fetch('/cart/update-quantity/' + itemId, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken(),
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: body.toString()
+            }).then(function (r) {
+                return r.json().then(function (data) { return { ok: r.ok, data: data }; });
+            }).then(function (res) {
+                if (res.ok && res.data.success) {
+                    applyCartState(res.data);
+                } else {
+                    input.value = savedQty;
+                    showRowError(itemId, (res.data && res.data.error) || 'Không thể cập nhật số lượng.');
+                }
+            }).catch(function () {
+                // Mất kết nối: chưa rõ đã lưu hay chưa -> đọc lại giỏ đã lưu trước khi cho gửi lại
+                return syncCartState(itemId).then(function () {
+                    showRowError(itemId, 'Mất kết nối. Đã tải lại số lượng đã lưu, vui lòng thử lại.');
+                }).catch(function () {
+                    input.value = savedQty;
+                    showRowError(itemId, 'Mất kết nối. Vui lòng tải lại trang để kiểm tra giỏ hàng.');
+                });
+            }).finally(function () {
+                qtyBusy[itemId] = false;
+                var r2 = document.getElementById('row_' + itemId);
+                if (r2) {
+                    var stillSaved = parseInt(r2.getAttribute('data-quantity'), 10) || 1;
+                    setRowBusy(itemId, false);
+                    var b = r2.querySelectorAll('.qty-btn');
+                    var mx = parseInt(input.max, 10) || 1;
+                    if (b.length === 2) b[1].disabled = stillSaved >= mx;
+                }
+            });
         }
 
         function toggleSelectAll(master) {

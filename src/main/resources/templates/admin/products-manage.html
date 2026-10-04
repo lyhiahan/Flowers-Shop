@@ -114,7 +114,7 @@
             <li>
                 <a th:href="@{/admin/deliveries}" class="nav-link">
                     <i class="bi bi-truck"></i>
-                    <span>Đơn vị vận chuyển</span>
+                    <span>Quản lý giao hàng</span>
                 </a>
             </li>
             <li>
@@ -136,9 +136,9 @@
                 </a>
             </li>
             <li>
-                <a th:href="@{/}" class="nav-link" target="_blank" style="color: #9DB7AA;">
+                <a th:href="@{/}" class="nav-link" target="_blank" style="color: #9DB7AA;" title="Xem trang bán hàng bên ngoài để kiểm tra nội dung">
                     <i class="bi bi-box-arrow-up-right"></i>
-                    <span>Xem cửa hàng</span>
+                    <span>Xem website</span>
                 </a>
             </li>
         </ul>
@@ -187,7 +187,7 @@
 
         <!-- 2. Nhóm kiểm duyệt (BƯỚC 3 THEO UC_028): Tất cả · Licensed products (Được cấp phép) · Unlicensed products (Bị cấm) · Chờ duyệt -->
         <div class="d-flex gap-2 mb-3 flex-wrap align-items-center" id="productFilterTabs">
-            <a th:href="@{/admin/products-manage(tab='ALL', keyword=${keyword}, style=${currentStyle}, status=${currentStatus})}"
+            <a th:href="@{/admin/products-manage(tab='ALL', keyword=${keyword}, storeId=${currentStoreId}, stockStatus=${currentStockStatus}, style=${currentStyle}, status=${currentStatus})}"
                class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2"
                id="tabAllProducts"
                th:classappend="${currentTab == 'ALL'} ? 'btn-dark' : 'btn-outline-secondary bg-white'"
@@ -195,7 +195,7 @@
                 Tất cả <span class="badge rounded-pill" th:classappend="${currentTab == 'ALL'} ? 'bg-light text-dark' : 'bg-secondary text-white'" th:text="${countAll}">0</span>
             </a>
             <!-- BƯỚC 3 THEO UC_028: Chọn Được cấp phép để xem sản phẩm được cấp phép -->
-            <a th:href="@{/admin/products-manage(tab='LICENSED', keyword=${keyword}, style=${currentStyle}, status=${currentStatus})}"
+            <a th:href="@{/admin/products-manage(tab='LICENSED', keyword=${keyword}, storeId=${currentStoreId}, stockStatus=${currentStockStatus}, style=${currentStyle}, status=${currentStatus})}"
                class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2"
                id="tabLicensedProducts"
                th:classappend="${currentTab == 'LICENSED' or currentTab == 'APPROVED'} ? 'btn-success text-white' : 'btn-outline-secondary bg-white'"
@@ -203,14 +203,14 @@
                 Được cấp phép <span class="badge rounded-pill" th:classappend="${currentTab == 'LICENSED' or currentTab == 'APPROVED'} ? 'bg-white text-success' : 'bg-secondary text-white'" th:text="${countApproved}">0</span>
             </a>
             <!-- BƯỚC 3 THEO UC_028: Chọn Bị cấm để xem sản phẩm bị cấm -->
-            <a th:href="@{/admin/products-manage(tab='UNLICENSED', keyword=${keyword}, style=${currentStyle}, status=${currentStatus})}"
+            <a th:href="@{/admin/products-manage(tab='UNLICENSED', keyword=${keyword}, storeId=${currentStoreId}, stockStatus=${currentStockStatus}, style=${currentStyle}, status=${currentStatus})}"
                class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2"
                id="tabUnlicensedProducts"
                th:classappend="${currentTab == 'UNLICENSED' or currentTab == 'BANNED' or currentTab == 'REJECTED'} ? 'btn-danger text-white' : 'btn-outline-secondary bg-white'"
                style="font-size: 14px; font-weight: 600;">
                 Bị cấm <span class="badge rounded-pill" th:classappend="${currentTab == 'UNLICENSED' or currentTab == 'BANNED' or currentTab == 'REJECTED'} ? 'bg-white text-danger' : 'bg-secondary text-white'" th:text="${countBanned}">0</span>
             </a>
-            <a th:href="@{/admin/products-manage(tab='PENDING', keyword=${keyword}, style=${currentStyle}, status=${currentStatus})}"
+            <a th:href="@{/admin/products-manage(tab='PENDING', keyword=${keyword}, storeId=${currentStoreId}, stockStatus=${currentStockStatus}, style=${currentStyle}, status=${currentStatus})}"
                class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2"
                id="tabPendingProducts"
                th:classappend="${currentTab == 'PENDING'} ? 'btn-warning text-dark' : 'btn-outline-secondary bg-white'"
@@ -218,24 +218,41 @@
                 Chờ duyệt <span class="badge rounded-pill" th:classappend="${currentTab == 'PENDING'} ? 'bg-dark text-white' : 'bg-secondary text-white'" th:text="${countPending}">0</span>
             </a>
         </div>
-
-        <!-- 3. Thanh lọc 44px: Tìm tên/mã… · Kiểu dáng ▾ · Trạng thái ▾ (ĐÃ BỎ BỘ LỌC CHI NHÁNH VÌ SẢN PHẨM CÓ Ở TẤT CẢ CHI NHÁNH) -->
+        <!-- 3. Thanh lọc 44px: Tìm tên/mã… · Chi nhánh ▾ · Tồn kho ▾ · Kiểu dáng ▾ · Trạng thái ▾ -->
         <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
             <form th:action="@{/admin/products-manage}" method="get" class="row g-2 align-items-center">
                 <input type="hidden" name="tab" th:value="${currentTab}">
-                <div class="col-12 col-md-5 col-lg-5">
+                <!-- Tìm tên hoặc mã -->
+                <div class="col-12 col-md-4 col-lg-3">
                     <div class="input-group" style="height: 44px;">
                         <span class="input-group-text bg-white border-end-0 text-muted" style="border-color: #E2E7E2; border-radius: 10px 0 0 10px;">
                             <i class="bi bi-search"></i>
                         </span>
                         <input type="text" name="keyword" th:value="${keyword}" 
                                class="form-control border-start-0" 
-                               style="height: 44px; border-color: #E2E7E2; border-radius: 0 10px 10px 0; font-size: 15px;" 
-                               placeholder="Tìm tên hoặc mã sản phẩm hoa tươi…">
+                               style="height: 44px; border-color: #E2E7E2; border-radius: 0 10px 10px 0; font-size: 14.5px;" 
+                               placeholder="Tìm tên hoặc mã sản phẩm…">
                     </div>
                 </div>
-                <div class="col-12 col-sm-6 col-md-3 col-lg-3">
-                    <select name="style" class="form-select" style="height: 44px; border-color: #E2E7E2; border-radius: 10px; font-size: 15px; color: #20382E; font-weight: 600;">
+                <!-- Chi nhánh -->
+                <div class="col-6 col-md-2 col-lg-2">
+                    <select name="storeId" class="form-select" style="height: 44px; border-color: #E2E7E2; border-radius: 10px; font-size: 14.5px; color: #20382E; font-weight: 600;">
+                        <option value="" th:selected="${currentStoreId == null or currentStoreId == 0}">Tất cả chi nhánh</option>
+                        <option th:each="st : ${stores}" th:value="${st.id}" th:text="${st.name}" th:selected="${currentStoreId != null and currentStoreId == st.id}">Chi nhánh Bến Thành</option>
+                    </select>
+                </div>
+                <!-- Tồn kho (Tất cả / Còn hàng / Sắp hết / Hết hàng) -->
+                <div class="col-6 col-md-2 col-lg-2">
+                    <select name="stockStatus" class="form-select" style="height: 44px; border-color: #E2E7E2; border-radius: 10px; font-size: 14.5px; color: #20382E; font-weight: 600;">
+                        <option value="ALL" th:selected="${currentStockStatus == 'ALL'}">Tồn kho: Tất cả</option>
+                        <option value="IN_STOCK" th:selected="${currentStockStatus == 'IN_STOCK'}">Còn hàng (&gt; 5)</option>
+                        <option value="LOW_STOCK" th:selected="${currentStockStatus == 'LOW_STOCK'}">Sắp hết (≤ 5)</option>
+                        <option value="OUT_OF_STOCK" th:selected="${currentStockStatus == 'OUT_OF_STOCK'}">Hết hàng (0)</option>
+                    </select>
+                </div>
+                <!-- Kiểu dáng -->
+                <div class="col-6 col-md-2 col-lg-2">
+                    <select name="style" class="form-select" style="height: 44px; border-color: #E2E7E2; border-radius: 10px; font-size: 14.5px; color: #20382E; font-weight: 600;">
                         <option value="ALL" th:selected="${currentStyle == 'ALL'}">Kiểu dáng: Tất cả</option>
                         <option value="Bó hoa" th:selected="${currentStyle == 'Bó hoa'}">Bó hoa</option>
                         <option value="Giỏ hoa" th:selected="${currentStyle == 'Giỏ hoa'}">Giỏ hoa</option>
@@ -245,44 +262,46 @@
                         <option value="Bình hoa" th:selected="${currentStyle == 'Bình hoa'}">Bình hoa</option>
                     </select>
                 </div>
-                <div class="col-12 col-sm-6 col-md-2 col-lg-2">
-                    <select name="status" class="form-select" style="height: 44px; border-color: #E2E7E2; border-radius: 10px; font-size: 15px; color: #20382E; font-weight: 600;">
+                <!-- Trạng thái -->
+                <div class="col-6 col-md-2 col-lg-2">
+                    <select name="status" class="form-select" style="height: 44px; border-color: #E2E7E2; border-radius: 10px; font-size: 14.5px; color: #20382E; font-weight: 600;">
                         <option value="ALL" th:selected="${currentStatus == 'ALL'}">Trạng thái: Tất cả</option>
                         <option value="SELLING" th:selected="${currentStatus == 'SELLING'}">Đang bán</option>
                         <option value="PAUSED" th:selected="${currentStatus == 'PAUSED'}">Tạm ngừng bán</option>
                         <option value="REJECTED" th:selected="${currentStatus == 'REJECTED'}">Từ chối duyệt</option>
                     </select>
                 </div>
+                <!-- Nút thao tác -->
                 <div class="col-auto d-flex gap-2">
                     <button class="btn btn-primary d-inline-flex align-items-center justify-content-center px-3" 
                             type="submit" 
-                            style="height: 44px; border-radius: 10px; font-size: 15.5px; font-weight: 700; background-color: #20382E !important; border-color: #20382E !important;">
+                            style="height: 44px; border-radius: 10px; font-size: 15px; font-weight: 700; background-color: #20382E !important; border-color: #20382E !important;">
                         <i class="bi bi-funnel me-1"></i> Tìm
                     </button>
                     <a th:href="@{/admin/products-manage}" 
                        class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center px-3" 
-                       style="height: 44px; border-radius: 10px; font-size: 15px; color: #66736B; border-color: #E2E7E2; background: #FFFFFF;">
+                       style="height: 44px; border-radius: 10px; font-size: 14.5px; color: #66736B; border-color: #E2E7E2; background: #FFFFFF;">
                         Xóa lọc
                     </a>
                 </div>
             </form>
         </div>
 
-        <!-- 4. Bảng sản phẩm: ĐÃ BỎ CỘT CHI NHÁNH VÌ CÓ MẶT Ở TẤT CẢ CHI NHÁNH -->
+        <!-- 4. Bảng sản phẩm: Cột Tồn kho đặt ngay sau Đã bán, Kiểu dáng lồng dưới tên sản phẩm -->
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-admin-products align-middle mb-0" id="productsTable">
                         <thead style="background-color: #E5EEE8 !important;">
                         <tr style="background-color: #E5EEE8 !important;">
-                            <th class="ps-4 fw-bold" style="white-space: nowrap !important; width: 80px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Mã</th>
-                            <th class="fw-bold" style="white-space: nowrap !important; min-width: 280px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Sản phẩm</th>
-                            <th class="fw-bold" style="white-space: nowrap !important; min-width: 120px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Kiểu dáng</th>
-                            <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 130px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Giá nhập</th>
-                            <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 130px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Giá bán</th>
+                            <th class="ps-4 fw-bold" style="white-space: nowrap !important; width: 75px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Mã</th>
+                            <th class="fw-bold" style="white-space: nowrap !important; min-width: 290px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Sản phẩm</th>
+                            <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 120px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Giá nhập</th>
+                            <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 120px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Giá bán</th>
                             <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 90px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Đã bán</th>
-                            <th class="fw-bold" style="white-space: nowrap !important; min-width: 160px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Trạng thái</th>
-                            <th class="text-end pe-4 fw-bold sticky-col-right" style="white-space: nowrap !important; min-width: 210px; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Thao tác</th>
+                            <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 155px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;" th:text="${stockColumnTitle}">Tổng tồn kho</th>
+                            <th class="fw-bold" style="white-space: nowrap !important; min-width: 140px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Trạng thái</th>
+                            <th class="text-end pe-4 fw-bold sticky-col-right" style="white-space: nowrap !important; min-width: 200px; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Thao tác</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -292,11 +311,14 @@
                                 Không tìm thấy sản phẩm hoa tươi nào phù hợp với bộ lọc.
                             </td>
                         </tr>
-                        <tr th:each="p : ${products}" th:id="'product-row-' + ${p.id}">
+                        <tr th:each="p : ${products}" th:id="'product-row-' + ${p.id}"
+                            th:with="pStock=${stockMap[p.id] != null ? stockMap[p.id] : 0}, 
+                                     pSummary=${inventorySummaryMap[p.id]}, 
+                                     pUnit=${pSummary != null ? pSummary.unit : 'bó'}">
                             <!-- 1. Mã sản phẩm -->
-                            <td class="ps-4 text-muted fw-bold" style="font-size: 14.5px;" th:text="'#' + ${p.id}">#1</td>
+                            <td class="ps-4 text-muted fw-bold" style="font-size: 14px;" th:text="'#' + ${p.id}">#1</td>
 
-                            <!-- 2. Sản phẩm: Ảnh 64x64px, Tên đậm 17px, Danh mục xám nhỏ -->
+                            <!-- 2. Sản phẩm: Ảnh 64x64px, Tên đậm 16.5px, Danh mục & Kiểu dáng bên dưới để tiết kiệm diện tích -->
                             <td>
                                 <div class="d-flex align-items-center gap-3 py-1">
                                     <img th:src="${p.imageUrl != null and !p.imageUrl.isEmpty() ? p.imageUrl : 'https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=150'}"
@@ -305,50 +327,71 @@
                                          class="product-thumb-img shadow-sm"
                                          style="width: 64px; height: 64px; border-radius: 8px; object-fit: cover; flex-shrink: 0; border: 1px solid #E2E7E2;">
                                     <div>
-                                        <div class="product-category-sub" style="font-size: 13.5px; color: #66736B; margin-bottom: 2px;" th:text="${p.category != null ? p.category.name : 'Hoa tươi'}">
-                                            Hoa Tình Yêu & Valentine
-                                        </div>
-                                        <div class="fw-bold" style="font-size: 17px; font-weight: 700; color: #20382E; line-height: 1.35;" th:text="${p.name}">
+                                        <div class="fw-bold" style="font-size: 16.5px; font-weight: 700; color: #20382E; line-height: 1.35;" th:text="${p.name}">
                                              Bó Hoa Hồng Đỏ Ecuador Tình Nồng Cháy
+                                        </div>
+                                        <div class="product-category-sub d-flex align-items-center gap-2 mt-1" style="font-size: 13px; color: #66736B;">
+                                            <span th:text="${p.category != null ? p.category.name : 'Hoa tươi'}">Hoa Tình Yêu & Valentine</span>
+                                            <span>•</span>
+                                            <span class="badge" style="background-color: #F0F4F2; color: #375344; border: 1px solid #D5E2DA; font-size: 12px; font-weight: 600;"
+                                                  th:text="${p.name.toLowerCase().startsWith('giỏ') ? 'Giỏ hoa' : 
+                                                           (p.name.toLowerCase().startsWith('hộp') ? 'Hộp hoa' : 
+                                                           (p.name.toLowerCase().startsWith('kệ') ? 'Kệ hoa' : 
+                                                           (p.name.toLowerCase().startsWith('chậu') ? 'Chậu hoa' : 
+                                                           (p.name.toLowerCase().startsWith('lọ') or p.name.toLowerCase().startsWith('bình') ? 'Bình hoa' : 'Bó hoa'))))}">
+                                                Bó hoa
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
                             </td>
 
-                            <!-- 3. Kiểu dáng: Bó hoa, Giỏ hoa, Hộp hoa, Chậu hoa, Kệ hoa, Bình hoa... -->
-                            <td>
-                                <div style="font-size: 15px; color: #24332C;" 
-                                     th:text="${p.name.toLowerCase().startsWith('giỏ') ? 'Giỏ hoa' : 
-                                              (p.name.toLowerCase().startsWith('hộp') ? 'Hộp hoa' : 
-                                              (p.name.toLowerCase().startsWith('kệ') ? 'Kệ hoa' : 
-                                              (p.name.toLowerCase().startsWith('chậu') ? 'Chậu hoa' : 
-                                              (p.name.toLowerCase().startsWith('lọ') or p.name.toLowerCase().startsWith('bình') ? 'Bình hoa' : 'Bó hoa'))))}">
-                                    Bó hoa
-                                </div>
-                            </td>
-
-                            <!-- 4. Giá nhập: Căn phải, không xuống dòng, Nunito 16px đậm 700 màu trầm #526058 -->
+                            <!-- 3. Giá nhập: Căn phải, không xuống dòng -->
                             <td class="text-end" style="white-space: nowrap;">
-                                <span style="font-size: 16px; font-weight: 700; color: #526058; white-space: nowrap;"
+                                <span style="font-size: 15.5px; font-weight: 700; color: #526058; white-space: nowrap;"
                                       th:text="${p.importPrice != null ? #numbers.formatDecimal(p.importPrice, 0, 'COMMA', 0, 'POINT') + ' ₫' : (p.priceBuy != null ? #numbers.formatDecimal(p.priceBuy.multiply(T(java.math.BigDecimal).valueOf(0.6)), 0, 'COMMA', 0, 'POINT') + ' ₫' : 'Chưa cập nhật')}">
                                     350.000 ₫
                                 </span>
                             </td>
 
-                            <!-- 5. Giá bán: Căn phải, không xuống dòng, Nunito 18px đậm 800 hồng trầm #A64060 -->
+                            <!-- 4. Giá bán: Căn phải, không xuống dòng, hồng trầm #A64060 -->
                             <td class="text-end" style="white-space: nowrap;">
-                                <span style="font-size: 18px; font-weight: 800; color: #A64060; white-space: nowrap;"
+                                <span style="font-size: 17px; font-weight: 800; color: #A64060; white-space: nowrap;"
                                       th:text="${p.priceBuy != null ? #numbers.formatDecimal(p.priceBuy, 0, 'COMMA', 0, 'POINT') + ' ₫' : 'Chưa cập nhật'}">
                                     650.000 ₫
                                 </span>
                             </td>
 
-                            <!-- 6. Đã bán: Căn phải, chỉ hiển thị số -->
-                            <td class="text-end" style="font-size: 15.5px; font-weight: 600; color: #24332C;">
+                            <!-- 5. Đã bán: Căn phải, chỉ hiển thị số -->
+                            <td class="text-end" style="font-size: 15px; font-weight: 600; color: #24332C;">
                                 <span th:text="${p.sold != null ? p.sold : 0}">45</span>
                             </td>
 
-                            <!-- 7. Trạng thái: Thống nhất nhãn và màu sắc rõ ràng -->
+                            <!-- 6. Tồn kho / Tổng tồn kho: Ngay sau Đã bán, bấm vào xem chi tiết các chi nhánh -->
+                            <td class="text-end" style="white-space: nowrap;">
+                                <button type="button" class="btn btn-link p-0 text-decoration-none text-end w-100" 
+                                        data-bs-toggle="modal" th:data-bs-target="'#inventoryModal' + ${p.id}"
+                                        title="Bấm để xem chi tiết tồn kho từng chi nhánh">
+                                    <!-- Còn hàng (> 5): số lượng bình thường -->
+                                    <span th:if="${pStock > 5}" class="fw-bold" style="font-size: 15px; color: #20382E;" th:text="${pStock} + ' ' + ${pUnit}">24 bó</span>
+
+                                    <!-- Sắp hết (1..5): nhãn vàng -->
+                                    <span th:if="${pStock > 0 and pStock <= 5}" class="badge" style="background-color: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; font-size: 12.5px; font-weight: 700; padding: 4px 9px; border-radius: 8px;">
+                                        <i class="bi bi-exclamation-circle me-1"></i><span th:text="${pStock} + ' ' + ${pUnit} + ' · Sắp hết'">3 bó · Sắp hết</span>
+                                    </span>
+
+                                    <!-- Hết hàng (<= 0): số 0 kèm nhãn đỏ -->
+                                    <span th:if="${pStock <= 0}" class="badge" style="background-color: #FEE2E2; color: #B91C1C; border: 1px solid #FCA5A5; font-size: 12.5px; font-weight: 700; padding: 4px 9px; border-radius: 8px;">
+                                        <i class="bi bi-x-circle me-1"></i><span th:text="'0 ' + ${pUnit} + ' · Hết hàng'">0 bó · Hết hàng</span>
+                                    </span>
+
+                                    <span class="d-block text-muted" style="font-size: 11.5px; font-weight: 500; margin-top: 2px;">
+                                        <i class="bi bi-building me-1"></i>Chi tiết kho <i class="bi bi-chevron-right" style="font-size: 9px;"></i>
+                                    </span>
+                                </button>
+                            </td>
+
+                            <!-- 7. Trạng thái: Tách biệt hoàn toàn với tình trạng kho -->
                             <td style="white-space: nowrap;">
                                 <!-- Nếu bị cấm / từ chối cấp phép -->
                                 <span th:if="${p.isActive != null and !p.isActive}" class="badge" style="background-color: #FEE2E2; color: #B91C1C; border: 1px solid #FCA5A5; height: 28px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;">
@@ -379,7 +422,7 @@
                                     </button>
 
                                     <!-- Nút Sửa (mở biểu mẫu sửa, kèm returnUrl để giữ trang và bộ lọc) -->
-                                    <a th:href="@{/admin/products-manage/edit/{id}(id=${p.id}, tab=${currentTab}, keyword=${keyword}, style=${currentStyle}, status=${currentStatus}, page=${currentPage}, size=${pageSize})}"
+                                    <a th:href="@{/admin/products-manage/edit/{id}(id=${p.id}, tab=${currentTab}, keyword=${keyword}, storeId=${currentStoreId}, stockStatus=${currentStockStatus}, style=${currentStyle}, status=${currentStatus}, page=${currentPage}, size=${pageSize})}"
                                        th:data-id="${p.id}"
                                        onclick="sessionStorage.setItem('admin_product_scroll_pos', window.scrollY); sessionStorage.setItem('admin_product_target_id', this.getAttribute('data-id'));"
                                        class="btn btn-sm btn-outline-forest d-inline-flex align-items-center gap-1 shadow-sm"
@@ -401,7 +444,7 @@
                                                       th:data-id="${p.id}"
                                                       onsubmit="sessionStorage.setItem('admin_product_scroll_pos', window.scrollY); sessionStorage.setItem('admin_product_target_id', this.getAttribute('data-id'));">
                                                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                                    <input type="hidden" name="returnUrl" th:value="@{/admin/products-manage(tab=${currentTab}, keyword=${keyword}, style=${currentStyle}, status=${currentStatus}, page=${currentPage}, size=${pageSize})}" />
+                                                    <input type="hidden" name="returnUrl" th:value="@{/admin/products-manage(tab=${currentTab}, keyword=${keyword}, storeId=${currentStoreId}, stockStatus=${currentStockStatus}, style=${currentStyle}, status=${currentStatus}, page=${currentPage}, size=${pageSize})}" />
                                                     <button type="submit" class="dropdown-item py-2 d-flex align-items-center gap-2" th:if="${p.isSelling == null or p.isSelling}">
                                                         <i class="bi bi-pause-circle text-warning fs-6"></i> Ngừng bán
                                                     </button>
@@ -459,7 +502,7 @@
                             <!-- Nút Previous -->
                             <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
                                 <a class="page-link" 
-                                   th:href="@{/admin/products-manage(tab=${currentTab}, keyword=${keyword}, style=${currentStyle}, status=${currentStatus}, page=${currentPage - 1}, size=${pageSize})}" 
+                                   th:href="@{/admin/products-manage(tab=${currentTab}, keyword=${keyword}, storeId=${currentStoreId}, stockStatus=${currentStockStatus}, style=${currentStyle}, status=${currentStatus}, page=${currentPage - 1}, size=${pageSize})}" 
                                    id="btnPrevPage" 
                                    data-testid="btnPrevPage" 
                                    aria-label="Previous">
@@ -471,7 +514,7 @@
                             <li class="page-item" th:each="p : ${#numbers.sequence(1, totalPages)}"
                                 th:classappend="${currentPage == (p - 1)} ? 'active' : ''">
                                 <a class="page-link" 
-                                   th:href="@{/admin/products-manage(tab=${currentTab}, keyword=${keyword}, style=${currentStyle}, status=${currentStatus}, page=${p - 1}, size=${pageSize})}" 
+                                   th:href="@{/admin/products-manage(tab=${currentTab}, keyword=${keyword}, storeId=${currentStoreId}, stockStatus=${currentStockStatus}, style=${currentStyle}, status=${currentStatus}, page=${p - 1}, size=${pageSize})}" 
                                    th:text="${p}"
                                    th:id="'pageBtn_' + ${p}">1</a>
                             </li>
@@ -479,7 +522,7 @@
                             <!-- Nút Next -->
                             <li class="page-item" th:classappend="${currentPage >= (totalPages - 1)} ? 'disabled' : ''">
                                 <a class="page-link" 
-                                   th:href="@{/admin/products-manage(tab=${currentTab}, keyword=${keyword}, style=${currentStyle}, status=${currentStatus}, page=${currentPage + 1}, size=${pageSize})}" 
+                                   th:href="@{/admin/products-manage(tab=${currentTab}, keyword=${keyword}, storeId=${currentStoreId}, stockStatus=${currentStockStatus}, style=${currentStyle}, status=${currentStatus}, page=${currentPage + 1}, size=${pageSize})}" 
                                    id="btnNextPage" 
                                    data-testid="btnNextPage" 
                                    aria-label="Next">
@@ -573,6 +616,102 @@
                             <i class="bi bi-box-arrow-up-right"></i> Xem trang sản phẩm khách
                         </a>
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" style="border-radius: 8px;">Đóng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Chi tiết tồn kho theo chi nhánh (Phân biệt: Tồn thực tế / Đang giữ / Có thể bán) -->
+        <div th:each="p : ${products}" class="modal fade" th:id="'inventoryModal' + ${p.id}" tabindex="-1" aria-hidden="true"
+             th:with="pSummary=${inventorySummaryMap[p.id]}">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="border: 1px solid #E2E7E2 !important; border-radius: 14px;">
+                    <div class="modal-header text-white" style="background-color: #20382E; border-bottom: none; padding: 18px 24px;">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-boxes fs-4 text-warning"></i>
+                            <div>
+                                <h5 class="modal-title fw-bold mb-0 text-white" style="font-size: 18px;">Chi tiết tồn kho chi nhánh</h5>
+                                <div class="text-white-50 small mt-1" style="font-size: 13px;">
+                                    Sản phẩm: <strong class="text-white" th:text="${p.name}">Tên sản phẩm</strong>
+                                    <span class="mx-1">·</span> Mã: <strong class="text-white" th:text="'#' + ${p.id}">#1</strong>
+                                    <span class="mx-1">·</span> Đơn vị tính: <strong class="text-warning" th:text="${pSummary != null ? pSummary.unit : 'bó'}">bó</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4" style="background-color: #FBFDFB;">
+                        <!-- Thẻ giải thích nguyên tắc tính toán -->
+                        <div class="alert alert-light border d-flex align-items-center gap-3 mb-3 py-2 px-3 shadow-sm" style="border-radius: 10px; font-size: 13.5px; color: #375344; background-color: #F0F6F2; border-color: #D1E5DA !important;">
+                            <i class="bi bi-shield-check text-success fs-4 flex-shrink-0"></i>
+                            <div>
+                                <strong>Nguyên tắc quản lý kho:</strong> 
+                                <strong>Tồn thực tế</strong> = <strong>Đang giữ</strong> (đơn mới chờ xác nhận / đang cắm hoa) + <strong>Có thể bán</strong> (sẵn sàng nhận đơn mới). Dữ liệu đối soát trực tiếp từ sổ kho chi nhánh.
+                            </div>
+                        </div>
+
+                        <!-- Bảng chi tiết tồn kho từng chi nhánh -->
+                        <div class="table-responsive rounded-3 border" style="border-color: #E2E7E2 !important;">
+                            <table class="table align-middle mb-0">
+                                <thead style="background-color: #E5EEE8;">
+                                    <tr>
+                                        <th class="ps-3 py-2 fw-bold text-start" style="color: #20382E; font-size: 14px; min-width: 200px;">Chi nhánh</th>
+                                        <th class="text-end py-2 fw-bold" style="color: #20382E; font-size: 14px; min-width: 110px;">Tồn thực tế</th>
+                                        <th class="text-end py-2 fw-bold" style="color: #20382E; font-size: 14px; min-width: 140px;">Đang giữ (đơn chờ)</th>
+                                        <th class="text-end py-2 pe-3 fw-bold" style="color: #20382E; font-size: 14px; min-width: 120px;">Có thể bán</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:if="${pSummary == null or #lists.isEmpty(pSummary.branchStocks)}">
+                                        <td colspan="4" class="text-center py-4 text-muted">
+                                            Chưa có dữ liệu tồn kho tại các chi nhánh.
+                                        </td>
+                                    </tr>
+                                    <tr th:each="b : ${pSummary != null ? pSummary.branchStocks : {}}">
+                                        <td class="ps-3 py-2">
+                                            <div class="fw-bold" style="color: #20382E; font-size: 14.5px;" th:text="${b.storeName}">Chi nhánh Bến Thành</div>
+                                            <small class="text-muted" th:text="${b.storeAddress != null ? b.storeAddress : 'Chi nhánh trực thuộc'}">123 Lê Lợi, Quận 1</small>
+                                        </td>
+                                        <!-- Tồn thực tế -->
+                                        <td class="text-end py-2 fw-semibold" style="font-size: 14.5px; color: #526058;" th:text="${b.physicalStock} + ' ' + ${b.unit}">
+                                            10 bó
+                                        </td>
+                                        <!-- Đang giữ -->
+                                        <td class="text-end py-2" style="font-size: 14.5px;">
+                                            <span th:if="${b.reservedStock > 0}" class="badge" style="background-color: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; font-size: 12.5px; font-weight: 700; padding: 4px 8px; border-radius: 6px;">
+                                                <i class="bi bi-clock-history me-1"></i><span th:text="${b.reservedStock} + ' ' + ${b.unit}">2 bó</span>
+                                            </span>
+                                            <span th:if="${b.reservedStock <= 0}" class="text-muted" style="font-size: 13.5px;">0</span>
+                                        </td>
+                                        <!-- Có thể bán -->
+                                        <td class="text-end py-2 pe-3" style="font-size: 15px;">
+                                            <span th:if="${b.availableStock > 5}" class="fw-bold" style="color: #166534;" th:text="${b.availableStock} + ' ' + ${b.unit}">
+                                                8 bó
+                                            </span>
+                                            <span th:if="${b.availableStock > 0 and b.availableStock <= 5}" class="badge" style="background-color: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 6px;">
+                                                <i class="bi bi-exclamation-circle me-1"></i><span th:text="${b.availableStock} + ' ' + ${b.unit} + ' · Sắp hết'">3 bó · Sắp hết</span>
+                                            </span>
+                                            <span th:if="${b.availableStock <= 0}" class="badge" style="background-color: #FEE2E2; color: #B91C1C; border: 1px solid #FCA5A5; font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 6px;">
+                                                <i class="bi bi-x-circle me-1"></i><span th:text="'0 ' + ${b.unit} + ' · Hết hàng'">0 bó · Hết hàng</span>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tfoot th:if="${pSummary != null}" style="background-color: #F8FAF9; border-top: 2px solid #D1E5DA;">
+                                    <tr class="fw-bold">
+                                        <td class="ps-3 py-3" style="font-size: 14.5px; color: #20382E;">
+                                            <i class="bi bi-calculator me-1"></i>TỔNG CỘNG HỆ THỐNG
+                                        </td>
+                                        <td class="text-end py-3" style="font-size: 15px; color: #526058;" th:text="${pSummary.totalPhysical} + ' ' + ${pSummary.unit}">24 bó</td>
+                                        <td class="text-end py-3" style="font-size: 15px; color: #B45309;" th:text="${pSummary.totalReserved} + ' ' + ${pSummary.unit}">0 bó</td>
+                                        <td class="text-end py-3 pe-3" style="font-size: 16px; color: #166534;" th:text="${pSummary.totalAvailable} + ' ' + ${pSummary.unit}">24 bó</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-white border-top-0 d-flex justify-content-end p-3">
+                        <button type="button" class="btn btn-secondary btn-sm px-4" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 600;">Đóng</button>
                     </div>
                 </div>
             </div>

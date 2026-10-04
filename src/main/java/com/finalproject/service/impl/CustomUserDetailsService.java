@@ -27,17 +27,26 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .or(() -> userRepository.findByEmail(cleanInput))
                 .orElseThrow(() -> new UsernameNotFoundException("Email, tên đăng nhập hoặc mật khẩu không chính xác: " + cleanInput));
 
-        java.util.Set<org.springframework.security.core.GrantedAuthority> authorities = new java.util.HashSet<>();
-        // Mọi người dùng đang hoạt động luôn giữ quyền Khách hàng để mua hoa và sử dụng tính năng thông thường
-        authorities.add(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
+        boolean isAdmin = (user.getRole() == com.finalproject.enums.Role.ADMIN)
+                || (user.getRoles() != null && user.getRoles().contains(com.finalproject.enums.Role.ADMIN))
+                || "admin".equalsIgnoreCase(user.getUsername());
 
-        if (user.getRole() != null) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
-        }
-        if (user.getRoles() != null) {
-            for (com.finalproject.enums.Role r : user.getRoles()) {
-                if (r != null) {
-                    authorities.add(new SimpleGrantedAuthority("ROLE_" + r.name()));
+        java.util.Set<org.springframework.security.core.GrantedAuthority> authorities = new java.util.HashSet<>();
+
+        if (isAdmin) {
+            // ADMIN: Không được tự động cấp ROLE_CUSTOMER (Tách bạch quản trị và mua hàng)
+            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        } else {
+            // Người dùng thông thường (Customer, Vendor, Manager) giữ quyền Khách hàng
+            authorities.add(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
+            if (user.getRole() != null) {
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+            }
+            if (user.getRoles() != null) {
+                for (com.finalproject.enums.Role r : user.getRoles()) {
+                    if (r != null) {
+                        authorities.add(new SimpleGrantedAuthority("ROLE_" + r.name()));
+                    }
                 }
             }
         }

@@ -89,6 +89,34 @@ public class SecurityConfig {
                 ).permitAll()
                 .anyRequest().authenticated()
             )
+            .exceptionHandling(exceptions -> exceptions
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    org.springframework.security.core.Authentication auth =
+                            org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+                    if (auth != null && auth.getAuthorities().stream().anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()))) {
+                        String uri = request.getRequestURI();
+                        if (uri != null && (uri.startsWith("/cart") || uri.startsWith("/checkout") || uri.startsWith("/customer") || uri.startsWith("/following"))) {
+                            if ("XMLHttpRequest".equalsIgnoreCase(request.getHeader("X-Requested-With"))
+                                    || (request.getHeader("Accept") != null && request.getHeader("Accept").contains("application/json"))) {
+                                response.setContentType("application/json;charset=UTF-8");
+                                response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN);
+                                response.getWriter().write("{\"success\":false,\"message\":\"Tài khoản Quản trị viên không thể thực hiện chức năng mua hàng hoặc truy cập giỏ hàng.\"}");
+                                return;
+                            }
+                            response.sendRedirect("/admin/dashboard?error=admin_shopping_denied");
+                            return;
+                        }
+                    }
+                    if ("XMLHttpRequest".equalsIgnoreCase(request.getHeader("X-Requested-With"))
+                            || (request.getHeader("Accept") != null && request.getHeader("Accept").contains("application/json"))) {
+                        response.setContentType("application/json;charset=UTF-8");
+                        response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN);
+                        response.getWriter().write("{\"success\":false,\"message\":\"Bạn không có quyền truy cập chức năng này.\"}");
+                        return;
+                    }
+                    response.sendError(jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN, "Access Denied");
+                })
+            )
             .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/perform_login")

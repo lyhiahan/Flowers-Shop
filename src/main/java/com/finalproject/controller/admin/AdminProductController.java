@@ -31,6 +31,8 @@ public class AdminProductController {
     private final CategoryRepository categoryRepository;
     private final ProductService productService;
     private final ProductSeederService productSeederService;
+    private final com.finalproject.repository.StoreInventoryRepository storeInventoryRepository;
+    private final com.finalproject.repository.OrderDetailRepository orderDetailRepository;
 
     private String safeReturnUrl(String value) {
         if (value != null && !value.contains("\\") && value.chars().noneMatch(Character::isISOControl)) {
@@ -46,12 +48,27 @@ public class AdminProductController {
     public static String detectStyle(String name) {
         if (name == null) return "Bó hoa";
         String n = name.trim().toLowerCase();
-        if (n.startsWith("giỏ")) return "Giỏ hoa";
-        if (n.startsWith("hộp")) return "Hộp hoa";
-        if (n.startsWith("kệ")) return "Kệ hoa";
-        if (n.startsWith("chậu")) return "Chậu hoa";
-        if (n.startsWith("lọ") || n.startsWith("bình")) return "Bình hoa";
+        if (n.startsWith("giỏ") || n.contains("giỏ")) return "Giỏ hoa";
+        if (n.startsWith("hộp") || n.contains("hộp")) return "Hộp hoa";
+        if (n.startsWith("kệ") || n.contains("kệ")) return "Kệ hoa";
+        if (n.startsWith("chậu") || n.contains("chậu")) return "Chậu hoa";
+        if (n.startsWith("lọ") || n.startsWith("bình") || n.contains("bình") || n.contains("lọ")) return "Bình hoa";
+        if (n.startsWith("lẵng") || n.contains("lẵng")) return "Lẵng hoa";
+        if (n.startsWith("cành") || n.contains("cành")) return "Cành hoa";
         return "Bó hoa";
+    }
+
+    public static String detectUnit(String name) {
+        if (name == null) return "bó";
+        String n = name.trim().toLowerCase();
+        if (n.startsWith("giỏ") || n.contains("giỏ")) return "giỏ";
+        if (n.startsWith("hộp") || n.contains("hộp")) return "hộp";
+        if (n.startsWith("chậu") || n.contains("chậu")) return "chậu";
+        if (n.startsWith("kệ") || n.contains("kệ")) return "kệ";
+        if (n.startsWith("lọ") || n.startsWith("bình") || n.contains("bình") || n.contains("lọ")) return "bình";
+        if (n.startsWith("lẵng") || n.contains("lẵng")) return "lẵng";
+        if (n.startsWith("cành") || n.contains("cành")) return "cành";
+        return "bó";
     }
 
     /**
@@ -63,6 +80,7 @@ public class AdminProductController {
             @RequestParam(value = "storeId", required = false) Long storeId,
             @RequestParam(value = "style", required = false) String style,
             @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "stockStatus", required = false, defaultValue = "ALL") String stockStatus,
             @RequestParam(value = "tab", required = false, defaultValue = "ALL") String tab,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
@@ -100,6 +118,100 @@ public class AdminProductController {
                 }
             }
 
+            List<Store> stores = storeRepository.findAll();
+
+            // 1. Tải bản đồ tồn kho thực tế từ store_inventories theo sản phẩm và chi nhánh
+            java.util.Map<Long, java.util.Map<Long, Integer>> productStoreStockMap = new java.util.HashMap<>();
+            try {
+                var allInventories = storeInventoryRepository.findAll();
+                for (var inv : allInventories) {
+                    if (inv.getProduct() != null && inv.getStore() != null) {
+                        productStoreStockMap
+                                .computeIfAbsent(inv.getProduct().getId(), k -> new java.util.HashMap<>())
+                                .put(inv.getStore().getId(), inv.getQuantity() != null ? inv.getQuantity() : 0);
+                    }
+                }
+            } catch (Exception ignored) {}
+
+            // 2. Tải bản đồ số lượng đang giữ (Reserved) cho các đơn hàng đang xử lý
+            java.util.Map<Long, java.util.Map<Long, Integer>> productStoreReservedMap = new java.util.HashMap<>();
+            try {
+                List<Object[]> reservedList = orderDetailRepository.findReservedStockGrouped();
+                if (reservedList != null) {
+                    for (Object[] row : reservedList) {
+                        Long pId = (Long) row[0];
+                        Long sId = (Long) row[1];
+                        Number qty = (Number) row[2];
+                        if (pId != null && sId != null && qty != null) {
+                            productStoreReservedMap
+                                    .computeIfAbsent(pId, k -> new java.util.HashMap<>())
+                                    .put(sId, qty.intValue());
+                        }
+                    }
+                }
+            } catch (Exception ignored) {}
+
+            // 3. Xây dựng DTO tổng hợp tồn kho và tồn kho hiển thị cho từng sản phẩm
+            java.util.Map<Long, com.finalproject.dto.response.ProductInventorySummaryDto> inventorySummaryMap = new java.util.HashMap<>();
+            java.util.Map<Long, Integer> stockMap = new java.util.HashMap<>();
+
+            for (Product p : allProducts) {
+                String unit = detectUnit(p.getName());
+                java.util.List<com.finalproject.dto.response.ProductInventorySummaryDto.BranchInventoryDto> branchStocks = new java.util.ArrayList<>();
+                int totalAvail = 0;
+                int totalPhys = 0;
+                int totalRes = 0;
+
+                for (Store s : stores) {
+                    int avail = productStoreStockMap.getOrDefault(p.getId(), java.util.Collections.emptyMap()).getOrDefault(s.getId(), 0);
+                    int res = productStoreReservedMap.getOrDefault(p.getId(), java.util.Collections.emptyMap()).getOrDefault(s.getId(), 0);
+                    int phys = avail + res;
+                    totalAvail += avail;
+                    totalPhys += phys;
+                    totalRes += res;
+                    branchStocks.add(com.finalproject.dto.response.ProductInventorySummaryDto.BranchInventoryDto.builder()
+                            .storeId(s.getId())
+                            .storeName(s.getName())
+                            .storeAddress(s.getAddress())
+                            .physicalStock(phys)
+                            .reservedStock(res)
+                            .availableStock(avail)
+                            .unit(unit)
+                            .build());
+                }
+
+                int displayStock = (storeId != null && storeId > 0)
+                        ? productStoreStockMap.getOrDefault(p.getId(), java.util.Collections.emptyMap()).getOrDefault(storeId, 0)
+                        : totalAvail;
+                stockMap.put(p.getId(), displayStock);
+
+                String stockStatusType;
+                String stockStatusText;
+                if (displayStock <= 0) {
+                    stockStatusType = "OUT_OF_STOCK";
+                    stockStatusText = "Hết hàng";
+                } else if (displayStock <= 5) {
+                    stockStatusType = "LOW_STOCK";
+                    stockStatusText = "Sắp hết";
+                } else {
+                    stockStatusType = "IN_STOCK";
+                    stockStatusText = "Còn hàng";
+                }
+
+                com.finalproject.dto.response.ProductInventorySummaryDto summary = com.finalproject.dto.response.ProductInventorySummaryDto.builder()
+                        .productId(p.getId())
+                        .productName(p.getName())
+                        .unit(unit)
+                        .totalAvailable(totalAvail)
+                        .totalPhysical(totalPhys)
+                        .totalReserved(totalRes)
+                        .status(stockStatusType)
+                        .statusLabel(stockStatusText)
+                        .branchStocks(branchStocks)
+                        .build();
+                inventorySummaryMap.put(p.getId(), summary);
+            }
+
             // Tính số lượng cho từng tab kiểm duyệt / cấp phép
             long countAll = allProducts.size();
             long countApproved = allProducts.stream().filter(p -> Boolean.TRUE.equals(p.getIsActive())).count();
@@ -128,7 +240,8 @@ public class AdminProductController {
             // Lọc theo Chi nhánh
             if (storeId != null && storeId > 0) {
                 filtered = filtered.stream().filter(p ->
-                        p.getStore() != null && storeId.equals(p.getStore().getId())
+                        (p.getStore() != null && storeId.equals(p.getStore().getId()))
+                        || (productStoreStockMap.containsKey(p.getId()) && productStoreStockMap.get(p.getId()).containsKey(storeId))
                 ).toList();
             }
 
@@ -152,6 +265,20 @@ public class AdminProductController {
                 }
             }
 
+            // Lọc theo Tình trạng tồn kho (Tất cả / Còn hàng / Sắp hết / Hết hàng)
+            if (stockStatus != null && !stockStatus.trim().isEmpty() && !"ALL".equalsIgnoreCase(stockStatus)) {
+                if ("IN_STOCK".equalsIgnoreCase(stockStatus)) {
+                    filtered = filtered.stream().filter(p -> stockMap.getOrDefault(p.getId(), 0) > 5).toList();
+                } else if ("LOW_STOCK".equalsIgnoreCase(stockStatus)) {
+                    filtered = filtered.stream().filter(p -> {
+                        int s = stockMap.getOrDefault(p.getId(), 0);
+                        return s > 0 && s <= 5;
+                    }).toList();
+                } else if ("OUT_OF_STOCK".equalsIgnoreCase(stockStatus)) {
+                    filtered = filtered.stream().filter(p -> stockMap.getOrDefault(p.getId(), 0) <= 0).toList();
+                }
+            }
+
             // Phân trang sản phẩm (UC_028)
             int totalElements = filtered.size();
             int totalPages = (int) Math.ceil((double) totalElements / size);
@@ -163,8 +290,6 @@ public class AdminProductController {
             int fromIndex = Math.min(page * size, totalElements);
             int toIndex = Math.min(fromIndex + size, totalElements);
             List<Product> pagedProducts = filtered.subList(fromIndex, toIndex);
-
-            List<Store> stores = storeRepository.findAll();
 
             model.addAttribute("products", pagedProducts);
             model.addAttribute("stores", stores);
@@ -178,12 +303,17 @@ public class AdminProductController {
             model.addAttribute("currentStoreId", storeId);
             model.addAttribute("currentStyle", style != null ? style : "ALL");
             model.addAttribute("currentStatus", status != null ? status : "ALL");
+            model.addAttribute("currentStockStatus", stockStatus != null ? stockStatus.toUpperCase() : "ALL");
             model.addAttribute("currentTab", tab != null ? tab.toUpperCase() : "ALL");
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", totalPages);
             model.addAttribute("totalElements", (long) totalElements);
             model.addAttribute("pageSize", size);
             model.addAttribute("dataLoadError", false);
+
+            model.addAttribute("inventorySummaryMap", inventorySummaryMap);
+            model.addAttribute("stockMap", stockMap);
+            model.addAttribute("stockColumnTitle", (storeId != null && storeId > 0) ? "Tồn kho" : "Tổng tồn kho");
 
         } catch (Exception ex) {
             model.addAttribute("dataLoadError", true);
@@ -200,6 +330,10 @@ public class AdminProductController {
             model.addAttribute("countBanned", 0L);
             model.addAttribute("countRejected", 0L);
             model.addAttribute("currentTab", tab != null ? tab.toUpperCase() : "ALL");
+            model.addAttribute("inventorySummaryMap", java.util.Collections.emptyMap());
+            model.addAttribute("stockMap", java.util.Collections.emptyMap());
+            model.addAttribute("currentStockStatus", "ALL");
+            model.addAttribute("stockColumnTitle", "Tổng tồn kho");
         }
 
         return "admin/products-manage";

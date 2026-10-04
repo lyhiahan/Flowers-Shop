@@ -19,6 +19,8 @@ public interface StoreInventoryRepository extends JpaRepository<StoreInventory, 
 
     List<StoreInventory> findByStoreId(Long storeId);
 
+    List<StoreInventory> findByProductId(Long productId);
+
     long countByStoreIdAndQuantityLessThanEqual(Long storeId, Integer threshold);
 
     // Tìm các chi nhánh khác còn hàng (> 0) cho 1 sản phẩm cụ thể

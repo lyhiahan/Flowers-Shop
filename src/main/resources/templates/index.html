@@ -5,6 +5,8 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta th:name="_csrf" th:content="${_csrf.token}" />
+    <meta th:name="_csrf_header" th:content="${_csrf.headerName}" />
     <title>Chuỗi Cửa Hàng Hoa Tươi - Nở Trọn Yêu Thương, Thắm Trọn Khoảnh Khắc</title>
     <!-- Google Font: Nunito, Plus Jakarta Sans, Playfair Display & Bootstrap 5 & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1421,7 +1423,11 @@
                                             Khách hàng
                                         </span>
                                     </div>
-                                    <div class="mt-1 d-flex align-items-center gap-1.5" style="font-size: 12.5px; color: #2E7D32; font-weight: 600;">
+                                    <div sec:authorize="hasRole('ADMIN')" class="mt-1 d-flex align-items-center gap-1.5" style="font-size: 12.5px; color: #20382E; font-weight: 700;">
+                                        <i class="bi bi-shield-check text-success" style="font-size: 12px;"></i>
+                                        <span>Chế độ quản trị viên (Xem website)</span>
+                                    </div>
+                                    <div sec:authorize="!hasRole('ADMIN')" class="mt-1 d-flex align-items-center gap-1.5" style="font-size: 12.5px; color: #2E7D32; font-weight: 600;">
                                         <i class="bi bi-check-circle-fill text-success" style="font-size: 11px;"></i>
                                         <span>Đang ở chế độ mua hàng</span>
                                     </div>
@@ -2014,33 +2020,33 @@
 
                 <!-- Kiểu dáng -->
                 <th:block th:if="${flowerStyles != null}">
-                    <span th:each="st : ${flowerStyles}" class="active-filter-badge">
+                    <span th:each="st : ${flowerStyles}" class="active-filter-badge filter-pill-tag">
                         <span>Kiểu dáng: <strong th:text="${st}"></strong></span>
-                        <button type="button" class="btn-remove-filter" th:onclick="'removeSingleFilter(\'flowerStyle\', \'' + ${st} + '\')'" title="Bỏ điều kiện này">×</button>
+                        <button type="button" class="btn-remove-filter" data-group="flowerStyle" th:data-value="${st}" onclick="removeFilterBadge(this)" title="Bỏ điều kiện này">×</button>
                     </span>
                 </th:block>
 
                 <!-- Loại hoa -->
                 <th:block th:if="${flowerTypes != null}">
-                    <span th:each="tp : ${flowerTypes}" class="active-filter-badge">
+                    <span th:each="tp : ${flowerTypes}" class="active-filter-badge filter-pill-tag">
                         <span>Loại hoa: <strong th:text="${tp}"></strong></span>
-                        <button type="button" class="btn-remove-filter" th:onclick="'removeSingleFilter(\'flowerType\', \'' + ${tp} + '\')'" title="Bỏ điều kiện này">×</button>
+                        <button type="button" class="btn-remove-filter" data-group="flowerType" th:data-value="${tp}" onclick="removeFilterBadge(this)" title="Bỏ điều kiện này">×</button>
                     </span>
                 </th:block>
 
                 <!-- Màu sắc -->
                 <th:block th:if="${flowerColors != null}">
-                    <span th:each="cl : ${flowerColors}" class="active-filter-badge">
+                    <span th:each="cl : ${flowerColors}" class="active-filter-badge filter-pill-tag">
                         <span>Màu sắc: <strong th:text="${cl}"></strong></span>
-                        <button type="button" class="btn-remove-filter" th:onclick="'removeSingleFilter(\'flowerColor\', \'' + ${cl} + '\')'" title="Bỏ điều kiện này">×</button>
+                        <button type="button" class="btn-remove-filter" data-group="flowerColor" th:data-value="${cl}" onclick="removeFilterBadge(this)" title="Bỏ điều kiện này">×</button>
                     </span>
                 </th:block>
 
                 <!-- Dịp tặng -->
                 <th:block th:if="${flowerOccasions != null}">
-                    <span th:each="oc : ${flowerOccasions}" class="active-filter-badge">
+                    <span th:each="oc : ${flowerOccasions}" class="active-filter-badge filter-pill-tag">
                         <span>Dịp tặng: <strong th:text="${oc}"></strong></span>
-                        <button type="button" class="btn-remove-filter" th:onclick="'removeSingleFilter(\'flowerOccasion\', \'' + ${oc} + '\')'" title="Bỏ điều kiện này">×</button>
+                        <button type="button" class="btn-remove-filter" data-group="flowerOccasion" th:data-value="${oc}" onclick="removeFilterBadge(this)" title="Bỏ điều kiện này">×</button>
                     </span>
                 </th:block>
 
@@ -2070,8 +2076,24 @@
             </div>
         </div>
 
+        <!-- THÔNG BÁO LỖI HỆ THỐNG KHI TẢI DỮ LIỆU -->
+        <div th:if="${loadError != null}" class="card filter-card p-4 text-center my-4 border-danger shadow-sm" style="background-color: #FFF5F5; border-radius: 16px;">
+            <div class="fs-1 mb-2 text-danger"><i class="bi bi-exclamation-triangle"></i></div>
+            <h4 class="fw-bold mb-2 text-danger" style="font-family: 'Nunito', sans-serif; font-size: 18px;">
+                Đã xảy ra lỗi khi tải danh sách sản phẩm
+            </h4>
+            <p class="text-secondary small mb-3" style="max-width: 520px; margin: 0 auto;" th:text="${loadError}">
+                Không thể tải danh sách mẫu hoa vào lúc này. Vui lòng tải lại trang hoặc thử lại sau.
+            </p>
+            <div class="d-flex align-items-center justify-content-center gap-2">
+                <a th:href="@{/products} + '#product-catalog'" class="btn btn-outline-danger rounded-pill px-4 btn-sm fw-semibold">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Tải lại danh sách
+                </a>
+            </div>
+        </div>
+
         <!-- TRẠNG THÁI KẾT QUẢ RỖNG (Quy chuẩn 6: Không tìm thấy sản phẩm phù hợp) -->
-        <div th:if="${#lists.isEmpty(products)}" class="card filter-card p-5 text-center my-4" style="background-color: #FAF7F2; border: 1.5px dashed #D6C8B8; border-radius: 16px;">
+        <div th:if="${loadError == null and #lists.isEmpty(products)}" class="card filter-card p-5 text-center my-4" style="background-color: #FAF7F2; border: 1.5px dashed #D6C8B8; border-radius: 16px;">
             <div class="fs-1 mb-2" style="color: #A64060;"><i class="bi bi-search"></i></div>
             <h4 class="fw-bold mb-2" style="font-family: 'Nunito', sans-serif; color: #20382E; font-size: 20px;">
                 <span th:if="${keyword != null and !keyword.isEmpty()}" th:text="'Không tìm thấy sản phẩm cho “' + ${keyword} + '”'">Không tìm thấy sản phẩm</span>
@@ -2091,7 +2113,7 @@
         </div>
 
         <!-- LƯỚI SẢN PHẨM ĐỒNG NHẤT (Quy chuẩn 1 & 5: 2 hàng × 4 cột máy tính, tối đa 8 sản phẩm/trang) -->
-        <div th:if="${not #lists.isEmpty(products)}" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="productListGrid">
+        <div th:if="${not #lists.isEmpty(products)}" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 product-grid" id="productListGrid">
             <div class="col" th:each="p : ${products}">
                 <div class="flower-card h-100 position-relative">
                     <!-- Nút theo dõi / Yêu thích nhanh 36x36px ở góc trên bên phải -->
@@ -2137,8 +2159,10 @@
                             </span>
                         </div>
 
-                        <!-- Nút thêm vào giỏ: Cao 44 px, chữ 16 px, nền xanh #355447 (đồng nhất cho cả khách và tài khoản) -->
-                        <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/cart/add}" method="post" class="mt-auto">
+                        <!-- Nút mua / xem chi tiết theo vai trò -->
+                        <!-- 1. Dành cho Khách hàng: Thêm vào giỏ -->
+                        <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/cart/add}" method="post" class="mt-auto ajax-add-to-cart">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <input type="hidden" name="productId" th:value="${p.id}">
                             <input type="hidden" name="storeId" th:value="${p.store != null ? p.store.id : 1}">
                             <input type="hidden" name="orderType" value="BUY">
@@ -2146,10 +2170,20 @@
                             <button type="submit" class="btn-add-cart">
                                 <i class="bi bi-cart-plus"></i> Thêm vào giỏ
                             </button>
+                            <p class="ajax-cart-error" style="display:none; font-size:13px; color:#c0392b; margin:4px 0 0; text-align:center;"></p>
                         </form>
 
-                        <div sec:authorize="!hasRole('CUSTOMER')" class="mt-auto">
-                            <a th:href="@{/login}" class="btn-add-cart">
+                        <!-- 2. Dành cho Quản trị viên: Xem chi tiết sản phẩm (chặn mua) -->
+                        <div sec:authorize="hasRole('ADMIN')" class="mt-auto">
+                            <a th:href="@{/product/{id}(id=${p.id})}" class="btn-add-cart text-decoration-none d-flex align-items-center justify-content-center gap-1.5"
+                               style="background-color: #20382E; color: #FFFFFF;" title="Xem chi tiết sản phẩm">
+                                <i class="bi bi-eye"></i> Xem chi tiết
+                            </a>
+                        </div>
+
+                        <!-- 3. Dành cho Khách vãng lai chưa đăng nhập: Chuyển hướng đăng nhập -->
+                        <div sec:authorize="isAnonymous()" class="mt-auto">
+                            <a th:href="@{/login}" class="btn-add-cart text-decoration-none d-flex align-items-center justify-content-center gap-1.5">
                                 <i class="bi bi-cart-plus"></i> Thêm vào giỏ
                             </a>
                         </div>
@@ -2993,14 +3027,25 @@
                 });
             }
 
+            // Thao tác bỏ từng nhãn lọc bằng thuộc tính data-*
+            window.removeFilterBadge = function (btn) {
+                if (!btn) return;
+                const group = btn.getAttribute('data-group');
+                const value = btn.getAttribute('data-value') || btn.getAttribute('data-val');
+                if (group && value) {
+                    removeSingleFilter(group, value);
+                }
+            };
+
             // Các hàm bỏ từng điều kiện lọc ở thanh "Đang lọc: [Tên điều kiện ×]"
             window.removeSingleFilter = function (group, value) {
                 const p = getQueryParams();
                 const existing = [];
+                const targetVal = (value || '').trim().toLowerCase();
                 p.getAll(group).forEach(function (item) {
                     item.split(',').forEach(function (v) {
                         const s = v.trim();
-                        if (s && s.toLowerCase() !== value.toLowerCase() && !existing.includes(s)) {
+                        if (s && s.toLowerCase() !== targetVal && !existing.includes(s)) {
                             existing.push(s);
                         }
                     });
@@ -3103,6 +3148,102 @@
         })();
     </script>
     <script th:src="@{/js/global-modal.js}"></script>
+
+    <!-- AJAX Thêm vào giỏ: không tải lại trang, cập nhật số lượng giỏ trực tiếp -->
+    <script>
+    (function () {
+        'use strict';
+
+        /** Cập nhật số lượng trên biểu tượng giỏ hàng ở header */
+        function updateCartBadge(count) {
+            const badge = document.querySelector('.cart-badge-pill');
+            const cartLink = document.querySelector('.header-cart-link');
+            if (!cartLink) return;
+            if (count > 0) {
+                if (badge) {
+                    badge.textContent = count;
+                    badge.style.display = '';
+                } else {
+                    const span = document.createElement('span');
+                    span.className = 'cart-badge-pill';
+                    span.textContent = count;
+                    cartLink.appendChild(span);
+                }
+            } else {
+                if (badge) badge.style.display = 'none';
+            }
+        }
+
+        /** Lấy CSRF token từ meta tag */
+        function getCsrfMeta() {
+            const token = document.querySelector('meta[name="_csrf"]');
+            const header = document.querySelector('meta[name="_csrf_header"]');
+            return {
+                token: token ? token.content : '',
+                header: header ? header.content : 'X-CSRF-TOKEN'
+            };
+        }
+
+        document.addEventListener('submit', function (e) {
+            const form = e.target.closest('.ajax-add-to-cart');
+            if (!form) return;
+            e.preventDefault();
+
+            const btn = form.querySelector('button[type="submit"]');
+            const errEl = form.querySelector('.ajax-cart-error');
+            if (form.dataset.pending) return;  // chặn bấm liên tiếp
+            form.dataset.pending = 'true';
+            if (btn) btn.disabled = true;
+            if (errEl) errEl.style.display = 'none';
+
+            const csrf = getCsrfMeta();
+            const headers = {
+                'X-Requested-With': 'XMLHttpRequest'
+            };
+            if (csrf.token) headers[csrf.header] = csrf.token;
+
+            fetch('/cart/add', {
+                method: 'POST',
+                headers: headers,
+                body: new FormData(form)
+            })
+            .then(function (res) {
+                if (res.status === 401) { window.location.href = '/login'; return null; }
+                if (res.status === 403) {
+                    return res.json().then(function (d) {
+                        throw new Error(d.message || 'Bạn không có quyền thực hiện thao tác này.');
+                    });
+                }
+                return res.json();
+            })
+            .then(function (data) {
+                if (!data) return;
+                if (data.success) {
+                    updateCartBadge(data.count);
+                    /* Hiệu ứng nhỏ: nút nhấp nháy xanh rồi trở lại */
+                    if (btn) {
+                        const orig = btn.innerHTML;
+                        btn.innerHTML = '<i class="bi bi-check-lg"></i>';
+                        btn.style.background = '#2ecc71';
+                        setTimeout(function () {
+                            btn.innerHTML = orig;
+                            btn.style.background = '';
+                        }, 800);
+                    }
+                } else {
+                    if (errEl) { errEl.textContent = data.error || 'Không thể thêm vào giỏ.'; errEl.style.display = 'block'; }
+                }
+            })
+            .catch(function (err) {
+                if (errEl) { errEl.textContent = err.message || 'Lỗi kết nối, vui lòng thử lại.'; errEl.style.display = 'block'; }
+            })
+            .finally(function () {
+                delete form.dataset.pending;
+                if (btn) btn.disabled = false;
+            });
+        });
+    })();
+    </script>
 </body>
 
 </html>

@@ -15,22 +15,25 @@
         body { font-family: var(--font-sans) !important; background-color: var(--admin-bg); color: var(--admin-text-main); min-height: 100vh; }
         .main-wrapper { flex: 1; overflow-x: hidden; background-color: var(--admin-bg); }
 
-        /* Sidebar Quản Trị Hệ Thống */
+        /* Sidebar Quản Trị Hệ Thống: ~225px, responsive thu gọn */
         .sidebar {
-            width: 250px !important;
+            width: 225px !important;
+            min-width: 225px !important;
             background-color: #1C2D24 !important;
             min-height: 100vh;
+            transition: width 0.2s ease, min-width 0.2s ease;
         }
         .sidebar .nav-link {
             color: #A9BCB3 !important;
-            font-size: 14.5px;
+            font-size: 14px;
             font-weight: 500;
-            padding: 10px 14px;
+            padding: 8px 12px;
             border-radius: 8px;
             display: flex;
             align-items: center;
             gap: 10px;
             transition: all 0.2s ease;
+            white-space: nowrap;
         }
         .sidebar .nav-link:hover {
             color: #FFFFFF !important;
@@ -42,37 +45,226 @@
             font-weight: 700;
             border-left: 3px solid #6EE7B7;
         }
+
+        @media (max-width: 991.98px) {
+            .sidebar {
+                width: 68px !important;
+                min-width: 68px !important;
+                padding: 12px 6px !important;
+            }
+            .sidebar .brand-text, .sidebar .nav-link span, .sidebar .logout-text {
+                display: none !important;
+            }
+            .sidebar .nav-link {
+                justify-content: center !important;
+                padding: 10px 0 !important;
+            }
+            .sidebar .brand-header {
+                justify-content: center !important;
+                padding: 0 !important;
+                margin-bottom: 1.5rem !important;
+            }
+        }
+
+        /* Khoảng cách thoáng đãng, dễ thở */
+        .admin-page-header {
+            margin-bottom: 24px !important;
+        }
+        .nav-tabs {
+            border-bottom: 2px solid #E2E7E2 !important;
+            margin-bottom: 24px !important;
+        }
         .nav-tabs .nav-link {
-            font-weight: 700;
+            font-weight: 600 !important; /* Tab còn lại: 600 */
             color: #64748B;
             border: none;
-            border-bottom: 3px solid transparent;
-            padding: 12px 24px;
-            font-size: 16px;
+            border-bottom: 2px solid transparent;
+            padding: 10px 22px;
+            font-size: 14.5px;
             background: transparent;
+            transition: color 0.15s ease, border-color 0.15s ease;
         }
         .nav-tabs .nav-link.active {
-            color: #20382E;
-            border-color: #20382E;
+            font-weight: 700 !important; /* Tab đang chọn: đậm 700 */
+            color: #20382E !important;
+            border-color: #20382E !important;
             background: transparent;
         }
         .nav-tabs .nav-link:hover {
             color: #20382E;
             border-color: #CBD5E1;
         }
+
+        /* 1. Tiêu đề trang: 26–28 px, đậm 800 */
+        .admin-page-title {
+            font-size: 26px !important;
+            font-weight: 800 !important;
+            color: #20382E !important;
+            letter-spacing: -0.01em;
+            line-height: 1.2;
+        }
+
+        /* Thanh lọc thoáng đãng, tách biệt rõ với phía trên và bảng bên dưới */
+        .user-filter-card {
+            border: 1px solid #E2E7E2 !important;
+            border-radius: 12px !important;
+            padding: 16px 22px !important;
+            background-color: #FFFFFF !important;
+            box-shadow: 0 1px 5px rgba(32, 56, 46, 0.04) !important;
+            margin-bottom: 24px !important;
+        }
+
+        /* Bảng người dùng đóng khung thanh lịch, có khoảng thở */
+        .user-table-card {
+            border: 1px solid #E2E7E2 !important;
+            border-radius: 12px !important;
+            background-color: #FFFFFF !important;
+            box-shadow: 0 2px 10px rgba(32, 56, 46, 0.04) !important;
+            margin-bottom: 28px !important;
+            overflow: hidden;
+        }
+
+        /* 2. Tiêu đề cột bảng: 13–14 px, đậm 700 (Đặc biệt cột "Người dùng", "Vai trò") */
+        #usersTable thead th {
+            font-size: 13.5px !important;
+            font-weight: 700 !important;
+            color: #20382E !important;
+            text-transform: none !important;
+            letter-spacing: normal !important;
+            padding: 13px 18px !important;
+            background-color: #E5EEE8 !important;
+            border-bottom: 2px solid #D1E5DA !important;
+            white-space: nowrap !important;
+        }
+        #usersTable thead th.th-highlight,
+        #usersTable thead th:nth-child(1),
+        #usersTable thead th:nth-child(3) {
+            font-weight: 700 !important;
+            color: #20382E !important;
+        }
+
+        /* Từng hàng: giữ nguyên kích thước 64–76 px và bố cục bảng hiện tại */
+        #usersTable tbody tr td {
+            padding: 13px 18px !important;
+            border-bottom: 1px solid #E2E7E2 !important;
+            vertical-align: middle !important;
+            height: 70px;
+        }
+        #usersTable tbody tr:hover {
+            background-color: #F8FAF9;
+        }
+
+        /* 3. Tên và tài khoản: Họ tên đậm 700, cỡ 15–16 px; Tên đăng nhập chữ thường 400 */
+        .user-fullname {
+            font-size: 15.5px !important;
+            font-weight: 700 !important;
+            color: #1E293B !important;
+            line-height: 1.25;
+        }
+        .user-handle {
+            font-size: 13px !important;
+            font-weight: 400 !important;
+            color: #64748B !important;
+            line-height: 1.2;
+        }
+
+        /* 4. Email, số điện thoại: 13 px, chữ thường 400, màu xám đủ rõ để phân biệt chính - phụ */
+        .user-contact-text {
+            font-size: 13px !important;
+            font-weight: 400 !important;
+            color: #4B5563 !important;
+            line-height: 1.35;
+        }
+        .user-contact-text i {
+            color: #9CA3AF !important;
+            font-weight: 400 !important;
+        }
+
+        /* 5. Nhãn vai trò: đậm 700, cỡ 13 px; giữ màu nền phân biệt */
         .role-pill {
-            font-size: 12px;
-            font-weight: 700;
-            padding: 4px 10px;
-            border-radius: 20px;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
+            font-size: 13px !important;
+            font-weight: 700 !important;
+            padding: 3px 9px !important;
+            border-radius: 9999px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 4.5px !important;
+            line-height: 1.3 !important;
+            white-space: nowrap !important;
         }
         .role-pill-admin { background-color: #EDE9FE; color: #5B21B6; border: 1px solid #DDD6FE; }
         .role-pill-manager { background-color: #E0F2FE; color: #0369A1; border: 1px solid #BAE6FD; }
         .role-pill-vendor { background-color: #FFEDD5; color: #C2410C; border: 1px solid #FED7AA; }
-        .role-pill-customer { background-color: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+        .role-pill-customer { background-color: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; }
+
+        .status-badge-inline {
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            padding: 2px 7px !important;
+            border-radius: 9999px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 3px !important;
+            line-height: 1.2 !important;
+            white-space: nowrap !important;
+        }
+
+        /* 6. Nút thao tác: 13–14 px, cao 32–36 px, luôn một dòng */
+        .btn-role-action {
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            height: 34px !important;
+            min-height: 34px !important;
+            max-height: 34px !important;
+            line-height: 32px !important;
+            padding: 0 12px !important;
+            white-space: nowrap !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 5px !important;
+            border-radius: 9999px !important;
+            border: 1px solid #20382E !important;
+            color: #20382E !important;
+            background-color: transparent !important;
+            transition: all 0.15s ease !important;
+        }
+        .btn-role-action:hover {
+            background-color: #20382E !important;
+            color: #FFFFFF !important;
+        }
+
+        .btn-dots-action {
+            width: 34px !important;
+            height: 34px !important;
+            min-width: 34px !important;
+            min-height: 34px !important;
+            padding: 0 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            border-radius: 50% !important;
+            border: 1px solid #D1D5DB !important;
+            color: #4B5563 !important;
+            background-color: #FFFFFF !important;
+            transition: all 0.15s ease !important;
+        }
+        .btn-dots-action:hover, .btn-dots-action[aria-expanded="true"] {
+            background-color: #F3F4F6 !important;
+            border-color: #9CA3AF !important;
+            color: #111827 !important;
+        }
+
+        .branch-clamp {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.35;
+            font-size: 13px;
+            max-width: 220px;
+        }
 
         .status-badge {
             font-size: 12.5px;
@@ -110,11 +302,11 @@
             <li><a th:href="@{/admin/orders-manage}" class="nav-link"><i class="bi bi-bag"></i><span>Đơn hàng</span></a></li>
             <li><a th:href="@{/admin/categories}" class="nav-link"><i class="bi bi-tags"></i><span>Danh mục hoa</span></a></li>
             <li><a th:href="@{/admin/styles}" class="nav-link"><i class="bi bi-sliders"></i><span>Thuộc tính sản phẩm</span></a></li>
-            <li><a th:href="@{/admin/deliveries}" class="nav-link"><i class="bi bi-truck"></i><span>Đơn vị vận chuyển</span></a></li>
+            <li><a th:href="@{/admin/deliveries}" class="nav-link"><i class="bi bi-truck"></i><span>Quản lý giao hàng</span></a></li>
             <li><a th:href="@{/admin/vouchers}" class="nav-link"><i class="bi bi-ticket-perforated"></i><span>Khuyến mãi</span></a></li>
             <li><a th:href="@{/admin/user-levels}" class="nav-link"><i class="bi bi-award"></i><span>Cấp bậc khách</span></a></li>
             <li><a th:href="@{/admin/transactions}" class="nav-link"><i class="bi bi-journal-text"></i><span>Lịch sử giao dịch</span></a></li>
-            <li><a th:href="@{/}" class="nav-link" target="_blank" style="color: #9DB7AA;"><i class="bi bi-box-arrow-up-right"></i><span>Xem cửa hàng</span></a></li>
+            <li><a th:href="@{/}" class="nav-link" target="_blank" style="color: #9DB7AA;" title="Xem trang bán hàng bên ngoài để kiểm tra nội dung"><i class="bi bi-box-arrow-up-right"></i><span>Xem website</span></a></li>
         </ul>
 
         <hr class="border-secondary my-2">
@@ -128,23 +320,23 @@
     <!-- Main Content -->
     <div class="main-wrapper p-4">
         <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+        <div class="d-flex justify-content-between align-items-center admin-page-header flex-wrap gap-2">
             <div>
-                <h1 class="admin-page-title mb-0" style="font-size: 28px !important; font-weight: 800; color: #20382E;">
+                <h1 class="admin-page-title mb-1">
                     Quản Lý Người Dùng & Vai Trò
                 </h1>
-                <p class="mb-0 mt-1" style="font-size: 15px; color: #66736B;">
+                <p class="mb-0 text-muted" style="font-size: 14px; color: #66736B !important;">
                     Quản lý tài khoản, phân quyền sử dụng và phê duyệt yêu cầu cấp vai trò
                 </p>
             </div>
         </div>
 
         <!-- Flash alerts & Data load error (Post-conditions UC_027) -->
-        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 px-3 small rounded-3" role="alert" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA;">
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2.5 px-3.5 small rounded-3 mb-4" role="alert" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA;">
             <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${successMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-        <div th:if="${errorMessage != null or dataLoadError == true}" class="alert alert-danger alert-dismissible fade show py-2 px-3 small rounded-3" id="dataLoadAlert" role="alert" style="background-color: #FDEBEB; color: #B83232; border: 1px solid #F7C6C6;">
+        <div th:if="${errorMessage != null or dataLoadError == true}" class="alert alert-danger alert-dismissible fade show py-2.5 px-3.5 small rounded-3 mb-4" id="dataLoadAlert" role="alert" style="background-color: #FDEBEB; color: #B83232; border: 1px solid #F7C6C6;">
             <i class="bi bi-exclamation-triangle-fill me-1"></i> <span th:text="${errorMessage != null ? errorMessage : 'Không thể tải danh sách người dùng. Vui lòng thử lại!'}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
@@ -153,17 +345,17 @@
         <ul class="nav nav-tabs border-bottom mb-4" id="userManagementTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <a class="nav-link" th:classappend="${activeTab == 'users' or activeTab == null} ? 'active' : ''"
-                   th:href="@{/admin/users(tab='users')}">
-                    <i class="bi bi-person-lines-fill me-2"></i>Người Dùng
-                    <span class="badge rounded-pill bg-light text-dark border ms-1" th:text="${totalElements != null ? totalElements : #lists.size(users)}">0</span>
+                   th:href="@{/admin/users(tab='users', size=${pageSize})}">
+                    <i class="bi bi-person-lines-fill me-1.5"></i>Người Dùng
+                    <span class="badge rounded-pill bg-light text-dark border ms-1" style="font-size: 11.5px; padding: 2px 7px;" th:text="${totalElements != null ? totalElements : #lists.size(users)}">0</span>
                 </a>
             </li>
             <li class="nav-item" role="presentation">
                 <a class="nav-link position-relative" th:classappend="${activeTab == 'requests'} ? 'active' : ''"
-                   th:href="@{/admin/users(tab='requests')}">
-                    <i class="bi bi-person-check-fill me-2"></i>Yêu Cầu Vai Trò
-                    <span th:if="${pendingCount > 0}" class="badge rounded-pill bg-danger ms-1" th:text="${pendingCount}"></span>
-                    <span th:if="${pendingCount == 0}" class="badge rounded-pill bg-light text-muted border ms-1">0</span>
+                   th:href="@{/admin/users(tab='requests', size=${pageSize})}">
+                    <i class="bi bi-person-check-fill me-1.5"></i>Yêu Cầu Vai Trò
+                    <span th:if="${pendingCount > 0}" class="badge rounded-pill bg-danger ms-1" style="font-size: 11.5px; padding: 2px 7px;" th:text="${pendingCount}"></span>
+                    <span th:if="${pendingCount == 0}" class="badge rounded-pill bg-light text-muted border ms-1" style="font-size: 11.5px; padding: 2px 7px;">0</span>
                 </a>
             </li>
         </ul>
@@ -172,23 +364,22 @@
         <!-- TAB 1: DANH SÁCH NGƯỜI DÙNG                -->
         <!-- ========================================== -->
         <div th:if="${activeTab == 'users' or activeTab == null}">
-            <!-- Thanh lọc người dùng -->
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
-                <form th:action="@{/admin/users}" method="get" class="row g-2 align-items-center">
+            <!-- Thanh lọc người dùng trên một hàng -->
+            <div class="card border-0 shadow-sm user-filter-card mb-4">
+                <form th:action="@{/admin/users}" method="get" class="d-flex align-items-center gap-3 flex-wrap flex-md-nowrap w-100">
                     <input type="hidden" name="tab" value="users">
-                    <div class="col-12 col-md-5 col-lg-6">
-                        <div class="input-group" style="height: 44px;">
-                            <span class="input-group-text bg-white border-end-0 text-muted" style="border-color: #E2E7E2; border-radius: 10px 0 0 10px;">
-                                <i class="bi bi-search"></i>
-                            </span>
-                            <input type="text" name="keyword" th:value="${keyword}" 
-                                   class="form-control border-start-0" 
-                                   style="height: 44px; border-color: #E2E7E2; border-radius: 0 10px 10px 0; font-size: 15px;" 
-                                   placeholder="Tìm theo tên đăng nhập, họ tên, email...">
-                        </div>
+                    <input type="hidden" name="size" th:value="${pageSize}">
+                    <div class="input-group input-group-sm flex-grow-1" style="max-width: 480px; height: 38px;">
+                        <span class="input-group-text bg-white border-end-0 text-muted" style="border-color: #E2E7E2; border-radius: 8px 0 0 8px; font-size: 13.5px;">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" name="keyword" th:value="${keyword}" 
+                               class="form-control border-start-0" 
+                               style="height: 38px; border-color: #E2E7E2; border-radius: 0 8px 8px 0; font-size: 13.5px;" 
+                               placeholder="Tìm theo tên đăng nhập, họ tên, email...">
                     </div>
-                    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                        <select name="role" class="form-select" style="height: 44px; border-color: #E2E7E2; border-radius: 10px; font-size: 15px; color: #20382E; font-weight: 600;">
+                    <div style="min-width: 170px; max-width: 200px;">
+                        <select name="role" class="form-select form-select-sm" style="height: 38px; border-color: #E2E7E2; border-radius: 8px; font-size: 13.5px; color: #20382E; font-weight: 600;">
                             <option value="ALL" th:selected="${currentRole == 'ALL' or currentRole == null}">Tất cả vai trò</option>
                             <option value="CUSTOMER" th:selected="${currentRole == 'CUSTOMER'}">Khách hàng</option>
                             <option value="VENDOR" th:selected="${currentRole == 'VENDOR'}">Người bán (Vendor)</option>
@@ -196,112 +387,161 @@
                             <option value="ADMIN" th:selected="${currentRole == 'ADMIN'}">Quản trị viên (Admin)</option>
                         </select>
                     </div>
-                    <div class="col-auto d-flex gap-2">
-                        <button class="btn btn-primary d-inline-flex align-items-center justify-content-center px-4" 
+                    <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                        <button class="btn btn-sm btn-primary d-inline-flex align-items-center justify-content-center px-3.5" 
                                 type="submit" 
-                                style="height: 44px; border-radius: 10px; font-size: 15px; font-weight: 700; background-color: #20382E !important; border-color: #20382E !important;">
-                            <i class="bi bi-funnel me-1"></i> Lọc
+                                style="height: 38px; border-radius: 8px; font-size: 13.5px; font-weight: 600; background-color: #20382E !important; border-color: #20382E !important; white-space: nowrap;">
+                            <i class="bi bi-funnel me-1.5"></i> Lọc
                         </button>
-                        <a th:href="@{/admin/users(tab='users')}" 
-                           class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center px-3" 
-                           style="height: 44px; border-radius: 10px; font-size: 15px; color: #66736B; border-color: #E2E7E2; background: #FFFFFF;">
+                        <a th:href="@{/admin/users(tab='users', size=${pageSize})}" 
+                           class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center justify-content-center px-3" 
+                           style="height: 38px; border-radius: 8px; font-size: 13px; color: #66736B; border-color: #E2E7E2; background: #FFFFFF; white-space: nowrap;">
                             Xóa lọc
                         </a>
                     </div>
                 </form>
             </div>
 
-            <!-- Bảng Người Dùng -->
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
+            <!-- Bảng Người Dùng (5 Cột chuẩn không kéo ngang) -->
+            <div class="card border-0 shadow-sm overflow-hidden user-table-card mb-4">
                 <div class="card-body p-0">
-                    <div class="table-responsive">
+                    <div class="table-responsive" style="min-height: 240px;">
                         <table class="table table-hover align-middle mb-0" id="usersTable">
-                            <thead style="background-color: #E5EEE8 !important;">
+                            <thead>
                             <tr>
-                                <th class="ps-4 fw-bold" style="width: 70px; color: #20382E;">ID</th>
-                                <th class="fw-bold" style="color: #20382E;">Tài khoản</th>
-                                <th class="fw-bold" style="color: #20382E;">Họ tên & Liên hệ</th>
-                                <th class="fw-bold" style="color: #20382E;">Vai trò đã cấp</th>
-                                <th class="fw-bold" style="color: #20382E;">Chi nhánh trực thuộc</th>
-                                <th class="fw-bold" style="color: #20382E; min-width: 150px;">Trạng thái</th>
-                                <th class="text-end pe-4 fw-bold" style="color: #20382E;">Thao tác</th>
+                                <th class="ps-3" style="width: 27%;">Người dùng</th>
+                                <th style="width: 25%;">Liên hệ</th>
+                                <th style="width: 17%;">Vai trò</th>
+                                <th style="width: 17%;">Chi nhánh</th>
+                                <th class="text-end pe-3" style="width: 14%;">Thao tác</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr th:if="${#lists.isEmpty(users)}">
-                                <td colspan="7" class="text-center py-5 text-muted">Không tìm thấy người dùng nào.</td>
+                                <td colspan="5" class="text-center py-4 text-muted" style="font-size: 14px;">Không tìm thấy người dùng nào.</td>
                             </tr>
                             <tr th:each="u : ${users}">
-                                <td class="ps-4 text-muted small" th:text="'#' + ${u.id}"></td>
-                                <td>
-                                    <strong class="text-dark d-block" th:text="${u.username}"></strong>
-                                    <span class="text-muted small" th:text="${u.email}"></span>
-                                </td>
-                                <td>
-                                    <div class="fw-semibold text-dark" th:text="${u.fullName}"></div>
-                                    <span class="text-muted small">
-                                        <i class="bi bi-telephone me-1"></i><span th:text="${u.phone != null and !#strings.isEmpty(u.phone) ? u.phone : 'Chưa cập nhật'}"></span>
-                                    </span>
-                                </td>
-                                <td>
-                                    <div class="d-flex flex-wrap gap-1">
-                                        <!-- Danh sách vai trò từ Set<Role> roles -->
-                                        <span th:each="r : ${u.roles}" class="role-pill"
-                                              th:classappend="${r.name() == 'ADMIN' ? 'role-pill-admin' : (r.name() == 'MANAGER' ? 'role-pill-manager' : (r.name() == 'VENDOR' ? 'role-pill-vendor' : 'role-pill-customer'))}">
-                                            <i class="bi" th:classappend="${r.name() == 'ADMIN' ? 'bi-shield-shaded' : (r.name() == 'MANAGER' ? 'bi-building' : (r.name() == 'VENDOR' ? 'bi-shop' : 'bi-person'))}"></i>
-                                            <span th:text="${r.name() == 'ADMIN' ? 'Admin' : (r.name() == 'MANAGER' ? 'Quản lý' : (r.name() == 'VENDOR' ? 'Người bán' : 'Khách hàng'))}"></span>
+                                <!-- 1. Người dùng: Họ tên + @username · Trạng thái -->
+                                <td class="ps-3">
+                                    <div class="user-fullname" th:text="${u.fullName}">Trần Thị Hoa</div>
+                                    <div class="d-flex align-items-center flex-wrap gap-1.5 mt-0.5">
+                                        <span class="user-handle" th:text="'@' + ${u.username}">@khachhang2</span>
+                                        <span class="text-muted" style="font-size: 10px;">&bull;</span>
+                                        <span th:if="${u.isActive == null or u.isActive}" 
+                                              class="status-badge-inline bg-success bg-opacity-10 text-success border border-success-subtle">
+                                            <i class="bi bi-check-circle-fill me-0.5" style="font-size: 9.5px;"></i>Đang hoạt động
                                         </span>
-                                        <!-- Fallback nếu user_roles chưa đồng bộ -->
-                                        <span th:if="${#sets.isEmpty(u.roles) and u.role != null}" class="role-pill role-pill-customer" th:text="${u.role.name()}"></span>
+                                        <span th:if="${u.isActive != null and !u.isActive}" 
+                                              class="status-badge-inline bg-danger bg-opacity-10 text-danger border border-danger-subtle">
+                                            <i class="bi bi-slash-circle-fill me-0.5" style="font-size: 9.5px;"></i>Đã khóa
+                                        </span>
                                     </div>
                                 </td>
+
+                                <!-- 2. Liên hệ: Email + Số điện thoại -->
                                 <td>
-                                    <span th:if="${u.store != null}" class="fw-semibold text-primary small d-inline-flex align-items-center gap-1">
-                                        <i class="bi bi-geo-alt-fill"></i> <span th:text="${u.store.name}"></span>
-                                    </span>
-                                    <span th:if="${u.store == null}" class="text-muted small">—</span>
+                                    <div class="user-contact-text text-truncate" style="max-width: 230px;" th:title="${u.email}">
+                                        <i class="bi bi-envelope me-1.5"></i><span th:text="${u.email}">khachhang2@gmail.com</span>
+                                    </div>
+                                    <div class="user-contact-text mt-0.5">
+                                        <i class="bi bi-telephone me-1.5"></i><span th:text="${u.phone != null and !#strings.isEmpty(u.phone) ? u.phone : 'Chưa cập nhật'}">0901234567</span>
+                                    </div>
                                 </td>
+
+                                <!-- 3. Vai trò: Đồng bộ tiếng Việt 100% -->
                                 <td>
-                                    <span th:if="${u.isActive == null or u.isActive}" class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill px-3 py-1">
-                                        <i class="bi bi-check-circle-fill me-1"></i>Đang hoạt động
-                                    </span>
-                                    <span th:if="${u.isActive != null and !u.isActive}" class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle rounded-pill px-3 py-1">
-                                        <i class="bi bi-slash-circle-fill me-1"></i>Đã khóa
-                                    </span>
+                                    <div class="d-flex flex-wrap gap-1 align-items-center">
+                                        <th:block th:if="${not #sets.isEmpty(u.roles)}">
+                                            <span th:each="r : ${u.roles}" class="role-pill"
+                                                  th:classappend="${r.name() == 'ADMIN' ? 'role-pill-admin' : (r.name() == 'MANAGER' ? 'role-pill-manager' : (r.name() == 'VENDOR' ? 'role-pill-vendor' : 'role-pill-customer'))}">
+                                                <i class="bi" th:classappend="${r.name() == 'ADMIN' ? 'bi-shield-shaded' : (r.name() == 'MANAGER' ? 'bi-building' : (r.name() == 'VENDOR' ? 'bi-shop' : 'bi-person'))}"></i>
+                                                <span th:text="${r.name() == 'ADMIN' ? 'Admin' : (r.name() == 'MANAGER' ? 'Quản lý' : (r.name() == 'VENDOR' ? 'Người bán' : 'Khách hàng'))}"></span>
+                                            </span>
+                                        </th:block>
+                                        <th:block th:if="${#sets.isEmpty(u.roles) and u.role != null}">
+                                            <span class="role-pill"
+                                                  th:classappend="${u.role.name() == 'ADMIN' ? 'role-pill-admin' : (u.role.name() == 'MANAGER' ? 'role-pill-manager' : (u.role.name() == 'VENDOR' ? 'role-pill-vendor' : 'role-pill-customer'))}">
+                                                <i class="bi" th:classappend="${u.role.name() == 'ADMIN' ? 'bi-shield-shaded' : (u.role.name() == 'MANAGER' ? 'bi-building' : (u.role.name() == 'VENDOR' ? 'bi-shop' : 'bi-person'))}"></i>
+                                                <span th:text="${u.role.name() == 'ADMIN' ? 'Admin' : (u.role.name() == 'MANAGER' ? 'Quản lý' : (u.role.name() == 'VENDOR' ? 'Người bán' : 'Khách hàng'))}"></span>
+                                            </span>
+                                        </th:block>
+                                        <span th:if="${#sets.isEmpty(u.roles) and u.role == null}" class="text-muted" style="font-size: 12.5px;">Chưa gán</span>
+                                    </div>
                                 </td>
-                                <td class="text-end pe-4">
-                                    <div class="d-inline-flex align-items-center gap-2">
-                                        <!-- Nút Quản lý vai trò (gán / thu hồi) -->
-                                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold"
-                                                data-bs-toggle="modal" th:data-bs-target="'#modalManageRoles_' + ${u.id}">
-                                            <i class="bi bi-shield-lock me-1"></i>Vai trò
+
+                                <!-- 4. Chi nhánh: giới hạn tối đa 2 dòng, có tooltip đầy đủ -->
+                                <td>
+                                    <div th:if="${u.store != null}">
+                                        <span class="branch-clamp fw-medium text-dark d-inline-block" 
+                                              th:title="${u.store.name + (u.store.address != null ? ' — ' + u.store.address : '')}"
+                                              th:text="${u.store.name}">
+                                            Chi nhánh Bến Thành
+                                        </span>
+                                    </div>
+                                    <div th:if="${u.store == null}">
+                                        <span class="text-muted" style="font-size: 13px;">Chưa gán</span>
+                                    </div>
+                                </td>
+
+                                <!-- 5. Thao tác: Nút Vai trò + Menu ⋮ (Khóa / Mở khóa, Xóa, Xem ID) -->
+                                <td class="text-end pe-3">
+                                    <div class="d-inline-flex align-items-center justify-content-end gap-1.5">
+                                        <!-- Nút Vai trò -->
+                                        <button type="button" 
+                                                class="btn-role-action"
+                                                data-bs-toggle="modal" 
+                                                th:data-bs-target="'#modalManageRoles_' + ${u.id}"
+                                                title="Quản lý vai trò">
+                                            <i class="bi bi-shield-lock"></i><span>Vai trò</span>
                                         </button>
 
-                                        <!-- Khóa / Mở khóa tài khoản -->
-                                        <form th:if="${(u.role == null or u.role.name() != 'ADMIN') and u.username != 'admin'}"
-                                              th:action="@{'/admin/users/toggle-active/' + ${u.id}}" method="post" class="d-inline">
-                                            <button type="submit" class="btn btn-sm rounded-pill px-3 fw-semibold"
-                                                    th:classappend="${u.isActive == null or u.isActive} ? 'btn-outline-danger' : 'btn-outline-success'"
-                                                    th:data-action="${u.isActive == null or u.isActive ? 'KHÓA' : 'MỞ KHÓA'}"
-                                                    th:data-user="${u.username}"
-                                                    onclick="return confirm('Bạn có chắc muốn ' + this.getAttribute('data-action') + ' tài khoản [' + this.getAttribute('data-user') + ']?')">
-                                                <i class="bi" th:classappend="${u.isActive == null or u.isActive} ? 'bi-lock' : 'bi-unlock'"></i>
-                                                <span th:text="${u.isActive == null or u.isActive} ? 'Khóa' : 'Mở'"></span>
+                                        <!-- Menu ⋮ (Dropdown) -->
+                                        <div class="dropdown d-inline-block">
+                                            <button class="btn-dots-action"
+                                                    type="button"
+                                                    data-bs-toggle="dropdown"
+                                                    data-bs-boundary="viewport"
+                                                    aria-expanded="false"
+                                                    title="Tùy chọn khác">
+                                                <i class="bi bi-three-dots-vertical"></i>
                                             </button>
-                                        </form>
-
-                                        <!-- Xóa tài khoản -->
-                                        <form th:if="${(u.role == null or u.role.name() != 'ADMIN') and u.username != 'admin'}"
-                                              th:action="@{'/admin/users/delete/' + ${u.id}}" method="post" class="d-inline">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2.5 fw-semibold"
-                                                    th:data-user="${u.username}"
-                                                    th:data-email="${u.email}"
-                                                    title="Xóa tài khoản vĩnh viễn và giải phóng email"
-                                                    onclick="return confirm('CẢNH BÁO: Bạn có chắc chắn muốn XÓA VĨNH VIỄN tài khoản [' + this.getAttribute('data-user') + '] (' + this.getAttribute('data-email') + ')?\n\nHành động này sẽ giải phóng email để có thể sử dụng đăng ký lại.')">
-                                                <i class="bi bi-trash3 me-1"></i>Xóa
-                                            </button>
-                                        </form>
-                                        <span th:if="${(u.role != null and u.role.name() == 'ADMIN') or u.username == 'admin'}" class="text-muted small px-2">—</span>
+                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-1" style="font-size: 13px; min-width: 175px; border: 1px solid #E2E7E2 !important; border-radius: 8px;">
+                                                <!-- Khóa / Mở khóa tài khoản -->
+                                                <li th:if="${(u.role == null or u.role.name() != 'ADMIN') and u.username != 'admin'}">
+                                                    <form th:action="@{'/admin/users/toggle-active/' + ${u.id}}" method="post" class="m-0 p-0">
+                                                        <button type="submit" class="dropdown-item d-flex align-items-center gap-2 py-1.5 px-3"
+                                                                th:classappend="${u.isActive == null or u.isActive} ? 'text-danger' : 'text-success'"
+                                                                th:data-action="${u.isActive == null or u.isActive ? 'KHÓA' : 'MỞ KHÓA'}"
+                                                                th:data-user="${u.username}"
+                                                                onclick="return confirm('Bạn có chắc muốn ' + this.getAttribute('data-action') + ' tài khoản [' + this.getAttribute('data-user') + ']?')">
+                                                            <i class="bi" th:classappend="${u.isActive == null or u.isActive} ? 'bi-lock' : 'bi-unlock'"></i>
+                                                            <span th:text="${u.isActive == null or u.isActive} ? 'Khóa tài khoản' : 'Mở khóa tài khoản'"></span>
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                                <!-- Xóa tài khoản -->
+                                                <li th:if="${(u.role == null or u.role.name() != 'ADMIN') and u.username != 'admin'}">
+                                                    <form th:action="@{'/admin/users/delete/' + ${u.id}}" method="post" class="m-0 p-0">
+                                                        <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2 py-1.5 px-3"
+                                                                th:data-user="${u.username}"
+                                                                th:data-email="${u.email}"
+                                                                title="Xóa tài khoản vĩnh viễn và giải phóng email"
+                                                                onclick="return confirm('CẢNH BÁO: Bạn có chắc chắn muốn XÓA VĨNH VIỄN tài khoản [' + this.getAttribute('data-user') + '] (' + this.getAttribute('data-email') + ')?\n\nHành động này sẽ giải phóng email để có thể sử dụng đăng ký lại.')">
+                                                            <i class="bi bi-trash3"></i>
+                                                            <span>Xóa tài khoản</span>
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                                <!-- Thông tin ID người dùng -->
+                                                <li><hr class="dropdown-divider my-1"></li>
+                                                <li>
+                                                    <span class="dropdown-item-text text-muted small py-1 px-3 d-flex align-items-center justify-content-between">
+                                                        <span>Mã ID:</span>
+                                                        <code class="text-dark fw-bold" th:text="'#' + ${u.id}">#1</code>
+                                                    </span>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -309,14 +549,14 @@
                         </table>
                     </div>
 
-                    <!-- BƯỚC 4 THEO UC_027: Phân trang (Next, Previous, hoặc số trang bất kỳ) -->
-                    <div th:if="${totalPages > 1}" class="d-flex justify-content-between align-items-center flex-wrap gap-3 p-3 border-top" style="border-color: #E2E7E2 !important;" id="usersPagination">
-                        <div class="small text-muted" style="font-size: 14px;">
+                    <!-- Phân trang ngay dưới bảng -->
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 px-4 py-3 border-top" style="border-color: #E2E7E2 !important; background-color: #FAFBFB;" id="usersPagination">
+                        <div class="small text-muted" style="font-size: 13.5px;">
                             Hiển thị <strong th:text="${totalElements > 0 ? (currentPage * pageSize) + 1 : 0}">1</strong> - 
-                            <strong th:text="${(currentPage + 1) * pageSize < totalElements ? (currentPage + 1) * pageSize : totalElements}">10</strong>
-                            trên tổng số <strong th:text="${totalElements}">10</strong> người dùng
+                            <strong th:text="${(currentPage + 1) * pageSize < totalElements ? (currentPage + 1) * pageSize : totalElements}">5</strong>
+                            trên tổng số <strong th:text="${totalElements}">5</strong> người dùng
                         </div>
-                        <nav aria-label="Users pagination">
+                        <nav aria-label="Users pagination" th:if="${totalPages > 1}">
                             <ul class="pagination pagination-sm mb-0">
                                 <!-- Nút Previous -->
                                 <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
@@ -360,12 +600,12 @@
         <!-- ========================================== -->
         <div th:if="${activeTab == 'requests'}">
             <!-- Bộ lọc trạng thái yêu cầu -->
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
+            <div class="card border-0 shadow-sm user-filter-card mb-4">
                 <form th:action="@{/admin/users}" method="get" class="row g-2 align-items-center">
                     <input type="hidden" name="tab" value="requests">
                     <div class="col-12 col-sm-6 col-md-4">
                         <select name="requestStatus" class="form-select" onchange="this.form.submit()"
-                                style="height: 44px; border-color: #E2E7E2; border-radius: 10px; font-size: 15px; color: #20382E; font-weight: 600;">
+                                style="height: 38px; border-color: #E2E7E2; border-radius: 8px; font-size: 13.5px; color: #20382E; font-weight: 600;">
                             <option value="ALL" th:selected="${currentRequestStatus == 'ALL'}">Tất cả trạng thái yêu cầu</option>
                             <option value="PENDING" th:selected="${currentRequestStatus == 'PENDING'}">⏳ Chờ duyệt</option>
                             <option value="APPROVED" th:selected="${currentRequestStatus == 'APPROVED'}">✅ Đã phê duyệt</option>
@@ -380,7 +620,7 @@
             </div>
 
             <!-- Bảng Yêu Cầu Vai Trò (Đúng theo mẫu yêu cầu) -->
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
+            <div class="card border-0 shadow-sm user-table-card mb-4">
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0">
@@ -400,8 +640,8 @@
                             </tr>
                             <tr th:each="req : ${roleRequests}">
                                 <td class="ps-4">
-                                    <strong class="text-dark d-block" th:text="${req.user.fullName}">Nguyễn Văn A</strong>
-                                    <span class="text-muted small" th:text="'@' + ${req.user.username} + ' • ' + ${req.user.email}"></span>
+                                    <div class="user-fullname" th:text="${req.user.fullName}">Nguyễn Văn A</div>
+                                    <div class="user-handle mt-0.5" th:text="'@' + ${req.user.username} + ' • ' + ${req.user.email}"></div>
                                 </td>
                                 <td>
                                     <span class="role-pill"

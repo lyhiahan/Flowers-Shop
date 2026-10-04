@@ -186,8 +186,30 @@ public class ProductSpecification {
         String lower = t.trim().toLowerCase();
         if (lower.contains("hồng") || lower.contains("rose")) {
             return cb.or(
-                    cb.like(cb.lower(root.get("name")), "%hồng%"),
-                    cb.like(cb.lower(root.get("description")), "%hồng%")
+                    cb.like(cb.lower(root.get("name")), "%hoa hồng%"),
+                    cb.like(cb.lower(root.get("name")), "%bó hồng%"),
+                    cb.like(cb.lower(root.get("name")), "%giỏ hồng%"),
+                    cb.like(cb.lower(root.get("name")), "%hộp hồng%"),
+                    cb.like(cb.lower(root.get("name")), "%bình hồng%"),
+                    cb.like(cb.lower(root.get("name")), "%lọ hồng%"),
+                    cb.like(cb.lower(root.get("name")), "%lẵng hồng%"),
+                    cb.like(cb.lower(root.get("name")), "%cành hồng%"),
+                    cb.like(cb.lower(root.get("name")), "%bông hồng%"),
+                    cb.like(cb.lower(root.get("name")), "%hồng đỏ%"),
+                    cb.like(cb.lower(root.get("name")), "%hồng vàng%"),
+                    cb.like(cb.lower(root.get("name")), "%hồng trắng%"),
+                    cb.like(cb.lower(root.get("name")), "%hồng kem%"),
+                    cb.like(cb.lower(root.get("name")), "%hồng phấn%"),
+                    cb.like(cb.lower(root.get("name")), "%hồng cam%"),
+                    cb.like(cb.lower(root.get("name")), "%hồng tím%"),
+                    cb.like(cb.lower(root.get("name")), "%hồng nhung%"),
+                    cb.like(cb.lower(root.get("name")), "%hồng ecuador%"),
+                    cb.like(cb.lower(root.get("name")), "%hồng ohara%"),
+                    cb.like(cb.lower(root.get("name")), "%rose%"),
+                    cb.like(cb.lower(root.get("description")), "%hoa hồng%"),
+                    cb.like(cb.lower(root.get("description")), "%bông hồng%"),
+                    cb.like(cb.lower(root.get("description")), "%cành hồng%"),
+                    cb.like(cb.lower(root.get("description")), "%rose%")
             );
         } else if (lower.contains("tulip")) {
             return cb.or(
@@ -288,6 +310,71 @@ public class ProductSpecification {
 
     private static Predicate buildColorPredicate(jakarta.persistence.criteria.CriteriaBuilder cb, jakarta.persistence.criteria.Root<Product> root, String c) {
         String lower = c.trim().toLowerCase();
+        if (lower.equals("hồng") || lower.contains("màu hồng") || lower.contains("pink")) {
+            return cb.or(
+                    cb.like(cb.lower(root.get("name")), "%màu hồng%"),
+                    cb.like(cb.lower(root.get("name")), "%tone hồng%"),
+                    cb.like(cb.lower(root.get("name")), "%sắc hồng%"),
+                    cb.like(cb.lower(root.get("name")), "%hồng phấn%"),
+                    cb.like(cb.lower(root.get("name")), "%hồng pastel%"),
+                    cb.like(cb.lower(root.get("name")), "%hồng nhạt%"),
+                    cb.like(cb.lower(root.get("name")), "%hồng sen%"),
+                    cb.like(cb.lower(root.get("name")), "%hồng kem%"),
+                    cb.like(cb.lower(root.get("name")), "%hồng baby%"),
+                    cb.like(cb.lower(root.get("name")), "%pink%"),
+                    cb.like(cb.lower(root.get("description")), "%màu hồng%"),
+                    cb.like(cb.lower(root.get("description")), "%tone hồng%"),
+                    cb.like(cb.lower(root.get("description")), "%hồng phấn%"),
+                    cb.like(cb.lower(root.get("description")), "%hồng pastel%"),
+                    cb.like(cb.lower(root.get("description")), "%pink%")
+            );
+        } else if (lower.contains("đỏ") || lower.contains("red")) {
+            return cb.or(
+                    cb.like(cb.lower(root.get("name")), "%đỏ%"),
+                    cb.like(cb.lower(root.get("name")), "%red%"),
+                    cb.like(cb.lower(root.get("description")), "%đỏ%"),
+                    cb.like(cb.lower(root.get("description")), "%red%")
+            );
+        } else if (lower.contains("vàng") || lower.contains("yellow")) {
+            return cb.or(
+                    cb.like(cb.lower(root.get("name")), "%vàng%"),
+                    cb.like(cb.lower(root.get("name")), "%yellow%"),
+                    cb.like(cb.lower(root.get("description")), "%vàng%"),
+                    cb.like(cb.lower(root.get("description")), "%yellow%")
+            );
+        } else if (lower.contains("trắng") || lower.contains("white")) {
+            return cb.or(
+                    cb.like(cb.lower(root.get("name")), "%trắng%"),
+                    cb.like(cb.lower(root.get("name")), "%white%"),
+                    cb.like(cb.lower(root.get("description")), "%trắng%"),
+                    cb.like(cb.lower(root.get("description")), "%white%")
+            );
+        } else if (lower.contains("tím") || lower.contains("purple") || lower.contains("violet")) {
+            return cb.or(
+                    cb.like(cb.lower(root.get("name")), "%tím%"),
+                    cb.like(cb.lower(root.get("name")), "%purple%"),
+                    cb.like(cb.lower(root.get("name")), "%violet%"),
+                    cb.like(cb.lower(root.get("description")), "%tím%"),
+                    cb.like(cb.lower(root.get("description")), "%purple%")
+            );
+        } else if (lower.contains("xanh") || lower.contains("blue") || lower.contains("green")) {
+            return cb.or(
+                    cb.like(cb.lower(root.get("name")), "%xanh%"),
+                    cb.like(cb.lower(root.get("name")), "%blue%"),
+                    cb.like(cb.lower(root.get("name")), "%green%"),
+                    cb.like(cb.lower(root.get("description")), "%xanh%"),
+                    cb.like(cb.lower(root.get("description")), "%blue%")
+            );
+        } else if (lower.contains("cam") || lower.contains("orange")) {
+            return cb.or(
+                    cb.like(cb.lower(root.get("name")), "%màu cam%"),
+                    cb.like(cb.lower(root.get("name")), "%cam %"),
+                    cb.like(cb.lower(root.get("name")), "% cam%"),
+                    cb.like(cb.lower(root.get("name")), "%orange%"),
+                    cb.like(cb.lower(root.get("description")), "%màu cam%"),
+                    cb.like(cb.lower(root.get("description")), "%orange%")
+            );
+        }
         return cb.or(
                 cb.like(cb.lower(root.get("name")), "%" + lower + "%"),
                 cb.like(cb.lower(root.get("description")), "%" + lower + "%")

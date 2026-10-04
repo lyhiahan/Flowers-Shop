@@ -23,7 +23,18 @@ public class Delivery {
 
     @Column(nullable = false)
     @Builder.Default
-    private BigDecimal price = BigDecimal.ZERO; // Phí giao hàng
+    private BigDecimal price = BigDecimal.ZERO; // Phí giao hàng tham chiếu
+
+    @Column(length = 50)
+    private String phone; // Số điện thoại / Hotline hỗ trợ
+
+    @org.hibernate.annotations.Nationalized
+    @Column(name = "coverage_area", length = 255)
+    private String coverageArea; // Phạm vi phục vụ (ví dụ: Toàn TP.HCM, Quận 1 & lân cận)
+
+    @org.hibernate.annotations.Nationalized
+    @Column(name = "vehicle_type", length = 100)
+    private String vehicleType; // Phương tiện: Xe máy giữ ẩm, Xe tải hoa lạnh, Xe van
 
     @Column(name = "is_active", nullable = false)
     @Builder.Default

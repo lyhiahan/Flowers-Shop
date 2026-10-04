@@ -49,6 +49,9 @@ public class ProfileController {
         model.addAttribute("availableStores", storeRepository.findAll());
         model.addAttribute("stores", storeRepository.findByStatusTrue());
         model.addAttribute("activeTab", activeTab != null ? activeTab : "info");
+        try {
+            model.addAttribute("cartItemCount", cartService.getCartItemCount(principal.getName()));
+        } catch (Exception ignored) {}
         return "customer/profile";
     }
 

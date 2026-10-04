@@ -33,6 +33,7 @@ public class OrderServiceImpl implements OrderService {
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
     private final DeliveryRepository deliveryRepository;
+    private final com.finalproject.repository.ShippingTariffRepository shippingTariffRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final com.finalproject.service.VoucherService voucherService;
     private final TransactionRepository transactionRepository;
@@ -352,7 +353,18 @@ public class OrderServiceImpl implements OrderService {
                     || delivery.getPrice() == null || delivery.getPrice().signum() < 0) {
                 throw new IllegalArgumentException("Đơn vị giao hàng hiện không khả dụng.");
             }
-            shippingFee = delivery.getPrice();
+            // Ưu tiên tính phí theo Biểu phí giao hàng (Shipping Tariff) đã cấu hình cho chi nhánh
+            BigDecimal customTariffFee = null;
+            if (store != null && store.getId() != null) {
+                List<com.finalproject.entity.ShippingTariff> tariffs = shippingTariffRepository.findByStoreIdAndIsDeletedFalse(store.getId());
+                for (com.finalproject.entity.ShippingTariff t : tariffs) {
+                    if (Boolean.TRUE.equals(t.getIsActive()) && t.getDelivery() != null && t.getDelivery().getId().equals(deliveryUnitId)) {
+                        customTariffFee = t.getBaseFee();
+                        break;
+                    }
+                }
+            }
+            shippingFee = customTariffFee != null ? customTariffFee : delivery.getPrice();
         }
         BigDecimal discount = BigDecimal.ZERO;
         if (voucherCode != null && !voucherCode.isBlank()) {
@@ -400,6 +412,12 @@ public class OrderServiceImpl implements OrderService {
     private void requireActiveCustomer(User user) {
         if (!Boolean.TRUE.equals(user.getIsActive()) || user.isRetiredDeliveryAccount()) {
             throw new org.springframework.security.access.AccessDeniedException("Tài khoản đã bị khóa hoặc vô hiệu hóa.");
+        }
+        boolean isAdmin = (user.getRole() == Role.ADMIN)
+                || (user.getRoles() != null && user.getRoles().contains(Role.ADMIN))
+                || "admin".equalsIgnoreCase(user.getUsername());
+        if (isAdmin) {
+            throw new org.springframework.security.access.AccessDeniedException("Tài khoản Quản trị viên không thể thực hiện tạo đơn hoặc mua hàng.");
         }
     }
 

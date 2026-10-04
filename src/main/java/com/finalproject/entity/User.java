@@ -117,13 +117,21 @@ public class User {
     public void addRole(Role newRole) {
         if (this.roles == null) this.roles = new java.util.HashSet<>();
         this.roles.add(newRole);
-        this.roles.add(Role.CUSTOMER); // Luôn giữ quyền khách hàng
+        if (hasRole(Role.ADMIN) || this.role == Role.ADMIN) {
+            this.roles.remove(Role.CUSTOMER); // Admin không bao giờ giữ vai trò Khách hàng
+        } else {
+            this.roles.add(Role.CUSTOMER); // Quản lý và Người bán vẫn giữ quyền khách hàng
+        }
     }
 
     public void removeRole(Role targetRole) {
         if (this.roles != null) {
             this.roles.remove(targetRole);
-            this.roles.add(Role.CUSTOMER); // Không bao giờ mất quyền khách hàng
+            if (hasRole(Role.ADMIN) || this.role == Role.ADMIN) {
+                this.roles.remove(Role.CUSTOMER);
+            } else {
+                this.roles.add(Role.CUSTOMER);
+            }
         }
         if (this.role == targetRole) {
             if (this.roles != null && !this.roles.isEmpty()) {

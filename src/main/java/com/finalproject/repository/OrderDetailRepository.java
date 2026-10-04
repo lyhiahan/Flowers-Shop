@@ -37,4 +37,12 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
            "GROUP BY od.product.id " +
            "ORDER BY SUM(od.quantity) DESC")
     List<Long> findTopSellingProductIdsSince(@Param("since") LocalDateTime since, Pageable pageable);
+
+    // Tính tổng số lượng đang giữ (Reserved) cho các đơn hàng đang xử lý theo sản phẩm và chi nhánh
+    @Query("SELECT od.product.id, od.order.pickupStore.id, SUM(od.quantity) " +
+           "FROM OrderDetail od " +
+           "WHERE od.order.status IN (com.finalproject.enums.OrderStatus.PENDING, com.finalproject.enums.OrderStatus.CONFIRMED, com.finalproject.enums.OrderStatus.PREPARING) " +
+           "AND od.order.pickupStore IS NOT NULL " +
+           "GROUP BY od.product.id, od.order.pickupStore.id")
+    List<Object[]> findReservedStockGrouped();
 }

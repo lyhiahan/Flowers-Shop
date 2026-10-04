@@ -256,20 +256,26 @@ input, select, textarea, .form-control, .form-select, .header-search-input, .qty
 }
 /* Nút bấm */
 .btn, .btn-primary, .btn-floral-primary, .btn-brand-hero, .btn-flower-add, .btn-add-cart, .btn-qty, .btn-qty-step, .account-pill-btn {
-    font-family: var(--font-sans) !important;
-    font-size: 17px !important;
-    font-weight: 400 !important;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 500;
+}
+.btn-sm, .btn-group-sm > .btn {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    padding: 0.25rem 0.65rem !important;
+    line-height: 1.4 !important;
+    white-space: nowrap !important;
 }
 
-/* 6. Thông tin phụ: 16 px, 400 */
+/* 6. Thông tin phụ: 12-14 px, 400 */
 .top-subbar {
     display: none !important;
 }
 
 .brand-hero-badge, small, .small, .text-muted, .form-text, .badge, .flower-card-meta-sub, .store-subtext, .info-helper, .accordion-button, .breadcrumb, .meta-text {
-    font-family: var(--font-sans) !important;
-    font-size: 16px !important;
-    font-weight: 400 !important;
+    font-family: var(--font-sans);
+    font-weight: 400;
 }
 
 .text-brand-green { color: var(--brand-green) !important; }
@@ -632,19 +638,28 @@ body.admin-body {
     color: var(--admin-text-sub) !important;
 }
 
-/* 7. Nút hành động chính: 17–18 px | 700 | Trắng trên nền xanh #355447 */
-.admin-body .btn-primary, .main-wrapper .btn-primary,
+/* 7. Nút hành động chính: 14–15 px | 600–700 | Trắng trên nền xanh #355447 */
+.admin-body .btn-primary:not(.btn-sm), .main-wrapper .btn-primary:not(.btn-sm),
 .top-navbar .btn-primary, .btn-action-main {
     font-family: var(--font-sans) !important;
-    font-size: 17px !important;
+    font-size: 15px !important;
     font-weight: 700 !important;
     color: #FFFFFF !important;
     background-color: var(--admin-primary) !important;
     border-color: var(--admin-primary) !important;
     border-radius: 9999px !important;
-    padding: 9px 22px !important;
+    padding: 8px 20px !important;
     transition: background-color 0.15s ease !important;
     box-shadow: none !important;
+}
+
+.admin-body .btn-sm, .main-wrapper .btn-sm, .table .btn-sm {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    height: 34px !important;
+    padding: 0 12px !important;
+    line-height: 32px !important;
+    white-space: nowrap !important;
 }
 
 .admin-body .btn-primary:hover, .main-wrapper .btn-primary:hover,
@@ -654,9 +669,10 @@ body.admin-body {
     color: #FFFFFF !important;
 }
 
-/* 8. Menu bên trái (Sidebar) */
+/* 8. Menu bên trái (Sidebar): ~225px */
 .sidebar, .admin-sidebar {
-    width: 250px !important;
+    width: 225px !important;
+    min-width: 225px !important;
     background-color: var(--admin-sidebar-bg) !important;
     min-height: 100vh !important;
 }
@@ -664,15 +680,15 @@ body.admin-body {
 .sidebar .nav-link, .admin-sidebar .nav-link {
     font-family: var(--font-sans) !important;
     color: #D1DCD5 !important;
-    font-size: 16px !important;
+    font-size: 14.5px !important;
     font-weight: 500 !important;
-    min-height: 46px !important;
+    min-height: 42px !important;
     display: flex !important;
     align-items: center !important;
-    gap: 12px !important;
-    padding: 10px 16px !important;
+    gap: 10px !important;
+    padding: 8px 14px !important;
     border-radius: 8px !important;
-    margin: 2px 8px !important;
+    margin: 2px 6px !important;
     text-decoration: none !important;
     border-left: 3px solid transparent !important;
     transition: background-color 0.15s ease, color 0.15s ease, border-left 0.15s ease !important;
@@ -708,11 +724,12 @@ body.admin-body {
 .manager-content table thead th {
     background-color: #E5EEE8 !important;
     color: #20382E !important;
-    font-size: 15.5px !important;
-    font-weight: 800 !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
     border-bottom: 2px solid #D1E5DA !important;
-    padding: 16px 20px !important;
-    letter-spacing: 0.02em !important;
+    padding: 10px 14px !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
     white-space: nowrap !important;
 }
 
@@ -728,7 +745,7 @@ body.admin-body {
 .table-manager-wallet tbody tr td,
 .manager-content table tbody td {
     border-bottom: 1px solid #E2E7E2 !important;
-    padding: 16px 20px !important;
+    padding: 10px 14px !important;
     vertical-align: middle !important;
 }
 

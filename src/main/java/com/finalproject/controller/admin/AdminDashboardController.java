@@ -34,9 +34,13 @@ public class AdminDashboardController {
             @org.springframework.web.bind.annotation.RequestParam(value = "timeframe", defaultValue = "day") String timeframe,
             @org.springframework.web.bind.annotation.RequestParam(value = "userChartType", defaultValue = "line") String userChartType,
             @org.springframework.web.bind.annotation.RequestParam(value = "storeChartType", defaultValue = "bar") String storeChartType,
+            @org.springframework.web.bind.annotation.RequestParam(value = "error", required = false) String error,
             Principal principal,
             Model model) {
         try {
+            if ("admin_shopping_denied".equalsIgnoreCase(error)) {
+                model.addAttribute("errorMessage", "Tài khoản Quản trị viên không thể thực hiện chức năng mua hàng hoặc truy cập giỏ hàng. Quý khách vui lòng quản trị hệ thống tại đây.");
+            }
             User admin = userRepository.findByUsername(principal.getName()).orElse(null);
 
             long totalProducts = productRepository.count();

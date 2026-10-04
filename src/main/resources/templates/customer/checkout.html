@@ -323,6 +323,46 @@
             margin-bottom: 16px;
         }
 
+        /* Pickup branch info card */
+        .pickup-branch-card {
+            background: #f8faf8;
+            border: 1px solid #C3D9CC;
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-size: 14px;
+            color: var(--flower-text-muted);
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+        .pickup-branch-card strong { color: var(--flower-text-main); }
+        .pickup-status-ok  { color: #16a34a; font-weight: 600; }
+        .pickup-status-err { color: #dc2626; font-weight: 600; }
+
+        /* Time slot picker */
+        .time-slot-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .time-slot-btn {
+            border: 1.5px solid var(--flower-border-input);
+            border-radius: 8px;
+            padding: 7px 4px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--flower-text-main);
+            background: #fff;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s ease;
+        }
+        .time-slot-btn:hover, .time-slot-btn.selected {
+            border-color: var(--flower-primary);
+            background: var(--flower-accent-bg);
+            color: var(--flower-primary);
+        }
+
         /* Voucher collapse */
         .voucher-toggle-btn {
             background: none;
@@ -398,14 +438,16 @@
                             </h2>
                         </div>
                         <div class="checkout-card-body">
-                            
-                            <!-- Nhóm 1: Cách nhận hàng -->
+
+                            <!-- Nhóm 1: Chọn cách nhận hàng -->
                             <div class="mb-4">
                                 <label class="form-label-custom">Cách nhận hàng (*)</label>
                                 <div class="row g-3">
                                     <div class="col-sm-6">
                                         <div class="form-check p-0">
-                                            <input class="form-check-input d-none" type="radio" name="shippingMethod" id="methodDelivery" value="DELIVERY" checked onchange="toggleShippingMethod()">
+                                            <input class="form-check-input d-none" type="radio" name="shippingMethod"
+                                                   id="methodDelivery" value="DELIVERY" checked
+                                                   onchange="toggleShippingMethod()">
                                             <label class="shipping-pill-label w-100" for="methodDelivery">
                                                 <i class="bi bi-truck fs-5"></i>
                                                 <div>
@@ -417,7 +459,9 @@
                                     </div>
                                     <div class="col-sm-6">
                                         <div class="form-check p-0">
-                                            <input class="form-check-input d-none" type="radio" name="shippingMethod" id="methodPickup" value="PICKUP" onchange="toggleShippingMethod()">
+                                            <input class="form-check-input d-none" type="radio" name="shippingMethod"
+                                                   id="methodPickup" value="PICKUP"
+                                                   onchange="toggleShippingMethod()">
                                             <label class="shipping-pill-label w-100" for="methodPickup">
                                                 <i class="bi bi-shop fs-5"></i>
                                                 <div>
@@ -428,33 +472,14 @@
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- Đơn vị giao hàng khi chọn Giao hàng tận nơi -->
-                                <div class="mt-3" id="deliveryUnitSection" th:if="${deliveries != null and !#lists.isEmpty(deliveries)}">
-                                    <label class="form-label-custom"><i class="bi bi-box-seam me-1"></i>Đơn vị giao hàng (*)</label>
-                                    <select name="deliveryUnitId" id="deliveryUnitSelect" class="form-select-custom w-100" onchange="updateCheckoutTotal()">
-                                        <option th:each="d : ${deliveries}" 
-                                                th:value="${d.id}" 
-                                                th:data-price="${d.price}"
-                                                th:text="${d.name + ' (' + #numbers.formatDecimal(d.price, 0, 'COMMA', 0, 'POINT') + 'đ)'}">
-                                        </option>
-                                    </select>
-                                </div>
                             </div>
 
-                            <!-- Nếu chọn Đến lấy: Dropdown chọn chi nhánh -->
-                            <div class="mb-4 d-none" id="pickupStoreSection">
-                                <label class="form-label-custom" for="pickupStoreSelect">Chọn chi nhánh nhận hoa (*)</label>
-                                <select name="pickupStoreId" id="pickupStoreSelect" class="form-select-custom w-100">
-                                    <option th:each="s : ${stores}" 
-                                            th:value="${s.id}" 
-                                            th:text="${s.name + ' - ' + s.address}"></option>
-                                </select>
-                            </div>
+                            <!-- ====================================================
+                                 CHẾ ĐỘ A: GIAO TẬN NƠI
+                                 ==================================================== -->
+                            <div id="sectionDelivery">
 
-                            <!-- Nhóm 2: Người nhận -->
-                            <div class="mb-4 pt-2 border-top">
-                                <!-- Địa chỉ đã lưu -->
+                                <!-- A1: Địa chỉ đã lưu -->
                                 <div th:if="${!#lists.isEmpty(addresses)}" class="saved-address-box mb-3" id="savedAddressSection">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <span class="small fw-semibold text-secondary">
@@ -463,8 +488,8 @@
                                     </div>
                                     <select class="form-select form-select-sm bg-white" onchange="fillAddress(this)">
                                         <option value="">-- Bấm để chọn địa chỉ đã lưu --</option>
-                                        <option th:each="a : ${addresses}" 
-                                                th:value="${a.id}" 
+                                        <option th:each="a : ${addresses}"
+                                                th:value="${a.id}"
                                                 th:data-name="${a.recipientName}"
                                                 th:data-phone="${a.phone}"
                                                 th:data-address="${a.addressDetail}"
@@ -474,44 +499,164 @@
                                     </select>
                                 </div>
 
-                                <div class="row g-3">
+                                <!-- A2: Người nhận -->  
+                                <div class="row g-3 mb-3">
                                     <div class="col-md-6">
                                         <label class="form-label-custom" for="recipientNameInput">Họ và tên người nhận (*)</label>
-                                        <input type="text" id="recipientNameInput" name="recipientName" class="form-control-custom w-100" 
-                                               th:value="${customer != null ? customer.fullName : ''}" 
-                                               placeholder="VD: Nguyễn Văn A" required>
+                                        <input type="text" id="recipientNameInput" name="recipientName"
+                                               class="form-control-custom w-100"
+                                               th:value="${customer != null ? customer.fullName : ''}"
+                                               placeholder="VD: Nguyễn Văn A">
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label-custom" for="recipientPhoneInput">Số điện thoại liên hệ (*)</label>
-                                        <input type="tel" id="recipientPhoneInput" name="recipientPhone" class="form-control-custom w-100" 
-                                               th:value="${customer != null ? customer.phone : ''}" 
-                                               placeholder="VD: 0901234567" required>
-                                    </div>
-                                    <!-- Địa chỉ giao tận nơi -->
-                                    <div class="col-12" id="deliveryAddressSection">
-                                        <label class="form-label-custom" for="recipientAddressInput">Địa chỉ nhận hoa (*)</label>
-                                        <input type="text" id="recipientAddressInput" name="recipientAddress" class="form-control-custom w-100" 
-                                               th:value="${customer != null ? customer.address : ''}" 
-                                               placeholder="Số nhà, tên đường, phường/xã, quận/huyện..." required>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Nhóm 3: Ngày nhận và lời nhắn -->
-                            <div class="pt-2 border-top">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label-custom">Ngày nhận hoa (*)</label>
-                                        <input type="date" name="deliveryDate" class="form-control-custom w-100" 
-                                               th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" required>
+                                        <input type="tel" id="recipientPhoneInput" name="recipientPhone"
+                                               class="form-control-custom w-100"
+                                               th:value="${customer != null ? customer.phone : ''}"
+                                               placeholder="VD: 0901234567">
                                     </div>
                                     <div class="col-12">
-                                        <label class="form-label-custom">Lời nhắn thiệp / banner (tùy chọn)</label>
-                                        <textarea name="greetingMessage" class="form-control-custom w-100" rows="2" 
-                                                  placeholder="VD: Chúc mừng sinh nhật mẹ yêu, chúc mẹ luôn vui vẻ và hạnh phúc!"></textarea>
+                                        <label class="form-label-custom" for="recipientAddressInput">Địa chỉ nhận hoa (*)</label>
+                                        <input type="text" id="recipientAddressInput" name="recipientAddress"
+                                               class="form-control-custom w-100"
+                                               th:value="${customer != null ? customer.address : ''}"
+                                               placeholder="Số nhà, tên đường, phường/xã, quận/huyện...">
                                     </div>
                                 </div>
-                            </div>
+
+                                <!-- A3: Dịch vụ giao hàng -->
+                                <div class="mb-3" id="deliveryUnitSection" th:if="${deliveries != null and !#lists.isEmpty(deliveries)}">
+                                    <label class="form-label-custom"><i class="bi bi-box-seam me-1"></i>Dịch vụ giao hàng (*)</label>
+                                    <select name="deliveryUnitId" id="deliveryUnitSelect" class="form-select-custom w-100"
+                                            onchange="updateCheckoutTotal()">
+                                        <option th:each="d : ${deliveries}"
+                                                th:value="${d.id}"
+                                                th:data-price="${d.price}"
+                                                th:text="${d.name + ' (' + #numbers.formatDecimal(d.price, 0, 'COMMA', 0, 'POINT') + ' ₫)'}">
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- A4: Ngày và khung giờ giao -->
+                                <div class="pt-2 border-top">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label-custom">Ngày giao hoa (*)</label>
+                                            <input type="date" name="deliveryDate" id="deliveryDateInput"
+                                                   class="form-control-custom w-100"
+                                                   th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label-custom">Khung giờ giao</label>
+                                            <select name="deliveryTimeSlot" class="form-select-custom w-100">
+                                                <option value="">-- Chọn khung giờ --</option>
+                                                <option value="07:00-09:00">07:00 – 09:00</option>
+                                                <option value="09:00-11:00">09:00 – 11:00</option>
+                                                <option value="11:00-13:00">11:00 – 13:00</option>
+                                                <option value="13:00-15:00">13:00 – 15:00</option>
+                                                <option value="15:00-17:00">15:00 – 17:00</option>
+                                                <option value="17:00-20:00">17:00 – 20:00</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label-custom">Lời nhắn thiệp / banner (tùy chọn)</label>
+                                            <textarea name="greetingMessage" class="form-control-custom w-100" rows="2"
+                                                      placeholder="VD: Chúc mừng sinh nhật mẹ yêu, chúc mẹ luôn vui vẻ và hạnh phúc!"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div><!-- end #sectionDelivery -->
+
+                            <!-- ====================================================
+                                 CHẾ ĐỘ B: ĐẾN LẤY TẠI CỬA HÀNG
+                                 ==================================================== -->
+                            <div id="sectionPickup" class="d-none">
+
+                                <!-- B1: Chọn chi nhánh -->
+                                <div class="mb-3">
+                                    <label class="form-label-custom" for="pickupStoreSelect">
+                                        <i class="bi bi-shop me-1"></i>Chọn chi nhánh nhận hoa (*)
+                                    </label>
+                                    <select name="pickupStoreId" id="pickupStoreSelect" class="form-select-custom w-100"
+                                            onchange="onPickupStoreChange()">
+                                        <option value="">-- Chọn chi nhánh --</option>
+                                        <option th:each="s : ${stores}"
+                                                th:value="${s.id}"
+                                                th:data-address="${s.address}"
+                                                th:text="${s.name}">
+                                        </option>
+                                    </select>
+                                    <!-- Thẻ thông tin chi nhánh được chọn -->
+                                    <div id="pickupBranchCard" class="pickup-branch-card d-none">
+                                        <div><i class="bi bi-geo-alt-fill text-danger me-1"></i><strong>Địa chỉ:</strong> <span id="pickupBranchAddr"></span></div>
+                                        <div class="mt-1"><i class="bi bi-clock me-1"></i><strong>Giờ mở cửa:</strong> 07:00 – 21:00 hàng ngày</div>
+                                        <!-- Trạng thái tồn kho -->
+                                        <div class="mt-2" id="pickupStockStatus">
+                                            <span class="text-muted" style="font-size:13px;">
+                                                <i class="bi bi-arrow-repeat me-1"></i>Đang kiểm tra tồn kho...
+                                            </span>
+                                        </div>
+                                        <!-- Chi tiết từng sản phẩm -->
+                                        <div id="pickupItemDetails" class="mt-2 d-none" style="font-size:13px; border-top:1px solid #e2eae5; padding-top:8px;"></div>
+                                    </div>
+                                </div>
+
+                                <!-- B2: Người đến lấy -->
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom" for="pickupPersonName">Họ và tên người đến lấy (*)</label>
+                                        <input type="text" id="pickupPersonName" name="recipientName"
+                                               class="form-control-custom w-100"
+                                               th:value="${customer != null ? customer.fullName : ''}"
+                                               placeholder="VD: Nguyễn Văn A">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom" for="pickupPersonPhone">Số điện thoại (*)</label>
+                                        <input type="tel" id="pickupPersonPhone" name="recipientPhone"
+                                               class="form-control-custom w-100"
+                                               th:value="${customer != null ? customer.phone : ''}"
+                                               placeholder="VD: 0901234567">
+                                    </div>
+                                </div>
+
+                                <!-- B3: Ngày và khung giờ đến lấy -->
+                                <div class="pt-2 border-top">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label-custom">Ngày đến lấy (*)</label>
+                                            <input type="date" name="deliveryDate" id="pickupDateInput"
+                                                   class="form-control-custom w-100"
+                                                   th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label-custom">Khung giờ đến lấy</label>
+                                            <select name="deliveryTimeSlot" class="form-select-custom w-100">
+                                                <option value="">-- Chọn khung giờ --</option>
+                                                <option value="07:00-09:00">07:00 – 09:00</option>
+                                                <option value="09:00-11:00">09:00 – 11:00</option>
+                                                <option value="11:00-13:00">11:00 – 13:00</option>
+                                                <option value="13:00-15:00">13:00 – 15:00</option>
+                                                <option value="15:00-17:00">15:00 – 17:00</option>
+                                                <option value="17:00-20:00">17:00 – 20:00</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label-custom">Lời nhắn thiệp / banner (tùy chọn)</label>
+                                            <textarea name="greetingMessage" class="form-control-custom w-100" rows="2"
+                                                      placeholder="VD: Chúc mừng sinh nhật mẹ yêu!"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- B4: Thông báo phí 0 đồng -->
+                                <div class="mt-3 d-flex align-items-center gap-2 p-2 rounded-3"
+                                     style="background:#f0fdf4; border:1px solid #bbf7d0; font-size:14px; color:#166534;">
+                                    <i class="bi bi-truck" style="font-size:18px;"></i>
+                                    <span>Đến lấy tại cửa hàng — <strong>Phí giao hàng: 0 ₫</strong></span>
+                                </div>
+
+                            </div><!-- end #sectionPickup -->
 
                         </div>
                     </div>
@@ -603,7 +748,8 @@
                                     <div class="input-group mb-2">
                                         <input type="text" name="voucherCode" id="voucherInput" 
                                                class="form-control text-uppercase" 
-                                               placeholder="Nhập mã (VD: FLOWER10)">
+                                               placeholder="Nhập mã (VD: FLOWER10)"
+                                               oninput="updateCheckoutTotal()">
                                     </div>
                                     
                                     <!-- Dropdown chọn mã phù hợp -->
@@ -671,99 +817,372 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        /* ============================================================
+         * Điền thông tin từ địa chỉ đã lưu (chỉ áp dụng khi Giao tận nơi)
+         * ============================================================ */
         function fillAddress(selectElem) {
             const opt = selectElem.options[selectElem.selectedIndex];
             if (opt && opt.value) {
-                const nameInp = document.getElementById('recipientNameInput');
+                const nameInp  = document.getElementById('recipientNameInput');
                 const phoneInp = document.getElementById('recipientPhoneInput');
-                const addrInp = document.getElementById('recipientAddressInput');
-                if (nameInp) nameInp.value = opt.getAttribute('data-name') || '';
-                if (phoneInp) phoneInp.value = opt.getAttribute('data-phone') || '';
-                if (addrInp) addrInp.value = opt.getAttribute('data-address') || '';
+                const addrInp  = document.getElementById('recipientAddressInput');
+                if (nameInp)  nameInp.value  = opt.getAttribute('data-name')    || '';
+                if (phoneInp) phoneInp.value = opt.getAttribute('data-phone')   || '';
+                if (addrInp)  addrInp.value  = opt.getAttribute('data-address') || '';
                 updateCheckoutTotal();
             }
         }
 
+        /* ============================================================
+         * Khi thay đổi cách nhận hàng — ẩn/hiện đúng nhóm trường
+         * ============================================================ */
         function toggleShippingMethod() {
             const isPickup = document.getElementById('methodPickup').checked;
-            const pickupSection = document.getElementById('pickupStoreSection');
-            const deliverySection = document.getElementById('deliveryAddressSection');
-            const savedAddressSection = document.getElementById('savedAddressSection');
-            const deliveryUnitSection = document.getElementById('deliveryUnitSection');
-            const addressInput = document.getElementById('recipientAddressInput');
-            const pickupSelect = document.getElementById('pickupStoreSelect');
+            const sDelivery = document.getElementById('sectionDelivery');
+            const sPickup   = document.getElementById('sectionPickup');
+
+            // Ẩn/hiện toàn bộ khối
+            if (sDelivery) sDelivery.classList.toggle('d-none', isPickup);
+            if (sPickup)   sPickup.classList.toggle('d-none', !isPickup);
+
+            // Cập nhật required cho các trường quan trọng
+            const addrInput   = document.getElementById('recipientAddressInput');
+            const pickupStore = document.getElementById('pickupStoreSelect');
+            const nameDelivery  = document.getElementById('recipientNameInput');
+            const phoneDelivery = document.getElementById('recipientPhoneInput');
+            const namePickup    = document.getElementById('pickupPersonName');
+            const phonePickup   = document.getElementById('pickupPersonPhone');
 
             if (isPickup) {
-                if (pickupSection) pickupSection.classList.remove('d-none');
-                if (deliverySection) deliverySection.classList.add('d-none');
-                if (savedAddressSection) savedAddressSection.classList.add('d-none');
-                if (deliveryUnitSection) deliveryUnitSection.classList.add('d-none');
-                if (addressInput) addressInput.removeAttribute('required');
-                if (pickupSelect) pickupSelect.setAttribute('required', 'required');
+                if (addrInput)   { addrInput.removeAttribute('required');   addrInput.value = ''; }
+                if (pickupStore)   pickupStore.setAttribute('required', 'required');
+                if (nameDelivery)  nameDelivery.removeAttribute('required');
+                if (phoneDelivery) phoneDelivery.removeAttribute('required');
+                if (namePickup)    namePickup.setAttribute('required', 'required');
+                if (phonePickup)   phonePickup.setAttribute('required', 'required');
             } else {
-                if (pickupSection) pickupSection.classList.add('d-none');
-                if (deliverySection) deliverySection.classList.remove('d-none');
-                if (savedAddressSection) savedAddressSection.classList.remove('d-none');
-                if (deliveryUnitSection) deliveryUnitSection.classList.remove('d-none');
-                if (addressInput) addressInput.setAttribute('required', 'required');
-                if (pickupSelect) pickupSelect.removeAttribute('required');
+                if (addrInput)   addrInput.setAttribute('required', 'required');
+                if (pickupStore) pickupStore.removeAttribute('required');
+                if (nameDelivery)  nameDelivery.setAttribute('required', 'required');
+                if (phoneDelivery) phoneDelivery.setAttribute('required', 'required');
+                if (namePickup)  { if (namePickup)  namePickup.removeAttribute('required'); }
+                if (phonePickup) { if (phonePickup) phonePickup.removeAttribute('required'); }
             }
+
+            // Khi chuyển về Giao tận nơi: bỏ khóa nút (khóa chỉ áp dụng cho chế độ Pickup)
+            if (!isPickup) lockPickupSubmit(false);
+
             updateCheckoutTotal();
         }
 
-        function selectPayment(radioId) {
-            const radio = document.getElementById(radioId);
-            if (radio) {
-                radio.checked = true;
-                updatePaymentStyle();
+        /* ============================================================
+         * Khi chọn chi nhánh lấy hàng — hiển thị thông tin + kiểm tra tồn kho
+         * ============================================================ */
+        function onPickupStoreChange() {
+            const sel  = document.getElementById('pickupStoreSelect');
+            const card = document.getElementById('pickupBranchCard');
+            const addrEl = document.getElementById('pickupBranchAddr');
+            const stockStatusEl = document.getElementById('pickupStockStatus');
+            const itemDetailsEl = document.getElementById('pickupItemDetails');
+            if (!sel || !card) return;
+
+            const opt = sel.options[sel.selectedIndex];
+            if (!opt || !opt.value) {
+                card.classList.add('d-none');
+                lockPickupSubmit(false);  // bỏ khóa khi bỏ chọn
+                updateCheckoutTotal();
+                return;
+            }
+
+            // Hiển thị địa chỉ người dùng
+            if (addrEl) addrEl.textContent = opt.getAttribute('data-address') || 'Đang cập nhật...';
+            card.classList.remove('d-none');
+
+            // Hiển thị trạng thái đang kiểm tra
+            if (stockStatusEl) {
+                stockStatusEl.innerHTML = '<span class="text-muted" style="font-size:13px;"><i class="bi bi-arrow-repeat me-1"></i>Đang kiểm tra tồn kho...</span>';
+            }
+            if (itemDetailsEl) itemDetailsEl.classList.add('d-none');
+
+            // Lấy danh sách cart item IDs từ form
+            const itemIds = Array.from(document.querySelectorAll('input[name="selectedItemIds"]'))
+                                 .map(function(el) { return el.value; })
+                                 .filter(Boolean);
+
+            if (itemIds.length === 0) {
+                if (stockStatusEl) stockStatusEl.innerHTML = '';
+                updateCheckoutTotal();
+                return;
+            }
+
+            const storeId = opt.value;
+            const url = '/api/customer/pickup-check?storeId=' + storeId
+                      + '&itemIds=' + itemIds.join(',');
+
+            fetch(url, { credentials: 'same-origin' })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                // Cập nhật trạng thái tổng
+                if (stockStatusEl) {
+                    if (data.ok) {
+                        stockStatusEl.innerHTML =
+                            '<span class="pickup-status-ok"><i class="bi bi-check-circle-fill me-1"></i>' + data.message + '</span>';
+                    } else {
+                        stockStatusEl.innerHTML =
+                            '<span class="pickup-status-err"><i class="bi bi-exclamation-circle-fill me-1"></i>' + data.message + '</span>';
+                    }
+                }
+
+                // Hiển thị chi tiết từng sản phẩm nếu có sản phẩm thiếu hàng
+                if (itemDetailsEl && data.items && data.items.length > 0) {
+                    const hasProblems = data.items.some(function(it) { return !it.ok; });
+                    if (hasProblems) {
+                        let html = '<div style="font-weight:600; margin-bottom:4px; color:#374151;">Tồn kho tại chi nhánh:</div>';
+                        data.items.forEach(function(it) {
+                            if (it.ok) {
+                                html += '<div style="color:#16a34a;"><i class="bi bi-check2 me-1"></i>' +
+                                    escHtml(it.productName) + ' &mdash; Còn ' + it.available + ' (cần ' + it.needed + ')</div>';
+                            } else {
+                                html += '<div style="color:#dc2626;"><i class="bi bi-x me-1"></i>' +
+                                    escHtml(it.productName) + ' &mdash; ' + escHtml(it.reason || 'Không đủ hàng') + '</div>';
+                            }
+                        });
+                        itemDetailsEl.innerHTML = html;
+                        itemDetailsEl.classList.remove('d-none');
+                    } else {
+                        itemDetailsEl.classList.add('d-none');
+                    }
+                }
+
+                // Khóa nút Đặt hàng nếu không đủ hàng
+                lockPickupSubmit(!data.ok);
+                updateCheckoutTotal();
+            })
+            .catch(function() {
+                if (stockStatusEl) {
+                    stockStatusEl.innerHTML =
+                        '<span class="text-muted" style="font-size:13px;"><i class="bi bi-wifi-off me-1"></i>Không kiểm tra được tồn kho lúc này.</span>';
+                }
+                lockPickupSubmit(false); // không khóa khi lỗi mạng
+                updateCheckoutTotal();
+            });
+        }
+
+        /** Khóa/mở nút Đặt hàng khi đang chế độ đến lấy mà chi nhánh thiếu hàng */
+        function lockPickupSubmit(lock) {
+            const btn = document.getElementById('btnPlaceOrder');
+            if (!btn) return;
+            btn.disabled = lock;
+            if (lock) {
+                btn.title = 'Chi nhánh không đủ hàng. Vui lòng chọn chi nhánh khác.';
+            } else {
+                btn.title = '';
             }
         }
 
+        /** Encode HTML an toàn */
+        function escHtml(str) {
+            return String(str)
+                .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        /* ============================================================
+         * Cập nhật tổng tiền bằng cách gọi /checkout/quote (AJAX)
+         * Bao gồm mã giảm giá, phí giao hàng theo đơn vị/chi nhánh đã chọn
+         * ============================================================ */
+        let quoteTimer = null;
+        function updateCheckoutTotal() {
+            clearTimeout(quoteTimer);
+            quoteTimer = setTimeout(_doQuote, 300);
+        }
+
+        function _doQuote() {
+            const isPickup = document.getElementById('methodPickup') &&
+                             document.getElementById('methodPickup').checked;
+            const form = document.getElementById('checkoutForm');
+
+            /* Gom các item đã chọn */
+            const itemInputs = form.querySelectorAll('input[name="selectedItemIds"]');
+            const params = new URLSearchParams();
+            itemInputs.forEach(function(el) { params.append('selectedItemIds', el.value); });
+
+            /* Phương thức nhận */
+            params.append('shippingMethod', isPickup ? 'PICKUP' : 'DELIVERY');
+
+            /* Địa chỉ người nhận */
+            const addrEl = document.getElementById('recipientAddressInput');
+            if (addrEl && addrEl.value.trim()) {
+                params.append('recipientAddress', addrEl.value.trim());
+            }
+
+            /* Đơn vị giao hàng (chỉ khi giao tận nơi) */
+            if (!isPickup) {
+                const unitSelect = document.getElementById('deliveryUnitSelect');
+                if (unitSelect && unitSelect.value) {
+                    params.append('deliveryUnitId', unitSelect.value);
+                }
+            }
+
+            /* Chi nhánh tự lấy */
+            if (isPickup) {
+                const storeSelect = document.getElementById('pickupStoreSelect');
+                if (storeSelect && storeSelect.value) {
+                    params.append('pickupStoreId', storeSelect.value);
+                }
+            }
+
+            /* Mã giảm giá */
+            const voucherEl = document.getElementById('voucherInput');
+            if (voucherEl && voucherEl.value.trim()) {
+                params.append('voucherCode', voucherEl.value.trim().toUpperCase());
+            }
+
+            /* CSRF */
+            const csrfInput = form.querySelector('input[name="_csrf"]');
+            if (csrfInput) {
+                params.append(csrfInput.name, csrfInput.value);
+            }
+
+            const quoteUrl = form.getAttribute('data-quote-url') || '/checkout/quote';
+            const statusEl = document.getElementById('quoteStatus');
+
+            if (statusEl) {
+                statusEl.textContent = '';
+            }
+
+            fetch(quoteUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params.toString()
+            })
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(res) {
+                if (!res.ok) {
+                    if (statusEl) {
+                        statusEl.textContent = res.data.message || 'Không thể tính tổng tiền.';
+                    }
+                    return;
+                }
+                const d = res.data;
+
+                /* Phí giao hàng */
+                const shippingFeeEl = document.getElementById('displayShippingFee');
+                if (shippingFeeEl) {
+                    const fee = parseFloat(d.shippingFee) || 0;
+                    if (fee > 0) {
+                        shippingFeeEl.textContent = formatVnd(fee);
+                        shippingFeeEl.classList.add('text-primary');
+                    } else {
+                        shippingFeeEl.textContent = 'Miễn phí';
+                        shippingFeeEl.classList.remove('text-primary');
+                    }
+                }
+
+                /* Giảm giá */
+                const discountEl = document.getElementById('displayDiscount');
+                if (discountEl) {
+                    const disc = parseFloat(d.discount) || 0;
+                    discountEl.textContent = '-' + formatVnd(disc);
+                    discountEl.style.color = disc > 0 ? '#16a34a' : '';
+                }
+
+                /* Tổng thanh toán */
+                const grandTotalEl = document.getElementById('displayGrandTotal');
+                if (grandTotalEl) {
+                    grandTotalEl.textContent = formatVnd(parseFloat(d.total) || 0);
+                }
+            })
+            .catch(function() {
+                /* Khi mất kết nối: tính cục bộ như trước để trang không đứng */
+                _calcLocalFallback();
+            });
+        }
+
+        /* Tính cục bộ khi không gọi được server (fallback, không tính voucher) */
+        function _calcLocalFallback() {
+            const isPickup = document.getElementById('methodPickup') &&
+                             document.getElementById('methodPickup').checked;
+            const shippingFeeEl = document.getElementById('displayShippingFee');
+            const grandTotalEl  = document.getElementById('displayGrandTotal');
+            const base = parseFloat((grandTotalEl && grandTotalEl.dataset.baseTotal) || '0');
+            let shippingFee = 0;
+            if (!isPickup) {
+                const unitSelect = document.getElementById('deliveryUnitSelect');
+                if (unitSelect && unitSelect.selectedIndex >= 0) {
+                    shippingFee = parseFloat(unitSelect.options[unitSelect.selectedIndex].getAttribute('data-price') || '0') || 0;
+                }
+            }
+            if (shippingFeeEl) {
+                if (isPickup) {
+                    shippingFeeEl.textContent = '0 ₫';
+                    shippingFeeEl.classList.remove('text-primary');
+                } else if (shippingFee > 0) {
+                    shippingFeeEl.textContent = formatVnd(shippingFee);
+                    shippingFeeEl.classList.add('text-primary');
+                } else {
+                    shippingFeeEl.textContent = 'Miễn phí';
+                    shippingFeeEl.classList.remove('text-primary');
+                }
+            }
+            if (grandTotalEl) {
+                grandTotalEl.textContent = formatVnd(base + (isPickup ? 0 : shippingFee));
+            }
+        }
+
+        function formatVnd(amount) {
+            return amount.toLocaleString('vi-VN') + ' ₫';
+        }
+
+        /* ============================================================
+         * Phương thức thanh toán
+         * ============================================================ */
+        function selectPayment(radioId) {
+            const radio = document.getElementById(radioId);
+            if (radio) { radio.checked = true; updatePaymentStyle(); }
+        }
+
         function updatePaymentStyle() {
-            const isCod = document.getElementById('pay_cod') && document.getElementById('pay_cod').checked;
-            const isMomo = document.getElementById('pay_momo') && document.getElementById('pay_momo').checked;
+            const isCod  = document.getElementById('pay_cod')  && document.getElementById('pay_cod').checked;
             const isBank = document.getElementById('pay_bank') && document.getElementById('pay_bank').checked;
 
-            const optCod = document.getElementById('payOptionCod');
-            const optMomo = document.getElementById('payOptionMomo');
+            const optCod  = document.getElementById('payOptionCod');
             const optBank = document.getElementById('payOptionBank');
-
-            const descCod = document.getElementById('desc_pay_cod');
-            const descMomo = document.getElementById('desc_pay_momo');
+            const descCod  = document.getElementById('desc_pay_cod');
             const descBank = document.getElementById('desc_pay_bank');
             const btnPlaceOrder = document.getElementById('btnPlaceOrder');
 
             if (isCod) {
-                if (optCod) optCod.classList.add('active');
+                if (optCod)  optCod.classList.add('active');
                 if (optBank) optBank.classList.remove('active');
-                if (descCod) descCod.classList.remove('d-none');
+                if (descCod)  descCod.classList.remove('d-none');
                 if (descBank) descBank.classList.add('d-none');
-                if (btnPlaceOrder) {
-                    btnPlaceOrder.innerHTML = '<i class="bi bi-bag-check me-2"></i>Đặt hàng';
-                }
+                if (btnPlaceOrder) btnPlaceOrder.innerHTML = '<i class="bi bi-bag-check me-2"></i>Đặt hàng';
             } else {
-                if (optCod) optCod.classList.remove('active');
+                if (optCod)  optCod.classList.remove('active');
                 if (optBank) optBank.classList.add('active');
-                if (descCod) descCod.classList.add('d-none');
+                if (descCod)  descCod.classList.add('d-none');
                 if (descBank) descBank.classList.remove('d-none');
-                if (btnPlaceOrder) {
-                    btnPlaceOrder.innerHTML = '<i class="bi bi-credit-card me-2"></i>Tiếp tục thanh toán';
+                if (btnPlaceOrder) btnPlaceOrder.innerHTML = '<i class="bi bi-credit-card me-2"></i>Tiếp tục thanh toán';
+            }
+        }
+
+        /* ============================================================
+         * Khởi tạo trang
+         * ============================================================ */
+        document.addEventListener('DOMContentLoaded', function () {
+            // Set ngày mặc định = hôm nay
+            ['deliveryDateInput', 'pickupDateInput'].forEach(function (id) {
+                const el = document.getElementById(id);
+                if (el && !el.value) {
+                    const today = new Date();
+                    el.value = [today.getFullYear(),
+                        String(today.getMonth() + 1).padStart(2, '0'),
+                        String(today.getDate()).padStart(2, '0')].join('-');
                 }
-            }
-        }
-
-            if (descCod) descCod.classList.toggle('d-none', !isCod);
-            if (descMomo) descMomo.classList.toggle('d-none', !isMomo);
-            if (descBank) descBank.classList.toggle('d-none', !isBank);
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const dateInput = document.querySelector('input[name="deliveryDate"]');
-            if (dateInput && !dateInput.value) {
-                const today = new Date();
-                dateInput.value = [today.getFullYear(), String(today.getMonth()+1).padStart(2,'0'), String(today.getDate()).padStart(2,'0')].join('-');
-            }
+            });
             updatePaymentStyle();
+            toggleShippingMethod(); // đảm bảo trạng thái ban đầu đúng
             updateCheckoutTotal();
         });
     </script>

@@ -26,6 +26,7 @@ public class AdminConfigController {
     private final StyleRepository styleRepository;
     private final StyleValueRepository styleValueRepository;
     private final StoreRepository storeRepository;
+    private final ShippingTariffRepository shippingTariffRepository;
 
     // --- 1. Quản lý Loại sản phẩm / Danh mục (Categories - UC_030) ---
     @GetMapping({"/categories", "/category", "/loai-san-pham"})
@@ -426,14 +427,18 @@ public class AdminConfigController {
         return "redirect:/admin/commissions";
     }
 
-    // --- 3. Quản lý Đơn vị vận chuyển / Nhà vận chuyển (Deliveries - UC_034) ---
-    @GetMapping({"/deliveries", "/delivery", "/don-vi-van-chuyen"})
+    // --- 3. Quản lý Giao hàng & Vận chuyển (Deliveries & Shipping Tariffs) ---
+    @GetMapping({"/deliveries", "/delivery", "/don-vi-van-chuyen", "/shipping-manage"})
     public String listDeliveries(
             @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "tab", defaultValue = "units") String activeTab,
+            @RequestParam(value = "storeId", required = false) Long storeId,
+            @RequestParam(value = "service", required = false) String service,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             Model model) {
         try {
+            ensureDefaultTariffs();
             java.util.List<Delivery> allDeliveries = deliveryRepository.findAllByOrderByIdAsc();
             java.util.List<Delivery> filtered = allDeliveries;
             if (keyword != null && !keyword.trim().isEmpty()) {
@@ -442,6 +447,7 @@ public class AdminConfigController {
                         (d.getName() != null && d.getName().toLowerCase().contains(kw))
                         || String.valueOf(d.getId()).contains(kw)
                         || (d.getDescription() != null && d.getDescription().toLowerCase().contains(kw))
+                        || (d.getPhone() != null && d.getPhone().toLowerCase().contains(kw))
                 ).toList();
             }
 
@@ -460,17 +466,74 @@ public class AdminConfigController {
             model.addAttribute("pageSize", size);
             model.addAttribute("keyword", keyword);
             model.addAttribute("dataLoadError", false);
+
+            // Tab navigation & Tariff data
+            model.addAttribute("activeTab", activeTab);
+            model.addAttribute("tariffs", shippingTariffRepository.searchTariffs(storeId, service));
+            model.addAttribute("stores", storeRepository.findAll());
+            model.addAttribute("currentStoreId", storeId);
+            model.addAttribute("currentService", service != null ? service : "ALL");
         } catch (Exception ex) {
             model.addAttribute("dataLoadError", true);
-            model.addAttribute("errorMessage", "Không thể tải danh sách đơn vị vận chuyển. Vui lòng thử lại!");
+            model.addAttribute("errorMessage", "Không thể tải dữ liệu quản lý giao hàng. Vui lòng thử lại!");
             model.addAttribute("deliveries", java.util.Collections.emptyList());
             model.addAttribute("allDeliveries", java.util.Collections.emptyList());
             model.addAttribute("currentPage", 0);
             model.addAttribute("totalPages", 0);
             model.addAttribute("totalElements", 0L);
             model.addAttribute("pageSize", size);
+            model.addAttribute("activeTab", activeTab);
+            model.addAttribute("tariffs", java.util.Collections.emptyList());
+            model.addAttribute("stores", java.util.Collections.emptyList());
         }
         return "admin/deliveries";
+    }
+
+    private void ensureDefaultTariffs() {
+        if (shippingTariffRepository.count() == 0) {
+            Store benThanh = storeRepository.findFirstByNameOrderByIdAsc("Chi Nhánh Bến Thành (Quận 1)")
+                    .or(() -> storeRepository.findAll().stream().findFirst()).orElse(null);
+            Delivery standardDeliv = deliveryRepository.findAll().stream().findFirst().orElse(null);
+
+            shippingTariffRepository.save(ShippingTariff.builder()
+                    .store(benThanh)
+                    .destinationArea("Khu vực gần chi nhánh (< 5km)")
+                    .serviceName("Tiêu chuẩn")
+                    .delivery(standardDeliv)
+                    .baseFee(new BigDecimal("25000"))
+                    .bulkySurcharge(new BigDecimal("20000"))
+                    .estimatedTime("4 - 6 giờ")
+                    .note("Giao hoa tươi giữ ẩm tận nơi trong bán kính gần")
+                    .isActive(true)
+                    .isDeleted(false)
+                    .build());
+
+            shippingTariffRepository.save(ShippingTariff.builder()
+                    .store(benThanh)
+                    .destinationArea("Khu vực xa hơn (5 - 15km)")
+                    .serviceName("Tiêu chuẩn")
+                    .delivery(standardDeliv)
+                    .baseFee(new BigDecimal("40000"))
+                    .bulkySurcharge(new BigDecimal("25000"))
+                    .estimatedTime("4 - 6 giờ")
+                    .note("Giao các quận nội thành xa chi nhánh")
+                    .isActive(true)
+                    .isDeleted(false)
+                    .build());
+
+            shippingTariffRepository.save(ShippingTariff.builder()
+                    .store(benThanh)
+                    .destinationArea("Khu vực gần chi nhánh (< 5km)")
+                    .serviceName("Hỏa tốc")
+                    .delivery(standardDeliv)
+                    .baseFee(new BigDecimal("50000"))
+                    .bulkySurcharge(new BigDecimal("30000"))
+                    .estimatedTime("Trong vòng 2 giờ")
+                    .note("Ưu tiên cắm và giao ngay trong lồng kính xe máy")
+                    .isActive(true)
+                    .isDeleted(false)
+                    .build());
+        }
     }
 
     /**
@@ -626,6 +689,98 @@ public class AdminConfigController {
         }
         ra.addFlashAttribute("successMessage", "Khôi phục toàn bộ danh sách đơn vị vận chuyển mẫu thành công!");
         return "redirect:/admin/deliveries";
+    }
+
+    // --- Biểu phí giao hàng (Shipping Tariffs) ---
+    @PostMapping("/deliveries/tariffs/add")
+    public String addTariff(@RequestParam(value = "storeId", required = false) Long storeId,
+                            @RequestParam("destinationArea") String destinationArea,
+                            @RequestParam("serviceName") String serviceName,
+                            @RequestParam(value = "deliveryId", required = false) Long deliveryId,
+                            @RequestParam("baseFee") BigDecimal baseFee,
+                            @RequestParam(value = "bulkySurcharge", defaultValue = "0") BigDecimal bulkySurcharge,
+                            @RequestParam(value = "estimatedTime", required = false) String estimatedTime,
+                            @RequestParam(value = "note", required = false) String note,
+                            RedirectAttributes ra) {
+        try {
+            Store store = (storeId != null && storeId > 0) ? storeRepository.findById(storeId).orElse(null) : null;
+            Delivery delivery = (deliveryId != null && deliveryId > 0) ? deliveryRepository.findById(deliveryId).orElse(null) : null;
+            ShippingTariff tariff = ShippingTariff.builder()
+                    .store(store)
+                    .destinationArea(destinationArea.trim())
+                    .serviceName(serviceName.trim())
+                    .delivery(delivery)
+                    .baseFee(baseFee != null ? baseFee : BigDecimal.ZERO)
+                    .bulkySurcharge(bulkySurcharge != null ? bulkySurcharge : BigDecimal.ZERO)
+                    .estimatedTime(estimatedTime)
+                    .note(note)
+                    .isActive(true)
+                    .isDeleted(false)
+                    .build();
+            shippingTariffRepository.save(tariff);
+            ra.addFlashAttribute("successMessage", "Thêm biểu phí giao hàng [" + serviceName + " - " + destinationArea + "] thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Lỗi khi thêm biểu phí: " + ex.getMessage());
+        }
+        return "redirect:/admin/deliveries?tab=tariffs";
+    }
+
+    @PostMapping("/deliveries/tariffs/update/{id}")
+    public String updateTariff(@PathVariable("id") Long id,
+                               @RequestParam(value = "storeId", required = false) Long storeId,
+                               @RequestParam("destinationArea") String destinationArea,
+                               @RequestParam("serviceName") String serviceName,
+                               @RequestParam(value = "deliveryId", required = false) Long deliveryId,
+                               @RequestParam("baseFee") BigDecimal baseFee,
+                               @RequestParam(value = "bulkySurcharge", defaultValue = "0") BigDecimal bulkySurcharge,
+                               @RequestParam(value = "estimatedTime", required = false) String estimatedTime,
+                               @RequestParam(value = "note", required = false) String note,
+                               RedirectAttributes ra) {
+        try {
+            ShippingTariff tariff = shippingTariffRepository.findById(id).orElseThrow();
+            Store store = (storeId != null && storeId > 0) ? storeRepository.findById(storeId).orElse(null) : null;
+            Delivery delivery = (deliveryId != null && deliveryId > 0) ? deliveryRepository.findById(deliveryId).orElse(null) : null;
+            tariff.setStore(store);
+            tariff.setDestinationArea(destinationArea.trim());
+            tariff.setServiceName(serviceName.trim());
+            tariff.setDelivery(delivery);
+            tariff.setBaseFee(baseFee != null ? baseFee : BigDecimal.ZERO);
+            tariff.setBulkySurcharge(bulkySurcharge != null ? bulkySurcharge : BigDecimal.ZERO);
+            tariff.setEstimatedTime(estimatedTime);
+            tariff.setNote(note);
+            shippingTariffRepository.save(tariff);
+            ra.addFlashAttribute("successMessage", "Cập nhật biểu phí giao hàng #" + id + " thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Lỗi khi cập nhật biểu phí: " + ex.getMessage());
+        }
+        return "redirect:/admin/deliveries?tab=tariffs";
+    }
+
+    @PostMapping("/deliveries/tariffs/toggle/{id}")
+    public String toggleTariff(@PathVariable("id") Long id, RedirectAttributes ra) {
+        try {
+            ShippingTariff tariff = shippingTariffRepository.findById(id).orElseThrow();
+            boolean newActive = !Boolean.TRUE.equals(tariff.getIsActive());
+            tariff.setIsActive(newActive);
+            shippingTariffRepository.save(tariff);
+            ra.addFlashAttribute("successMessage", (newActive ? "Đã bật áp dụng" : "Đã tạm dừng") + " biểu phí #" + id + ".");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Lỗi khi đổi trạng thái: " + ex.getMessage());
+        }
+        return "redirect:/admin/deliveries?tab=tariffs";
+    }
+
+    @PostMapping("/deliveries/tariffs/delete/{id}")
+    public String deleteTariff(@PathVariable("id") Long id, RedirectAttributes ra) {
+        try {
+            ShippingTariff tariff = shippingTariffRepository.findById(id).orElseThrow();
+            tariff.setIsDeleted(true);
+            shippingTariffRepository.save(tariff);
+            ra.addFlashAttribute("successMessage", "Đã xóa biểu phí giao hàng #" + id + " thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Lỗi khi xóa biểu phí: " + ex.getMessage());
+        }
+        return "redirect:/admin/deliveries?tab=tariffs";
     }
 
     // --- 4. Quản lý Khuyến mãi toàn sàn (Vouchers) ---

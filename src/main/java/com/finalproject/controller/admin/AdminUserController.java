@@ -45,7 +45,7 @@ public class AdminUserController {
                             @RequestParam(value = "role", required = false) String roleStr,
                             @RequestParam(value = "requestStatus", required = false) String requestStatusStr,
                             @RequestParam(value = "page", defaultValue = "0") int page,
-                            @RequestParam(value = "size", defaultValue = "10") int size,
+                            @RequestParam(value = "size", defaultValue = "5") int size,
                             Model model) {
         try {
             // Tab 1: Danh sách người dùng có phân trang (UC_027)

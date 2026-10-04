@@ -1,192 +1,1215 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:replace="~{fragments/floral :: head('Tài khoản của tôi')}"></head>
-<body><header th:replace="~{fragments/floral :: header}"></header>
-<main class="container py-4 floral-page"><h1 class="mb-4">Tài khoản của tôi</h1><div th:replace="~{fragments/floral :: flashes}"></div><div class="d-flex flex-wrap gap-2 mb-4"><a class="btn btn-outline-success" th:href="@{/customer/profile/wishlist}">Hoa yêu thích</a><a class="btn btn-outline-success" th:href="@{/customer/profile/recently-viewed}">Hoa đã xem</a><a class="btn btn-outline-success" th:href="@{/customer/profile/followed-stores}">Cửa hàng theo dõi</a><form th:action="@{/logout}" method="post"><button class="btn btn-outline-danger" type="submit">Đăng xuất</button></form></div>
-<ul class="nav nav-pills flex-wrap gap-2 mb-4" role="tablist"><li class="nav-item" role="presentation"><button class="nav-link active" id="info-tab" data-bs-toggle="pill" data-bs-target="#tab-info" type="button" role="tab" aria-controls="tab-info" aria-selected="true">Thông tin</button></li><li class="nav-item" role="presentation"><button class="nav-link " id="address-tab" data-bs-toggle="pill" data-bs-target="#tab-address" type="button" role="tab" aria-controls="tab-address" aria-selected="false">Sổ địa chỉ</button></li><li class="nav-item" role="presentation"><button class="nav-link " id="password-tab" data-bs-toggle="pill" data-bs-target="#tab-password" type="button" role="tab" aria-controls="tab-password" aria-selected="false">Đổi mật khẩu</button></li><li class="nav-item" role="presentation"><button class="nav-link " id="roles-tab" data-bs-toggle="pill" data-bs-target="#tab-roles" type="button" role="tab" aria-controls="tab-roles" aria-selected="false">Vai trò</button></li></ul>
-<div class="tab-content"><section class="tab-pane fade show active" id="tab-info" role="tabpanel" aria-labelledby="info-tab"><form th:action="@{/customer/profile/update}" method="post" enctype="multipart/form-data" class="card p-4" id="profileForm">
-<img th:src="${user.avatarUrl != null ? user.avatarUrl : '/images/flower-logo.png'}" id="avatarPreview" class="floral-avatar mb-3" alt="Ảnh đại diện"><div class="row g-3"><div class="col-md-6"><label for="avatarFileInput" class="form-label">Ảnh đại diện</label><input id="avatarFileInput" name="avatarFile" type="file" accept="image/*" class="form-control" data-preview="avatarPreview"></div><div class="col-md-6"><label for="coverFileInput" class="form-label">Ảnh bìa</label><input id="coverFileInput" name="coverFile" type="file" accept="image/*" class="form-control" data-preview="coverPreview"></div><div class="col-12"><img id="coverPreview" class="floral-cover w-100" th:if="${user.cover != null}" th:src="${user.cover}" alt="Ảnh bìa"></div>
-<div class="col-md-6"><label for="profileName" class="form-label">Họ và tên</label><input id="profileName" name="fullName" th:value="${user.fullName}" required maxlength="100" class="form-control"></div><div class="col-md-6"><label for="profileEmail" class="form-label">Email</label><input id="profileEmail" th:value="${user.email}" type="email" readonly class="form-control"></div><div class="col-md-6"><label for="profilePhone" class="form-label">Số điện thoại</label><input id="profilePhone" name="phone" th:value="${user.phone}" maxlength="20" class="form-control"></div><div class="col-md-6"><label for="profileAddress" class="form-label">Địa chỉ liên hệ</label><input id="profileAddress" name="address" th:value="${user.address}" maxlength="255" class="form-control"></div></div><button class="btn btn-success mt-4 align-self-start" type="submit">Lưu thông tin</button></form></section>
-<section class="tab-pane fade" id="tab-address" role="tabpanel" aria-labelledby="address-tab"><div class="card p-4 mb-4"><h2 class="h5">Địa chỉ nhận hàng</h2><p th:if="${#lists.isEmpty(addresses)}">Chưa có địa chỉ nhận hàng.</p><article class="border rounded p-3 mb-3" th:each="addr : ${addresses}"><strong th:text="${addr.recipientName}"></strong><span class="badge bg-success" th:if="${addr.isDefault}">Mặc định</span><p th:text="${addr.phone}"></p><p th:text="${addr.addressDetail}"></p><div class="d-flex flex-wrap gap-2"><form th:unless="${addr.isDefault}" th:action="@{/customer/profile/address/set-default/{id}(id=${addr.id})}" method="post"><button class="btn btn-outline-success" type="submit">Đặt mặc định</button></form><form th:action="@{/customer/profile/address/delete/{id}(id=${addr.id})}" method="post" onsubmit="return confirm('Xóa địa chỉ này?')"><button class="btn btn-outline-danger" type="submit">Xóa</button></form></div><details class="mt-3"><summary>Chỉnh sửa địa chỉ</summary><form th:action="@{/customer/profile/address/update/{id}(id=${addr.id})}" method="post" class="row g-2 mt-2"><div class="col-md-6"><input name="recipientName" th:value="${addr.recipientName}" class="form-control" required aria-label="Người nhận"></div><div class="col-md-6"><input name="phone" th:value="${addr.phone}" class="form-control" required aria-label="Điện thoại"></div><div class="col-12"><input name="addressDetail" th:value="${addr.addressDetail}" class="form-control" required aria-label="Địa chỉ"></div><div class="col-12"><label><input name="isDefault" type="checkbox" value="true" th:checked="${addr.isDefault}"> Địa chỉ mặc định</label></div><div class="col-12"><button class="btn btn-success" type="submit">Lưu địa chỉ</button></div></form></details></article></div>
-<form th:action="@{/customer/profile/address/add}" method="post" class="card p-4"><h2 class="h5">Thêm địa chỉ</h2><div class="row g-3"><div class="col-md-6"><label for="addRecipient" class="form-label">Người nhận</label><input id="addRecipient" name="recipientName" required class="form-control"></div><div class="col-md-6"><label for="addPhone" class="form-label">Điện thoại</label><input id="addPhone" name="phone" type="tel" required class="form-control"></div><div class="col-12"><label for="addAddress" class="form-label">Địa chỉ</label><input id="addAddress" name="addressDetail" required class="form-control"></div><div class="col-12"><label><input name="isDefault" type="checkbox" value="true"> Đặt làm mặc định</label></div></div><button type="submit" class="btn btn-success align-self-start mt-3">Thêm địa chỉ</button></form></section>
-<section class="tab-pane fade" id="tab-password" role="tabpanel" aria-labelledby="password-tab"><form th:action="@{/customer/profile/change-password}" method="post" class="card p-4" id="passwordForm"><h2 class="h5">Đổi mật khẩu</h2><label for="oldPassword" class="form-label">Mật khẩu hiện tại</label><input id="oldPassword" name="oldPassword" type="password" required autocomplete="current-password" class="form-control mb-3"><label for="newPassword" class="form-label">Mật khẩu mới (tối thiểu 6 ký tự)</label><input id="newPassword" name="newPassword" type="password" required minlength="6" autocomplete="new-password" class="form-control mb-3"><div class="d-flex flex-wrap gap-2 mb-3"><button type="button" id="sendPasswordOtp" class="btn btn-outline-success" th:data-url="@{/customer/profile/send-password-otp}" th:data-email="${user.email}">Gửi OTP đến email</button><span id="otpStatus" role="status" class="small"></span></div><label for="otpCode" class="form-label">Mã OTP (6 chữ số)</label><input id="otpCode" name="otpCode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required autocomplete="one-time-code" class="form-control mb-3"><button type="submit" class="btn btn-success align-self-start">Đổi mật khẩu</button></form></section><div class="tab-pane fade" id="tab-roles" th:classappend="${activeTab == 'roles'} ? ' show active' : ''">
-                        <div class="card profile-card bg-white p-4">
-                            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                                <div>
-                                    <h5 class="fw-bold mb-1 font-serif text-dark"><i class="bi bi-shield-check text-primary me-2"></i>Vai Trò Của Tôi</h5>
-                                    <p class="text-muted small mb-0">Quản lý các vai trò trong hệ thống và gửi hồ sơ đăng ký xin cấp thêm vai trò mới.</p>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta th:name="_csrf" th:content="${_csrf.token}" />
+    <meta th:name="_csrf_header" th:content="${_csrf.headerName}" />
+    <title>Tài Khoản Của Tôi | Hoa Tươi Sài Gòn</title>
+
+    <!-- Google Font Nunito & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
+    <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
+
+    <style>
+        :root {
+            --flower-bg: #FAF4F0;
+            --flower-surface: #FFFFFF;
+            --flower-border: #E8DFD8;
+            --flower-primary: #355447;
+            --flower-primary-hover: #264136;
+            --flower-primary-subtle: #EBF3EE;
+            --flower-accent: #A64060;
+            --flower-accent-hover: #8C3450;
+            --flower-sub-bg: #F3E6E1;
+            --flower-sub-border: #E7DED4;
+            --flower-text-main: #293B32;
+            --flower-text-muted: #686E65;
+        }
+
+        body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, p, span, a, label, strong, div {
+            font-family: 'Nunito', Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        }
+
+        body {
+            background-color: var(--flower-bg);
+            color: var(--flower-text-main);
+            font-size: 15.5px;
+            line-height: 1.6;
+        }
+
+        .flower-container {
+            max-width: 1240px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        /* Top Subbar */
+        .top-subbar {
+            background-color: var(--flower-sub-bg);
+            border-bottom: 1px solid var(--flower-sub-border);
+            font-size: 14.5px;
+            color: var(--flower-primary);
+            padding: 7px 0;
+            font-weight: 400;
+        }
+        .top-subbar a {
+            color: var(--flower-primary);
+            text-decoration: none;
+            transition: opacity 0.15s ease;
+        }
+        .top-subbar a:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        /* Header Main Bar */
+        .header-main-bar {
+            background-color: #FFFCF8;
+            border-bottom: 1px solid var(--flower-border);
+            padding: 12px 0;
+        }
+        .brand-logo-text {
+            font-family: 'Playfair Display', Georgia, serif !important;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--flower-primary);
+            letter-spacing: 0.5px;
+            line-height: 1;
+        }
+        .brand-logo-img {
+            width: 40px !important;
+            height: 40px !important;
+            object-fit: contain !important;
+        }
+
+        /* Search Box */
+        .header-search-box {
+            background: #FFFFFF;
+            border: 1.5px solid var(--flower-border);
+            border-radius: 9999px;
+            padding: 3px 4px 3px 10px;
+            box-shadow: 0 1px 3px rgba(41, 59, 50, 0.03);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+        .header-search-box:focus-within {
+            border-color: var(--flower-primary);
+            box-shadow: 0 0 0 3px rgba(53, 84, 71, 0.12);
+        }
+        .header-search-type-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            border-right: 1px solid var(--flower-border);
+            padding-right: 4px;
+            flex-shrink: 0;
+        }
+        .header-search-type {
+            background: transparent;
+            font-size: 13.5px !important;
+            color: #4A3E3D !important;
+            font-weight: 600 !important;
+            padding: 2px 18px 2px 4px;
+            outline: none;
+            border: none;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        .header-search-type-icon {
+            font-size: 16px !important;
+            color: #5C4A42;
+            pointer-events: none;
+            position: absolute;
+            right: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .header-search-input {
+            border: none;
+            outline: none;
+            font-size: 14px;
+            color: var(--flower-text-main);
+            background: transparent;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+        .header-search-input:focus {
+            box-shadow: none;
+            background: transparent;
+        }
+        .header-search-btn {
+            background-color: var(--flower-primary);
+            border: none;
+            color: #ffffff;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 13px;
+            padding: 6px 16px;
+            transition: background-color 0.2s ease;
+        }
+        .header-search-btn:hover {
+            background-color: var(--flower-primary-hover);
+            color: #ffffff;
+        }
+
+        /* Cart Link & Badge */
+        .header-cart-link {
+            color: var(--flower-text-main);
+            text-decoration: none;
+            font-size: 21px;
+            padding: 6px;
+            display: inline-flex;
+            align-items: center;
+            position: relative;
+            transition: color 0.15s ease;
+        }
+        .header-cart-link:hover {
+            color: var(--flower-accent);
+        }
+        .cart-badge-pill {
+            position: absolute;
+            top: 1px;
+            right: -2px;
+            background-color: var(--flower-accent);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 700;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
+        /* Account Pill Button */
+        .account-pill-btn {
+            border: 1.5px solid var(--flower-border);
+            background-color: #FFFFFF;
+            color: var(--flower-text-main);
+            border-radius: 9999px;
+            padding: 7px 16px;
+            font-size: 15px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+        }
+        .account-pill-btn:hover, .account-pill-btn:focus {
+            background-color: var(--flower-sub-bg);
+            border-color: var(--flower-sub-border);
+            color: var(--flower-primary);
+        }
+
+        /* Main Page Typography & Layout */
+        .profile-page-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--flower-text-main);
+            letter-spacing: -0.3px;
+            margin-bottom: 4px;
+        }
+        .profile-page-subtitle {
+            font-size: 15px;
+            color: var(--flower-text-muted);
+            margin-bottom: 0;
+        }
+
+        /* Card Styles */
+        .flower-card {
+            background-color: var(--flower-surface);
+            border: 1px solid var(--flower-border);
+            border-radius: 16px;
+            box-shadow: 0 3px 12px rgba(41, 59, 50, 0.04);
+            padding: 24px;
+        }
+
+        /* Navigation Tabs Custom Styling (Bỏ xanh dương mặc định) */
+        .profile-nav-pills {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            border: none;
+            padding: 6px;
+            background-color: #EFE7E1;
+            border-radius: 14px;
+        }
+        .profile-nav-pills .nav-item {
+            margin: 0;
+        }
+        .profile-nav-pills .nav-link {
+            border-radius: 10px !important;
+            padding: 10px 20px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #5C645E;
+            background: transparent;
+            border: none;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .profile-nav-pills .nav-link:hover {
+            color: var(--flower-text-main);
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+        .profile-nav-pills .nav-link.active {
+            background-color: var(--flower-primary) !important;
+            color: #FFFFFF !important;
+            font-weight: 700;
+            box-shadow: 0 4px 10px rgba(53, 84, 71, 0.25);
+        }
+        .profile-nav-pills .nav-link.active i {
+            color: #FFFFFF !important;
+        }
+
+        /* Form Controls Standard: Cao 44px, bo góc 10-12px, nhãn 14px 600 */
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        .form-control, .form-select {
+            height: 44px;
+            border-radius: 10px;
+            border: 1px solid #D8CFC7;
+            font-size: 15px;
+            padding: 0 14px;
+            color: var(--flower-text-main);
+            background-color: #FFFFFF;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        textarea.form-control {
+            height: auto;
+            min-height: 88px;
+            padding: 10px 14px;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--flower-primary);
+            box-shadow: 0 0 0 3px rgba(53, 84, 71, 0.15);
+            background-color: #FFFFFF;
+        }
+        .form-control[readonly], .form-control:disabled {
+            background-color: #F8F5F2;
+            color: #718096;
+            cursor: not-allowed;
+        }
+
+        /* Buttons */
+        .btn-flower-primary {
+            background-color: var(--flower-primary);
+            color: #FFFFFF;
+            border: none;
+            height: 44px;
+            padding: 0 24px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .btn-flower-primary:hover {
+            background-color: var(--flower-primary-hover);
+            color: #FFFFFF;
+        }
+        .btn-flower-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-flower-secondary {
+            background-color: #FFFFFF;
+            color: var(--flower-primary);
+            border: 1.5px solid var(--flower-primary);
+            height: 44px;
+            padding: 0 20px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+        }
+        .btn-flower-secondary:hover {
+            background-color: var(--flower-primary-subtle);
+            color: var(--flower-primary-hover);
+        }
+
+        /* Secondary Links Group (Pill Buttons) */
+        .sublink-pill {
+            background: #FFFFFF;
+            border: 1.5px solid var(--flower-border);
+            color: var(--flower-text-main);
+            border-radius: 9999px;
+            padding: 7px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.18s ease;
+        }
+        .sublink-pill:hover {
+            border-color: var(--flower-accent);
+            color: var(--flower-accent);
+            background-color: #FFF5F7;
+        }
+
+        /* Avatar & Cover Area */
+        .profile-cover-box {
+            position: relative;
+            height: 180px;
+            border-radius: 14px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #E9DFD8 0%, #D8CFC8 100%);
+            border: 1px solid var(--flower-border);
+            margin-bottom: 50px;
+        }
+        .profile-cover-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .profile-avatar-wrapper {
+            position: absolute;
+            bottom: -36px;
+            left: 28px;
+            display: flex;
+            align-items: flex-end;
+            gap: 16px;
+        }
+        .profile-avatar-img {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            border: 4px solid #FFFFFF;
+            object-fit: cover;
+            box-shadow: 0 4px 14px rgba(41, 59, 50, 0.15);
+            background-color: #FFFFFF;
+        }
+        .cover-upload-trigger {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--flower-border);
+            color: var(--flower-primary);
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(4px);
+            transition: all 0.15s ease;
+        }
+        .cover-upload-trigger:hover {
+            background: #FFFFFF;
+            color: var(--flower-primary-hover);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Custom File Input Container */
+        .custom-file-upload-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn-choose-file {
+            background-color: #FFFFFF;
+            border: 1.5px solid #D8CFC7;
+            color: var(--flower-text-main);
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 13.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-choose-file:hover {
+            border-color: var(--flower-primary);
+            color: var(--flower-primary);
+            background-color: var(--flower-primary-subtle);
+        }
+        .file-chosen-name {
+            font-size: 13px;
+            color: var(--flower-text-muted);
+            max-width: 220px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Compact Notification (Alerts) */
+        .compact-alert {
+            padding: 9px 16px;
+            border-radius: 10px;
+            font-size: 14.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+        .compact-alert-success {
+            background-color: #EBF3EE;
+            color: #20382E;
+            border: 1px solid #C7DFD1;
+        }
+        .compact-alert-danger {
+            background-color: #FDE8E8;
+            color: #9B1C1C;
+            border: 1px solid #F8B4B4;
+        }
+
+        /* Address Item Card */
+        .address-item-card {
+            background-color: #FCFAF8;
+            border: 1px solid var(--flower-border);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 14px;
+            transition: border-color 0.15s ease;
+        }
+        .address-item-card:hover {
+            border-color: #D3C4B8;
+        }
+        .address-item-card.is-default {
+            border-color: var(--flower-primary);
+            background-color: #F8FAF8;
+        }
+
+        /* Role Request Table */
+        .table-custom-roles th {
+            background-color: #F7F3EE;
+            color: var(--flower-text-main);
+            font-size: 13.5px;
+            font-weight: 700;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--flower-border);
+        }
+        .table-custom-roles td {
+            padding: 14px 16px;
+            font-size: 14.5px;
+            border-bottom: 1px solid #EFEAE4;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ==============================================
+         HEADER CHUẨN ĐỒNG BỘ TRANG BÁN HÀNG
+         ============================================== -->
+    <header class="sticky-top shadow-sm" style="z-index: 1020;">
+
+        <!-- Dòng phụ nhỏ: Hotline + Giao nhanh + Following + Cửa hàng + Người dùng -->
+        <div class="top-subbar">
+            <div class="container flower-container d-flex justify-content-between align-items-center">
+                <span class="d-none d-sm-inline">
+                    <i class="bi bi-flower1 me-1"></i>Chuỗi Cửa Hàng Hoa Tươi & Điện Hoa Sài Gòn
+                </span>
+                <div class="d-flex align-items-center gap-3 ms-auto">
+                    <span class="d-none d-md-inline"><i class="bi bi-telephone me-1"></i>028 1111 222</span>
+                    <span class="d-none d-lg-inline"><i class="bi bi-clock me-1"></i>Giao nhanh 60–90 phút</span>
+                    <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/following}"><i class="bi bi-bookmark-heart me-1"></i>Following</a>
+                    <a th:href="@{/stores}"><i class="bi bi-shop me-1"></i>Hệ thống cửa hàng</a>
+                    <a th:href="@{/users}"><i class="bi bi-people me-1"></i>Người dùng</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dòng chính: Logo, Ô Tìm Kiếm, Giỏ Hàng & Menu Tài Khoản -->
+        <div class="header-main-bar">
+            <div class="container flower-container">
+                <div class="row align-items-center g-3">
+
+                    <!-- Logo -->
+                    <div class="col-lg-3 col-md-3 col-6">
+                        <a class="d-flex align-items-center text-decoration-none gap-2" th:href="@{/}">
+                            <img th:src="@{/images/flower-logo.png}" alt="Hoa Tươi Sài Gòn" class="brand-logo-img">
+                            <span class="brand-logo-text">HOA TƯƠI SÀI GÒN</span>
+                        </a>
+                    </div>
+
+                    <!-- Ô Tìm Kiếm -->
+                    <div class="col-lg-6 col-md-6 col-12 order-3 order-md-2">
+                        <form id="globalSearchForm" th:action="@{/products#product-catalog}" method="get" class="w-100">
+                            <div class="header-search-box d-flex align-items-center">
+                                <div class="header-search-type-wrapper">
+                                    <select id="searchScopeSelect" class="header-search-type"
+                                        onchange="this.style.width = this.value === 'users' ? '115px' : (this.value === 'stores' ? '103px' : '96px')"
+                                        style="width: 96px;">
+                                        <option value="products" selected>🌸 Mẫu hoa</option>
+                                        <option value="stores">🏬 Cửa hàng</option>
+                                        <option value="users">👥 Người dùng</option>
+                                    </select>
+                                    <span class="material-symbols-outlined header-search-type-icon">expand_more</span>
                                 </div>
-                                <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#registerRoleModal">
-                                    <i class="bi bi-plus-circle me-1"></i> Đăng ký vai trò
+                                <input type="text" id="headerSearchInput" name="keyword"
+                                    class="form-control header-search-input shadow-none flex-grow-1"
+                                    placeholder="Tìm hoa hồng, cửa hàng hoặc người dùng...">
+                                <button class="btn header-search-btn d-flex align-items-center gap-1 flex-shrink-0"
+                                    type="submit" id="btnHeaderSearch" title="Tìm kiếm">
+                                    <span class="material-symbols-outlined" style="font-size: 16px;">search</span>
+                                    <span class="d-none d-sm-inline">Tìm</span>
                                 </button>
                             </div>
+                        </form>
+                    </div>
 
-                            <!-- Banner thông báo khi có role được approve nhưng session cũ chưa có quyền mới -->
-                            <div th:if="${hasApprovedUnactivated}"
-                                 class="alert py-3 px-4 rounded-3 mb-3 d-flex align-items-center gap-3"
-                                 style="background: linear-gradient(135deg, #FFF7E6 0%, #FFFBF0 100%); border: 1px solid #F6AD55; color: #7B4F00;">
-                                <i class="bi bi-arrow-repeat fs-4 text-warning flex-shrink-0"></i>
-                                <div class="flex-grow-1">
-                                    <strong class="d-block mb-1">&#127881; Yêu cầu vai trò của bạn đã được phê duyệt!</strong>
-                                    <span class="small">Để kích hoạt quyền truy cập mới, vui lòng <strong>đăng xuất và đăng nhập lại</strong>. Tài khoản Khách hàng vẫn hoạt động bình thường trong lúc đó.</span>
-                                </div>
-                                <form th:action="@{/logout}" method="post" class="flex-shrink-0">
-                                    <button type="submit" class="btn btn-warning btn-sm rounded-pill px-3 fw-bold" style="white-space: nowrap;">
-                                        <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất ngay
+                    <!-- Giỏ Hàng + Tài Khoản -->
+                    <div class="col-lg-3 col-md-3 col-6 order-2 order-md-3 d-flex align-items-center justify-content-end gap-3">
+                        <!-- Following shortcut -->
+                        <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/following}" class="header-cart-link" title="Bộ sưu tập theo dõi">
+                            <i class="bi bi-bookmark-heart"></i>
+                        </a>
+
+                        <!-- Giỏ hàng kèm số lượng -->
+                        <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/cart}" class="header-cart-link" title="Giỏ hoa của bạn">
+                            <i class="bi bi-cart3"></i>
+                            <span th:if="${cartItemCount != null and cartItemCount > 0}" class="cart-badge-pill"
+                                th:text="${cartItemCount}">0</span>
+                        </a>
+
+                        <!-- Chuông thông báo -->
+                        <a sec:authorize="isAuthenticated()" th:href="@{/notifications}" class="header-cart-link" title="Thông báo hệ thống">
+                            <i class="bi bi-bell"></i>
+                        </a>
+
+                        <!-- Dropdown Tài Khoản Tinh Gọn -->
+                        <div sec:authorize="isAuthenticated()" class="dropdown">
+                            <button class="account-pill-btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                                id="accountDropdown" title="Tài khoản" aria-label="Tài khoản">
+                                <i class="bi bi-person-circle fs-6"></i>
+                                <span class="d-none d-sm-inline" sec:authentication="name">Tài khoản</span>
+                            </button>
+
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border border-light-subtle rounded-3 py-2" style="min-width: 250px;">
+                                <!-- Header dropdown: Tên và Vai trò -->
+                                <li class="px-3 py-2 border-bottom mb-2 bg-light bg-opacity-50">
+                                    <div class="d-flex align-items-center justify-content-between gap-2">
+                                        <span class="fw-bold text-dark text-truncate" sec:authentication="name" style="font-size: 15px;">User</span>
+                                        <span class="badge rounded-pill" style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="hasRole('ADMIN')">
+                                            Quản trị viên
+                                        </span>
+                                        <span class="badge rounded-pill" style="background-color: #E3F2FD; color: #1565C0; border: 1px solid #BBDEFB; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')">
+                                            Quản lý chi nhánh
+                                        </span>
+                                        <span class="badge rounded-pill" style="background-color: #F5F5F5; color: #424242; border: 1px solid #E0E0E0; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="!hasAnyRole('ADMIN', 'MANAGER')">
+                                            Khách hàng
+                                        </span>
+                                    </div>
+                                    <div sec:authorize="hasRole('ADMIN')" class="mt-1 d-flex align-items-center gap-1.5" style="font-size: 12.5px; color: #20382E; font-weight: 700;">
+                                        <i class="bi bi-shield-check text-success" style="font-size: 12px;"></i>
+                                        <span>Chế độ quản trị viên (Xem website)</span>
+                                    </div>
+                                    <div sec:authorize="!hasRole('ADMIN')" class="mt-1 d-flex align-items-center gap-1.5" style="font-size: 12.5px; color: #2E7D32; font-weight: 600;">
+                                        <i class="bi bi-check-circle-fill text-success" style="font-size: 11px;"></i>
+                                        <span>Đang ở chế độ mua hàng</span>
+                                    </div>
+                                </li>
+
+                                <!-- Nút Vào trang quản trị (Admin) -->
+                                <li sec:authorize="hasRole('ADMIN')" class="px-2 mb-2">
+                                    <a th:href="@{/admin/dashboard}" class="btn btn-sm w-100 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
+                                       style="background-color: #20382E; color: #FFFFFF; border-radius: 8px; padding: 7px 12px; font-size: 13.5px; text-decoration: none;">
+                                        <i class="bi bi-speedometer2"></i>
+                                        <span>Vào trang quản trị</span>
+                                    </a>
+                                </li>
+
+                                <!-- Nút Shop Manager (Manager / Vendor) -->
+                                <li sec:authorize="hasAnyRole('MANAGER', 'VENDOR') and !hasRole('ADMIN')" class="px-2 mb-2">
+                                    <a th:href="@{/manager/stores}" class="btn btn-sm btn-outline-primary w-100 fw-bold d-flex align-items-center justify-content-center gap-2"
+                                       style="border-radius: 8px; padding: 6px 12px; font-size: 13.5px;">
+                                        <i class="bi bi-shop-window"></i>
+                                        <span>Shop Manager (Quản lý cửa hàng)</span>
+                                    </a>
+                                </li>
+
+                                <!-- Hồ sơ cá nhân -->
+                                <li>
+                                    <a class="dropdown-item py-2 small d-flex align-items-center gap-2 fw-semibold" th:href="@{/customer/profile}">
+                                        <i class="bi bi-person text-secondary"></i>
+                                        <span>Hồ sơ cá nhân</span>
+                                    </a>
+                                </li>
+
+                                <!-- Đơn hàng của tôi -->
+                                <li sec:authorize="hasRole('CUSTOMER')">
+                                    <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/customer/orders}">
+                                        <i class="bi bi-bag-check text-secondary"></i>
+                                        <span>Đơn hàng của tôi</span>
+                                    </a>
+                                </li>
+
+                                <!-- Thông báo của tôi -->
+                                <li>
+                                    <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/notifications}">
+                                        <i class="bi bi-bell text-secondary"></i>
+                                        <span>Thông báo của tôi</span>
+                                    </a>
+                                </li>
+
+                                <!-- Yêu thích -->
+                                <li sec:authorize="hasRole('CUSTOMER')">
+                                    <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/customer/wishlist}">
+                                        <i class="bi bi-heart text-danger"></i>
+                                        <span>Yêu thích</span>
+                                    </a>
+                                </li>
+
+                                <!-- Đăng ký cấp vai trò: ẨN VỚI ADMIN -->
+                                <li sec:authorize="!hasRole('ADMIN')">
+                                    <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/customer/profile(tab='roles')}">
+                                        <i class="bi bi-person-plus text-primary"></i>
+                                        <span>Đăng ký cấp vai trò</span>
+                                    </a>
+                                </li>
+
+                                <li><hr class="dropdown-divider my-1"></li>
+
+                                <!-- Đăng xuất -->
+                                <li>
+                                    <button type="button" class="dropdown-item py-2 text-danger small fw-semibold d-flex align-items-center gap-2"
+                                            data-bs-toggle="modal" data-bs-target="#signOutModal" id="btnSignOut">
+                                        <i class="bi bi-box-arrow-right"></i>
+                                        <span>Đăng xuất</span>
                                     </button>
-                                </form>
-                            </div>
+                                </li>
+                            </ul>
+                        </div>
 
-                            <div class="alert alert-info py-2 px-3 small rounded-3 mb-4 d-flex align-items-center gap-2" style="background-color: #EBF3EE; color: #20382E; border: 1px solid #D1E5DA;">
-                                <i class="bi bi-info-circle-fill fs-5 text-success flex-shrink-0"></i>
-                                <span>Tài khoản của bạn luôn giữ vai trò <strong>Khách hàng</strong> và có thể mua hoa, thanh toán bình thường trong thời gian chờ quản trị viên xét duyệt yêu cầu cấp vai trò. Gửi yêu cầu <strong>không làm tăng quyền truy cập</strong> ngay lập tức.</span>
-                            </div>
+                        <!-- Khách chưa đăng nhập -->
+                        <div sec:authorize="!isAuthenticated()" class="d-flex align-items-center gap-2">
+                            <a th:href="@{/login}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">Đăng Nhập</a>
+                            <a th:href="@{/register}" class="btn btn-flower-primary btn-sm rounded-pill px-3">Đăng Ký</a>
+                        </div>
+                    </div>
 
-                            <!-- Bảng vai trò của tôi -->
-                            <div class="table-responsive rounded-3 border">
-                                <table class="table table-hover align-middle mb-0">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th class="ps-3 fw-bold">Vai trò</th>
-                                            <th class="fw-bold">Trạng thái</th>
-                                            <th class="fw-bold">Chi tiết / Phân công</th>
-                                            <th class="text-end pe-3 fw-bold">Thao tác</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Vai trò mặc định: Khách hàng -->
-                                        <tr>
-                                            <td class="ps-3">
-                                                <div class="fw-bold text-dark">Khách hàng</div>
-                                                <small class="text-muted">Quyền mặc định khi tạo tài khoản</small>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-3 py-2 rounded-pill">
-                                                    <i class="bi bi-check-circle-fill me-1"></i> Đang hoạt động
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="small text-secondary">Mua hoa tươi, tích điểm, nhận khuyến mãi</span>
-                                            </td>
-                                            <td class="text-end pe-3">
-                                                <a th:href="@{/}" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold">
-                                                    <i class="bi bi-cart3 me-1"></i> Mua hàng
-                                                </a>
-                                            </td>
-                                        </tr>
+                </div>
+            </div>
+        </div>
+    </header>
 
+    <!-- ==============================================
+         NỘI DUNG CHÍNH TRANG TÀI KHOẢN
+         ============================================== -->
+    <main class="py-4">
+        <div class="container flower-container">
 
+            <!-- Tiêu đề trang & Nhóm liên kết phụ (Hoa yêu thích, Hoa đã xem, Cửa hàng theo dõi) -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                <div>
+                    <h1 class="profile-page-title">Tài khoản của tôi</h1>
+                    <p class="profile-page-subtitle">Quản lý hồ sơ cá nhân, sổ địa chỉ nhận hoa và quyền tài khoản</p>
+                </div>
+                <!-- Nhóm liên kết phụ thanh nhã: không để cạnh nút Đăng xuất -->
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="sublink-pill" th:href="@{/customer/wishlist}" title="Xem danh sách hoa yêu thích">
+                        <i class="bi bi-heart-fill text-danger"></i>
+                        <span>Hoa yêu thích</span>
+                    </a>
+                    <a class="sublink-pill" th:href="@{/customer/profile/recently-viewed}" title="Xem các mẫu hoa đã xem gần đây">
+                        <i class="bi bi-clock-history text-secondary"></i>
+                        <span>Hoa đã xem</span>
+                    </a>
+                    <a class="sublink-pill" th:href="@{/customer/profile/followed-stores}" title="Xem các chi nhánh, cửa hàng hoa đang theo dõi">
+                        <i class="bi bi-shop text-success"></i>
+                        <span>Cửa hàng theo dõi</span>
+                    </a>
+                </div>
+            </div>
 
+            <!-- Thông báo thu gọn thành một dòng có icon -->
+            <div th:if="${successMessage}" class="compact-alert compact-alert-success" role="status">
+                <i class="bi bi-check-circle-fill text-success fs-5 flex-shrink-0"></i>
+                <span class="flex-grow-1" th:text="${successMessage}"></span>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close" style="font-size: 10px;"></button>
+            </div>
+            <div th:if="${errorMessage}" class="compact-alert compact-alert-danger" role="alert">
+                <i class="bi bi-exclamation-triangle-fill text-danger fs-5 flex-shrink-0"></i>
+                <span class="flex-grow-1" th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close" style="font-size: 10px;"></button>
+            </div>
 
-                                        <!-- Vai trò đã cấp: Quản lý chi nhánh -->
-                                        <tr th:if="${user.hasRole(T(com.finalproject.enums.Role).MANAGER)}">
-                                            <td class="ps-3">
-                                                <div class="fw-bold text-dark">Quản lý chi nhánh</div>
-                                                <small class="text-muted">Được phân quyền quản lý</small>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-3 py-2 rounded-pill">
-                                                    <i class="bi bi-check-circle-fill me-1"></i> Đang hoạt động
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="small fw-semibold text-primary">
-                                                    <i class="bi bi-shop me-1"></i>
-                                                    <span th:text="${user.store != null ? user.store.name : 'Chưa phân công chi nhánh'}"></span>
-                                                </span>
-                                            </td>
-                                            <td class="text-end pe-3">
-                                                <a th:href="@{/manager/orders}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">
-                                                    <i class="bi bi-building me-1"></i> Chuyển giao diện
-                                                </a>
-                                            </td>
-                                        </tr>
+            <!-- BỐ CỤC: Nhóm điều hướng 4 Tab chính rõ ràng -->
+            <ul class="profile-nav-pills mb-4" id="profileTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="info-tab" data-bs-toggle="pill" data-bs-target="#tab-info"
+                            type="button" role="tab" aria-controls="tab-info"
+                            th:classappend="${activeTab == 'info' or activeTab == null or activeTab == ''} ? ' active' : ''"
+                            th:aria-selected="${activeTab == 'info' or activeTab == null or activeTab == ''} ? 'true' : 'false'">
+                        <i class="bi bi-person-badge"></i>
+                        <span>Thông tin cá nhân</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="address-tab" data-bs-toggle="pill" data-bs-target="#tab-address"
+                            type="button" role="tab" aria-controls="tab-address"
+                            th:classappend="${activeTab == 'address' or activeTab == 'addresses'} ? ' active' : ''"
+                            th:aria-selected="${activeTab == 'address' or activeTab == 'addresses'} ? 'true' : 'false'">
+                        <i class="bi bi-geo-alt"></i>
+                        <span>Sổ địa chỉ</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="password-tab" data-bs-toggle="pill" data-bs-target="#tab-password"
+                            type="button" role="tab" aria-controls="tab-password"
+                            th:classappend="${activeTab == 'password'} ? ' active' : ''"
+                            th:aria-selected="${activeTab == 'password'} ? 'true' : 'false'">
+                        <i class="bi bi-shield-lock"></i>
+                        <span>Đổi mật khẩu</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="roles-tab" data-bs-toggle="pill" data-bs-target="#tab-roles"
+                            type="button" role="tab" aria-controls="tab-roles"
+                            th:classappend="${activeTab == 'roles'} ? ' active' : ''"
+                            th:aria-selected="${activeTab == 'roles'} ? 'true' : 'false'">
+                        <i class="bi bi-shield-check"></i>
+                        <span>Vai trò &amp; yêu cầu</span>
+                    </button>
+                </li>
+            </ul>
 
-                                        <!-- Vai trò đã cấp: Người bán -->
-                                        <tr th:if="${user.hasRole(T(com.finalproject.enums.Role).VENDOR)}">
-                                            <td class="ps-3">
-                                                <div class="fw-bold text-dark">Người bán</div>
-                                                <small class="text-muted">Cửa hàng hoa đối tác</small>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-3 py-2 rounded-pill">
-                                                    <i class="bi bi-check-circle-fill me-1"></i> Đang hoạt động
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="small text-secondary">Kênh quản lý sản phẩm đối tác</span>
-                                            </td>
-                                            <td class="text-end pe-3">
-                                                <a th:href="@{/vendor/dashboard}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">
-                                                    <i class="bi bi-shop me-1"></i> Chuyển giao diện
-                                                </a>
-                                            </td>
-                                        </tr>
+            <!-- VÙNG NỘI DUNG TỪNG TAB -->
+            <div class="tab-content" id="profileTabContent">
 
-                                        <!-- Danh sách yêu cầu vai trò -->
-                                        <tr th:each="req : ${roleRequests}">
-                                            <td class="ps-3">
-                                                <strong class="text-dark" th:text="${req.targetRoleDisplayName}"></strong>
-                                                <div class="text-muted small" th:text="'Ngày gửi: ' + ${#temporals.format(req.createdAt, 'dd/MM/yyyy HH:mm')}"></div>
-                                            </td>
-                                            <td>
-                                                <span th:if="${req.status.name() == 'PENDING'}" class="badge bg-warning bg-opacity-10 text-dark border border-warning px-3 py-2 rounded-pill">
-                                                    <i class="bi bi-hourglass-split me-1 text-warning"></i> Chờ duyệt
-                                                </span>
-                                                <span th:if="${req.status.name() == 'APPROVED'}" class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2 rounded-pill">
-                                                    <i class="bi bi-check-circle-fill me-1"></i> Đã duyệt
-                                                </span>
-                                                <span th:if="${req.status.name() == 'REJECTED'}" class="badge bg-danger bg-opacity-10 text-danger border border-danger px-3 py-2 rounded-pill">
-                                                    <i class="bi bi-x-circle-fill me-1"></i> Bị từ chối
-                                                </span>
-                                                <span th:if="${req.status.name() == 'CANCELLED'}" class="badge bg-secondary bg-opacity-10 text-secondary border px-3 py-2 rounded-pill">
-                                                    Đã rút yêu cầu
-                                                </span>
-                                            </td>
-                                            <td>
+                <!-- ==============================================
+                     TAB 1: THÔNG TIN CÁ NHÂN
+                     ============================================== -->
+                <section class="tab-pane fade" id="tab-info" role="tabpanel" aria-labelledby="info-tab"
+                         th:classappend="${activeTab == 'info' or activeTab == null or activeTab == ''} ? ' show active' : ''">
+                    <form th:action="@{/customer/profile/update}" method="post" enctype="multipart/form-data" class="flower-card" id="profileForm">
+                        
+                        <!-- Vùng xem trước Ảnh bìa & Ảnh đại diện -->
+                        <div class="profile-cover-box" id="coverContainer">
+                            <img id="coverPreview" class="profile-cover-img"
+                                 th:src="${user.cover != null and !user.cover.isEmpty() ? user.cover : 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=1200&h=350&fit=crop&q=80'}"
+                                 alt="Ảnh bìa">
+                            <label for="coverFileInput" class="cover-upload-trigger">
+                                <i class="bi bi-camera me-1"></i>
+                                <span>Chọn ảnh bìa</span>
+                            </label>
 
-                                                <div th:if="${req.targetRole.name() == 'MANAGER'}" class="small text-secondary">
-                                                    <span>Chi nhánh mong muốn: <strong th:text="${req.targetStore != null ? req.targetStore.name : 'Tất cả chi nhánh'}"></strong></span>
-                                                </div>
-                                                <div th:if="${req.targetRole.name() == 'VENDOR'}" class="small text-secondary">
-                                                    <span>Cửa hàng: <strong th:text="${req.shopName != null ? req.shopName : 'Đối tác'}"></strong></span>
-                                                </div>
-                                                <div th:if="${req.status.name() == 'REJECTED' and req.rejectionReason != null}" class="text-danger small mt-1">
-                                                    <i class="bi bi-exclamation-circle me-1"></i><strong>Lý do từ chối:</strong> <span th:text="${req.rejectionReason}"></span>
-                                                </div>
-                                            </td>
-                                            <td class="text-end pe-3">
-                                                <div th:if="${req.status.name() == 'PENDING'}" class="d-inline-flex gap-1">
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3"
-                                                            data-bs-toggle="modal" th:data-bs-target="'#modalReqDetail' + ${req.id}">
-                                                        Xem yêu cầu
-                                                    </button>
-                                                    <form th:action="@{/customer/profile/role-request/cancel/{id}(id=${req.id})}" method="post" class="d-inline"
-                                                          onsubmit="return confirm('Bạn có chắc chắn muốn rút yêu cầu đăng ký vai trò này không?');">
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
-                                                            Rút yêu cầu
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                                <div th:if="${req.status.name() == 'REJECTED'}">
-                                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3"
-                                                            data-bs-toggle="modal" data-bs-target="#registerRoleModal">
-                                                        Đăng ký lại
-                                                    </button>
-                                                </div>
-                                                <span th:if="${req.status.name() == 'APPROVED' or req.status.name() == 'CANCELLED'}" class="text-muted small">—</span>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <div class="profile-avatar-wrapper">
+                                <img th:src="${user.avatarUrl != null and !user.avatarUrl.isEmpty() ? user.avatarUrl : '/images/flower-logo.png'}"
+                                     id="avatarPreview" class="profile-avatar-img" alt="Ảnh đại diện">
+                                <div class="bg-white px-3 py-1.5 rounded-3 border shadow-sm d-flex align-items-center gap-2">
+                                    <label for="avatarFileInput" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-bold mb-0" style="cursor: pointer;">
+                                        <i class="bi bi-image me-1"></i> Đổi ảnh đại diện
+                                    </label>
+                                    <span id="avatarFileName" class="file-chosen-name text-muted small">Chưa chọn tệp</span>
+                                </div>
                             </div>
                         </div>
-                    </div></div><div class="modal fade" id="registerRoleModal" tabindex="-1" aria-labelledby="registerRoleModalLabel" aria-hidden="true">
+
+                        <!-- Ẩn input file mặc định, dùng trigger tiếng Việt -->
+                        <input id="coverFileInput" name="coverFile" type="file" accept="image/*" class="d-none" onchange="previewCoverImage(this)">
+                        <input id="avatarFileInput" name="avatarFile" type="file" accept="image/*" class="d-none" onchange="previewAvatarImage(this)">
+
+                        <div class="d-flex align-items-center justify-content-between mb-3 pt-2">
+                            <h5 class="fw-bold mb-0 text-dark">Hồ sơ người dùng</h5>
+                            <span class="small text-muted">ID: #<span th:text="${user.id}">1</span></span>
+                        </div>
+
+                        <!-- Các trường nhập liệu: Cao 44px, bo góc 10-12px, khoảng cách 16-20px -->
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="profileName" class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                                <input id="profileName" name="fullName" th:value="${user.fullName}" required maxlength="100" class="form-control" placeholder="Nhập họ và tên...">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="profileEmail" class="form-label">Địa chỉ Email (Đăng nhập)</label>
+                                <input id="profileEmail" th:value="${user.email}" type="email" readonly class="form-control" title="Email tài khoản không thể chỉnh sửa trực tiếp">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="profilePhone" class="form-label">Số điện thoại liên hệ</label>
+                                <input id="profilePhone" name="phone" th:value="${user.phone}" maxlength="20" class="form-control" placeholder="Nhập số điện thoại nhận hoa...">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="profileAddress" class="form-label">Địa chỉ mặc định</label>
+                                <input id="profileAddress" name="address" th:value="${user.address}" maxlength="255" class="form-control" placeholder="Nhập số nhà, tên đường, phường/xã...">
+                            </div>
+                        </div>
+
+                        <!-- Nút Lưu thay đổi xanh đậm -->
+                        <div class="mt-4 pt-2 border-top d-flex justify-content-end">
+                            <button class="btn-flower-primary" type="submit" id="btnSaveProfile">
+                                <i class="bi bi-check-lg"></i>
+                                <span>Lưu thay đổi</span>
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- ==============================================
+                     TAB 2: SỔ ĐỊA CHỈ NHẬN HÀNG
+                     ============================================== -->
+                <section class="tab-pane fade" id="tab-address" role="tabpanel" aria-labelledby="address-tab"
+                         th:classappend="${activeTab == 'address' or activeTab == 'addresses'} ? ' show active' : ''">
+                    <div class="row g-4">
+                        <!-- Danh sách địa chỉ đã lưu -->
+                        <div class="col-lg-7">
+                            <div class="flower-card h-100">
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-geo-alt-fill text-danger me-2"></i>Địa chỉ đã lưu</h5>
+                                    <span class="badge bg-light text-secondary border px-3 py-1.5 rounded-pill" th:text="${#lists.size(addresses)} + ' địa chỉ'">0</span>
+                                </div>
+
+                                <div th:if="${#lists.isEmpty(addresses)}" class="text-center py-5 text-muted">
+                                    <i class="bi bi-pin-map fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                                    <p class="mb-0">Bạn chưa lưu địa chỉ nhận hoa nào. Hãy thêm địa chỉ mới bên cạnh!</p>
+                                </div>
+
+                                <div class="address-item-card" th:each="addr : ${addresses}" th:classappend="${addr.isDefault} ? ' is-default' : ''">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <strong class="text-dark fs-6" th:text="${addr.recipientName}">Nguyễn Văn A</strong>
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success ms-2 px-2.5 py-1 rounded-pill" th:if="${addr.isDefault}">
+                                                <i class="bi bi-check-circle-fill me-1"></i>Mặc định
+                                            </span>
+                                        </div>
+                                        <div class="text-muted small" th:text="${addr.phone}">0901234567</div>
+                                    </div>
+                                    <p class="text-secondary small mb-3" th:text="${addr.addressDetail}">123 Đường Lê Lợi, Bến Thành, Quận 1, TP.HCM</p>
+                                    
+                                    <div class="d-flex align-items-center gap-2 flex-wrap border-top pt-2">
+                                        <form th:unless="${addr.isDefault}" th:action="@{/customer/profile/address/set-default/{id}(id=${addr.id})}" method="post">
+                                            <button class="btn btn-sm btn-outline-success rounded-pill px-3" type="submit">
+                                                Đặt làm mặc định
+                                            </button>
+                                        </form>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3"
+                                                th:onclick="openEditAddressModal([[${addr.id}]], [[${addr.recipientName}]], [[${addr.phone}]], [[${addr.addressDetail}]], [[${addr.isDefault}]])">
+                                            <i class="bi bi-pencil me-1"></i>Sửa
+                                        </button>
+                                        <form th:action="@{/customer/profile/address/delete/{id}(id=${addr.id})}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa địa chỉ này?');">
+                                            <button class="btn btn-sm btn-outline-danger rounded-pill px-3" type="submit">
+                                                <i class="bi bi-trash me-1"></i>Xóa
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form thêm địa chỉ mới -->
+                        <div class="col-lg-5">
+                            <form th:action="@{/customer/profile/address/add}" method="post" class="flower-card">
+                                <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-plus-circle-fill text-success me-2"></i>Thêm địa chỉ mới</h5>
+                                
+                                <div class="mb-3">
+                                    <label for="addRecipient" class="form-label">Tên người nhận <span class="text-danger">*</span></label>
+                                    <input id="addRecipient" name="recipientName" required class="form-control" placeholder="Ví dụ: Anh Tuấn, Chị Hoa...">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="addPhone" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                    <input id="addPhone" name="phone" type="tel" required class="form-control" placeholder="Ví dụ: 0909888777...">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="addAddress" class="form-label">Địa chỉ chi tiết <span class="text-danger">*</span></label>
+                                    <textarea id="addAddress" name="addressDetail" rows="3" required class="form-control" placeholder="Số nhà, tên đường, phường/xã, quận/huyện..."></textarea>
+                                </div>
+                                <div class="form-check mb-4">
+                                    <input class="form-check-input" type="checkbox" name="isDefault" value="true" id="checkDefaultAddress">
+                                    <label class="form-check-label small" for="checkDefaultAddress">
+                                        Đặt địa chỉ này làm mặc định khi thanh toán
+                                    </label>
+                                </div>
+                                <button type="submit" class="btn-flower-primary w-100">
+                                    <i class="bi bi-plus-lg"></i>
+                                    <span>Thêm địa chỉ</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==============================================
+                     TAB 3: ĐỔI MẬT KHẨU
+                     ============================================== -->
+                <section class="tab-pane fade" id="tab-password" role="tabpanel" aria-labelledby="password-tab"
+                         th:classappend="${activeTab == 'password'} ? ' show active' : ''">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-7">
+                            <form th:action="@{/customer/profile/change-password}" method="post" class="flower-card" id="passwordForm">
+                                <div class="d-flex align-items-center gap-2 mb-3">
+                                    <i class="bi bi-shield-lock-fill text-success fs-4"></i>
+                                    <div>
+                                        <h5 class="fw-bold mb-0 text-dark">Đổi mật khẩu tài khoản</h5>
+                                        <p class="small text-muted mb-0">Bảo vệ tài khoản của bạn với mật khẩu an toàn và xác thực mã OTP gửi về email.</p>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="oldPassword" class="form-label">Mật khẩu hiện tại <span class="text-danger">*</span></label>
+                                    <input id="oldPassword" name="oldPassword" type="password" required autocomplete="current-password" class="form-control" placeholder="Nhập mật khẩu đang dùng...">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="newPassword" class="form-label">Mật khẩu mới <span class="text-danger">*</span></label>
+                                    <input id="newPassword" name="newPassword" type="password" required minlength="6" autocomplete="new-password" class="form-control" placeholder="Tối thiểu 6 ký tự..." oninput="checkPasswordStrength(this.value)">
+                                    <div class="mt-2">
+                                        <div class="progress" style="height: 6px; border-radius: 4px;">
+                                            <div id="passwordStrengthBar" class="progress-bar bg-secondary" role="progressbar" style="width: 0%;"></div>
+                                        </div>
+                                        <span id="strengthLabel" class="small text-muted mt-1 d-block">Độ mạnh mật khẩu</span>
+                                    </div>
+                                </div>
+
+                                <!-- Gửi OTP đến email -->
+                                <div class="p-3 rounded-3 mb-3 bg-light border">
+                                    <label class="form-label mb-1">Mã xác thực OTP gửi qua Email <span class="text-danger">*</span></label>
+                                    <p class="small text-muted mb-2">Hệ thống sẽ gửi mã gồm 6 chữ số đến email: <strong class="text-dark" th:text="${user.email}">user@gmail.com</strong></p>
+                                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                                        <button type="button" id="sendPasswordOtp" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-bold"
+                                                th:data-url="@{/customer/profile/send-password-otp}" th:data-email="${user.email}"
+                                                onclick="sendPasswordOtpCode()">
+                                            <i class="bi bi-send me-1"></i>
+                                            <span id="btnSendOtpText">Gửi mã OTP</span>
+                                        </button>
+                                        <span id="otpStatus" role="status" class="small fw-semibold"></span>
+                                    </div>
+                                    <input id="otpCode" name="otpCode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required autocomplete="one-time-code" class="form-control text-center fw-bold fs-5" style="letter-spacing: 4px; max-width: 220px;" placeholder="• • • • • •">
+                                </div>
+
+                                <div class="d-flex justify-content-end pt-2">
+                                    <button type="submit" class="btn-flower-primary">
+                                        <i class="bi bi-check-circle"></i>
+                                        <span>Đổi mật khẩu</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==============================================
+                     TAB 4: VAI TRÒ & YÊU CẦU
+                     ============================================== -->
+                <section class="tab-pane fade" id="tab-roles" role="tabpanel" aria-labelledby="roles-tab"
+                         th:classappend="${activeTab == 'roles'} ? ' show active' : ''">
+                    <div class="flower-card">
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                            <div>
+                                <h5 class="fw-bold mb-1 text-dark"><i class="bi bi-shield-check text-success me-2"></i>Vai trò &amp; Quyền hạn của tôi</h5>
+                                <p class="text-muted small mb-0">Quản lý các vai trò trong chuỗi cửa hàng hoa và gửi hồ sơ xin cấp vai trò Quản lý / Người bán.</p>
+                            </div>
+                            <button type="button" class="btn-flower-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#registerRoleModal">
+                                <i class="bi bi-plus-circle me-1"></i> Đăng ký vai trò mới
+                            </button>
+                        </div>
+
+                        <!-- Banner thông báo khi có vai trò đã duyệt nhưng chưa đăng nhập lại để nhận quyền -->
+                        <div th:if="${hasApprovedUnactivated}" class="compact-alert"
+                             style="background: linear-gradient(135deg, #FFF7E6 0%, #FFFBF0 100%); border: 1px solid #F6AD55; color: #7B4F00;">
+                            <i class="bi bi-bell-fill fs-5 text-warning flex-shrink-0"></i>
+                            <div class="flex-grow-1">
+                                <strong class="d-block">🎉 Yêu cầu cấp vai trò của bạn đã được phê duyệt!</strong>
+                                <span class="small">Vui lòng đăng xuất và đăng nhập lại để nhận quyền truy cập mới.</span>
+                            </div>
+                            <form th:action="@{/logout}" method="post" class="flex-shrink-0 ms-2">
+                                <button type="submit" class="btn btn-warning btn-sm rounded-pill px-3 fw-bold">
+                                    <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất ngay
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Ghi chú giải thích vai trò Khách hàng -->
+                        <div class="alert alert-info py-2 px-3 small rounded-3 mb-4 d-flex align-items-center gap-2" style="background-color: #EBF3EE; color: #20382E; border: 1px solid #D1E5DA;">
+                            <i class="bi bi-info-circle-fill fs-5 text-success flex-shrink-0"></i>
+                            <span>Tài khoản của bạn luôn giữ vai trò <strong>Khách hàng</strong> để mua hoa và nhận khuyến mãi trong thời gian chờ duyệt hồ sơ vai trò mới.</span>
+                        </div>
+
+                        <!-- Bảng Vai trò hiện tại và Các yêu cầu -->
+                        <div class="table-responsive rounded-3 border">
+                            <table class="table table-hover align-middle mb-0 table-custom-roles">
+                                <thead>
+                                    <tr>
+                                        <th class="ps-3">Vai trò</th>
+                                        <th>Trạng thái</th>
+                                        <th>Chi tiết / Phân công</th>
+                                        <th class="text-end pe-3">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Vai trò mặc định: Khách hàng -->
+                                    <tr>
+                                        <td class="ps-3">
+                                            <div class="fw-bold text-dark">Khách hàng</div>
+                                            <small class="text-muted">Quyền mặc định khi tạo tài khoản</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-3 py-1.5 rounded-pill">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Đang hoạt động
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="small text-secondary">Mua hoa tươi, đặt giao tận nơi, nhận ưu đãi</span>
+                                        </td>
+                                        <td class="text-end pe-3">
+                                            <a th:href="@{/}" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold">
+                                                <i class="bi bi-cart3 me-1"></i> Mua hoa
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Vai trò đã cấp: Quản lý chi nhánh -->
+                                    <tr th:if="${user.hasRole(T(com.finalproject.enums.Role).MANAGER)}">
+                                        <td class="ps-3">
+                                            <div class="fw-bold text-dark">Quản lý chi nhánh</div>
+                                            <small class="text-muted">Được phân quyền quản lý</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-3 py-1.5 rounded-pill">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Đang hoạt động
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="small fw-semibold text-primary">
+                                                <i class="bi bi-shop me-1"></i>
+                                                <span th:text="${user.store != null ? user.store.name : 'Chưa phân công chi nhánh'}"></span>
+                                            </span>
+                                        </td>
+                                        <td class="text-end pe-3">
+                                            <a th:href="@{/manager/orders}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">
+                                                <i class="bi bi-building me-1"></i> Quản lý
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Vai trò đã cấp: Người bán -->
+                                    <tr th:if="${user.hasRole(T(com.finalproject.enums.Role).VENDOR)}">
+                                        <td class="ps-3">
+                                            <div class="fw-bold text-dark">Người bán</div>
+                                            <small class="text-muted">Cửa hàng hoa đối tác</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-3 py-1.5 rounded-pill">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Đang hoạt động
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="small text-secondary">Kênh quản lý sản phẩm đối tác</span>
+                                        </td>
+                                        <td class="text-end pe-3">
+                                            <a th:href="@{/vendor/dashboard}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">
+                                                <i class="bi bi-shop me-1"></i> Quản lý
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Danh sách các yêu cầu cấp vai trò đã gửi -->
+                                    <tr th:each="req : ${roleRequests}">
+                                        <td class="ps-3">
+                                            <strong class="text-dark" th:text="${req.targetRoleDisplayName}"></strong>
+                                            <div class="text-muted small" th:text="'Ngày gửi: ' + ${#temporals.format(req.createdAt, 'dd/MM/yyyy HH:mm')}"></div>
+                                        </td>
+                                        <td>
+                                            <span th:if="${req.status.name() == 'PENDING'}" class="badge bg-warning bg-opacity-10 text-dark border border-warning px-3 py-1.5 rounded-pill">
+                                                <i class="bi bi-hourglass-split me-1 text-warning"></i> Chờ duyệt
+                                            </span>
+                                            <span th:if="${req.status.name() == 'APPROVED'}" class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-1.5 rounded-pill">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Đã duyệt
+                                            </span>
+                                            <span th:if="${req.status.name() == 'REJECTED'}" class="badge bg-danger bg-opacity-10 text-danger border border-danger px-3 py-1.5 rounded-pill">
+                                                <i class="bi bi-x-circle-fill me-1"></i> Bị từ chối
+                                            </span>
+                                            <span th:if="${req.status.name() == 'CANCELLED'}" class="badge bg-secondary bg-opacity-10 text-secondary border px-3 py-1.5 rounded-pill">
+                                                Đã rút yêu cầu
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div th:if="${req.targetRole.name() == 'MANAGER'}" class="small text-secondary">
+                                                <span>Chi nhánh: <strong th:text="${req.targetStore != null ? req.targetStore.name : 'Tất cả chi nhánh'}"></strong></span>
+                                            </div>
+                                            <div th:if="${req.targetRole.name() == 'VENDOR'}" class="small text-secondary">
+                                                <span>Cửa hàng: <strong th:text="${req.shopName != null ? req.shopName : 'Đối tác'}"></strong></span>
+                                            </div>
+                                            <div th:if="${req.status.name() == 'REJECTED' and req.rejectionReason != null}" class="text-danger small mt-1">
+                                                <i class="bi bi-exclamation-circle me-1"></i><strong>Lý do:</strong> <span th:text="${req.rejectionReason}"></span>
+                                            </div>
+                                        </td>
+                                        <td class="text-end pe-3">
+                                            <div th:if="${req.status.name() == 'PENDING'}" class="d-inline-flex gap-1">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3"
+                                                        data-bs-toggle="modal" th:data-bs-target="'#modalReqDetail' + ${req.id}">
+                                                    Xem yêu cầu
+                                                </button>
+                                                <form th:action="@{/customer/profile/role-request/cancel/{id}(id=${req.id})}" method="post" class="d-inline"
+                                                      onsubmit="return confirm('Bạn có chắc chắn muốn rút yêu cầu đăng ký vai trò này không?');">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                                                        Rút yêu cầu
+                                                    </button>
+                                                </form>
+                                            </div>
+                                            <div th:if="${req.status.name() == 'REJECTED'}">
+                                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3"
+                                                        data-bs-toggle="modal" data-bs-target="#registerRoleModal">
+                                                    Đăng ký lại
+                                                </button>
+                                            </div>
+                                            <span th:if="${req.status.name() == 'APPROVED' or req.status.name() == 'CANCELLED'}" class="text-muted small">—</span>
+                                        </td>
+                                    </tr>
+
+                                    <tr th:if="${#lists.isEmpty(roleRequests)}">
+                                        <td colspan="4" class="text-center py-4 text-muted small">
+                                            Chưa có hồ sơ yêu cầu vai trò nào được gửi. Bấm nút <strong>"Đăng ký vai trò mới"</strong> phía trên để gửi hồ sơ.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </section>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ==============================================
+         MODAL 1: ĐĂNG KÝ VAI TRÒ MỚI (#registerRoleModal)
+         ============================================== -->
+    <div class="modal fade" id="registerRoleModal" tabindex="-1" aria-labelledby="registerRoleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content rounded-4 border-0 shadow">
                 <div class="modal-header border-bottom pb-3">
-                    <h5 class="modal-title font-serif fw-bold text-dark" id="registerRoleModalLabel">
-                        <i class="bi bi-person-plus-fill text-danger me-2"></i>Đăng Ký Cấp Thêm Vai Trò
+                    <h5 class="modal-title fw-bold text-dark" id="registerRoleModalLabel">
+                        <i class="bi bi-person-plus-fill text-success me-2"></i>Đăng Ký Cấp Thêm Vai Trò
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -194,12 +1217,12 @@
                     <div class="modal-body p-4">
                         <div class="alert alert-light border small text-muted mb-4 rounded-3 d-flex align-items-center gap-2">
                             <i class="bi bi-shield-check text-success fs-5 flex-shrink-0"></i>
-                            <span>Trong thời gian chờ quản trị viên xét duyệt, tài khoản của bạn vẫn hoạt động và mua sắm hoa tươi bình thường với vai trò <strong>Khách hàng</strong>.</span>
+                            <span>Trong thời gian chờ duyệt, tài khoản vẫn mua hoa bình thường với vai trò <strong>Khách hàng</strong>.</span>
                         </div>
 
                         <!-- 1. Chọn vai trò xin cấp -->
                         <div class="mb-4">
-                            <label class="form-label fw-bold text-dark">Vai trò xin cấp <span class="text-danger">(*)</span></label>
+                            <label class="form-label fw-bold text-dark">Vai trò muốn xin cấp <span class="text-danger">*</span></label>
                             <select name="targetRole" id="selectTargetRole" class="form-select form-select-lg rounded-3 fs-6" required onchange="handleRoleChange(this.value)">
                                 <option value="" disabled selected>-- Chọn vai trò bạn muốn xin cấp --</option>
                                 <option value="MANAGER">🏢 Quản lý chi nhánh (Store Manager)</option>
@@ -207,9 +1230,6 @@
                             </select>
                             <div class="form-text text-muted small">Lưu ý: Không được tự đăng ký vai trò Quản trị viên (Admin).</div>
                         </div>
-
-
-
 
                         <!-- Form chi tiết cho Quản lý chi nhánh (MANAGER) -->
                         <div id="sectionManager" class="role-section border rounded-3 p-3 mb-3 bg-light" style="display: none;">
@@ -242,7 +1262,7 @@
                                     <input type="text" name="shopName" class="form-control" placeholder="Ví dụ: Vườn Hoa Tươi Đà Lạt Organic...">
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label small fw-semibold">Thông tin liên hệ / Hotline (*)</label>
+                                    <label class="form-label small fw-semibold">Hotline / Email liên hệ (*)</label>
                                     <input type="text" name="contactInfo" class="form-control" placeholder="Số điện thoại / Email liên hệ...">
                                 </div>
                                 <div class="col-12">
@@ -250,7 +1270,7 @@
                                     <input type="text" name="shopAddress" class="form-control" placeholder="Số nhà, tên đường, phường, quận/huyện...">
                                 </div>
                                 <div class="col-12">
-                                    <label class="form-label small fw-semibold">Giới thiệu sản phẩm đối tác</label>
+                                    <label class="form-label small fw-semibold">Giới thiệu sản phẩm cung ứng</label>
                                     <textarea name="experienceNote" class="form-control" rows="2" placeholder="Các chủng loại hoa tươi cung ứng: Lan hồ điệp, hoa hồng nhập, cẩm chướng..."></textarea>
                                 </div>
                             </div>
@@ -258,19 +1278,24 @@
                     </div>
                     <div class="modal-footer border-top">
                         <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Hủy bỏ</button>
-                        <button type="submit" id="btnSubmitRoleRequest" class="btn btn-danger rounded-pill px-4 fw-bold" disabled>
+                        <button type="submit" id="btnSubmitRoleRequest" class="btn-flower-primary rounded-pill px-4" disabled>
                             <i class="bi bi-send-fill me-1"></i> Gửi Yêu Cầu Xét Duyệt
                         </button>
                     </div>
                 </form>
             </div>
         </div>
-    </div><div th:each="req : ${roleRequests}" class="modal fade" th:id="'modalReqDetail' + ${req.id}" tabindex="-1" aria-hidden="true">
+    </div>
+
+    <!-- ==============================================
+         MODAL 2: XEM CHI TIẾT YÊU CẦU (#modalReqDetail)
+         ============================================== -->
+    <div th:each="req : ${roleRequests}" class="modal fade" th:id="'modalReqDetail' + ${req.id}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rounded-4 border-0 shadow">
                 <div class="modal-header border-bottom">
-                    <h5 class="modal-title font-serif fw-bold text-dark">
-                        <i class="bi bi-file-earmark-person text-primary me-2"></i>Hồ Sơ Yêu Cầu Vai Trò
+                    <h5 class="modal-title fw-bold text-dark">
+                        <i class="bi bi-file-earmark-person text-success me-2"></i>Hồ Sơ Yêu Cầu Vai Trò
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -284,25 +1309,15 @@
                         <span class="badge bg-warning bg-opacity-10 text-dark border border-warning px-3 py-1 rounded-pill" th:text="${req.status.displayName}"></span>
                     </div>
                     <div class="mb-3 d-flex justify-content-between align-items-center">
-                        <span class="text-muted small">Ngày gửi thực tế:</span>
+                        <span class="text-muted small">Thời gian gửi:</span>
                         <span class="fw-semibold text-dark" th:text="${#temporals.format(req.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
                     </div>
 
                     <hr class="my-3">
 
                     <div th:if="${req.phone != null and !#strings.isEmpty(req.phone)}" class="mb-2">
-                        <span class="text-muted small d-block">Số điện thoại liên hệ:</span>
+                        <span class="text-muted small d-block">Số điện thoại:</span>
                         <strong class="text-dark" th:text="${req.phone}"></strong>
-                    </div>
-
-                    <div th:if="${req.workArea != null and !#strings.isEmpty(req.workArea)}" class="mb-2">
-                        <span class="text-muted small d-block">Khu vực làm việc:</span>
-                        <strong class="text-dark" th:text="${req.workArea}"></strong>
-                    </div>
-
-                    <div th:if="${req.vehicleType != null and !#strings.isEmpty(req.vehicleType)}" class="mb-2">
-                        <span class="text-muted small d-block">Phương tiện di chuyển:</span>
-                        <strong class="text-dark" th:text="${req.vehicleType}"></strong>
                     </div>
 
                     <div th:if="${req.targetStore != null}" class="mb-2">
@@ -326,8 +1341,8 @@
                     </div>
 
                     <div th:if="${req.experienceNote != null and !#strings.isEmpty(req.experienceNote)}" class="mb-2">
-                        <span class="text-muted small d-block">Kinh nghiệm / Ghi chú phân công:</span>
-                        <p class="text-secondary small bg-light p-2 rounded-2 mb-0" th:text="${req.experienceNote}"></p>
+                        <span class="text-muted small d-block">Ghi chú / Kinh nghiệm:</span>
+                        <p class="text-secondary small bg-light p-2.5 rounded-2 mb-0 border" th:text="${req.experienceNote}"></p>
                     </div>
 
                     <div th:if="${req.rejectionReason != null and !#strings.isEmpty(req.rejectionReason)}" class="mt-3 p-3 bg-danger bg-opacity-10 border border-danger-subtle rounded-3">
@@ -340,586 +1355,323 @@
                 </div>
             </div>
         </div>
-
-        <!-- Form chi tiết cho Quản lý chi nhánh (MANAGER) -->
-        <div id="sectionManager" class="hidden p-space-md rounded-xl bg-[#FAF7F5] border border-[#EAE1DC] space-y-space-md">
-          <h5 class="font-bold text-[14px] text-[#2D2424] flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-[#264E43] text-[18px]">store</span>
-            Thông tin ứng tuyển Quản lý chi nhánh
-          </h5>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
-            <div>
-              <label class="block font-label-sm text-label-sm text-on-surface mb-1">Chi nhánh mong muốn (*)</label>
-              <select name="targetStoreId"
-                class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none cursor-pointer">
-                <option value="">-- Chọn chi nhánh --</option>
-                <option th:each="st : ${availableStores}" th:value="${st.id}" th:text="${st.name} + ' (' + ${st.address} + ')'"></option>
-              </select>
-            </div>
-            <div>
-              <label class="block font-label-sm text-label-sm text-on-surface mb-1">Số điện thoại liên hệ (*)</label>
-              <input type="text" name="phone" th:value="${user.phone}" placeholder="Nhập số điện thoại..."
-                class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none">
-            </div>
-          </div>
-          <div>
-            <label class="block font-label-sm text-label-sm text-on-surface mb-1">Kinh nghiệm hoặc thông tin phân công (*)</label>
-            <textarea name="experienceNote" rows="3" placeholder="Kinh nghiệm quản lý cửa hàng hoa, điều hành nhân viên, giám sát kho bảo quản..."
-              class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none"></textarea>
-          </div>
-        </div>
-
-        <!-- Form chi tiết cho Người bán (VENDOR) -->
-        <div id="sectionVendor" class="hidden p-space-md rounded-xl bg-[#FAF7F5] border border-[#EAE1DC] space-y-space-md">
-          <h5 class="font-bold text-[14px] text-[#2D2424] flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-[#264E43] text-[18px]">storefront</span>
-            Thông tin đối tác bán hoa (Vendor)
-          </h5>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
-            <div>
-              <label class="block font-label-sm text-label-sm text-on-surface mb-1">Tên cửa hàng (*)</label>
-              <input type="text" name="shopName" placeholder="Ví dụ: Vườn Hoa Tươi Đà Lạt Organic..."
-                class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none">
-            </div>
-            <div>
-              <label class="block font-label-sm text-label-sm text-on-surface mb-1">Hotline / Liên hệ (*)</label>
-              <input type="text" name="contactInfo" placeholder="Số điện thoại / Email..."
-                class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none">
-            </div>
-          </div>
-          <div>
-            <label class="block font-label-sm text-label-sm text-on-surface mb-1">Địa chỉ cửa hàng (*)</label>
-            <input type="text" name="shopAddress" placeholder="Số nhà, tên đường, phường, quận/huyện..."
-              class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none">
-          </div>
-          <div>
-            <label class="block font-label-sm text-label-sm text-on-surface mb-1">Giới thiệu sản phẩm cung ứng</label>
-            <textarea name="experienceNote" rows="2" placeholder="Các chủng loại hoa tươi cung ứng: Lan hồ điệp, hoa hồng nhập, cẩm chướng..."
-              class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none"></textarea>
-          </div>
-        </div>
-
-        <div class="pt-space-md flex items-center justify-end gap-space-md border-t border-[#F0E8E3]">
-          <button type="button"
-            class="px-space-lg py-2 rounded-full bg-[#F5ECE7] text-on-surface font-label-md text-label-md border border-[#E2D7D1] cursor-pointer"
-            onclick="closeModal('modalRegisterRole')">
-            Hủy bỏ
-          </button>
-          <button type="submit" id="btnSubmitRoleRequest" disabled
-            class="px-space-xl py-2 rounded-full bg-[#1E453E] text-white font-label-md text-label-md shadow-xs hover:bg-[#163630] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
-            Gửi Yêu Cầu Xét Duyệt
-          </button>
-        </div>
-      </form>
     </div>
-  </div>
 
-  <!-- 5. Modals: Xem Chi Tiết Từng Yêu Cầu (#modalReqDetail) -->
-  <div th:each="req : ${roleRequests}"
-    class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
-    th:id="'modalReqDetail' + ${req.id}">
-    <div
-      class="bg-surface-container-lowest rounded-xl max-w-md w-full p-space-lg shadow-2xl relative border border-[#EAE1DC]">
-      <div class="flex items-center justify-between pb-space-sm border-b border-[#F0E8E3] mb-space-md">
-        <h4 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
-          <span class="material-symbols-outlined text-[#264E43]">description</span>
-          Chi Tiết Yêu Cầu Vai Trò
-        </h4>
-        <button type="button" class="text-outline hover:text-on-surface cursor-pointer"
-          th:onclick="'closeModal('modalReqDetail' + ${req.id} + '')'">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-      </div>
-
-      <div class="space-y-3 text-body-sm">
-        <div class="flex items-center justify-between">
-          <span class="text-on-surface-variant">Vai trò xin cấp:</span>
-          <strong class="text-on-surface text-[15px]" th:text="${req.targetRoleDisplayName}"></strong>
+    <!-- ==============================================
+         MODAL 3: SỬA ĐỊA CHỈ (#modalEditAddress)
+         ============================================== -->
+    <div class="modal fade" id="modalEditAddress" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title fw-bold text-dark">
+                        <i class="bi bi-pencil-square text-success me-2"></i>Chỉnh Sửa Địa Chỉ
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formEditAddress" method="post">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label">Tên người nhận (*)</label>
+                            <input type="text" name="recipientName" id="editRecipientName" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Số điện thoại (*)</label>
+                            <input type="tel" name="phone" id="editPhone" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Địa chỉ chi tiết (*)</label>
+                            <textarea name="addressDetail" id="editAddressDetail" rows="3" class="form-control" required></textarea>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="isDefault" value="true" id="editIsDefault">
+                            <label class="form-check-label small" for="editIsDefault">Đặt làm địa chỉ mặc định</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn-flower-primary rounded-pill px-4">Lưu thay đổi</button>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="flex items-center justify-between">
-          <span class="text-on-surface-variant">Trạng thái:</span>
-          <span class="px-2.5 py-0.5 rounded-full bg-[#FFF8E1] text-[#F57F17] font-semibold text-[12px] border border-[#FFE082]"
-            th:text="${req.status.displayName}"></span>
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="text-on-surface-variant">Thời gian gửi:</span>
-          <span class="font-medium text-on-surface" th:text="${#temporals.format(req.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
-        </div>
-
-        <div class="border-t border-[#F0E8E3] pt-3 space-y-2">
-          <div th:if="${req.phone != null and !#strings.isEmpty(req.phone)}">
-            <span class="text-outline text-[12px] block">Số điện thoại:</span>
-            <span class="text-on-surface font-medium" th:text="${req.phone}"></span>
-          </div>
-          <div th:if="${req.workArea != null and !#strings.isEmpty(req.workArea)}">
-            <span class="text-outline text-[12px] block">Khu vực làm việc:</span>
-            <span class="text-on-surface font-medium" th:text="${req.workArea}"></span>
-          </div>
-          <div th:if="${req.vehicleType != null and !#strings.isEmpty(req.vehicleType)}">
-            <span class="text-outline text-[12px] block">Phương tiện:</span>
-            <span class="text-on-surface font-medium" th:text="${req.vehicleType}"></span>
-          </div>
-          <div th:if="${req.targetStore != null}">
-            <span class="text-outline text-[12px] block">Chi nhánh mong muốn:</span>
-            <span class="text-primary font-medium" th:text="${req.targetStore.name} + ' (' + ${req.targetStore.address} + ')'"></span>
-          </div>
-          <div th:if="${req.shopName != null and !#strings.isEmpty(req.shopName)}">
-            <span class="text-outline text-[12px] block">Tên cửa hàng:</span>
-            <span class="text-on-surface font-medium" th:text="${req.shopName}"></span>
-          </div>
-          <div th:if="${req.shopAddress != null and !#strings.isEmpty(req.shopAddress)}">
-            <span class="text-outline text-[12px] block">Địa chỉ cửa hàng:</span>
-            <span class="text-on-surface font-medium" th:text="${req.shopAddress}"></span>
-          </div>
-          <div th:if="${req.contactInfo != null and !#strings.isEmpty(req.contactInfo)}">
-            <span class="text-outline text-[12px] block">Thông tin liên hệ:</span>
-            <span class="text-on-surface font-medium" th:text="${req.contactInfo}"></span>
-          </div>
-          <div th:if="${req.experienceNote != null and !#strings.isEmpty(req.experienceNote)}">
-            <span class="text-outline text-[12px] block">Ghi chú / Kinh nghiệm:</span>
-            <p class="text-on-surface bg-[#FAF7F5] p-2.5 rounded-lg text-[13px] mt-1 border border-[#EAE1DC]" th:text="${req.experienceNote}"></p>
-          </div>
-          <div th:if="${req.rejectionReason != null and !#strings.isEmpty(req.rejectionReason)}"
-            class="p-3 bg-[#FFEBEE] rounded-lg border border-[#FFCDD2] text-[#C62828] text-[13px]">
-            <div class="font-bold mb-0.5">Lý do từ chối:</div>
-            <div th:text="${req.rejectionReason}"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="pt-space-md flex items-center justify-end border-t border-[#F0E8E3] mt-space-md">
-        <button type="button"
-          class="px-space-lg py-2 rounded-full bg-[#F5ECE7] text-on-surface font-label-md text-label-md border border-[#E2D7D1] cursor-pointer"
-          th:onclick="'closeModal(\'modalReqDetail' + ${req.id} + '\')'">
-          Đóng
-        </button>
-      </div>
     </div>
-  </div>
 
-
-  <!-- ==============================================
-       FOOTER CHUẨN ĐỒNG BỘ THEO MẪU (BOTANICAL ATELIER)
-       ============================================== -->
-  <footer class="w-full border-top pt-4 pb-3 mt-12" style="background-color: #FAF4F0 !important; border-top: 1px solid #EBDED4 !important; font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif !important; color: #4A3E3D !important; width: 100%;">
-    <div style="max-width: 1240px; margin: 0 auto; padding-left: 20px; padding-right: 20px;">
-      
-      <!-- Hàng trên: 2 Cột thông tin -->
-      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 24px; padding-bottom: 24px;">
-        
-        <!-- Cột 1: Thương hiệu & Liên hệ -->
-        <div style="flex: 1 1 320px; max-width: 480px;">
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
-            <span style="font-size: 22px; line-height: 1;">🌸</span>
-            <span style="font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 700; color: #C84357; letter-spacing: 0.5px;">HOA TƯƠI SÀI GÒN</span>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; color: #555555;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; line-height: 1;">call</span>
-              <span>Hotline: <strong style="color: #222222; font-weight: 700;">028 1111 222 - 0909 888 777</strong></span>
+    <!-- ==============================================
+         MODAL 4: XÁC NHẬN ĐĂNG XUẤT (#signOutModal)
+         ============================================== -->
+    <div sec:authorize="isAuthenticated()" class="modal fade" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-dark" id="signOutModalLabel">
+                        🌸 Xác Nhận Đăng Xuất
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-3 text-secondary">
+                    Bạn có chắc chắn muốn đăng xuất khỏi hệ thống Hoa Tươi Sài Gòn?
+                </div>
+                <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold text-white">
+                            Xác nhận
+                        </button>
+                    </form>
+                </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; line-height: 1;">mail</span>
-              <span>Email: <a href="mailto:atelier@hoatuoisaigon.vn" style="color: #555555; text-decoration: none;">atelier@hoatuoisaigon.vn</a></span>
-            </div>
-          </div>
         </div>
-
-        <!-- Cột 2: Hệ thống Atelier & Chi nhánh -->
-        <div style="flex: 1 1 360px; max-width: 560px;">
-          <h4 style="font-size: 13px; font-weight: 800; color: #264E43; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; margin-top: 2px;">HỆ THỐNG ATELIER &amp; CHI NHÁNH</h4>
-          <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; color: #555555;">
-            <div style="display: flex; align-items: flex-start; gap: 8px;">
-              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
-              <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Q.1:</strong> 123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM</span>
-            </div>
-            <div style="display: flex; align-items: flex-start; gap: 8px;">
-              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
-              <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Q.7:</strong> 456 Nguyễn Thị Thập, Tân Hưng, Quận 7, TP.HCM</span>
-            </div>
-            <div style="display: flex; align-items: flex-start; gap: 8px;">
-              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
-              <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Thủ Đức:</strong> 1 Võ Văn Ngân, Linh Chiểu, TP. Thủ Đức, TP.HCM</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Hàng dưới: Bản quyền + Cam kết chất lượng & Giao hàng -->
-      <div style="border-top: 1px solid #EBDED4; padding-top: 16px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; font-size: 12.5px; color: #777777;">
-        <div>
-          <span>© 2026 HOA TƯƠI SÀI GÒN .</span>
-        </div>
-        <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
-          <span style="display: inline-flex; align-items: center; gap: 5px; color: #333333; font-weight: 600;">
-            <span style="color: #C84357;">🌸</span> 100% Hoa Tươi Nhập Khẩu &amp; Đà Lạt
-          </span>
-          <span style="color: #D8CBC2;">•</span>
-          <span style="display: inline-flex; align-items: center; gap: 4px; color: #666666;">
-            <span class="material-symbols-outlined" style="font-size: 15px; color: #264E43; line-height: 1;">schedule</span> Giao hỏa tốc 60–90 phút
-          </span>
-        </div>
-      </div>
-
     </div>
-  </footer>
 
-  <!-- ==============================================
-       INTERACTIVE JAVASCRIPT LOGIC
-       ============================================== -->
-  <script>
-    // Tab Switching
-    function switchTab(tabId) {
-      const contents = document.querySelectorAll('.tab-content');
-      contents.forEach(c => c.classList.add('hidden'));
+    <!-- ==============================================
+         FOOTER CHUẨN ĐỒNG BỘ THEO MẪU (BOTANICAL ATELIER)
+         ============================================== -->
+    <footer th:replace="~{fragments/floral :: footer}"></footer>
 
-      const buttons = document.querySelectorAll('.tab-btn');
-      buttons.forEach(b => {
-        b.classList.remove('bg-[#1E453E]', 'text-white', 'font-semibold', 'shadow-xs');
-        b.classList.add('text-on-surface-variant');
-      });
+    <!-- ==============================================
+         SCRIPTS
+         ============================================== -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/global-modal.js}"></script>
 
-      const targetContent = document.getElementById(tabId);
-      if (targetContent) {
-        targetContent.classList.remove('hidden');
-      }
+    <script>
+        // Xử lý xem trước ảnh Avatar & Cover
+        function previewAvatarImage(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const fileNameElem = document.getElementById('avatarFileName');
+                if (fileNameElem) fileNameElem.textContent = file.name;
 
-      let activeBtnId = 'btnTabProfile';
-      if (tabId === 'tabAddresses') activeBtnId = 'btnTabAddresses';
-      if (tabId === 'tabPassword') activeBtnId = 'btnTabPassword';
-      if (tabId === 'tabRoles') activeBtnId = 'btnTabRoles';
-
-      const activeBtn = document.getElementById(activeBtnId);
-      if (activeBtn) {
-        activeBtn.classList.remove('text-on-surface-variant');
-        activeBtn.classList.add('bg-[#1E453E]', 'text-white', 'font-semibold', 'shadow-xs');
-      }
-    }
-
-    // Toggle Edit Profile Mode (UC_009)
-    let isEditingProfile = false;
-    function toggleEditProfileMode() {
-      isEditingProfile = !isEditingProfile;
-      const inputs = document.querySelectorAll('.profile-input');
-      const actionButtons = document.getElementById('profileActionButtons');
-      const banner = document.getElementById('profileModeBanner');
-      const btnText = document.getElementById('btnEditText');
-      const btnIcon = document.getElementById('btnEditIcon');
-
-      inputs.forEach(input => {
-        input.disabled = !isEditingProfile;
-      });
-
-      if (isEditingProfile) {
-        actionButtons.classList.remove('hidden');
-        banner.classList.remove('bg-[#FAF7F5]');
-        banner.classList.add('bg-[#E9F3EE]');
-        banner.innerHTML = `
-          <span class="flex items-center gap-space-xs text-[#264E43] font-semibold">
-            <span class="material-symbols-outlined text-[18px]">edit_note</span>
-            <span>Chế độ chỉnh sửa đang bật. Bạn có thể thay đổi họ tên, số điện thoại và địa chỉ.</span>
-          </span>
-          <span class="font-label-sm text-label-sm text-[#264E43] px-2 py-0.5 rounded bg-white shadow-xs">Đang sửa</span>
-        `;
-        btnText.textContent = "Khóa chỉnh sửa";
-        btnIcon.textContent = "lock";
-      } else {
-        cancelEditProfile();
-      }
-    }
-
-    function cancelEditProfile() {
-      isEditingProfile = false;
-      const inputs = document.querySelectorAll('.profile-input');
-      const actionButtons = document.getElementById('profileActionButtons');
-      const banner = document.getElementById('profileModeBanner');
-      const btnText = document.getElementById('btnEditText');
-      const btnIcon = document.getElementById('btnEditIcon');
-
-      inputs.forEach(input => {
-        input.disabled = true;
-      });
-
-      actionButtons.classList.add('hidden');
-      banner.classList.remove('bg-[#E9F3EE]');
-      banner.classList.add('bg-[#FAF7F5]');
-      banner.innerHTML = `
-        <span class="flex items-center gap-space-xs">
-          <span class="material-symbols-outlined text-[18px] text-[#264E43]">verified_user</span>
-          <span>Đang ở chế độ xem an toàn. Bấm <strong>"Chỉnh sửa hồ sơ"</strong> để cập nhật thông tin.</span>
-        </span>
-        <span class="font-label-sm text-label-sm text-outline px-2 py-0.5 rounded bg-[#EFE7E2]">Chỉ đọc</span>
-      `;
-      btnText.textContent = "Chỉnh sửa hồ sơ";
-      btnIcon.textContent = "edit";
-    }
-
-    // Avatar & Cover Upload triggers
-    function triggerAvatarUpload() {
-      document.getElementById('avatarFileInput').click();
-    }
-
-    function triggerCoverUpload() {
-      document.getElementById('coverFileInput').click();
-    }
-
-    function previewAvatarImage(input) {
-      if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          document.getElementById('avatarPreviewImg').src = e.target.result;
-        };
-        reader.readAsDataURL(input.files[0]);
-        // Tự động bật chế độ lưu hồ sơ để người dùng bấm Lưu
-        if (!isEditingProfile) toggleEditProfileMode();
-      }
-    }
-
-    function previewCoverImage(input) {
-      if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          document.getElementById('coverPreviewImg').src = e.target.result;
-        };
-        reader.readAsDataURL(input.files[0]);
-        // Tự động bật chế độ lưu hồ sơ để người dùng bấm Lưu
-        if (!isEditingProfile) toggleEditProfileMode();
-      }
-    }
-
-    // Password strength check
-    function checkPasswordStrength(val) {
-      const bar = document.getElementById('passwordStrengthBar');
-      const label = document.getElementById('strengthLabel');
-      if (!val || val.length === 0) {
-        bar.style.width = '10%';
-        bar.className = 'h-full bg-outline-variant transition-all duration-300';
-        label.textContent = 'Trống';
-        label.className = 'text-on-surface-variant font-medium';
-        return;
-      }
-      if (val.length < 6) {
-        bar.style.width = '30%';
-        bar.className = 'h-full bg-secondary transition-all duration-300';
-        label.textContent = 'Yếu (dưới 6 ký tự)';
-        label.className = 'text-secondary font-medium';
-      } else if (val.length < 10) {
-        bar.style.width = '65%';
-        bar.className = 'h-full bg-[#E58C5A] transition-all duration-300';
-        label.textContent = 'Trung bình';
-        label.className = 'text-[#B86230] font-medium';
-      } else {
-        bar.style.width = '100%';
-        bar.className = 'h-full bg-[#1E453E] transition-all duration-300';
-        label.textContent = 'Mạnh & An toàn';
-        label.className = 'text-[#1E453E] font-medium';
-      }
-    }
-
-    function togglePasswordVisibility(fieldId, btn) {
-      const input = document.getElementById(fieldId);
-      const icon = btn.querySelector('.material-symbols-outlined');
-      if (input.type === 'password') {
-        input.type = 'text';
-        icon.textContent = 'visibility_off';
-      } else {
-        input.type = 'password';
-        icon.textContent = 'visibility';
-      }
-    }
-
-    let otpTimer = null;
-    function sendPasswordOtpCode() {
-      const emailInput = document.getElementById('otpEmail');
-      const msgElem = document.getElementById('otpSendMsg');
-      const btn = document.getElementById('btnSendPasswordOtp');
-      const btnText = document.getElementById('btnSendOtpText');
-      const email = emailInput ? emailInput.value.trim() : '';
-
-      if (!email) {
-        if (msgElem) {
-          msgElem.textContent = 'Vui lòng nhập địa chỉ email nhận mã OTP!';
-          msgElem.className = 'text-xs mt-1.5 font-semibold text-rose-600 block';
-        }
-        emailInput?.focus();
-        return;
-      }
-
-      if (btn) btn.disabled = true;
-      if (btnText) btnText.textContent = 'Đang gửi...';
-      if (msgElem) {
-        msgElem.textContent = 'Đang gửi mã OTP đến email của bạn...';
-        msgElem.className = 'text-xs mt-1.5 font-semibold text-[#264E43] block';
-      }
-
-      const csrfInput = document.querySelector('input[name="_csrf"]');
-      const csrfToken = csrfInput ? csrfInput.value : '';
-
-      const params = new URLSearchParams();
-      params.append('email', email);
-      if (csrfToken) params.append('_csrf', csrfToken);
-
-      const headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'X-Requested-With': 'XMLHttpRequest'
-      };
-      if (csrfToken) {
-        headers['X-CSRF-TOKEN'] = csrfToken;
-      }
-
-      fetch('/customer/profile/send-password-otp', {
-        method: 'POST',
-        headers: headers,
-        body: params.toString()
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          if (msgElem) {
-            msgElem.textContent = '✓ ' + data.message;
-            msgElem.className = 'text-xs mt-1.5 font-semibold text-emerald-700 block';
-          }
-          const otpInput = document.getElementById('otpCode');
-          if (otpInput) otpInput.focus();
-
-          // Countdown 60 seconds
-          let countdown = 60;
-          if (otpTimer) clearInterval(otpTimer);
-          if (btnText) btnText.textContent = `Gửi lại (${countdown}s)`;
-          otpTimer = setInterval(() => {
-            countdown--;
-            if (countdown <= 0) {
-              clearInterval(otpTimer);
-              if (btn) btn.disabled = false;
-              if (btnText) btnText.textContent = 'Gửi lại mã OTP';
-            } else {
-              if (btnText) btnText.textContent = `Gửi lại (${countdown}s)`;
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const preview = document.getElementById('avatarPreview');
+                    if (preview) preview.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
             }
-          }, 1000);
-        } else {
-          if (btn) btn.disabled = false;
-          if (btnText) btnText.textContent = 'Gửi mã OTP';
-          if (msgElem) {
-            msgElem.textContent = '✕ ' + (data.message || 'Không thể gửi mã OTP. Vui lòng kiểm tra lại email.');
-            msgElem.className = 'text-xs mt-1.5 font-semibold text-rose-600 block';
-          }
         }
-      })
-      .catch(err => {
-        console.error('Send OTP error:', err);
-        if (btn) btn.disabled = false;
-        if (btnText) btnText.textContent = 'Gửi mã OTP';
-        if (msgElem) {
-          msgElem.textContent = '✕ Lỗi kết nối máy chủ khi gửi OTP. Vui lòng thử lại!';
-          msgElem.className = 'text-xs mt-1.5 font-semibold text-rose-600 block';
+
+        function previewCoverImage(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const preview = document.getElementById('coverPreview');
+                    if (preview) preview.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
         }
-      });
-    }
 
-    function validatePasswordChange(e) {
-      const otpCode = document.getElementById('otpCode')?.value?.trim();
-      const newPass = document.getElementById('newPass')?.value;
-      const confirmPass = document.getElementById('confirmPass')?.value;
+        // Đổi vai trò trong modal đăng ký
+        function handleRoleChange(role) {
+            const secManager = document.getElementById('sectionManager');
+            const secVendor = document.getElementById('sectionVendor');
+            const btnSubmit = document.getElementById('btnSubmitRoleRequest');
 
-      if (!otpCode || otpCode.length !== 6) {
-        alert("Vui lòng nhập đủ 6 chữ số mã OTP xác thực được gửi về email!");
-        document.getElementById('otpCode')?.focus();
-        return false;
-      }
+            if (secManager) secManager.style.display = 'none';
+            if (secVendor) secVendor.style.display = 'none';
 
-      if (!newPass || newPass.length < 6) {
-        alert("Mật khẩu mới phải có ít nhất 6 ký tự!");
-        document.getElementById('newPass')?.focus();
-        return false;
-      }
+            if (role === 'MANAGER') {
+                if (secManager) secManager.style.display = 'block';
+                if (btnSubmit) btnSubmit.disabled = false;
+            } else if (role === 'VENDOR') {
+                if (secVendor) secVendor.style.display = 'block';
+                if (btnSubmit) btnSubmit.disabled = false;
+            } else {
+                if (btnSubmit) btnSubmit.disabled = true;
+            }
+        }
 
-      if (newPass !== confirmPass) {
-        alert("Mật khẩu xác nhận không khớp với mật khẩu mới! Vui lòng kiểm tra lại.");
-        document.getElementById('confirmPass')?.focus();
-        return false;
-      }
-      return true;
-    }
+        // Mở modal sửa địa chỉ
+        function openEditAddressModal(id, recipientName, phone, addressDetail, isDefault) {
+            const form = document.getElementById('formEditAddress');
+            if (form) form.action = '/customer/profile/address/update/' + id;
+            const nameEl = document.getElementById('editRecipientName');
+            const phoneEl = document.getElementById('editPhone');
+            const addrEl = document.getElementById('editAddressDetail');
+            const defEl = document.getElementById('editIsDefault');
 
-    // Modal controls
-    function openModal(id) {
-      const modal = document.getElementById(id);
-      if (modal) modal.classList.remove('hidden');
-    }
+            if (nameEl) nameEl.value = recipientName || '';
+            if (phoneEl) phoneEl.value = phone || '';
+            if (addrEl) addrEl.value = addressDetail || '';
+            if (defEl) defEl.checked = Boolean(isDefault);
 
-    function closeModal(id) {
-      const modal = document.getElementById(id);
-      if (modal) modal.classList.add('hidden');
-    }
+            const modalEl = document.getElementById('modalEditAddress');
+            if (modalEl && typeof bootstrap !== 'undefined') {
+                const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                bsModal.show();
+            }
+        }
 
-    function openEditAddressModal(id, recipientName, phone, addressDetail, isDefault) {
-      const form = document.getElementById('formEditAddress');
-      form.action = '/customer/profile/address/update/' + id;
-      document.getElementById('editRecipientName').value = recipientName;
-      document.getElementById('editPhone').value = phone;
-      document.getElementById('editAddressDetail').value = addressDetail;
-      document.getElementById('editIsDefault').checked = isDefault;
-      openModal('modalEditAddress');
-    }
+        // Đổi mật khẩu: Kiểm tra độ mạnh
+        function checkPasswordStrength(val) {
+            const bar = document.getElementById('passwordStrengthBar');
+            const label = document.getElementById('strengthLabel');
+            if (!bar || !label) return;
 
+            if (!val || val.length === 0) {
+                bar.style.width = '0%';
+                bar.className = 'progress-bar bg-secondary';
+                label.textContent = 'Độ mạnh mật khẩu';
+                label.className = 'small text-muted mt-1 d-block';
+                return;
+            }
+            if (val.length < 6) {
+                bar.style.width = '30%';
+                bar.className = 'progress-bar bg-danger';
+                label.textContent = 'Yếu (Tối thiểu 6 ký tự)';
+                label.className = 'small text-danger mt-1 d-block fw-semibold';
+            } else if (val.length < 10) {
+                bar.style.width = '65%';
+                bar.className = 'progress-bar bg-warning';
+                label.textContent = 'Trung bình';
+                label.className = 'small text-warning mt-1 d-block fw-semibold';
+            } else {
+                bar.style.width = '100%';
+                bar.className = 'progress-bar bg-success';
+                label.textContent = 'Mạnh & An toàn';
+                label.className = 'small text-success mt-1 d-block fw-semibold';
+            }
+        }
 
-    function handleRoleChange(role) {
-      const secManager = document.getElementById('sectionManager');
-      const secVendor = document.getElementById('sectionVendor');
-      const btnSubmit = document.getElementById('btnSubmitRoleRequest');
+        // Gửi OTP email
+        let otpTimer = null;
+        function sendPasswordOtpCode() {
+            const btn = document.getElementById('sendPasswordOtp');
+            const btnText = document.getElementById('btnSendOtpText');
+            const statusElem = document.getElementById('otpStatus');
+            const email = btn?.getAttribute('data-email');
+            const url = btn?.getAttribute('data-url') || '/customer/profile/send-password-otp';
 
-      if (secManager) secManager.classList.add('hidden');
-      if (secVendor) secVendor.classList.add('hidden');
+            if (!email) {
+                if (statusElem) {
+                    statusElem.textContent = 'Không tìm thấy email tài khoản!';
+                    statusElem.className = 'small text-danger fw-semibold';
+                }
+                return;
+            }
 
-      if (role === 'MANAGER') {
-        if (secManager) secManager.classList.remove('hidden');
-        if (btnSubmit) btnSubmit.disabled = false;
-      } else if (role === 'VENDOR') {
-        if (secVendor) secVendor.classList.remove('hidden');
-        if (btnSubmit) btnSubmit.disabled = false;
-      } else {
-        if (btnSubmit) btnSubmit.disabled = true;
-      }
-    }
+            if (btn) btn.disabled = true;
+            if (btnText) btnText.textContent = 'Đang gửi...';
+            if (statusElem) {
+                statusElem.textContent = 'Đang gửi mã xác thực đến email...';
+                statusElem.className = 'small text-primary fw-semibold';
+            }
 
-    // Script điều hướng tìm kiếm thông minh theo Phạm vi (Hoa / Cửa Hàng / Người Dùng)
-    document.getElementById('globalSearchForm')?.addEventListener('submit', function (e) {
-      const scope = document.getElementById('searchScopeSelect')?.value;
-      const kwInput = this.querySelector('input[name="keyword"]');
-      const kw = kwInput ? kwInput.value.trim() : '';
-      if (scope === 'users') {
-        e.preventDefault();
-        window.location.href = '/users' + (kw ? '?keyword=' + encodeURIComponent(kw) : '');
-      } else if (scope === 'stores') {
-        e.preventDefault();
-        window.location.href = '/stores' + (kw ? '?keyword=' + encodeURIComponent(kw) : '');
-      }
-    });
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
 
-    // Auto tab selection based on URL hash or query param
-    document.addEventListener('DOMContentLoaded', function () {
-      const scopeSel = document.getElementById('searchScopeSelect');
-      if (scopeSel) {
-        scopeSel.style.width = scopeSel.value === 'users' ? '120px' : (scopeSel.value === 'stores' ? '110px' : '96px');
-      }
-      function switchToAddressTab() {
-        switchTab('tabAddresses');
-      }
-      window.switchToAddressTab = switchToAddressTab;
+            const params = new URLSearchParams();
+            params.append('email', email);
 
-      const urlParams = new URLSearchParams(window.location.search);
-      const tabParam = urlParams.get('tab');
-      if (tabParam === 'addresses' || tabParam === 'address' || window.location.hash === '#tabAddresses') {
-        switchTab('tabAddresses');
-      } else if (tabParam === 'password' || window.location.hash === '#tabPassword') {
-        switchTab('tabPassword');
-      } else if (tabParam === 'roles' || window.location.hash === '#tabRoles') {
-        switchTab('tabRoles');
-      }
-    });
-  </script>
-  <script th:src="@{/js/global-modal.js}"></script>
+            const headers = {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            };
+            if (csrfToken && csrfHeader) {
+                headers[csrfHeader] = csrfToken;
+            }
+
+            fetch(url, {
+                method: 'POST',
+                headers: headers,
+                body: params.toString()
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (statusElem) {
+                        statusElem.textContent = '✓ ' + (data.message || 'Mã OTP đã được gửi đến email!');
+                        statusElem.className = 'small text-success fw-semibold';
+                    }
+                    const otpInput = document.getElementById('otpCode');
+                    if (otpInput) otpInput.focus();
+
+                    let countdown = 60;
+                    if (otpTimer) clearInterval(otpTimer);
+                    if (btnText) btnText.textContent = `Gửi lại (${countdown}s)`;
+
+                    otpTimer = setInterval(() => {
+                        countdown--;
+                        if (countdown <= 0) {
+                            clearInterval(otpTimer);
+                            if (btn) btn.disabled = false;
+                            if (btnText) btnText.textContent = 'Gửi lại mã OTP';
+                        } else {
+                            if (btnText) btnText.textContent = `Gửi lại (${countdown}s)`;
+                        }
+                    }, 1000);
+                } else {
+                    if (btn) btn.disabled = false;
+                    if (btnText) btnText.textContent = 'Gửi mã OTP';
+                    if (statusElem) {
+                        statusElem.textContent = '✕ ' + (data.message || 'Không thể gửi OTP');
+                        statusElem.className = 'small text-danger fw-semibold';
+                    }
+                }
+            })
+            .catch(err => {
+                console.error('Lỗi gửi OTP:', err);
+                if (btn) btn.disabled = false;
+                if (btnText) btnText.textContent = 'Gửi mã OTP';
+                if (statusElem) {
+                    statusElem.textContent = '✕ Lỗi kết nối máy chủ khi gửi OTP.';
+                    statusElem.className = 'small text-danger fw-semibold';
+                }
+            });
+        }
+
+        // Đồng bộ tab đang chọn theo URL (?tab=roles / ?tab=address / ?tab=password)
+        document.addEventListener('DOMContentLoaded', function () {
+            // Điều chỉnh scope select width
+            const scopeSel = document.getElementById('searchScopeSelect');
+            if (scopeSel) {
+                scopeSel.style.width = scopeSel.value === 'users' ? '115px' : (scopeSel.value === 'stores' ? '103px' : '96px');
+            }
+
+            // Đọc tab từ URL search params hoặc hash
+            const urlParams = new URLSearchParams(window.location.search);
+            const tabParam = urlParams.get('tab') || window.location.hash.replace('#', '');
+
+            if (tabParam) {
+                let targetTabBtnId = null;
+                if (tabParam === 'roles' || tabParam === 'tab-roles' || tabParam === 'tabRoles') {
+                    targetTabBtnId = 'roles-tab';
+                } else if (tabParam === 'address' || tabParam === 'addresses' || tabParam === 'tab-address') {
+                    targetTabBtnId = 'address-tab';
+                } else if (tabParam === 'password' || tabParam === 'tab-password') {
+                    targetTabBtnId = 'password-tab';
+                } else if (tabParam === 'info' || tabParam === 'tab-info') {
+                    targetTabBtnId = 'info-tab';
+                }
+
+                if (targetTabBtnId) {
+                    const tabBtn = document.getElementById(targetTabBtnId);
+                    if (tabBtn && typeof bootstrap !== 'undefined') {
+                        const tabInstance = bootstrap.Tab.getOrCreateInstance(tabBtn);
+                        tabInstance.show();
+                    }
+                }
+            }
+
+            // Khi người dùng bấm tab, cập nhật URL không reload
+            document.querySelectorAll('#profileTab button[data-bs-toggle="pill"]').forEach(function (btn) {
+                btn.addEventListener('shown.bs.tab', function (e) {
+                    const targetTarget = e.target.getAttribute('data-bs-target');
+                    let newTab = 'info';
+                    if (targetTarget === '#tab-roles') newTab = 'roles';
+                    else if (targetTarget === '#tab-address') newTab = 'address';
+                    else if (targetTarget === '#tab-password') newTab = 'password';
+
+                    const currentUrl = new URL(window.location.href);
+                    currentUrl.searchParams.set('tab', newTab);
+                    window.history.replaceState(null, '', currentUrl.toString());
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>
