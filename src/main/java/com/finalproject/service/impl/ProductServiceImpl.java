@@ -261,6 +261,81 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
+    public Product updateProduct(Long id, ProductForm form) throws IOException {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm có ID: " + id));
+
+        Category category = categoryRepository.findById(form.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Danh mục không tồn tại"));
+
+        // Chống bán lỗ: Nếu giá bán < giá nhập mà chưa xác nhận bán lỗ thì ném cảnh báo
+        if (form.getPriceBuy() != null && form.getImportPrice() != null
+                && form.getPriceBuy().compareTo(form.getImportPrice()) < 0 && !form.isConfirmSellAtLoss()) {
+            throw new IllegalArgumentException("WARN_SELL_AT_LOSS");
+        }
+
+        product.setName(form.getName());
+        product.setCategory(category);
+        product.setDescription(form.getDescription());
+        product.setImportPrice(form.getImportPrice());
+        product.setPriceBuy(form.getPriceBuy());
+
+        // Cửa hàng hoặc phạm vi áp dụng (null hoặc <= 0 là Toàn hệ thống)
+        if (form.getStoreId() != null && form.getStoreId() > 0) {
+            Store store = storeRepository.findById(form.getStoreId()).orElse(null);
+            product.setStore(store);
+        } else {
+            product.setStore(null);
+        }
+
+        if (form.getIsSelling() != null) {
+            product.setIsSelling(form.getIsSelling());
+        }
+        if (form.getIsActive() != null) {
+            product.setIsActive(form.getIsActive());
+        }
+
+        // Không cho phép sửa trực tiếp số lượng đã bán (sold) - bảo toàn từ đơn hàng
+
+        // Upload ảnh mới nếu có
+        if (form.getImageFiles() != null && !form.getImageFiles().isEmpty()) {
+            boolean isFirst = true;
+            for (MultipartFile file : form.getImageFiles()) {
+                if (!file.isEmpty()) {
+                    CloudinaryService.UploadResult result = cloudinaryService.upload(file, "rental_shop_products");
+                    if (result == null) continue;
+                    ProductImage productImage = ProductImage.builder()
+                            .product(product)
+                            .imageUrl(result.secureUrl())
+                            .cloudinaryPublicId(result.publicId())
+                            .isMain(isFirst)
+                            .build();
+                    productImageRepository.save(productImage);
+                    if (isFirst) {
+                        product.setImageUrl(result.secureUrl());
+                    }
+                    isFirst = false;
+                }
+            }
+        }
+
+        return productRepository.save(product);
+    }
+
+    @Override
+    @Transactional
+    public void softDeleteProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm có ID: " + id));
+        // Soft delete: loại khỏi danh sách bán nhưng bảo toàn toàn bộ đơn hàng và lịch sử
+        product.setIsDeleted(true);
+        product.setIsSelling(false);
+        product.setIsActive(false);
+        productRepository.save(product);
+    }
+
+    @Override
+    @Transactional
     public void deleteProduct(Long id) {
         if (!productRepository.existsById(id)) {
             throw new ResourceNotFoundException("Sản phẩm không tồn tại");

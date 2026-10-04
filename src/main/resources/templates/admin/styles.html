@@ -299,12 +299,12 @@
                                 <span th:if="${s.isDeleted == null or !s.isDeleted}"
                                       class="status-badge"
                                       style="background-color: #E8F5E9; color: #2E7D32;">
-                                    <span class="dot" style="background-color: #2E7D32;"></span> Đang bật
+                                    <span class="dot" style="background-color: #2E7D32;"></span> ĐANG MỞ BÁN
                                 </span>
                                 <span th:if="${s.isDeleted != null and s.isDeleted}"
                                       class="status-badge"
                                       style="background-color: #F5F5F5; color: #757575;">
-                                    <span class="dot" style="background-color: #9E9E9E;"></span> Đã tắt
+                                    <span class="dot" style="background-color: #9E9E9E;"></span> ĐÃ XÓA
                                 </span>
                             </td>
 
@@ -337,12 +337,13 @@
                                         <ul class="dropdown-menu dropdown-menu-end shadow-sm border py-1" style="border-radius: 8px; font-size: 13.5px; min-width: 180px;">
                                             <li th:if="${s.isDeleted == null or !s.isDeleted}">
                                                 <form th:action="@{'/admin/styles/delete/' + ${s.id}}" method="post" class="m-0">
+                                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                                     <button type="submit"
                                                             th:id="'btnDeleteStyle_' + ${s.id}"
                                                             class="dropdown-item py-2 text-danger d-flex align-items-center gap-2"
                                                             th:data-style-name="${s.name}"
-                                                            onclick="return confirm('Xác nhận ngừng sử dụng nhóm [' + this.getAttribute('data-style-name') + ']?\n(Sản phẩm đã gán giá trị không mất liên kết)')">
-                                                        <i class="bi bi-eye-slash"></i> Ngừng sử dụng
+                                                            onclick="return confirm('Xác nhận xóa / ngừng sử dụng nhóm thuộc tính [' + this.getAttribute('data-style-name') + ']?\n(Sản phẩm đã gán giá trị không mất liên kết)')">
+                                                        <i class="bi bi-trash3 text-danger"></i> Xóa nhóm thuộc tính
                                                     </button>
                                                 </form>
                                             </li>

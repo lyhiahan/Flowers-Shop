@@ -53,6 +53,48 @@
         }
         .btn-action-edit:hover { background-color: #F7FAFC; border-color: #CBD5E0; color: #2D3748; }
 
+        /* Nút Xóa */
+        .btn-action-delete {
+            background-color: #FFFFFF;
+            border: 1px solid #FED7D7;
+            color: #E53E3E;
+            font-weight: 600;
+            font-size: 13.5px;
+            border-radius: 8px;
+            padding: 0 13px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.18s ease;
+        }
+        .btn-action-delete:hover {
+            background-color: #FFF5F5;
+            border-color: #FEB2B2;
+            color: #C53030;
+        }
+
+        /* Nút Bật lại */
+        .btn-action-restore {
+            background-color: #FFFFFF;
+            border: 1px solid #C6F6D5;
+            color: #2E7D32;
+            font-weight: 600;
+            font-size: 13.5px;
+            border-radius: 8px;
+            padding: 0 13px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.18s ease;
+        }
+        .btn-action-restore:hover {
+            background-color: #F0FFF4;
+            border-color: #9AE6B4;
+            color: #22543D;
+        }
+
         /* Nút ⋯ */
         .btn-action-more {
             background-color: #FFFFFF;
@@ -248,7 +290,7 @@
                                 </span>
                             </td>
 
-                            <!-- 3. Thao tác: Sửa · ⋯ (Ngừng / Bật lại trong menu phụ) -->
+                            <!-- 3. Thao tác: Sửa · Xóa · ⋯ -->
                             <td class="text-end pe-4">
                                 <div class="d-inline-flex align-items-center" style="gap: 8px;">
                                     <!-- Sửa → mở modal -->
@@ -260,6 +302,31 @@
                                         <i class="bi bi-pencil"></i> Sửa
                                     </button>
 
+                                    <!-- Nút Xóa trực tiếp (khi đang bật) -->
+                                    <button th:if="${v.isDeleted == null or !v.isDeleted}"
+                                            type="button"
+                                            th:id="'btnDeleteStyleValue_' + ${v.id}"
+                                            class="btn-action-delete"
+                                            th:data-val-id="${v.id}"
+                                            th:data-val-name="${v.name}"
+                                            onclick="openDeleteStyleValueModal(this.getAttribute('data-val-id'), this.getAttribute('data-val-name'))"
+                                            title="Xóa giá trị này">
+                                        <i class="bi bi-trash3"></i> Xóa
+                                    </button>
+
+                                    <!-- Nút Bật lại (khi đã tắt) -->
+                                    <form th:if="${v.isDeleted != null and v.isDeleted}"
+                                          th:action="@{'/admin/styles/' + ${style.id} + '/values/restore/' + ${v.id}}"
+                                          method="post" class="m-0 d-inline">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                        <button type="submit"
+                                                th:id="'btnRestoreStyleValue_' + ${v.id}"
+                                                class="btn-action-restore"
+                                                title="Khôi phục / Bật lại">
+                                            <i class="bi bi-arrow-counterclockwise"></i> Bật lại
+                                        </button>
+                                    </form>
+
                                     <!-- Menu ⋯ -->
                                     <div class="dropdown d-inline-block">
                                         <button class="btn-action-more"
@@ -267,30 +334,38 @@
                                                 title="Thao tác khác">
                                             <i class="bi bi-three-dots-vertical" style="font-size: 14px;"></i>
                                         </button>
-                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border py-1" style="border-radius: 8px; font-size: 13.5px; min-width: 170px;">
-                                            <!-- Ngừng sử dụng -->
+                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border py-1" style="border-radius: 8px; font-size: 13.5px; min-width: 175px;">
+                                            <!-- Tạm tắt / Bật lại -->
                                             <li th:if="${v.isDeleted == null or !v.isDeleted}">
                                                 <form th:action="@{'/admin/styles/' + ${style.id} + '/values/delete/' + ${v.id}}" method="post" class="m-0">
+                                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                                     <button type="submit"
-                                                            th:id="'btnDeleteStyleValue_' + ${v.id}"
-                                                            class="dropdown-item py-2 text-danger d-flex align-items-center gap-2"
+                                                            class="dropdown-item py-2 text-warning d-flex align-items-center gap-2"
                                                             th:data-val-name="${v.name}"
-                                                            onclick="return confirm('Xác nhận ngừng sử dụng giá trị [' + this.getAttribute('data-val-name') + ']?\n(Sản phẩm đang gắn giá trị này sẽ không mất liên kết)')">
-                                                        <i class="bi bi-eye-slash"></i> Ngừng sử dụng
+                                                            onclick="return confirm('Tạm tắt giá trị [' + this.getAttribute('data-val-name') + ']?')">
+                                                        <i class="bi bi-pause-circle"></i> Tạm tắt
                                                     </button>
                                                 </form>
                                             </li>
-                                            <!-- Bật lại -->
                                             <li th:if="${v.isDeleted != null and v.isDeleted}">
                                                 <form th:action="@{'/admin/styles/' + ${style.id} + '/values/restore/' + ${v.id}}" method="post" class="m-0">
+                                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                                     <button type="submit"
-                                                            th:id="'btnRestoreStyleValue_' + ${v.id}"
-                                                            class="dropdown-item py-2 text-success d-flex align-items-center gap-2"
-                                                            th:data-val-name="${v.name}"
-                                                            onclick="return confirm('Bật lại giá trị thuộc tính [' + this.getAttribute('data-val-name') + ']?')">
-                                                        <i class="bi bi-arrow-counterclockwise"></i> Bật lại
+                                                            class="dropdown-item py-2 text-success d-flex align-items-center gap-2">
+                                                        <i class="bi bi-play-circle"></i> Bật lại
                                                     </button>
                                                 </form>
+                                            </li>
+                                            <li><hr class="dropdown-divider my-1"></li>
+                                            <!-- Xóa hoàn toàn khỏi CSDL -->
+                                            <li>
+                                                <button type="button"
+                                                        class="dropdown-item py-2 text-danger d-flex align-items-center gap-2"
+                                                        th:data-val-id="${v.id}"
+                                                        th:data-val-name="${v.name}"
+                                                        onclick="openDestroyStyleValueModal(this.getAttribute('data-val-id'), this.getAttribute('data-val-name'))">
+                                                    <i class="bi bi-trash3-fill text-danger"></i> Xóa vĩnh viễn
+                                                </button>
                                             </li>
                                         </ul>
                                     </div>
@@ -391,6 +466,97 @@
     </div>
 </div>
 
+<!-- Modal Xác Nhận Xóa Giá Trị Thuộc Tính -->
+<div class="modal fade" id="deleteStyleValueModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header text-white" style="background-color: #842029; padding: 16px 20px;">
+                <h5 class="modal-title fw-bold text-white fs-6">
+                    <i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>Xác nhận xóa giá trị
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                <p class="mb-2">Bạn có chắc chắn muốn xóa giá trị thuộc tính:</p>
+                <div class="p-3 bg-white rounded-3 border fw-bold fs-5 text-danger mb-3" id="deleteValNameDisplay">
+                    [Tên giá trị]
+                </div>
+                <div class="small text-muted mb-0">
+                    <i class="bi bi-info-circle me-1 text-primary"></i>
+                    Giá trị này sẽ được gỡ khỏi danh sách thuộc tính <span th:text="${style.name}" class="fw-semibold">Màu sắc</span>.
+                </div>
+            </div>
+            <form id="deleteStyleValueForm" method="post" action="">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <div class="modal-footer bg-white border-top-0 d-flex justify-content-end gap-2 p-3">
+                    <button type="button" class="btn btn-outline-secondary px-3 py-2 fw-semibold" data-bs-dismiss="modal" style="border-radius: 8px;">
+                        Hủy bỏ
+                    </button>
+                    <button type="submit" class="btn btn-danger px-4 py-2 fw-bold text-white shadow-sm" style="border-radius: 8px;">
+                        <i class="bi bi-trash3 me-1"></i> Xác nhận xóa
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Xác Nhận Xóa Vĩnh Viễn Giá Trị Thuộc Tính -->
+<div class="modal fade" id="destroyStyleValueModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header text-white" style="background-color: #DC2626; padding: 16px 20px;">
+                <h5 class="modal-title fw-bold text-white fs-6">
+                    <i class="bi bi-trash3-fill me-2"></i>Xóa vĩnh viễn khỏi CSDL
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                <p class="mb-2">Hành động này sẽ <strong>xóa hoàn toàn</strong> bản ghi giá trị thuộc tính:</p>
+                <div class="p-3 bg-white rounded-3 border fw-bold fs-5 text-danger mb-3" id="destroyValNameDisplay">
+                    [Tên giá trị]
+                </div>
+                <div class="small text-danger mb-0">
+                    <i class="bi bi-exclamation-octagon-fill me-1"></i>
+                    Dữ liệu sẽ bị xóa triệt để khỏi hệ thống và không thể khôi phục lại.
+                </div>
+            </div>
+            <form id="destroyStyleValueForm" method="post" action="">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <div class="modal-footer bg-white border-top-0 d-flex justify-content-end gap-2 p-3">
+                    <button type="button" class="btn btn-outline-secondary px-3 py-2 fw-semibold" data-bs-dismiss="modal" style="border-radius: 8px;">
+                        Hủy bỏ
+                    </button>
+                    <button type="submit" class="btn btn-danger px-4 py-2 fw-bold text-white shadow-sm" style="border-radius: 8px;">
+                        <i class="bi bi-trash3-fill me-1"></i> Xóa vĩnh viễn
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var currentStyleId = /*[[${style.id}]]*/ 0;
+
+    function openDeleteStyleValueModal(valId, valName) {
+        document.getElementById('deleteValNameDisplay').innerText = valName;
+        document.getElementById('deleteStyleValueForm').action = '/admin/styles/' + currentStyleId + '/values/delete/' + valId;
+        var modalEl = document.getElementById('deleteStyleValueModal');
+        var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+
+    function openDestroyStyleValueModal(valId, valName) {
+        document.getElementById('destroyValNameDisplay').innerText = valName;
+        document.getElementById('destroyStyleValueForm').action = '/admin/styles/' + currentStyleId + '/values/destroy/' + valId;
+        var modalEl = document.getElementById('destroyStyleValueModal');
+        var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+    /*]]>*/
+</script>
 </body>
 </html>

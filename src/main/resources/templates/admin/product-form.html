@@ -2,31 +2,85 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Thêm Mẫu Hoa & Phụ Kiện Mới - Quản Trị Hệ Thống Hoa Tươi</title>
+    <title th:text="${isEdit ? 'Chỉnh Sửa Sản Phẩm #' + productForm.id + ' - Quản Trị Hệ Thống Hoa Tươi' : 'Thêm Mẫu Hoa & Phụ Kiện Mới - Quản Trị Hệ Thống Hoa Tươi'}">Sản Phẩm - Quản Trị Hệ Thống Hoa Tươi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
     <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
+    <style>
+        body { font-family: var(--font-sans) !important; background-color: #F4F7F5; color: #20382E; min-height: 100vh; }
+        .form-card { border: 1px solid #D1E5DA; border-radius: 14px; background: #FFFFFF; box-shadow: 0 4px 16px rgba(32, 56, 46, 0.04); }
+        .section-title { font-size: 16px; font-weight: 800; color: #20382E; border-bottom: 2px solid #E5EEE8; padding-bottom: 8px; margin-bottom: 18px; }
+        .form-label { font-size: 14.5px; font-weight: 700; color: #20382E; margin-bottom: 6px; }
+        .form-control, .form-select { border-color: #D1E5DA; border-radius: 9px; font-size: 15px; padding: 10px 14px; }
+        .form-control:focus, .form-select:focus { border-color: #2E7D32; box-shadow: 0 0 0 0.2rem rgba(46, 125, 50, 0.15); }
+        .current-img-preview { width: 100px; height: 100px; object-fit: cover; border-radius: 10px; border: 1px solid #D1E5DA; }
+    </style>
 </head>
 <body class="admin-body">
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="font-serif fw-bold">Thêm Mẫu Hoa / Phụ Kiện Mới</h2>
-        <a th:href="@{/admin/products}" class="btn btn-outline-forest rounded-pill px-3"><i class="bi bi-arrow-left me-1"></i> Quay lại danh sách</a>
+<div class="container py-4" style="max-width: 960px;">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <div class="d-flex align-items-center gap-2">
+                <a th:href="${productForm.returnUrl != null and !productForm.returnUrl.isEmpty() ? productForm.returnUrl : '/admin/products-manage'}" 
+                   class="btn btn-sm btn-outline-secondary rounded-circle d-inline-flex align-items-center justify-content-center" 
+                   style="width: 36px; height: 36px;" title="Quay lại danh sách">
+                    <i class="bi bi-arrow-left fs-5"></i>
+                </a>
+                <h2 class="fw-bold mb-0" style="color: #20382E;" th:text="${isEdit ? 'Chỉnh Sửa Sản Phẩm #' + productForm.id : 'Thêm Mẫu Hoa & Phụ Kiện Mới'}">
+                    Chỉnh Sửa Sản Phẩm
+                </h2>
+            </div>
+            <p class="text-muted small mb-0 mt-1 ms-5 ps-1">
+                Điền đầy đủ thông tin chi tiết, định giá và thiết lập trạng thái kinh doanh cho sản phẩm hoa tươi.
+            </p>
+        </div>
+        <a th:href="${productForm.returnUrl != null and !productForm.returnUrl.isEmpty() ? productForm.returnUrl : '/admin/products-manage'}" 
+           class="btn btn-outline-secondary rounded-pill px-3 py-2 fw-semibold" style="font-size: 14.5px;">
+            <i class="bi bi-x-lg me-1"></i> Hủy & Quay lại
+        </a>
     </div>
 
-    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+    <!-- Error alert -->
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show rounded-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 
-    <div class="card shadow-sm border-0">
-        <div class="card-body p-4">
-            <form id="productForm" th:action="@{/admin/products/create}" th:object="${productForm}" method="post" enctype="multipart/form-data">
+    <!-- Form Card -->
+    <div class="card form-card border-0 mb-5">
+        <div class="card-body p-4 p-md-5">
+            <form id="productForm" 
+                  th:action="${isEdit ? '/admin/products-manage/edit/' + productForm.id : '/admin/products-manage/create'}" 
+                  th:object="${productForm}" 
+                  method="post" 
+                  enctype="multipart/form-data">
                 
-                <!-- Cờ xác nhận bán lỗ (mặc định false) -->
+                <!-- Hidden inputs -->
+                <input type="hidden" th:field="*{id}">
                 <input type="hidden" th:field="*{confirmSellAtLoss}" id="confirmSellAtLoss">
+                <input type="hidden" th:field="*{returnUrl}">
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label font-weight-bold">Danh mục sản phẩm (*)</label>
+                <!-- 1. Thông tin cơ bản -->
+                <div class="section-title d-flex align-items-center gap-2">
+                    <i class="bi bi-info-circle text-success"></i> 1. Thông tin cơ bản sản phẩm
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-8">
+                        <label class="form-label">Tên sản phẩm (*)</label>
+                        <input type="text" th:field="*{name}" class="form-control" 
+                               placeholder="Ví dụ: Bó Hoa Hồng Đỏ Ecuador Tình Nồng Cháy"
+                               th:classappend="${#fields.hasErrors('name')} ? 'is-invalid' : ''">
+                        <div class="invalid-feedback" th:errors="*{name}"></div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Danh mục hoa (*)</label>
                         <select th:field="*{categoryId}" class="form-select" th:classappend="${#fields.hasErrors('categoryId')} ? 'is-invalid' : ''">
                             <option value="">-- Chọn danh mục --</option>
                             <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
@@ -34,43 +88,137 @@
                         <div class="invalid-feedback" th:errors="*{categoryId}"></div>
                     </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Tên sản phẩm (*)</label>
-                        <input type="text" th:field="*{name}" class="form-control" th:classappend="${#fields.hasErrors('name')} ? 'is-invalid' : ''">
-                        <div class="invalid-feedback" th:errors="*{name}"></div>
+                    <div class="col-12">
+                        <label class="form-label">Mô tả chi tiết & Công thức phối hoa</label>
+                        <textarea th:field="*{description}" class="form-control" rows="4" 
+                                  placeholder="Mô tả ý nghĩa bó hoa, loại hoa chính, phụ kiện đính kèm và lưu ý bảo quản..."></textarea>
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
+                <!-- 2. Định giá & Lợi nhuận -->
+                <div class="section-title d-flex align-items-center gap-2">
+                    <i class="bi bi-cash-coin text-success"></i> 2. Định giá bán & Kiểm soát lợi nhuận
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
                         <label class="form-label">Giá nhập gốc (VNĐ) (*)</label>
-                        <input type="number" th:field="*{importPrice}" class="form-control" th:classappend="${#fields.hasErrors('importPrice')} ? 'is-invalid' : ''">
-                        <div class="invalid-feedback" th:errors="*{importPrice}"></div>
+                        <div class="input-group">
+                            <input type="number" th:field="*{importPrice}" class="form-control" placeholder="350000"
+                                   th:classappend="${#fields.hasErrors('importPrice')} ? 'is-invalid' : ''">
+                            <span class="input-group-text bg-light text-muted fw-bold">₫</span>
+                        </div>
+                        <div class="form-text text-muted">Giá vốn nhập hoặc chi phí tạo mẫu hoa, dùng để chống bán lỗ.</div>
+                        <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('importPrice')}" th:errors="*{importPrice}"></div>
                     </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Giá bán (VNĐ) (*)</label>
-                        <input type="number" th:field="*{priceBuy}" id="priceBuyInput" class="form-control" th:classappend="${#fields.hasErrors('priceBuy')} ? 'is-invalid' : ''">
-                        <div class="invalid-feedback" th:errors="*{priceBuy}"></div>
+                    <div class="col-md-6">
+                        <label class="form-label">Giá bán niêm yết (VNĐ) (*)</label>
+                        <div class="input-group">
+                            <input type="number" th:field="*{priceBuy}" id="priceBuyInput" class="form-control fw-bold" 
+                                   style="color: #A64060;" placeholder="650000"
+                                   th:classappend="${#fields.hasErrors('priceBuy')} ? 'is-invalid' : ''">
+                            <span class="input-group-text bg-light text-muted fw-bold">₫</span>
+                        </div>
+                        <div class="form-text text-muted">Giá bán niêm yết trên toàn bộ website cho khách hàng.</div>
+                        <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('priceBuy')}" th:errors="*{priceBuy}"></div>
                     </div>
                 </div>
 
-                <!-- Ẩn các trường cho thuê và cọc (hệ thống chỉ bán hoa tươi) -->
+                <!-- 3. Phạm vi áp dụng & Trạng thái kinh doanh -->
+                <div class="section-title d-flex align-items-center gap-2">
+                    <i class="bi bi-shop text-success"></i> 3. Phạm vi áp dụng & Trạng thái bán
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Cửa hàng / Phạm vi áp dụng</label>
+                        <select th:field="*{storeId}" class="form-select">
+                            <option value="">Toàn hệ thống (Áp dụng cho tất cả chi nhánh)</option>
+                            <option th:each="st : ${stores}" th:value="${st.id}" th:text="'Chi nhánh: ' + ${st.name} + ' (' + ${st.address} + ')'"></option>
+                        </select>
+                        <div class="form-text text-muted">Mặc định áp dụng toàn hệ thống, hoặc gán riêng cho một chi nhánh.</div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Trạng thái bán</label>
+                        <select th:field="*{isSelling}" class="form-select fw-semibold">
+                            <option value="true" class="text-success">Đang mở bán (Nhận đơn)</option>
+                            <option value="false" class="text-secondary">Tạm ngừng bán (Dừng nhận đơn)</option>
+                        </select>
+                        <div class="form-text text-muted">Ngừng bán chỉ tạm dừng nhận đơn mới, không xóa sản phẩm.</div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Cấp phép kinh doanh</label>
+                        <select th:field="*{isActive}" class="form-select fw-semibold">
+                            <option value="true" class="text-success">Được cấp phép</option>
+                            <option value="false" class="text-danger">Bị cấm / Thu hồi phép</option>
+                        </select>
+                        <div class="form-text text-muted">Quyền kiểm duyệt cấp phép.</div>
+                    </div>
+
+                    <!-- Trường Số lượng Đã bán (Chỉ hiển thị, không sửa) -->
+                    <div class="col-md-6" th:if="${isEdit}">
+                        <label class="form-label">Số lượng đã bán (Thống kê)</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control bg-light fw-bold text-dark" readonly 
+                                   th:value="${productForm.sold != null ? productForm.sold : 0} + ' sản phẩm'">
+                            <span class="input-group-text bg-light text-muted"><i class="bi bi-lock-fill"></i></span>
+                        </div>
+                        <div class="form-text text-muted">
+                            <i class="bi bi-shield-check text-success me-1"></i>Số lượng được tự động tính từ các đơn hàng thực tế, không thể sửa trực tiếp.
+                        </div>
+                    </div>
+
+                    <div class="col-md-6" th:if="${!isEdit}">
+                        <label class="form-label">Tồn kho ban đầu mỗi chi nhánh</label>
+                        <input type="number" th:field="*{initialStock}" min="0" max="1000000" class="form-control" placeholder="10">
+                        <div class="form-text text-muted">Số lượng hoa tự động nhập vào kho của từng chi nhánh đang hoạt động.</div>
+                    </div>
+                </div>
+
+                <!-- 4. Hình ảnh sản phẩm -->
+                <div class="section-title d-flex align-items-center gap-2">
+                    <i class="bi bi-image text-success"></i> 4. Hình ảnh sản phẩm
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-12" th:if="${isEdit and productForm.imageUrl != null and !productForm.imageUrl.isEmpty()}">
+                        <label class="form-label d-block">Ảnh đại diện hiện tại:</label>
+                        <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3 border" style="border-color: #E2E7E2 !important;">
+                            <img th:src="${productForm.imageUrl}" class="current-img-preview shadow-sm" alt="Ảnh hoa hiện tại">
+                            <div>
+                                <span class="badge bg-success mb-1">Ảnh chính đang hiển thị</span>
+                                <div class="small text-muted">Tải ảnh mới bên dưới nếu bạn muốn thay đổi ảnh đại diện hoặc bổ sung góc chụp khác.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label" th:text="${isEdit ? 'Tải ảnh mới thay thế hoặc bổ sung (chọn nhiều ảnh nếu cần):' : 'Chọn ảnh sản phẩm (chọn nhiều ảnh, ảnh đầu tiên làm ảnh chính):'}">Hình ảnh sản phẩm</label>
+                        <input type="file" th:field="*{imageFiles}" class="form-control" multiple accept="image/*">
+                        <div class="form-text text-muted">Định dạng hỗ trợ: JPG, PNG, WEBP. Dung lượng tối đa mỗi ảnh 5MB.</div>
+                    </div>
+                </div>
+
+                <!-- Ẩn các trường cho thuê và cọc (hệ thống bán hoa tươi) -->
                 <input type="hidden" th:field="*{priceRentPerDay}" value="0">
                 <input type="hidden" th:field="*{depositFee}" value="0">
 
-                <div class="mb-3">
-                    <label class="form-label">Mô tả chi tiết</label>
-                    <textarea th:field="*{description}" class="form-control" rows="3"></textarea>
-                </div>
+                <hr class="my-4" style="border-color: #D1E5DA;">
 
-                <div class="mb-4">
-                    <label class="form-label">Hình ảnh sản phẩm (chọn nhiều ảnh, ảnh đầu làm ảnh chính)</label>
-                    <input type="file" th:field="*{imageFiles}" class="form-control" multiple accept="image/*">
+                <!-- Hành động cuối form -->
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <a th:href="${productForm.returnUrl != null and !productForm.returnUrl.isEmpty() ? productForm.returnUrl : '/admin/products-manage'}" 
+                       class="btn btn-outline-secondary px-4 py-2 rounded-3 fw-bold" style="font-size: 15px;">
+                        <i class="bi bi-x-circle me-1"></i> Hủy bỏ
+                    </a>
+                    <button type="submit" class="btn btn-primary px-5 py-2 rounded-3 fw-bold shadow-sm" 
+                            style="background-color: #20382E !important; border-color: #20382E !important; font-size: 15.5px;">
+                        <i class="bi bi-check-circle me-1"></i> <span th:text="${isEdit ? 'Lưu thay đổi' : 'Lưu sản phẩm mới'}">Lưu thay đổi</span>
+                    </button>
                 </div>
-
-                <button type="submit" class="btn btn-primary px-4">Lưu Sản Phẩm</button>
-                <div class="mb-3"><label>Tồn kho ban đầu mỗi chi nhánh</label><input type="number" th:field="*{initialStock}" min="0" max="1000000" class="form-control"></div>
             </form>
         </div>
     </div>
@@ -78,18 +226,21 @@
 
 <!-- MODAL CẢNH BÁO BÁN LỖ (YES/NO) -->
 <div class="modal fade" id="lossWarningModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-warning">
-                <h5 class="modal-title font-weight-bold">⚠️ CẢNH BÁO MẤT LỢI NHUẬN!</h5>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header bg-warning text-dark py-3">
+                <h5 class="modal-title fw-bold mb-0">⚠️ CẢNH BÁO NGUY CƠ BÁN LỖ!</h5>
+                <button type="button" class="btn-close" onclick="handleNo()"></button>
             </div>
-            <div class="modal-body">
-                <p>Giá bán đứt vừa nhập (<strong th:text="${priceBuyVal}"></strong>đ) đang thấp hơn Giá nhập hàng gốc (<strong th:text="${importPriceVal}"></strong>đ).</p>
-                <p class="mb-0">Hành động này sẽ khiến cửa hàng bị bán lỗ. Bạn có chắc chắn muốn xác nhận xả lỗ sản phẩm này không?</p>
+            <div class="modal-body p-4">
+                <p>Giá bán vừa nhập (<strong class="text-danger" th:text="${priceBuyVal}"></strong> đ) đang thấp hơn Giá vốn nhập gốc (<strong class="text-dark" th:text="${importPriceVal}"></strong> đ).</p>
+                <div class="p-3 bg-light rounded-3 border text-muted small mb-0">
+                    Hành động này có thể gây thiệt hại doanh thu. Bạn có chắc chắn muốn xác nhận xả lỗ có chủ đích cho sản phẩm này không?
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="handleNo()">Nhập lại</button>
-                <button type="button" class="btn btn-danger" onclick="handleYes()">Xác nhận bán lỗ</button>
+            <div class="modal-footer bg-light border-top-0 d-flex justify-content-end gap-2 p-3">
+                <button type="button" class="btn btn-secondary px-3" onclick="handleNo()">Nhập lại giá</button>
+                <button type="button" class="btn btn-danger px-4 fw-bold" onclick="handleYes()">Xác nhận bán lỗ</button>
             </div>
         </div>
     </div>
@@ -107,10 +258,14 @@
     function handleNo() {
         var modalEl = document.getElementById('lossWarningModal');
         var modalInstance = bootstrap.Modal.getInstance(modalEl);
-        modalInstance.hide();
+        if (modalInstance) {
+            modalInstance.hide();
+        }
         var priceInput = document.getElementById('priceBuyInput');
-        priceInput.focus();
-        priceInput.classList.add('is-invalid');
+        if (priceInput) {
+            priceInput.focus();
+            priceInput.classList.add('is-invalid');
+        }
     }
 
     function handleYes() {

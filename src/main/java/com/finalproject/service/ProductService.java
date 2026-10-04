@@ -10,6 +10,8 @@ public interface ProductService {
     List<Product> getAllProducts();
     Product getProductById(Long id);
     Product createProduct(ProductForm form) throws IOException;
+    Product updateProduct(Long id, ProductForm form) throws IOException;
+    void softDeleteProduct(Long id);
     void deleteProduct(Long id);
 
     // Guest: Trên 10 sản phẩm bán chạy nhất sắp xếp giảm dần

@@ -23,7 +23,7 @@ public class UserLevel {
     @Builder.Default
     private BigDecimal discount = BigDecimal.ZERO;
 
-    @Column(name = "is_deleted", nullable = false)
+    @Column(name = "is_deleted")
     @Builder.Default
     private Boolean isDeleted = false;
 

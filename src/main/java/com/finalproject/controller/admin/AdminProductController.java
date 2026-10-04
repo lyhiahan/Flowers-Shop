@@ -11,6 +11,7 @@ import com.finalproject.service.ProductService;
 import com.finalproject.service.ProductSeederService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,6 +23,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping({"/admin/products", "/admin/products-manage"})
+@PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 public class AdminProductController {
 
@@ -56,7 +58,9 @@ public class AdminProductController {
             @RequestParam(value = "size", defaultValue = "10") int size,
             Model model) {
         try {
-            List<Product> allProducts = productRepository.findAll();
+            List<Product> allProducts = productRepository.findAll().stream()
+                    .filter(p -> !Boolean.TRUE.equals(p.getIsDeleted()))
+                    .toList();
 
             // Tự động bảo toàn dữ liệu cho sản phẩm nếu có trường rỗng
             for (Product p : allProducts) {
@@ -236,7 +240,9 @@ public class AdminProductController {
      * Tạm dừng hoặc mở bán lại sản phẩm
      */
     @PostMapping("/toggle-selling/{id}")
-    public String toggleProductSelling(@PathVariable("id") Long id, RedirectAttributes ra) {
+    public String toggleProductSelling(@PathVariable("id") Long id,
+                                       @RequestParam(value = "returnUrl", required = false) String returnUrl,
+                                       RedirectAttributes ra) {
         Product product = productRepository.findById(id).orElseThrow();
         boolean newSelling = !Boolean.TRUE.equals(product.getIsSelling());
         product.setIsSelling(newSelling);
@@ -247,7 +253,8 @@ public class AdminProductController {
         } else {
             ra.addFlashAttribute("successMessage", "Đã tạm ngừng bán sản phẩm [" + product.getName() + "].");
         }
-        return "redirect:/admin/products-manage";
+        String target = (returnUrl != null && !returnUrl.isBlank()) ? returnUrl : "/admin/products-manage";
+        return "redirect:" + target;
     }
 
     /**
@@ -282,11 +289,15 @@ public class AdminProductController {
     }
 
     @GetMapping("/create")
-    public String showCreateForm(Model model) {
+    public String showCreateForm(@RequestParam(value = "returnUrl", required = false) String returnUrl, Model model) {
         if (!model.containsAttribute("productForm")) {
-            model.addAttribute("productForm", new ProductForm());
+            ProductForm form = new ProductForm();
+            form.setReturnUrl(returnUrl != null && !returnUrl.isBlank() ? returnUrl : "/admin/products-manage");
+            model.addAttribute("productForm", form);
         }
+        model.addAttribute("isEdit", false);
         model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("stores", storeRepository.findAll());
         return "admin/product-form";
     }
 
@@ -295,7 +306,9 @@ public class AdminProductController {
                                       BindingResult bindingResult,
                                       Model model,
                                       RedirectAttributes redirectAttributes) {
+        model.addAttribute("isEdit", false);
         model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("stores", storeRepository.findAll());
 
         if (bindingResult.hasErrors()) {
             return "admin/product-form";
@@ -303,8 +316,10 @@ public class AdminProductController {
 
         try {
             productService.createProduct(form);
-            redirectAttributes.addFlashAttribute("successMessage", "Thêm sản phẩm mới thành công!");
-            return "redirect:/admin/products";
+            redirectAttributes.addFlashAttribute("successMessage", "Thêm sản phẩm mới [" + form.getName() + "] thành công!");
+            String target = (form.getReturnUrl() != null && !form.getReturnUrl().isBlank())
+                    ? form.getReturnUrl() : "/admin/products-manage";
+            return "redirect:" + target;
         } catch (IllegalArgumentException ex) {
             if ("WARN_SELL_AT_LOSS".equals(ex.getMessage())) {
                 model.addAttribute("showLossWarningModal", true);
@@ -318,6 +333,88 @@ public class AdminProductController {
             model.addAttribute("errorMessage", "Lỗi khi lưu sản phẩm: " + ex.getMessage());
             return "admin/product-form";
         }
+    }
+
+    @GetMapping("/edit/{id}")
+    public String showEditForm(@PathVariable("id") Long id,
+                               @RequestParam(value = "returnUrl", required = false) String returnUrl,
+                               Model model,
+                               RedirectAttributes ra) {
+        Product product = productRepository.findById(id).orElse(null);
+        if (product == null || Boolean.TRUE.equals(product.getIsDeleted())) {
+            ra.addFlashAttribute("errorMessage", "Không tìm thấy sản phẩm hoặc sản phẩm đã bị xóa!");
+            return "redirect:/admin/products-manage";
+        }
+
+        ProductForm form = new ProductForm();
+        form.setId(product.getId());
+        form.setName(product.getName());
+        form.setCategoryId(product.getCategory() != null ? product.getCategory().getId() : null);
+        form.setDescription(product.getDescription());
+        form.setImportPrice(product.getImportPrice());
+        form.setPriceBuy(product.getPriceBuy());
+        form.setStoreId(product.getStore() != null ? product.getStore().getId() : null);
+        form.setIsSelling(product.getIsSelling() != null ? product.getIsSelling() : true);
+        form.setIsActive(product.getIsActive() != null ? product.getIsActive() : true);
+        form.setImageUrl(product.getImageUrl());
+        form.setSold(product.getSold() != null ? product.getSold() : 0);
+        form.setReturnUrl(returnUrl != null && !returnUrl.isBlank() ? returnUrl : "/admin/products-manage");
+
+        model.addAttribute("productForm", form);
+        model.addAttribute("isEdit", true);
+        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("stores", storeRepository.findAll());
+        return "admin/product-form";
+    }
+
+    @PostMapping("/edit/{id}")
+    public String handleEditProduct(@PathVariable("id") Long id,
+                                    @Valid @ModelAttribute("productForm") ProductForm form,
+                                    BindingResult bindingResult,
+                                    Model model,
+                                    RedirectAttributes redirectAttributes) {
+        model.addAttribute("isEdit", true);
+        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("stores", storeRepository.findAll());
+
+        if (bindingResult.hasErrors()) {
+            return "admin/product-form";
+        }
+
+        try {
+            productService.updateProduct(id, form);
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật sản phẩm [" + form.getName() + "] thành công!");
+            String target = (form.getReturnUrl() != null && !form.getReturnUrl().isBlank())
+                    ? form.getReturnUrl() : "/admin/products-manage";
+            return "redirect:" + target;
+        } catch (IllegalArgumentException ex) {
+            if ("WARN_SELL_AT_LOSS".equals(ex.getMessage())) {
+                model.addAttribute("showLossWarningModal", true);
+                model.addAttribute("importPriceVal", form.getImportPrice());
+                model.addAttribute("priceBuyVal", form.getPriceBuy());
+                return "admin/product-form";
+            }
+            bindingResult.rejectValue("name", "error.product", ex.getMessage());
+            return "admin/product-form";
+        } catch (Exception ex) {
+            model.addAttribute("errorMessage", "Lỗi khi cập nhật sản phẩm: " + ex.getMessage());
+            return "admin/product-form";
+        }
+    }
+
+    @PostMapping("/delete/{id}")
+    public String deleteProduct(@PathVariable("id") Long id,
+                                @RequestParam(value = "returnUrl", required = false) String returnUrl,
+                                RedirectAttributes ra) {
+        Product product = productRepository.findById(id).orElse(null);
+        if (product != null) {
+            productService.softDeleteProduct(id);
+            ra.addFlashAttribute("successMessage", "Đã xóa sản phẩm [" + product.getName() + "] khỏi danh sách bán. Toàn bộ lịch sử và dữ liệu đơn hàng liên quan được bảo toàn nguyên vẹn.");
+        } else {
+            ra.addFlashAttribute("errorMessage", "Không tìm thấy sản phẩm cần xóa.");
+        }
+        String target = (returnUrl != null && !returnUrl.isBlank()) ? returnUrl : "/admin/products-manage";
+        return "redirect:" + target;
     }
 
     @PostMapping({"/seed-defaults", "/reset-defaults"})

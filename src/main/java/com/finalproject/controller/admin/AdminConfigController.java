@@ -1549,6 +1549,24 @@ public class AdminConfigController {
     }
 
     /**
+     * Xóa vĩnh viễn Style Value khỏi hệ thống (Hard Delete)
+     */
+    @PostMapping("/styles/{styleId}/values/destroy/{valueId}")
+    public String destroyStyleValue(@PathVariable("styleId") Long styleId,
+                                    @PathVariable("valueId") Long valueId,
+                                    RedirectAttributes ra) {
+        try {
+            StyleValue val = styleValueRepository.findById(valueId).orElseThrow();
+            String name = val.getName();
+            styleValueRepository.delete(val);
+            ra.addFlashAttribute("successMessage", "Đã xóa hoàn toàn giá trị thuộc tính [" + name + "] khỏi hệ thống!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Không thể xóa giá trị thuộc tính: " + ex.getMessage());
+        }
+        return "redirect:/admin/styles/" + styleId + "/values";
+    }
+
+    /**
      * Bổ sung thuộc tính mặc định: Đồng bộ an toàn 4 nhóm thuộc tính cốt lõi và các giá trị chuẩn
      * Tuyệt đối không xóa hay ghi đè dữ liệu người dùng đã tạo
      */

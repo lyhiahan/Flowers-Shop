@@ -393,13 +393,14 @@ input, select, textarea, .form-control, .form-select, .header-search-input, .qty
 
 /* Admin & Manager Sidebar Styling */
 .sidebar, .admin-sidebar, .manager-sidebar {
-    background-color: var(--sidebar-dark);
-    color: #E3ECE7;
+    background-color: var(--sidebar-dark) !important;
+    color: #E3ECE7 !important;
     min-height: 100vh;
 }
 
-.sidebar .nav-link, .sidebar a {
-    color: #A9BCB3;
+.sidebar .nav-link, .admin-sidebar .nav-link, .manager-sidebar .nav-link,
+.sidebar .nav-link:visited, .admin-sidebar .nav-link:visited {
+    color: #A9BCB3 !important;
     font-weight: 500;
     padding: 10px 16px;
     border-radius: 10px;
@@ -408,17 +409,20 @@ input, select, textarea, .form-control, .form-select, .header-search-input, .qty
     gap: 10px;
     text-decoration: none;
     transition: all 0.2s ease;
+    background-color: transparent !important;
 }
 
-.sidebar .nav-link:hover, .sidebar a:hover {
-    background-color: var(--sidebar-hover);
-    color: #FFFFFF;
+.sidebar .nav-link:hover, .admin-sidebar .nav-link:hover, .manager-sidebar .nav-link:hover {
+    background-color: var(--sidebar-hover) !important;
+    color: #FFFFFF !important;
 }
 
-.sidebar .nav-link.active, .sidebar a.active {
+.sidebar .nav-link.active, .admin-sidebar .nav-link.active, .manager-sidebar .nav-link.active,
+.nav-pills .sidebar .nav-link.active, .sidebar.nav-pills .nav-link.active {
     background-color: var(--brand-green) !important;
     color: #FFFFFF !important;
-    font-weight: 600;
+    font-weight: 700;
+    border-left: 3px solid #6EE7B7 !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
@@ -430,6 +434,20 @@ input, select, textarea, .form-control, .form-select, .header-search-input, .qty
 
 .breadcrumb-item.active {
     color: var(--text-muted);
+}
+
+/* Material Symbols protection against font-family overrides */
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined' !important;
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
 }
 
 /* Unified Brand Logo Styles */
