@@ -64,7 +64,15 @@ public class Product {
     @Column(name = "image_url", length = 500)
     private String imageUrl;
 
+    @Column(name = "is_deleted")
+    @Builder.Default
+    private Boolean isDeleted = false;
+
     private java.time.LocalDateTime createdAt;
+
+    public Boolean getIsDeleted() {
+        return isDeleted != null ? isDeleted : false;
+    }
 
     public BigDecimal getSellingPrice() {
         if (priceBuy == null) {

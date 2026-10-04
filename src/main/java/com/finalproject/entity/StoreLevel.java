@@ -24,7 +24,7 @@ public class StoreLevel {
     @Builder.Default
     private BigDecimal discount = BigDecimal.ZERO; // Giảm phí sàn
 
-    @Column(name = "is_deleted", nullable = false)
+    @Column(name = "is_deleted")
     @Builder.Default
     private Boolean isDeleted = false;
 

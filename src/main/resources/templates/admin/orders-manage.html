@@ -17,14 +17,46 @@
         .nav-tabs-orders { display: flex; overflow-x: auto; flex-wrap: nowrap; gap: 8px; padding-bottom: 4px; }
         .nav-tabs-orders::-webkit-scrollbar { height: 4px; }
         .nav-tabs-orders::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+
+        /* Sidebar Quản Trị Hệ Thống Chuẩn Thương Hiệu Tiệm Hoa */
+        .sidebar {
+            width: 255px !important;
+            min-width: 255px !important;
+            background-color: #1C2D24 !important;
+            min-height: 100vh;
+        }
+        .sidebar .nav-link {
+            color: #A9BCB3 !important;
+            font-size: 14.5px !important;
+            font-weight: 500 !important;
+            padding: 10px 14px !important;
+            border-radius: 8px !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            text-decoration: none !important;
+            transition: all 0.2s ease !important;
+            background-color: transparent !important;
+        }
+        .sidebar .nav-link:hover {
+            color: #FFFFFF !important;
+            background-color: rgba(255, 255, 255, 0.08) !important;
+        }
+        .sidebar .nav-link.active {
+            color: #FFFFFF !important;
+            background-color: #355447 !important;
+            font-weight: 700 !important;
+            border-left: 3px solid #6EE7B7 !important;
+        }
     </style>
 </head>
 <body class="admin-body">
 <div class="d-flex">
     <!-- Sidebar Quản Trị Hệ Thống Chuẩn Thương Hiệu Tiệm Hoa -->
-    <aside class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white">
+    <aside class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white" style="width: 255px; min-width: 255px; min-height: 100vh; background-color: #1C2D24 !important;">
         <a th:href="@{/admin/dashboard}" class="d-flex align-items-center gap-3 mb-4 text-white text-decoration-none px-2 pt-2">
-            <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img flex-shrink-0" style="width: 40px; height: 40px; border-radius: 8px;">
+            <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img flex-shrink-0" style="width: 40px; height: 40px; border-radius: 8px; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+            <span class="brand-logo-fallback flex-shrink-0 align-items-center justify-content-center rounded-2" style="display: none; width: 40px; height: 40px; background: rgba(255,255,255,0.12); color: #6EE7B7; font-size: 22px;">🌸</span>
             <div>
                 <div class="fw-bold text-white" style="font-size: 16px; line-height: 1.2; letter-spacing: 0.5px;">HOA TƯƠI SÀI GÒN</div>
                 <div class="small" style="font-size: 11px; color: #9DB7AA !important; letter-spacing: 0.05em;">QUẢN TRỊ VIÊN HỆ THỐNG</div>

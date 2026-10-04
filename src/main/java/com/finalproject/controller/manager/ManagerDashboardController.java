@@ -58,6 +58,7 @@ public class ManagerDashboardController {
      */
     @GetMapping({"", "/dashboard"})
     public String showManagerDashboard(
+            @RequestParam(name = "storeId", required = false) Long storeIdParam,
             @RequestParam(name = "timeRange", defaultValue = "day") String timeRange,
             @RequestParam(name = "criteria", defaultValue = "revenue") String criteria,
             @RequestParam(name = "chartType", defaultValue = "line") String chartType,
@@ -69,7 +70,37 @@ public class ManagerDashboardController {
         User manager = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new AccessDeniedException("Người dùng không tồn tại"));
 
-        Store store = resolveStore(manager);
+        // Danh sách cửa hàng mà Vendor/Manager được phân quyền (theo UC_018)
+        List<Store> accessibleStores;
+        if (manager.getRole() == com.finalproject.enums.Role.ADMIN) {
+            accessibleStores = storeRepository.findAll();
+        } else {
+            Set<Long> storeIds = new LinkedHashSet<>();
+            List<Store> owned = storeRepository.findByOwnerId(manager.getId());
+            for (Store s : owned) storeIds.add(s.getId());
+            if (manager.getStore() != null) storeIds.add(manager.getStore().getId());
+            accessibleStores = storeRepository.findAllById(storeIds);
+        }
+
+        Store store = null;
+        if (storeIdParam != null) {
+            for (Store s : accessibleStores) {
+                if (s.getId().equals(storeIdParam)) {
+                    store = s;
+                    manager.setStore(s);
+                    userRepository.save(manager);
+                    break;
+                }
+            }
+        }
+        if (store == null) {
+            store = resolveStore(manager);
+        }
+        if (store == null && !accessibleStores.isEmpty()) {
+            store = accessibleStores.get(0);
+            manager.setStore(store);
+            userRepository.save(manager);
+        }
         if (store == null) {
             return "redirect:/manager/stores";
         }
@@ -77,17 +108,17 @@ public class ManagerDashboardController {
 
         Long storeId = store.getId();
 
-        // Rút gọn tên và địa điểm chi nhánh
-        String storeShortTitle = "Chi Nhánh Tiệm Hoa";
-        if (store.getName() != null) {
-            String shortName = store.getName().replace("Chi Nhánh ", "").replace("Chi nhánh ", "").trim();
-            if (shortName.contains("(") && shortName.contains(")")) {
-                shortName = shortName.replace("(", "· ").replace(")", "").replaceAll("\\s+", " ").trim();
-            }
-            storeShortTitle = shortName;
-        }
+        // Kiểm tra quyền quan hệ theo UC_018: Sở hữu vs Hợp tác
+        boolean isOwned = store.getOwner() != null && store.getOwner().getId().equals(manager.getId());
+        String storeRelationType = isOwned ? "Sở hữu" : "Hợp tác";
+
+        // Tên hiển thị cửa hàng
+        String storeShortTitle = store.getName() != null ? store.getName() : "Cửa hàng hoa tươi";
 
         model.addAttribute("store", store);
+        model.addAttribute("accessibleStores", accessibleStores);
+        model.addAttribute("storeRelationType", storeRelationType);
+        model.addAttribute("isOwned", isOwned);
         model.addAttribute("storeShortTitle", storeShortTitle);
         model.addAttribute("lastUpdatedTime", LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
 
@@ -396,6 +427,7 @@ public class ManagerDashboardController {
             // Đổ dữ liệu vào model
             model.addAttribute("dataLoadError", false);
             model.addAttribute("flowerRevenue", flowerRevenue);
+            model.addAttribute("rangeOrdersCount", rangeOrders.size());
             model.addAttribute("completedOrdersCount", completedOrdersCount);
             model.addAttribute("pendingOrdersCount", pendingOrdersCount);
             model.addAttribute("lowStockProductsCount", lowStockCount);

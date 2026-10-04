@@ -13,15 +13,47 @@
     <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
     <style>
         body { font-family: var(--font-sans) !important; background-color: var(--admin-bg); color: var(--admin-text-main); min-height: 100vh; }
-        .main-wrapper { flex: 1; overflow-x: hidden; background-color: var(--admin-bg); }
+        .main-wrapper { flex: 1; overflow-x: hidden; background-color: var(--admin-bg); min-height: 100vh; }
+
+        /* Sidebar Quản Trị Hệ Thống Chuẩn Thương Hiệu Tiệm Hoa */
+        .sidebar {
+            width: 255px !important;
+            min-width: 255px !important;
+            background-color: #1C2D24 !important;
+            min-height: 100vh;
+        }
+        .sidebar .nav-link {
+            color: #A9BCB3 !important;
+            font-size: 14.5px !important;
+            font-weight: 500 !important;
+            padding: 10px 14px !important;
+            border-radius: 8px !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            text-decoration: none !important;
+            transition: all 0.2s ease !important;
+            background-color: transparent !important;
+        }
+        .sidebar .nav-link:hover {
+            color: #FFFFFF !important;
+            background-color: rgba(255, 255, 255, 0.08) !important;
+        }
+        .sidebar .nav-link.active {
+            color: #FFFFFF !important;
+            background-color: #355447 !important;
+            font-weight: 700 !important;
+            border-left: 3px solid #6EE7B7 !important;
+        }
     </style>
 </head>
 <body class="admin-body">
 <div class="d-flex">
-    <!-- Sidebar -->
-    <aside class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white">
+    <!-- Sidebar Quản Trị Hệ Thống Chuẩn Thương Hiệu Tiệm Hoa -->
+    <aside class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white" style="width: 255px; min-width: 255px; min-height: 100vh; background-color: #1C2D24 !important;">
         <a th:href="@{/admin/dashboard}" class="d-flex align-items-center gap-3 mb-4 text-white text-decoration-none px-2 pt-2">
-            <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img flex-shrink-0" style="width: 40px; height: 40px; border-radius: 8px;">
+            <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img flex-shrink-0" style="width: 40px; height: 40px; border-radius: 8px; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+            <span class="brand-logo-fallback flex-shrink-0 align-items-center justify-content-center rounded-2" style="display: none; width: 40px; height: 40px; background: rgba(255,255,255,0.12); color: #6EE7B7; font-size: 22px;">🌸</span>
             <div>
                 <div class="fw-bold text-white" style="font-size: 16px; line-height: 1.2; letter-spacing: 0.5px;">HOA TƯƠI SÀI GÒN</div>
                 <div class="small" style="font-size: 11px; color: #9DB7AA !important; letter-spacing: 0.05em;">QUẢN TRỊ VIÊN HỆ THỐNG</div>
@@ -48,6 +80,12 @@
                 </a>
             </li>
             <li>
+                <a th:href="@{/admin/store-levels}" class="nav-link">
+                    <i class="bi bi-award"></i>
+                    <span>Hạng chi nhánh</span>
+                </a>
+            </li>
+            <li>
                 <a th:href="@{/admin/products-manage}" class="nav-link" id="sidebarProductsLink">
                     <i class="bi bi-box-seam"></i>
                     <span>Sản phẩm</span>
@@ -65,11 +103,47 @@
                     <span>Danh mục hoa</span>
                 </a>
             </li>
+            <li>
+                <a th:href="@{/admin/styles}" class="nav-link">
+                    <i class="bi bi-sliders"></i>
+                    <span>Thuộc tính sản phẩm</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/deliveries}" class="nav-link">
+                    <i class="bi bi-truck"></i>
+                    <span>Đơn vị vận chuyển</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/vouchers}" class="nav-link">
+                    <i class="bi bi-ticket-perforated"></i>
+                    <span>Khuyến mãi</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/user-levels}" class="nav-link">
+                    <i class="bi bi-award"></i>
+                    <span>Cấp bậc khách</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/transactions}" class="nav-link">
+                    <i class="bi bi-journal-text"></i>
+                    <span>Lịch sử giao dịch</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/}" class="nav-link" target="_blank" style="color: #9DB7AA;">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                    <span>Xem cửa hàng</span>
+                </a>
+            </li>
         </ul>
 
         <hr class="border-secondary my-2">
-        <form th:action="@{/logout}" method="post" class="d-inline">
-            <button type="submit" class="btn btn-outline-danger btn-sm w-100 d-flex align-items-center justify-content-center gap-2">
+        <form th:action="@{/logout}" method="post" class="d-inline mt-auto">
+            <button type="submit" class="btn btn-outline-danger btn-sm w-100 d-flex align-items-center justify-content-center gap-2" style="border-radius: 8px;">
                 <i class="bi bi-box-arrow-right"></i> Đăng xuất
             </button>
         </form>
@@ -87,8 +161,8 @@
                     Chi tiết đơn hàng #<span th:text="${order.id}">1</span>
                 </h1>
                 <span class="badge rounded-pill px-3 py-2 fw-bold"
-                      th:style="${order.status.name() == 'COMPLETED'} ? 'background-color: #20382E; color: #FFFFFF;' : 'background-color: #E5EEE8; color: #20382E; border: 1px solid #D1E5DA;'"
-                      th:text="${order.status}">PENDING</span>
+                      th:classappend="${order.status != null and order.status.name() == 'PENDING' ? 'bg-warning-subtle text-warning-emphasis border border-warning' : (order.status != null and order.status.name() == 'CONFIRMED' ? 'bg-primary-subtle text-primary border border-primary' : (order.status != null and order.status.name() == 'PREPARING' ? 'bg-info-subtle text-info-emphasis border border-info' : (order.status != null and order.status.name() == 'DELIVERING' ? 'bg-warning-subtle text-warning-emphasis border border-warning' : (order.status != null and (order.status.name() == 'DELIVERED' or order.status.name() == 'COMPLETED') ? 'bg-success-subtle text-success border border-success' : 'bg-danger-subtle text-danger border border-danger'))))}"
+                      th:text="${order.status != null ? order.status : 'PENDING'}">PENDING</span>
             </div>
             <div class="text-muted small">
                 Thời gian đặt: <strong th:text="${order.createdAt != null ? #temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm:ss') : '---'}"></strong>
@@ -107,15 +181,17 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <!-- BƯỚC 8 THEO UC_029: Chọn cập nhật trạng thái đơn hàng ở phần dropdown (nút này sẽ tồn tại với các đơn hàng đã bàn giao cho đơn vị vận chuyển của hệ thống) -->
-        <div th:if="${isHandedOverToDelivery}" class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white" style="border-left: 5px solid #20382E !important;" id="deliveryStatusUpdateSection">
+        <!-- BƯỚC 8 THEO UC_029: Chọn cập nhật trạng thái đơn hàng ở phần dropdown -->
+        <div th:if="${!#lists.isEmpty(availableStatuses)}" class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white" style="border-left: 5px solid #20382E !important;" id="deliveryStatusUpdateSection">
             <div class="row align-items-center g-3">
                 <div class="col-lg-6">
                     <h5 class="fw-bold mb-1" style="color: #20382E;">
-                        <i class="bi bi-truck me-2 text-primary"></i> Cập nhật trạng thái giao hàng
+                        <i th:class="${isHandedOverToDelivery ? 'bi bi-truck me-2 text-primary' : 'bi bi-arrow-repeat me-2 text-success'}"></i>
+                        <span th:text="${isHandedOverToDelivery ? 'Cập nhật trạng thái giao hàng' : 'Cập nhật trạng thái đơn hàng'}">Cập nhật trạng thái</span>
                     </h5>
                     <p class="text-muted small mb-0">
-                        Đơn hàng đã bàn giao cho đơn vị vận chuyển của hệ thống. Chọn trạng thái tiếp theo để cập nhật tiến độ giao hoa.
+                        <span th:if="${isHandedOverToDelivery}">Đơn hàng đã bàn giao cho đơn vị vận chuyển của hệ thống. Chọn trạng thái tiếp theo để cập nhật tiến độ giao hoa.</span>
+                        <span th:unless="${isHandedOverToDelivery}">Chọn trạng thái tiếp theo để tiếp tục quy trình xử lý đơn hàng.</span>
                     </p>
                 </div>
                 <div class="col-lg-6">

@@ -128,3 +128,16 @@ IF EXISTS (SELECT 1 FROM dbo.store_levels WHERE name LIKE N'%Vàng%' OR name LIK
 
 IF EXISTS (SELECT 1 FROM dbo.store_levels WHERE name LIKE N'%Chuẩn%' OR min_point = 0)
     UPDATE dbo.store_levels SET name = N'Tiêu chuẩn', min_point = 0 WHERE name LIKE N'%Chuẩn%' OR min_point = 0;
+
+-- Đảm bảo các cột lưu tiếng Việt dùng kiểu NVARCHAR thay vì VARCHAR
+IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'styles' AND COLUMN_NAME = 'name' AND DATA_TYPE = 'varchar')
+    ALTER TABLE dbo.styles ALTER COLUMN name NVARCHAR(100) NOT NULL;
+
+IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'promotions' AND COLUMN_NAME = 'name' AND DATA_TYPE = 'varchar')
+    ALTER TABLE dbo.promotions ALTER COLUMN name NVARCHAR(150) NOT NULL;
+
+IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'notifications' AND COLUMN_NAME = 'title' AND DATA_TYPE = 'varchar')
+    ALTER TABLE dbo.notifications ALTER COLUMN title NVARCHAR(200) NOT NULL;
+
+IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'notifications' AND COLUMN_NAME = 'content' AND DATA_TYPE = 'text')
+    ALTER TABLE dbo.notifications ALTER COLUMN content NVARCHAR(MAX) NOT NULL;

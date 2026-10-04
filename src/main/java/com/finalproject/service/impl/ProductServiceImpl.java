@@ -27,6 +27,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductWishlistRepository wishlistRepository;
     private final RecentlyViewedRepository recentlyViewedRepository;
     private final UserRepository userRepository;
+    private final OrderDetailRepository orderDetailRepository;
 
     @Override
     public List<Product> getAllProducts() {
@@ -41,12 +42,46 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Product> getGuestFeaturedProducts() {
-        List<Product> featured = productRepository.findGuestFeaturedProducts();
-        if (featured.isEmpty()) {
-            // Fallback nếu dữ liệu mẫu chưa có sold >= 10: lấy tất cả sắp xếp theo giá hoặc ID
-            return productRepository.findAll();
+        return getTop8BestSellingProducts();
+    }
+
+    @Override
+    public List<Product> getTop8BestSellingProducts() {
+        java.time.LocalDateTime thirtyDaysAgo = java.time.LocalDateTime.now().minusDays(30);
+        List<Long> topProductIds = orderDetailRepository.findTopSellingProductIdsSince(
+                thirtyDaysAgo, org.springframework.data.domain.PageRequest.of(0, 8));
+
+        List<Product> result = new java.util.ArrayList<>();
+        if (topProductIds != null && !topProductIds.isEmpty()) {
+            List<Product> productsFromOrders = productRepository.findAllById(topProductIds);
+            java.util.Map<Long, Product> productMap = productsFromOrders.stream()
+                    .filter(p -> Boolean.TRUE.equals(p.getIsActive()) && Boolean.TRUE.equals(p.getIsSelling()))
+                    .collect(java.util.stream.Collectors.toMap(Product::getId, java.util.function.Function.identity()));
+            for (Long id : topProductIds) {
+                Product p = productMap.get(id);
+                if (p != null) {
+                    result.add(p);
+                }
+            }
         }
-        return featured;
+
+        // Bổ sung từ top sản phẩm có số lượng bán cao nhất (p.sold > 0) nếu trong 30 ngày chưa đủ 8 sản phẩm
+        if (result.size() < 8) {
+            java.util.Set<Long> existingIds = result.stream().map(Product::getId).collect(java.util.stream.Collectors.toSet());
+            List<Product> additional = productRepository.findTopBestSellers(org.springframework.data.domain.PageRequest.of(0, 16));
+            for (Product p : additional) {
+                if (!existingIds.contains(p.getId())) {
+                    result.add(p);
+                    existingIds.add(p.getId());
+                    if (result.size() >= 8) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Tối đa 8 sản phẩm, chỉ hiển thị số lượng thực tế phù hợp, không lặp sản phẩm
+        return result.stream().limit(8).collect(java.util.stream.Collectors.toList());
     }
 
     @Override
@@ -222,6 +257,81 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return savedProduct;
+    }
+
+    @Override
+    @Transactional
+    public Product updateProduct(Long id, ProductForm form) throws IOException {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm có ID: " + id));
+
+        Category category = categoryRepository.findById(form.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Danh mục không tồn tại"));
+
+        // Chống bán lỗ: Nếu giá bán < giá nhập mà chưa xác nhận bán lỗ thì ném cảnh báo
+        if (form.getPriceBuy() != null && form.getImportPrice() != null
+                && form.getPriceBuy().compareTo(form.getImportPrice()) < 0 && !form.isConfirmSellAtLoss()) {
+            throw new IllegalArgumentException("WARN_SELL_AT_LOSS");
+        }
+
+        product.setName(form.getName());
+        product.setCategory(category);
+        product.setDescription(form.getDescription());
+        product.setImportPrice(form.getImportPrice());
+        product.setPriceBuy(form.getPriceBuy());
+
+        // Cửa hàng hoặc phạm vi áp dụng (null hoặc <= 0 là Toàn hệ thống)
+        if (form.getStoreId() != null && form.getStoreId() > 0) {
+            Store store = storeRepository.findById(form.getStoreId()).orElse(null);
+            product.setStore(store);
+        } else {
+            product.setStore(null);
+        }
+
+        if (form.getIsSelling() != null) {
+            product.setIsSelling(form.getIsSelling());
+        }
+        if (form.getIsActive() != null) {
+            product.setIsActive(form.getIsActive());
+        }
+
+        // Không cho phép sửa trực tiếp số lượng đã bán (sold) - bảo toàn từ đơn hàng
+
+        // Upload ảnh mới nếu có
+        if (form.getImageFiles() != null && !form.getImageFiles().isEmpty()) {
+            boolean isFirst = true;
+            for (MultipartFile file : form.getImageFiles()) {
+                if (!file.isEmpty()) {
+                    CloudinaryService.UploadResult result = cloudinaryService.upload(file, "rental_shop_products");
+                    if (result == null) continue;
+                    ProductImage productImage = ProductImage.builder()
+                            .product(product)
+                            .imageUrl(result.secureUrl())
+                            .cloudinaryPublicId(result.publicId())
+                            .isMain(isFirst)
+                            .build();
+                    productImageRepository.save(productImage);
+                    if (isFirst) {
+                        product.setImageUrl(result.secureUrl());
+                    }
+                    isFirst = false;
+                }
+            }
+        }
+
+        return productRepository.save(product);
+    }
+
+    @Override
+    @Transactional
+    public void softDeleteProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm có ID: " + id));
+        // Soft delete: loại khỏi danh sách bán nhưng bảo toàn toàn bộ đơn hàng và lịch sử
+        product.setIsDeleted(true);
+        product.setIsSelling(false);
+        product.setIsActive(false);
+        productRepository.save(product);
     }
 
     @Override

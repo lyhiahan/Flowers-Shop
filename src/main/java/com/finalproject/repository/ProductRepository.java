@@ -4,6 +4,7 @@ import com.finalproject.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
     List<Product> findByCategoryId(Long categoryId);
 
     @Query("SELECT p FROM Product p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
@@ -27,9 +28,16 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p WHERE p.category.id = :categoryId AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Product> searchByCategoryAndKeyword(@Param("categoryId") Long categoryId, @Param("keyword") String keyword, Pageable pageable);
 
-    // Guest: Sản phẩm có số lượng bán trên 10, sắp xếp giảm dần
-    @Query("SELECT p FROM Product p WHERE p.isActive = true AND p.isSelling = true AND p.sold >= 10 ORDER BY p.sold DESC")
-    List<Product> findGuestFeaturedProducts();
+    // Guest: Tối đa 8 sản phẩm bán chạy nhất
+    List<Product> findTop8ByIsActiveTrueAndIsSellingTrueAndSoldGreaterThanEqualOrderBySoldDesc(int sold);
+
+    default List<Product> findGuestFeaturedProducts() {
+        return findTop8ByIsActiveTrueAndIsSellingTrueAndSoldGreaterThanEqualOrderBySoldDesc(10);
+    }
+
+    // Lấy sản phẩm bán chạy có giới hạn số lượng
+    @Query("SELECT p FROM Product p WHERE p.isActive = true AND p.isSelling = true AND p.sold > 0 ORDER BY p.sold DESC, p.id DESC")
+    List<Product> findTopBestSellers(Pageable pageable);
 
     // Top 20 Mới nhất
     List<Product> findTop20ByIsActiveTrueAndIsSellingTrueOrderByCreatedAtDesc();

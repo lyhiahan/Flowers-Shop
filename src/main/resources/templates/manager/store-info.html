@@ -24,25 +24,26 @@
         <!-- Sidebar -->
         <div class="col-md-2 p-3 sidebar">
             <div class="d-flex align-items-center gap-2 mb-4 px-2">
-                <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img me-1">
+                <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img me-1" style="width: 36px; height: 36px; object-fit: contain; flex-shrink: 0;">
                 <div>
-                    <h6 class="font-serif fw-bold text-white mb-0">CỬA HÀNG HOA</h6>
+                    <h6 class="font-serif fw-bold text-white mb-0">TIỆM HOA TƯƠI</h6>
                     <small class="text-secondary" th:text="${store.name}"></small>
                 </div>
             </div>
             <nav class="d-flex flex-column gap-1">
                 <a th:href="@{/manager/dashboard}"><i class="bi bi-speedometer2"></i> Tổng Quan Chi Nhánh</a>
-                <a th:href="@{/manager/orders}"><i class="bi bi-bag-check"></i> Quản Lý Đơn Hàng</a>
+                <a th:href="@{/manager/orders}" id="sidebarOrders"><i class="bi bi-bag-check"></i> Quản Lý Đơn Hàng</a>
                 <a th:href="@{/manager/products}"><i class="bi bi-flower1"></i> Kho Mẫu Hoa</a>
-                <a th:href="@{/manager/staff}"><i class="bi bi-people"></i> Nhân Viên Cửa Hàng</a>
-                <a th:href="@{/manager/wallet}"><i class="bi bi-wallet2"></i> Ví Cửa Hàng & Rút Tiền</a>
-                <a th:href="@{/manager/vouchers}"><i class="bi bi-ticket-perforated"></i> Khuyến Mãi Shop</a>
+                <a th:href="@{/manager/staff}" id="sidebarStaffs"><i class="bi bi-people"></i> Quản Lý Nhân Viên</a>
+                <a th:href="@{/manager/wallet}" id="sidebarGdCoins"><i class="bi bi-coin"></i> Ví Cửa Hàng</a>
+                <a th:href="@{/manager/vouchers}"><i class="bi bi-ticket-perforated"></i> Chương Trình Khuyến Mãi</a>
+                <a th:href="@{/manager/analytics}"><i class="bi bi-graph-up-arrow"></i> Báo Cáo Doanh Thu</a>
                 <a th:href="@{/manager/stores}"><i class="bi bi-shop"></i> Danh Sách Cửa Hàng</a>
                 <!-- BƯỚC 6 THEO UC_019: Chọn Profile trên thanh sidebar -->
-                <a th:href="@{/manager/profile}" id="sidebarProfile"><i class="bi bi-person-badge"></i> Profile</a>
+                <a th:href="@{/manager/profile}" id="sidebarProfile"><i class="bi bi-person-badge"></i> Thông Tin Cửa Hàng</a>
                 <hr class="border-secondary my-2">
-                <a th:href="@{/}"><i class="bi bi-house-door"></i> Xem Website Khách</a>
-                <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit"   class="text-danger"><i class="bi bi-box-arrow-right"></i> Đăng Xuất</button></form>
+                <a th:href="@{/}" target="_blank"><i class="bi bi-house-door"></i> Xem Trang Bán Hàng</a>
+                <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit" class="text-danger" style="background:none;border:none;padding:10px 16px;width:100%;text-align:left;display:flex;align-items:center;gap:10px;font-weight:600;"><i class="bi bi-box-arrow-right"></i> Đăng Xuất</button></form>
             </nav>
         </div>
 
@@ -57,20 +58,24 @@
             <div class="card border-0 shadow-sm rounded-4 p-4 bg-white" style="max-width: 700px; border: 1px solid #E2E7E2 !important; border-radius: 14px;">
                 <form th:action="@{'/manager/stores/edit/' + ${store.id}}" th:object="${store}" method="post">
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold">Tên chi nhánh cửa hàng hoa:</label>
-                        <input type="text" th:field="*{name}" class="form-control" required>
+                        <label class="form-label small fw-semibold">Tên chi nhánh cửa hàng hoa <span class="text-danger">*</span>:</label>
+                        <input type="text" th:field="*{name}" id="editStoreName" class="form-control" required minlength="3" maxlength="120" placeholder="Ví dụ: Tiệm Hoa Tươi Sài Gòn">
+                        <div class="form-text" style="font-size:12.5px;">Tên chính thức từ 3 đến 120 ký tự.</div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold">Số điện thoại hotline chi nhánh:</label>
-                        <input type="text" th:field="*{phone}" class="form-control" required>
+                        <label class="form-label small fw-semibold">Số điện thoại hotline chi nhánh <span class="text-danger">*</span>:</label>
+                        <input type="tel" th:field="*{phone}" id="editStorePhone" class="form-control" required maxlength="15"
+                               placeholder="Ví dụ: 0901234567 hoặc 02838123456">
+                        <div class="form-text" style="font-size:12.5px;">Định dạng chuẩn Việt Nam: 10 số di động (đầu 03, 05, 07, 08, 09) hoặc 11 số máy bàn (đầu 02x).</div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold">Địa chỉ chi nhánh chi tiết:</label>
-                        <input type="text" th:field="*{address}" class="form-control" required>
+                        <label class="form-label small fw-semibold">Địa chỉ chi nhánh chi tiết <span class="text-danger">*</span>:</label>
+                        <input type="text" th:field="*{address}" id="editStoreAddress" class="form-control" required minlength="5" maxlength="200" placeholder="Số nhà, tên đường, phường/xã, quận/huyện">
+                        <div class="form-text" style="font-size:12.5px;">Địa chỉ cụ thể từ 5 đến 200 ký tự.</div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-semibold">Giới thiệu ngắn về cửa hàng:</label>
-                        <textarea th:field="*{bio}" rows="3" class="form-control"></textarea>
+                        <textarea th:field="*{bio}" id="editStoreBio" rows="3" class="form-control" maxlength="500"></textarea>
                     </div>
                     <div class="row g-2 mb-3">
                         <div class="col-md-6">
@@ -102,5 +107,29 @@
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const editPhone = document.getElementById('editStorePhone');
+    if (editPhone) {
+        editPhone.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9+\s.-]/g, '');
+        });
+    }
+
+    const editForm = document.querySelector('form');
+    if (editForm) {
+        editForm.addEventListener('submit', function(e) {
+            const phoneVal = (editPhone ? editPhone.value.trim() : '').replace(/[\s.-]/g, '');
+            const regexVN = /^(?:\+84|84|0)(?:(?:3[2-9]|5[25689]|7[06-9]|8[1-9]|9[0-9])\d{7}|2\d{9})$/;
+            if (!regexVN.test(phoneVal)) {
+                e.preventDefault();
+                alert('Số điện thoại không đúng chuẩn Việt Nam! Vui lòng nhập số hợp lệ (ví dụ: 0901234567 hoặc máy bàn 02838123456).');
+                if (editPhone) {
+                    editPhone.focus();
+                    editPhone.classList.add('is-invalid');
+                }
+            }
+        });
+    }
+</script>
 </body>
 </html>

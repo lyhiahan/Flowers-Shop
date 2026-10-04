@@ -17,9 +17,9 @@
     </style>
 </head>
 <body class="admin-body">
-<div class="d-flex">
+<div class="d-flex" style="min-height: 100vh;">
     <!-- Sidebar -->
-    <aside class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white">
+    <aside class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white" style="width: 250px; min-width: 250px; min-height: 100vh;">
         <a th:href="@{/admin/dashboard}" class="d-flex align-items-center gap-3 mb-4 text-white text-decoration-none px-2 pt-2">
             <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img flex-shrink-0" style="width: 40px; height: 40px; border-radius: 8px;">
             <div>
@@ -33,6 +33,24 @@
                 <a th:href="@{/admin/dashboard}" class="nav-link">
                     <i class="bi bi-grid"></i>
                     <span>Thống kê</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/users}" class="nav-link">
+                    <i class="bi bi-people"></i>
+                    <span>Người dùng</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/stores}" class="nav-link">
+                    <i class="bi bi-shop"></i>
+                    <span>Cửa hàng</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/store-levels}" class="nav-link" id="sidebarStoreLevelsLink">
+                    <i class="bi bi-award"></i>
+                    <span>Hạng chi nhánh</span>
                 </a>
             </li>
             <li>
@@ -59,10 +77,40 @@
                     <span>Thuộc tính sản phẩm</span>
                 </a>
             </li>
+            <li>
+                <a th:href="@{/admin/deliveries}" class="nav-link">
+                    <i class="bi bi-truck"></i>
+                    <span>Đơn vị vận chuyển</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/vouchers}" class="nav-link">
+                    <i class="bi bi-ticket-perforated"></i>
+                    <span>Khuyến mãi</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/user-levels}" class="nav-link">
+                    <i class="bi bi-award"></i>
+                    <span>Cấp bậc khách</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/transactions}" class="nav-link">
+                    <i class="bi bi-journal-text"></i>
+                    <span>Lịch sử giao dịch</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/}" class="nav-link" target="_blank" style="color: #9DB7AA;">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                    <span>Xem cửa hàng</span>
+                </a>
+            </li>
         </ul>
 
         <hr class="border-secondary my-2">
-        <form th:action="@{/logout}" method="post" class="d-inline">
+        <form th:action="@{/logout}" method="post" class="d-inline mt-auto">
             <button type="submit" class="btn btn-outline-danger btn-sm w-100 d-flex align-items-center justify-content-center gap-2">
                 <i class="bi bi-box-arrow-right"></i> Đăng xuất
             </button>
@@ -78,24 +126,24 @@
                     <i class="bi bi-arrow-left"></i> Quay lại danh sách
                 </a>
                 <h1 class="admin-page-title mb-0" style="font-size: 24px !important; font-weight: 800; color: #20382E;"
-                    th:text="${isEdit ? 'Chỉnh sửa thuộc tính sản phẩm: ' + style.name : 'Thêm mới thuộc tính sản phẩm (New style)'}">
-                    Thêm mới thuộc tính sản phẩm
+                    th:text="${isEdit ? 'Chỉnh sửa nhóm thuộc tính: ' + style.name : 'Thêm mới nhóm thuộc tính'}">
+                    Thêm mới nhóm thuộc tính
                 </h1>
             </div>
         </div>
 
-        <!-- Form Card (BƯỚC 6 & 7 THEO UC_031: Chuyển đến trang form tạo style mới, nhập đầy đủ thông tin) -->
+        <!-- Form Card (Nhập thông tin nhóm thuộc tính) -->
         <div class="card border-0 shadow-sm rounded-4 p-4 bg-white" style="border: 1px solid #E2E7E2 !important; max-width: 800px;">
             <form id="styleForm" th:action="${isEdit ? '/admin/styles/update/' + style.id : '/admin/styles/add'}" method="post">
                 <div class="mb-3">
-                    <label class="form-label fw-bold" style="color: #20382E; font-size: 15px;">Tên thuộc tính sản phẩm (*):</label>
+                    <label class="form-label fw-bold" style="color: #20382E; font-size: 15px;">Tên nhóm thuộc tính (*):</label>
                     <input type="text" name="name" id="styleNameInput" class="form-control" th:value="${style.name}" 
-                           placeholder="VD: Tone Màu Thiết Kế, Kiểu Dáng Cắm, Kích Cỡ..." 
+                           placeholder="VD: Màu sắc, Kiểu dáng, Loại hoa, Dịp tặng..." 
                            style="height: 44px; border-radius: 10px; border-color: #E2E7E2; font-size: 15px;" required>
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label fw-bold" style="color: #20382E; font-size: 15px;">Danh mục hoa áp dụng (nếu áp dụng riêng cho một danh mục):</label>
+                    <label class="form-label fw-bold" style="color: #20382E; font-size: 15px;">Phạm vi áp dụng (nếu chỉ áp dụng riêng cho một danh mục hoa):</label>
                     <select name="categoryId" id="styleCategorySelect" class="form-select" style="height: 44px; border-radius: 10px; border-color: #E2E7E2; font-size: 15px;">
                         <option value="0">-- Áp dụng chung cho tất cả sản phẩm --</option>
                         <option th:each="c : ${categories}" th:value="${c.id}" 
@@ -104,7 +152,7 @@
                     </select>
                 </div>
 
-                <!-- BƯỚC 8 THEO UC_031: Bấm nút Submit -->
+                <!-- Bấm nút Submit -->
                 <div class="d-flex justify-content-end gap-2">
                     <a th:href="@{/admin/styles}" class="btn btn-outline-secondary px-4 py-2" style="border-radius: 10px;">
                         Hủy
@@ -113,7 +161,7 @@
                             id="btnSubmitStyle" data-testid="btnSubmitStyle"
                             onclick="triggerConfirmStyleModal()"
                             style="border-radius: 10px; background-color: #20382E !important; border-color: #20382E !important;">
-                        <i class="bi bi-check2-circle me-1"></i> Submit
+                        <i class="bi bi-check2-circle me-1"></i> Lưu nhóm thuộc tính
                     </button>
                 </div>
             </form>
@@ -122,32 +170,32 @@
     </div>
 </div>
 
-<!-- BƯỚC 9 & 10 THEO UC_031: Hiển thị thông báo yêu cầu xác nhận -> Bấm nút Confirm -->
+<!-- Modal xác nhận lưu nhóm thuộc tính -->
 <div class="modal fade" id="confirmStyleModal" tabindex="-1" aria-labelledby="confirmStyleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 450px;">
         <div class="modal-content rounded-4 border-0 shadow">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title font-serif fw-bold text-dark" id="confirmStyleModalLabel">
-                    ✨ Xác Nhận Lưu Thuộc Tính Sản Phẩm
+                    ✨ Xác Nhận Lưu Nhóm Thuộc Tính
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body py-3 text-secondary">
-                Bạn có chắc chắn muốn lưu thông tin thuộc tính sản phẩm:
+                Bạn có chắc chắn muốn lưu thông tin nhóm thuộc tính:
                 <div class="alert alert-info py-2 px-3 mt-2 mb-0 fw-bold" id="confirmStyleNameDisplay">
-                    Tên thuộc tính
+                    Tên nhóm thuộc tính
                 </div>
             </div>
             <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
                 <!-- Alternative 11h: Bấm nút Cancel -> 12h: Hủy thao tác -->
                 <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancelStyle" data-testid="btnCancelStyle">
-                    Cancel
+                    Hủy bỏ
                 </button>
                 <!-- Bước 10: Bấm nút Confirm -> Bước 11: Thông báo thành công -->
                 <button type="button" class="btn btn-primary rounded-pill px-4 fw-semibold text-white" 
                         id="btnConfirmStyle" data-testid="btnConfirmStyle"
                         onclick="document.getElementById('styleForm').submit();">
-                    Confirm
+                    Xác nhận lưu
                 </button>
             </div>
         </div>

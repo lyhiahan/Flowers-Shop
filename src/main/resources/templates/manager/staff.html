@@ -153,7 +153,7 @@
                 <a th:href="@{/manager/dashboard}">
                     <i class="bi bi-speedometer2"></i> Tổng Quan Chi Nhánh
                 </a>
-                <a th:href="@{/manager/orders}">
+                <a th:href="@{/manager/orders}" id="sidebarOrders">
                     <i class="bi bi-bag-check"></i> Quản Lý Đơn Hàng
                 </a>
                 <a th:href="@{/manager/products}">
@@ -161,13 +161,13 @@
                 </a>
                 <!-- BƯỚC 6 THEO UC_020: Chọn Staffs trên thanh sidebar -->
                 <a th:href="@{/manager/staff}" class="active" id="sidebarStaffs">
-                    <i class="bi bi-people"></i> Staffs (Nhân Viên)
+                    <i class="bi bi-people"></i> Quản Lý Nhân Viên
                 </a>
-                <a th:href="@{/manager/wallet}">
-                    <i class="bi bi-wallet2"></i> Ví Cửa Hàng & Rút Tiền
+                <a th:href="@{/manager/wallet}" id="sidebarGdCoins">
+                    <i class="bi bi-coin"></i> Ví Cửa Hàng
                 </a>
                 <a th:href="@{/manager/vouchers}">
-                    <i class="bi bi-ticket-perforated"></i> Khuyến Mãi Shop
+                    <i class="bi bi-ticket-perforated"></i> Chương Trình Khuyến Mãi
                 </a>
                 <a th:href="@{/manager/analytics}">
                     <i class="bi bi-graph-up-arrow"></i> Báo Cáo Doanh Thu
@@ -176,11 +176,11 @@
                     <i class="bi bi-shop"></i> Danh Sách Cửa Hàng
                 </a>
                 <a th:href="@{/manager/profile}" id="sidebarProfile">
-                    <i class="bi bi-person-badge"></i> Profile
+                    <i class="bi bi-person-badge"></i> Thông Tin Cửa Hàng
                 </a>
                 <hr class="border-secondary my-2">
                 <a th:href="@{/}" target="_blank">
-                    <i class="bi bi-house-door"></i> Xem Website Khách
+                    <i class="bi bi-house-door"></i> Xem Trang Bán Hàng
                 </a>
                 <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#signOutModal" class="text-danger fw-bold">
                     <i class="bi bi-box-arrow-right me-1"></i> Đăng Xuất

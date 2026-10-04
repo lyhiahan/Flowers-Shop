@@ -188,22 +188,13 @@
                 <button type="button" id="btnReviewCategoryTree" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 fw-semibold" 
                         data-bs-toggle="modal" data-bs-target="#categoryTreeModal"
                         style="font-size: 15px; height: 44px; padding: 0 16px; border-radius: 10px; background-color: #FFFFFF; border-color: #D1E5DA; color: #20382E;">
-                    <i class="bi bi-diagram-3 text-success"></i> Xem cây danh mục (Review)
+                    <i class="bi bi-diagram-3 text-success"></i> Xem cây danh mục
                 </button>
-
-                <!-- Nút nạp lại 9 loại sản phẩm mẫu -->
-                <form th:action="@{/admin/categories/reset-defaults}" method="post" class="d-inline m-0">
-                    <button type="submit" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 fw-semibold" 
-                            style="font-size: 15px; height: 44px; padding: 0 16px; border-radius: 10px; background-color: #FFFFFF; border-color: #D1E5DA; color: #20382E;"
-                            onclick="return confirm('Khôi phục danh sách 9 loại sản phẩm hoa tươi tiêu chuẩn?')">
-                        <i class="bi bi-arrow-clockwise text-success"></i> Khôi phục mẫu
-                    </button>
-                </form>
 
                 <!-- Nút New category để thêm mới (Bước 6) -->
                 <a th:href="@{/admin/categories/create}" id="btnNewCategory" class="btn btn-primary d-inline-flex align-items-center gap-2 fw-bold shadow-sm" 
                    style="font-size: 15.5px; height: 44px; padding: 0 20px; border-radius: 10px; background-color: #20382E !important; border-color: #20382E !important;">
-                    <i class="bi bi-plus-lg"></i> New category
+                    <i class="bi bi-plus-lg"></i> Thêm danh mục
                 </a>
             </div>
         </div>

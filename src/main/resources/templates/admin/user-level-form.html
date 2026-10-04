@@ -12,12 +12,13 @@
     <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
     <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
     <style>
-        body { font-family: var(--font-sans) !important; background-color: var(--admin-bg); color: var(--admin-text-main); min-height: 100vh; }
-        .main-wrapper { flex: 1; overflow-x: hidden; background-color: var(--admin-bg); }
+        body, .admin-body { font-family: var(--font-sans) !important; background-color: var(--admin-bg); color: var(--admin-text-main); min-height: 100vh; }
+        .main-wrapper { flex: 1; overflow-x: hidden; background-color: var(--admin-bg); min-height: 100vh; }
+        .sidebar { width: 250px !important; min-width: 250px !important; min-height: 100vh !important; }
     </style>
 </head>
 <body class="admin-body">
-<div class="d-flex">
+<div class="d-flex" style="min-height: 100vh;">
     <!-- Sidebar -->
     <aside class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white">
         <a th:href="@{/admin/dashboard}" class="d-flex align-items-center gap-3 mb-4 text-white text-decoration-none px-2 pt-2">
@@ -39,6 +40,18 @@
                 <a th:href="@{/admin/users}" class="nav-link">
                     <i class="bi bi-people"></i>
                     <span>Người dùng</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/stores}" class="nav-link">
+                    <i class="bi bi-shop"></i>
+                    <span>Cửa hàng</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/store-levels}" class="nav-link" id="sidebarStoreLevelsLink">
+                    <i class="bi bi-award"></i>
+                    <span>Hạng chi nhánh</span>
                 </a>
             </li>
             <li>
@@ -66,15 +79,39 @@
                 </a>
             </li>
             <li>
+                <a th:href="@{/admin/deliveries}" class="nav-link" id="sidebarDeliveriesLink">
+                    <i class="bi bi-truck"></i>
+                    <span>Đơn vị vận chuyển</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/vouchers}" class="nav-link" id="sidebarVouchersLink">
+                    <i class="bi bi-ticket-perforated"></i>
+                    <span>Khuyến mãi</span>
+                </a>
+            </li>
+            <li>
                 <a th:href="@{/admin/user-levels}" class="nav-link active" id="sidebarUserLevelsLink">
                     <i class="bi bi-award"></i>
                     <span>Cấp bậc khách</span>
                 </a>
             </li>
+            <li>
+                <a th:href="@{/admin/transactions}" class="nav-link" id="sidebarTransactionsLink">
+                    <i class="bi bi-journal-text"></i>
+                    <span>Lịch sử giao dịch</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/}" class="nav-link" target="_blank" style="color: #9DB7AA;">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                    <span>Xem cửa hàng</span>
+                </a>
+            </li>
         </ul>
 
         <hr class="border-secondary my-2">
-        <form th:action="@{/logout}" method="post" class="d-inline">
+        <form th:action="@{/logout}" method="post" class="d-inline mt-auto">
             <button type="submit" class="btn btn-outline-danger btn-sm w-100 d-flex align-items-center justify-content-center gap-2">
                 <i class="bi bi-box-arrow-right"></i> Đăng xuất
             </button>
@@ -131,7 +168,7 @@
                             id="btnSubmitUserLevel" data-testid="btnSubmitUserLevel"
                             onclick="triggerConfirmUserLevelModal()"
                             style="border-radius: 10px; background-color: #20382E !important; border-color: #20382E !important;">
-                        <i class="bi bi-check2-circle me-1"></i> Submit
+                        <i class="bi bi-check2-circle me-1"></i> Lưu thay đổi
                     </button>
                 </div>
             </form>

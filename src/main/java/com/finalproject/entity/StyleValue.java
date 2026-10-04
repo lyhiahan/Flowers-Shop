@@ -20,7 +20,7 @@ public class StyleValue {
     @JoinColumn(name = "style_id", nullable = false)
     private Style style;
 
-    @Column(name = "is_deleted", nullable = false)
+    @Column(name = "is_deleted")
     @Builder.Default
     private Boolean isDeleted = false;
 

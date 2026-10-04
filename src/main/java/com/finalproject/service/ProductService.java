@@ -10,10 +10,15 @@ public interface ProductService {
     List<Product> getAllProducts();
     Product getProductById(Long id);
     Product createProduct(ProductForm form) throws IOException;
+    Product updateProduct(Long id, ProductForm form) throws IOException;
+    void softDeleteProduct(Long id);
     void deleteProduct(Long id);
 
     // Guest: Trên 10 sản phẩm bán chạy nhất sắp xếp giảm dần
     List<Product> getGuestFeaturedProducts();
+
+    // Trang chủ: Tối đa 8 sản phẩm bán chạy nhất (dựa trên đơn hoàn thành 30 ngày gần nhất hoặc số lượng bán thực tế)
+    List<Product> getTop8BestSellingProducts();
 
     // Top 20 theo các tiêu chí
     List<Product> getTop20Newest();
