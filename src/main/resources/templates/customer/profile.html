@@ -341,5 +341,585 @@
             </div>
         </div>
 
-    </div></main>
-<footer th:replace="~{fragments/floral :: footer}"></footer><th:block th:replace="~{fragments/floral :: scripts}"></th:block><script th:src="@{/js/profile.js}"></script></body></html>
+        <!-- Form chi tiết cho Quản lý chi nhánh (MANAGER) -->
+        <div id="sectionManager" class="hidden p-space-md rounded-xl bg-[#FAF7F5] border border-[#EAE1DC] space-y-space-md">
+          <h5 class="font-bold text-[14px] text-[#2D2424] flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[#264E43] text-[18px]">store</span>
+            Thông tin ứng tuyển Quản lý chi nhánh
+          </h5>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+            <div>
+              <label class="block font-label-sm text-label-sm text-on-surface mb-1">Chi nhánh mong muốn (*)</label>
+              <select name="targetStoreId"
+                class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none cursor-pointer">
+                <option value="">-- Chọn chi nhánh --</option>
+                <option th:each="st : ${availableStores}" th:value="${st.id}" th:text="${st.name} + ' (' + ${st.address} + ')'"></option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-label-sm text-label-sm text-on-surface mb-1">Số điện thoại liên hệ (*)</label>
+              <input type="text" name="phone" th:value="${user.phone}" placeholder="Nhập số điện thoại..."
+                class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none">
+            </div>
+          </div>
+          <div>
+            <label class="block font-label-sm text-label-sm text-on-surface mb-1">Kinh nghiệm hoặc thông tin phân công (*)</label>
+            <textarea name="experienceNote" rows="3" placeholder="Kinh nghiệm quản lý cửa hàng hoa, điều hành nhân viên, giám sát kho bảo quản..."
+              class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none"></textarea>
+          </div>
+        </div>
+
+        <!-- Form chi tiết cho Người bán (VENDOR) -->
+        <div id="sectionVendor" class="hidden p-space-md rounded-xl bg-[#FAF7F5] border border-[#EAE1DC] space-y-space-md">
+          <h5 class="font-bold text-[14px] text-[#2D2424] flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[#264E43] text-[18px]">storefront</span>
+            Thông tin đối tác bán hoa (Vendor)
+          </h5>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+            <div>
+              <label class="block font-label-sm text-label-sm text-on-surface mb-1">Tên cửa hàng (*)</label>
+              <input type="text" name="shopName" placeholder="Ví dụ: Vườn Hoa Tươi Đà Lạt Organic..."
+                class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-label-sm text-label-sm text-on-surface mb-1">Hotline / Liên hệ (*)</label>
+              <input type="text" name="contactInfo" placeholder="Số điện thoại / Email..."
+                class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none">
+            </div>
+          </div>
+          <div>
+            <label class="block font-label-sm text-label-sm text-on-surface mb-1">Địa chỉ cửa hàng (*)</label>
+            <input type="text" name="shopAddress" placeholder="Số nhà, tên đường, phường, quận/huyện..."
+              class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none">
+          </div>
+          <div>
+            <label class="block font-label-sm text-label-sm text-on-surface mb-1">Giới thiệu sản phẩm cung ứng</label>
+            <textarea name="experienceNote" rows="2" placeholder="Các chủng loại hoa tươi cung ứng: Lan hồ điệp, hoa hồng nhập, cẩm chướng..."
+              class="w-full px-space-md py-2 rounded-lg bg-[#FCFAF8] border border-[#E2D7D1] text-on-surface font-body-md text-body-md focus:bg-white focus:ring-2 focus:ring-[#264E43]/30 focus:outline-none"></textarea>
+          </div>
+        </div>
+
+        <div class="pt-space-md flex items-center justify-end gap-space-md border-t border-[#F0E8E3]">
+          <button type="button"
+            class="px-space-lg py-2 rounded-full bg-[#F5ECE7] text-on-surface font-label-md text-label-md border border-[#E2D7D1] cursor-pointer"
+            onclick="closeModal('modalRegisterRole')">
+            Hủy bỏ
+          </button>
+          <button type="submit" id="btnSubmitRoleRequest" disabled
+            class="px-space-xl py-2 rounded-full bg-[#1E453E] text-white font-label-md text-label-md shadow-xs hover:bg-[#163630] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+            Gửi Yêu Cầu Xét Duyệt
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. Modals: Xem Chi Tiết Từng Yêu Cầu (#modalReqDetail) -->
+  <div th:each="req : ${roleRequests}"
+    class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+    th:id="'modalReqDetail' + ${req.id}">
+    <div
+      class="bg-surface-container-lowest rounded-xl max-w-md w-full p-space-lg shadow-2xl relative border border-[#EAE1DC]">
+      <div class="flex items-center justify-between pb-space-sm border-b border-[#F0E8E3] mb-space-md">
+        <h4 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
+          <span class="material-symbols-outlined text-[#264E43]">description</span>
+          Chi Tiết Yêu Cầu Vai Trò
+        </h4>
+        <button type="button" class="text-outline hover:text-on-surface cursor-pointer"
+          th:onclick="'closeModal('modalReqDetail' + ${req.id} + '')'">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-body-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-on-surface-variant">Vai trò xin cấp:</span>
+          <strong class="text-on-surface text-[15px]" th:text="${req.targetRoleDisplayName}"></strong>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-on-surface-variant">Trạng thái:</span>
+          <span class="px-2.5 py-0.5 rounded-full bg-[#FFF8E1] text-[#F57F17] font-semibold text-[12px] border border-[#FFE082]"
+            th:text="${req.status.displayName}"></span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-on-surface-variant">Thời gian gửi:</span>
+          <span class="font-medium text-on-surface" th:text="${#temporals.format(req.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+        </div>
+
+        <div class="border-t border-[#F0E8E3] pt-3 space-y-2">
+          <div th:if="${req.phone != null and !#strings.isEmpty(req.phone)}">
+            <span class="text-outline text-[12px] block">Số điện thoại:</span>
+            <span class="text-on-surface font-medium" th:text="${req.phone}"></span>
+          </div>
+          <div th:if="${req.workArea != null and !#strings.isEmpty(req.workArea)}">
+            <span class="text-outline text-[12px] block">Khu vực làm việc:</span>
+            <span class="text-on-surface font-medium" th:text="${req.workArea}"></span>
+          </div>
+          <div th:if="${req.vehicleType != null and !#strings.isEmpty(req.vehicleType)}">
+            <span class="text-outline text-[12px] block">Phương tiện:</span>
+            <span class="text-on-surface font-medium" th:text="${req.vehicleType}"></span>
+          </div>
+          <div th:if="${req.targetStore != null}">
+            <span class="text-outline text-[12px] block">Chi nhánh mong muốn:</span>
+            <span class="text-primary font-medium" th:text="${req.targetStore.name} + ' (' + ${req.targetStore.address} + ')'"></span>
+          </div>
+          <div th:if="${req.shopName != null and !#strings.isEmpty(req.shopName)}">
+            <span class="text-outline text-[12px] block">Tên cửa hàng:</span>
+            <span class="text-on-surface font-medium" th:text="${req.shopName}"></span>
+          </div>
+          <div th:if="${req.shopAddress != null and !#strings.isEmpty(req.shopAddress)}">
+            <span class="text-outline text-[12px] block">Địa chỉ cửa hàng:</span>
+            <span class="text-on-surface font-medium" th:text="${req.shopAddress}"></span>
+          </div>
+          <div th:if="${req.contactInfo != null and !#strings.isEmpty(req.contactInfo)}">
+            <span class="text-outline text-[12px] block">Thông tin liên hệ:</span>
+            <span class="text-on-surface font-medium" th:text="${req.contactInfo}"></span>
+          </div>
+          <div th:if="${req.experienceNote != null and !#strings.isEmpty(req.experienceNote)}">
+            <span class="text-outline text-[12px] block">Ghi chú / Kinh nghiệm:</span>
+            <p class="text-on-surface bg-[#FAF7F5] p-2.5 rounded-lg text-[13px] mt-1 border border-[#EAE1DC]" th:text="${req.experienceNote}"></p>
+          </div>
+          <div th:if="${req.rejectionReason != null and !#strings.isEmpty(req.rejectionReason)}"
+            class="p-3 bg-[#FFEBEE] rounded-lg border border-[#FFCDD2] text-[#C62828] text-[13px]">
+            <div class="font-bold mb-0.5">Lý do từ chối:</div>
+            <div th:text="${req.rejectionReason}"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-space-md flex items-center justify-end border-t border-[#F0E8E3] mt-space-md">
+        <button type="button"
+          class="px-space-lg py-2 rounded-full bg-[#F5ECE7] text-on-surface font-label-md text-label-md border border-[#E2D7D1] cursor-pointer"
+          th:onclick="'closeModal(\'modalReqDetail' + ${req.id} + '\')'">
+          Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==============================================
+       FOOTER CHUẨN ĐỒNG BỘ THEO MẪU (BOTANICAL ATELIER)
+       ============================================== -->
+  <footer class="w-full border-top pt-4 pb-3 mt-12" style="background-color: #FAF4F0 !important; border-top: 1px solid #EBDED4 !important; font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif !important; color: #4A3E3D !important; width: 100%;">
+    <div style="max-width: 1240px; margin: 0 auto; padding-left: 20px; padding-right: 20px;">
+      
+      <!-- Hàng trên: 2 Cột thông tin -->
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 24px; padding-bottom: 24px;">
+        
+        <!-- Cột 1: Thương hiệu & Liên hệ -->
+        <div style="flex: 1 1 320px; max-width: 480px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+            <span style="font-size: 22px; line-height: 1;">🌸</span>
+            <span style="font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 700; color: #C84357; letter-spacing: 0.5px;">HOA TƯƠI SÀI GÒN</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; color: #555555;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; line-height: 1;">call</span>
+              <span>Hotline: <strong style="color: #222222; font-weight: 700;">028 1111 222 - 0909 888 777</strong></span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; line-height: 1;">mail</span>
+              <span>Email: <a href="mailto:atelier@hoatuoisaigon.vn" style="color: #555555; text-decoration: none;">atelier@hoatuoisaigon.vn</a></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột 2: Hệ thống Atelier & Chi nhánh -->
+        <div style="flex: 1 1 360px; max-width: 560px;">
+          <h4 style="font-size: 13px; font-weight: 800; color: #264E43; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; margin-top: 2px;">HỆ THỐNG ATELIER &amp; CHI NHÁNH</h4>
+          <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; color: #555555;">
+            <div style="display: flex; align-items: flex-start; gap: 8px;">
+              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
+              <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Q.1:</strong> 123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM</span>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 8px;">
+              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
+              <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Q.7:</strong> 456 Nguyễn Thị Thập, Tân Hưng, Quận 7, TP.HCM</span>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 8px;">
+              <span class="material-symbols-outlined" style="font-size: 17px; color: #C84357; margin-top: 2px; flex-shrink: 0; line-height: 1;">location_on</span>
+              <span><strong style="color: #222222; font-weight: 700;">Chi nhánh Thủ Đức:</strong> 1 Võ Văn Ngân, Linh Chiểu, TP. Thủ Đức, TP.HCM</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Hàng dưới: Bản quyền + Cam kết chất lượng & Giao hàng -->
+      <div style="border-top: 1px solid #EBDED4; padding-top: 16px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; font-size: 12.5px; color: #777777;">
+        <div>
+          <span>© 2026 HOA TƯƠI SÀI GÒN .</span>
+        </div>
+        <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <span style="display: inline-flex; align-items: center; gap: 5px; color: #333333; font-weight: 600;">
+            <span style="color: #C84357;">🌸</span> 100% Hoa Tươi Nhập Khẩu &amp; Đà Lạt
+          </span>
+          <span style="color: #D8CBC2;">•</span>
+          <span style="display: inline-flex; align-items: center; gap: 4px; color: #666666;">
+            <span class="material-symbols-outlined" style="font-size: 15px; color: #264E43; line-height: 1;">schedule</span> Giao hỏa tốc 60–90 phút
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ==============================================
+       INTERACTIVE JAVASCRIPT LOGIC
+       ============================================== -->
+  <script>
+    // Tab Switching
+    function switchTab(tabId) {
+      const contents = document.querySelectorAll('.tab-content');
+      contents.forEach(c => c.classList.add('hidden'));
+
+      const buttons = document.querySelectorAll('.tab-btn');
+      buttons.forEach(b => {
+        b.classList.remove('bg-[#1E453E]', 'text-white', 'font-semibold', 'shadow-xs');
+        b.classList.add('text-on-surface-variant');
+      });
+
+      const targetContent = document.getElementById(tabId);
+      if (targetContent) {
+        targetContent.classList.remove('hidden');
+      }
+
+      let activeBtnId = 'btnTabProfile';
+      if (tabId === 'tabAddresses') activeBtnId = 'btnTabAddresses';
+      if (tabId === 'tabPassword') activeBtnId = 'btnTabPassword';
+      if (tabId === 'tabRoles') activeBtnId = 'btnTabRoles';
+
+      const activeBtn = document.getElementById(activeBtnId);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-on-surface-variant');
+        activeBtn.classList.add('bg-[#1E453E]', 'text-white', 'font-semibold', 'shadow-xs');
+      }
+    }
+
+    // Toggle Edit Profile Mode (UC_009)
+    let isEditingProfile = false;
+    function toggleEditProfileMode() {
+      isEditingProfile = !isEditingProfile;
+      const inputs = document.querySelectorAll('.profile-input');
+      const actionButtons = document.getElementById('profileActionButtons');
+      const banner = document.getElementById('profileModeBanner');
+      const btnText = document.getElementById('btnEditText');
+      const btnIcon = document.getElementById('btnEditIcon');
+
+      inputs.forEach(input => {
+        input.disabled = !isEditingProfile;
+      });
+
+      if (isEditingProfile) {
+        actionButtons.classList.remove('hidden');
+        banner.classList.remove('bg-[#FAF7F5]');
+        banner.classList.add('bg-[#E9F3EE]');
+        banner.innerHTML = `
+          <span class="flex items-center gap-space-xs text-[#264E43] font-semibold">
+            <span class="material-symbols-outlined text-[18px]">edit_note</span>
+            <span>Chế độ chỉnh sửa đang bật. Bạn có thể thay đổi họ tên, số điện thoại và địa chỉ.</span>
+          </span>
+          <span class="font-label-sm text-label-sm text-[#264E43] px-2 py-0.5 rounded bg-white shadow-xs">Đang sửa</span>
+        `;
+        btnText.textContent = "Khóa chỉnh sửa";
+        btnIcon.textContent = "lock";
+      } else {
+        cancelEditProfile();
+      }
+    }
+
+    function cancelEditProfile() {
+      isEditingProfile = false;
+      const inputs = document.querySelectorAll('.profile-input');
+      const actionButtons = document.getElementById('profileActionButtons');
+      const banner = document.getElementById('profileModeBanner');
+      const btnText = document.getElementById('btnEditText');
+      const btnIcon = document.getElementById('btnEditIcon');
+
+      inputs.forEach(input => {
+        input.disabled = true;
+      });
+
+      actionButtons.classList.add('hidden');
+      banner.classList.remove('bg-[#E9F3EE]');
+      banner.classList.add('bg-[#FAF7F5]');
+      banner.innerHTML = `
+        <span class="flex items-center gap-space-xs">
+          <span class="material-symbols-outlined text-[18px] text-[#264E43]">verified_user</span>
+          <span>Đang ở chế độ xem an toàn. Bấm <strong>"Chỉnh sửa hồ sơ"</strong> để cập nhật thông tin.</span>
+        </span>
+        <span class="font-label-sm text-label-sm text-outline px-2 py-0.5 rounded bg-[#EFE7E2]">Chỉ đọc</span>
+      `;
+      btnText.textContent = "Chỉnh sửa hồ sơ";
+      btnIcon.textContent = "edit";
+    }
+
+    // Avatar & Cover Upload triggers
+    function triggerAvatarUpload() {
+      document.getElementById('avatarFileInput').click();
+    }
+
+    function triggerCoverUpload() {
+      document.getElementById('coverFileInput').click();
+    }
+
+    function previewAvatarImage(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          document.getElementById('avatarPreviewImg').src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+        // Tự động bật chế độ lưu hồ sơ để người dùng bấm Lưu
+        if (!isEditingProfile) toggleEditProfileMode();
+      }
+    }
+
+    function previewCoverImage(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          document.getElementById('coverPreviewImg').src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+        // Tự động bật chế độ lưu hồ sơ để người dùng bấm Lưu
+        if (!isEditingProfile) toggleEditProfileMode();
+      }
+    }
+
+    // Password strength check
+    function checkPasswordStrength(val) {
+      const bar = document.getElementById('passwordStrengthBar');
+      const label = document.getElementById('strengthLabel');
+      if (!val || val.length === 0) {
+        bar.style.width = '10%';
+        bar.className = 'h-full bg-outline-variant transition-all duration-300';
+        label.textContent = 'Trống';
+        label.className = 'text-on-surface-variant font-medium';
+        return;
+      }
+      if (val.length < 6) {
+        bar.style.width = '30%';
+        bar.className = 'h-full bg-secondary transition-all duration-300';
+        label.textContent = 'Yếu (dưới 6 ký tự)';
+        label.className = 'text-secondary font-medium';
+      } else if (val.length < 10) {
+        bar.style.width = '65%';
+        bar.className = 'h-full bg-[#E58C5A] transition-all duration-300';
+        label.textContent = 'Trung bình';
+        label.className = 'text-[#B86230] font-medium';
+      } else {
+        bar.style.width = '100%';
+        bar.className = 'h-full bg-[#1E453E] transition-all duration-300';
+        label.textContent = 'Mạnh & An toàn';
+        label.className = 'text-[#1E453E] font-medium';
+      }
+    }
+
+    function togglePasswordVisibility(fieldId, btn) {
+      const input = document.getElementById(fieldId);
+      const icon = btn.querySelector('.material-symbols-outlined');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.textContent = 'visibility_off';
+      } else {
+        input.type = 'password';
+        icon.textContent = 'visibility';
+      }
+    }
+
+    let otpTimer = null;
+    function sendPasswordOtpCode() {
+      const emailInput = document.getElementById('otpEmail');
+      const msgElem = document.getElementById('otpSendMsg');
+      const btn = document.getElementById('btnSendPasswordOtp');
+      const btnText = document.getElementById('btnSendOtpText');
+      const email = emailInput ? emailInput.value.trim() : '';
+
+      if (!email) {
+        if (msgElem) {
+          msgElem.textContent = 'Vui lòng nhập địa chỉ email nhận mã OTP!';
+          msgElem.className = 'text-xs mt-1.5 font-semibold text-rose-600 block';
+        }
+        emailInput?.focus();
+        return;
+      }
+
+      if (btn) btn.disabled = true;
+      if (btnText) btnText.textContent = 'Đang gửi...';
+      if (msgElem) {
+        msgElem.textContent = 'Đang gửi mã OTP đến email của bạn...';
+        msgElem.className = 'text-xs mt-1.5 font-semibold text-[#264E43] block';
+      }
+
+      const csrfInput = document.querySelector('input[name="_csrf"]');
+      const csrfToken = csrfInput ? csrfInput.value : '';
+
+      const params = new URLSearchParams();
+      params.append('email', email);
+      if (csrfToken) params.append('_csrf', csrfToken);
+
+      const headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-Requested-With': 'XMLHttpRequest'
+      };
+      if (csrfToken) {
+        headers['X-CSRF-TOKEN'] = csrfToken;
+      }
+
+      fetch('/customer/profile/send-password-otp', {
+        method: 'POST',
+        headers: headers,
+        body: params.toString()
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          if (msgElem) {
+            msgElem.textContent = '✓ ' + data.message;
+            msgElem.className = 'text-xs mt-1.5 font-semibold text-emerald-700 block';
+          }
+          const otpInput = document.getElementById('otpCode');
+          if (otpInput) otpInput.focus();
+
+          // Countdown 60 seconds
+          let countdown = 60;
+          if (otpTimer) clearInterval(otpTimer);
+          if (btnText) btnText.textContent = `Gửi lại (${countdown}s)`;
+          otpTimer = setInterval(() => {
+            countdown--;
+            if (countdown <= 0) {
+              clearInterval(otpTimer);
+              if (btn) btn.disabled = false;
+              if (btnText) btnText.textContent = 'Gửi lại mã OTP';
+            } else {
+              if (btnText) btnText.textContent = `Gửi lại (${countdown}s)`;
+            }
+          }, 1000);
+        } else {
+          if (btn) btn.disabled = false;
+          if (btnText) btnText.textContent = 'Gửi mã OTP';
+          if (msgElem) {
+            msgElem.textContent = '✕ ' + (data.message || 'Không thể gửi mã OTP. Vui lòng kiểm tra lại email.');
+            msgElem.className = 'text-xs mt-1.5 font-semibold text-rose-600 block';
+          }
+        }
+      })
+      .catch(err => {
+        console.error('Send OTP error:', err);
+        if (btn) btn.disabled = false;
+        if (btnText) btnText.textContent = 'Gửi mã OTP';
+        if (msgElem) {
+          msgElem.textContent = '✕ Lỗi kết nối máy chủ khi gửi OTP. Vui lòng thử lại!';
+          msgElem.className = 'text-xs mt-1.5 font-semibold text-rose-600 block';
+        }
+      });
+    }
+
+    function validatePasswordChange(e) {
+      const otpCode = document.getElementById('otpCode')?.value?.trim();
+      const newPass = document.getElementById('newPass')?.value;
+      const confirmPass = document.getElementById('confirmPass')?.value;
+
+      if (!otpCode || otpCode.length !== 6) {
+        alert("Vui lòng nhập đủ 6 chữ số mã OTP xác thực được gửi về email!");
+        document.getElementById('otpCode')?.focus();
+        return false;
+      }
+
+      if (!newPass || newPass.length < 6) {
+        alert("Mật khẩu mới phải có ít nhất 6 ký tự!");
+        document.getElementById('newPass')?.focus();
+        return false;
+      }
+
+      if (newPass !== confirmPass) {
+        alert("Mật khẩu xác nhận không khớp với mật khẩu mới! Vui lòng kiểm tra lại.");
+        document.getElementById('confirmPass')?.focus();
+        return false;
+      }
+      return true;
+    }
+
+    // Modal controls
+    function openModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function openEditAddressModal(id, recipientName, phone, addressDetail, isDefault) {
+      const form = document.getElementById('formEditAddress');
+      form.action = '/customer/profile/address/update/' + id;
+      document.getElementById('editRecipientName').value = recipientName;
+      document.getElementById('editPhone').value = phone;
+      document.getElementById('editAddressDetail').value = addressDetail;
+      document.getElementById('editIsDefault').checked = isDefault;
+      openModal('modalEditAddress');
+    }
+
+
+    function handleRoleChange(role) {
+      const secManager = document.getElementById('sectionManager');
+      const secVendor = document.getElementById('sectionVendor');
+      const btnSubmit = document.getElementById('btnSubmitRoleRequest');
+
+      if (secManager) secManager.classList.add('hidden');
+      if (secVendor) secVendor.classList.add('hidden');
+
+      if (role === 'MANAGER') {
+        if (secManager) secManager.classList.remove('hidden');
+        if (btnSubmit) btnSubmit.disabled = false;
+      } else if (role === 'VENDOR') {
+        if (secVendor) secVendor.classList.remove('hidden');
+        if (btnSubmit) btnSubmit.disabled = false;
+      } else {
+        if (btnSubmit) btnSubmit.disabled = true;
+      }
+    }
+
+    // Script điều hướng tìm kiếm thông minh theo Phạm vi (Hoa / Cửa Hàng / Người Dùng)
+    document.getElementById('globalSearchForm')?.addEventListener('submit', function (e) {
+      const scope = document.getElementById('searchScopeSelect')?.value;
+      const kwInput = this.querySelector('input[name="keyword"]');
+      const kw = kwInput ? kwInput.value.trim() : '';
+      if (scope === 'users') {
+        e.preventDefault();
+        window.location.href = '/users' + (kw ? '?keyword=' + encodeURIComponent(kw) : '');
+      } else if (scope === 'stores') {
+        e.preventDefault();
+        window.location.href = '/stores' + (kw ? '?keyword=' + encodeURIComponent(kw) : '');
+      }
+    });
+
+    // Auto tab selection based on URL hash or query param
+    document.addEventListener('DOMContentLoaded', function () {
+      const scopeSel = document.getElementById('searchScopeSelect');
+      if (scopeSel) {
+        scopeSel.style.width = scopeSel.value === 'users' ? '120px' : (scopeSel.value === 'stores' ? '110px' : '96px');
+      }
+      function switchToAddressTab() {
+        switchTab('tabAddresses');
+      }
+      window.switchToAddressTab = switchToAddressTab;
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const tabParam = urlParams.get('tab');
+      if (tabParam === 'addresses' || tabParam === 'address' || window.location.hash === '#tabAddresses') {
+        switchTab('tabAddresses');
+      } else if (tabParam === 'password' || window.location.hash === '#tabPassword') {
+        switchTab('tabPassword');
+      } else if (tabParam === 'roles' || window.location.hash === '#tabRoles') {
+        switchTab('tabRoles');
+      }
+    });
+  </script>
+  <script th:src="@{/js/global-modal.js}"></script>
+</body>
+
+</html>

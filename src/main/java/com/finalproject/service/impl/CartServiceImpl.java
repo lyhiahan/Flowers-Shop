@@ -20,7 +20,7 @@ public class CartServiceImpl implements CartService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final StoreRepository storeRepository;
-    private final StoreInventoryRepository inventories;
+    private final StoreInventoryRepository storeInventoryRepository;
 
     @Override
     public Cart getCartByUsername(String username) {
@@ -50,6 +50,14 @@ public class CartServiceImpl implements CartService {
         Long storeId = request.getStoreId() != null ? request.getStoreId() : (product.getStore() != null ? product.getStore().getId() : 1L);
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Chi nhánh không tồn tại"));
+
+        // Kiểm tra tồn kho tại chi nhánh: Không cho phép thêm nếu hết hàng hoặc không có hàng
+        StoreInventory inventory = storeInventoryRepository.findByStoreIdAndProductId(store.getId(), product.getId())
+                .orElse(null);
+        int availableStock = (inventory != null && inventory.getQuantity() != null) ? inventory.getQuantity() : 0;
+        if (availableStock <= 0) {
+            throw new IllegalStateException("Mẫu hoa '" + product.getName() + "' hiện đang tạm hết hàng tại " + store.getName() + ". Quý khách vui lòng chọn chi nhánh khác hoặc mẫu hoa khác.");
+        }
 
         int addQty = (request.getQuantity() != null && request.getQuantity() > 0) ? request.getQuantity() : 1;
         requireAvailableStock(cart, product, store, null, addQty);
@@ -95,7 +103,11 @@ public class CartServiceImpl implements CartService {
         }
 
         if (existingItem != null) {
-            existingItem.setQuantity(existingItem.getQuantity() + addQty);
+            int newTotal = existingItem.getQuantity() + addQty;
+            if (newTotal > availableStock) {
+                throw new IllegalStateException("Tổng số lượng trong giỏ (" + newTotal + " bó) vượt quá tồn kho còn lại (" + availableStock + " bó) tại " + store.getName() + ".");
+            }
+            existingItem.setQuantity(newTotal);
             if (greetingMsg != null && !greetingMsg.isBlank()) {
                 existingItem.setGreetingMessage(greetingMsg);
             }
@@ -176,7 +188,7 @@ public class CartServiceImpl implements CartService {
         cartItemRepository.flush();
     }
     private void requireAvailableStock(Cart cart, Product product, Store store, Long excludedItemId, int quantity) {
-        int available = inventories.findByStoreIdAndProductId(store.getId(), product.getId())
+        int available = storeInventoryRepository.findByStoreIdAndProductId(store.getId(), product.getId())
                 .map(stock -> Math.max(0, stock.getQuantity())).orElse(0);
         long requested = quantity;
         for (CartItem line : cart.getItems()) {

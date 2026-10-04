@@ -436,7 +436,7 @@
                                         <option th:each="d : ${deliveries}" 
                                                 th:value="${d.id}" 
                                                 th:data-price="${d.price}"
-                                                th:text="${d.name + ' (' + #numbers.formatDecimal(d.price, 0, 'COMMA', 0, 'POINT') + ' đ) - ' + (d.description != null ? d.description : 'Bảo đảm hoa tươi')}">
+                                                th:text="${d.name + ' (' + #numbers.formatDecimal(d.price, 0, 'COMMA', 0, 'POINT') + 'đ)'}">
                                         </option>
                                     </select>
                                 </div>
@@ -537,32 +537,16 @@
                                 </div>
                             </div>
 
-                            <!-- Lựa chọn 2: Ví điện tử MoMo -->
-                            <div class="payment-card-option" id="payOptionMomo" onclick="selectPayment('pay_momo')">
-                                <div class="form-check mb-0 d-flex align-items-center justify-content-between">
-                                    <div>
-                                        <input class="form-check-input" type="radio" name="paymentMethod" id="pay_momo" value="MOMO" onchange="updatePaymentStyle()">
-                                        <label class="form-check-label fw-bold text-dark ps-2" for="pay_momo" style="cursor: pointer;">
-                                            <span th:text="${momoMock ? 'MoMo — Mô phỏng DEV' : 'MoMo Sandbox — Thanh toán test'}"></span>
-                                        </label>
-                                    </div>
-                                    <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo" style="height: 24px; width: 24px;">
-                                </div>
-                                <div class="payment-desc d-none" id="desc_pay_momo">
-                                    <span th:text="${momoMock ? 'Kiểm thử thanh toán bằng nút mô phỏng ở bước tiếp theo. Không chuyển tiền thật.' : 'Dùng ứng dụng MoMo Test và tài khoản test. Không chuyển tiền thật.'}"></span>
-                                </div>
-                            </div>
-
-                            <!-- Lựa chọn 3: Chuyển khoản ngân hàng (VietQR) -->
+                            <!-- Lựa chọn 2: Chuyển khoản ngân hàng -->
                             <div class="payment-card-option" id="payOptionBank" onclick="selectPayment('pay_bank')">
                                 <div class="form-check mb-0">
                                     <input class="form-check-input" type="radio" name="paymentMethod" id="pay_bank" value="BANK_TRANSFER" onchange="updatePaymentStyle()">
                                     <label class="form-check-label fw-bold text-dark ps-2" for="pay_bank" style="cursor: pointer;">
-                                        Chuyển khoản ngân hàng (VietQR)
+                                        Chuyển khoản ngân hàng
                                     </label>
                                 </div>
                                 <div class="payment-desc d-none" id="desc_pay_bank">
-                                    Quét mã VietQR hoặc chuyển khoản qua ngân hàng. Cửa hàng sẽ xác nhận thanh toán sau khi nhận được tiền.
+                                    Quét mã QR hoặc chuyển khoản qua ngân hàng. Hệ thống sẽ tạo đơn và chuyển đến trang thanh toán.
                                 </div>
                             </div>
                         </div>
@@ -747,10 +731,26 @@
             const descCod = document.getElementById('desc_pay_cod');
             const descMomo = document.getElementById('desc_pay_momo');
             const descBank = document.getElementById('desc_pay_bank');
+            const btnPlaceOrder = document.getElementById('btnPlaceOrder');
 
-            if (optCod) optCod.classList.toggle('active', !!isCod);
-            if (optMomo) optMomo.classList.toggle('active', !!isMomo);
-            if (optBank) optBank.classList.toggle('active', !!isBank);
+            if (isCod) {
+                if (optCod) optCod.classList.add('active');
+                if (optBank) optBank.classList.remove('active');
+                if (descCod) descCod.classList.remove('d-none');
+                if (descBank) descBank.classList.add('d-none');
+                if (btnPlaceOrder) {
+                    btnPlaceOrder.innerHTML = '<i class="bi bi-bag-check me-2"></i>Đặt hàng';
+                }
+            } else {
+                if (optCod) optCod.classList.remove('active');
+                if (optBank) optBank.classList.add('active');
+                if (descCod) descCod.classList.add('d-none');
+                if (descBank) descBank.classList.remove('d-none');
+                if (btnPlaceOrder) {
+                    btnPlaceOrder.innerHTML = '<i class="bi bi-credit-card me-2"></i>Tiếp tục thanh toán';
+                }
+            }
+        }
 
             if (descCod) descCod.classList.toggle('d-none', !isCod);
             if (descMomo) descMomo.classList.toggle('d-none', !isMomo);
@@ -767,6 +767,6 @@
             updateCheckoutTotal();
         });
     </script>
-<script th:src="@{/js/checkout-quote.js}"></script>
+    <script th:src="@{/js/global-modal.js}"></script>
 </body>
 </html>

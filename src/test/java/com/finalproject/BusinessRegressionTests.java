@@ -662,6 +662,28 @@ class BusinessRegressionTests {
                 .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("bank-qr-source"))));
     }
 
+    @Test void customerPaymentCompatibilityRouteCannotSelfConfirmBankTransfer() throws Exception {
+        Order order = checkout(PaymentMethod.BANK_TRANSFER);
+        String route = "/customer/payment/" + order.getId();
+        mvc.perform(get(route).with(user(customer.getUsername()).roles("CUSTOMER")))
+                .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/checkout/bank/" + order.getId()));
+        mvc.perform(post(route + "/process").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.pending").value(true));
+        em.flush(); em.clear();
+        assertThat(orders.findById(order.getId()).orElseThrow().getPaymentStatus()).isEqualTo("UNPAID");
+        assertThat(payments.findByOrderId(order.getId())).allMatch(p -> p.getStatus() == PaymentStatus.PENDING);
+        mvc.perform(post(route + "/process").with(user("another-customer").roles("CUSTOMER")).with(csrf()))
+                .andExpect(status().isForbidden());
+        login(manager); workflow.confirmPayment(order.getId());
+        mvc.perform(post(route + "/process").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true));
+        login(customer); orderService.cancelOrder(customer.getUsername(), order.getId());
+        mvc.perform(post(route + "/process").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf()))
+                .andExpect(status().isBadRequest());
+        assertThat(orders.findById(order.getId()).orElseThrow().getStatus()).isEqualTo(OrderStatus.REFUND_REQUESTED);
+    }
+
     @Test void bankCheckoutRedirectsToInstructionsWithoutRecordingPaid() throws Exception {
         var response = mvc.perform(post("/checkout").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf())
                 .param("selectedItemIds", item.getId().toString()).param("paymentMethod", "BANK_TRANSFER")
