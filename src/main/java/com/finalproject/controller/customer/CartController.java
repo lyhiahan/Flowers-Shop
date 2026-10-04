@@ -66,6 +66,12 @@ public class CartController {
             Principal principal,
             @ModelAttribute AddToCartRequest request) {
         Map<String, Object> body = new HashMap<>();
+        if (principal == null) {
+            body.put("success", false);
+            body.put("requireLogin", true);
+            body.put("error", "Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.");
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).body(body);
+        }
         try {
             // addToCart trả về tổng số lượng mới — không cần query thêm
             int count = cartService.addToCart(principal.getName(), request);

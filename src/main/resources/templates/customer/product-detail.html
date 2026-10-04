@@ -492,10 +492,12 @@
 
                 <!-- Right Menu: Cart & Account -->
                 <div class="d-flex align-items-center gap-2">
-                    <a th:href="@{/cart}" class="btn btn-light rounded-pill px-3 py-2 d-flex align-items-center gap-2 border position-relative" style="background:#ffffff; font-size:14px;">
+                    <a th:href="@{/cart}" id="headerCartLink" class="btn btn-light rounded-pill px-3 py-2 d-flex align-items-center gap-2 border position-relative header-cart-link" style="background:#ffffff; font-size:14px;" title="Giỏ hàng">
                         <i class="bi bi-bag-heart text-danger fs-5"></i>
                         <span class="d-none d-sm-inline fw-semibold text-dark">Giỏ hàng</span>
-                        <span th:if="${cartItemCount != null and cartItemCount > 0}" class="badge bg-danger rounded-pill px-2" th:text="${cartItemCount}">0</span>
+                        <span id="headerCartBadge" class="badge bg-danger rounded-pill px-2 cart-badge-pill"
+                              th:style="${cartItemCount != null and cartItemCount > 0} ? '' : 'display:none;'"
+                              th:text="${cartItemCount != null and cartItemCount > 0 ? cartItemCount : ''}"></span>
                     </a>
 
                     <!-- Account: Not Authenticated -->
@@ -1258,21 +1260,27 @@
         'use strict';
 
         function updateCartBadge(count) {
-            const badge = document.querySelector('.cart-badge-pill');
-            const cartLink = document.querySelector('.header-cart-link');
-            if (!cartLink) return;
-            if (count > 0) {
+            let badge = document.getElementById('headerCartBadge') || document.querySelector('.cart-badge-pill') || document.querySelector('a[href$="/cart"] .badge');
+            const cartLink = document.getElementById('headerCartLink') || document.querySelector('.header-cart-link') || document.querySelector('a[href$="/cart"]');
+
+            const num = parseInt(count, 10);
+            if (!isNaN(num) && num > 0) {
                 if (badge) {
-                    badge.textContent = count;
-                    badge.style.display = '';
-                } else {
-                    const span = document.createElement('span');
-                    span.className = 'cart-badge-pill';
-                    span.textContent = count;
-                    cartLink.appendChild(span);
+                    badge.textContent = num;
+                    badge.style.display = 'inline-block';
+                } else if (cartLink) {
+                    badge = document.createElement('span');
+                    badge.id = 'headerCartBadge';
+                    badge.className = 'badge bg-danger rounded-pill px-2 cart-badge-pill';
+                    badge.textContent = num;
+                    badge.style.display = 'inline-block';
+                    cartLink.appendChild(badge);
                 }
             } else {
-                if (badge) badge.style.display = 'none';
+                if (badge) {
+                    badge.textContent = '';
+                    badge.style.display = 'none';
+                }
             }
         }
 
@@ -1298,19 +1306,31 @@
             if (errEl) errEl.style.display = 'none';
 
             const csrf = getCsrfMeta();
-            const headers = { 'X-Requested-With': 'XMLHttpRequest' };
+            const headers = {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            };
             if (csrf.token) headers[csrf.header] = csrf.token;
 
-            fetch('/cart/add', {
+            fetch(form.getAttribute('action') || '/cart/add', {
                 method: 'POST',
                 headers: headers,
                 body: new FormData(form)
             })
             .then(function (res) {
-                if (res.status === 401) { window.location.href = '/login'; return null; }
+                if (res.redirected && res.url.includes('/login')) {
+                    window.location.href = '/login';
+                    return null;
+                }
+                if (res.status === 401) {
+                    window.location.href = '/login';
+                    return null;
+                }
                 if (res.status === 403) {
                     return res.json().then(function (d) {
                         throw new Error(d.message || 'Bạn không có quyền thực hiện thao tác này.');
+                    }).catch(function () {
+                        throw new Error('Bạn không có quyền thực hiện thao tác này.');
                     });
                 }
                 return res.json();
@@ -1318,20 +1338,12 @@
             .then(function (data) {
                 if (!data) return;
                 if (data.success) {
+                    // Cập nhật ngay lập tức số nhỏ màu đỏ cạnh "Giỏ hàng" trên thanh đầu trang
                     updateCartBadge(data.count);
-                    /* Hiệu ứng nhanh: icon checkmark trong 900 ms rồi khôi phục */
-                    if (btn) {
-                        const orig = btn.innerHTML;
-                        btn.innerHTML = '<i class="bi bi-check-circle me-2"></i> Đã thêm vào giỏ';
-                        btn.style.background = '#27ae60';
-                        btn.style.borderColor = '#27ae60';
-                        setTimeout(function () {
-                            btn.innerHTML = orig;
-                            btn.style.background = '';
-                            btn.style.borderColor = '';
-                        }, 900);
-                    }
+                    // Khách vẫn ở nguyên trang, không cần tải lại, không bật thông báo và không chuyển sang giỏ hàng
+                    if (errEl) errEl.style.display = 'none';
                 } else {
+                    // Thêm thất bại thì giữ nguyên số cũ
                     if (errEl) {
                         errEl.textContent = data.error || 'Không thể thêm vào giỏ.';
                         errEl.style.display = 'block';
@@ -1339,6 +1351,7 @@
                 }
             })
             .catch(function (err) {
+                // Thêm thất bại thì giữ nguyên số cũ
                 if (errEl) {
                     errEl.textContent = err.message || 'Lỗi kết nối, vui lòng thử lại.';
                     errEl.style.display = 'block';
