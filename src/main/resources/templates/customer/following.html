@@ -308,7 +308,7 @@
 
               <!-- Huy hiệu danh mục -->
               <span class="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/95 backdrop-blur-md text-botanic-rose font-bold text-[11px] shadow-xs">
-                <span th:text="${p.category != null ? p.category.name : 'Hoa tươi'}">Hoa tươi</span>
+                <span th:text="${p.category != null and p.category.isDeleted != true ? p.category.name : 'Hoa tươi'}">Hoa tươi</span>
               </span>
 
               <!-- Nút Following hình tim góc phải trên ảnh -->

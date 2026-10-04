@@ -114,6 +114,102 @@ class BusinessRegressionTests {
         return order;
     }
 
+    @Test void lockingPaidCustomerRequiresRefundAndReturnsStockOnlyOnce() throws Exception {
+        User admin = createUser("account-admin", Role.ADMIN, null);
+        Order order = checkout(PaymentMethod.BANK_TRANSFER);
+        login(admin); workflow.confirmPayment(order.getId());
+        mvc.perform(post("/admin/users/toggle-active/" + customer.getId()).with(user(admin.getUsername()).roles("ADMIN")).with(csrf()))
+                .andExpect(status().is3xxRedirection());
+        assertThat(customer.getIsActive()).isFalse();
+        assertThat(customer.getAccountDisabledByAdmin()).isTrue();
+        otps.save(OtpVerification.builder().user(customer).code("123456").type(OtpType.ACTIVATE_ACCOUNT)
+                .expiredAt(java.time.LocalDateTime.now().plusMinutes(5)).build());
+        assertThat(auth.verifyOtp(customer.getEmail(), "123456")).isFalse();
+        assertThatThrownBy(() -> auth.resendOtp(customer.getEmail())).hasMessageContaining("quản trị viên");
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.REFUND_REQUESTED);
+        assertThat(order.getPaymentStatus()).isEqualTo("PAID");
+        assertThat(order.getCancellationReason()).contains("khóa", "Vui lòng hoàn tiền");
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(10);
+        long notificationCount = notifications.count();
+        mvc.perform(post("/admin/users/delete/" + customer.getId()).with(user(admin.getUsername()).roles("ADMIN")).with(csrf()))
+                .andExpect(status().is3xxRedirection());
+        assertThat(users.findById(customer.getId())).isPresent();
+        assertThat(notifications.count()).isEqualTo(notificationCount);
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(10);
+        mvc.perform(get("/admin/orders/" + order.getId()).with(user(admin.getUsername()).roles("ADMIN")))
+                .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("Vui lòng hoàn tiền")));
+        login(admin); workflow.transition(order.getId(), OrderStatus.REFUNDED);
+        assertThat(order.getPaymentStatus()).isEqualTo("REFUNDED");
+    }
+
+    @Test void deletingPaidMomoCustomerKeepsReceiptAndRequiresRefund() throws Exception {
+        User admin = createUser("account-admin", Role.ADMIN, null);
+        Order order = checkout(PaymentMethod.MOMO);
+        momo.simulatePayment(order.getId(), customer.getUsername());
+        login(admin);
+        mvc.perform(post("/admin/users/delete/" + customer.getId()).with(user(admin.getUsername()).roles("ADMIN")).with(csrf()))
+                .andExpect(status().is3xxRedirection());
+        assertThat(customer.getIsActive()).isFalse();
+        assertThat(users.findById(customer.getId())).isPresent();
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.REFUND_REQUESTED);
+        assertThat(order.getCancellationReason()).contains("xóa", "Vui lòng hoàn tiền");
+        assertThat(payments.findByOrderId(order.getId()).get(0).getStatus()).isEqualTo(PaymentStatus.SUCCESS);
+    }
+
+    @Test void lockingCustomerCancelsUnpaidPickupButNeverCancelsHandedOverDelivery() throws Exception {
+        User admin = createUser("account-admin", Role.ADMIN, null);
+        Order handed = deliveryOrder();
+        Cart cart = carts.findByUserId(customer.getId()).orElseThrow();
+        item = items.save(CartItem.builder().cart(cart).store(store).product(product).quantity(1).orderType(OrderType.BUY).build());
+        cart.getItems().add(item);
+        Order pickup = checkout(PaymentMethod.COD);
+        login(manager); workflow.transition(pickup.getId(), OrderStatus.CONFIRMED); workflow.transition(pickup.getId(), OrderStatus.PREPARING);
+        login(admin);
+        mvc.perform(post("/admin/users/toggle-active/" + customer.getId()).with(user(admin.getUsername()).roles("ADMIN")).with(csrf()))
+                .andExpect(status().is3xxRedirection());
+        assertThat(pickup.getStatus()).isEqualTo(OrderStatus.CANCELLED);
+        assertThat(pickup.getPaymentStatus()).isEqualTo("UNPAID");
+        assertThat(handed.getStatus()).isEqualTo(OrderStatus.DELIVERING);
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(8);
+    }
+
+    @Test void adminCancellationOfPaidOrderRequiresExplicitRefundAndDoesNotCreateRevenue() throws Exception {
+        User admin = createUser("refund-admin", Role.ADMIN, null);
+        Order order = checkout(PaymentMethod.BANK_TRANSFER);
+        login(admin); workflow.confirmPayment(order.getId());
+        mvc.perform(post("/admin/orders/update-status/" + order.getId()).with(user(admin.getUsername()).roles("ADMIN")).with(csrf())
+                .param("status", "CANCELLED")).andExpect(status().is3xxRedirection());
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.REFUND_REQUESTED);
+        assertThat(order.getCancellationReason()).contains("quản trị viên", "Vui lòng hoàn tiền");
+        assertThat(order.getPaymentStatus()).isEqualTo("PAID");
+        assertThat(analytics.getStoreRevenueStats(store.getId()).getTotalBuyRevenue()).isEqualByComparingTo("0");
+        login(admin); workflow.transition(order.getId(), OrderStatus.REFUNDED); workflow.transition(order.getId(), OrderStatus.REFUNDED);
+        assertThat(store.getEWallet()).isEqualByComparingTo("0");
+        assertThat(order.getCancellationReason()).contains("Đã xác nhận hoàn tiền").doesNotContain("Vui lòng hoàn tiền");
+        assertThat(customer.getIsActive()).isTrue();
+    }
+
+    @Test void refundDeductsRevenueOnceWithoutDeductingOtherOrders() throws Exception {
+        Order refunded = deliveryOrder(); login(manager);
+        workflow.transition(refunded.getId(), OrderStatus.DELIVERED);
+        item = items.save(CartItem.builder().cart(cart).store(store).product(product).quantity(1).orderType(OrderType.BUY).build());
+        cart.getItems().add(item);
+        Order kept = checkout(PaymentMethod.COD);
+        login(manager); workflow.transition(kept.getId(), OrderStatus.CONFIRMED);
+        workflow.transition(kept.getId(), OrderStatus.PREPARING); workflow.transition(kept.getId(), OrderStatus.COMPLETED);
+        assertThat(analytics.getStoreRevenueStats(store.getId()).getTotalBuyRevenue()).isEqualByComparingTo("240000");
+        login(customer); workflow.requestRefund(customer.getUsername(), refunded.getId());
+        assertThat(analytics.getStoreRevenueStats(store.getId()).getTotalBuyRevenue()).isEqualByComparingTo("240000");
+        login(manager); workflow.transition(refunded.getId(), OrderStatus.REFUNDED);
+        workflow.transition(refunded.getId(), OrderStatus.REFUNDED);
+        assertThat(store.getEWallet()).isEqualByComparingTo("72000");
+        assertThat(transactions.findAllByOrderIdAndType(refunded.getId(), "REFUND")).hasSize(1);
+        assertThat(analytics.getStoreRevenueStats(store.getId()).getTotalBuyRevenue()).isEqualByComparingTo("80000");
+        var view = mvc.perform(get("/manager/dashboard").with(user(manager.getUsername()).roles("MANAGER")))
+                .andExpect(status().isOk()).andReturn().getModelAndView();
+        assertThat((BigDecimal) view.getModel().get("flowerRevenue")).isEqualByComparingTo("80000");
+    }
+
     @Test void checkoutReservesRealStockAndLeavesBankPaymentPending() {
         Order order = checkout(PaymentMethod.BANK_TRANSFER);
         assertThat(order.getTotalAmount()).isEqualByComparingTo("160000");
@@ -225,7 +321,12 @@ class BusinessRegressionTests {
 
     @Test void removedCategoryCannotBeUsedToCreateProductsAndValidCreationHasStock() throws Exception {
         var form = validProductForm(); Category category = product.getCategory();
+        category.setName("Danh mục đã xóa khỏi giao diện");
         category.setIsDeleted(true); categories.save(category); long count = products.count();
+        mvc.perform(get("/products/" + product.getId()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString(category.getName()))));
+        assertThat(products.findById(product.getId()).orElseThrow().getCategory().getId()).isEqualTo(category.getId());
         assertThatThrownBy(() -> productService.createProduct(form)).hasMessageContaining("Danh mục đã bị xóa");
         assertThatThrownBy(() -> productService.updateProduct(product.getId(), form)).hasMessageContaining("Danh mục đã bị xóa");
         mvc.perform(post("/manager/products/add").with(user(manager.getUsername()).roles("MANAGER")).with(csrf())
@@ -559,6 +660,28 @@ class BusinessRegressionTests {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.paymentStatus").value("PAID"));
         mvc.perform(get(route).with(user(customer.getUsername()).roles("CUSTOMER")))
                 .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("bank-qr-source"))));
+    }
+
+    @Test void customerPaymentCompatibilityRouteCannotSelfConfirmBankTransfer() throws Exception {
+        Order order = checkout(PaymentMethod.BANK_TRANSFER);
+        String route = "/customer/payment/" + order.getId();
+        mvc.perform(get(route).with(user(customer.getUsername()).roles("CUSTOMER")))
+                .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/checkout/bank/" + order.getId()));
+        mvc.perform(post(route + "/process").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.pending").value(true));
+        em.flush(); em.clear();
+        assertThat(orders.findById(order.getId()).orElseThrow().getPaymentStatus()).isEqualTo("UNPAID");
+        assertThat(payments.findByOrderId(order.getId())).allMatch(p -> p.getStatus() == PaymentStatus.PENDING);
+        mvc.perform(post(route + "/process").with(user("another-customer").roles("CUSTOMER")).with(csrf()))
+                .andExpect(status().isForbidden());
+        login(manager); workflow.confirmPayment(order.getId());
+        mvc.perform(post(route + "/process").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true));
+        login(customer); orderService.cancelOrder(customer.getUsername(), order.getId());
+        mvc.perform(post(route + "/process").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf()))
+                .andExpect(status().isBadRequest());
+        assertThat(orders.findById(order.getId()).orElseThrow().getStatus()).isEqualTo(OrderStatus.REFUND_REQUESTED);
     }
 
     @Test void bankCheckoutRedirectsToInstructionsWithoutRecordingPaid() throws Exception {

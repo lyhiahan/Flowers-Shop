@@ -865,19 +865,14 @@
 
 
     function handleRoleChange(role) {
-      const secShipper = document.getElementById('sectionShipper');
       const secManager = document.getElementById('sectionManager');
       const secVendor = document.getElementById('sectionVendor');
       const btnSubmit = document.getElementById('btnSubmitRoleRequest');
 
-      if (secShipper) secShipper.classList.add('hidden');
       if (secManager) secManager.classList.add('hidden');
       if (secVendor) secVendor.classList.add('hidden');
 
-      if (role === 'SHIPPER') {
-        if (secShipper) secShipper.classList.remove('hidden');
-        if (btnSubmit) btnSubmit.disabled = false;
-      } else if (role === 'MANAGER') {
+      if (role === 'MANAGER') {
         if (secManager) secManager.classList.remove('hidden');
         if (btnSubmit) btnSubmit.disabled = false;
       } else if (role === 'VENDOR') {

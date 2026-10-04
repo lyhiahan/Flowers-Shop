@@ -206,7 +206,7 @@ public class AdminProductController {
     }
 
     private String buildReturnUrl(String returnUrl, String tab, String keyword, String style, String status, Integer page, Integer size) {
-        if (returnUrl != null && !returnUrl.isBlank()) {
+        if (com.finalproject.utils.SafeRedirect.isWithin(returnUrl, "/admin/products-manage", "/admin/products")) {
             return returnUrl;
         }
         org.springframework.web.util.UriComponentsBuilder builder = org.springframework.web.util.UriComponentsBuilder.fromPath("/admin/products-manage");
@@ -232,7 +232,7 @@ public class AdminProductController {
 
         ra.addFlashAttribute("successMessage", "Đã CẤP PHÉP / DUYỆT BÁN cho sản phẩm [" + product.getName() + "]. Sản phẩm hiện đã đủ điều kiện kinh doanh trên toàn hệ thống.");
         ra.addFlashAttribute("highlightProductId", id);
-        String target = (returnUrl != null && !returnUrl.isBlank()) ? returnUrl : "/admin/products-manage";
+        String target = safeReturnUrl(returnUrl);
         return "redirect:" + target;
     }
 
@@ -249,7 +249,7 @@ public class AdminProductController {
 
         ra.addFlashAttribute("successMessage", "Đã CẤM / THU HỒI giấy phép của sản phẩm [" + product.getName() + "]. Sản phẩm đã bị ngừng bán trên toàn hệ thống.");
         ra.addFlashAttribute("highlightProductId", id);
-        String target = (returnUrl != null && !returnUrl.isBlank()) ? returnUrl : "/admin/products-manage";
+        String target = safeReturnUrl(returnUrl);
         return "redirect:" + target;
     }
 
@@ -271,7 +271,7 @@ public class AdminProductController {
             ra.addFlashAttribute("successMessage", "Đã CẤM / THU HỒI giấy phép của sản phẩm [" + product.getName() + "].");
         }
         ra.addFlashAttribute("highlightProductId", id);
-        String target = (returnUrl != null && !returnUrl.isBlank()) ? returnUrl : "/admin/products-manage";
+        String target = safeReturnUrl(returnUrl);
         return "redirect:" + target;
     }
 
@@ -293,7 +293,7 @@ public class AdminProductController {
             ra.addFlashAttribute("successMessage", "Đã tạm ngừng bán sản phẩm [" + product.getName() + "].");
         }
         ra.addFlashAttribute("highlightProductId", id);
-        String target = (returnUrl != null && !returnUrl.isBlank()) ? returnUrl : "/admin/products-manage";
+        String target = safeReturnUrl(returnUrl);
         return "redirect:" + target;
     }
 
@@ -313,7 +313,7 @@ public class AdminProductController {
             model.addAttribute("productForm", form);
         }
         model.addAttribute("isEdit", false);
-        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("categories", categoryRepository.findActiveCategories());
         model.addAttribute("stores", storeRepository.findAll());
         return "admin/product-form";
     }
@@ -324,7 +324,7 @@ public class AdminProductController {
                                       Model model,
                                       RedirectAttributes redirectAttributes) {
         model.addAttribute("isEdit", false);
-        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("categories", categoryRepository.findActiveCategories());
         model.addAttribute("stores", storeRepository.findAll());
 
         if (bindingResult.hasErrors()) {
@@ -337,8 +337,7 @@ public class AdminProductController {
             if (created != null && created.getId() != null) {
                 redirectAttributes.addFlashAttribute("highlightProductId", created.getId());
             }
-            String target = (form.getReturnUrl() != null && !form.getReturnUrl().isBlank())
-                    ? form.getReturnUrl() : "/admin/products-manage";
+            String target = safeReturnUrl(form.getReturnUrl());
             return "redirect:" + target;
         } catch (IllegalArgumentException ex) {
             if ("WARN_SELL_AT_LOSS".equals(ex.getMessage())) {
@@ -388,7 +387,7 @@ public class AdminProductController {
 
         model.addAttribute("productForm", form);
         model.addAttribute("isEdit", true);
-        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("categories", categoryRepository.findActiveCategories());
         model.addAttribute("stores", storeRepository.findAll());
         return "admin/product-form";
     }
@@ -400,7 +399,7 @@ public class AdminProductController {
                                     Model model,
                                     RedirectAttributes redirectAttributes) {
         model.addAttribute("isEdit", true);
-        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("categories", categoryRepository.findActiveCategories());
         model.addAttribute("stores", storeRepository.findAll());
 
         if (bindingResult.hasErrors()) {
@@ -411,8 +410,7 @@ public class AdminProductController {
             productService.updateProduct(id, form);
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật sản phẩm [" + form.getName() + "] thành công!");
             redirectAttributes.addFlashAttribute("highlightProductId", id);
-            String target = (form.getReturnUrl() != null && !form.getReturnUrl().isBlank())
-                    ? form.getReturnUrl() : "/admin/products-manage";
+            String target = safeReturnUrl(form.getReturnUrl());
             return "redirect:" + target;
         } catch (IllegalArgumentException ex) {
             if ("WARN_SELL_AT_LOSS".equals(ex.getMessage())) {

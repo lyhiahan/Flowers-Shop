@@ -71,6 +71,10 @@ public class Order {
     @Builder.Default
     private String paymentStatus = "UNPAID"; // UNPAID, PAID
 
+    @org.hibernate.annotations.Nationalized
+    @Column(name = "cancellation_reason", length = 500)
+    private String cancellationReason;
+
     @Column(name = "shipping_method", length = 20)
     @Builder.Default
     private String shippingMethod = "DELIVERY";

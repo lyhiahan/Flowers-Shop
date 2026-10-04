@@ -320,17 +320,12 @@ public class ProductSeederService {
                 allCurrent.add(saved);
                 addedCount++;
 
-                // Tạo tồn kho cho tất cả chi nhánh
-                List<Store> allActiveStores = storeRepository.findByStatusTrue();
-                for (Store st : allActiveStores) {
-                    if (storeInventoryRepository.findByStoreIdAndProductId(st.getId(), saved.getId()).isEmpty()) {
-                        storeInventoryRepository.save(StoreInventory.builder()
-                                .store(st)
-                                .product(saved)
-                                .quantity(25)
-                                .build());
-                    }
-                }
+                // Tạo tồn kho chi nhánh
+                storeInventoryRepository.save(StoreInventory.builder()
+                        .store(assignedStore)
+                        .product(saved)
+                        .quantity(25)
+                        .build());
             }
         }
 

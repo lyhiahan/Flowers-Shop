@@ -36,6 +36,7 @@ public class CheckoutController {
     private final com.finalproject.service.VoucherService voucherService;
     private final com.finalproject.repository.StoreInventoryRepository storeInventoryRepository;
     private final com.finalproject.config.MomoConfig momoConfig;
+    private final com.finalproject.service.MomoService momoService;
 
     @GetMapping
     public String showCheckoutPage(
@@ -127,9 +128,25 @@ public class CheckoutController {
             RedirectAttributes redirectAttributes) {
 
         try {
-            List<Order> createdOrders = orderService.checkout(principal.getName(), selectedItemIds, paymentMethod, recipientName, recipientPhone, recipientAddress, greetingMessage, voucherCode, deliveryDate, shippingMethod, pickupStoreId);
+            if (selectedItemIds == null || selectedItemIds.isEmpty()) throw new IllegalArgumentException("Vui lòng chọn sản phẩm để thanh toán.");
+            if (deliveryDate == null) throw new IllegalArgumentException("Vui lòng chọn ngày nhận hàng.");
+            if (recipientName == null || recipientName.isBlank() || recipientPhone == null || recipientPhone.isBlank())
+                throw new IllegalArgumentException("Vui lòng nhập tên và số điện thoại người nhận.");
+            if ("DELIVERY".equals(shippingMethod) && (recipientAddress == null || recipientAddress.isBlank()))
+                throw new IllegalArgumentException("Vui lòng nhập địa chỉ giao hàng.");
+            validateDeliverySelection(shippingMethod, deliveryUnitId);
+            List<com.finalproject.entity.Order> createdOrders = orderService.checkout(principal.getName(), selectedItemIds, paymentMethod, recipientName, recipientPhone, recipientAddress, greetingMessage, voucherCode, deliveryDate, shippingMethod, pickupStoreId, deliveryUnitId);
+            if (paymentMethod == PaymentMethod.MOMO && createdOrders != null && !createdOrders.isEmpty()) {
+                com.finalproject.entity.Order firstOrder = createdOrders.get(0);
+                try {
+                    return "redirect:" + momoService.createPaymentUrl(firstOrder, request);
+                } catch (IllegalArgumentException | IllegalStateException ex) {
+                    redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage() + " Đơn đã được lưu để thanh toán lại.");
+                    return "redirect:/customer/orders";
+                }
+            }
             if (paymentMethod == PaymentMethod.BANK_TRANSFER && createdOrders != null && !createdOrders.isEmpty()) {
-                return "redirect:/customer/payment/" + createdOrders.get(0).getId();
+                return "redirect:/checkout/bank/" + createdOrders.get(0).getId();
             }
             redirectAttributes.addFlashAttribute("successMessage", "🌸 Đặt hoa thành công! Đơn hàng của bạn đã được chuyển đến chi nhánh cắm hoa để chuẩn bị.");
             return "redirect:/customer/orders";

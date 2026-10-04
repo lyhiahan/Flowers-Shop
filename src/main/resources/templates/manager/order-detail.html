@@ -71,6 +71,7 @@
 
                 <!-- Current Status Badge -->
                 <div>
+                    <div th:if="${order.cancellationReason != null}" class="alert alert-warning" role="alert" th:text="${order.cancellationReason}"></div>
                     <span th:if="${order.status.name() == 'PENDING'}" class="badge px-3 py-2 rounded-pill" style="background-color: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; font-size: 14px; font-weight: 700;">
                         <i class="bi bi-clock me-1"></i> CHỜ TIẾP NHẬN
                     </span>
@@ -293,7 +294,8 @@
                                 <span th:if="${order.paymentStatus == 'PAID'}" class="badge bg-success text-white rounded-pill px-2 py-1">
                                     <i class="bi bi-check-circle-fill me-1"></i>Đã thanh toán
                                 </span>
-                                <span th:unless="${order.paymentStatus == 'PAID'}" class="badge bg-warning text-dark rounded-pill px-2 py-1">
+                                <span th:if="${order.paymentStatus == 'REFUNDED'}" class="badge bg-secondary text-white rounded-pill px-2 py-1">Đã hoàn tiền</span>
+                                <span th:if="${order.paymentStatus == 'UNPAID'}" class="badge bg-warning text-dark rounded-pill px-2 py-1">
                                     <i class="bi bi-clock-history me-1"></i>Chưa thanh toán
                                 </span>
                             </div>

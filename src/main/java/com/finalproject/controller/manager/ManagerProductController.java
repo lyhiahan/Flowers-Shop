@@ -31,6 +31,8 @@ public class ManagerProductController {
     private final UserRepository userRepository;
     private final com.finalproject.service.StoreAccessService storeAccess;
     private final StoreRepository storeRepository;
+    private final com.finalproject.service.CloudinaryService cloudinaryService;
+    private final com.finalproject.repository.ProductImageRepository productImages;
 
     @GetMapping
     public String listProducts(Principal principal, Model model) {
@@ -45,7 +47,7 @@ public class ManagerProductController {
         for (Product product : products) stock.put(product.getId(), inventories.findByStoreIdAndProductId(storeId, product.getId())
                 .map(com.finalproject.entity.StoreInventory::getQuantity).orElse(0));
         model.addAttribute("stock", stock);
-        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("categories", categoryRepository.findActiveCategories());
         model.addAttribute("store", user.getStore());
         return "manager/products";
     }
@@ -59,6 +61,7 @@ public class ManagerProductController {
                              @RequestParam(value = "promotionalPrice", required = false) BigDecimal promotionalPrice,
                              @RequestParam(value = "initialStock", defaultValue = "0") int initialStock,
                              @RequestParam(value = "imageUrl", required = false) String imageUrl,
+                             @RequestParam(value = "imageFile", required = false) org.springframework.web.multipart.MultipartFile imageFile,
                              @RequestParam(value = "description", required = false) String description,
                              RedirectAttributes ra) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
@@ -69,6 +72,7 @@ public class ManagerProductController {
         validatePrice(priceBuy, promotionalPrice);
         validateName(name);
         if (initialStock < 0 || initialStock > 1000000) throw new IllegalArgumentException("Tồn kho phải từ 0 đến 1.000.000.");
+        var uploaded = uploadProductImage(imageFile);
         Product product = Product.builder()
                 .name(name)
                 .category(category)
@@ -80,25 +84,28 @@ public class ManagerProductController {
                 .promotionalPrice(promotionalPrice != null ? promotionalPrice : priceBuy)
                 .sold(0)
                 .rating(5.0)
-                .imageUrl(imageUrl != null && !imageUrl.trim().isEmpty() ? imageUrl.trim() : "https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=600")
+                .imageUrl(uploaded != null ? uploaded.secureUrl() : (imageUrl != null && !imageUrl.trim().isEmpty() ? imageUrl.trim() : "/images/flower-logo.png"))
                 .description(description)
                 .isActive(true)
                 .isSelling(true)
                 .build();
 
         productRepository.save(product);
+        saveUploadedImage(product, uploaded);
         inventoryService.setStock(product.getId(), initialStock);
         ra.addFlashAttribute("successMessage", "Thêm mẫu hoa [" + name + "] thành công!");
         return "redirect:/manager/products";
     }
 
     @PostMapping("/update/{id}")
+    @org.springframework.transaction.annotation.Transactional
     public String updateProduct(@PathVariable("id") Long id,
                                 @RequestParam("name") String name,
                                 @RequestParam("categoryId") Long categoryId,
                                 @RequestParam("priceBuy") BigDecimal priceBuy,
                                 @RequestParam(value = "promotionalPrice", required = false) BigDecimal promotionalPrice,
                                 @RequestParam(value = "imageUrl", required = false) String imageUrl,
+                                @RequestParam(value = "imageFile", required = false) org.springframework.web.multipart.MultipartFile imageFile,
                                 @RequestParam(value = "description", required = false) String description,
                                 RedirectAttributes ra) {
         Product p = productRepository.findById(id).orElseThrow();
@@ -108,15 +115,19 @@ public class ManagerProductController {
         if (Boolean.TRUE.equals(cat.getIsDeleted())) throw new IllegalArgumentException("Danh mục đã bị xóa.");
         validatePrice(priceBuy, promotionalPrice);
         validateName(name);
+        var uploaded = uploadProductImage(imageFile);
         p.setName(name);
         p.setCategory(cat);
         p.setPriceBuy(priceBuy);
         p.setPromotionalPrice(promotionalPrice != null ? promotionalPrice : priceBuy);
-        if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+        if (uploaded != null) {
+            p.setImageUrl(uploaded.secureUrl());
+        } else if (imageUrl != null && !imageUrl.trim().isEmpty()) {
             p.setImageUrl(imageUrl.trim());
         }
         p.setDescription(description);
         productRepository.save(p);
+        saveUploadedImage(p, uploaded);
         ra.addFlashAttribute("successMessage", "Cập nhật mẫu hoa [" + name + "] thành công!");
         return "redirect:/manager/products";
     }
@@ -135,6 +146,23 @@ public class ManagerProductController {
         inventoryService.setStock(id, quantity);
         ra.addFlashAttribute("successMessage", "Đã cập nhật tồn kho thực tế.");
         return "redirect:/manager/products";
+    }
+
+    private com.finalproject.service.CloudinaryService.UploadResult uploadProductImage(org.springframework.web.multipart.MultipartFile file) {
+        try {
+            return cloudinaryService.upload(file, "rental_shop_products");
+        } catch (java.io.IOException ex) {
+            throw new IllegalStateException("Không thể tải ảnh lên Cloudinary. Vui lòng thử lại.", ex);
+        }
+    }
+
+    private void saveUploadedImage(Product product, com.finalproject.service.CloudinaryService.UploadResult uploaded) {
+        if (uploaded == null) return;
+        var previous = productImages.findByProductId(product.getId());
+        previous.forEach(image -> image.setIsMain(false));
+        productImages.saveAll(previous);
+        productImages.save(com.finalproject.entity.ProductImage.builder().product(product).imageUrl(uploaded.secureUrl())
+                .cloudinaryPublicId(uploaded.publicId()).isMain(true).build());
     }
 
     private void validatePrice(BigDecimal price, BigDecimal promotion) {

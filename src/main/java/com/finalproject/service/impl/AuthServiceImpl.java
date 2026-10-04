@@ -35,6 +35,12 @@ public class AuthServiceImpl implements AuthService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final jakarta.validation.Validator validator;
+    private final jakarta.persistence.EntityManager entityManager;
+
+    private void lockAndRefreshUser(User user) {
+        userRepository.findLockedById(user.getId()).orElseThrow();
+        entityManager.refresh(user, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+    }
 
     // Lưu tạm thông tin đăng ký chờ xác thực OTP trong bộ nhớ, CHƯA LƯU VÀO DATABASE để tránh tài khoản rác
     private final Map<String, PendingRegistration> pendingRegistrations = new ConcurrentHashMap<>();
@@ -158,7 +164,8 @@ public class AuthServiceImpl implements AuthService {
         // Hỗ trợ trường hợp tài khoản đã tồn tại ở DB nhưng chưa kích hoạt
         User user = userRepository.findByEmail(email).orElse(null);
         if (user != null) {
-            if (user.isRetiredDeliveryAccount()) return false;
+            lockAndRefreshUser(user);
+            if (user.isRetiredDeliveryAccount() || Boolean.TRUE.equals(user.getAccountDisabledByAdmin())) return false;
             OtpVerification otp = otpRepository
                     .findTopByUserIdAndCodeAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
                             user.getId(), otpCode, OtpType.ACTIVATE_ACCOUNT)
@@ -204,6 +211,11 @@ public class AuthServiceImpl implements AuthService {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy thông tin đăng ký chờ kích hoạt cho email: " + email));
+        lockAndRefreshUser(user);
+
+        if (user.isRetiredDeliveryAccount() || Boolean.TRUE.equals(user.getAccountDisabledByAdmin())) {
+            throw new IllegalStateException("Tài khoản đã bị quản trị viên khóa hoặc vô hiệu hóa. Vui lòng liên hệ quản trị viên.");
+        }
 
         if (Boolean.TRUE.equals(user.getIsActive())) {
             throw new IllegalStateException("Tài khoản này đã được kích hoạt trước đó!");
@@ -228,7 +240,7 @@ public class AuthServiceImpl implements AuthService {
 
         rejectRetiredDeliveryAccount(user);
 
-        userRepository.findLockedById(user.getId()).orElseThrow();
+        lockAndRefreshUser(user);
         if (otpRepository.countByUserIdAndCreatedAtAfter(user.getId(), LocalDateTime.now().minusMinutes(10)) >= 3) {
             throw new IllegalStateException("Vui lòng chờ 10 phút trước khi yêu cầu thêm mã OTP.");
         }
@@ -270,7 +282,8 @@ public class AuthServiceImpl implements AuthService {
         if (otpCode == null || !otpCode.trim().matches("[0-9]{6}")) {
             throw new IllegalArgumentException("Vui lòng nhập mã OTP đã gửi đến email của bạn!");
         }
-        userRepository.findLockedById(user.getId()).orElseThrow();
+        lockAndRefreshUser(user);
+        rejectRetiredDeliveryAccount(user);
         OtpVerification otp = otpRepository.findTopByUserIdAndTypeOrderByExpiredAtDesc(user.getId(), OtpType.RESET_PASSWORD)
                 .orElseThrow(() -> new IllegalArgumentException("Mã xác thực không hợp lệ."));
         if (Boolean.TRUE.equals(otp.getIsUsed()) || otp.getExpiredAt().isBefore(LocalDateTime.now()) || otp.getFailedAttempts() >= 5) {

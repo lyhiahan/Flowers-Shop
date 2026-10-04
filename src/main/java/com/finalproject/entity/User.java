@@ -78,6 +78,10 @@ public class User {
     @Builder.Default
     private Boolean retiredDeliveryAccount = false;
 
+    @Column(name = "account_disabled_by_admin")
+    @Builder.Default
+    private Boolean accountDisabledByAdmin = false;
+
     public boolean isRetiredDeliveryAccount() {
         return Boolean.TRUE.equals(retiredDeliveryAccount) || "SHIPPER".equals(storedRole);
     }
@@ -85,7 +89,7 @@ public class User {
     @PostLoad
     private void disableRetiredDeliveryAccount() {
         if ("SHIPPER".equals(storedRole)) retiredDeliveryAccount = true;
-        if (isRetiredDeliveryAccount()) isActive = false;
+        if (isRetiredDeliveryAccount() || Boolean.TRUE.equals(accountDisabledByAdmin)) isActive = false;
     }
 
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)

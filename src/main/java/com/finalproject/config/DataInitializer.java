@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 
 @Component
 @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "app.demo-data.enabled", havingValue = "true")
@@ -153,30 +152,6 @@ public class DataInitializer implements CommandLineRunner {
                     .phone("0909999888")
                     .addressDetail("Toà nhà Bitexco, số 2 Hải Triều, Phường Bến Nghé, Quận 1, TP.HCM")
                     .isDefault(false)
-                    .build());
-        }
-
-        User customer2 = userRepository.findByUsername("khachhang2").orElseGet(() -> userRepository.save(User.builder()
-                .username("khachhang2")
-                .password(passwordEncoder.encode("123456"))
-                .fullName("Trần Thị Hoa")
-                .email("khachhang2@gmail.com")
-                .phone("0901234567")
-                .address("123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP.HCM")
-                .role(Role.CUSTOMER)
-                .isActive(true)
-                .isEmailActive(true)
-                .eWallet(new BigDecimal("3000000"))
-                .createdDate(LocalDate.now())
-                .build()));
-
-        if (userAddressRepository.findByUserIdOrderByIsDefaultDescCreatedAtDesc(customer2.getId()).isEmpty()) {
-            userAddressRepository.save(UserAddress.builder()
-                    .user(customer2)
-                    .recipientName("Trần Thị Hoa")
-                    .phone("0901234567")
-                    .addressDetail("123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP.HCM")
-                    .isDefault(true)
                     .build());
         }
 
@@ -619,26 +594,6 @@ public class DataInitializer implements CommandLineRunner {
                 productRepository.save(p);
             }
         });
-
-        // 9. Đảm bảo toàn bộ sản phẩm đang bán đều có tồn kho tại tất cả chi nhánh hoạt động
-        ensureStoreInventoriesForAllBranches();
-    }
-
-    public void ensureStoreInventoriesForAllBranches() {
-        List<Store> activeStores = storeRepository.findByStatusTrue();
-        List<Product> allProducts = productRepository.findAll();
-        for (Product prod : allProducts) {
-            if (Boolean.TRUE.equals(prod.getIsDeleted())) continue;
-            for (Store st : activeStores) {
-                if (storeInventoryRepository.findByStoreIdAndProductId(st.getId(), prod.getId()).isEmpty()) {
-                    storeInventoryRepository.save(StoreInventory.builder()
-                            .store(st)
-                            .product(prod)
-                            .quantity(25)
-                            .build());
-                }
-            }
-        }
     }
 
     /**

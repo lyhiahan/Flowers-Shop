@@ -49,6 +49,7 @@ public class CartController {
         }
         model.addAttribute("itemsByStore", itemsByStore);
         model.addAttribute("itemStockMap", itemStockMap);
+        model.addAttribute("stockByItem", itemStockMap);
         model.addAttribute("totalQuantity", totalQuantity);
         model.addAttribute("paymentMethods", PaymentMethod.values());
         return "customer/cart";
@@ -65,12 +66,12 @@ public class CartController {
             redirectAttributes.addFlashAttribute("successMessage", "Đã thêm sản phẩm vào giỏ hàng thành công!");
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
-            if (referer != null && !referer.isEmpty() && !referer.contains("/cart")) {
+            if (com.finalproject.utils.SafeRedirect.isWithin(referer, "/products", "/stores")) {
                 return "redirect:" + referer;
             }
             return "redirect:/";
         }
-        if (referer != null && !referer.isEmpty() && !referer.contains("/cart")) {
+        if (com.finalproject.utils.SafeRedirect.isWithin(referer, "/products", "/stores")) {
             return "redirect:" + referer;
         }
         return "redirect:/cart";

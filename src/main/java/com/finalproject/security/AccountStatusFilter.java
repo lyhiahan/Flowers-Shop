@@ -23,7 +23,8 @@ public class AccountStatusFilter extends OncePerRequestFilter {
         if (authentication != null && authentication.isAuthenticated()
                 && !(authentication instanceof AnonymousAuthenticationToken)) {
             var user = users.findByUsername(authentication.getName()).orElse(null);
-            if (user != null && (!Boolean.TRUE.equals(user.getIsActive()) || user.isRetiredDeliveryAccount())) {
+            if (user != null && (!Boolean.TRUE.equals(user.getIsActive()) || user.isRetiredDeliveryAccount()
+                    || Boolean.TRUE.equals(user.getAccountDisabledByAdmin()))) {
                 SecurityContextHolder.clearContext();
                 var session = request.getSession(false);
                 if (session != null) session.invalidate();
