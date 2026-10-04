@@ -284,6 +284,18 @@
             background-color: var(--flower-surface);
             border-bottom: 1px solid var(--flower-border);
             padding: 8px 0;
+            overflow-x: auto;
+        }
+
+        .nav-categories-bar .flower-container > div {
+            flex-wrap: nowrap !important;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .nav-categories-bar .flower-container > div::-webkit-scrollbar {
+            display: none;
         }
 
         .cat-nav-link {
@@ -1418,8 +1430,10 @@
                                         <span class="badge rounded-pill" style="background-color: #E3F2FD; color: #1565C0; border: 1px solid #BBDEFB; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')">
                                             Quản lý chi nhánh
                                         </span>
-
-                                        <span class="badge rounded-pill" style="background-color: #F5F5F5; color: #424242; border: 1px solid #E0E0E0; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="!hasAnyRole('ADMIN', 'MANAGER')">
+                                        <span class="badge rounded-pill" style="background-color: #FFF3E0; color: #E65100; border: 1px solid #FFE0B2; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="hasRole('VENDOR') and !hasAnyRole('ADMIN', 'MANAGER')">
+                                            Đối tác bán hoa
+                                        </span>
+                                        <span class="badge rounded-pill" style="background-color: #F5F5F5; color: #424242; border: 1px solid #E0E0E0; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="!hasAnyRole('ADMIN', 'MANAGER', 'VENDOR')">
                                             Khách hàng
                                         </span>
                                     </div>
@@ -1427,7 +1441,11 @@
                                         <i class="bi bi-shield-check text-success" style="font-size: 12px;"></i>
                                         <span>Chế độ quản trị viên (Xem website)</span>
                                     </div>
-                                    <div sec:authorize="!hasRole('ADMIN')" class="mt-1 d-flex align-items-center gap-1.5" style="font-size: 12.5px; color: #2E7D32; font-weight: 600;">
+                                    <div sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')" class="mt-1 d-flex align-items-center gap-1.5" style="font-size: 12.5px; color: #20382E; font-weight: 700;">
+                                        <i class="bi bi-shop text-success" style="font-size: 12px;"></i>
+                                        <span>Chế độ quản lý chi nhánh (Xem website)</span>
+                                    </div>
+                                    <div sec:authorize="!hasAnyRole('ADMIN', 'MANAGER')" class="mt-1 d-flex align-items-center gap-1.5" style="font-size: 12.5px; color: #2E7D32; font-weight: 600;">
                                         <i class="bi bi-check-circle-fill text-success" style="font-size: 11px;"></i>
                                         <span>Đang ở chế độ mua hàng</span>
                                     </div>
@@ -1442,18 +1460,25 @@
                                     </a>
                                 </li>
 
-                                <!-- Nút Shop Manager / Kênh Quản lý cửa hàng (cho Manager / Vendor) -->
-                                <li sec:authorize="hasAnyRole('MANAGER', 'VENDOR') and !hasRole('ADMIN')" class="px-2 mb-2">
-                                    <a th:href="@{/manager/stores}" class="btn btn-sm btn-outline-primary w-100 fw-bold d-flex align-items-center justify-content-center gap-2"
-                                       id="navShopManagerDropdown"
-                                       style="border-radius: 8px; padding: 6px 12px; font-size: 13.5px;">
-                                        <i class="bi bi-shop-window"></i>
-                                        <span>Shop Manager (Quản lý cửa hàng)</span>
+                                <!-- Nút Kênh Quản lý cửa hàng (Nổi bật cho Manager) -->
+                                <li sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')" class="px-2 mb-2">
+                                    <a th:href="@{/manager/dashboard}" class="btn btn-sm w-100 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
+                                       id="navManagerDashboardDropdown"
+                                       style="background-color: #20382E; color: #FFFFFF; border-radius: 8px; padding: 7px 12px; font-size: 13.5px; text-decoration: none;">
+                                        <i class="bi bi-speedometer2"></i>
+                                        <span>Vào kênh quản lý cửa hàng</span>
                                     </a>
                                 </li>
 
-
-
+                                <!-- Nút Shop Manager (cho Vendor) -->
+                                <li sec:authorize="hasRole('VENDOR') and !hasAnyRole('ADMIN', 'MANAGER')" class="px-2 mb-2">
+                                    <a th:href="@{/manager/stores}" class="btn btn-sm w-100 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
+                                       id="navVendorStoresDropdown"
+                                       style="background-color: #20382E; color: #FFFFFF; border-radius: 8px; padding: 7px 12px; font-size: 13.5px; text-decoration: none;">
+                                        <i class="bi bi-shop-window"></i>
+                                        <span>Kênh đối tác cửa hàng</span>
+                                    </a>
+                                </li>
 
                                 <!-- Hồ sơ cá nhân -->
                                 <li>
@@ -1463,7 +1488,27 @@
                                     </a>
                                 </li>
 
-                                <!-- Đơn hàng của tôi -->
+                                <!-- Phím tắt nhanh dành cho Quản lý chi nhánh -->
+                                <li sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')">
+                                    <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/manager/orders}">
+                                        <i class="bi bi-receipt text-success"></i>
+                                        <span>Đơn hàng chi nhánh</span>
+                                    </a>
+                                </li>
+                                <li sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')">
+                                    <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/manager/products}">
+                                        <i class="bi bi-flower1 text-success"></i>
+                                        <span>Sản phẩm chi nhánh</span>
+                                    </a>
+                                </li>
+                                <li sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')">
+                                    <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/manager/wallet}">
+                                        <i class="bi bi-coin text-warning"></i>
+                                        <span>Ví cửa hàng</span>
+                                    </a>
+                                </li>
+
+                                <!-- Đơn hàng của tôi (Khách hàng) -->
                                 <li sec:authorize="hasRole('CUSTOMER')">
                                     <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/customer/orders}">
                                         <i class="bi bi-bag-check text-secondary"></i>
@@ -1487,8 +1532,8 @@
                                     </a>
                                 </li>
 
-                                <!-- Đăng ký cấp vai trò: ẨN VỚI ADMIN -->
-                                <li sec:authorize="!hasRole('ADMIN')">
+                                <!-- Đăng ký cấp vai trò: ẨN VỚI ADMIN VÀ MANAGER -->
+                                <li sec:authorize="!hasAnyRole('ADMIN', 'MANAGER')">
                                     <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/customer/profile(tab='roles')}">
                                         <i class="bi bi-person-plus text-primary"></i>
                                         <span>Đăng ký cấp vai trò</span>
@@ -1502,7 +1547,6 @@
                                     <button type="button" class="dropdown-item py-2 text-danger small fw-semibold d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#signOutModal" id="btnSignOut">
                                         <i class="bi bi-box-arrow-right"></i>
                                         <span>Đăng xuất</span>
-
                                     </button>
                                 </li>
                             </ul>
@@ -1520,8 +1564,7 @@
             </div>
         </div>
 
-        <!-- Dòng Danh Mục Gọn Gàng: ☰ Danh mục hoa · Tất cả · Sinh nhật · Tình yêu · Khai trương · Dịp khác -->
-        <!-- Dòng Thanh Điều Hướng Tinh Gọn: Danh mục hoa · Tất cả mẫu hoa · Bán chạy · Cửa hàng -->
+        <!-- Dòng Thanh Điều Hướng Tinh Gọn: Danh mục hoa · Tất cả mẫu hoa · Danh mục chính · Bán chạy · Cửa hàng · Kênh Quản lý -->
         <div class="nav-categories-bar position-relative">
             <div class="container flower-container">
                 <div class="d-flex align-items-center justify-content-center gap-4 flex-wrap">
@@ -1541,7 +1584,6 @@
                         </button>
                     </div>
 
-
                     <!-- 2. Tất cả mẫu hoa -->
                     <a th:href="@{/products} + '#product-catalog'" 
                        class="cat-nav-link"
@@ -1549,33 +1591,49 @@
                         Tất cả mẫu hoa
                     </a>
 
-                    <!-- Danh mục hệ thống -->
-                    <th:block th:if="${categories != null and not #lists.isEmpty(categories)}">
-                        <a th:each="cat : ${categories}" th:href="@{/products(categoryId=${cat.id})} + '#product-catalog'"
+                    <!-- 3. Danh mục hệ thống chính (Hiển thị tối đa 4 danh mục gốc để thanh điều hướng luôn gọn đẹp 1 hàng) -->
+                    <th:block th:if="${discoverCategories != null and not #lists.isEmpty(discoverCategories)}">
+                        <a th:each="cat, iterStat : ${discoverCategories}"
+                           th:if="${iterStat.index < 4}"
+                           th:href="@{/products(categoryId=${cat.id})} + '#product-catalog'"
                            class="cat-nav-link"
                            th:classappend="${selectedCategory != null and selectedCategory.id == cat.id} ? 'active' : ''"
                            th:text="${cat.name}">
                         </a>
                     </th:block>
 
-                    <!-- 3. Bán chạy (cuộn nhanh đến mục hoa bán chạy) -->
+                    <!-- 4. Bán chạy (cuộn nhanh đến mục hoa bán chạy) -->
                     <a th:href="@{/#best-seller}" 
                        class="cat-nav-link"
                        th:classappend="${tab == 'bestseller'} ? 'active' : ''">
                         <i class="bi bi-fire me-1 text-danger"></i>Bán chạy
                     </a>
 
-                    <!-- 4. Cửa hàng -->
+                    <!-- 5. Cửa hàng -->
                     <a th:href="@{/stores}" 
                        class="cat-nav-link">
                         <i class="bi bi-shop me-1 text-success"></i>Cửa hàng
                     </a>
 
-                    <!-- 5. Shop Manager (Kênh bán dành cho Vendor / Manager / Admin) -->
-                    <a sec:authorize="hasAnyRole('MANAGER', 'VENDOR', 'ADMIN')" 
+                    <!-- 6. Kênh Quản trị / Quản lý theo từng vai trò -->
+                    <a sec:authorize="hasRole('ADMIN')" 
+                       th:href="@{/admin/dashboard}" 
+                       class="cat-nav-link fw-bold" id="navAdminNav"
+                       style="color: var(--flower-primary);"
+                       title="Chuyển đến trang quản trị hệ thống">
+                        <i class="bi bi-speedometer2 me-1 text-success"></i>Trang quản trị
+                    </a>
+                    <a sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')" 
+                       th:href="@{/manager/dashboard}" 
+                       class="cat-nav-link fw-bold" id="navManagerNav"
+                       style="color: var(--flower-primary);"
+                       title="Chuyển đến kênh quản lý chi nhánh cửa hàng">
+                        <i class="bi bi-shop me-1 text-success"></i>Kênh Quản Lý
+                    </a>
+                    <a sec:authorize="hasRole('VENDOR') and !hasAnyRole('ADMIN', 'MANAGER')" 
                        th:href="@{/manager/stores}" 
-                       class="cat-nav-link fw-semibold" id="navShopManager"
-                       title="Chuyển đến trang quản lý các cửa hàng">
+                       class="cat-nav-link fw-semibold" id="navVendorNav"
+                       title="Chuyển đến kênh đối tác quản lý">
                         <i class="bi bi-shop-window me-1 text-primary"></i>Shop Manager
                     </a>
                 </div>

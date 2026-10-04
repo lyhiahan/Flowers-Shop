@@ -45,6 +45,12 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public int addToCart(String username, AddToCartRequest request) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Tài khoản không tồn tại."));
+        if (isAdminUser(user)) {
+            throw new org.springframework.security.access.AccessDeniedException("Tài khoản Quản trị viên không thể thực hiện thao tác mua hàng hoặc sử dụng giỏ hàng.");
+        }
+
         // --- Kiểm tra đầu vào trước khi lấy khóa ---
         if (request == null || request.getProductId() == null || request.getProductId() <= 0)
             throw new IllegalArgumentException("Vui lòng chọn sản phẩm hợp lệ.");
@@ -95,8 +101,6 @@ public class CartServiceImpl implements CartService {
         if (existingItem != null) {
             int newTotal = existingItem.getQuantity() + addQty;
             if (newTotal > availableStock) {
-                Store store = storeRepository.findById(storeId)
-                        .orElseThrow(() -> new ResourceNotFoundException("Chi nhánh không tồn tại"));
                 throw new IllegalStateException("Tổng số lượng trong giỏ (" + newTotal
                         + " bó) vượt quá tồn kho còn lại (" + availableStock + " bó) tại " + store.getName() + ".");
             }
@@ -110,12 +114,8 @@ public class CartServiceImpl implements CartService {
             // --- Ưu tiên 3: Kiểm tra tồn kho tổng hợp: SL đã có + SL mới thêm ---
             long alreadyInCart = cartItemRepository.sumQtyByCartProductStore(cart.getId(), product.getId(), storeId);
             if (alreadyInCart + addQty > availableStock) {
-                Store store = storeRepository.findById(storeId)
-                        .orElseThrow(() -> new ResourceNotFoundException("Chi nhánh không tồn tại"));
                 throw new IllegalStateException("Chỉ còn " + availableStock + " sản phẩm tại chi nhánh này.");
             }
-            Store store = storeRepository.findById(storeId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Chi nhánh không tồn tại"));
             CartItem cartItem = CartItem.builder()
                     .cart(cart)
                     .product(product)

@@ -302,11 +302,11 @@
                             <li sec:authorize="hasRole('STAFF')">
                                 <a class="dropdown-item py-2" th:href="@{/staff/dashboard}"><i class="bi bi-speedometer2 me-2 text-secondary"></i> Trang quản lý đơn</a>
                             </li>
-                            <li sec:authorize="hasRole('STORE_MANAGER')">
-                                <a class="dropdown-item py-2" th:href="@{/manager/dashboard}"><i class="bi bi-shop-window me-2 text-secondary"></i> Quản lý cửa hàng</a>
+                            <li sec:authorize="hasRole('MANAGER')">
+                                <a class="dropdown-item py-2 fw-semibold text-success" th:href="@{/manager/dashboard}"><i class="bi bi-shop me-2"></i> Kênh Quản lý cửa hàng</a>
                             </li>
                             <li sec:authorize="hasRole('ADMIN')">
-                                <a class="dropdown-item py-2" th:href="@{/admin/dashboard}"><i class="bi bi-shield-check me-2 text-secondary"></i> Quản trị hệ thống</a>
+                                <a class="dropdown-item py-2 fw-semibold text-success" th:href="@{/admin/dashboard}"><i class="bi bi-shield-check me-2"></i> Quản trị hệ thống</a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>

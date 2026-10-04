@@ -417,6 +417,30 @@ public class DataInitializer implements CommandLineRunner {
             }
         }
 
+        // Tự động dọn dẹp các danh mục lỗi font tiếng Việt (mojikake như Nháº¹t, TrÆ°Æ¡ng)
+        for (Category c : categoryRepository.findAll()) {
+            String name = c.getName();
+            if (name != null && (name.contains("Ã") || name.contains("Æ") || name.contains("º") || name.contains("¹") || name.contains("Â") || name.contains("¿"))) {
+                Category targetCat = catSinhNhat;
+                String lower = name.toLowerCase();
+                if (lower.contains("khai")) targetCat = catKhaiTruong;
+                else if (lower.contains("sinh")) targetCat = catSinhNhat;
+                else if (lower.contains("lan")) targetCat = catLanHoDiep;
+                else if (lower.contains("tình") || lower.contains("love")) targetCat = catTinhYeu;
+
+                java.util.List<Product> prods = productRepository.findByCategoryId(c.getId());
+                if (prods != null) {
+                    for (Product p : prods) {
+                        p.setCategory(targetCat);
+                        productRepository.save(p);
+                    }
+                }
+                try {
+                    categoryRepository.delete(c);
+                } catch (Exception ignored) {}
+            }
+        }
+
         // 7. Tạo danh sách hoa mẫu phong phú có sold >= 10 phục vụ tiêu chí Khách vãng lai (Guest)
         if (productRepository.count() < 5) {
             Product p1 = Product.builder()

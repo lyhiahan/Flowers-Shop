@@ -229,6 +229,12 @@
                             <li sec:authorize="hasRole('CUSTOMER')">
                                 <a class="dropdown-item py-2" th:href="@{/customer/orders}"><i class="bi bi-box2-heart me-2 text-secondary"></i> Đơn hoa đã đặt</a>
                             </li>
+                            <li sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')">
+                                <a class="dropdown-item py-2 fw-semibold text-success" th:href="@{/manager/dashboard}"><i class="bi bi-shop me-2"></i> Kênh Quản lý cửa hàng</a>
+                            </li>
+                            <li sec:authorize="hasRole('ADMIN')">
+                                <a class="dropdown-item py-2 fw-semibold text-success" th:href="@{/admin/dashboard}"><i class="bi bi-shield-check me-2"></i> Quản trị hệ thống</a>
+                            </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form th:action="@{/logout}" method="post" class="px-2">
