@@ -141,9 +141,12 @@ public class OrderServiceImpl implements OrderService {
 
         CartItem firstItem = items.get(0);
         java.time.LocalDate finalDelivDate = deliveryDate != null ? deliveryDate : (firstItem.getDeliveryDate() != null ? firstItem.getDeliveryDate() : java.time.LocalDate.now());
-        String finalRecipientName = (recipientName != null && !recipientName.trim().isEmpty()) ? recipientName.trim() : user.getFullName();
-        String finalRecipientPhone = (recipientPhone != null && !recipientPhone.trim().isEmpty()) ? recipientPhone.trim() : user.getPhone();
+        String rawRecipientName = (recipientName != null && !recipientName.trim().isEmpty()) ? recipientName.trim() : user.getFullName();
+        String rawRecipientPhone = (recipientPhone != null && !recipientPhone.trim().isEmpty()) ? recipientPhone.trim() : user.getPhone();
         String finalGreeting = (greetingMessage != null && !greetingMessage.trim().isEmpty()) ? greetingMessage.trim() : null;
+
+        String finalRecipientName = extractFirstNonBlank(rawRecipientName);
+        String finalRecipientPhone = cleanPhone(rawRecipientPhone);
 
         if (finalDelivDate.isBefore(LocalDate.now())) throw new IllegalArgumentException("Ngày nhận hàng không được ở quá khứ.");
         if (finalRecipientName == null || finalRecipientName.isBlank() || finalRecipientPhone == null || finalRecipientPhone.isBlank()
@@ -152,7 +155,9 @@ public class OrderServiceImpl implements OrderService {
         }
         if (finalRecipientName.length() > 100 || finalRecipientAddress.length() > 255 || (finalGreeting != null && finalGreeting.length() > 500))
             throw new IllegalArgumentException("Tên tối đa 100, địa chỉ 255 và lời chúc 500 ký tự.");
-        if (!finalRecipientPhone.matches("^(0|\\+?84)[35789][0-9]{8}$")) throw new IllegalArgumentException("Số điện thoại người nhận không hợp lệ.");
+        if (!isValidPhoneNumber(finalRecipientPhone)) {
+            throw new IllegalArgumentException("Số điện thoại người nhận không hợp lệ (vui lòng nhập 10 chữ số, ví dụ: 0901234567).");
+        }
         Order order = Order.builder()
                 .shippingMethod(shippingMethod)
                 .user(user)
@@ -533,5 +538,35 @@ public class OrderServiceImpl implements OrderService {
             messagingTemplate.convertAndSend("/topic/store/" + order.getPickupStore().getId() + "/orders",
                     "Đơn thuê #" + order.getId() + " của khách " + order.getUser().getFullName() + " đã QUÁ HẠN!");
         }
+    }
+
+    private String extractFirstNonBlank(String input) {
+        if (input == null) return null;
+        if (input.contains(",")) {
+            for (String part : input.split(",")) {
+                if (part != null && !part.trim().isEmpty()) {
+                    return part.trim();
+                }
+            }
+        }
+        return input.trim();
+    }
+
+    private String cleanPhone(String phone) {
+        if (phone == null) return null;
+        String extracted = extractFirstNonBlank(phone);
+        if (extracted == null) return null;
+        String cleaned = extracted.replaceAll("[\\s.\\-\\(\\)]", "");
+        if (cleaned.startsWith("+84")) {
+            cleaned = "0" + cleaned.substring(3);
+        } else if (cleaned.startsWith("84") && cleaned.length() >= 11) {
+            cleaned = "0" + cleaned.substring(2);
+        }
+        return cleaned;
+    }
+
+    private boolean isValidPhoneNumber(String phone) {
+        if (phone == null) return false;
+        return phone.matches("^0[235789][0-9]{8,9}$");
     }
 }

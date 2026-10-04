@@ -52,10 +52,22 @@ public class CheckoutController {
             return "redirect:/cart";
         }
 
+        List<Long> effectiveItemIds = selectedItemIds;
+        if ((effectiveItemIds == null || effectiveItemIds.isEmpty()) && model.containsAttribute("selectedItemIds")) {
+            Object obj = model.asMap().get("selectedItemIds");
+            if (obj instanceof List<?>) {
+                effectiveItemIds = ((List<?>) obj).stream()
+                        .filter(Long.class::isInstance)
+                        .map(Long.class::cast)
+                        .toList();
+            }
+        }
+        final List<Long> finalSelectedItemIds = effectiveItemIds;
+
         List<CartItem> checkoutItems;
-        if (selectedItemIds != null && !selectedItemIds.isEmpty()) {
+        if (finalSelectedItemIds != null && !finalSelectedItemIds.isEmpty()) {
             checkoutItems = allItems.stream()
-                    .filter(item -> selectedItemIds.contains(item.getId()))
+                    .filter(item -> finalSelectedItemIds.contains(item.getId()))
                     .collect(Collectors.toList());
             if (checkoutItems.isEmpty()) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng chọn ít nhất 1 sản phẩm để thanh toán!");
@@ -126,15 +138,19 @@ public class CheckoutController {
             jakarta.servlet.http.HttpServletRequest request,
             RedirectAttributes redirectAttributes) {
 
+        String finalRecipientName = extractFirstNonBlank(recipientName);
+        String finalRecipientPhone = extractFirstNonBlank(recipientPhone);
+        String finalRecipientAddress = extractFirstNonBlank(recipientAddress);
+
         try {
             if (selectedItemIds == null || selectedItemIds.isEmpty()) throw new IllegalArgumentException("Vui lòng chọn sản phẩm để thanh toán.");
             if (deliveryDate == null) throw new IllegalArgumentException("Vui lòng chọn ngày nhận hàng.");
-            if (recipientName == null || recipientName.isBlank() || recipientPhone == null || recipientPhone.isBlank())
+            if (finalRecipientName == null || finalRecipientName.isBlank() || finalRecipientPhone == null || finalRecipientPhone.isBlank())
                 throw new IllegalArgumentException("Vui lòng nhập tên và số điện thoại người nhận.");
-            if ("DELIVERY".equals(shippingMethod) && (recipientAddress == null || recipientAddress.isBlank()))
+            if ("DELIVERY".equals(shippingMethod) && (finalRecipientAddress == null || finalRecipientAddress.isBlank()))
                 throw new IllegalArgumentException("Vui lòng nhập địa chỉ giao hàng.");
             validateDeliverySelection(shippingMethod, deliveryUnitId);
-            List<com.finalproject.entity.Order> createdOrders = orderService.checkout(principal.getName(), selectedItemIds, paymentMethod, recipientName, recipientPhone, recipientAddress, greetingMessage, voucherCode, deliveryDate, shippingMethod, pickupStoreId, deliveryUnitId);
+            List<com.finalproject.entity.Order> createdOrders = orderService.checkout(principal.getName(), selectedItemIds, paymentMethod, finalRecipientName, finalRecipientPhone, finalRecipientAddress, greetingMessage, voucherCode, deliveryDate, shippingMethod, pickupStoreId, deliveryUnitId);
             if (paymentMethod == PaymentMethod.MOMO && createdOrders != null && !createdOrders.isEmpty()) {
                 com.finalproject.entity.Order firstOrder = createdOrders.get(0);
                 try {
@@ -151,6 +167,19 @@ public class CheckoutController {
             return "redirect:/customer/orders";
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            if (selectedItemIds != null && !selectedItemIds.isEmpty()) {
+                redirectAttributes.addFlashAttribute("selectedItemIds", selectedItemIds);
+                redirectAttributes.addFlashAttribute("prevShippingMethod", shippingMethod);
+                redirectAttributes.addFlashAttribute("prevRecipientName", finalRecipientName);
+                redirectAttributes.addFlashAttribute("prevRecipientPhone", finalRecipientPhone);
+                redirectAttributes.addFlashAttribute("prevRecipientAddress", finalRecipientAddress);
+                redirectAttributes.addFlashAttribute("prevGreetingMessage", greetingMessage);
+                redirectAttributes.addFlashAttribute("prevVoucherCode", voucherCode);
+                redirectAttributes.addFlashAttribute("prevPickupStoreId", pickupStoreId);
+                redirectAttributes.addFlashAttribute("prevDeliveryUnitId", deliveryUnitId);
+                String query = selectedItemIds.stream().map(id -> "selectedItemIds=" + id).collect(Collectors.joining("&"));
+                return "redirect:/checkout?" + query;
+            }
             return "redirect:/cart";
         }
     }
@@ -178,5 +207,17 @@ public class CheckoutController {
                 .anyMatch(d -> Boolean.TRUE.equals(d.getIsActive()) && !Boolean.TRUE.equals(d.getIsDeleted()))) {
             throw new IllegalArgumentException("Vui lòng chọn đơn vị giao hàng.");
         }
+    }
+
+    private String extractFirstNonBlank(String input) {
+        if (input == null) return null;
+        if (input.contains(",")) {
+            for (String part : input.split(",")) {
+                if (part != null && !part.trim().isEmpty()) {
+                    return part.trim();
+                }
+            }
+        }
+        return input.trim();
     }
 }

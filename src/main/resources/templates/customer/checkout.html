@@ -446,7 +446,8 @@
                                     <div class="col-sm-6">
                                         <div class="form-check p-0">
                                             <input class="form-check-input d-none" type="radio" name="shippingMethod"
-                                                   id="methodDelivery" value="DELIVERY" checked
+                                                   id="methodDelivery" value="DELIVERY"
+                                                   th:checked="${prevShippingMethod != 'PICKUP'}"
                                                    onchange="toggleShippingMethod()">
                                             <label class="shipping-pill-label w-100" for="methodDelivery">
                                                 <i class="bi bi-truck fs-5"></i>
@@ -461,6 +462,7 @@
                                         <div class="form-check p-0">
                                             <input class="form-check-input d-none" type="radio" name="shippingMethod"
                                                    id="methodPickup" value="PICKUP"
+                                                   th:checked="${prevShippingMethod == 'PICKUP'}"
                                                    onchange="toggleShippingMethod()">
                                             <label class="shipping-pill-label w-100" for="methodPickup">
                                                 <i class="bi bi-shop fs-5"></i>
@@ -505,21 +507,21 @@
                                         <label class="form-label-custom" for="recipientNameInput">Họ và tên người nhận (*)</label>
                                         <input type="text" id="recipientNameInput" name="recipientName"
                                                class="form-control-custom w-100"
-                                               th:value="${customer != null ? customer.fullName : ''}"
+                                               th:value="${prevRecipientName != null ? prevRecipientName : (customer != null ? customer.fullName : '')}"
                                                placeholder="VD: Nguyễn Văn A">
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label-custom" for="recipientPhoneInput">Số điện thoại liên hệ (*)</label>
                                         <input type="tel" id="recipientPhoneInput" name="recipientPhone"
                                                class="form-control-custom w-100"
-                                               th:value="${customer != null ? customer.phone : ''}"
+                                               th:value="${prevRecipientPhone != null ? prevRecipientPhone : (customer != null ? customer.phone : '')}"
                                                placeholder="VD: 0901234567">
                                     </div>
                                     <div class="col-12">
                                         <label class="form-label-custom" for="recipientAddressInput">Địa chỉ nhận hoa (*)</label>
                                         <input type="text" id="recipientAddressInput" name="recipientAddress"
                                                class="form-control-custom w-100"
-                                               th:value="${customer != null ? customer.address : ''}"
+                                               th:value="${prevRecipientAddress != null ? prevRecipientAddress : (customer != null ? customer.address : '')}"
                                                placeholder="Số nhà, tên đường, phường/xã, quận/huyện...">
                                     </div>
                                 </div>
@@ -608,14 +610,14 @@
                                         <label class="form-label-custom" for="pickupPersonName">Họ và tên người đến lấy (*)</label>
                                         <input type="text" id="pickupPersonName" name="recipientName"
                                                class="form-control-custom w-100"
-                                               th:value="${customer != null ? customer.fullName : ''}"
+                                               th:value="${prevRecipientName != null ? prevRecipientName : (customer != null ? customer.fullName : '')}"
                                                placeholder="VD: Nguyễn Văn A">
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label-custom" for="pickupPersonPhone">Số điện thoại (*)</label>
                                         <input type="tel" id="pickupPersonPhone" name="recipientPhone"
                                                class="form-control-custom w-100"
-                                               th:value="${customer != null ? customer.phone : ''}"
+                                               th:value="${prevRecipientPhone != null ? prevRecipientPhone : (customer != null ? customer.phone : '')}"
                                                placeholder="VD: 0901234567">
                                     </div>
                                 </div>
@@ -748,6 +750,7 @@
                                     <div class="input-group mb-2">
                                         <input type="text" name="voucherCode" id="voucherInput" 
                                                class="form-control text-uppercase" 
+                                               th:value="${prevVoucherCode != null ? prevVoucherCode : ''}"
                                                placeholder="Nhập mã (VD: FLOWER10)"
                                                oninput="updateCheckoutTotal()">
                                     </div>
@@ -810,6 +813,49 @@
         </form>
     </div>
 
+    <!-- Modal Thông Báo Cảnh Báo Khi Có Lỗi Đặt Hàng -->
+    <div class="modal fade" id="systemAlertModal" tabindex="-1" aria-labelledby="systemAlertModalLabel" aria-hidden="true" th:if="${errorMessage != null}">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="border-radius: 16px;">
+                <div class="modal-header py-3 px-4 border-0" 
+                     th:style="${errorMessage != null} ? 'background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);' : 'background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);'">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center text-danger" 
+                             style="width: 38px; height: 38px; background: rgba(239, 68, 68, 0.15);">
+                            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold mb-0 font-serif text-danger" id="systemAlertModalLabel" 
+                                style="font-size: 17.5px;">
+                                Thông Báo Cảnh Báo
+                            </h5>
+                            <div class="small text-muted" style="font-size: 12px;">Hệ thống Hoa Tươi Sài Gòn</div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="p-3 rounded-3 mb-3 text-start" 
+                         style="background-color: #FFF5F5; border: 1px solid #FECACA; color: #991B1B; line-height: 1.5; font-size: 15px;">
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="bi bi-info-circle-fill fs-5 text-danger flex-shrink-0 mt-0.5"></i>
+                            <span th:text="${errorMessage}">Nội dung thông báo</span>
+                        </div>
+                    </div>
+                    <p class="small text-muted mb-0" style="font-size: 13.5px;">
+                        Vui lòng kiểm tra lại thông tin nhận hàng để tiếp tục đặt hoa.
+                    </p>
+                </div>
+                <div class="modal-footer bg-light border-0 py-3 px-4 d-flex justify-content-center">
+                    <button type="button" class="btn rounded-pill px-5 py-2 fw-bold text-white shadow-sm" data-bs-dismiss="modal" 
+                            style="background-color: #355447; border-color: #355447; font-size: 14.5px;">
+                        Đã hiểu & Tiếp tục
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ==============================================
          FOOTER CHUẨN ĐỒNG BỘ THEO MẪU (BOTANICAL ATELIER)
          ============================================== -->
@@ -837,13 +883,25 @@
          * Khi thay đổi cách nhận hàng — ẩn/hiện đúng nhóm trường
          * ============================================================ */
         function toggleShippingMethod() {
-            const isPickup = document.getElementById('methodPickup').checked;
+            const isPickup = document.getElementById('methodPickup') && document.getElementById('methodPickup').checked;
             const sDelivery = document.getElementById('sectionDelivery');
             const sPickup   = document.getElementById('sectionPickup');
 
             // Ẩn/hiện toàn bộ khối
             if (sDelivery) sDelivery.classList.toggle('d-none', isPickup);
             if (sPickup)   sPickup.classList.toggle('d-none', !isPickup);
+
+            // Vô hiệu hóa các trường trong phần bị ẩn để trình duyệt không gửi trùng giá trị (vd: sđt người nhận bị lặp)
+            if (sDelivery) {
+                sDelivery.querySelectorAll('input, select, textarea').forEach(function(el) {
+                    el.disabled = isPickup;
+                });
+            }
+            if (sPickup) {
+                sPickup.querySelectorAll('input, select, textarea').forEach(function(el) {
+                    el.disabled = !isPickup;
+                });
+            }
 
             // Cập nhật required cho các trường quan trọng
             const addrInput   = document.getElementById('recipientAddressInput');
@@ -854,7 +912,7 @@
             const phonePickup   = document.getElementById('pickupPersonPhone');
 
             if (isPickup) {
-                if (addrInput)   { addrInput.removeAttribute('required');   addrInput.value = ''; }
+                if (addrInput)   { addrInput.removeAttribute('required'); }
                 if (pickupStore)   pickupStore.setAttribute('required', 'required');
                 if (nameDelivery)  nameDelivery.removeAttribute('required');
                 if (phoneDelivery) phoneDelivery.removeAttribute('required');
@@ -865,8 +923,8 @@
                 if (pickupStore) pickupStore.removeAttribute('required');
                 if (nameDelivery)  nameDelivery.setAttribute('required', 'required');
                 if (phoneDelivery) phoneDelivery.setAttribute('required', 'required');
-                if (namePickup)  { if (namePickup)  namePickup.removeAttribute('required'); }
-                if (phonePickup) { if (phonePickup) phonePickup.removeAttribute('required'); }
+                if (namePickup)  { namePickup.removeAttribute('required'); }
+                if (phonePickup) { phonePickup.removeAttribute('required'); }
             }
 
             // Khi chuyển về Giao tận nơi: bỏ khóa nút (khóa chỉ áp dụng cho chế độ Pickup)
@@ -1145,14 +1203,17 @@
         function updatePaymentStyle() {
             const isCod  = document.getElementById('pay_cod')  && document.getElementById('pay_cod').checked;
             const isBank = document.getElementById('pay_bank') && document.getElementById('pay_bank').checked;
+            const isMomo = document.getElementById('pay_momo') && document.getElementById('pay_momo').checked;
 
             const optCod  = document.getElementById('payOptionCod');
             const optBank = document.getElementById('payOptionBank');
+            const optMomo = document.getElementById('payOptionMomo');
             const descCod  = document.getElementById('desc_pay_cod');
             const descBank = document.getElementById('desc_pay_bank');
+            const descMomo = document.getElementById('desc_pay_momo');
             const btnPlaceOrder = document.getElementById('btnPlaceOrder');
 
-            if (optMomo) optMomo.classList.toggle('active', !!isMomo);
+            if (optMomo)  optMomo.classList.toggle('active', !!isMomo);
             if (descMomo) descMomo.classList.toggle('d-none', !isMomo);
             if (isCod) {
                 if (optCod)  optCod.classList.add('active');
@@ -1172,6 +1233,45 @@
         }
 
         /* ============================================================
+         * Kiểm tra tính hợp lệ của Số điện thoại khi ấn Đặt hàng
+         * ============================================================ */
+        const checkoutForm = document.getElementById('checkoutForm');
+        if (checkoutForm) {
+            checkoutForm.addEventListener('submit', function (e) {
+                const isPickup = document.getElementById('methodPickup') && document.getElementById('methodPickup').checked;
+                const phoneInput = isPickup ? document.getElementById('pickupPersonPhone') : document.getElementById('recipientPhoneInput');
+                if (phoneInput) {
+                    let phoneVal = phoneInput.value.trim().replace(/[\s.\-\(\)]/g, '');
+                    if (phoneVal.startsWith('+84')) {
+                        phoneVal = '0' + phoneVal.substring(3);
+                    } else if (phoneVal.startsWith('84') && phoneVal.length >= 11) {
+                        phoneVal = '0' + phoneVal.substring(2);
+                    }
+                    const phoneRegex = /^0[235789][0-9]{8,9}$/;
+                    if (!phoneRegex.test(phoneVal)) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (typeof window.showGlobalAlertModal === 'function') {
+                            window.showGlobalAlertModal({
+                                title: 'Thông Báo Cảnh Báo',
+                                message: 'Số điện thoại người nhận không hợp lệ (vui lòng nhập 10 chữ số, ví dụ: 0901234567).',
+                                isError: true,
+                                btnText: 'Đã hiểu & Tiếp tục',
+                                onClose: function () {
+                                    phoneInput.focus();
+                                }
+                            });
+                        } else {
+                            alert('Số điện thoại người nhận không hợp lệ (vui lòng nhập 10 chữ số, ví dụ: 0901234567).');
+                            phoneInput.focus();
+                        }
+                        return false;
+                    }
+                }
+            });
+        }
+
+        /* ============================================================
          * Khởi tạo trang
          * ============================================================ */
         document.addEventListener('DOMContentLoaded', function () {
@@ -1186,8 +1286,15 @@
                 }
             });
             updatePaymentStyle();
-            toggleShippingMethod(); // đảm bảo trạng thái ban đầu đúng
+            toggleShippingMethod(); // đảm bảo trạng thái ban đầu đúng và vô hiệu hóa đúng nhóm trường
             updateCheckoutTotal();
+
+            // Hiển thị modal thông báo cảnh báo nếu có lỗi từ server
+            var systemAlertEl = document.getElementById('systemAlertModal');
+            if (systemAlertEl) {
+                var systemAlertModal = new bootstrap.Modal(systemAlertEl);
+                systemAlertModal.show();
+            }
         });
     </script>
     <script th:src="@{/js/checkout-quote.js}"></script>

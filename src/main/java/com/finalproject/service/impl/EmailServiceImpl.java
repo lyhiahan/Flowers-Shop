@@ -18,6 +18,9 @@ public class EmailServiceImpl implements EmailService {
     @Value("${spring.mail.password:}")
     private String mailPassword;
 
+    @Value("${spring.mail.username:}")
+    private String fromEmail;
+
     @Override
     public void sendOtpEmail(String toEmail, String otpCode) {
         // Luôn in mã OTP ra Console / Terminal Spring Tool để theo dõi và hỗ trợ kiểm thử
@@ -35,6 +38,9 @@ public class EmailServiceImpl implements EmailService {
         }
 
         SimpleMailMessage message = new SimpleMailMessage();
+        if (fromEmail != null && !fromEmail.isBlank()) {
+            message.setFrom(fromEmail);
+        }
         message.setTo(toEmail);
         message.setSubject("Mã xác thực - Cửa hàng hoa tươi");
         message.setText("Mã xác thực của bạn: " + otpCode
