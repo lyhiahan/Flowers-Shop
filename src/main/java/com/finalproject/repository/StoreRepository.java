@@ -16,6 +16,7 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
     org.springframework.data.domain.Page<Store> findByStatusTrue(org.springframework.data.domain.Pageable pageable);
     List<Store> findByOwnerId(Long ownerId);
     Optional<Store> findByName(String name);
+    Optional<Store> findFirstByNameOrderByIdAsc(String name);
     long countByStatus(Boolean status);
 
     @org.springframework.data.jpa.repository.Query("SELECT s FROM Store s WHERE s.status = true AND (LOWER(s.name) LIKE LOWER(CONCAT('%', :kw, '%')) OR LOWER(s.address) LIKE LOWER(CONCAT('%', :kw, '%')))")

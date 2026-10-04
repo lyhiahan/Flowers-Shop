@@ -13,6 +13,7 @@ public class StoreLevel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @org.hibernate.annotations.Nationalized
     @Column(nullable = false, unique = true, length = 32)
     private String name; // Tiêu Chuẩn, Bạc, Vàng, Đối Tác Kim Cương
 
@@ -23,7 +24,7 @@ public class StoreLevel {
     @Builder.Default
     private BigDecimal discount = BigDecimal.ZERO; // Giảm phí sàn
 
-    @Column(name = "is_deleted", nullable = false)
+    @Column(name = "is_deleted")
     @Builder.Default
     private Boolean isDeleted = false;
 

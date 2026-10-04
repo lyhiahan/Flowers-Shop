@@ -166,33 +166,10 @@ public class AdminOrderManagementController {
         }
 
         // BƯỚC 8 THEO UC_029: Kiểm tra nếu đơn hàng đã bàn giao cho đơn vị vận chuyển
-        boolean isHandedOverToDelivery = (order.getStatus() == OrderStatus.DELIVERING || order.getStatus() == OrderStatus.PICKED_UP);
+        boolean isHandedOverToDelivery = order.getStatus() != null && (order.getStatus() == OrderStatus.DELIVERING || order.getStatus() == OrderStatus.PICKED_UP);
 
-        List<StatusOption> availableStatuses = new ArrayList<>();
-        if (isHandedOverToDelivery) {
-            availableStatuses.add(new StatusOption(OrderStatus.DELIVERED.name(), "📦 Đã giao hàng thành công (DELIVERED)"));
-            availableStatuses.add(new StatusOption(OrderStatus.COMPLETED.name(), "🎉 Hoàn tất đơn hàng (COMPLETED)"));
-            availableStatuses.add(new StatusOption(OrderStatus.CANCELLED.name(), "❌ Hủy đơn hàng (CANCELLED)"));
-        } else {
-            switch (order.getStatus()) {
-                case PENDING -> {
-                    availableStatuses.add(new StatusOption(OrderStatus.CONFIRMED.name(), "✅ Tiếp nhận đơn hàng (CONFIRMED)"));
-                    availableStatuses.add(new StatusOption(OrderStatus.CANCELLED.name(), "❌ Hủy đơn hàng (CANCELLED)"));
-                }
-                case CONFIRMED -> {
-                    availableStatuses.add(new StatusOption(OrderStatus.PREPARING.name(), "🌸 Bắt đầu cắm hoa & Chuẩn bị (PREPARING)"));
-                    availableStatuses.add(new StatusOption(OrderStatus.CANCELLED.name(), "❌ Hủy đơn hàng (CANCELLED)"));
-                }
-                case PREPARING -> {
-                    availableStatuses.add(new StatusOption(OrderStatus.DELIVERING.name(), "🚚 Bàn giao cho Đơn vị vận chuyển (DELIVERING)"));
-                    availableStatuses.add(new StatusOption(OrderStatus.CANCELLED.name(), "❌ Hủy đơn hàng (CANCELLED)"));
-                }
-                case DELIVERED -> {
-                    availableStatuses.add(new StatusOption(OrderStatus.COMPLETED.name(), "🎉 Hoàn tất đơn hàng (COMPLETED)"));
-                }
-                default -> {}
-            }
-        }
+        List<StatusOption> availableStatuses = workflow.availableTransitions(order).stream()
+                .map(next -> new StatusOption(next.name(), workflow.transitionLabel(order, next))).toList();
 
         model.addAttribute("order", order);
         model.addAttribute("isHandedOverToDelivery", isHandedOverToDelivery);
@@ -225,19 +202,24 @@ public class AdminOrderManagementController {
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
-        if (redirectUrl != null && !redirectUrl.trim().isEmpty()) {
+        if (com.finalproject.utils.SafeRedirect.isWithin(redirectUrl, "/admin/orders")) {
             return "redirect:" + redirectUrl;
         }
         return "redirect:/admin/orders-manage/" + id;
     }
 
     @PostMapping("/confirm-payment/{id}")
-    public String confirmPayment(@PathVariable("id") Long id, RedirectAttributes ra) {
+    public String confirmPayment(@PathVariable("id") Long id,
+                                 @RequestParam(value = "redirect", required = false) String redirectUrl,
+                                 RedirectAttributes ra) {
         try {
             workflow.confirmPayment(id);
             ra.addFlashAttribute("successMessage", "Đã xác nhận thanh toán đơn #" + id);
         } catch (RuntimeException ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        if (com.finalproject.utils.SafeRedirect.isWithin(redirectUrl, "/admin/orders-manage", "/admin/orders")) {
+            return "redirect:" + redirectUrl;
         }
         return "redirect:/admin/orders-manage";
     }

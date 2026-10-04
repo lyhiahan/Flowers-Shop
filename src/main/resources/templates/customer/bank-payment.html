@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/floral :: head('Hướng dẫn chuyển khoản ngân hàng')}"></head>
+<body>
+<header th:replace="~{fragments/floral :: header}"></header>
+<main class="container py-5 floral-page" style="max-width:960px;">
+    <div class="d-flex gap-3 align-items-center mb-2">
+        <i class="bi bi-check-circle text-success fs-1"></i><h1 class="h2 mb-0">Đặt hàng thành công</h1>
+    </div>
+    <p class="text-muted mb-4">Mã đơn hàng #<strong th:text="${transferContent}"></strong></p>
+    <section class="card shadow-sm overflow-hidden">
+        <div class="card-header bg-white text-center py-3"><h2 class="h5 mb-0">Hướng dẫn thanh toán qua chuyển khoản ngân hàng</h2></div>
+        <div class="row g-0" id="bankTransferInstructions" th:if="${order.paymentStatus == 'UNPAID' and order.status.name() != 'CANCELLED' and order.status.name() != 'REFUNDED'}">
+            <div class="col-md-6 p-4 text-center border-end">
+                <h3 class="h6 fw-bold">Cách 1: Mở ứng dụng ngân hàng và quét mã QR</h3>
+                <div class="bank-qr-crop mx-auto my-4" role="img" aria-label="Mã QR tài khoản Techcombank BUI THANH PHUC 3337110941">
+                    <img th:src="@{/images/bank-transfer-techcombank.jpg}" alt="" class="bank-qr-source">
+                </div>
+                <p class="small text-muted">VietQR · NAPAS 247 · Techcombank</p>
+                <p class="small">QR chứa tài khoản nhận. Sau khi quét, nhập đúng số tiền và nội dung chuyển khoản ở bên cạnh.</p>
+            </div>
+            <div class="col-md-6 p-4">
+                <h3 class="h6 fw-bold mb-4">Cách 2: Chuyển khoản thủ công theo thông tin</h3>
+                <p class="h4 text-center fw-bold mb-4" th:text="${bank.bankName}"></p>
+                <dl class="bank-transfer-details">
+                    <div><dt>Chủ tài khoản</dt><dd th:text="${bank.accountName}"></dd></div>
+                    <div><dt>Số tài khoản</dt><dd th:text="${bank.accountNumber}"></dd></div>
+                    <div><dt>Số tiền</dt><dd th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></dd></div>
+                    <div><dt>Nội dung CK</dt><dd th:text="${transferContent}"></dd></div>
+                </dl>
+                <div class="alert alert-light border small">Giữ nguyên nội dung <strong th:text="${transferContent}"></strong> để cửa hàng đối chiếu giao dịch. Thanh toán được xác nhận sau khi cửa hàng nhận và kiểm tra tiền.</div>
+            </div>
+        </div>
+        <div class="card-footer bg-white p-3 text-center">
+            <p id="bankPaymentStatus" class="mb-2 fw-semibold" role="status" aria-live="polite"
+               th:data-status-url="@{/checkout/bank/{id}/status(id=${order.id})}"
+               th:data-payment-status="${order.paymentStatus}" th:data-order-status="${order.status.name()}"></p>
+            <a th:href="@{/customer/orders/detail/{id}(id=${order.id})}" class="btn btn-outline-success btn-sm">Xem chi tiết đơn</a>
+            <a th:href="@{/customer/orders}" class="btn btn-outline-secondary btn-sm">Danh sách đơn hàng</a>
+        </div>
+    </section>
+</main>
+<footer th:replace="~{fragments/floral :: footer}"></footer>
+<div th:replace="~{fragments/floral :: scripts}"></div>
+<script th:src="@{/js/bank-payment.js}"></script>
+</body>
+</html>

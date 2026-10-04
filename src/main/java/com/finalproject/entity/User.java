@@ -19,6 +19,7 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @org.hibernate.annotations.Nationalized
     @Column(nullable = false, length = 100)
     private String fullName;
 
@@ -28,6 +29,7 @@ public class User {
     @Column(length = 20)
     private String phone;
 
+    @org.hibernate.annotations.Nationalized
     @Column(length = 255)
     private String address;
 

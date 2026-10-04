@@ -17,4 +17,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Transaction> findAllByOrderByCreatedAtDesc();
     org.springframework.data.domain.Page<Transaction> findAllByOrderByCreatedAtDesc(org.springframework.data.domain.Pageable pageable);
     org.springframework.data.domain.Page<Transaction> findByDescriptionContainingIgnoreCaseOrderByCreatedAtDesc(String keyword, org.springframework.data.domain.Pageable pageable);
+    org.springframework.data.domain.Page<Transaction> findAllByOrderByCreatedAtDescIdDesc(org.springframework.data.domain.Pageable pageable);
+    org.springframework.data.domain.Page<Transaction> findByDescriptionContainingIgnoreCaseOrderByCreatedAtDescIdDesc(String keyword, org.springframework.data.domain.Pageable pageable);
 }

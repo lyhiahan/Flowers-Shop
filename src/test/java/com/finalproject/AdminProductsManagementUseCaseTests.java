@@ -251,4 +251,107 @@ class AdminProductsManagementUseCaseTests {
                 .andExpect(content().string(containsString("id=\"dataLoadAlert\"")))
                 .andExpect(content().string(containsString("Không thể tải danh sách sản phẩm. Vui lòng thử lại!")));
     }
+
+    /**
+     * Kiểm thử hiển thị cột thao tác cố định sticky-col-right và đầy đủ các nút [Chi tiết], [Sửa], [⋯]
+     */
+    @Test
+    @WithMockUser(username = "admin_uc28", roles = {"ADMIN"})
+    void testActionColumn_DisplaysStickyAndAllActions() throws Exception {
+        mockMvc.perform(get("/admin/products-manage"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("sticky-col-right")))
+                .andExpect(content().string(containsString("Chi tiết")))
+                .andExpect(content().string(containsString("Sửa")))
+                .andExpect(content().string(containsString("bi-three-dots")))
+                .andExpect(content().string(containsString("Ngừng bán")))
+                .andExpect(content().string(containsString("Xóa sản phẩm")));
+    }
+
+    /**
+     * Kiểm thử luồng Sửa sản phẩm: Mở biểu mẫu điền sẵn thông tin hiện tại, số lượng đã bán readonly
+     */
+    @Test
+    @WithMockUser(username = "admin_uc28", roles = {"ADMIN"})
+    void testEditProduct_ShowFormWithExistingData() throws Exception {
+        mockMvc.perform(get("/admin/products-manage/edit/" + licensedProduct1.getId())
+                        .param("returnUrl", "/admin/products-manage?page=0&tab=ALL"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/product-form"))
+                .andExpect(model().attribute("isEdit", true))
+                .andExpect(model().attributeExists("productForm"))
+                .andExpect(model().attribute("productForm", org.hamcrest.Matchers.hasProperty("name", org.hamcrest.Matchers.equalTo(licensedProduct1.getName()))))
+                .andExpect(model().attribute("productForm", org.hamcrest.Matchers.hasProperty("sold", org.hamcrest.Matchers.equalTo(10))))
+                .andExpect(content().string(containsString("Chỉnh Sửa Sản Phẩm #" + licensedProduct1.getId())))
+                .andExpect(content().string(containsString("Hoa Hồng Đỏ")))
+                .andExpect(content().string(containsString("10 s")))
+                .andExpect(content().string(containsString("Lưu thay đổi")));
+    }
+
+    /**
+     * Kiểm thử luồng Sửa sản phẩm: Lưu thay đổi và redirect về đúng returnUrl
+     */
+    @Test
+    @WithMockUser(username = "admin_uc28", roles = {"ADMIN"})
+    void testEditProduct_SaveUpdatesAndRedirectToReturnUrl() throws Exception {
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/admin/products-manage/edit/" + licensedProduct1.getId())
+                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("name", "Bó Hoa Hồng Đỏ Đã Cập Nhật")
+                        .param("categoryId", category.getId().toString())
+                        .param("importPrice", "180000")
+                        .param("priceBuy", "290000")
+                        .param("description", "Mô tả mới đã chỉnh sửa")
+                        .param("isSelling", "true")
+                        .param("isActive", "true")
+                        .param("returnUrl", "/admin/products-manage?tab=ALL&page=0"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/products-manage?tab=ALL&page=0"))
+                .andExpect(flash().attributeExists("successMessage"));
+
+        Product updated = productRepository.findById(licensedProduct1.getId()).orElseThrow();
+        org.junit.jupiter.api.Assertions.assertEquals("Bó Hoa Hồng Đỏ Đã Cập Nhật", updated.getName());
+        org.junit.jupiter.api.Assertions.assertEquals(new BigDecimal("290000"), updated.getPriceBuy());
+        org.junit.jupiter.api.Assertions.assertEquals(10, updated.getSold()); // Số lượng đã bán được bảo toàn
+    }
+
+    /**
+     * Kiểm thử thao tác Ngừng bán / Mở bán lại sản phẩm
+     */
+    @Test
+    @WithMockUser(username = "admin_uc28", roles = {"ADMIN"})
+    void testToggleSellingProduct() throws Exception {
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/admin/products-manage/toggle-selling/" + licensedProduct1.getId())
+                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("returnUrl", "/admin/products-manage?page=0"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/products-manage?page=0"))
+                .andExpect(flash().attributeExists("successMessage"));
+
+        Product toggled = productRepository.findById(licensedProduct1.getId()).orElseThrow();
+        org.junit.jupiter.api.Assertions.assertFalse(toggled.getIsSelling());
+    }
+
+    /**
+     * Kiểm thử thao tác Xóa sản phẩm: Xóa mềm (isDeleted = true), bảo toàn entity và dữ liệu đơn hàng
+     */
+    @Test
+    @WithMockUser(username = "admin_uc28", roles = {"ADMIN"})
+    void testSoftDeleteProduct() throws Exception {
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/admin/products-manage/delete/" + licensedProduct1.getId())
+                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("returnUrl", "/admin/products-manage?page=0"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/products-manage?page=0"))
+                .andExpect(flash().attributeExists("successMessage"));
+
+        Product softDeleted = productRepository.findById(licensedProduct1.getId()).orElseThrow();
+        org.junit.jupiter.api.Assertions.assertTrue(softDeleted.getIsDeleted());
+        org.junit.jupiter.api.Assertions.assertFalse(softDeleted.getIsSelling());
+        org.junit.jupiter.api.Assertions.assertFalse(softDeleted.getIsActive());
+
+        // Kiểm tra sản phẩm đã xóa không còn xuất hiện trong danh sách hiển thị
+        mockMvc.perform(get("/admin/products-manage"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("Bó Hoa Hồng Đỏ Cấp Phép UC28"))));
+    }
 }

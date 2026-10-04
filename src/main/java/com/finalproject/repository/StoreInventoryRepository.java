@@ -13,6 +13,10 @@ import java.util.Optional;
 public interface StoreInventoryRepository extends JpaRepository<StoreInventory, Long> {
     Optional<StoreInventory> findByStoreIdAndProductId(Long storeId, Long productId);
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT si FROM StoreInventory si WHERE si.store.id = :storeId AND si.product.id = :productId")
+    Optional<StoreInventory> findLockedStock(@Param("storeId") Long storeId, @Param("productId") Long productId);
+
     List<StoreInventory> findByStoreId(Long storeId);
 
     long countByStoreIdAndQuantityLessThanEqual(Long storeId, Integer threshold);

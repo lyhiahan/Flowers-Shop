@@ -13,6 +13,7 @@ public class UserLevel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @org.hibernate.annotations.Nationalized
     @Column(nullable = false, unique = true, length = 32)
     private String name; // Đồng, Bạc, Vàng, Kim Cương
 
@@ -23,7 +24,7 @@ public class UserLevel {
     @Builder.Default
     private BigDecimal discount = BigDecimal.ZERO;
 
-    @Column(name = "is_deleted", nullable = false)
+    @Column(name = "is_deleted")
     @Builder.Default
     private Boolean isDeleted = false;
 

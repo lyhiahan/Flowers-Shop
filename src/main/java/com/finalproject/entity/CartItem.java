@@ -36,6 +36,7 @@ public class CartItem {
     private LocalDate rentEndDate;
 
     private LocalDate deliveryDate; // Ngày nhận/giao hoa
+    @org.hibernate.annotations.Nationalized
     @Column(length = 500)
     private String greetingMessage; // Lời chúc trên thiệp/banner hoa tươi
 

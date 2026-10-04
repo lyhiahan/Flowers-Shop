@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thông Báo Của Tôi - Hoa Tươi Sài Gòn</title>
@@ -71,7 +72,7 @@
             <h2 class="font-serif fw-bold text-dark mb-1">Trung Tâm Thông Báo</h2>
             <p class="text-muted small mb-0">Cập nhật tiến độ đơn hàng và giao dịch của bạn</p>
         </div>
-        <button th:if="${unreadCount > 0}" onclick="markAllRead()" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+        <button th:if="${unreadCount > 0}" onclick="markAllRead(this)" class="btn btn-sm btn-outline-danger rounded-pill px-3">
             <i class="bi bi-check2-all me-1"></i> Đánh dấu đã đọc tất cả
         </button>
     </div>
@@ -134,32 +135,40 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    function markOneRead(btn) {
+    async function readNotification(url) {
+        const response = await fetch(url, { method: 'POST', keepalive: true });
+        if (!response.ok || response.redirected) throw new Error('Không cập nhật được thông báo. Vui lòng thử lại.');
+        return response.json();
+    }
+    async function markOneRead(btn) {
+        if (btn.disabled) return;
+        btn.disabled = true;
         const id = btn.getAttribute('data-id');
-        fetch('/api/notifications/read/' + id, { method: 'POST' })
-            .then(res => res.json())
-            .then(() => {
+        try {
+            await readNotification('/api/notifications/read/' + id);
                 const card = document.getElementById('notif_' + id);
                 if (card) {
                     card.classList.remove('unread');
                     btn.remove();
                 }
-            });
+        } catch (error) { alert(error.message); }
+        finally { btn.disabled = false; }
     }
 
     function markReadDirect(link) {
         const id = link.getAttribute('data-id');
         if (id) {
-            fetch('/api/notifications/read/' + id, { method: 'POST' });
+            readNotification('/api/notifications/read/' + id).catch(error => console.warn(error.message));
         }
     }
 
-    function markAllRead() {
-        fetch('/api/notifications/read-all', { method: 'POST' })
-            .then(res => res.json())
-            .then(() => {
-                location.reload();
-            });
+    async function markAllRead(btn) {
+        if (btn.disabled) return;
+        btn.disabled = true;
+        try {
+            await readNotification('/api/notifications/read-all');
+            location.reload();
+        } catch (error) { alert(error.message); btn.disabled = false; }
     }
 </script>
 </body>

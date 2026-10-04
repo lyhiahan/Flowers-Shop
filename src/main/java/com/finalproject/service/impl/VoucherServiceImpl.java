@@ -17,13 +17,15 @@ import java.util.List;
 public class VoucherServiceImpl implements VoucherService {
 
     private final VoucherRepository voucherRepository;
+    private final jakarta.persistence.EntityManager entityManager;
 
     @Override
     @Transactional
     public Voucher findByCode(String code) {
         if (code == null || code.trim().isEmpty()) return null;
-        return voucherRepository.findByCodeAndIsActiveTrue(code.trim().toUpperCase())
-                .orElse(null);
+        Voucher voucher = voucherRepository.findByCodeAndIsActiveTrue(code.trim().toUpperCase(java.util.Locale.ROOT)).orElse(null);
+        if (voucher != null) entityManager.refresh(voucher, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        return voucher;
     }
 
     @Override
@@ -76,7 +78,8 @@ public class VoucherServiceImpl implements VoucherService {
         }
 
         // Ràng buộc bảo toàn: Đảm bảo khi áp mã giảm giá thì đơn hàng không bị giảm thấp hơn giá nhập gốc
-        if (minAllowedAmount != null && minAllowedAmount.compareTo(BigDecimal.ZERO) > 0) {
+        if (!"FREE_SHIP".equalsIgnoreCase(voucher.getDiscountType())
+                && minAllowedAmount != null && minAllowedAmount.compareTo(BigDecimal.ZERO) > 0) {
             BigDecimal maxAllowedDiscount = orderAmount.subtract(minAllowedAmount).max(BigDecimal.ZERO);
             if (discount.compareTo(maxAllowedDiscount) > 0) {
                 discount = maxAllowedDiscount;

@@ -204,7 +204,7 @@ public class ManagerOrderController {
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
-        if (redirectUrl != null && !redirectUrl.trim().isEmpty()) {
+        if (com.finalproject.utils.SafeRedirect.isWithin(redirectUrl, "/manager/orders", "/vendor/orders")) {
             return "redirect:" + redirectUrl;
         }
         return "redirect:/manager/orders/" + id;
@@ -220,7 +220,7 @@ public class ManagerOrderController {
         } catch (RuntimeException ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
-        if (redirectUrl != null && !redirectUrl.trim().isEmpty()) {
+        if (com.finalproject.utils.SafeRedirect.isWithin(redirectUrl, "/manager/orders", "/vendor/orders")) {
             return "redirect:" + redirectUrl;
         }
         return "redirect:/manager/orders";
@@ -237,53 +237,15 @@ public class ManagerOrderController {
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
-        if (redirectUrl != null && !redirectUrl.trim().isEmpty()) {
+        if (com.finalproject.utils.SafeRedirect.isWithin(redirectUrl, "/manager/orders", "/vendor/orders")) {
             return "redirect:" + redirectUrl;
         }
         return "redirect:/manager/orders";
     }
 
     private List<StatusOption> getAvailableStatuses(Order order) {
-        List<StatusOption> options = new ArrayList<>();
-        if (order == null || order.getStatus() == null) return options;
-
-        boolean isPickup = "PICKUP".equals(order.getShippingMethod());
-
-        switch (order.getStatus()) {
-            case PENDING -> {
-                options.add(new StatusOption(OrderStatus.CONFIRMED.name(), "✅ Tiếp nhận đơn hàng (CONFIRMED)"));
-                options.add(new StatusOption(OrderStatus.CANCELLED.name(), "❌ Hủy đơn hàng (CANCELLED)"));
-            }
-            case CONFIRMED -> {
-                options.add(new StatusOption(OrderStatus.PREPARING.name(), "🌸 Bắt đầu cắm hoa & Chuẩn bị (PREPARING)"));
-                options.add(new StatusOption(OrderStatus.CANCELLED.name(), "❌ Hủy đơn hàng (CANCELLED)"));
-            }
-            case PREPARING -> {
-                if (isPickup) {
-                    options.add(new StatusOption(OrderStatus.COMPLETED.name(), "🎉 Khách nhận hoa tại quầy - Hoàn tất (COMPLETED)"));
-                } else {
-                    options.add(new StatusOption(OrderStatus.DELIVERING.name(), "🚚 Đang giao hoa đến khách (DELIVERING)"));
-                }
-                options.add(new StatusOption(OrderStatus.CANCELLED.name(), "❌ Hủy đơn hàng (CANCELLED)"));
-            }
-            case PICKED_UP -> {
-                options.add(new StatusOption(OrderStatus.DELIVERING.name(), "🚚 Đang giao hoa đến khách (DELIVERING)"));
-            }
-            case DELIVERING -> {
-                options.add(new StatusOption(OrderStatus.DELIVERED.name(), "📦 Đã giao hoa thành công (DELIVERED)"));
-                options.add(new StatusOption(OrderStatus.COMPLETED.name(), "🎉 Hoàn tất đơn hàng (COMPLETED)"));
-            }
-            case DELIVERED -> {
-                options.add(new StatusOption(OrderStatus.COMPLETED.name(), "🎉 Hoàn tất đơn hàng (COMPLETED)"));
-            }
-            case REFUND_REQUESTED -> {
-                options.add(new StatusOption(OrderStatus.REFUNDED.name(), "💵 Xác nhận đã hoàn tiền cho khách (REFUNDED)"));
-            }
-            default -> {
-                // Đơn đã hoàn tất hoặc đã hủy
-            }
-        }
-        return options;
+        return workflow.availableTransitions(order).stream()
+                .map(next -> new StatusOption(next.name(), workflow.transitionLabel(order, next))).toList();
     }
 
     private Store resolveStore(User user) {

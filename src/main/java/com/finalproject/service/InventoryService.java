@@ -13,6 +13,7 @@ public class InventoryService {
     private final StoreAccessService access;
     private final ProductRepository products;
     private final StoreInventoryRepository inventories;
+    private final jakarta.persistence.EntityManager entityManager;
 
     @Transactional
     public void setStock(Long productId, int quantity) {
@@ -20,8 +21,9 @@ public class InventoryService {
         var product = products.findById(productId).orElseThrow();
         access.requireManager(product.getStore());
         var store = access.assignedStore();
-        var inventory = inventories.findByStoreIdAndProductId(store.getId(), productId)
+        var inventory = inventories.findLockedStock(store.getId(), productId)
                 .orElseGet(() -> StoreInventory.builder().store(store).product(product).quantity(0).build());
+        if (inventory.getId() != null) entityManager.refresh(inventory, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
         inventory.setQuantity(quantity);
         inventories.save(inventory);
     }

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
     <title th:text="'Chi Tiết Đơn Hàng #' + ${order.id} + ' - Kênh Cửa Hàng'">Chi Tiết Đơn Hàng - Kênh Cửa Hàng</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -181,11 +182,9 @@
                                 <tr th:each="d : ${order.orderDetails}">
                                     <td>
                                         <div class="d-flex align-items-center gap-3">
-                                            <img th:if="${d.product.images != null and !d.product.images.isEmpty()}" 
-                                                 th:src="${d.product.images[0]}" 
+                                            <img th:src="${#strings.isEmpty(d.product.imageUrl) ? '/images/flower-logo.png' : d.product.imageUrl}"
+                                                 onerror="this.onerror=null; this.src='/images/flower-logo.png';"
                                                  alt="Hoa" class="flower-item-thumb">
-                                            <div th:if="${d.product.images == null or d.product.images.isEmpty()}" 
-                                                 class="flower-item-thumb d-flex align-items-center justify-content-center fs-4">🌸</div>
                                             <div>
                                                 <div class="fw-bold" style="font-size: 15.5px; color: #20382E;" th:text="${d.product.name}">Hoa Bó</div>
                                                 <small class="text-muted" th:text="${d.orderType == 'RENT' ? 'Dịch vụ: Thuê mẫu hoa/phụ kiện' : 'Mua mẫu hoa tươi'}">Mua mẫu hoa</small>
@@ -193,8 +192,8 @@
                                         </div>
                                     </td>
                                     <td class="text-center fw-bold" th:text="${d.quantity}">1</td>
-                                    <td class="text-end text-muted" th:text="${#numbers.formatDecimal(d.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'">100.000 ₫</td>
-                                    <td class="text-end fw-bold text-dark" th:text="${#numbers.formatDecimal(d.price * d.quantity, 0, 'COMMA', 0, 'POINT')} + ' ₫'">100.000 ₫</td>
+                                    <td class="text-end text-muted" th:text="${#numbers.formatDecimal(d.unitPrice, 0, 'COMMA', 0, 'POINT')} + ' ₫'">100.000 ₫</td>
+                                    <td class="text-end fw-bold text-dark" th:text="${#numbers.formatDecimal(d.subtotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">100.000 ₫</td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -433,6 +432,7 @@
     </div>
 </div>
 
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // Hàm kích hoạt Modal Xác nhận Cập nhật Trạng thái (Bước 12 & 13)
@@ -454,4 +454,4 @@
     }
 </script>
 </body>
-</html>
+</html><div class="container mb-4"><div class="card p-3"><div class="d-flex flex-wrap gap-4"><span>Phí giao hàng: <strong th:text="${#numbers.formatDecimal(order.shippingFee != null ? order.shippingFee : 0,0,'COMMA',0,'POINT')} + ' ₫'"></strong></span><span>Giảm giá: <strong th:text="${#numbers.formatDecimal(order.discountAmount != null ? order.discountAmount : 0,0,'COMMA',0,'POINT')} + ' ₫'"></strong></span></div></div></div>

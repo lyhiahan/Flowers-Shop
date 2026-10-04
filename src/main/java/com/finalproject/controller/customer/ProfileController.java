@@ -239,7 +239,7 @@ public class ProfileController {
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
-        return "redirect:/customer/profile";
+        return "redirect:/customer/profile?tab=address";
     }
 
     @PostMapping({"/address/update/{id}", "/profile/address/update/{id}"})
@@ -257,7 +257,7 @@ public class ProfileController {
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
-        return "redirect:/customer/profile";
+        return "redirect:/customer/profile?tab=address";
     }
 
     @PostMapping({"/address/delete/{id}", "/profile/address/delete/{id}"})
@@ -269,7 +269,7 @@ public class ProfileController {
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
-        return "redirect:/customer/profile";
+        return "redirect:/customer/profile?tab=address";
     }
 
     @PostMapping({"/address/set-default/{id}", "/profile/address/set-default/{id}"})
@@ -281,7 +281,7 @@ public class ProfileController {
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
-        return "redirect:/customer/profile";
+        return "redirect:/customer/profile?tab=address";
     }
 
     @GetMapping({"/wishlist", "/profile/wishlist"})

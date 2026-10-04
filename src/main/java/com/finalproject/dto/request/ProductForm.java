@@ -24,16 +24,19 @@ public class ProductForm {
     private Long categoryId;
 
     @NotBlank(message = "Vui lòng điền tên sản phẩm")
+    @jakarta.validation.constraints.Size(max = 200, message = "Tên sản phẩm tối đa 200 ký tự")
     private String name;
 
     private String description;
 
     @NotNull(message = "Vui lòng điền giá nhập hàng")
     @DecimalMin(value = "0.0", inclusive = false, message = "Giá nhập hàng phải lớn hơn 0")
+    @jakarta.validation.constraints.Digits(integer = 16, fraction = 2, message = "Giá nhập tối đa 16 chữ số và 2 số thập phân")
     private BigDecimal importPrice;
 
     @NotNull(message = "Vui lòng điền giá bán")
     @DecimalMin(value = "0.0", inclusive = false, message = "Giá bán đứt phải là số dương lớn hơn 0. Vui lòng nhập lại.")
+    @jakarta.validation.constraints.Digits(integer = 16, fraction = 2, message = "Giá bán tối đa 16 chữ số và 2 số thập phân")
     private BigDecimal priceBuy;
 
     private BigDecimal priceRentPerDay = BigDecimal.ZERO;
@@ -49,4 +52,22 @@ public class ProductForm {
 
     // Cờ xác nhận bán lỗ có chủ đích khi Admin chọn [YES] trên cảnh báo Modal
     private boolean confirmSellAtLoss = false;
+
+    // Cửa hàng hoặc phạm vi áp dụng (null = Toàn hệ thống)
+    private Long storeId;
+
+    // Trạng thái kinh doanh / Trạng thái bán
+    private Boolean isSelling = true;
+
+    // Trạng thái cấp phép / hoạt động
+    private Boolean isActive = true;
+
+    // Ảnh chính hiện tại (dùng để xem trước khi chỉnh sửa)
+    private String imageUrl;
+
+    // Số lượng đã bán (chỉ đọc, tính từ đơn hàng)
+    private Integer sold = 0;
+
+    // Đường dẫn quay lại sau khi lưu / hủy để giữ nguyên bộ lọc và phân trang
+    private String returnUrl;
 }

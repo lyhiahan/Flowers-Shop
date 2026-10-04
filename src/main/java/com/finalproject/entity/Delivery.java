@@ -13,9 +13,11 @@ public class Delivery {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @org.hibernate.annotations.Nationalized
     @Column(nullable = false, unique = true, length = 100)
     private String name; // GrabExpress Hỏa Tốc, Giao Hàng Tiết Kiệm, AhaMove, Shipper Nội Bộ
 
+    @org.hibernate.annotations.Nationalized
     @Column(length = 1000)
     private String description;
 
@@ -27,7 +29,7 @@ public class Delivery {
     @Builder.Default
     private Boolean isActive = true;
 
-    @Column(name = "is_deleted", nullable = false)
+    @Column(name = "is_deleted")
     @Builder.Default
     private Boolean isDeleted = false;
 

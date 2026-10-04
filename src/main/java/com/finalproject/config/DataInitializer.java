@@ -29,6 +29,7 @@ public class DataInitializer implements CommandLineRunner {
     private final StoreLevelRepository storeLevelRepository;
     private final CommissionRepository commissionRepository;
     private final StyleRepository styleRepository;
+    private final StyleValueRepository styleValueRepository;
     private final ReviewRepository reviewRepository;
     private final PasswordEncoder passwordEncoder;
     private final ProductSeederService productSeederService;
@@ -36,8 +37,8 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // 1. Tạo hoặc cập nhật 3 chi nhánh mẫu sang tiếng Việt thuần
-        Store storeA = storeRepository.findByName("Chi Nhánh Bến Thành (Quận 1)")
-                .orElseGet(() -> storeRepository.findByName("Bloom Flower - Chi Nhánh Bến Thành (Quận 1)")
+        Store storeA = storeRepository.findFirstByNameOrderByIdAsc("Chi Nhánh Bến Thành (Quận 1)")
+                .orElseGet(() -> storeRepository.findFirstByNameOrderByIdAsc("Bloom Flower - Chi Nhánh Bến Thành (Quận 1)")
                         .map(s -> {
                             s.setName("Chi Nhánh Bến Thành (Quận 1)");
                             return storeRepository.save(s);
@@ -52,8 +53,8 @@ public class DataInitializer implements CommandLineRunner {
                                 .eWallet(new BigDecimal("15500000"))
                                 .build())));
 
-        Store storeB = storeRepository.findByName("Chi Nhánh Phú Mỹ Hưng (Quận 7)")
-                .orElseGet(() -> storeRepository.findByName("Bloom Flower - Chi Nhánh Phú Mỹ Hưng (Quận 7)")
+        Store storeB = storeRepository.findFirstByNameOrderByIdAsc("Chi Nhánh Phú Mỹ Hưng (Quận 7)")
+                .orElseGet(() -> storeRepository.findFirstByNameOrderByIdAsc("Bloom Flower - Chi Nhánh Phú Mỹ Hưng (Quận 7)")
                         .map(s -> {
                             s.setName("Chi Nhánh Phú Mỹ Hưng (Quận 7)");
                             return storeRepository.save(s);
@@ -68,8 +69,8 @@ public class DataInitializer implements CommandLineRunner {
                                 .eWallet(new BigDecimal("8200000"))
                                 .build())));
 
-        Store storeC = storeRepository.findByName("Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
-                .orElseGet(() -> storeRepository.findByName("Bloom Flower - Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
+        Store storeC = storeRepository.findFirstByNameOrderByIdAsc("Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
+                .orElseGet(() -> storeRepository.findFirstByNameOrderByIdAsc("Bloom Flower - Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
                         .map(s -> {
                             s.setName("Chi Nhánh Làng Đại Học (TP. Thủ Đức)");
                             return storeRepository.save(s);
@@ -278,13 +279,8 @@ public class DataInitializer implements CommandLineRunner {
             commissionRepository.save(Commission.builder().name("Gói Đối Tác Chiến Lược").cost(new BigDecimal("5")).description("Tỷ lệ chiết khấu đặc biệt 5% cho chuỗi phân phối hoa tươi lớn").isDeleted(false).build());
         }
 
-        // Nhóm thuộc tính sản phẩm (Styles) - Tên ngắn gọn <= 30 ký tự để phù hợp giới hạn cột DB
-        if (styleRepository.count() == 0) {
-            styleRepository.save(Style.builder().name("Tone màu hoa").isDeleted(false).build());
-            styleRepository.save(Style.builder().name("Kiểu dáng cắm").isDeleted(false).build());
-            styleRepository.save(Style.builder().name("Phong cách thiết kế").isDeleted(false).build());
-            styleRepository.save(Style.builder().name("Kích cỡ bó hoa").isDeleted(false).build());
-        }
+        // 5. Khởi tạo & chuẩn hóa nhóm thuộc tính và giá trị thuộc tính mẫu
+        initOrUpdateStylesAndValues();
 
         // Gán cấp bậc và gói hoa hồng cho các cửa hàng nếu chưa có
         java.util.List<StoreLevel> allSLs = storeLevelRepository.findAll();
@@ -610,5 +606,75 @@ public class DataInitializer implements CommandLineRunner {
                 productRepository.save(p);
             }
         });
+    }
+
+    /**
+     * Đồng bộ và bổ sung an toàn 4 nhóm thuộc tính cốt lõi và các giá trị tiêu chuẩn khớp bộ lọc khách hàng
+     */
+    public void initOrUpdateStylesAndValues() {
+        // 1. Chuẩn hóa tên các nhóm cũ sang tên mới thống nhất
+        styleRepository.findAll().forEach(s -> {
+            String n = s.getName().trim();
+            if (n.equalsIgnoreCase("Tone màu hoa") || n.equalsIgnoreCase("Tone màu thiết kế")) {
+                s.setName("Màu sắc");
+                styleRepository.save(s);
+            } else if (n.equalsIgnoreCase("Kiểu dáng cắm") || n.equalsIgnoreCase("Kiểu dáng hoa")) {
+                s.setName("Kiểu dáng");
+                styleRepository.save(s);
+            } else if (n.equalsIgnoreCase("Kích cỡ bó hoa") || n.equalsIgnoreCase("Kích cỡ thiết kế")) {
+                s.setName("Kích cỡ");
+                styleRepository.save(s);
+            }
+        });
+
+        // 2. Định nghĩa 4 nhóm chính và các nhóm bổ sung cùng giá trị chuẩn
+        java.util.Map<String, java.util.List<String>> defaultGroups = new java.util.LinkedHashMap<>();
+        defaultGroups.put("Loại hoa", java.util.List.of(
+                "Hướng dương", "Hoa hồng", "Tulip", "Cẩm tú cầu", "Lan hồ điệp", "Calla Lily", "Hoa Baby"
+        ));
+        defaultGroups.put("Kiểu dáng", java.util.List.of(
+                "Bó hoa", "Giỏ hoa", "Bình hoa", "Hộp hoa", "Chậu hoa", "Kệ hoa"
+        ));
+        defaultGroups.put("Màu sắc", java.util.List.of(
+                "Vàng", "Hồng", "Trắng", "Đỏ", "Tím", "Xanh", "Cam"
+        ));
+        defaultGroups.put("Dịp tặng", java.util.List.of(
+                "Sinh nhật", "Tốt nghiệp", "Khai trương", "Tình yêu", "Chúc mừng", "Đám cưới", "Chia buồn"
+        ));
+        defaultGroups.put("Phong cách thiết kế", java.util.List.of(
+                "Hàn Quốc hiện đại", "Vintage cổ điển", "Tối giản Minimalist", "Châu Âu sang trọng"
+        ));
+        defaultGroups.put("Kích cỡ", java.util.List.of(
+                "Size S (Nhỏ)", "Size M (Vừa)", "Size L (Lớn)"
+        ));
+
+        // 3. Bổ sung nhóm và giá trị còn thiếu mà không xóa hay ghi đè dữ liệu của người dùng
+        for (java.util.Map.Entry<String, java.util.List<String>> entry : defaultGroups.entrySet()) {
+            String groupName = entry.getKey();
+            java.util.List<String> values = entry.getValue();
+
+            Style style = styleRepository.findAll().stream()
+                    .filter(s -> s.getName().equalsIgnoreCase(groupName))
+                    .findFirst()
+                    .orElseGet(() -> styleRepository.save(Style.builder()
+                            .name(groupName)
+                            .isDeleted(false)
+                            .build()));
+
+            java.util.List<StyleValue> existingValues = styleValueRepository.findByStyleId(style.getId());
+            java.util.Set<String> existingNames = existingValues.stream()
+                    .map(v -> v.getName().toLowerCase().trim())
+                    .collect(java.util.stream.Collectors.toSet());
+
+            for (String valName : values) {
+                if (!existingNames.contains(valName.toLowerCase().trim())) {
+                    styleValueRepository.save(StyleValue.builder()
+                            .name(valName)
+                            .style(style)
+                            .isDeleted(false)
+                            .build());
+                }
+            }
+        }
     }
 }

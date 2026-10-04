@@ -13,16 +13,18 @@ public class Commission {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @org.hibernate.annotations.Nationalized
     @Column(nullable = false, unique = true, length = 32)
     private String name; // Ví dụ: Tiêu chuẩn 10%, Ưu đãi 5%, Đối tác 8%
 
     @Column(nullable = false)
     private BigDecimal cost; // Tỷ lệ hoa hồng hoặc phí cố định
 
+    @org.hibernate.annotations.Nationalized
     @Column(length = 3000)
     private String description;
 
-    @Column(name = "is_deleted", nullable = false)
+    @Column(name = "is_deleted")
     @Builder.Default
     private Boolean isDeleted = false;
 

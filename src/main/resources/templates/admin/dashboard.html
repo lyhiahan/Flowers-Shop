@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bảng Điều Khiển Quản Trị - Quản Trị Hệ Thống Hoa Tươi</title>
@@ -189,7 +190,7 @@
             <li class="nav-item">
                 <a th:href="@{/admin/dashboard}" class="nav-link active">
                     <i class="bi bi-grid"></i>
-                    <span>Thống kê</span>
+                    <span>Tổng quan</span>
                 </a>
             </li>
             <li>
@@ -207,7 +208,7 @@
             <li>
                 <a th:href="@{/admin/store-levels}" class="nav-link" id="sidebarStoreLevelsLink" data-testid="sidebarStoreLevelsLink">
                     <i class="bi bi-award"></i>
-                    <span>Hạng chi nhánh (Store level)</span>
+                    <span>Hạng chi nhánh</span>
                 </a>
             </li>
 
@@ -238,13 +239,13 @@
             <li>
                 <a th:href="@{/admin/deliveries}" class="nav-link" id="sidebarDeliveriesLink" data-testid="sidebarDeliveriesLink">
                     <i class="bi bi-truck"></i>
-                    <span>Đơn vị vận chuyển (Delivery)</span>
+                    <span>Đơn vị vận chuyển</span>
                 </a>
             </li>
             <li>
                 <a th:href="@{/admin/commissions}" class="nav-link" id="sidebarCommissionsLink" data-testid="sidebarCommissionsLink">
                     <i class="bi bi-percent"></i>
-                    <span>Chính sách hoa hồng (Commission)</span>
+                    <span>Chính sách hoa hồng</span>
                 </a>
             </li>
             <li>
@@ -256,7 +257,7 @@
             <li>
                 <a th:href="@{/admin/user-levels}" class="nav-link" id="sidebarUserLevelsLink" data-testid="sidebarLevelsLink">
                     <i class="bi bi-award"></i>
-                    <span>Cấp bậc khách (User level)</span>
+                    <span>Cấp bậc khách</span>
                 </a>
             </li>
 
@@ -296,14 +297,14 @@
         <!-- TOP NAVBAR -->
         <header class="top-navbar d-flex justify-content-between align-items-center sticky-top">
             <div class="d-flex align-items-center gap-3">
-                <h1 class="admin-page-title mb-0" style="font-size: 27px !important; font-weight: 700; color: #24332C;">Trung tâm quản trị hệ thống</h1>
+                <h1 class="admin-page-title mb-0" style="font-size: 28px !important; font-weight: 800; color: #20382E;">Tổng quan hệ thống</h1>
                 <span class="badge" style="background-color: #FEF5E7; color: #925C15; border: 1px solid #F6E2C2; font-size: 14px; font-weight: 600; padding: 6px 14px;">
                     <i class="bi bi-clock-history me-1"></i> <strong th:text="${pendingOrders}">0</strong> đơn chờ xử lý
                 </span>
             </div>
             <div class="d-flex align-items-center gap-3">
-                <a th:href="@{/admin/products/create}" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm fw-bold">
-                    <i class="bi bi-plus-lg"></i> Thêm sản phẩm
+                <a th:href="@{/admin/products-manage}" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm fw-bold" style="background-color: #355447; border-color: #355447;">
+                    <i class="bi bi-check2-circle"></i> Duyệt sản phẩm
                 </a>
             </div>
         </header>
@@ -324,44 +325,41 @@
                 </div>
             </div>
 
-            <!-- 1. HÀNG THỐNG KÊ (5 THẺ ĐỒNG ĐỀU, PADDING 22PX, BO GÓC 12PX, ICON CHUẨN MÀU) -->
+            <!-- 1. HÀNG THỐNG KÊ (5 THẺ RÕ RÀNG THEO YÊU CẦU QUẢN TRỊ) -->
             <div class="row g-3 mb-4">
-                <!-- Doanh thu -->
+                <!-- Doanh số đơn hàng toàn hệ thống -->
                 <div class="col-12 col-sm-6 col-lg-4 col-xl">
                     <div class="card stat-card p-4 h-100 d-flex flex-column justify-content-between" style="border-radius: 12px; border: 1px solid #E2E7E2 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
                         <div class="d-flex align-items-start justify-content-between">
                             <div>
-                                <span class="stat-card-label text-uppercase" style="font-size: 15px; font-weight: 600; color: #66736B; letter-spacing: 0.5px;">Doanh thu</span>
-                                <h3 class="stat-card-price stat-revenue fw-bold mt-2 mb-0" style="font-size: 28px; font-weight: 800; color: #A64060 !important;" th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</h3>
+                                <span class="stat-card-label text-uppercase" style="font-size: 14px; font-weight: 700; color: #66736B; letter-spacing: 0.5px;">Doanh số đơn hàng</span>
+                                <h3 class="stat-card-price stat-revenue fw-bold mt-2 mb-0" style="font-size: 30px; font-weight: 800; color: #A64060 !important;" th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</h3>
                             </div>
                             <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; border-radius: 10px; background-color: #F9EBEF; color: #A64060; font-size: 1.25rem;">
                                 <i class="bi bi-wallet2"></i>
                             </div>
                         </div>
-                        <div class="stat-subtext mt-3 text-truncate" style="font-size: 14px; color: #66736B;">
-                            <i class="bi bi-arrow-up-right me-1" style="color: #355447;"></i>Toàn hệ thống
+                        <div class="stat-subtext mt-3 text-truncate" style="font-size: 13.5px; color: #66736B;">
+                            <i class="bi bi-shop me-1" style="color: #355447;"></i>Toàn bộ chuỗi cửa hàng
                         </div>
                     </div>
                 </div>
 
-                <!-- BƯỚC 2 THEO UC_025: Hiển thị tổng số người dùng của hệ thống -->
+                <!-- Người dùng -->
                 <div class="col-12 col-sm-6 col-lg-4 col-xl">
                     <div class="card stat-card p-4 h-100 d-flex flex-column justify-content-between" id="kpi-total-users" style="border-radius: 12px; border: 1px solid #E2E7E2 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
                         <div class="d-flex align-items-start justify-content-between">
                             <div>
-                                <span class="stat-card-label text-uppercase" style="font-size: 15px; font-weight: 600; color: #66736B; letter-spacing: 0.5px;">Người dùng</span>
-                                <h3 class="stat-card-price fw-bold mt-2 mb-0" id="totalUsersCount" style="font-size: 28px; font-weight: 800; color: #24332C !important;" th:text="${totalUsers}">0</h3>
+                                <span class="stat-card-label text-uppercase" style="font-size: 14px; font-weight: 700; color: #66736B; letter-spacing: 0.5px;">Người dùng</span>
+                                <h3 class="stat-card-price fw-bold mt-2 mb-0" id="totalUsersCount" style="font-size: 30px; font-weight: 800; color: #20382E !important;" th:text="${totalUsers}">0</h3>
                             </div>
                             <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; border-radius: 10px; background-color: #EBF2EE; color: #20382E; font-size: 1.25rem;">
                                 <i class="bi bi-people"></i>
                             </div>
                         </div>
                         <div class="stat-subtext mt-3 d-flex align-items-center justify-content-between" style="font-size: 13.5px; color: #66736B;">
-                            <span><strong th:text="${totalCustomers}">0</strong> khách</span>
-                            <!-- BƯỚC 3 THEO UC_025: Bấm vào xem biểu đồ -->
-                            <a href="#usersChartSection" id="btnViewUsersChart" class="btn btn-sm btn-link p-0 text-decoration-none fw-bold" style="color: #355447; font-size: 13px;">
-                                Xem biểu đồ <i class="bi bi-arrow-down-short"></i>
-                            </a>
+                            <span>Gồm <strong class="text-dark" th:text="${totalCustomers}">0</strong> khách hàng</span>
+                            <a th:href="@{/admin/users}" class="text-decoration-none fw-bold" style="color: #355447; font-size: 13px;">Chi tiết →</a>
                         </div>
                     </div>
                 </div>
@@ -371,15 +369,17 @@
                     <div class="card stat-card p-4 h-100 d-flex flex-column justify-content-between" id="kpi-total-orders" style="border-radius: 12px; border: 1px solid #E2E7E2 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
                         <div class="d-flex align-items-start justify-content-between">
                             <div>
-                                <span class="stat-card-label text-uppercase" style="font-size: 15px; font-weight: 600; color: #66736B; letter-spacing: 0.5px;">Đơn hàng</span>
-                                <h3 class="stat-card-price fw-bold mt-2 mb-0" style="font-size: 28px; font-weight: 800; color: #24332C !important;" th:text="${totalOrders}">0</h3>
+                                <span class="stat-card-label text-uppercase" style="font-size: 14px; font-weight: 700; color: #66736B; letter-spacing: 0.5px;">Đơn hàng</span>
+                                <h3 class="stat-card-price fw-bold mt-2 mb-0" style="font-size: 30px; font-weight: 800; color: #20382E !important;" th:text="${totalOrders}">0</h3>
                             </div>
                             <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; border-radius: 10px; background-color: #EBF2EE; color: #20382E; font-size: 1.25rem;">
                                 <i class="bi bi-bag-check"></i>
                             </div>
                         </div>
-                        <div class="stat-subtext mt-3 text-truncate" style="font-size: 13.5px; color: #66736B;">
-                            <span class="badge" style="background-color: #FEF5E7; color: #925C15; border: 1px solid #F6E2C2; font-size: 12.5px; font-weight: 600; padding: 2px 6px;"><strong th:text="${pendingOrders}">0</strong> chờ</span>
+                        <div class="stat-subtext mt-3" style="font-size: 13.5px; color: #66736B;">
+                            <span class="badge" style="background-color: #FEF5E7; color: #925C15; border: 1px solid #F6E2C2; font-size: 13px; font-weight: 700; padding: 3px 8px;">
+                                <strong th:text="${pendingOrders}">0</strong> chờ xử lý
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -389,61 +389,159 @@
                     <div class="card stat-card p-4 h-100 d-flex flex-column justify-content-between" id="kpi-total-products" style="border-radius: 12px; border: 1px solid #E2E7E2 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
                         <div class="d-flex align-items-start justify-content-between">
                             <div>
-                                <span class="stat-card-label text-uppercase" style="font-size: 15px; font-weight: 600; color: #66736B; letter-spacing: 0.5px;">Sản phẩm</span>
-                                <h3 class="stat-card-price fw-bold mt-2 mb-0" style="font-size: 28px; font-weight: 800; color: #24332C !important;" th:text="${totalProducts}">0</h3>
+                                <span class="stat-card-label text-uppercase" style="font-size: 14px; font-weight: 700; color: #66736B; letter-spacing: 0.5px;">Sản phẩm</span>
+                                <h3 class="stat-card-price fw-bold mt-2 mb-0" style="font-size: 30px; font-weight: 800; color: #20382E !important;" th:text="${totalProducts}">0</h3>
                             </div>
                             <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; border-radius: 10px; background-color: #EBF2EE; color: #20382E; font-size: 1.25rem;">
                                 <i class="bi bi-flower1"></i>
                             </div>
                         </div>
-                        <div class="stat-subtext mt-3 text-truncate" style="font-size: 13.5px; color: #66736B;">
-                            <strong th:text="${totalCategories}">0</strong> danh mục
+                        <div class="stat-subtext mt-3" style="font-size: 13.5px; color: #66736B;">
+                            <span class="badge" th:if="${pendingProducts != null and pendingProducts > 0}" style="background-color: #FEF5E7; color: #925C15; border: 1px solid #F6E2C2; font-size: 13px; font-weight: 700; padding: 3px 8px;">
+                                <strong th:text="${pendingProducts}">0</strong> chờ duyệt
+                            </span>
+                            <span class="badge" th:unless="${pendingProducts != null and pendingProducts > 0}" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA; font-size: 13px; font-weight: 700; padding: 3px 8px;">
+                                Đã duyệt tất cả
+                            </span>
                         </div>
                     </div>
                 </div>
 
-                <!-- BƯỚC 2 THEO UC_026: Hiển thị tổng số cửa hàng của hệ thống -->
+                <!-- Cửa hàng -->
                 <div class="col-12 col-sm-6 col-lg-4 col-xl">
                     <div class="card stat-card p-4 h-100 d-flex flex-column justify-content-between" id="kpi-total-stores" style="border-radius: 12px; border: 1px solid #E2E7E2 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
                         <div class="d-flex align-items-start justify-content-between">
                             <div>
-                                <span class="stat-card-label text-uppercase" style="font-size: 15px; font-weight: 600; color: #66736B; letter-spacing: 0.5px;">Cửa hàng</span>
-                                <h3 class="stat-card-price fw-bold mt-2 mb-0" id="totalStoresCount" style="font-size: 28px; font-weight: 800; color: #24332C !important;" th:text="${totalStores}">0</h3>
+                                <span class="stat-card-label text-uppercase" style="font-size: 14px; font-weight: 700; color: #66736B; letter-spacing: 0.5px;">Cửa hàng</span>
+                                <h3 class="stat-card-price fw-bold mt-2 mb-0" id="totalStoresCount" style="font-size: 30px; font-weight: 800; color: #20382E !important;" th:text="${totalStores}">0</h3>
                             </div>
                             <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; border-radius: 10px; background-color: #EBF2EE; color: #20382E; font-size: 1.25rem;">
                                 <i class="bi bi-shop"></i>
                             </div>
                         </div>
-                        <div class="stat-subtext mt-3 d-flex align-items-center justify-content-between" style="font-size: 13.5px; color: #66736B;">
-                            <span class="badge" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA; font-size: 12.5px; font-weight: 600; padding: 2px 6px;">Hoạt động</span>
-                            <!-- BƯỚC 3 THEO UC_026: Bấm vào xem biểu đồ -->
-                            <a href="#storesChartSection" id="btnViewStoresChart" class="btn btn-sm btn-link p-0 text-decoration-none fw-bold" style="color: #355447; font-size: 13px;">
-                                Xem biểu đồ <i class="bi bi-arrow-down-short"></i>
-                            </a>
+                        <div class="stat-subtext mt-3" style="font-size: 13.5px; color: #66736B;">
+                            <span class="badge" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA; font-size: 13px; font-weight: 700; padding: 3px 8px;">
+                                <strong th:text="${activeStores != null ? activeStores : totalStores}">0</strong> đang hoạt động
+                            </span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- BƯỚC 3, 4 & 5 THEO UC_025: KHU VỰC THỐNG KÊ NGƯỜI DÙNG MỚI & TOP ĐIỂM THÀNH VIÊN
-                 - Bấm vào xem biểu đồ (id="usersChartSection")
-                 - Chọn loại biểu đồ (đường, cột, tròn), chọn thời gian (giờ, ngày, tháng, năm)
-                 - Hiển thị bên cạnh biểu đồ là Top người dùng điểm cao nhất hệ thống -->
+            <!-- 2. KHU VỰC DOANH THU & VIỆC CẦN XỬ LÝ (ĐƯỢC ĐƯA LÊN TRƯỚC THEO ĐỀ XUẤT) -->
+            <div class="row g-4 mb-4 align-items-stretch">
+                <!-- Biểu đồ doanh số toàn hệ thống (col-lg-8) -->
+                <div class="col-lg-8">
+                    <div class="card border-0 bg-white p-4 h-100 d-flex flex-column justify-content-between" style="border: 1px solid #E2E7E2 !important; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                        <div>
+                            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+                                <div>
+                                    <h3 class="admin-section-title mb-0" style="font-size: 20px !important; font-weight: 700; color: #20382E;">
+                                        <i class="bi bi-graph-up-arrow me-2" style="color: #A64060;"></i>Doanh số theo thời gian
+                                    </h3>
+                                    <small class="text-muted">Tổng doanh thu bán hoa của toàn bộ chuỗi cửa hàng</small>
+                                </div>
+                                <div class="chart-toggle-group">
+                                    <button type="button" class="btn-chart-toggle active" id="revBarBtn" onclick="toggleChartType('revenue', 'bar')">
+                                        <i class="bi bi-bar-chart-line me-1"></i>Cột
+                                    </button>
+                                    <button type="button" class="btn-chart-toggle" id="revLineBtn" onclick="toggleChartType('revenue', 'line')">
+                                        <i class="bi bi-graph-up me-1"></i>Đường
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Bộ lọc thời gian -->
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3 pt-2 border-top" style="border-color: #E2E7E2 !important;">
+                                <span class="small fw-semibold text-muted" style="font-size: 13.5px;">Phạm vi:</span>
+                                <div class="btn-group bg-light p-1 rounded-pill border" style="border-color: #E2E7E2 !important;">
+                                    <a th:href="@{/admin/dashboard(timeframe='hour')}" class="btn btn-sm rounded-pill px-3"
+                                       th:classappend="${timeframe == 'hour'} ? 'btn-primary' : 'btn-light'" style="font-size: 13px; font-weight: 700;">Hôm nay</a>
+                                    <a th:href="@{/admin/dashboard(timeframe='day')}" class="btn btn-sm rounded-pill px-3"
+                                       th:classappend="${timeframe == 'day' or timeframe == null} ? 'btn-primary' : 'btn-light'" style="font-size: 13px; font-weight: 700;">7 ngày qua</a>
+                                    <a th:href="@{/admin/dashboard(timeframe='month')}" class="btn btn-sm rounded-pill px-3"
+                                       th:classappend="${timeframe == 'month'} ? 'btn-primary' : 'btn-light'" style="font-size: 13px; font-weight: 700;">Tháng này</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Canvas biểu đồ doanh thu -->
+                        <div style="height: 290px; position: relative;">
+                            <canvas id="adminRevenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột Việc cần xử lý (col-lg-4) -->
+                <div class="col-lg-4">
+                    <div class="card border-0 bg-white p-4 h-100 d-flex flex-column justify-content-between" style="border: 1px solid #E2E7E2 !important; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #E2E7E2 !important;">
+                                <div>
+                                    <h3 class="admin-section-title mb-0" style="font-size: 20px !important; font-weight: 700; color: #20382E;">
+                                        <i class="bi bi-exclamation-circle me-1" style="color: #355447;"></i>Việc cần xử lý
+                                    </h3>
+                                    <small class="text-muted">Các yêu cầu và dữ liệu cần Admin phê duyệt</small>
+                                </div>
+                                <span class="badge rounded-pill px-2.5 py-1" style="background: #FEF3C7; color: #B45309; font-size: 13px; font-weight: 800;">Ưu tiên</span>
+                            </div>
+
+                            <div class="d-flex flex-column gap-3">
+                                <!-- Mục 1: Yêu cầu cấp vai trò -->
+                                <div class="p-3 rounded-3 border bg-light d-flex align-items-center justify-content-between" style="border-color: #E2E7E2 !important;">
+                                    <div>
+                                        <div class="fw-bold text-dark" style="font-size: 14.5px;">Yêu cầu cấp vai trò</div>
+                                        <small class="text-muted"><span class="fw-bold text-danger" th:text="${pendingRoleRequestsCount != null ? pendingRoleRequestsCount : 0}">0</span> yêu cầu đang chờ duyệt</small>
+                                    </div>
+                                    <a th:href="@{/admin/users(tab='requests')}" class="btn btn-sm btn-primary rounded-pill px-3" style="background-color: #355447; border-color: #355447; font-size: 13px; font-weight: 700;">
+                                        Xử lý
+                                    </a>
+                                </div>
+
+                                <!-- Mục 2: Sản phẩm chờ duyệt -->
+                                <div class="p-3 rounded-3 border bg-light d-flex align-items-center justify-content-between" style="border-color: #E2E7E2 !important;">
+                                    <div>
+                                        <div class="fw-bold text-dark" style="font-size: 14.5px;">Sản phẩm chờ duyệt</div>
+                                        <small class="text-muted"><span class="fw-bold text-warning" th:text="${pendingProducts != null ? pendingProducts : 0}">0</span> mẫu hoa mới đăng</small>
+                                    </div>
+                                    <a th:href="@{/admin/products-manage}" class="btn btn-sm btn-outline-secondary rounded-pill px-3" style="font-size: 13px; font-weight: 700;">
+                                        Xem xét
+                                    </a>
+                                </div>
+
+                                <!-- Mục 3: Đơn hàng chờ xử lý -->
+                                <div class="p-3 rounded-3 border bg-light d-flex align-items-center justify-content-between" style="border-color: #E2E7E2 !important;">
+                                    <div>
+                                        <div class="fw-bold text-dark" style="font-size: 14.5px;">Đơn hàng toàn sàn</div>
+                                        <small class="text-muted"><span class="fw-bold text-danger" th:text="${pendingOrders}">0</span> đơn chờ tiếp nhận</small>
+                                    </div>
+                                    <a th:href="@{/admin/orders-manage}" class="btn btn-sm btn-outline-secondary rounded-pill px-3" style="font-size: 13px; font-weight: 700;">
+                                        Xem đơn
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-top mt-3 text-center" style="border-color: #E2E7E2 !important;">
+                            <small class="text-muted"><i class="bi bi-shield-check text-success me-1"></i>Hệ thống vận hành an toàn và ổn định</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. KHU VỰC THỐNG KÊ NGƯỜI DÙNG & CỬA HÀNG CÓ DOANH SỐ CAO -->
             <div class="row g-4 mb-4 align-items-stretch" id="usersChartSection">
-                
-                <!-- Cột Biểu Đồ Người Dùng Mới (col-lg-7 col-xl-8) -->
-                <div class="col-lg-7 col-xl-8">
+                <!-- Cột Biểu Đồ Người Dùng Mới (col-lg-7) -->
+                <div class="col-lg-7">
                     <div class="card border-0 bg-white p-4 h-100 d-flex flex-column justify-content-between" id="newUserChartCard" style="border: 1px solid #E2E7E2 !important; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
                         <div>
                             <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
                                 <div>
-                                    <h3 class="admin-section-title mb-0" style="font-size: 20px !important;">
-                                        <i class="bi bi-person-plus me-2" style="color: #355447;"></i>Biểu đồ người dùng mới
+                                    <h3 class="admin-section-title mb-0" style="font-size: 20px !important; font-weight: 700; color: #20382E;">
+                                        <i class="bi bi-person-plus me-2" style="color: #355447;"></i>Người dùng mới
                                     </h3>
-                                    <small class="text-muted">Thống kê số lượng thành viên mới đăng ký vào hệ thống</small>
+                                    <small class="text-muted">Biến động thành viên và khách hàng mới gia nhập</small>
                                 </div>
-                                
-                                <!-- BƯỚC 4 THEO UC_025: Chọn loại biểu đồ (đường, cột, tròn) -->
                                 <div class="chart-toggle-group" id="userChartTypeGroup">
                                     <button type="button" class="btn-chart-toggle active" id="userLineBtn" onclick="toggleChartType('users', 'line')">
                                         <i class="bi bi-graph-up me-1"></i>Đường
@@ -451,191 +549,48 @@
                                     <button type="button" class="btn-chart-toggle" id="userBarBtn" onclick="toggleChartType('users', 'bar')">
                                         <i class="bi bi-bar-chart-line me-1"></i>Cột
                                     </button>
-                                    <button type="button" class="btn-chart-toggle" id="userPieBtn" onclick="toggleChartType('users', 'doughnut')">
-                                        <i class="bi bi-pie-chart me-1"></i>Tròn
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- BƯỚC 4 THEO UC_025: Chọn thời gian (giờ, ngày, tháng, năm) -->
-                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3 pt-2 border-top" style="border-color: #E2E7E2 !important;">
-                                <span class="small fw-semibold text-muted" style="font-size: 13.5px;">Phạm vi thời gian:</span>
-                                <div class="btn-group bg-light p-1 rounded-pill border" style="border-color: #E2E7E2 !important;">
-                                    <a th:href="@{/admin/dashboard(timeframe='hour')}" class="btn btn-sm rounded-pill px-3" id="userTimeHour"
-                                       th:classappend="${timeframe == 'hour'} ? 'btn-primary' : 'btn-light'" style="font-size: 13px; font-weight: 700;">Theo giờ</a>
-                                    <a th:href="@{/admin/dashboard(timeframe='day')}" class="btn btn-sm rounded-pill px-3" id="userTimeDay"
-                                       th:classappend="${timeframe == 'day' or timeframe == null} ? 'btn-primary' : 'btn-light'" style="font-size: 13px; font-weight: 700;">Theo ngày</a>
-                                    <a th:href="@{/admin/dashboard(timeframe='month')}" class="btn btn-sm rounded-pill px-3" id="userTimeMonth"
-                                       th:classappend="${timeframe == 'month'} ? 'btn-primary' : 'btn-light'" style="font-size: 13px; font-weight: 700;">Theo tháng</a>
-                                    <a th:href="@{/admin/dashboard(timeframe='year')}" class="btn btn-sm rounded-pill px-3" id="userTimeYear"
-                                       th:classappend="${timeframe == 'year'} ? 'btn-primary' : 'btn-light'" style="font-size: 13px; font-weight: 700;">Theo năm</a>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Vùng hiển thị canvas biểu đồ người dùng -->
-                        <div style="height: 280px; position: relative;">
+                        <!-- Canvas biểu đồ người dùng -->
+                        <div style="height: 270px; position: relative;">
                             <canvas id="adminUsersChart"></canvas>
                         </div>
                     </div>
                 </div>
 
-                <!-- Cột Bên Cạnh Biểu Đồ (BƯỚC 5 THEO UC_025): Top người dùng điểm cao nhất hệ thống (col-lg-5 col-xl-4) -->
-                <div class="col-lg-5 col-xl-4">
-                    <div class="card border-0 bg-white p-4 h-100 d-flex flex-column" id="topPointUsersCard" style="border: 1px solid #E2E7E2 !important; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #E2E7E2 !important;">
-                            <div>
-                                <h3 class="admin-section-title mb-0" style="font-size: 18px !important;">
-                                    🏆 Top Người Dùng Điểm Cao Nhất
-                                </h3>
-                                <small class="text-muted">Bảng xếp hạng thành viên theo điểm tích lũy</small>
-                            </div>
-                            <span class="badge rounded-pill px-3 py-1" style="background: #FEF3C7; color: #B45309; font-size: 12.5px; font-weight: 700;">
-                                Top Điểm
-                            </span>
-                        </div>
-
-                        <div class="flex-grow-1 overflow-auto" style="max-height: 310px;">
-                            <div th:if="${#lists.isEmpty(topPointUsers)}" class="text-center py-5 text-muted small">
-                                Chưa có dữ liệu điểm tích lũy của thành viên.
-                            </div>
-                            <div th:each="user, iter : ${topPointUsers}" class="d-flex align-items-center justify-content-between p-2 mb-2 rounded-3 border bg-light" style="border-color: #E2E7E2 !important;">
-                                <div class="d-flex align-items-center gap-2 text-truncate me-2">
-                                    <span class="badge rounded-circle d-flex align-items-center justify-content-center fw-bold"
-                                          th:classappend="${iter.index == 0 ? 'bg-warning text-dark' : (iter.index == 1 ? 'bg-secondary text-white' : (iter.index == 2 ? 'bg-danger text-white' : 'bg-light text-dark border'))}"
-                                          style="width: 26px; height: 26px; font-size: 12px;" th:text="${iter.index + 1}">1</span>
-                                    <div class="text-truncate">
-                                        <strong class="text-dark d-block text-truncate" style="font-size: 14px;" th:text="${user.fullName != null and !user.fullName.isEmpty() ? user.fullName : user.username}">Nguyễn Văn A</strong>
-                                        <small class="text-muted d-block text-truncate" style="font-size: 12px;" th:text="${user.email}">user@example.com</small>
-                                    </div>
-                                </div>
-                                <div class="text-end flex-shrink-0">
-                                    <span class="badge rounded-pill px-2.5 py-1" style="background: #E5EEE8; color: #20382E; font-size: 13px; font-weight: 800;" th:text="${user.point != null ? user.point : 0} + ' pts'">0 pts</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- BƯỚC 3, 4 & 5 THEO UC_026: KHU VỰC THỐNG KÊ CỬA HÀNG MỚI & TOP ĐIỂM CỬA HÀNG
-                 - Bấm vào xem biểu đồ (id="storesChartSection")
-                 - Chọn loại biểu đồ (đường, cột, tròn), chọn thời gian (giờ, ngày, tháng, năm)
-                 - Hiển thị bên cạnh biểu đồ là Top cửa hàng điểm cao nhất hệ thống -->
-            <div class="row g-4 mb-4 align-items-stretch" id="storesChartSection">
-                
-                <!-- Cột Biểu Đồ Cửa Hàng Mới (col-lg-7 col-xl-8) -->
-                <div class="col-lg-7 col-xl-8">
-                    <div class="card border-0 bg-white p-4 h-100 d-flex flex-column justify-content-between" id="newStoreChartCard" style="border: 1px solid #E2E7E2 !important; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-                        <div>
-                            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
-                                <div>
-                                    <h3 class="admin-section-title mb-0" style="font-size: 20px !important;">
-                                        <i class="bi bi-shop me-2" style="color: #355447;"></i>Biểu đồ cửa hàng mới
-                                    </h3>
-                                    <small class="text-muted">Thống kê số lượng cửa hàng / chi nhánh mới tham gia vào hệ thống</small>
-                                </div>
-                                
-                                <!-- BƯỚC 4 THEO UC_026: Chọn loại biểu đồ (đường, cột, tròn) -->
-                                <div class="chart-toggle-group" id="storeChartTypeGroup">
-                                    <button type="button" class="btn-chart-toggle" id="storeLineBtn" onclick="toggleChartType('stores', 'line')">
-                                        <i class="bi bi-graph-up me-1"></i>Đường
-                                    </button>
-                                    <button type="button" class="btn-chart-toggle active" id="storeBarBtn" onclick="toggleChartType('stores', 'bar')">
-                                        <i class="bi bi-bar-chart-line me-1"></i>Cột
-                                    </button>
-                                    <button type="button" class="btn-chart-toggle" id="storePieBtn" onclick="toggleChartType('stores', 'doughnut')">
-                                        <i class="bi bi-pie-chart me-1"></i>Tròn
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- BƯỚC 4 THEO UC_026: Chọn thời gian (giờ, ngày, tháng, năm) -->
-                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3 pt-2 border-top" style="border-color: #E2E7E2 !important;">
-                                <span class="small fw-semibold text-muted" style="font-size: 13.5px;">Phạm vi thời gian:</span>
-                                <div class="btn-group bg-light p-1 rounded-pill border" style="border-color: #E2E7E2 !important;">
-                                    <a th:href="@{/admin/dashboard(timeframe='hour')}" class="btn btn-sm rounded-pill px-3" id="storeTimeHour"
-                                       th:classappend="${timeframe == 'hour'} ? 'btn-primary' : 'btn-light'" style="font-size: 13px; font-weight: 700;">Theo giờ</a>
-                                    <a th:href="@{/admin/dashboard(timeframe='day')}" class="btn btn-sm rounded-pill px-3" id="storeTimeDay"
-                                       th:classappend="${timeframe == 'day' or timeframe == null} ? 'btn-primary' : 'btn-light'" style="font-size: 13px; font-weight: 700;">Theo ngày</a>
-                                    <a th:href="@{/admin/dashboard(timeframe='month')}" class="btn btn-sm rounded-pill px-3" id="storeTimeMonth"
-                                       th:classappend="${timeframe == 'month'} ? 'btn-primary' : 'btn-light'" style="font-size: 13px; font-weight: 700;">Theo tháng</a>
-                                    <a th:href="@{/admin/dashboard(timeframe='year')}" class="btn btn-sm rounded-pill px-3" id="storeTimeYear"
-                                       th:classappend="${timeframe == 'year'} ? 'btn-primary' : 'btn-light'" style="font-size: 13px; font-weight: 700;">Theo năm</a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Vùng hiển thị canvas biểu đồ cửa hàng -->
-                        <div style="height: 280px; position: relative;">
-                            <canvas id="adminStoresChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Cột Bên Cạnh Biểu Đồ (BƯỚC 5 THEO UC_026): Top cửa hàng điểm cao nhất hệ thống (col-lg-5 col-xl-4) -->
-                <div class="col-lg-5 col-xl-4">
+                <!-- Cột Cửa Hàng Có Doanh Số / Điểm Tốt (col-lg-5) -->
+                <div class="col-lg-5">
                     <div class="card border-0 bg-white p-4 h-100 d-flex flex-column" id="topPointStoresCard" style="border: 1px solid #E2E7E2 !important; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
                         <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #E2E7E2 !important;">
                             <div>
-                                <h3 class="admin-section-title mb-0" style="font-size: 18px !important;">
-                                    🏆 Top Cửa Hàng Điểm Cao Nhất
+                                <h3 class="admin-section-title mb-0" style="font-size: 20px !important; font-weight: 700; color: #20382E;">
+                                    <i class="bi bi-shop me-1" style="color: #355447;"></i>Cửa hàng có doanh số cao
                                 </h3>
-                                <small class="text-muted">Bảng xếp hạng chi nhánh theo điểm uy tín</small>
+                                <small class="text-muted">Các chi nhánh và đối tác hoạt động nổi bật</small>
                             </div>
-                            <span class="badge rounded-pill px-3 py-1" style="background: #FEF3C7; color: #B45309; font-size: 12.5px; font-weight: 700;">
-                                Top Điểm
-                            </span>
+                            <a th:href="@{/admin/stores}" class="text-decoration-none fw-bold small" style="color: #355447;">Tất cả →</a>
                         </div>
 
-                        <div class="flex-grow-1 overflow-auto" style="max-height: 310px;">
-                            <div th:if="${#lists.isEmpty(topPointStores)}" class="text-center py-5 text-muted small">
-                                Chưa có dữ liệu điểm của cửa hàng.
+                        <div class="flex-grow-1 overflow-auto" style="max-height: 270px;">
+                            <div th:if="${#lists.isEmpty(stores)}" class="text-center py-4 text-muted small">
+                                Chưa có cửa hàng nào trong hệ thống.
                             </div>
-                            <div th:each="st, iter : ${topPointStores}" class="d-flex align-items-center justify-content-between p-2 mb-2 rounded-3 border bg-light" style="border-color: #E2E7E2 !important;">
+                            <div th:each="st, iter : ${stores}" th:if="${iter.index < 5}" class="d-flex align-items-center justify-content-between p-2 mb-2 rounded-3 border bg-light" style="border-color: #E2E7E2 !important;">
                                 <div class="d-flex align-items-center gap-2 text-truncate me-2">
                                     <span class="badge rounded-circle d-flex align-items-center justify-content-center fw-bold"
                                           th:classappend="${iter.index == 0 ? 'bg-warning text-dark' : (iter.index == 1 ? 'bg-secondary text-white' : (iter.index == 2 ? 'bg-danger text-white' : 'bg-light text-dark border'))}"
                                           style="width: 26px; height: 26px; font-size: 12px;" th:text="${iter.index + 1}">1</span>
                                     <div class="text-truncate">
                                         <strong class="text-dark d-block text-truncate" style="font-size: 14px;" th:text="${st.name}">Cửa hàng Hoa Tươi</strong>
-                                        <small class="text-muted d-block text-truncate" style="font-size: 12px;" th:text="${st.address != null ? st.address : (st.phone != null ? st.phone : 'Chi nhánh')}">Địa chỉ</small>
+                                        <small class="text-muted d-block text-truncate" style="font-size: 12px;" th:text="${st.address != null ? st.address : 'Chi nhánh trực thuộc'}">Địa chỉ</small>
                                     </div>
                                 </div>
                                 <div class="text-end flex-shrink-0">
-                                    <span class="badge rounded-pill px-2.5 py-1" style="background: #E5EEE8; color: #20382E; font-size: 13px; font-weight: 800;" th:text="${st.point != null ? st.point : 0} + ' pts'">0 pts</span>
+                                    <span class="badge" th:classappend="${st.status ? 'bg-success' : 'bg-secondary'}" th:text="${st.status ? 'Hoạt động' : 'Tạm ngưng'}">Hoạt động</span>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- BIỂU ĐỒ DOANH THU TOÀN HỆ THỐNG -->
-            <div class="row g-4 mb-4">
-                <div class="col-12">
-                    <div class="card border-0 bg-white p-4 h-100 d-flex flex-column justify-content-between" style="border: 1px solid #E2E7E2 !important; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div>
-                                <h3 class="admin-section-title mb-0" style="font-size: 19px !important;"><i class="bi bi-graph-up-arrow me-2" style="color: #A64060;"></i>Doanh thu hệ thống</h3>
-                                <small class="text-muted">Tổng giá trị đơn hàng theo chu kỳ</small>
-                            </div>
-                            <div class="chart-toggle-group">
-                                <button type="button" class="btn-chart-toggle active" id="revBarBtn" onclick="toggleChartType('revenue', 'bar')">
-                                    <i class="bi bi-bar-chart-line me-1"></i>Cột
-                                </button>
-                                <button type="button" class="btn-chart-toggle" id="revLineBtn" onclick="toggleChartType('revenue', 'line')">
-                                    <i class="bi bi-graph-up me-1"></i>Đường
-                                </button>
-                                <button type="button" class="btn-chart-toggle" id="revPieBtn" onclick="toggleChartType('revenue', 'doughnut')">
-                                    <i class="bi bi-pie-chart me-1"></i>Tròn
-                                </button>
-                            </div>
-                        </div>
-                        <div style="height: 240px; position: relative;">
-                            <canvas id="adminRevenueChart"></canvas>
                         </div>
                     </div>
                 </div>

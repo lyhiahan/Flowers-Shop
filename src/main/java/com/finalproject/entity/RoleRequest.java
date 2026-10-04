@@ -36,9 +36,11 @@ public class RoleRequest {
     @Column(length = 20)
     private String phone;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "work_area", length = 255)
     private String workArea;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "vehicle_type", length = 100)
     private String vehicleType;
 
@@ -46,18 +48,23 @@ public class RoleRequest {
     @JoinColumn(name = "target_store_id")
     private Store targetStore;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "shop_name", length = 255)
     private String shopName;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "shop_address", length = 500)
     private String shopAddress;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "contact_info", length = 255)
     private String contactInfo;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "experience_note", length = 1000)
     private String experienceNote;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "rejection_reason", length = 500)
     private String rejectionReason;
 

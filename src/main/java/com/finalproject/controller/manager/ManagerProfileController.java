@@ -280,16 +280,32 @@ public class ManagerProfileController {
         if (store == null) return "redirect:/manager/stores";
         storeAccess.requireManager(store);
 
-        if (name == null || name.trim().isEmpty()) {
-            ra.addFlashAttribute("errorMessage", "Vui lòng điền tên cửa hàng!");
+        String trimmedName = name != null ? name.trim() : "";
+        if (trimmedName.isEmpty() || trimmedName.length() < 3 || trimmedName.length() > 120) {
+            ra.addFlashAttribute("errorMessage", "Tên cửa hàng phải có độ dài từ 3 đến 120 ký tự!");
+            return "redirect:/manager/profile";
+        }
+
+        String cleanPhone = null;
+        if (phone != null && !phone.trim().isEmpty()) {
+            cleanPhone = phone.trim().replaceAll("[\\s.-]", "");
+            if (!cleanPhone.matches("^(?:\\+84|84|0)(?:(?:3[2-9]|5[25689]|7[06-9]|8[1-9]|9[0-9])\\d{7}|2\\d{9})$")) {
+                ra.addFlashAttribute("errorMessage", "Số điện thoại không đúng chuẩn Việt Nam! Vui lòng nhập số hợp lệ (ví dụ: 0901234567 hoặc 02838123456).");
+                return "redirect:/manager/profile";
+            }
+        }
+
+        String trimmedAddress = address != null ? address.trim() : null;
+        if (trimmedAddress != null && !trimmedAddress.isEmpty() && (trimmedAddress.length() < 5 || trimmedAddress.length() > 200)) {
+            ra.addFlashAttribute("errorMessage", "Địa chỉ cửa hàng phải có ít nhất 5 ký tự và tối đa 200 ký tự!");
             return "redirect:/manager/profile";
         }
 
         try {
-            store.setName(name.trim());
+            store.setName(trimmedName);
             store.setBio(bio != null ? bio.trim() : null);
-            if (phone != null) store.setPhone(phone.trim());
-            if (address != null) store.setAddress(address.trim());
+            if (cleanPhone != null) store.setPhone(cleanPhone);
+            if (trimmedAddress != null) store.setAddress(trimmedAddress);
             store.setIsOpen(isOpen);
             storeRepository.save(store);
             ra.addFlashAttribute("successMessage", "Thông tin cửa hàng đã được lưu thành công!");

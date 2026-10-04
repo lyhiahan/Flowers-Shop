@@ -16,12 +16,14 @@ public class UserAddress {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "recipient_name", nullable = false, length = 100)
     private String recipientName;
 
     @Column(nullable = false, length = 20)
     private String phone;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "address_detail", nullable = false, length = 255)
     private String addressDetail;
 

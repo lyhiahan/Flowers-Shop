@@ -12,6 +12,7 @@ public class StyleValue {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @org.hibernate.annotations.Nationalized
     @Column(nullable = false, length = 32)
     private String name; // Đỏ, Hồng Pastel, Khai Trương, Bó Lớn
 
@@ -19,7 +20,7 @@ public class StyleValue {
     @JoinColumn(name = "style_id", nullable = false)
     private Style style;
 
-    @Column(name = "is_deleted", nullable = false)
+    @Column(name = "is_deleted")
     @Builder.Default
     private Boolean isDeleted = false;
 

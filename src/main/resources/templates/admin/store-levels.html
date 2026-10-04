@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hạng chi nhánh - Quản Trị Hệ Thống Hoa Tươi</title>
@@ -320,39 +321,17 @@
                 </p>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <!-- Bước 6: Chọn nút New level để thêm level mới -->
+                <!-- Bước 6: Chọn nút Thêm cấp bậc để thêm level mới -->
                 <a th:href="@{/admin/store-levels/create}" id="btnNewStoreLevel" data-testid="btnNewStoreLevel" class="btn btn-primary-dark shadow-sm d-inline-flex align-items-center gap-2">
-                    <i class="bi bi-plus-lg"></i> New level
+                    <i class="bi bi-plus-lg"></i> Thêm cấp bậc
                 </a>
 
-                <!-- Menu phụ tùy chọn khác (chứa nạp lại chuẩn có giải thích rõ) -->
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center justify-content-center shadow-sm"
-                            type="button" data-bs-toggle="dropdown" aria-expanded="false"
-                            style="height: 38px; width: 38px; border-radius: 9999px; border-color: #D1E5DA; background-color: #FFFFFF; color: #20382E;"
-                            title="Tùy chọn cấu hình khác">
-                        <i class="bi bi-three-dots-vertical"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li>
-                            <form th:action="@{/admin/store-levels/reset-defaults}" method="post" class="m-0"
-                                  onsubmit="return confirm('Khôi phục về 3 hạng chuẩn: Tiêu chuẩn (0 ₫) · Cửa hàng uy tín (từ 10 triệu) · Cửa hàng xuất sắc (từ 30 triệu)?\nThao tác này sẽ đồng bộ lại tên và ngưỡng doanh số chuẩn. Dữ liệu chi nhánh hiện tại vẫn được bảo toàn.');">
-                                <button type="submit" class="dropdown-item py-2 small d-flex align-items-center gap-2 rounded-2 text-dark">
-                                    <i class="bi bi-arrow-clockwise text-success"></i>
-                                    <span>Nạp lại 3 hạng chuẩn</span>
-                                </button>
-                            </form>
-                        </li>
-                        <li><hr class="dropdown-divider my-1"></li>
-                        <li>
-                            <a class="dropdown-item py-2 small d-flex align-items-center gap-2 rounded-2 text-secondary"
-                               href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#policyGuideModal">
-                                <i class="bi bi-book text-primary"></i>
-                                <span>Xem quy chế xét duyệt</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                <!-- Nút xem quy chế xét duyệt -->
+                <button type="button" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 fw-semibold shadow-sm"
+                        data-bs-toggle="modal" data-bs-target="#policyGuideModal"
+                        style="height: 44px; padding: 0 16px; border-radius: 10px; border-color: #D1E5DA; background-color: #FFFFFF; color: #20382E; font-size: 14.5px;">
+                    <i class="bi bi-book text-primary"></i> Quy chế xét duyệt
+                </button>
             </div>
         </div>
 

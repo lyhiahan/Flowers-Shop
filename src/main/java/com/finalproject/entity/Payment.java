@@ -31,6 +31,8 @@ public class Payment {
     private PaymentStatus status;
 
     private String transactionCode;
+    @Column(length = 16)
+    private String momoEnvironment;
     private LocalDateTime paidAt;
 
     // Phục vụ hoàn cọc tại quầy hoặc chuyển khoản thủ công
