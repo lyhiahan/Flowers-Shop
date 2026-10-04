@@ -52,7 +52,8 @@ public class Order {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shipper_id")
-    private User shipper;
+    // Historical delivery contact only; no assignment or account role.
+    private User legacyDeliveryContact;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "voucher_id")

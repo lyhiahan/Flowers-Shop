@@ -60,7 +60,7 @@ class AdminStoreLevelManagementUseCaseTests {
                 .email("admin_uc33@example.com")
                 .password(encodedPass)
                 .fullName("Quản Trị Viên UC33")
-                .role(Role.ADMIN)
+                .isActive(true).role(Role.ADMIN)
                 .build());
 
         customer = userRepository.save(User.builder()
@@ -68,7 +68,7 @@ class AdminStoreLevelManagementUseCaseTests {
                 .email("customer_uc33@example.com")
                 .password(encodedPass)
                 .fullName("Khách Hàng UC33")
-                .role(Role.CUSTOMER)
+                .isActive(true).role(Role.CUSTOMER)
                 .build());
 
         level1 = storeLevelRepository.save(StoreLevel.builder()

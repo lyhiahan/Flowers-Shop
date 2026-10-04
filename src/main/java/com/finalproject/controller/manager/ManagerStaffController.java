@@ -80,7 +80,7 @@ public class ManagerStaffController {
         List<User> candidateUsers = allUsers.stream()
                 .filter(u -> u.getStore() == null && !u.getId().equals(user.getId())
                         && (shopOwner == null || !u.getId().equals(shopOwner.getId()))
-                        && (u.getRole() == Role.STAFF || u.getRole() == Role.SHIPPER || u.getRole() == Role.CUSTOMER))
+                        && (u.getRole() == Role.STAFF || u.getRole() == Role.CUSTOMER))
                 .limit(20)
                 .toList();
 
@@ -127,6 +127,7 @@ public class ManagerStaffController {
         }
 
         try {
+            if (!"STAFF".equalsIgnoreCase(roleStr)) throw new IllegalArgumentException("Chỉ được thêm vai trò nhân viên chi nhánh.");
             int addedCount = 0;
 
             // Cách 1: Chọn các nhân viên có sẵn trong hệ thống (Bước 15 dạng danh sách lựa chọn)
@@ -158,7 +159,7 @@ public class ManagerStaffController {
                     userRepository.save(existing);
                     addedCount++;
                 } else {
-                    Role role = "SHIPPER".equalsIgnoreCase(roleStr) ? Role.SHIPPER : Role.STAFF;
+                    Role role = Role.STAFF;
                     User newStaff = User.builder()
                             .username(cleanUsername)
                             .fullName(fullName != null && !fullName.trim().isEmpty() ? fullName.trim() : cleanUsername)

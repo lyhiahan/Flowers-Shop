@@ -40,7 +40,7 @@ class MomoSandboxSecurityTests {
 
     @BeforeEach void setup() {
         User user = users.save(User.builder().username("momo-customer").email("momo@test.local")
-                .fullName("MoMo Test").password("unused-test-password").role(Role.CUSTOMER).build());
+                .fullName("MoMo Test").password("unused-test-password").isActive(true).role(Role.CUSTOMER).build());
         Store store = stores.save(Store.builder().name("Sandbox store").address("Test address").build());
         order = orders.saveAndFlush(Order.builder().user(user).pickupStore(store).orderType(OrderType.BUY)
                 .status(OrderStatus.PENDING).paymentMethod("MOMO").paymentStatus("UNPAID").totalAmount(new BigDecimal("100000")).build());

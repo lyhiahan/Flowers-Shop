@@ -15,10 +15,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findLockedById(@org.springframework.data.repository.query.Param("id") Long id);
     Optional<User> findByUsername(String username);
     Optional<User> findByEmail(String email);
-    Optional<User> findByPhone(String phone);
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
-    boolean existsByPhone(String phone);
     List<User> findByStoreIdAndRole(Long storeId, Role role);
     List<User> findByStoreId(Long storeId);
     long countByRole(Role role);

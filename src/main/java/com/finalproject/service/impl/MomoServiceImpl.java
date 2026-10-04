@@ -37,6 +37,7 @@ public class MomoServiceImpl implements MomoService {
         // Commit the correlation record BEFORE contacting MoMo, so early IPN can find it.
         MomoPaymentAttempt attempt = new TransactionTemplate(transactionManager).execute(tx -> {
             Order order = orders.findLockedById(input.getId()).orElseThrow();
+            requireActiveOwner(order);
             validatePayable(order);
             Payment payment = payment(order);
             if (payment.getStatus() != PaymentStatus.PENDING) throw new IllegalStateException("Giao dịch không còn chờ thanh toán.");
@@ -127,6 +128,7 @@ public class MomoServiceImpl implements MomoService {
         if (!config.isMock()) throw new IllegalStateException("Mô phỏng chỉ dùng trong chế độ mock.");
         Order order = orders.findLockedById(id).orElseThrow();
         if (!order.getUser().getUsername().equals(username)) throw new org.springframework.security.access.AccessDeniedException("Không phải đơn của bạn.");
+        requireActiveOwner(order);
         Payment payment = payment(order);
         if ("PAID".equals(order.getPaymentStatus()) && "mock".equals(payment.getMomoEnvironment())
                 && payment.getStatus() == PaymentStatus.SUCCESS) return;
@@ -134,6 +136,12 @@ public class MomoServiceImpl implements MomoService {
         if (payment.getMomoEnvironment() != null && !"mock".equals(payment.getMomoEnvironment()))
             throw new IllegalStateException("Không mô phỏng giao dịch sandbox.");
         complete(order, payment, "DEV-MOMO-" + id, "mock");
+    }
+
+    private void requireActiveOwner(Order order) {
+        if (!Boolean.TRUE.equals(order.getUser().getIsActive()) || order.getUser().isRetiredDeliveryAccount()) {
+            throw new org.springframework.security.access.AccessDeniedException("Tài khoản đã bị khóa hoặc vô hiệu hóa.");
+        }
     }
 
     private void validatePayable(Order order) {

@@ -123,18 +123,6 @@ public class DataInitializer implements CommandLineRunner {
                 .createdDate(LocalDate.now())
                 .build()));
 
-        User shipper = userRepository.findByUsername("shipper_nhanh").orElseGet(() -> userRepository.save(User.builder()
-                .username("shipper_nhanh")
-                .password(passwordEncoder.encode("123456"))
-                .fullName("Phạm Giao Hàng Hỏa Tốc")
-                .email("shipper@rentalshop.vn")
-                .phone("0933445566")
-                .role(Role.SHIPPER)
-                .isActive(true)
-                .isEmailActive(true)
-                .createdDate(LocalDate.now())
-                .build()));
-
         User customer = userRepository.findByUsername("khachhang").orElseGet(() -> userRepository.save(User.builder()
                 .username("khachhang")
                 .password(passwordEncoder.encode("123456"))

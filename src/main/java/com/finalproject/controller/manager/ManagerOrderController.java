@@ -119,10 +119,6 @@ public class ManagerOrderController {
         int toIndex = Math.min(fromIndex + size, totalElements);
         List<Order> pagedOrders = totalElements > 0 ? filteredOrders.subList(fromIndex, toIndex) : Collections.emptyList();
 
-        List<User> shippers = userRepository.findByRole(Role.SHIPPER).stream()
-                .filter(s -> Boolean.TRUE.equals(s.getIsActive()) && s.getStore() != null && store.getId().equals(s.getStore().getId()))
-                .toList();
-
         model.addAttribute("orders", pagedOrders);
         model.addAttribute("activeTab", activeTab);
         model.addAttribute("currentStatus", statusStr != null ? statusStr : "ALL");
@@ -133,7 +129,6 @@ public class ManagerOrderController {
         model.addAttribute("processingCount", processingCount);
         model.addAttribute("processedCount", processedCount);
         model.addAttribute("totalCount", totalCount);
-        model.addAttribute("shippers", shippers);
         model.addAttribute("store", store);
         model.addAttribute("currentUser", user);
 
@@ -172,16 +167,11 @@ public class ManagerOrderController {
         boolean isProcessing = PROCESSING_STATUSES.contains(order.getStatus());
         List<StatusOption> availableStatuses = getAvailableStatuses(order);
 
-        List<User> shippers = userRepository.findByRole(Role.SHIPPER).stream()
-                .filter(s -> Boolean.TRUE.equals(s.getIsActive()) && s.getStore() != null && store.getId().equals(s.getStore().getId()))
-                .toList();
-
         model.addAttribute("order", order);
         model.addAttribute("store", store);
         model.addAttribute("currentUser", user);
         model.addAttribute("isProcessing", isProcessing);
         model.addAttribute("availableStatuses", availableStatuses);
-        model.addAttribute("shippers", shippers);
 
         return "manager/order-detail";
     }
@@ -218,23 +208,6 @@ public class ManagerOrderController {
             workflow.confirmPayment(id);
             ra.addFlashAttribute("successMessage", "Đã xác nhận nhận thanh toán cho đơn #" + id);
         } catch (RuntimeException ex) {
-            ra.addFlashAttribute("errorMessage", ex.getMessage());
-        }
-        if (com.finalproject.utils.SafeRedirect.isWithin(redirectUrl, "/manager/orders", "/vendor/orders")) {
-            return "redirect:" + redirectUrl;
-        }
-        return "redirect:/manager/orders";
-    }
-
-    @PostMapping("/assign-shipper/{id}")
-    public String assignShipper(@PathVariable("id") Long id,
-                                @RequestParam("shipperId") Long shipperId,
-                                @RequestParam(value = "redirect", required = false) String redirectUrl,
-                                RedirectAttributes ra) {
-        try {
-            orderService.assignShipper(id, shipperId);
-            ra.addFlashAttribute("successMessage", "Đã phân công Shipper cho đơn #" + id + " thành công!");
-        } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
         if (com.finalproject.utils.SafeRedirect.isWithin(redirectUrl, "/manager/orders", "/vendor/orders")) {

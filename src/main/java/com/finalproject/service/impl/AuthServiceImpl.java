@@ -65,15 +65,12 @@ public class AuthServiceImpl implements AuthService {
         }
         if (request.getAddress().length() > 255) throw new IllegalArgumentException("Địa chỉ tối đa 255 ký tự.");
 
-        // Kiểm tra trùng username, email hoặc số điện thoại trong Database
+        // Username/email identify accounts; phone is contact information and may be shared.
         if (userRepository.existsByUsername(username)) {
             throw new IllegalArgumentException("Tên đăng nhập '" + username + "' đã tồn tại trong hệ thống. Vui lòng chọn tên đăng nhập khác!");
         }
         if (userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Email '" + email + "' đã được sử dụng để đăng ký tài khoản. Vui lòng sử dụng email khác hoặc đăng nhập!");
-        }
-        if (!phone.isEmpty() && userRepository.existsByPhone(phone)) {
-            throw new IllegalArgumentException("Số điện thoại '" + phone + "' đã được sử dụng bởi một tài khoản khác. Vui lòng kiểm tra lại!");
         }
 
         // 2. Tạo mã OTP và lưu tạm vào bộ nhớ (CHƯA LƯU VÀO DATABASE)
@@ -161,6 +158,7 @@ public class AuthServiceImpl implements AuthService {
         // Hỗ trợ trường hợp tài khoản đã tồn tại ở DB nhưng chưa kích hoạt
         User user = userRepository.findByEmail(email).orElse(null);
         if (user != null) {
+            if (user.isRetiredDeliveryAccount()) return false;
             OtpVerification otp = otpRepository
                     .findTopByUserIdAndCodeAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
                             user.getId(), otpCode, OtpType.ACTIVATE_ACCOUNT)
@@ -228,6 +226,8 @@ public class AuthServiceImpl implements AuthService {
                 .or(() -> userRepository.findByUsername(query))
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản với email hoặc tên đăng nhập: " + query));
 
+        rejectRetiredDeliveryAccount(user);
+
         userRepository.findLockedById(user.getId()).orElseThrow();
         if (otpRepository.countByUserIdAndCreatedAtAfter(user.getId(), LocalDateTime.now().minusMinutes(10)) >= 3) {
             throw new IllegalStateException("Vui lòng chờ 10 phút trước khi yêu cầu thêm mã OTP.");
@@ -242,6 +242,8 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(query)
                 .or(() -> userRepository.findByUsername(query))
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản với email: " + query));
+
+        if (user.isRetiredDeliveryAccount()) return false;
 
         OtpVerification otp = otpRepository
                 .findTopByUserIdAndCodeAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
@@ -258,6 +260,8 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(query)
                 .or(() -> userRepository.findByUsername(query))
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản với email: " + query));
+
+        rejectRetiredDeliveryAccount(user);
 
         if (newPassword == null || newPassword.trim().length() < 6 || newPassword.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72) {
             throw new IllegalArgumentException("Mật khẩu mới phải có tối thiểu 6 ký tự!");
@@ -282,6 +286,12 @@ public class AuthServiceImpl implements AuthService {
 
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    private void rejectRetiredDeliveryAccount(User user) {
+        if (user.isRetiredDeliveryAccount()) {
+            throw new IllegalArgumentException("Tài khoản giao hàng đã được vô hiệu hóa.");
+        }
     }
 
     private String createAndSendOtp(User user, OtpType type) {

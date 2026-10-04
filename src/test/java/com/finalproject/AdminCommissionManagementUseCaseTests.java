@@ -60,7 +60,7 @@ class AdminCommissionManagementUseCaseTests {
                 .email("admin_uc35@example.com")
                 .password(encodedPass)
                 .fullName("Quản Trị Viên UC35")
-                .role(Role.ADMIN)
+                .isActive(true).role(Role.ADMIN)
                 .build());
 
         customer = userRepository.save(User.builder()
@@ -68,7 +68,7 @@ class AdminCommissionManagementUseCaseTests {
                 .email("customer_uc35@example.com")
                 .password(encodedPass)
                 .fullName("Khách Hàng UC35")
-                .role(Role.CUSTOMER)
+                .isActive(true).role(Role.CUSTOMER)
                 .build());
 
         commission1 = commissionRepository.save(Commission.builder()

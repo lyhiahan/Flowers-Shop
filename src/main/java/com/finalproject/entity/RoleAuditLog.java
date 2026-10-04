@@ -26,9 +26,17 @@ public class RoleAuditLog {
     @Column(nullable = false, length = 20)
     private String action; // 'GRANT' hoặc 'REVOKE'
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = RoleConverter.class)
     @Column(nullable = false, length = 30)
     private Role role;
+
+    @Column(name = "role", nullable = false, length = 30, insertable = false, updatable = false)
+    private String storedRole;
+
+    public String getRoleDisplayName() {
+        if ("SHIPPER".equals(storedRole)) return "Vai trò đã ngừng sử dụng";
+        return role == null ? "Chưa xác định" : role.name();
+    }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id")

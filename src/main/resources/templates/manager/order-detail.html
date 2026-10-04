@@ -81,7 +81,7 @@
                         <i class="bi bi-flower1 me-1"></i> ĐANG CẮM HOA
                     </span>
                     <span th:if="${order.status.name() == 'PICKED_UP'}" class="badge px-3 py-2 rounded-pill" style="background-color: #EDE9FE; color: #6D28D9; border: 1px solid #DDD6FE; font-size: 14px; font-weight: 700;">
-                        <i class="bi bi-box-seam me-1"></i> SHIPPER ĐÃ NHẬN
+                        <i class="bi bi-box-seam me-1"></i> ĐÃ BÀN GIAO VẬN CHUYỂN
                     </span>
                     <span th:if="${order.status.name() == 'DELIVERING'}" class="badge px-3 py-2 rounded-pill" style="background-color: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; font-size: 14px; font-weight: 700;">
                         <i class="bi bi-truck me-1"></i> ĐANG GIAO HOA
@@ -245,7 +245,7 @@
                     </div>
                 </div>
 
-                <!-- Cột phải: Thanh toán, Tổng kết & Phân công Shipper -->
+
                 <div class="col-lg-4">
                     <!-- Tổng tiền & Thanh toán -->
                     <div class="card-custom p-4 mb-4">
@@ -310,33 +310,8 @@
                         </form>
                     </div>
 
-                    <!-- Nhân viên giao hàng (Shipper) -->
-                    <div class="card-custom p-4">
-                        <h5 class="fw-bold mb-3" style="color: #20382E;">
-                            <i class="bi bi-bicycle me-2 text-warning"></i> Nhân viên giao hàng
-                        </h5>
-                        <div th:if="${order.shipper != null}" class="p-3 rounded-3 bg-light">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                    <i class="bi bi-person-fill fs-5"></i>
-                                </div>
-                                <div>
-                                    <div class="fw-bold text-dark" th:text="${order.shipper.fullName}">Nguyễn Giao Hàng</div>
-                                    <small class="text-muted"><i class="bi bi-telephone me-1"></i><span th:text="${order.shipper.phone}">0909123456</span></small>
-                                </div>
-                            </div>
-                        </div>
-                        <div th:if="${order.shipper == null and order.shippingMethod != 'PICKUP'}" class="text-center py-3">
-                            <p class="text-muted small mb-2">Chưa phân công Shipper giao đơn này.</p>
-                            <button th:if="${order.status.name() == 'PREPARING'}" class="btn btn-warning btn-sm fw-bold px-3 shadow-sm rounded-pill"
-                                    data-bs-toggle="modal" data-bs-target="#assignShipperModal">
-                                <i class="bi bi-person-plus me-1"></i> Phân công Shipper
-                            </button>
-                        </div>
-                        <div th:if="${order.shippingMethod == 'PICKUP'}" class="text-muted small text-center py-2">
-                            <i class="bi bi-shop me-1"></i> Đơn khách nhận hoa trực tiếp tại quầy.
-                        </div>
-                    </div>
+
+
                 </div>
             </div>
         </div>
@@ -379,31 +354,8 @@
     </div>
 </div>
 
-<!-- Modal phân công Shipper -->
-<div class="modal fade" id="assignShipperModal" tabindex="-1" aria-hidden="true" th:if="${order.shippingMethod != 'PICKUP'}">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4 border-0 shadow">
-            <form th:action="@{'/manager/orders/assign-shipper/' + ${order.id}}" method="post">
-                <input type="hidden" name="redirect" th:value="'/manager/orders/' + ${order.id}">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title font-serif fw-bold text-dark">🌸 Điều Phối Shipper Đơn #<span th:text="${order.id}"></span></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body py-3">
-                    <label class="form-label small fw-semibold text-secondary">Chọn tài xế giao hoa thuộc chi nhánh:</label>
-                    <select name="shipperId" class="form-select" required style="border-radius: 10px;">
-                        <option value="">-- Chọn nhân viên giao hàng --</option>
-                        <option th:each="s : ${shippers}" th:value="${s.id}" th:text="${s.fullName} + ' (' + ${s.phone} + ')'"></option>
-                    </select>
-                </div>
-                <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold">Xác Nhận & Giao Hàng</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+
+
 
 <!-- Modal Đăng Xuất -->
 <div class="modal fade" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">

@@ -777,12 +777,6 @@ body.admin-body {
     border: 1px solid #BAE6FD !important;
 }
 
-.role-badge-shipper {
-    background-color: #F1F5F9 !important;
-    color: #475569 !important;
-    border: 1px solid #E2E8F0 !important;
-}
-
 .role-badge-vendor {
     background-color: #FEF3C7 !important;
     color: #92400E !important;

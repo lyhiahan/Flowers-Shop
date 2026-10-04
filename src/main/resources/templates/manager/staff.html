@@ -299,9 +299,7 @@
 
                                         <!-- 3. Vai trò -->
                                         <td style="white-space: nowrap;">
-                                            <span th:if="${s.role.name() == 'SHIPPER'}" class="badge" style="background-color: #E0F2FE; color: #0369A1; border: 1px solid #BAE6FD; padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 12px;">
-                                                <i class="bi bi-bicycle me-1"></i>SHIPPER
-                                            </span>
+
                                             <span th:if="${s.role.name() == 'STAFF'}" class="badge" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA; padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 12px;">
                                                 <i class="bi bi-person-badge me-1"></i>STAFF
                                             </span>
@@ -488,7 +486,6 @@
                                 <label class="form-label small fw-semibold">Vai trò:</label>
                                 <select name="role" class="form-select">
                                     <option value="STAFF">Nhân viên cửa hàng (STAFF)</option>
-                                    <option value="SHIPPER">Nhân viên giao hàng (SHIPPER)</option>
                                 </select>
                             </div>
                         </div>
