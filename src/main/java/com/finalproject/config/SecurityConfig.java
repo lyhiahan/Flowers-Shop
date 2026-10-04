@@ -58,7 +58,8 @@ public class SecurityConfig {
                 "/resend-otp",
                 "/forgot-password",
                 "/reset-password",
-                "/api/**",
+                "/api/auth/login",
+                "/api/auth/refresh",
                 "/checkout/momo/ipn"
             ))
             .authorizeHttpRequests(auth -> auth

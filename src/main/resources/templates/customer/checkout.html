@@ -543,13 +543,13 @@
                                     <div>
                                         <input class="form-check-input" type="radio" name="paymentMethod" id="pay_momo" value="MOMO" onchange="updatePaymentStyle()">
                                         <label class="form-check-label fw-bold text-dark ps-2" for="pay_momo" style="cursor: pointer;">
-                                            Ví điện tử MoMo (Quét mã QR / App MoMo)
+                                            <span th:text="${momoMock ? 'MoMo — Mô phỏng DEV' : 'MoMo Sandbox — Thanh toán test'}"></span>
                                         </label>
                                     </div>
                                     <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo" style="height: 24px; width: 24px;">
                                 </div>
                                 <div class="payment-desc d-none" id="desc_pay_momo">
-                                    Thanh toán nhanh chóng, an toàn qua ứng dụng MoMo hoặc quét mã QR MoMo Pay tức thì.
+                                    <span th:text="${momoMock ? 'Kiểm thử thanh toán bằng nút mô phỏng ở bước tiếp theo. Không chuyển tiền thật.' : 'Dùng ứng dụng MoMo Test và tài khoản test. Không chuyển tiền thật.'}"></span>
                                 </div>
                             </div>
 

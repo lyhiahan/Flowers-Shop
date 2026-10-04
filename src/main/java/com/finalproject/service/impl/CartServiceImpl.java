@@ -37,18 +37,19 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public void addToCart(String username, AddToCartRequest request) {
+        if (request == null || request.getProductId() == null || request.getProductId() <= 0) throw new IllegalArgumentException("Vui lòng chọn sản phẩm hợp lệ.");
         Cart cart = getCartForUpdate(username);
 
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("Sản phẩm không tồn tại"));
 
         if (request.getOrderType() != com.finalproject.enums.OrderType.BUY) throw new IllegalArgumentException("Hệ thống chỉ hỗ trợ mua hoa.");
-        if (!Boolean.TRUE.equals(product.getIsActive()) || !Boolean.TRUE.equals(product.getIsSelling())) throw new IllegalStateException("Sản phẩm đã ngừng bán.");
+        if (Boolean.TRUE.equals(product.getIsDeleted()) || !Boolean.TRUE.equals(product.getIsActive()) || !Boolean.TRUE.equals(product.getIsSelling())) throw new IllegalStateException("Sản phẩm đã ngừng bán.");
         if (request.getQuantity() == null || request.getQuantity() <= 0 || request.getQuantity() > 10000) throw new IllegalArgumentException("Số lượng không hợp lệ.");
         if (request.getDeliveryDate() != null && request.getDeliveryDate().isBefore(java.time.LocalDate.now())) throw new IllegalArgumentException("Ngày nhận hàng không được ở quá khứ.");
         Long storeId = request.getStoreId() != null ? request.getStoreId() : (product.getStore() != null ? product.getStore().getId() : 1L);
         Store store = storeRepository.findById(storeId)
-                .orElseGet(() -> storeRepository.findAll().stream().findFirst().orElseThrow(() -> new ResourceNotFoundException("Chi nhánh không tồn tại")));
+                .orElseThrow(() -> new ResourceNotFoundException("Chi nhánh không tồn tại"));
 
         int addQty = (request.getQuantity() != null && request.getQuantity() > 0) ? request.getQuantity() : 1;
         requireAvailableStock(cart, product, store, null, addQty);
@@ -119,6 +120,7 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public void updateQuantity(String username, Long cartItemId, Integer quantity) {
+        if (quantity == null || quantity < 0) throw new IllegalArgumentException("Số lượng không được âm hoặc bỏ trống.");
         Cart cart = getCartForUpdate(username);
         CartItem item = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new ResourceNotFoundException("Mục giỏ hàng không tồn tại"));

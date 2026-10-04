@@ -17,13 +17,15 @@ import java.util.List;
 public class VoucherServiceImpl implements VoucherService {
 
     private final VoucherRepository voucherRepository;
+    private final jakarta.persistence.EntityManager entityManager;
 
     @Override
     @Transactional
     public Voucher findByCode(String code) {
         if (code == null || code.trim().isEmpty()) return null;
-        return voucherRepository.findByCodeAndIsActiveTrue(code.trim().toUpperCase())
-                .orElse(null);
+        Voucher voucher = voucherRepository.findByCodeAndIsActiveTrue(code.trim().toUpperCase(java.util.Locale.ROOT)).orElse(null);
+        if (voucher != null) entityManager.refresh(voucher, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        return voucher;
     }
 
     @Override

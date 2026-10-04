@@ -37,6 +37,7 @@ public class OrderServiceImpl implements OrderService {
     private final com.finalproject.service.VoucherService voucherService;
     private final TransactionRepository transactionRepository;
     private final com.finalproject.service.NotificationService notificationService;
+    private final jakarta.persistence.EntityManager entityManager;
 
     @Override
     @Transactional
@@ -98,6 +99,8 @@ public class OrderServiceImpl implements OrderService {
 
         List<CartItem> items;
         if (selectedCartItemIds != null && !selectedCartItemIds.isEmpty()) {
+            Set<Long> ownedIds = allItems.stream().map(CartItem::getId).collect(Collectors.toSet());
+            if (!ownedIds.containsAll(selectedCartItemIds)) throw new IllegalArgumentException("Sản phẩm được chọn không thuộc giỏ hàng của bạn.");
             items = allItems.stream()
                     .filter(i -> selectedCartItemIds.contains(i.getId()))
                     .collect(Collectors.toList());
@@ -146,6 +149,9 @@ public class OrderServiceImpl implements OrderService {
                 || finalRecipientAddress == null || finalRecipientAddress.isBlank()) {
             throw new IllegalArgumentException("Vui lòng nhập đầy đủ tên, số điện thoại và địa chỉ nhận hàng.");
         }
+        if (finalRecipientName.length() > 100 || finalRecipientAddress.length() > 255 || (finalGreeting != null && finalGreeting.length() > 500))
+            throw new IllegalArgumentException("Tên tối đa 100, địa chỉ 255 và lời chúc 500 ký tự.");
+        if (!finalRecipientPhone.matches("^(0|\\+?84)[35789][0-9]{8}$")) throw new IllegalArgumentException("Số điện thoại người nhận không hợp lệ.");
         Order order = Order.builder()
                 .shippingMethod(shippingMethod)
                 .user(user)
@@ -160,23 +166,33 @@ public class OrderServiceImpl implements OrderService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
+        // Lock each stock row once, in the same product order for all checkouts.
+        // Delivery selection may already have loaded stale stock into this persistence context.
+        Map<Long, StoreInventory> lockedStock = new HashMap<>();
+        for (Long productId : items.stream().map(i -> i.getProduct().getId()).distinct().sorted().toList()) {
+            StoreInventory stock = storeInventoryRepository.findLockedStock(assignedStore.getId(), productId)
+                    .orElseThrow(() -> new IllegalStateException("Chi nhánh không có hàng."));
+            entityManager.refresh(stock, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+            lockedStock.put(productId, stock);
+        }
         for (CartItem item : items) {
             Product product = item.getProduct();
 
             if (item.getOrderType() != OrderType.BUY || item.getQuantity() == null || item.getQuantity() <= 0) {
                 throw new IllegalArgumentException("Giỏ hàng chỉ hỗ trợ mua hoa với số lượng dương.");
             }
-            if (!Boolean.TRUE.equals(product.getIsActive()) || !Boolean.TRUE.equals(product.getIsSelling())) {
+            if (Boolean.TRUE.equals(product.getIsDeleted()) || !Boolean.TRUE.equals(product.getIsActive()) || !Boolean.TRUE.equals(product.getIsSelling())) {
                 throw new IllegalStateException("Sản phẩm đã ngừng bán: " + product.getName());
             }
-            StoreInventory inventory = storeInventoryRepository.findByStoreIdAndProductId(assignedStore.getId(), product.getId())
-                    .orElseThrow(() -> new IllegalStateException("Chi nhánh không có hàng: " + product.getName()));
+            StoreInventory inventory = lockedStock.get(product.getId());
             if (inventory.getQuantity() < item.getQuantity()) {
                 throw new IllegalStateException("Không đủ tồn kho: " + product.getName());
             }
             inventory.setQuantity(inventory.getQuantity() - item.getQuantity());
             storeInventoryRepository.save(inventory);
             BigDecimal unitPrice = product.getSellingPrice();
+            if (unitPrice == null || unitPrice.signum() <= 0 || unitPrice.stripTrailingZeros().scale() > 2)
+                throw new IllegalStateException("Giá sản phẩm không hợp lệ: " + product.getName());
             BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
             totalAmount = totalAmount.add(lineTotal);
 

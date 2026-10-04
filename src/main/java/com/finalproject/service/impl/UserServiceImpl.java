@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new IllegalArgumentException("Mật khẩu hiện tại không chính xác!");
         }
-        if (newPassword == null || newPassword.length() < 6) {
+        if (newPassword == null || newPassword.trim().length() < 6 || newPassword.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72) {
             throw new IllegalArgumentException("Mật khẩu mới phải có ít nhất 6 ký tự!");
         }
         user.setPassword(passwordEncoder.encode(newPassword));

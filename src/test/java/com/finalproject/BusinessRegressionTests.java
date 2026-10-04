@@ -59,6 +59,9 @@ class BusinessRegressionTests {
     @Autowired UserFollowStoreRepository follows;
     @Autowired UserAddressRepository addresses;
     @Autowired RoleRequestRepository roleRequests;
+    @Autowired MomoService momo;
+    @Autowired NotificationRepository notifications;
+    @Autowired ProductService productService;
     Store store, otherStore;
     User customer, manager, shipper, outsider;
     Product product;
@@ -287,6 +290,9 @@ class BusinessRegressionTests {
         mvc.perform(get("/manager/orders").with(user(manager.getUsername()).roles("MANAGER")))
                 .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("confirm-payment/" + order.getId())));
         login(manager); workflow.confirmPayment(order.getId());
+        long notificationCount = notifications.count();
+        workflow.confirmPayment(order.getId());
+        assertThat(notifications.count()).isEqualTo(notificationCount);
         login(customer); orderService.cancelOrder(customer.getUsername(), order.getId());
         assertThat(order.getStatus()).isEqualTo(OrderStatus.REFUND_REQUESTED);
         mvc.perform(get("/customer/orders").with(user(customer.getUsername()).roles("CUSTOMER")))
@@ -408,6 +414,251 @@ class BusinessRegressionTests {
         mvc.perform(get("/products/" + id).with(user(customer.getUsername()).roles("CUSTOMER")))
                 .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString(name)))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(description)));
+    }
+
+    @Test void momoMockRequiresOwnerAndCsrfAndDoesNotUsePublicCallbackToPay() throws Exception {
+        Order order = checkout(PaymentMethod.MOMO);
+        mvc.perform(get("/checkout/momo/callback").param("orderId", order.getId().toString()).param("resultCode", "0"))
+                .andExpect(status().is3xxRedirection());
+        assertThat(order.getPaymentStatus()).isEqualTo("UNPAID");
+        mvc.perform(post("/checkout/momo/ipn").contentType("application/json").content("{\"resultCode\":0}"))
+                .andExpect(status().isForbidden());
+        mvc.perform(get("/checkout/momo/" + order.getId()).with(user(customer.getUsername()).roles("CUSTOMER")))
+                .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("Mô phỏng local")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("api.qrserver.com"))));
+        mvc.perform(post("/checkout/momo/" + order.getId() + "/simulate").with(user(customer.getUsername()).roles("CUSTOMER")))
+                .andExpect(status().isForbidden());
+        assertThatThrownBy(() -> momo.simulatePayment(order.getId(), "not-owner"))
+                .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
+        mvc.perform(post("/checkout/momo/" + order.getId() + "/simulate")
+                .with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf())).andExpect(status().is3xxRedirection());
+        assertThat(order.getPaymentStatus()).isEqualTo("PAID");
+        Payment paid = payments.findByOrderId(order.getId()).get(0);
+        assertThat(paid.getMomoEnvironment()).isEqualTo("mock");
+        assertThat(paid.getTransactionCode()).startsWith("DEV-MOMO-");
+        long count = notifications.count();
+        momo.simulatePayment(order.getId(), customer.getUsername());
+        assertThat(notifications.count()).isEqualTo(count);
+    }
+
+    @Test void bankInstructionsUseOrderTotalAndOnlyOwnerCanReadPaymentStatus() throws Exception {
+        Order order = checkout(PaymentMethod.BANK_TRANSFER);
+        String route = "/checkout/bank/" + order.getId();
+        mvc.perform(get(route).with(user(customer.getUsername()).roles("CUSTOMER")))
+                .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("3337110941")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("BUI THANH PHUC")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("160,000")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("DH" + order.getId())))
+                .andExpect(model().attribute("order", order));
+        assertThat(order.getPaymentStatus()).isEqualTo("UNPAID");
+        for (String suffix : List.of("", "/status")) {
+            mvc.perform(get(route + suffix).with(user("another-customer").roles("CUSTOMER"))).andExpect(status().isForbidden());
+        }
+        mvc.perform(get(route + "/status").with(user(customer.getUsername()).roles("CUSTOMER")))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.paymentStatus").value("UNPAID"));
+        login(manager); workflow.confirmPayment(order.getId());
+        mvc.perform(get(route + "/status").with(user(customer.getUsername()).roles("CUSTOMER")))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.paymentStatus").value("PAID"));
+        mvc.perform(get(route).with(user(customer.getUsername()).roles("CUSTOMER")))
+                .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("bank-qr-source"))));
+    }
+
+    @Test void bankCheckoutRedirectsToInstructionsWithoutRecordingPaid() throws Exception {
+        var response = mvc.perform(post("/checkout").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf())
+                .param("selectedItemIds", item.getId().toString()).param("paymentMethod", "BANK_TRANSFER")
+                .param("recipientName", "Khách").param("recipientPhone", "0900000000")
+                .param("deliveryDate", LocalDate.now().toString())
+                .param("shippingMethod", "PICKUP").param("pickupStoreId", store.getId().toString()))
+                .andExpect(status().is3xxRedirection()).andReturn().getResponse();
+        assertThat(response.getRedirectedUrl()).startsWith("/checkout/bank/");
+        long id = Long.parseLong(response.getRedirectedUrl().substring("/checkout/bank/".length()));
+        assertThat(orders.findById(id).orElseThrow().getPaymentStatus()).isEqualTo("UNPAID");
+    }
+
+    com.finalproject.dto.request.ProductForm validProductForm() {
+        var form = new com.finalproject.dto.request.ProductForm();
+        form.setName("Hoa kiểm thử"); form.setCategoryId(product.getCategory().getId());
+        form.setImportPrice(new BigDecimal("50000")); form.setPriceBuy(new BigDecimal("80000"));
+        form.setStoreId(store.getId()); form.setInitialStock(3); return form;
+    }
+
+    @Test void productServiceRejectsBadInputBeforeAnyDatabaseWrite() {
+        long before = products.count();
+        for (BigDecimal price : List.of(new BigDecimal("-1"), BigDecimal.ZERO, new BigDecimal("1.123"), new BigDecimal("1E30"))) {
+            var form = validProductForm(); form.setPriceBuy(price); form.setConfirmSellAtLoss(true);
+            assertThatThrownBy(() -> productService.createProduct(form)).isInstanceOf(IllegalArgumentException.class);
+        }
+        var form = validProductForm(); form.setInitialStock(-1);
+        assertThatThrownBy(() -> productService.createProduct(form)).isInstanceOf(IllegalArgumentException.class);
+        form.setInitialStock(3); form.setName(" ");
+        assertThatThrownBy(() -> productService.createProduct(form)).isInstanceOf(IllegalArgumentException.class);
+        assertThat(products.count()).isEqualTo(before);
+    }
+
+    @Test void adminProductBindingRejectsNegativeTextAndHugePricesWithoutSaving() throws Exception {
+        long before = products.count();
+        for (String price : List.of("-100", "0", "abc", "1.234", "999999999999999999999999")) {
+            mvc.perform(post("/admin/products/create").with(user("admin-test").roles("ADMIN")).with(csrf())
+                    .param("name", "Hoa invalid").param("categoryId", product.getCategory().getId().toString())
+                    .param("importPrice", "50000").param("priceBuy", price).param("initialStock", "5"))
+                    .andExpect(status().isOk()).andExpect(model().attributeHasFieldErrors("productForm", "priceBuy"));
+        }
+        assertThat(products.count()).isEqualTo(before);
+    }
+
+    @Test void newProductRespectsBranchAndBlocksExternalReturnUrl() throws Exception {
+        mvc.perform(post("/admin/products/create").with(user("admin-test").roles("ADMIN")).with(csrf())
+                .param("name", "Branch product").param("categoryId", product.getCategory().getId().toString())
+                .param("importPrice", "50000").param("priceBuy", "80000").param("initialStock", "3")
+                .param("storeId", store.getId().toString()).param("returnUrl", "https://example.invalid/"))
+                .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/admin/products-manage"));
+        Product created = products.findAll().stream().filter(p -> "Branch product".equals(p.getName())).findFirst().orElseThrow();
+        assertThat(created.getStore().getId()).isEqualTo(store.getId());
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), created.getId()).orElseThrow().getQuantity()).isEqualTo(3);
+        assertThat(inventory.findByStoreIdAndProductId(otherStore.getId(), created.getId())).isEmpty();
+    }
+
+    @Test void invalidManagerPriceAndCartQuantityDoNotChangeData() throws Exception {
+        mvc.perform(post("/manager/products/add").with(user(manager.getUsername()).roles("MANAGER")).with(csrf())
+                .param("name", "Bad manager price").param("categoryId", product.getCategory().getId().toString()).param("priceBuy", "abc"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(post("/manager/products/add").with(user(manager.getUsername()).roles("MANAGER")).with(csrf())
+                .param("name", "Bad manager price").param("categoryId", product.getCategory().getId().toString()).param("priceBuy", "-100"))
+                .andExpect(status().isBadRequest());
+        assertThatThrownBy(() -> cartService.updateQuantity(customer.getUsername(), item.getId(), -1)).isInstanceOf(IllegalArgumentException.class);
+        assertThat(items.existsById(item.getId())).isTrue();
+        assertThatThrownBy(() -> orderService.checkout(customer.getUsername(), List.of(item.getId(), Long.MAX_VALUE), PaymentMethod.COD,
+                "Khách", "0900000000", "Quận 1", null, null, LocalDate.now(), "PICKUP", store.getId())).hasMessageContaining("không thuộc");
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(10);
+    }
+
+    @Test void momoMockCannotPayCancelledOrders() {
+        Order order = checkout(PaymentMethod.MOMO);
+        order.setStatus(OrderStatus.CANCELLED);
+        assertThatThrownBy(() -> momo.simulatePayment(order.getId(), customer.getUsername())).hasMessageContaining("không còn chờ");
+        assertThat(order.getPaymentStatus()).isEqualTo("UNPAID");
+    }
+
+    @Test void blankAuthFormsDoNotAuthenticateOrCreateUsers() throws Exception {
+        SecurityContextHolder.clearContext();
+        long count = users.count();
+        for (String value : List.of("", " ")) {
+            mvc.perform(post("/perform_login").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous()).with(csrf()).param("username", value).param("password", value))
+                    .andExpect(status().is3xxRedirection()).andExpect(org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated());
+        }
+        mvc.perform(post("/register").param("username", "").param("password", "").param("fullName", " ").param("email", "").param("phone", ""))
+                .andExpect(status().isOk()).andExpect(model().attributeHasFieldErrors("registerRequest", "username", "password", "fullName", "email", "phone", "province", "district"));
+        mvc.perform(post("/forgot-password").param("email", "")).andExpect(status().isOk());
+        assertThat(users.count()).isEqualTo(count);
+    }
+
+    @Test void checkoutBlankRequiredFieldsAndMalformedSelectionNeverReserveStock() throws Exception {
+        long before = orders.count();
+        for (String field : List.of("recipientName", "recipientPhone", "recipientAddress", "selectedItemIds", "pickupStoreId", "paymentMethod", "deliveryDate")) {
+            var params = new org.springframework.util.LinkedMultiValueMap<String, String>();
+            params.add("selectedItemIds", item.getId().toString()); params.add("paymentMethod", "BANK_TRANSFER");
+            params.add("recipientName", "Khách"); params.add("recipientPhone", "0900000000"); params.add("recipientAddress", "Quận 1");
+            params.add("deliveryDate", LocalDate.now().toString());
+            params.add("shippingMethod", "recipientAddress".equals(field) ? "DELIVERY" : "PICKUP"); params.add("pickupStoreId", store.getId().toString());
+            params.set(field, "");
+            int result = mvc.perform(post("/checkout").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf()).params(params))
+                    .andReturn().getResponse().getStatus();
+            assertThat(result).isIn(302, 400);
+        }
+        mvc.perform(post("/checkout").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf()))
+                .andExpect(status().isBadRequest());
+        mvc.perform(post("/cart/add").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf())
+                .param("productId", product.getId().toString()).param("quantity", "abc")).andExpect(status().isBadRequest());
+        mvc.perform(post("/cart/add").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf()))
+                .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("errorMessage"));
+        mvc.perform(get("/cart/remove/" + item.getId()).with(user(customer.getUsername()).roles("CUSTOMER"))).andExpect(status().isMethodNotAllowed());
+        assertThat(orders.count()).isEqualTo(before);
+        assertThat(items.existsById(item.getId())).isTrue();
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(10);
+    }
+
+    @Test void emptyAdminProductFormAndManagerMissingPricesHaveUsefulErrors() throws Exception {
+        long count = products.count();
+        mvc.perform(post("/admin/products/create").with(user("admin-test").roles("ADMIN")).with(csrf()))
+                .andExpect(status().isOk()).andExpect(model().attributeHasFieldErrors("productForm", "name", "categoryId", "priceBuy", "importPrice"));
+        mvc.perform(post("/manager/products/add").with(user(manager.getUsername()).roles("MANAGER")).with(csrf()))
+                .andExpect(status().isBadRequest());
+        mvc.perform(post("/checkout/momo/ipn").contentType("application/json").content("{}"))
+                .andExpect(status().isForbidden());
+        mvc.perform(post("/checkout/momo/ipn").contentType("application/json").content("not json"))
+                .andExpect(status().isBadRequest());
+        assertThat(products.count()).isEqualTo(count);
+    }
+
+    @Test void paidPickupOrderOffersCompletionAndRejectsDeliveryWithoutChangingPayment() throws Exception {
+        Order order = checkout(PaymentMethod.MOMO);
+        momo.simulatePayment(order.getId(), customer.getUsername());
+        login(manager); workflow.transition(order.getId(), OrderStatus.CONFIRMED); workflow.transition(order.getId(), OrderStatus.PREPARING);
+        for (String route : List.of("/admin/orders-manage/" + order.getId(), "/manager/orders/" + order.getId())) {
+            String role = route.startsWith("/admin") ? "ADMIN" : "MANAGER";
+            var result = mvc.perform(get(route).with(user(manager.getUsername()).roles(role))).andExpect(status().isOk()).andReturn();
+            var options = (List<?>) result.getModelAndView().getModel().get("availableStatuses");
+            assertThat(options).extracting("value").contains("COMPLETED", "CANCELLED").doesNotContain("DELIVERING", "PICKED_UP", "DELIVERED");
+        }
+        mvc.perform(post("/admin/orders-manage/update-status/" + order.getId()).with(user(manager.getUsername()).roles("ADMIN")).with(csrf())
+                .param("status", "DELIVERING")).andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("errorMessage", org.hamcrest.Matchers.containsString("nhận tại tiệm")));
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PREPARING);
+        assertThat(order.getPaymentStatus()).isEqualTo("PAID");
+        login(manager); workflow.transition(order.getId(), OrderStatus.COMPLETED);
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.COMPLETED);
+        assertThat(order.getPaymentStatus()).isEqualTo("PAID");
+    }
+
+    @Test void deliveryDropdownDoesNotOfferSkippingDeliveryOrCancellingAfterHandover() throws Exception {
+        Order order = deliveryOrder();
+        for (String route : List.of("/admin/orders-manage/" + order.getId(), "/manager/orders/" + order.getId())) {
+            String role = route.startsWith("/admin") ? "ADMIN" : "MANAGER";
+            var result = mvc.perform(get(route).with(user(manager.getUsername()).roles(role))).andExpect(status().isOk()).andReturn();
+            var options = (List<?>) result.getModelAndView().getModel().get("availableStatuses");
+            assertThat(options).extracting("value").containsExactly("DELIVERED");
+        }
+        login(shipper); workflow.transition(order.getId(), OrderStatus.DELIVERED);
+        assertThat(workflow.availableTransitions(order)).containsExactly(OrderStatus.COMPLETED);
+    }
+
+    @Test void adminCanConfirmBankPaymentFromDetailAndCustomerSeesUpdatedStatus() throws Exception {
+        Order order = checkout(PaymentMethod.BANK_TRANSFER);
+        User admin = createUser("payment-admin", Role.ADMIN, null);
+        String detail = "/admin/orders-manage/" + order.getId();
+        String confirm = "/admin/orders-manage/confirm-payment/" + order.getId();
+        mvc.perform(get(detail).with(user(admin.getUsername()).roles("ADMIN"))).andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("bankPaymentConfirmation")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Xác nhận đã nhận tiền")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("DH" + order.getId())))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("160,000")));
+        mvc.perform(post(confirm).with(user(admin.getUsername()).roles("ADMIN"))).andExpect(status().isForbidden());
+        mvc.perform(post(confirm).with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf())).andExpect(status().isForbidden());
+        assertThat(order.getPaymentStatus()).isEqualTo("UNPAID");
+        mvc.perform(post(confirm).with(user(admin.getUsername()).roles("ADMIN")).with(csrf()).param("redirect", detail))
+                .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl(detail)).andExpect(flash().attributeExists("successMessage"));
+        assertThat(order.getPaymentStatus()).isEqualTo("PAID");
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
+        assertThat(payments.findByOrderId(order.getId()).get(0).getStatus()).isEqualTo(PaymentStatus.SUCCESS);
+        long count = notifications.count();
+        mvc.perform(post(confirm).with(user(admin.getUsername()).roles("ADMIN")).with(csrf()).param("redirect", "https://example.invalid"))
+                .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/admin/orders-manage"));
+        assertThat(notifications.count()).isEqualTo(count);
+        mvc.perform(get(detail).with(user(admin.getUsername()).roles("ADMIN"))).andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("bankPaymentConfirmation"))));
+        mvc.perform(get("/checkout/bank/" + order.getId() + "/status").with(user(customer.getUsername()).roles("CUSTOMER")))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.paymentStatus").value("PAID"));
+    }
+
+    @Test void adminBankConfirmationIsHiddenAndRejectedForCancelledOrders() throws Exception {
+        Order order = checkout(PaymentMethod.BANK_TRANSFER);
+        order.setStatus(OrderStatus.CANCELLED);
+        User admin = createUser("payment-admin", Role.ADMIN, null);
+        mvc.perform(get("/admin/orders-manage/" + order.getId()).with(user(admin.getUsername()).roles("ADMIN")))
+                .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("bankPaymentConfirmation"))));
+        mvc.perform(post("/admin/orders-manage/confirm-payment/" + order.getId()).with(user(admin.getUsername()).roles("ADMIN")).with(csrf()))
+                .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("errorMessage"));
+        assertThat(order.getPaymentStatus()).isEqualTo("UNPAID");
     }
 
     @Test void deliveryFallsBackToAStoreWithStockAndQuoteMatchesCheckout() {

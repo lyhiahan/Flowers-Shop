@@ -27,6 +27,37 @@ public class OrderWorkflowService {
         return orders.findLockedById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng."));
     }
 
+    public java.util.List<OrderStatus> availableTransitions(Order order) {
+        if (order == null || order.getStatus() == null) return java.util.List.of();
+        boolean pickup = "PICKUP".equals(order.getShippingMethod());
+        return switch (order.getStatus()) {
+            case PENDING -> java.util.List.of(OrderStatus.CONFIRMED, OrderStatus.CANCELLED);
+            case CONFIRMED -> java.util.List.of(OrderStatus.PREPARING, OrderStatus.CANCELLED);
+            case PREPARING -> pickup ? java.util.List.of(OrderStatus.COMPLETED, OrderStatus.CANCELLED)
+                    : order.getShipper() != null ? java.util.List.of(OrderStatus.PICKED_UP, OrderStatus.DELIVERING, OrderStatus.CANCELLED)
+                    : java.util.List.of(OrderStatus.DELIVERING, OrderStatus.CANCELLED);
+            case PICKED_UP -> java.util.List.of(OrderStatus.DELIVERING);
+            case DELIVERING -> java.util.List.of(OrderStatus.DELIVERED);
+            case DELIVERED -> java.util.List.of(OrderStatus.COMPLETED);
+            case REFUND_REQUESTED -> java.util.List.of(OrderStatus.REFUNDED);
+            default -> java.util.List.of();
+        };
+    }
+
+    public String transitionLabel(Order order, OrderStatus next) {
+        return switch (next) {
+            case CONFIRMED -> "Tiếp nhận đơn hàng";
+            case PREPARING -> "Bắt đầu cắm hoa & Chuẩn bị";
+            case PICKED_UP -> "Bàn giao cho người giao hàng";
+            case DELIVERING -> "Đang giao hoa đến khách";
+            case DELIVERED -> "Đã giao hoa thành công";
+            case COMPLETED -> "PICKUP".equals(order.getShippingMethod()) ? "Khách nhận hoa tại quầy - Hoàn tất" : "Hoàn tất đơn hàng";
+            case CANCELLED -> "Hủy đơn hàng";
+            case REFUNDED -> "Xác nhận đã hoàn tiền cho khách";
+            default -> next.name();
+        };
+    }
+
     @Transactional
     public Order transition(Long id, OrderStatus next) {
         Order order = lockedOrder(id);
@@ -42,19 +73,9 @@ public class OrderWorkflowService {
         }
         OrderStatus previous = order.getStatus();
         if (previous == next) return order;
-        boolean pickup = "PICKUP".equals(order.getShippingMethod());
-        boolean allowed = switch (previous) {
-            case PENDING -> next == OrderStatus.CONFIRMED || next == OrderStatus.CANCELLED;
-            case CONFIRMED -> next == OrderStatus.PREPARING || next == OrderStatus.CANCELLED;
-            case PREPARING -> next == OrderStatus.CANCELLED
-                    || (pickup && next == OrderStatus.COMPLETED)
-                    || (!pickup && ((next == OrderStatus.PICKED_UP && order.getShipper() != null) || next == OrderStatus.DELIVERING));
-            case PICKED_UP -> next == OrderStatus.DELIVERING;
-            case DELIVERING -> next == OrderStatus.DELIVERED;
-            case DELIVERED -> next == OrderStatus.COMPLETED;
-            case REFUND_REQUESTED -> next == OrderStatus.REFUNDED;
-            default -> false;
-        };
+        if ("PICKUP".equals(order.getShippingMethod()) && (next == OrderStatus.PICKED_UP || next == OrderStatus.DELIVERING || next == OrderStatus.DELIVERED))
+            throw new IllegalStateException("Đơn khách nhận tại tiệm không có bước vận chuyển. Khi khách đã nhận hoa, chọn 'Khách nhận hoa tại quầy - Hoàn tất'.");
+        boolean allowed = availableTransitions(order).contains(next);
         if (!allowed) throw new IllegalStateException("Không thể chuyển đơn từ " + previous + " sang " + next);
         if (next == OrderStatus.CANCELLED) return cancel(order);
         if (next == OrderStatus.REFUNDED) refund(order);
@@ -83,6 +104,7 @@ public class OrderWorkflowService {
         if (!"BANK_TRANSFER".equals(order.getPaymentMethod())) {
             throw new IllegalStateException("Chỉ xác nhận thủ công cho chuyển khoản ngân hàng.");
         }
+        if ("PAID".equals(order.getPaymentStatus())) return;
         markPaid(order);
         orders.save(order);
         try {
@@ -155,10 +177,16 @@ public class OrderWorkflowService {
     }
 
     private Order cancel(Order order) {
-        for (OrderDetail detail : order.getOrderDetails()) {
-            StoreInventory inventory = inventories.findByStoreIdAndProductId(order.getPickupStore().getId(), detail.getProduct().getId())
+        java.util.Map<Long, StoreInventory> stock = new java.util.HashMap<>();
+        for (Long productId : order.getOrderDetails().stream().map(d -> d.getProduct().getId()).distinct().sorted().toList()) {
+            StoreInventory row = inventories.findLockedStock(order.getPickupStore().getId(), productId)
                     .orElseThrow(() -> new IllegalStateException("Không tìm thấy tồn kho của đơn hàng."));
-            inventory.setQuantity(inventory.getQuantity() + detail.getQuantity());
+            entityManager.refresh(row, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+            stock.put(productId, row);
+        }
+        for (OrderDetail detail : order.getOrderDetails()) {
+            StoreInventory inventory = stock.get(detail.getProduct().getId());
+            inventory.setQuantity(Math.addExact(inventory.getQuantity(), detail.getQuantity()));
             inventories.save(inventory);
         }
         boolean paid = "PAID".equals(order.getPaymentStatus());

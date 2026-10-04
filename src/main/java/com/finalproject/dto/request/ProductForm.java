@@ -24,16 +24,19 @@ public class ProductForm {
     private Long categoryId;
 
     @NotBlank(message = "Vui lòng điền tên sản phẩm")
+    @jakarta.validation.constraints.Size(max = 200, message = "Tên sản phẩm tối đa 200 ký tự")
     private String name;
 
     private String description;
 
     @NotNull(message = "Vui lòng điền giá nhập hàng")
     @DecimalMin(value = "0.0", inclusive = false, message = "Giá nhập hàng phải lớn hơn 0")
+    @jakarta.validation.constraints.Digits(integer = 16, fraction = 2, message = "Giá nhập tối đa 16 chữ số và 2 số thập phân")
     private BigDecimal importPrice;
 
     @NotNull(message = "Vui lòng điền giá bán")
     @DecimalMin(value = "0.0", inclusive = false, message = "Giá bán đứt phải là số dương lớn hơn 0. Vui lòng nhập lại.")
+    @jakarta.validation.constraints.Digits(integer = 16, fraction = 2, message = "Giá bán tối đa 16 chữ số và 2 số thập phân")
     private BigDecimal priceBuy;
 
     private BigDecimal priceRentPerDay = BigDecimal.ZERO;

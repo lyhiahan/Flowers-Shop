@@ -142,6 +142,8 @@
                             </div>
                         </div>
                         <div class="d-flex align-items-center gap-2">
+                            <a th:if="${o.paymentMethod == 'BANK_TRANSFER' and o.paymentStatus == 'UNPAID' and o.status.name() != 'CANCELLED' and o.status.name() != 'REFUNDED'}"
+                               th:href="@{/checkout/bank/{id}(id=${o.id})}" class="btn btn-outline-success btn-sm rounded-pill px-3">Hướng dẫn chuyển khoản</a>
                             <!-- Nút thanh toán MoMo nếu chưa thanh toán và đơn chưa hủy -->
                             <a th:if="${o.paymentMethod == 'MOMO' and o.paymentStatus != 'PAID' and o.status.name() != 'CANCELLED'}"
                                th:href="@{'/checkout/momo/' + ${o.id}}" 

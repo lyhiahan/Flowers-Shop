@@ -34,6 +34,7 @@ public class AuthServiceImpl implements AuthService {
     private final CartRepository cartRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+    private final jakarta.validation.Validator validator;
 
     // Lưu tạm thông tin đăng ký chờ xác thực OTP trong bộ nhớ, CHƯA LƯU VÀO DATABASE để tránh tài khoản rác
     private final Map<String, PendingRegistration> pendingRegistrations = new ConcurrentHashMap<>();
@@ -41,6 +42,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public String registerCustomer(RegisterRequest request) {
+        if (request == null) throw new IllegalArgumentException("Vui lòng điền thông tin đăng ký.");
         // 1. Chuẩn hóa dữ liệu đầu vào
         String username = request.getUsername() != null ? request.getUsername().trim() : "";
         String email = request.getEmail() != null ? request.getEmail().trim().toLowerCase() : "";
@@ -51,11 +53,17 @@ public class AuthServiceImpl implements AuthService {
             phone = "0" + phone.substring(2);
         }
         request.setUsername(username);
+        var validationErrors = validator.validate(request);
+        if (!validationErrors.isEmpty()) throw new IllegalArgumentException(validationErrors.stream()
+                .map(jakarta.validation.ConstraintViolation::getMessage).sorted().collect(java.util.stream.Collectors.joining("; ")));
+        if (request.getPassword().getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72)
+            throw new IllegalArgumentException("Mật khẩu tối đa 72 byte UTF-8.");
         request.setEmail(email);
         request.setPhone(phone);
         if (request.getAddress() == null || request.getAddress().trim().isEmpty()) {
             request.setAddress(request.getFullAddress());
         }
+        if (request.getAddress().length() > 255) throw new IllegalArgumentException("Địa chỉ tối đa 255 ký tự.");
 
         // Kiểm tra trùng username, email hoặc số điện thoại trong Database
         if (userRepository.existsByUsername(username)) {
@@ -251,7 +259,7 @@ public class AuthServiceImpl implements AuthService {
                 .or(() -> userRepository.findByUsername(query))
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản với email: " + query));
 
-        if (newPassword == null || newPassword.trim().length() < 6) {
+        if (newPassword == null || newPassword.trim().length() < 6 || newPassword.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72) {
             throw new IllegalArgumentException("Mật khẩu mới phải có tối thiểu 6 ký tự!");
         }
 
