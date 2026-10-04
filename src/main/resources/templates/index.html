@@ -1543,6 +1543,15 @@
                         Tất cả mẫu hoa
                     </a>
 
+                    <!-- Danh mục hệ thống -->
+                    <th:block th:if="${categories != null and not #lists.isEmpty(categories)}">
+                        <a th:each="cat : ${categories}" th:href="@{/products(categoryId=${cat.id})} + '#product-catalog'"
+                           class="cat-nav-link"
+                           th:classappend="${selectedCategory != null and selectedCategory.id == cat.id} ? 'active' : ''"
+                           th:text="${cat.name}">
+                        </a>
+                    </th:block>
+
                     <!-- 3. Bán chạy (cuộn nhanh đến mục hoa bán chạy) -->
                     <a th:href="@{/#best-seller}" 
                        class="cat-nav-link"
