@@ -73,6 +73,7 @@ class BusinessRegressionTests {
         otherStore = stores.save(Store.builder().name("Quận 7").address("Quận 7").build());
         customer = createUser("customer", Role.CUSTOMER, null);
         manager = createUser("manager", Role.MANAGER, store);
+        store.setOwner(manager); stores.save(store);
         outsider = createUser("outsider", Role.MANAGER, otherStore);
         Category category = categories.save(Category.builder().name("Hoa").build());
         product = products.save(Product.builder().name("Hoa hồng").category(category).store(store)
@@ -443,7 +444,7 @@ class BusinessRegressionTests {
 
     @Test void withdrawalReservesFundsAndRejectionRestoresThem() {
         store.setEWallet(new BigDecimal("100000")); login(manager);
-        wallet.requestWithdrawal(new BigDecimal("60000"), "Bank", "123", "Manager");
+        wallet.requestWithdrawal(new BigDecimal("60000"), "Bank", "123456789", "Manager");
         assertThat(store.getEWallet()).isEqualByComparingTo("40000");
         Transaction tx = transactions.findAll().get(0);
         assertThat(tx.getStatus()).isEqualTo("PENDING");
@@ -454,7 +455,7 @@ class BusinessRegressionTests {
 
     @Test void withdrawalCannotExceedAvailableFunds() {
         store.setEWallet(new BigDecimal("50000")); login(manager);
-        assertThatThrownBy(() -> wallet.requestWithdrawal(new BigDecimal("60000"), "Bank", "123", "Manager"))
+        assertThatThrownBy(() -> wallet.requestWithdrawal(new BigDecimal("60000"), "Bank", "123456789", "Manager"))
                 .isInstanceOf(IllegalStateException.class);
         assertThat(transactions.count()).isZero();
     }

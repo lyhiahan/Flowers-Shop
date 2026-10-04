@@ -50,6 +50,9 @@ public class Store {
     @Column(name = "featured_images", columnDefinition = "NVARCHAR(MAX)")
     private String featuredImages;
 
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String featuredImagePublicIds;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "commission_id")
     private Commission commission;
@@ -79,6 +82,7 @@ public class Store {
     private Double longitude;
 
     private java.time.LocalDateTime createdAt;
+    @Column(length = 80) private String creationRequestKey;
 
     @PrePersist
     public void prePersist() {

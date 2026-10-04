@@ -12,6 +12,26 @@ import java.util.List;
 
 @Repository
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> {
+    interface SalesRank {
+        Long getId();
+        String getName();
+        Long getSold();
+    }
+
+    @Query("""
+        select d.product.id as id, d.product.name as name, sum(d.quantity) as sold
+        from OrderDetail d
+        where (:storeId is null or d.order.pickupStore.id = :storeId)
+        and d.order.createdAt >= :start and d.order.createdAt < :end
+        and d.order.paymentStatus = 'PAID'
+        and (d.order.status in (com.finalproject.enums.OrderStatus.DELIVERED, com.finalproject.enums.OrderStatus.COMPLETED)
+          or (d.order.status = com.finalproject.enums.OrderStatus.REFUND_REQUESTED
+            and exists(select t.id from Transaction t where t.order.id = d.order.id and t.type = 'ORDER_PAYMENT')))
+        group by d.product.id, d.product.name
+        order by sum(d.quantity) desc, d.product.id desc
+        """)
+    List<SalesRank> rankSales(Long storeId, LocalDateTime start, LocalDateTime end, Pageable pageable);
+
     List<OrderDetail> findByOrderId(Long orderId);
 
     @Query("SELECT CASE WHEN COUNT(od) > 0 THEN true ELSE false END " +
@@ -37,7 +57,6 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
            "GROUP BY od.product.id " +
            "ORDER BY SUM(od.quantity) DESC")
     List<Long> findTopSellingProductIdsSince(@Param("since") LocalDateTime since, Pageable pageable);
-
     // Tính tổng số lượng đang giữ (Reserved) cho các đơn hàng đang xử lý theo sản phẩm và chi nhánh
     @Query("SELECT od.product.id, od.order.pickupStore.id, SUM(od.quantity) " +
            "FROM OrderDetail od " +

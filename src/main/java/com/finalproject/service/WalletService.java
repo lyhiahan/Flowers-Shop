@@ -24,23 +24,40 @@ public class WalletService {
 
     @Transactional
     public void requestWithdrawal(Store targetStore, BigDecimal amount, String bank, String account, String holder) {
+        requestWithdrawal(targetStore, amount, bank, account, holder, null);
+    }
+
+    @Transactional
+    public void requestWithdrawal(Store targetStore, BigDecimal amount, String bank, String account, String holder, String requestId) {
         Store assigned = targetStore != null ? targetStore : access.assignedStore();
-        access.requireManager(assigned);
-        if (amount == null || amount.compareTo(BigDecimal.valueOf(50000)) < 0 || amount.scale() > 2) {
+        access.requireOwner(assigned);
+        if (amount == null || amount.compareTo(BigDecimal.valueOf(50000)) < 0 || amount.scale() > 2 || amount.precision() - amount.scale() > 16) {
             throw new IllegalArgumentException("Số tiền rút tối thiểu là 50.000 VNĐ và tối đa 2 chữ số thập phân.");
         }
         if (bank == null || bank.isBlank() || account == null || account.isBlank() || holder == null || holder.isBlank()) {
             throw new IllegalArgumentException("Vui lòng nhập đầy đủ thông tin ngân hàng.");
         }
+        if (bank.trim().length() > 100 || holder.trim().length() > 100 || !account.trim().matches("[0-9]{6,30}")) {
+            throw new IllegalArgumentException("Tên ngân hàng/chủ tài khoản tối đa 100 ký tự; số tài khoản gồm 6–30 chữ số.");
+        }
+        String description = "Rút về " + bank.trim() + " - " + account.trim() + " (" + holder.trim() + ")";
         Store store = stores.findLockedById(assigned.getId()).orElseThrow();
         entityManager.refresh(store, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        String key = requestId == null || requestId.isBlank() ? null : store.getId() + ":" + java.util.UUID.fromString(requestId);
+        if (key != null) {
+            var previous = transactions.findByRequestKey(key);
+            if (previous.isPresent()) {
+                if (previous.get().getAmount().compareTo(amount) != 0 || !"WITHDRAWAL".equals(previous.get().getType()) || !description.equals(previous.get().getDescription())) throw new IllegalArgumentException("Mã yêu cầu đã được dùng cho giao dịch khác.");
+                return;
+            }
+        }
         if (store.getEWallet() == null || store.getEWallet().compareTo(amount) < 0) {
             throw new IllegalStateException("Số dư ví không đủ.");
         }
         store.setEWallet(store.getEWallet().subtract(amount));
         stores.save(store);
-        transactions.save(Transaction.builder().store(store).amount(amount).isUp(false).type("WITHDRAWAL")
-                .description("Rút về " + bank.trim() + " - " + account.trim() + " (" + holder.trim() + ")")
+        transactions.save(Transaction.builder().store(store).amount(amount).isUp(false).type("WITHDRAWAL").requestKey(key)
+                .description(description)
                 .status("PENDING").build());
     }
 

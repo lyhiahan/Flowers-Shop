@@ -176,7 +176,7 @@ public class HomeController {
             // - Chỉ lọc thuộc tính: “Kết quả lọc sản phẩm”
             String activeFilterTitle;
             if (trimmedKeyword != null) {
-                activeFilterTitle = "Kết quả tìm kiếm: ‘" + trimmedKeyword + "’";
+                activeFilterTitle = "Kết quả cho “" + trimmedKeyword + "”";
             } else if (selectedCategory != null) {
                 activeFilterTitle = selectedCategory.getName();
             } else if (!cleanStyles.isEmpty() && cleanStyles.size() == 1) {

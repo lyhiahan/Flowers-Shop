@@ -62,16 +62,20 @@ public class CartServiceImpl implements CartService {
                 || !Boolean.TRUE.equals(product.getIsSelling()))
             throw new IllegalStateException("Sản phẩm đã ngừng bán.");
 
-        Long storeId = request.getStoreId() != null ? request.getStoreId()
-                : (product.getStore() != null ? product.getStore().getId() : 1L);
+        if (request.getOrderType() != com.finalproject.enums.OrderType.BUY) throw new IllegalArgumentException("Hệ thống chỉ hỗ trợ mua hoa.");
+        if (!com.finalproject.service.ProductAvailability.isPublic(product)) throw new IllegalStateException("Sản phẩm đã ngừng bán.");
+        if (request.getQuantity() == null || request.getQuantity() <= 0 || request.getQuantity() > 10000) throw new IllegalArgumentException("Số lượng không hợp lệ.");
+        if (request.getDeliveryDate() != null && request.getDeliveryDate().isBefore(java.time.LocalDate.now())) throw new IllegalArgumentException("Ngày nhận hàng không được ở quá khứ.");
+        Long storeId = request.getStoreId() != null ? request.getStoreId() : (product.getStore() != null ? product.getStore().getId() : 1L);
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Chi nhánh không tồn tại"));
 
+        if (!Boolean.TRUE.equals(store.getStatus()) || !Boolean.TRUE.equals(store.getIsOpen())) throw new IllegalStateException("Chi nhánh hiện không nhận đơn.");
         // --- Ưu tiên 3: Lấy tồn kho một lần ---
-        StoreInventory inventory = storeInventoryRepository.findByStoreIdAndProductId(storeId, product.getId())
+        StoreInventory inventory = storeInventoryRepository.findByStoreIdAndProductId(store.getId(), product.getId())
                 .orElse(null);
         int availableStock = (inventory != null && inventory.getQuantity() != null) ? inventory.getQuantity() : 0;
         if (availableStock <= 0) {
-            Store store = storeRepository.findById(storeId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Chi nhánh không tồn tại"));
             throw new IllegalStateException("Mẫu hoa '" + product.getName()
                     + "' hiện đang tạm hết hàng tại " + store.getName()
                     + ". Quý khách vui lòng chọn chi nhánh khác hoặc mẫu hoa khác.");

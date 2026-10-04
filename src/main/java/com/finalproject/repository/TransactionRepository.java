@@ -8,6 +8,8 @@ import java.util.List;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
+    java.util.Optional<Transaction> findByRequestKey(String key);
+    org.springframework.data.domain.Page<Transaction> findByStoreId(Long storeId, org.springframework.data.domain.Pageable pageable);
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @org.springframework.data.jpa.repository.Query("select t from Transaction t where t.id = :id")
     java.util.Optional<Transaction> findLockedById(@org.springframework.data.repository.query.Param("id") Long id);

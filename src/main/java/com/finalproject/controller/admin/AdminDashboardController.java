@@ -35,6 +35,8 @@ public class AdminDashboardController {
             @org.springframework.web.bind.annotation.RequestParam(value = "userChartType", defaultValue = "line") String userChartType,
             @org.springframework.web.bind.annotation.RequestParam(value = "storeChartType", defaultValue = "bar") String storeChartType,
             @org.springframework.web.bind.annotation.RequestParam(value = "error", required = false) String error,
+            @org.springframework.web.bind.annotation.RequestParam(value = "criteria", defaultValue = "revenue") String criteria,
+            @org.springframework.web.bind.annotation.RequestParam(value = "chartType", defaultValue = "line") String chartType,
             Principal principal,
             Model model) {
         try {
@@ -65,7 +67,7 @@ public class AdminDashboardController {
 
             List<Order> recentOrders;
             try {
-                recentOrders = orderRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 10, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"))).getContent();
+                recentOrders = orderRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"))).getContent();
             } catch (Exception e) {
                 recentOrders = orderRepository.findTop10ByOrderByCreatedAtDesc();
             }
@@ -80,7 +82,7 @@ public class AdminDashboardController {
             // UC_025: Top người dùng điểm cao nhất hệ thống (lên đến 1000 người dùng)
             List<User> topPointUsers;
             try {
-                topPointUsers = userRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "point"))).getContent();
+                topPointUsers = userRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "point", "id"))).getContent();
             } catch (Exception e) {
                 topPointUsers = java.util.Collections.emptyList();
             }
@@ -88,7 +90,7 @@ public class AdminDashboardController {
             // UC_025: 1000 người dùng mới nhất
             List<User> recentUsers;
             try {
-                recentUsers = userRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "id"))).getContent();
+                recentUsers = userRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt", "id"))).getContent();
             } catch (Exception e) {
                 recentUsers = java.util.Collections.emptyList();
             }
@@ -96,7 +98,7 @@ public class AdminDashboardController {
             // UC_026: Top cửa hàng điểm cao nhất hệ thống (lên đến 1000 cửa hàng)
             List<Store> topPointStores;
             try {
-                topPointStores = storeRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "point"))).getContent();
+                topPointStores = storeRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "point", "id"))).getContent();
             } catch (Exception e) {
                 topPointStores = java.util.Collections.emptyList();
             }
@@ -104,7 +106,7 @@ public class AdminDashboardController {
             // UC_026: 1000 cửa hàng mới nhất
             List<Store> recentStores;
             try {
-                recentStores = storeRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "id"))).getContent();
+                recentStores = storeRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt", "id"))).getContent();
             } catch (Exception e) {
                 recentStores = java.util.Collections.emptyList();
             }
@@ -116,6 +118,9 @@ public class AdminDashboardController {
             var usersChart = analyticsService.getNewUsersChart(timeframe);
             var storesChart = analyticsService.getNewStoresChart(timeframe);
 
+            if (!java.util.Set.of("line", "bar", "pie").contains(chartType) || !java.util.Set.of("line", "bar", "pie").contains(userChartType) || !java.util.Set.of("line", "bar", "pie").contains(storeChartType)) throw new IllegalArgumentException("Loại biểu đồ không hợp lệ.");
+            model.addAllAttributes(analyticsService.dashboard(null, timeframe, criteria));
+            model.addAttribute("criteria", criteria); model.addAttribute("chartType", chartType);
             model.addAttribute("dataLoadError", false);
             model.addAttribute("admin", admin);
             model.addAttribute("timeframe", timeframe);
@@ -142,8 +147,8 @@ public class AdminDashboardController {
             model.addAttribute("rentingOrders", rentingOrders);
             model.addAttribute("completedOrders", completedOrders);
             model.addAttribute("totalRevenue", totalRevenue);
-            model.addAttribute("recentOrders", recentOrders);
-            model.addAttribute("topProducts", topProducts);
+
+
             model.addAttribute("topPointUsers", topPointUsers);
             model.addAttribute("recentUsers", recentUsers);
             model.addAttribute("topPointStores", topPointStores);
@@ -154,6 +159,8 @@ public class AdminDashboardController {
             model.addAttribute("products", productRepository.findAll());
             model.addAttribute("stores", storeRepository.findAll());
 
+        } catch (IllegalArgumentException ex) {
+            throw ex;
         } catch (Exception ex) {
             model.addAttribute("dataLoadError", true);
             model.addAttribute("errorMessage", "Không thể tải dữ liệu thống kê hệ thống. Vui lòng thử lại!");
@@ -167,6 +174,8 @@ public class AdminDashboardController {
             model.addAttribute("recentStores", java.util.Collections.emptyList());
         }
 
+
+        for (String ranking : java.util.List.of("topProducts", "recentOrders", "topPointUsers", "topPointStores")) com.finalproject.utils.DashboardPages.apply(model, ranking);
         return "admin/dashboard";
     }
 }

@@ -51,31 +51,18 @@ public class ManagerWalletController {
         if (store == null) {
             return "redirect:/manager/stores";
         }
-        storeAccess.requireStore(store);
+        storeAccess.requireManager(store);
 
-        boolean isOwner = (store.getOwner() != null && user.getId().equals(store.getOwner().getId()))
-                || user.getRole() == Role.ADMIN;
+        boolean isOwner = (store.getOwner() != null && user.getId().equals(store.getOwner().getId()));
 
-        List<Transaction> allTransactions = transactionRepository.findByStoreIdOrderByCreatedAtDesc(store.getId());
-
-        // Bước 8: Phân trang giao dịch
-        int totalElements = allTransactions.size();
-        int totalPages = totalElements > 0 ? (int) Math.ceil((double) totalElements / size) : 1;
-        if (page < 0) page = 0;
-        if (page >= totalPages && totalElements > 0) page = totalPages - 1;
-
-        int fromIndex = Math.min(page * size, totalElements);
-        int toIndex = Math.min(fromIndex + size, totalElements);
-        List<Transaction> pagedTransactions = totalElements > 0 ? allTransactions.subList(fromIndex, toIndex) : Collections.emptyList();
-
+        var result = com.finalproject.utils.StorePages.load(page, size, pageable -> transactionRepository.findByStoreId(store.getId(), pageable));
+        List<Transaction> pagedTransactions = result.getContent();
+        com.finalproject.utils.StorePages.model(model, result);
         model.addAttribute("store", store);
         model.addAttribute("currentUser", user);
         model.addAttribute("isOwner", isOwner);
+        model.addAttribute("requestId", java.util.UUID.randomUUID().toString());
         model.addAttribute("transactions", pagedTransactions);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("pageSize", size);
-        model.addAttribute("totalElements", totalElements);
 
         return "manager/wallet";
     }
@@ -95,6 +82,7 @@ public class ManagerWalletController {
                                     @RequestParam(value = "bankName", required = false) String bankName,
                                     @RequestParam(value = "accountNumber", required = false) String accountNumber,
                                     @RequestParam(value = "accountHolder", required = false) String accountHolder,
+                                    @RequestParam(value = "requestId", required = false) String requestId,
                                     RedirectAttributes ra) {
         try {
             User user = userRepository.findByUsername(principal.getName()).orElseThrow();
@@ -102,11 +90,10 @@ public class ManagerWalletController {
             if (store == null) {
                 return "redirect:/manager/stores";
             }
-            storeAccess.requireStore(store);
+            storeAccess.requireManager(store);
 
             // Bước 9: Nút này sẽ tồn tại nếu người quản lý là chủ cửa hàng
-            boolean isOwner = (store.getOwner() != null && user.getId().equals(store.getOwner().getId()))
-                    || user.getRole() == Role.ADMIN;
+            boolean isOwner = (store.getOwner() != null && user.getId().equals(store.getOwner().getId()));
             if (!isOwner) {
                 throw new AccessDeniedException("Chỉ chủ cửa hàng mới có quyền thực hiện rút tiền từ ví cửa hàng.");
             }
@@ -115,19 +102,12 @@ public class ManagerWalletController {
             if (password == null || password.trim().isEmpty()) {
                 throw new IllegalArgumentException("Vui lòng nhập mật khẩu xác nhận.");
             }
-            boolean passwordValid = (user.getPassword() != null && user.getPassword().equals(password))
-                    || passwordEncoder.matches(password, user.getPassword());
+            boolean passwordValid = user.getPassword() != null && passwordEncoder.matches(password, user.getPassword());
             if (!passwordValid) {
                 throw new IllegalArgumentException("Mật khẩu xác nhận không chính xác. Vui lòng thử lại!");
             }
 
-            if (bankName == null || bankName.isBlank()) bankName = "Vietcombank";
-            if (accountNumber == null || accountNumber.isBlank()) accountNumber = "1012345678";
-            if (accountHolder == null || accountHolder.isBlank()) {
-                accountHolder = user.getFullName() != null ? user.getFullName() : user.getUsername();
-            }
-
-            walletService.requestWithdrawal(store, amount, bankName, accountNumber, accountHolder);
+            walletService.requestWithdrawal(store, amount, bankName, accountNumber, accountHolder, requestId);
             ra.addFlashAttribute("successMessage", "Yêu cầu rút " + String.format("%,d", amount.longValue()) + " VNĐ thành công! Hệ thống đang xử lý.");
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
@@ -136,16 +116,6 @@ public class ManagerWalletController {
     }
 
     private Store resolveStore(User user) {
-        if (user.getStore() != null) {
-            return user.getStore();
-        }
-        List<Store> owned = storeRepository.findByOwnerId(user.getId());
-        if (!owned.isEmpty()) {
-            Store first = owned.get(0);
-            user.setStore(first);
-            userRepository.save(user);
-            return first;
-        }
-        return null;
+        return storeAccess.selectedStore();
     }
 }

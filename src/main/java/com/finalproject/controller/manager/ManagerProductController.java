@@ -34,21 +34,47 @@ public class ManagerProductController {
     private final com.finalproject.service.CloudinaryService cloudinaryService;
     private final com.finalproject.repository.ProductImageRepository productImages;
 
+    @GetMapping("/create")
+    public String createForm(Model model) {
+        storeAccess.requireManager(storeAccess.assignedStore());
+        model.addAttribute("product", new Product());
+        model.addAttribute("categories", categoryRepository.findActiveCategories());
+        return "manager/product-form";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String editForm(@PathVariable Long id, Model model) {
+        Product product = productRepository.findById(id).orElseThrow();
+        storeAccess.requireManager(product.getStore());
+        if (Boolean.TRUE.equals(product.getIsDeleted())) throw new IllegalArgumentException("Sản phẩm đã bị xóa.");
+        model.addAttribute("product", product);
+        model.addAttribute("categories", categoryRepository.findActiveCategories());
+        return "manager/product-form";
+    }
+
     @GetMapping
-    public String listProducts(Principal principal, Model model) {
+    public String listProducts(Principal principal, Model model,
+            @RequestParam(value="tab", defaultValue="selling") String tab,
+            @RequestParam(value="page", defaultValue="0") int page,
+            @RequestParam(value="size", defaultValue="8") int size) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         Long storeId = storeAccess.assignedStore().getId();
 
-        List<Product> products = productRepository.findByStoreIdOrderByCreatedAtDesc(storeId);
+        if (!java.util.Set.of("selling", "stored").contains(tab)) throw new IllegalArgumentException("Tab sản phẩm không hợp lệ.");
+        var result = com.finalproject.utils.StorePages.load(page, size, pageable -> productRepository.findAll((root, query, cb) -> cb.and(
+                cb.equal(root.get("store").get("id"), storeId), cb.isFalse(root.get("isDeleted")),
+                cb.equal(root.get("isSelling"), "selling".equals(tab))), pageable));
+        List<Product> products = result.getContent();
+        com.finalproject.utils.StorePages.model(model, result);
+        model.addAttribute("activeTab", tab);
 
 
         model.addAttribute("products", products);
         java.util.Map<Long, Integer> stock = new java.util.HashMap<>();
-        for (Product product : products) stock.put(product.getId(), inventories.findByStoreIdAndProductId(storeId, product.getId())
-                .map(com.finalproject.entity.StoreInventory::getQuantity).orElse(0));
+        inventories.findByStoreIdAndProductIdIn(storeId, products.stream().map(Product::getId).toList()).forEach(item -> stock.put(item.getProduct().getId(), item.getQuantity()));
         model.addAttribute("stock", stock);
         model.addAttribute("categories", categoryRepository.findActiveCategories());
-        model.addAttribute("store", user.getStore());
+        model.addAttribute("store", storeAccess.assignedStore());
         return "manager/products";
     }
 
@@ -66,11 +92,14 @@ public class ManagerProductController {
                              RedirectAttributes ra) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         Store store = storeAccess.assignedStore();
+        storeAccess.requireManager(store);
         Category category = categoryRepository.findById(categoryId).orElseThrow();
         if (Boolean.TRUE.equals(category.getIsDeleted())) throw new IllegalArgumentException("Danh mục đã bị xóa.");
 
         validatePrice(priceBuy, promotionalPrice);
         validateName(name);
+        if (imageUrl != null && !imageUrl.isBlank() && !com.finalproject.utils.ImageUrls.valid(imageUrl)) throw new IllegalArgumentException("URL ảnh không hợp lệ.");
+        if (description != null && description.length() > 10000) throw new IllegalArgumentException("Mô tả tối đa 10000 ký tự.");
         if (initialStock < 0 || initialStock > 1000000) throw new IllegalArgumentException("Tồn kho phải từ 0 đến 1.000.000.");
         var uploaded = uploadProductImage(imageFile);
         Product product = Product.builder()
@@ -115,6 +144,8 @@ public class ManagerProductController {
         if (Boolean.TRUE.equals(cat.getIsDeleted())) throw new IllegalArgumentException("Danh mục đã bị xóa.");
         validatePrice(priceBuy, promotionalPrice);
         validateName(name);
+        if (imageUrl != null && !imageUrl.isBlank() && !com.finalproject.utils.ImageUrls.valid(imageUrl)) throw new IllegalArgumentException("URL ảnh không hợp lệ.");
+        if (description != null && description.length() > 10000) throw new IllegalArgumentException("Mô tả tối đa 10000 ký tự.");
         var uploaded = uploadProductImage(imageFile);
         p.setName(name);
         p.setCategory(cat);
@@ -133,10 +164,11 @@ public class ManagerProductController {
     }
 
     @PostMapping("/toggle-selling/{id}")
-    public String toggleSelling(@PathVariable("id") Long id, RedirectAttributes ra) {
+    public String toggleSelling(@PathVariable("id") Long id, @RequestParam(value="selling", required=false) Boolean selling, RedirectAttributes ra) {
         Product p = productRepository.findById(id).orElseThrow();
         storeAccess.requireManager(p.getStore());
-        p.setIsSelling(!p.getIsSelling());
+        if (Boolean.TRUE.equals(p.getIsDeleted())) throw new IllegalArgumentException("Sản phẩm đã bị xóa.");
+        p.setIsSelling(selling != null ? selling : !Boolean.TRUE.equals(p.getIsSelling()));
         productRepository.save(p);
         ra.addFlashAttribute("successMessage", "Đã cập nhật trạng thái mở bán sản phẩm!");
         return "redirect:/manager/products";

@@ -40,7 +40,7 @@ public class ManagerAnalyticsController {
         model.addAttribute("timeframe", timeframe);
         model.addAttribute("type", type);
         model.addAttribute("revenueChart", revenueChart);
-        model.addAttribute("store", user.getStore());
+        model.addAttribute("store", storeAccess.assignedStore());
         return "manager/analytics";
     }
 }

@@ -47,6 +47,7 @@ class StoreManagementRevenueUseCaseTests {
 
     @Autowired
     private OrderRepository orderRepository;
+    @Autowired private OrderDetailRepository orderDetails;
 
     @Autowired
     private CategoryRepository categoryRepository;
@@ -142,6 +143,9 @@ class StoreManagementRevenueUseCaseTests {
                 .recipientPhone("0987654321")
                 .createdAt(LocalDateTime.now())
                 .build());
+
+        var detail = orderDetails.save(OrderDetail.builder().order(order1).product(product1).quantity(2).unitPrice(new BigDecimal("300000")).orderType(OrderType.BUY).build());
+        order1.setOrderDetails(new java.util.ArrayList<>(java.util.List.of(detail)));
 
         order2 = orderRepository.save(Order.builder()
                 .user(vendor)
@@ -279,7 +283,7 @@ class StoreManagementRevenueUseCaseTests {
                 .andExpect(content().string(containsString("btnGoDashboard_" + store.getId())));
 
         // Bấm nút Go to dashboard
-        mockMvc.perform(get("/manager/stores/switch/" + store.getId()))
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/manager/stores/switch/" + store.getId()).with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/manager/dashboard"));
     }

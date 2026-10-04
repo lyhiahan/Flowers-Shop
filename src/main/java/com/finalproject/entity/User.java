@@ -103,6 +103,20 @@ public class User {
     private Boolean isActive = false;
 
     private LocalDate createdDate;
+    private java.time.LocalDateTime createdAt;
+    @Builder.Default private Boolean creationTimeKnown = false;
+
+    @PrePersist
+    private void initializeCreationTime() {
+        if (createdAt == null) {
+            if (createdDate != null) createdAt = createdDate.atStartOfDay();
+            else {
+                createdAt = java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Bangkok"));
+                createdDate = createdAt.toLocalDate();
+                creationTimeKnown = true;
+            }
+        }
+    }
 
     // Chi nhánh làm việc (NULL đối với Customer và Admin)
     @ManyToOne(fetch = FetchType.LAZY)

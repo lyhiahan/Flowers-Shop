@@ -185,7 +185,7 @@ public class OrderServiceImpl implements OrderService {
             if (item.getOrderType() != OrderType.BUY || item.getQuantity() == null || item.getQuantity() <= 0) {
                 throw new IllegalArgumentException("Giỏ hàng chỉ hỗ trợ mua hoa với số lượng dương.");
             }
-            if (Boolean.TRUE.equals(product.getIsDeleted()) || !Boolean.TRUE.equals(product.getIsActive()) || !Boolean.TRUE.equals(product.getIsSelling())) {
+            if (!com.finalproject.service.ProductAvailability.isPublic(product)) {
                 throw new IllegalStateException("Sản phẩm đã ngừng bán: " + product.getName());
             }
             StoreInventory inventory = lockedStock.get(product.getId());
@@ -325,7 +325,7 @@ public class OrderServiceImpl implements OrderService {
             if (item.getOrderType() != OrderType.BUY || item.getQuantity() == null || item.getQuantity() <= 0) {
                 throw new IllegalArgumentException("Giỏ hàng chỉ hỗ trợ mua hoa với số lượng dương.");
             }
-            if (Boolean.TRUE.equals(p.getIsDeleted()) || !Boolean.TRUE.equals(p.getIsActive()) || !Boolean.TRUE.equals(p.getIsSelling())) {
+            if (!com.finalproject.service.ProductAvailability.isPublic(p)) {
                 throw new IllegalStateException("Sản phẩm đã ngừng bán: " + p.getName());
             }
             StoreInventory inventory = storeInventoryRepository.findByStoreIdAndProductId(store.getId(), p.getId())

@@ -11,7 +11,18 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-public interface OrderRepository extends JpaRepository<Order, Long> {
+public interface OrderRepository extends JpaRepository<Order, Long>, org.springframework.data.jpa.repository.JpaSpecificationExecutor<Order> {
+    @Query("""
+        select coalesce(sum(o.totalAmount), 0) from Order o
+        where (:storeId is null or o.pickupStore.id = :storeId)
+        and (:start is null or o.createdAt >= :start) and (:end is null or o.createdAt < :end)
+        and o.paymentStatus = 'PAID'
+        and (o.status in (com.finalproject.enums.OrderStatus.DELIVERED, com.finalproject.enums.OrderStatus.COMPLETED)
+          or (o.status = com.finalproject.enums.OrderStatus.REFUND_REQUESTED
+            and exists(select t.id from Transaction t where t.order = o and t.type = 'ORDER_PAYMENT')))
+        """)
+    java.math.BigDecimal recognizedRevenue(Long storeId, java.time.LocalDateTime start, java.time.LocalDateTime end);
+
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @Query("select o from Order o where o.id = :id")
     java.util.Optional<Order> findLockedById(@Param("id") Long id);
