@@ -60,12 +60,11 @@
                     </div>
                     <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Theo dõi danh mục mẫu hoa, giá bán và trạng thái kinh doanh của chi nhánh.</p>
                 </div>
-                <button class="btn btn-primary d-inline-flex align-items-center gap-2 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#addProductModal"
-                        style="font-size: 15.5px; height: 44px; padding: 0 20px; border-radius: 10px; background-color: #20382E !important; border-color: #20382E !important;">
-                    <i class="bi bi-plus-lg"></i> Thêm mẫu hoa
-                </button>
+                <a class="btn btn-success" href="/manager/products/create">New product</a>
             </div>
 
+            <div class="nav nav-pills gap-2 mb-3"><a class="nav-link" th:classappend="${activeTab == 'selling'} ? 'active'" th:href="@{/manager/products(tab='selling')}">Selling products</a><a class="nav-link" th:classappend="${activeTab == 'stored'} ? 'active'" th:href="@{/manager/products(tab='stored')}">Stored products</a></div>
+            <nav aria-label="Phân trang" class="my-3"><ul class="pagination"><li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'"><a class="page-link" th:href="@{/manager/products(page=${currentPage-1},size=${pageSize},tab=${activeTab},keyword=${keyword})}">Previous</a></li><li class="page-item" th:each="p : ${#numbers.sequence(0,totalPages-1)}" th:classappend="${p == currentPage} ? 'active'"><a class="page-link" th:href="@{/manager/products(page=${p},size=${pageSize},tab=${activeTab},keyword=${keyword})}" th:text="${p+1}"></a></li><li class="page-item" th:classappend="${currentPage+1 >= totalPages} ? 'disabled'"><a class="page-link" th:href="@{/manager/products(page=${currentPage+1},size=${pageSize},tab=${activeTab},keyword=${keyword})}">Next</a></li></ul></nav>
             <!-- Flash alerts -->
             <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show py-2 small" role="alert" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA; border-radius: 10px;">
                 <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${successMessage}"></span>
@@ -165,13 +164,9 @@
                                 <!-- 8. Thao tác -->
                                 <td class="text-end pe-4" style="white-space: nowrap;">
                                     <div class="d-inline-flex align-items-center gap-2">
-                                        <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-1"
-                                                data-bs-toggle="modal" th:data-bs-target="'#editProductModal_' + ${p.id}"
-                                                style="height: 32px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px; border: 1px solid #D1E5DA; background-color: #FFFFFF; color: #20382E;">
-                                            <i class="bi bi-pencil"></i> Sửa
-                                        </button>
+                                        <a th:href="@{/manager/products/edit/{id}(id=${p.id})}" class="btn btn-sm btn-outline-success">Edit</a>
                                         <form th:action="@{'/manager/products/toggle-selling/' + ${p.id}}" method="post" class="d-inline m-0"
-                                              th:data-id="${p.id}" onsubmit="sessionStorage.setItem('manager_product_scroll_pos', window.scrollY); sessionStorage.setItem('manager_product_target_id', this.getAttribute('data-id'));">
+                                              th:data-id="${p.id}" onsubmit="sessionStorage.setItem('manager_product_scroll_pos', window.scrollY); sessionStorage.setItem('manager_product_target_id', this.getAttribute('data-id'));" data-confirm="Xác nhận cập nhật sản phẩm?"><input type="hidden" name="selling" th:value="${!p.isSelling}">
                                             <button type="submit" class="btn btn-sm d-inline-flex align-items-center gap-1"
                                                     th:classappend="${p.isSelling == null or p.isSelling ? 'btn-outline-danger' : 'btn-outline-success'}"
                                                     style="height: 32px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px;">
@@ -180,58 +175,7 @@
                                             </button>
                                         </form>
                                     </div>
-                                    <!-- Modal Sửa Mẫu Hoa -->
-                                    <div class="modal fade text-start" th:id="'editProductModal_' + ${p.id}" tabindex="-1">
-                                        <div class="modal-dialog modal-lg modal-dialog-centered">
-                                            <div class="modal-content">
-                                                <form th:action="@{'/manager/products/update/' + ${p.id}}" method="post" enctype="multipart/form-data"
-                                                      th:data-id="${p.id}" onsubmit="sessionStorage.setItem('manager_product_scroll_pos', window.scrollY); sessionStorage.setItem('manager_product_target_id', this.getAttribute('data-id'));">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title font-serif">🌸 Chỉnh Sửa Mẫu Hoa</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <div class="row g-3 mb-3">
-                                                            <div class="col-md-7">
-                                                                <label class="form-label small fw-semibold">Tên mẫu hoa (*):</label>
-                                                                <input type="text" name="name" class="form-control" th:value="${p.name}" required>
-                                                            </div>
-                                                            <div class="col-md-5">
-                                                                <label class="form-label small fw-semibold">Danh mục:</label>
-                                                                <select name="categoryId" class="form-select" required>
-                                                                    <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}" th:selected="${p.category != null and p.category.id == c.id}"></option>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                        <div class="row g-3 mb-3">
-                                                            <div class="col-md-6">
-                                                                <label class="form-label small fw-semibold">Giá bán (VNĐ) (*):</label>
-                                                                <input type="number" name="priceBuy" class="form-control" th:value="${p.priceBuy}" required min="1000">
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label small fw-semibold">Giá khuyến mãi (VNĐ):</label>
-                                                                <input type="number" name="promotionalPrice" class="form-control" th:value="${p.promotionalPrice}">
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label small fw-semibold">Đường dẫn ảnh hoa (URL):</label>
-                                                            <input type="file" name="imageFile" class="form-control mb-2" accept="image/jpeg,image/png,image/webp,image/gif">
-                                                            <input type="url" name="imageUrl" class="form-control" th:value="${p.imageUrl}">
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label small fw-semibold">Mô tả ý nghĩa hoa:</label>
-                                                            <textarea name="description" rows="3" class="form-control" th:text="${p.description}"></textarea>
-                                                        </div>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
-                                                        <button type="submit" class="btn btn-primary btn-sm">Lưu Thay Đổi</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
+                                    </td>
                             </tr>
                             </tbody>
                         </table>
@@ -246,7 +190,7 @@
 <div class="modal fade" id="addProductModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
-            <form th:action="@{/manager/products/add}" method="post" enctype="multipart/form-data">
+            <form th:action="@{/manager/products/add}" method="post" enctype="multipart/form-data" data-confirm="Xác nhận cập nhật sản phẩm?">
                 <div class="modal-header">
                     <h5 class="modal-title font-serif">🌸 Thêm Mẫu Hoa Tươi Mới</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -349,5 +293,5 @@
         </div>
     </div>
     <script th:src="@{/js/global-modal.js}"></script>
-</body>
+<script src="/js/store-confirm.js"></script></body>
 </html>

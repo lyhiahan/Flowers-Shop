@@ -44,13 +44,14 @@ public class CartServiceImpl implements CartService {
                 .orElseThrow(() -> new ResourceNotFoundException("Sản phẩm không tồn tại"));
 
         if (request.getOrderType() != com.finalproject.enums.OrderType.BUY) throw new IllegalArgumentException("Hệ thống chỉ hỗ trợ mua hoa.");
-        if (Boolean.TRUE.equals(product.getIsDeleted()) || !Boolean.TRUE.equals(product.getIsActive()) || !Boolean.TRUE.equals(product.getIsSelling())) throw new IllegalStateException("Sản phẩm đã ngừng bán.");
+        if (!com.finalproject.service.ProductAvailability.isPublic(product)) throw new IllegalStateException("Sản phẩm đã ngừng bán.");
         if (request.getQuantity() == null || request.getQuantity() <= 0 || request.getQuantity() > 10000) throw new IllegalArgumentException("Số lượng không hợp lệ.");
         if (request.getDeliveryDate() != null && request.getDeliveryDate().isBefore(java.time.LocalDate.now())) throw new IllegalArgumentException("Ngày nhận hàng không được ở quá khứ.");
         Long storeId = request.getStoreId() != null ? request.getStoreId() : (product.getStore() != null ? product.getStore().getId() : 1L);
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Chi nhánh không tồn tại"));
 
+        if (!Boolean.TRUE.equals(store.getStatus()) || !Boolean.TRUE.equals(store.getIsOpen())) throw new IllegalStateException("Chi nhánh hiện không nhận đơn.");
         // Kiểm tra tồn kho tại chi nhánh: Không cho phép thêm nếu hết hàng hoặc không có hàng
         StoreInventory inventory = storeInventoryRepository.findByStoreIdAndProductId(store.getId(), product.getId())
                 .orElse(null);

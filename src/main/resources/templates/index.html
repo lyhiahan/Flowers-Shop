@@ -1735,7 +1735,7 @@
             </div>
 
             <!-- Lưới sản phẩm: 4 sản phẩm mỗi hàng trên máy tính, 2 trên điện thoại, khoảng cách 24px (g-4) -->
-            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+            <div id="featuredProductGrid" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
                 <div class="col" th:each="fp : ${guestFeaturedProducts}">
                     <a th:href="@{/product/{id}(id=${fp.id})}" class="text-decoration-none">
                         <div class="card flower-card h-100">
@@ -2019,7 +2019,7 @@
                     <div class="d-flex flex-wrap gap-2">
                         <!-- Nút Tất Cả -->
 
-                        <a th:href="@{/products(keyword=${keyword}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, size=${size})} + '#product-catalog'" 
+                        <a th:href="@{/products(keyword=${keyword}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, size=${size}, flowerStyle=${flowerStyles}, flowerType=${flowerTypes}, flowerColor=${flowerColors}, flowerOccasion=${flowerOccasions})} + '#product-catalog'"
                            class="category-pill"
                            th:classappend="${categoryId == null or categoryId == 0} ? 'active' : ''">
 
@@ -2029,7 +2029,7 @@
                         <!-- Danh sách các danh mục hoa -->
 
                         <a th:each="cat : ${categories}" 
-                           th:href="@{/products(categoryId=${cat.id}, keyword=${keyword}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, size=${size})} + '#product-catalog'" 
+                           th:href="@{/products(categoryId=${cat.id}, keyword=${keyword}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, size=${size}, flowerStyle=${flowerStyles}, flowerType=${flowerTypes}, flowerColor=${flowerColors}, flowerOccasion=${flowerOccasions})} + '#product-catalog'"
                            class="category-pill"
                            th:classappend="${categoryId != null and (categoryId == cat.id or (parentCategory != null and parentCategory.id == cat.id))} ? 'active' : ''"
                            th:text="${cat.name}">
@@ -2047,11 +2047,11 @@
             <span th:if="${keyword != null and !keyword.isEmpty()}" class="badge badge-flower-accent p-2">
                 Từ khóa: "<span th:text="${keyword}"></span>"
 
-                <a th:href="@{/products(categoryId=${categoryId}, sort=${sort}, size=${size})} + '#product-catalog'" class="ms-1 text-decoration-none" style="color: var(--flower-accent);">×</a>
+                <a th:href="@{/products(categoryId=${categoryId}, sort=${sort}, size=${size}, flowerStyle=${flowerStyles}, flowerType=${flowerTypes}, flowerColor=${flowerColors}, flowerOccasion=${flowerOccasions})} + '#product-catalog'" class="ms-1 text-decoration-none" style="color: var(--flower-accent);">×</a>
             </span>
             <span th:if="${categoryId != null and categoryId > 0}" class="badge badge-flower-accent p-2">
                 <span th:each="c : ${categories}" th:if="${c.id == categoryId}" th:text="'Danh mục: ' + ${c.name}"></span>
-                <a th:href="@{/products(keyword=${keyword}, sort=${sort}, size=${size})} + '#product-catalog'" class="ms-1 text-decoration-none" style="color: var(--flower-accent);">×</a>
+                <a th:href="@{/products(keyword=${keyword}, sort=${sort}, size=${size}, flowerStyle=${flowerStyles}, flowerType=${flowerTypes}, flowerColor=${flowerColors}, flowerOccasion=${flowerOccasions})} + '#product-catalog'" class="ms-1 text-decoration-none" style="color: var(--flower-accent);">×</a>
             </span>
             <span th:if="${sort == 'price_asc'}" class="badge bg-light text-dark border p-2">Giá: Thấp → Cao</span>
             <span th:if="${sort == 'price_desc'}" class="badge bg-light text-dark border p-2">Giá: Cao → Thấp</span>
@@ -2059,18 +2059,20 @@
 
         </div>
 
+        <div th:if="${keyword != null and !keyword.isBlank()}" class="h5" th:text="${'Kết quả cho “' + keyword + '”'}"></div>
+        <div class="d-flex gap-2 mb-3"><span th:each="tag : ${flowerStyles}" class="filter-pill-tag badge bg-success" th:text="${tag}"></span><span th:each="tag : ${flowerTypes}" class="filter-pill-tag badge bg-success" th:text="${tag}"></span><span th:each="tag : ${flowerColors}" class="filter-pill-tag badge bg-success" th:text="${tag}"></span><span th:each="tag : ${flowerOccasions}" class="filter-pill-tag badge bg-success" th:text="${tag}"></span></div>
         <!-- Khi không tìm thấy sản phẩm nào -->
         <div th:if="${#lists.isEmpty(products)}" class="card filter-card p-5 text-center my-4">
             <div class="fs-1 mb-2"><i class="bi bi-search text-muted"></i></div>
             <h4 class="font-serif fw-bold" style="color: var(--flower-primary);">Không tìm thấy mẫu hoa phù hợp</h4>
-            <p class="text-muted small">Vui lòng thử tìm với từ khóa khác hoặc bấm xem tất cả danh mục hoa tươi.</p>
+            <p class="text-muted small">Không có sản phẩm nào khớp với điều kiện lọc hiện tại.</p>
             <div>
                 <a th:href="@{/}" class="btn btn-flower-primary rounded-pill px-4 mt-2">Xem Toàn Bộ Mẫu Hoa</a>
             </div>
         </div>
 
         <!-- Lưới sản phẩm hoa tươi: 4 sản phẩm/hàng máy tính, 2 trên điện thoại, khoảng cách 24px (g-4) -->
-        <div th:if="${not #lists.isEmpty(products)}" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+        <div th:if="${not #lists.isEmpty(products)}" id="productGrid" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
             <div class="col" th:each="p : ${products}">
                 <div class="card flower-card h-100 position-relative">
                     <!-- UC_015 Alternative 1a: Nút Follow/Following ở một thẻ sản phẩm (Nút theo dõi nhanh) -->
@@ -2147,7 +2149,7 @@
                     <li class="page-item" th:classappend="${currentPage <= 1} ? 'disabled' : ''">
 
                         <a class="page-link page-nav-arrow" id="btnPrevPage" 
-                           th:href="@{/products(page=${currentPage - 1}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
+                           th:href="@{/products(page=${currentPage - 1}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size}, flowerStyle=${flowerStyles}, flowerType=${flowerTypes}, flowerColor=${flowerColors}, flowerOccasion=${flowerOccasions})} + '#product-catalog'"
                            title="Trang trước" aria-label="Previous">
 
                             <i class="bi bi-chevron-left"></i>
@@ -2160,7 +2162,7 @@
                             th:classappend="${i == currentPage} ? 'active' : ''">
 
                             <a class="page-link" 
-                               th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
+                               th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size}, flowerStyle=${flowerStyles}, flowerType=${flowerTypes}, flowerColor=${flowerColors}, flowerOccasion=${flowerOccasions})} + '#product-catalog'"
                                th:text="${i}">1</a>
 
                         </li>
@@ -2174,12 +2176,12 @@
                                 th:classappend="${i == currentPage} ? 'active' : ''">
 
                                 <a class="page-link" 
-                                   th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
+                                   th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size}, flowerStyle=${flowerStyles}, flowerType=${flowerTypes}, flowerColor=${flowerColors}, flowerOccasion=${flowerOccasions})} + '#product-catalog'"
                                    th:text="${i}">1</a>
                             </li>
                             <li class="page-item">
                                 <a class="page-link page-ellipsis" 
-                                   th:href="@{/products(page=6, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
+                                   th:href="@{/products(page=6, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size}, flowerStyle=${flowerStyles}, flowerType=${flowerTypes}, flowerColor=${flowerColors}, flowerOccasion=${flowerOccasions})} + '#product-catalog'"
                                    title="Xem thêm các trang tiếp theo">...</a>
 
                             </li>
@@ -2190,7 +2192,7 @@
                             <li class="page-item">
 
                                 <a class="page-link page-ellipsis" 
-                                   th:href="@{/products(page=${totalPages - 5}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
+                                   th:href="@{/products(page=${totalPages - 5}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size}, flowerStyle=${flowerStyles}, flowerType=${flowerTypes}, flowerColor=${flowerColors}, flowerOccasion=${flowerOccasions})} + '#product-catalog'"
                                    title="Xem các trang trước">...</a>
 
                             </li>
@@ -2198,7 +2200,7 @@
                                 th:classappend="${i == currentPage} ? 'active' : ''">
 
                                 <a class="page-link" 
-                                   th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
+                                   th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size}, flowerStyle=${flowerStyles}, flowerType=${flowerTypes}, flowerColor=${flowerColors}, flowerOccasion=${flowerOccasions})} + '#product-catalog'"
                                    th:text="${i}">1</a>
 
                             </li>
@@ -2209,19 +2211,19 @@
                             <li class="page-item">
 
                                 <a class="page-link page-ellipsis" 
-                                   th:href="@{/products(page=${currentPage - 3}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'">...</a>
+                                   th:href="@{/products(page=${currentPage - 3}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size}, flowerStyle=${flowerStyles}, flowerType=${flowerTypes}, flowerColor=${flowerColors}, flowerOccasion=${flowerOccasions})} + '#product-catalog'">...</a>
 
                             </li>
                             <li th:each="i : ${#numbers.sequence(currentPage - 2, currentPage + 2)}" class="page-item"
                                 th:classappend="${i == currentPage} ? 'active' : ''">
 
                                 <a class="page-link" 
-                                   th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
+                                   th:href="@{/products(page=${i}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size}, flowerStyle=${flowerStyles}, flowerType=${flowerTypes}, flowerColor=${flowerColors}, flowerOccasion=${flowerOccasions})} + '#product-catalog'"
                                    th:text="${i}">1</a>
                             </li>
                             <li class="page-item">
                                 <a class="page-link page-ellipsis" 
-                                   th:href="@{/products(page=${currentPage + 3}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'">...</a>
+                                   th:href="@{/products(page=${currentPage + 3}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size}, flowerStyle=${flowerStyles}, flowerType=${flowerTypes}, flowerColor=${flowerColors}, flowerOccasion=${flowerOccasions})} + '#product-catalog'">...</a>
 
                             </li>
                         </th:block>
@@ -2231,7 +2233,7 @@
                     <li class="page-item" th:classappend="${currentPage >= totalPages} ? 'disabled' : ''">
 
                         <a class="page-link page-nav-arrow" id="btnNextPage" 
-                           th:href="@{/products(page=${currentPage + 1}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size})} + '#product-catalog'" 
+                           th:href="@{/products(page=${currentPage + 1}, keyword=${keyword}, categoryId=${categoryId}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice}, minRating=${minRating}, storeId=${storeId}, size=${size}, flowerStyle=${flowerStyles}, flowerType=${flowerTypes}, flowerColor=${flowerColors}, flowerOccasion=${flowerOccasions})} + '#product-catalog'"
                            title="Trang sau" aria-label="Next">
 
                             <i class="bi bi-chevron-right"></i>

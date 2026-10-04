@@ -45,6 +45,7 @@ public class Transaction {
     private String status = "COMPLETED"; // PENDING, COMPLETED, REJECTED
 
     private LocalDateTime createdAt;
+    @Column(length = 80) private String requestKey;
 
     @PrePersist
     public void prePersist() {

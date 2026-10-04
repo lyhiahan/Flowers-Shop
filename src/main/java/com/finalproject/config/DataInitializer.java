@@ -123,6 +123,10 @@ public class DataInitializer implements CommandLineRunner {
                 .createdDate(LocalDate.now())
                 .build()));
 
+        // Demo fixtures must identify actual shop owners for owner-only staff and wallet actions.
+        if (storeA.getOwner() == null) { storeA.setOwner(managerA); storeRepository.save(storeA); }
+        if (storeB.getOwner() == null) { storeB.setOwner(vendor); storeRepository.save(storeB); }
+
         User customer = userRepository.findByUsername("khachhang").orElseGet(() -> userRepository.save(User.builder()
                 .username("khachhang")
                 .password(passwordEncoder.encode("123456"))

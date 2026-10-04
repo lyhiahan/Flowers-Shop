@@ -733,6 +733,8 @@
             const descBank = document.getElementById('desc_pay_bank');
             const btnPlaceOrder = document.getElementById('btnPlaceOrder');
 
+            if (optMomo) optMomo.classList.toggle('active', !!isMomo);
+            if (descMomo) descMomo.classList.toggle('d-none', !isMomo);
             if (isCod) {
                 if (optCod) optCod.classList.add('active');
                 if (optBank) optBank.classList.remove('active');
@@ -743,18 +745,13 @@
                 }
             } else {
                 if (optCod) optCod.classList.remove('active');
-                if (optBank) optBank.classList.add('active');
+                if (optBank) optBank.classList.toggle('active', !!isBank);
                 if (descCod) descCod.classList.add('d-none');
-                if (descBank) descBank.classList.remove('d-none');
+                if (descBank) descBank.classList.toggle('d-none', !isBank);
                 if (btnPlaceOrder) {
                     btnPlaceOrder.innerHTML = '<i class="bi bi-credit-card me-2"></i>Tiếp tục thanh toán';
                 }
             }
-        }
-
-            if (descCod) descCod.classList.toggle('d-none', !isCod);
-            if (descMomo) descMomo.classList.toggle('d-none', !isMomo);
-            if (descBank) descBank.classList.toggle('d-none', !isBank);
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -767,6 +764,7 @@
             updateCheckoutTotal();
         });
     </script>
-    <script th:src="@{/js/global-modal.js}"></script>
+    <script th:src="@{/js/checkout-quote.js}"></script>
+<script th:src="@{/js/global-modal.js}"></script>
 </body>
 </html>

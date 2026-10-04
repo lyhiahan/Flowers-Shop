@@ -32,6 +32,7 @@ public class ManagerStaffController {
     private final StoreAccessService storeAccess;
     private final StoreRepository storeRepository;
     private final PasswordEncoder passwordEncoder;
+    private final com.finalproject.service.StoreStaffManagementService staffManagement;
 
     /**
      * Bước 6 & 7: Vào trang quản lý nhân viên cửa hàng
@@ -43,54 +44,43 @@ public class ManagerStaffController {
     public String listStaff(@RequestParam(value = "tab", defaultValue = "staffs") String tab,
                             @RequestParam(value = "page", defaultValue = "0") int page,
                             @RequestParam(value = "size", defaultValue = "6") int size,
+                            @RequestParam(value="candidateKeyword", defaultValue="") String candidateKeyword,
+                            @RequestParam(value="candidatePage", defaultValue="0") int candidatePage,
                             Principal principal, Model model) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         Store store = resolveStore(user);
         if (store == null) {
             return "redirect:/manager/stores";
         }
-        storeAccess.requireStore(store);
+        storeAccess.requireManager(store);
 
         // Kiểm tra xem người quản lý có phải là Chủ cửa hàng hay Đối tác (Partner)
-        boolean isOwner = (store.getOwner() != null && user.getId().equals(store.getOwner().getId()))
-                || user.getRole() == Role.ADMIN;
+        boolean isOwner = (store.getOwner() != null && user.getId().equals(store.getOwner().getId()));
         boolean isPartner = !isOwner;
 
         // Chủ cửa hàng (Shop owner)
         User shopOwner = store.getOwner();
 
-        // Lấy danh sách nhân viên của chi nhánh (loại trừ chủ sở hữu)
-        List<User> allStaff = userRepository.findByStoreId(store.getId());
-        List<User> staffOnlyList = allStaff.stream()
-                .filter(s -> shopOwner == null || !s.getId().equals(shopOwner.getId()))
-                .toList();
-
-        // Phân trang danh sách nhân viên (Bước 12)
-        int totalElements = staffOnlyList.size();
-        int totalPages = totalElements > 0 ? (int) Math.ceil((double) totalElements / size) : 1;
-        if (page < 0) page = 0;
-        if (page >= totalPages && totalElements > 0) page = totalPages - 1;
-
-        int fromIndex = Math.min(page * size, totalElements);
-        int toIndex = Math.min(fromIndex + size, totalElements);
-        List<User> pagedStaff = staffOnlyList.subList(fromIndex, toIndex);
-
-        // Danh sách ứng viên tiềm năng có thể thêm vào cửa hàng (chưa thuộc cửa hàng nào)
-        List<User> allUsers = userRepository.findAll();
-        List<User> candidateUsers = allUsers.stream()
-                .filter(u -> u.getStore() == null && !u.getId().equals(user.getId())
-                        && (shopOwner == null || !u.getId().equals(shopOwner.getId()))
-                        && (u.getRole() == Role.STAFF || u.getRole() == Role.CUSTOMER))
-                .limit(20)
-                .toList();
-
+        var result = com.finalproject.utils.StorePages.load(page, size, pageable -> userRepository.findStoreStaff(store.getId(), shopOwner == null ? -1L : shopOwner.getId(), pageable));
+        List<User> pagedStaff = result.getContent();
+        com.finalproject.utils.StorePages.model(model, result);
+        var candidates = com.finalproject.utils.StorePages.load(candidatePage, 20, pageable -> userRepository.findAll((root, query, cb) -> {
+            var alreadyMember = query.subquery(Long.class);
+            var member = alreadyMember.from(com.finalproject.entity.StoreMembership.class);
+            alreadyMember.select(member.get("user").get("id")).where(cb.equal(member.get("user").get("id"), root.get("id")), cb.isTrue(member.get("active")));
+            var eligibility = cb.or(root.get("role").in(Role.VENDOR, Role.MANAGER), cb.and(root.get("role").in(Role.STAFF, Role.CUSTOMER), cb.isNull(root.get("store")), cb.not(cb.exists(alreadyMember))));
+            String kw = "%" + candidateKeyword.trim().toLowerCase() + "%";
+            return cb.and(eligibility, cb.isTrue(root.get("isActive")), cb.isFalse(root.get("accountDisabledByAdmin")), cb.notEqual(root.get("id"), user.getId()),
+                    cb.or(cb.like(cb.lower(root.get("username")), kw), cb.like(cb.lower(root.get("fullName")), kw)));
+        }, pageable));
+        List<User> candidateUsers = candidates.getContent();
+        model.addAttribute("candidateKeyword", candidateKeyword);
+        model.addAttribute("candidatePage", candidates.getNumber());
+        model.addAttribute("candidatePages", Math.max(1, candidates.getTotalPages()));
         model.addAttribute("store", store);
         model.addAttribute("shopOwner", shopOwner);
         model.addAttribute("staffList", pagedStaff);
-        model.addAttribute("totalStaffCount", totalElements);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("pageSize", size);
+        model.addAttribute("totalStaffCount", result.getTotalElements());
         model.addAttribute("activeTab", tab);
         model.addAttribute("isOwner", isOwner);
         model.addAttribute("isPartner", isPartner);
@@ -112,75 +102,22 @@ public class ManagerStaffController {
                            @RequestParam(value = "fullName", required = false) String fullName,
                            @RequestParam(value = "email", required = false) String email,
                            @RequestParam(value = "phone", required = false) String phone,
-                           @RequestParam(value = "password", defaultValue = "123456") String password,
+                           @RequestParam(value = "password", required = false) String password,
                            @RequestParam(value = "role", defaultValue = "STAFF") String roleStr,
                            RedirectAttributes ra) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         Store store = resolveStore(user);
         if (store == null) return "redirect:/manager/stores";
-        storeAccess.requireStore(store);
+        storeAccess.requireManager(store);
 
-        boolean isOwner = (store.getOwner() != null && user.getId().equals(store.getOwner().getId()))
-                || user.getRole() == Role.ADMIN;
+        boolean isOwner = (store.getOwner() != null && user.getId().equals(store.getOwner().getId()));
         if (!isOwner) {
             throw new AccessDeniedException("Chỉ chủ cửa hàng mới có quyền thêm nhân viên.");
         }
 
         try {
-            if (!"STAFF".equalsIgnoreCase(roleStr)) throw new IllegalArgumentException("Chỉ được thêm vai trò nhân viên chi nhánh.");
-            int addedCount = 0;
-
-            // Cách 1: Chọn các nhân viên có sẵn trong hệ thống (Bước 15 dạng danh sách lựa chọn)
-            if (selectedUserIds != null && !selectedUserIds.isEmpty()) {
-                for (Long uid : selectedUserIds) {
-                    var optUser = userRepository.findById(uid);
-                    if (optUser.isPresent()) {
-                        User u = optUser.get();
-                        u.setStore(store);
-                        if (u.getRole() == Role.CUSTOMER) {
-                            u.setRole(Role.STAFF);
-                        }
-                        userRepository.save(u);
-                        addedCount++;
-                    }
-                }
-            }
-
-            // Cách 2: Nhập username trực tiếp hoặc tạo tài khoản nhân viên mới
-            if (username != null && !username.trim().isEmpty()) {
-                String cleanUsername = username.trim();
-                var existingOpt = userRepository.findByUsername(cleanUsername);
-                if (existingOpt.isPresent()) {
-                    User existing = existingOpt.get();
-                    existing.setStore(store);
-                    if (existing.getRole() == Role.CUSTOMER) {
-                        existing.setRole(Role.STAFF);
-                    }
-                    userRepository.save(existing);
-                    addedCount++;
-                } else {
-                    Role role = Role.STAFF;
-                    User newStaff = User.builder()
-                            .username(cleanUsername)
-                            .fullName(fullName != null && !fullName.trim().isEmpty() ? fullName.trim() : cleanUsername)
-                            .email(email != null && !email.trim().isEmpty() ? email.trim() : cleanUsername + "@bloomflower.vn")
-                            .phone(phone)
-                            .password(passwordEncoder.encode(password))
-                            .role(role)
-                            .store(store)
-                            .isEmailActive(true)
-                            .isActive(true)
-                            .build();
-                    userRepository.save(newStaff);
-                    addedCount++;
-                }
-            }
-
-            if (addedCount > 0) {
-                ra.addFlashAttribute("successMessage", "Đã thêm " + addedCount + " nhân viên vào cửa hàng thành công!");
-            } else {
-                ra.addFlashAttribute("errorMessage", "Vui lòng chọn hoặc điền thông tin nhân viên cần thêm!");
-            }
+            int addedCount = staffManagement.add(store, selectedUserIds, username, fullName, email, phone, password, roleStr);
+            ra.addFlashAttribute("successMessage", "Đã thêm " + addedCount + " nhân viên vào cửa hàng thành công!");
         } catch (Exception ex) {
             log.error("Lỗi thêm nhân viên", ex);
             ra.addFlashAttribute("errorMessage", "Thêm nhân viên thất bại: " + ex.getMessage());
@@ -199,22 +136,15 @@ public class ManagerStaffController {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         Store store = resolveStore(user);
         if (store == null) return "redirect:/manager/stores";
-        storeAccess.requireStore(store);
+        storeAccess.requireManager(store);
 
-        boolean isOwner = (store.getOwner() != null && user.getId().equals(store.getOwner().getId()))
-                || user.getRole() == Role.ADMIN;
+        boolean isOwner = (store.getOwner() != null && user.getId().equals(store.getOwner().getId()));
         if (!isOwner) {
             throw new AccessDeniedException("Chỉ chủ cửa hàng mới có quyền xóa nhân viên khỏi cửa hàng.");
         }
 
-        User staff = userRepository.findById(id).orElseThrow();
-        if (staff.getStore() != null && staff.getStore().getId().equals(store.getId())) {
-            staff.setStore(null);
-            userRepository.save(staff);
-            ra.addFlashAttribute("successMessage", "Đã xóa nhân viên [" + staff.getFullName() + "] khỏi cửa hàng thành công!");
-        } else {
-            ra.addFlashAttribute("errorMessage", "Nhân viên không thuộc cửa hàng này!");
-        }
+        staffManagement.remove(store, id);
+        ra.addFlashAttribute("successMessage", "Đã xóa nhân viên khỏi cửa hàng thành công!");
 
         return "redirect:/manager/staff?tab=staffs";
     }
@@ -234,24 +164,13 @@ public class ManagerStaffController {
             return "redirect:/manager/staff";
         }
 
-        user.setStore(null);
-        userRepository.save(user);
+        staffManagement.leave(store);
 
         ra.addFlashAttribute("successMessage", "Bạn đã rời khỏi cửa hàng [" + store.getName() + "] thành công!");
         return "redirect:/manager/stores";
     }
 
     private Store resolveStore(User user) {
-        if (user.getStore() != null) {
-            return user.getStore();
-        }
-        List<Store> owned = storeRepository.findByOwnerId(user.getId());
-        if (!owned.isEmpty()) {
-            Store first = owned.get(0);
-            user.setStore(first);
-            userRepository.save(user);
-            return first;
-        }
-        return null;
+        return storeAccess.selectedStore();
     }
 }

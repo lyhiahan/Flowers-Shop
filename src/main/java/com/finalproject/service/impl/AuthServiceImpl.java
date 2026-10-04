@@ -134,7 +134,9 @@ public class AuthServiceImpl implements AuthService {
                     .address(req.getAddress())
                     .role(Role.CUSTOMER)
                     .isActive(true)
-                    .createdDate(LocalDate.now())
+                    .createdDate(LocalDate.now(java.time.ZoneId.of("Asia/Bangkok")))
+                    .createdAt(java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Bangkok")))
+                    .creationTimeKnown(true)
                     .build();
             user.addRole(Role.CUSTOMER);
             userRepository.save(user);

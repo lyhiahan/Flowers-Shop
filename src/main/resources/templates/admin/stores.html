@@ -358,6 +358,7 @@
         </div>
 
         <!-- HỘP THOẠI MESSAGE XÁC NHẬN CHUYỂN ĐỔI TRẠNG THÁI CẤP PHÉP (BẮT BUỘC HIỂN THỊ XÁC NHẬN) -->
+<nav aria-label="Phân trang" class="my-3"><ul class="pagination"><li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'"><a class="page-link" th:href="@{/admin/stores(page=${currentPage-1},size=${pageSize},tab=${currentTab},keyword=${keyword})}">Previous</a></li><li class="page-item" th:each="p : ${#numbers.sequence(0,totalPages-1)}" th:classappend="${p == currentPage} ? 'active'"><a class="page-link" th:href="@{/admin/stores(page=${p},size=${pageSize},tab=${currentTab},keyword=${keyword})}" th:text="${p+1}"></a></li><li class="page-item" th:classappend="${currentPage+1 >= totalPages} ? 'disabled'"><a class="page-link" th:href="@{/admin/stores(page=${currentPage+1},size=${pageSize},tab=${currentTab},keyword=${keyword})}">Next</a></li></ul></nav>
         <div class="modal fade" id="statusConfirmModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="border: 1px solid #E2E7E2 !important; border-radius: 16px;">

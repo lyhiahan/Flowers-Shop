@@ -58,6 +58,7 @@ class ConcurrencyRegressionTests {
                 String name = prefix + i;
                 User user = users.save(User.builder().username(name).email(name + "@test.local").fullName(name).password("unused")
                         .role(i == 2 ? Role.MANAGER : Role.CUSTOMER).isActive(true).store(i == 2 ? store : null).build());
+                if (i == 2) { store.setOwner(user); stores.save(store); }
                 userIds.add(user.getId());
                 if (i < 2) {
                     customerNames.add(name);
@@ -83,7 +84,8 @@ class ConcurrencyRegressionTests {
             for (Long id : f.userIds()) {
                 jdbc.update("delete from notifications where user_id=?", id);
                 jdbc.update("delete from otp_verifications where user_id=?", id);
-                jdbc.update("delete from users where id=?", id);
+                jdbc.update("update stores set owner_id=null where id=?", f.storeId());
+            jdbc.update("delete from users where id=?", id);
             }
             jdbc.update("delete from stores where id=?", f.storeId());
         });
@@ -152,7 +154,7 @@ class ConcurrencyRegressionTests {
             int successes = race(i -> {
                 SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(f.manager(), "",
                         List.of(new SimpleGrantedAuthority("ROLE_MANAGER"))));
-                wallet.requestWithdrawal(new BigDecimal("60000"), "Bank", "123", "Manager");
+                wallet.requestWithdrawal(new BigDecimal("60000"), "Bank", "123456789", "Manager");
             });
             assertThat(successes).isEqualTo(1);
             assertThat(jdbc.queryForObject("select e_wallet from stores where id=?", BigDecimal.class, f.storeId())).isEqualByComparingTo("40000");

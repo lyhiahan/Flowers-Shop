@@ -25,6 +25,7 @@ import java.util.List;
 @RequestMapping({"/manager/profile", "/manager/stores/profile", "/vendor/profile"})
 @RequiredArgsConstructor
 @Slf4j
+@org.springframework.transaction.annotation.Transactional
 public class ManagerProfileController {
 
     private final StoreRepository storeRepository;
@@ -38,7 +39,7 @@ public class ManagerProfileController {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         Store store = getActiveStore(user);
         if (store == null) return "redirect:/manager/stores";
-        storeAccess.requireStore(store);
+        storeAccess.requireManager(store);
 
         model.addAttribute("store", store);
         model.addAttribute("featuredImages", parseFeaturedImages(store.getFeaturedImages()));
@@ -87,11 +88,13 @@ public class ManagerProfileController {
 
             store.setAvatar(newUrl);
             store.setAvatarPublicId(newPublicId);
-            storeRepository.save(store);
+            storeRepository.saveAndFlush(store);
             ra.addFlashAttribute("successMessage", "Ảnh đại diện cửa hàng đã được cập nhật thành công!");
         } catch (IllegalArgumentException ex) {
+            org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         } catch (Exception ex) {
+            org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             log.error("Lỗi cập nhật ảnh đại diện", ex);
             ra.addFlashAttribute("errorMessage", "Cập nhật thất bại: " + ex.getMessage());
         }
@@ -135,11 +138,13 @@ public class ManagerProfileController {
 
             store.setCover(newUrl);
             store.setCoverPublicId(newPublicId);
-            storeRepository.save(store);
+            storeRepository.saveAndFlush(store);
             ra.addFlashAttribute("successMessage", "Ảnh bìa cửa hàng đã được cập nhật thành công!");
         } catch (IllegalArgumentException ex) {
+            org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         } catch (Exception ex) {
+            org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             log.error("Lỗi cập nhật ảnh bìa", ex);
             ra.addFlashAttribute("errorMessage", "Cập nhật thất bại: " + ex.getMessage());
         }
@@ -160,10 +165,11 @@ public class ManagerProfileController {
 
         try {
             String newUrl = null;
+            String newPublicId = null;
 
             if (featuredFile != null && !featuredFile.isEmpty()) {
                 CloudinaryService.UploadResult result = cloudinaryService.upload(featuredFile, "rental_shop_stores/featured");
-                if (result != null) newUrl = result.secureUrl();
+                if (result != null) { newUrl = result.secureUrl(); newPublicId = result.publicId(); }
             } else if (imageUrl != null && !imageUrl.trim().isEmpty()) {
                 if (!isValidImageUrl(imageUrl)) {
                     ra.addFlashAttribute("errorMessage", "Hình ảnh không hợp lệ! Vui lòng nhập đường dẫn hình ảnh trực tuyến hợp lệ.");
@@ -176,13 +182,18 @@ public class ManagerProfileController {
             }
 
             List<String> list = parseFeaturedImages(store.getFeaturedImages());
-            list.add(newUrl);
+            if (list.size() >= 20) throw new IllegalArgumentException("Tối đa 20 ảnh đặc trưng.");
+            var ids = imageIds(store, list.size());
+            list.add(newUrl); ids.add(newPublicId == null ? "" : newPublicId);
+            store.setFeaturedImagePublicIds(String.join("\n", ids));
             store.setFeaturedImages(joinFeaturedImages(list));
-            storeRepository.save(store);
+            storeRepository.saveAndFlush(store);
             ra.addFlashAttribute("successMessage", "Ảnh đặc trưng mới đã được thêm thành công!");
         } catch (IllegalArgumentException ex) {
+            org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         } catch (Exception ex) {
+            org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             log.error("Lỗi thêm ảnh đặc trưng", ex);
             ra.addFlashAttribute("errorMessage", "Cập nhật thất bại: " + ex.getMessage());
         }
@@ -210,9 +221,10 @@ public class ManagerProfileController {
             }
 
             String updatedUrl = null;
+            String newPublicId = null;
             if (editFile != null && !editFile.isEmpty()) {
                 CloudinaryService.UploadResult result = cloudinaryService.upload(editFile, "rental_shop_stores/featured");
-                if (result != null) updatedUrl = result.secureUrl();
+                if (result != null) { updatedUrl = result.secureUrl(); newPublicId = result.publicId(); }
             } else if (editUrl != null && !editUrl.trim().isEmpty()) {
                 if (!isValidImageUrl(editUrl)) {
                     ra.addFlashAttribute("errorMessage", "Hình ảnh không hợp lệ! Vui lòng nhập đường dẫn hình ảnh hợp lệ.");
@@ -224,13 +236,19 @@ public class ManagerProfileController {
                 return "redirect:/manager/profile";
             }
 
+            var ids = imageIds(store, list.size());
+            cloudinaryService.delete(ids.get(index));
+            ids.set(index, newPublicId == null ? "" : newPublicId);
+            store.setFeaturedImagePublicIds(String.join("\n", ids));
             list.set(index, updatedUrl);
             store.setFeaturedImages(joinFeaturedImages(list));
-            storeRepository.save(store);
+            storeRepository.saveAndFlush(store);
             ra.addFlashAttribute("successMessage", "Ảnh đặc trưng đã được cập nhật thành công!");
         } catch (IllegalArgumentException ex) {
+            org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         } catch (Exception ex) {
+            org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             log.error("Lỗi sửa ảnh đặc trưng", ex);
             ra.addFlashAttribute("errorMessage", "Cập nhật thất bại: " + ex.getMessage());
         }
@@ -251,14 +269,18 @@ public class ManagerProfileController {
         try {
             List<String> list = parseFeaturedImages(store.getFeaturedImages());
             if (index >= 0 && index < list.size()) {
+                var ids = imageIds(store, list.size());
+                cloudinaryService.delete(ids.remove(index));
+                store.setFeaturedImagePublicIds(String.join("\n", ids));
                 list.remove(index);
                 store.setFeaturedImages(joinFeaturedImages(list));
-                storeRepository.save(store);
+                storeRepository.saveAndFlush(store);
                 ra.addFlashAttribute("successMessage", "Ảnh đặc trưng xóa thành công!");
             } else {
                 ra.addFlashAttribute("errorMessage", "Không tìm thấy ảnh đặc trưng cần xóa!");
             }
         } catch (Exception ex) {
+            org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             log.error("Lỗi xóa ảnh đặc trưng", ex);
             ra.addFlashAttribute("errorMessage", "Cập nhật thất bại: " + ex.getMessage());
         }
@@ -273,13 +295,14 @@ public class ManagerProfileController {
                                   @RequestParam(value = "bio", required = false) String bio,
                                   @RequestParam(value = "phone", required = false) String phone,
                                   @RequestParam(value = "address", required = false) String address,
-                                  @RequestParam(value = "isOpen", defaultValue = "false") boolean isOpen,
+                                  @RequestParam(value = "isOpen", required = false) Boolean isOpen,
                                   RedirectAttributes ra) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         Store store = getActiveStore(user);
         if (store == null) return "redirect:/manager/stores";
         storeAccess.requireManager(store);
 
+        if (bio != null && bio.length() > 500) { ra.addFlashAttribute("errorMessage", "Bio tối đa 500 ký tự."); return "redirect:/manager/profile"; }
         String trimmedName = name != null ? name.trim() : "";
         if (trimmedName.isEmpty() || trimmedName.length() < 3 || trimmedName.length() > 120) {
             ra.addFlashAttribute("errorMessage", "Tên cửa hàng phải có độ dài từ 3 đến 120 ký tự!");
@@ -303,13 +326,15 @@ public class ManagerProfileController {
 
         try {
             store.setName(trimmedName);
-            store.setBio(bio != null ? bio.trim() : null);
+            if (bio != null) store.setBio(bio.trim());
             if (cleanPhone != null) store.setPhone(cleanPhone);
             if (trimmedAddress != null) store.setAddress(trimmedAddress);
-            store.setIsOpen(isOpen);
-            storeRepository.save(store);
+            if (isOpen != null) store.setIsOpen(isOpen);
+            else if (address != null) store.setIsOpen(false);
+            storeRepository.saveAndFlush(store);
             ra.addFlashAttribute("successMessage", "Thông tin cửa hàng đã được lưu thành công!");
         } catch (Exception ex) {
+            org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             log.error("Lỗi cập nhật thông tin cửa hàng", ex);
             ra.addFlashAttribute("errorMessage", "Cập nhật thất bại: " + ex.getMessage());
         }
@@ -319,23 +344,20 @@ public class ManagerProfileController {
 
     // ─── Private helpers ──────────────────────────────────────────────────────
 
+    private List<String> imageIds(Store store, int size) {
+        var ids = new ArrayList<String>();
+        if (store.getFeaturedImagePublicIds() != null) ids.addAll(java.util.Arrays.asList(store.getFeaturedImagePublicIds().split("\\n", -1)));
+        while (ids.size() < size) ids.add("");
+        while (ids.size() > size) ids.remove(ids.size() - 1);
+        return ids;
+    }
+
     private Store getActiveStore(User user) {
-        if (user.getStore() != null) return user.getStore();
-        List<Store> owned = storeRepository.findByOwnerId(user.getId());
-        if (!owned.isEmpty()) {
-            Store first = owned.get(0);
-            user.setStore(first);
-            userRepository.save(user);
-            return first;
-        }
-        return null;
+        return storeAccess.selectedStore();
     }
 
     private boolean isValidImageUrl(String url) {
-        if (url == null || url.trim().isEmpty()) return false;
-        String u = url.trim().toLowerCase();
-        return u.startsWith("http://") || u.startsWith("https://")
-                || u.startsWith("/upload/") || u.startsWith("/images/");
+        return com.finalproject.utils.ImageUrls.valid(url);
     }
 
     private List<String> parseFeaturedImages(String raw) {

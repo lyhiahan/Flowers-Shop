@@ -20,7 +20,7 @@ public class InventoryService {
         if (quantity < 0 || quantity > 1000000) throw new IllegalArgumentException("Tồn kho phải từ 0 đến 1.000.000.");
         var product = products.findById(productId).orElseThrow();
         access.requireManager(product.getStore());
-        var store = access.assignedStore();
+        var store = product.getStore();
         var inventory = inventories.findLockedStock(store.getId(), productId)
                 .orElseGet(() -> StoreInventory.builder().store(store).product(product).quantity(0).build());
         if (inventory.getId() != null) entityManager.refresh(inventory, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);

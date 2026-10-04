@@ -72,7 +72,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
                     String secureUrl = uploadResult.get("secure_url").toString();
                     String publicId = uploadResult.get("public_id").toString();
                     log.info("Cloudinary upload OK: publicId={}, url={}", publicId, secureUrl);
-                    return new UploadResult(secureUrl, publicId);
+                    return track(new UploadResult(secureUrl, publicId));
                 }
                 throw new IOException("Cloudinary không trả về thông tin ảnh hợp lệ.");
             } catch (Exception ex) {
@@ -84,13 +84,39 @@ public class CloudinaryServiceImpl implements CloudinaryService {
         }
 
         // 3. Fallback: lưu cục bộ (chỉ cho môi trường phát triển)
-        return saveLocally(file);
+        return track(saveLocally(file));
     }
 
     // ─── Delete ───────────────────────────────────────────────────────────────
 
     @Override
     public void delete(String publicId) {
+        if (org.springframework.transaction.support.TransactionSynchronizationManager.isSynchronizationActive()) {
+            org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(new org.springframework.transaction.support.TransactionSynchronization() {
+                @Override public void afterCommit() { deleteNow(publicId); }
+            });
+        } else deleteNow(publicId);
+    }
+
+    private UploadResult track(UploadResult result) {
+        if (org.springframework.transaction.support.TransactionSynchronizationManager.isSynchronizationActive()) {
+            org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(new org.springframework.transaction.support.TransactionSynchronization() {
+                @Override public void afterCompletion(int status) {
+                    if (status != STATUS_COMMITTED) deleteNow(result.publicId());
+                }
+            });
+        }
+        return result;
+    }
+
+    private void deleteNow(String publicId) {
+        if (publicId != null && publicId.matches("/upload/avatar/img_[a-f0-9]{12}\\.(jpg|jpeg|png|gif|webp)")) {
+            for (String directory : java.util.List.of("upload/avatar", "src/main/resources/static/upload/avatar", "target/classes/static/upload/avatar")) {
+                try { Files.deleteIfExists(Paths.get(directory).resolve(publicId.substring(publicId.lastIndexOf('/') + 1))); }
+                catch (IOException ex) { log.warn("Không thể dọn ảnh local: {}", ex.getMessage()); }
+            }
+            return;
+        }
         if (publicId == null || publicId.isBlank() || !isCloudinaryConfigured()) {
             return;
         }
@@ -112,7 +138,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     /**
      * Kiểm tra file hợp lệ: định dạng và kích thước
      */
-    private void validateFile(MultipartFile file) {
+    private void validateFile(MultipartFile file) throws IOException {
         // Kiểm tra kích thước
         if (file.getSize() > MAX_FILE_SIZE_BYTES) {
             throw new IllegalArgumentException(
@@ -137,6 +163,25 @@ public class CloudinaryServiceImpl implements CloudinaryService {
                 throw new IllegalArgumentException(
                         "Phần mở rộng file không hợp lệ! Chấp nhận: .jpg .jpeg .png .webp .gif");
             }
+        }
+        byte[] bytes = file.getBytes();
+        boolean png = bytes.length >= 24 && bytes[0] == (byte)137 && bytes[1] == 80 && bytes[2] == 78 && bytes[3] == 71
+                && bytes[4] == 13 && bytes[5] == 10 && bytes[6] == 26 && bytes[7] == 10;
+        boolean jpeg = bytes.length >= 4 && bytes[0] == (byte)255 && bytes[1] == (byte)216 && bytes[2] == (byte)255;
+        boolean gif = bytes.length >= 10 && (new String(bytes, 0, 6, java.nio.charset.StandardCharsets.US_ASCII).equals("GIF87a")
+                || new String(bytes, 0, 6, java.nio.charset.StandardCharsets.US_ASCII).equals("GIF89a"));
+        boolean webp = bytes.length >= 20 && new String(bytes, 0, 4, java.nio.charset.StandardCharsets.US_ASCII).equals("RIFF")
+                && new String(bytes, 8, 4, java.nio.charset.StandardCharsets.US_ASCII).equals("WEBP");
+        boolean matching = switch (contentType.toLowerCase()) {
+            case "image/png" -> png;
+            case "image/jpeg", "image/jpg" -> jpeg;
+            case "image/gif" -> gif;
+            case "image/webp" -> webp;
+            default -> false;
+        };
+        if (!matching) throw new IllegalArgumentException("Nội dung file không khớp định dạng ảnh.");
+        if (!webp && javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(bytes)) == null) {
+            throw new IllegalArgumentException("File ảnh bị hỏng hoặc không đọc được.");
         }
     }
 
@@ -190,6 +235,6 @@ public class CloudinaryServiceImpl implements CloudinaryService {
 
         String localUrl = "/upload/avatar/" + fileName;
         log.info("[Dev] Lưu ảnh cục bộ: {}", localUrl);
-        return new UploadResult(localUrl, null); // publicId = null với ảnh cục bộ
+        return new UploadResult(localUrl, localUrl); // publicId = null với ảnh cục bộ
     }
 }

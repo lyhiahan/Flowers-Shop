@@ -35,6 +35,7 @@ public class ManagerOrderController {
     private final UserRepository userRepository;
     private final StoreAccessService storeAccess;
     private final StoreRepository storeRepository;
+    private final com.finalproject.repository.OrderRepository orders;
 
     private static final Set<OrderStatus> PROCESSING_STATUSES = Set.of(
             OrderStatus.PENDING,
@@ -42,14 +43,12 @@ public class ManagerOrderController {
             OrderStatus.PREPARING,
             OrderStatus.PICKED_UP,
             OrderStatus.DELIVERING,
-            OrderStatus.RENTING
+            OrderStatus.RENTING, OrderStatus.DELIVERED, OrderStatus.REFUND_REQUESTED
     );
 
     private static final Set<OrderStatus> PROCESSED_STATUSES = Set.of(
-            OrderStatus.DELIVERED,
             OrderStatus.COMPLETED,
             OrderStatus.CANCELLED,
-            OrderStatus.REFUND_REQUESTED,
             OrderStatus.REFUNDED,
             OrderStatus.RETURNED,
             OrderStatus.OVERDUE
@@ -80,52 +79,34 @@ public class ManagerOrderController {
         if (store == null) {
             return "redirect:/manager/stores";
         }
-        storeAccess.requireStore(store);
+        storeAccess.requireManager(store);
 
-        List<Order> allOrders = orderService.getOrdersByStore(store.getId());
-
-        long processingCount = allOrders.stream().filter(o -> PROCESSING_STATUSES.contains(o.getStatus())).count();
-        long processedCount = allOrders.stream().filter(o -> PROCESSED_STATUSES.contains(o.getStatus())).count();
-        long totalCount = allOrders.size();
+        org.springframework.data.jpa.domain.Specification<Order> scope = (root, query, cb) -> cb.equal(root.get("pickupStore").get("id"), store.getId());
+        long processingCount = orders.count(scope.and((root, query, cb) -> root.get("status").in(PROCESSING_STATUSES)));
+        long processedCount = orders.count(scope.and((root, query, cb) -> root.get("status").in(PROCESSED_STATUSES)));
+        long totalCount = orders.count(scope);
 
         // Xác định active tab: processing, processed, hoặc all
         String activeTab = (tab != null && !tab.trim().isEmpty()) ? tab.toLowerCase() : "all";
         if ("PROCESSING".equalsIgnoreCase(statusStr)) activeTab = "processing";
         if ("PROCESSED".equalsIgnoreCase(statusStr)) activeTab = "processed";
 
-        List<Order> filteredOrders = new ArrayList<>(allOrders);
-        if ("processing".equalsIgnoreCase(activeTab)) {
-            filteredOrders = filteredOrders.stream()
-                    .filter(o -> PROCESSING_STATUSES.contains(o.getStatus()))
-                    .toList();
-        } else if ("processed".equalsIgnoreCase(activeTab)) {
-            filteredOrders = filteredOrders.stream()
-                    .filter(o -> PROCESSED_STATUSES.contains(o.getStatus()))
-                    .toList();
-        } else if (statusStr != null && !statusStr.trim().isEmpty() && !"ALL".equalsIgnoreCase(statusStr)) {
-            try {
-                OrderStatus st = OrderStatus.valueOf(statusStr.toUpperCase());
-                filteredOrders = filteredOrders.stream().filter(o -> o.getStatus() == st).toList();
-            } catch (Exception ignored) {}
+        if (!Set.of("all", "processing", "processed").contains(activeTab)) throw new IllegalArgumentException("Tab đơn hàng không hợp lệ.");
+        org.springframework.data.jpa.domain.Specification<Order> filter = scope;
+        if ("processing".equals(activeTab)) filter = filter.and((root, query, cb) -> root.get("status").in(PROCESSING_STATUSES));
+        else if ("processed".equals(activeTab)) filter = filter.and((root, query, cb) -> root.get("status").in(PROCESSED_STATUSES));
+        else if (statusStr != null && !statusStr.isBlank() && !"ALL".equalsIgnoreCase(statusStr)) {
+            OrderStatus wanted = OrderStatus.valueOf(statusStr.toUpperCase());
+            filter = filter.and((root, query, cb) -> cb.equal(root.get("status"), wanted));
         }
-
-        // Bước 9: Phân trang danh sách đơn hàng
-        int totalElements = filteredOrders.size();
-        int totalPages = totalElements > 0 ? (int) Math.ceil((double) totalElements / size) : 1;
-        if (page < 0) page = 0;
-        if (page >= totalPages && totalElements > 0) page = totalPages - 1;
-
-        int fromIndex = Math.min(page * size, totalElements);
-        int toIndex = Math.min(fromIndex + size, totalElements);
-        List<Order> pagedOrders = totalElements > 0 ? filteredOrders.subList(fromIndex, toIndex) : Collections.emptyList();
+        var finalFilter = filter;
+        var result = com.finalproject.utils.StorePages.load(page, size, pageable -> orders.findAll(finalFilter, pageable));
+        List<Order> pagedOrders = result.getContent();
+        com.finalproject.utils.StorePages.model(model, result);
 
         model.addAttribute("orders", pagedOrders);
         model.addAttribute("activeTab", activeTab);
         model.addAttribute("currentStatus", statusStr != null ? statusStr : "ALL");
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("pageSize", size);
-        model.addAttribute("totalElements", totalElements);
         model.addAttribute("processingCount", processingCount);
         model.addAttribute("processedCount", processedCount);
         model.addAttribute("totalCount", totalCount);
@@ -149,7 +130,7 @@ public class ManagerOrderController {
         if (store == null) {
             return "redirect:/manager/stores";
         }
-        storeAccess.requireStore(store);
+        storeAccess.requireManager(store);
 
         Order order;
         try {
@@ -222,16 +203,6 @@ public class ManagerOrderController {
     }
 
     private Store resolveStore(User user) {
-        if (user.getStore() != null) {
-            return user.getStore();
-        }
-        List<Store> owned = storeRepository.findByOwnerId(user.getId());
-        if (!owned.isEmpty()) {
-            Store first = owned.get(0);
-            user.setStore(first);
-            userRepository.save(user);
-            return first;
-        }
-        return null;
+        return storeAccess.selectedStore();
     }
 }

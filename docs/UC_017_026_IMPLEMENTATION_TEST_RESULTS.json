@@ -1,0 +1,1187 @@
+{
+  "timestamp": "2026-10-04T18:33:28.638669+07:00",
+  "base_head": "f33474f122bb0794c0880045638c916efba05e21",
+  "branch": "codex/complete-store-use-cases",
+  "worktree_dirty": true,
+  "changed_source_snapshot_sha256": "c32a115d7f15a4fab4d7884e2479c064ff536665f927c54db6dd80e7e403d2e7",
+  "environment": {
+    "jdk": "Eclipse Adoptium 25.0.3",
+    "java_release": 21,
+    "profile": "test",
+    "database": "H2 MSSQLServer mode"
+  },
+  "maven": {
+    "command": "mvnw.cmd test",
+    "log": "target/uc-implementation-final-test.log",
+    "build": "SUCCESS",
+    "summary": {
+      "tests": 228,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    }
+  },
+  "frontend": {
+    "template_count": 64,
+    "checker_errors": 0,
+    "checkout_quote": "passed",
+    "dashboard_initializer": "passed",
+    "diff_check": "passed"
+  },
+  "browser_smoke": {
+    "environment": "H2 demo, localhost:8081",
+    "verified": [
+      "UC_017 Submit/Cancel/Confirm + dashboard redirect",
+      "UC_021 Submit/Cancel/Confirm + Stored tab",
+      "Vendor dashboard rendering"
+    ],
+    "evidence": [
+      "UC_017_BROWSER_CONFIRM.png",
+      "UC_021_BROWSER_CONFIRM.png"
+    ],
+    "server_stopped": true
+  },
+  "external_validation": {
+    "sqlserver": "not run: SQLEXPRESS instance lookup/login timeout",
+    "cloudinary_live": "opt-in skipped"
+  },
+  "suites": [
+    {
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.AdminCategoryManagementUseCaseTests",
+      "testcases": [
+        {
+          "name": "testAlternative6To9bAnd6To9c_DeleteAndRestoreCategory",
+          "status": "passed"
+        },
+        {
+          "name": "testStep3And4_DisplayCategoriesTableAndPagination",
+          "status": "passed"
+        },
+        {
+          "name": "deletedCategoriesDisappearFromCustomerListsAndOldLinksAndReturnAfterRestore",
+          "status": "passed"
+        },
+        {
+          "name": "testPreCondition_CustomerDeniedAccessToAdminCategories",
+          "status": "passed"
+        },
+        {
+          "name": "testAlternative6aAnd7a_EditCategory",
+          "status": "passed"
+        },
+        {
+          "name": "testPostCondition_ErrorNotificationWhenDataLoadFails",
+          "status": "passed"
+        },
+        {
+          "name": "testStep6To12_CreateNewCategoryWithConfirmModal",
+          "status": "passed"
+        },
+        {
+          "name": "testAlternative11dAnd12d_CancelCreation",
+          "status": "passed"
+        },
+        {
+          "name": "testStep1And2_NavigateFromDashboardToCategories",
+          "status": "passed"
+        },
+        {
+          "name": "testStep5_ReviewCategoryTree",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.AdminCommissionManagementUseCaseTests",
+      "testcases": [
+        {
+          "name": "testStep5To11_CreateNewCommissionFlow",
+          "status": "passed"
+        },
+        {
+          "name": "testStep1To3_NavigateFromDashboardToCommissions",
+          "status": "passed"
+        },
+        {
+          "name": "testPreCondition_CustomerDeniedAccessToAdminCommissions",
+          "status": "passed"
+        },
+        {
+          "name": "testAlternative5aAnd6a_EditCommissionFlow",
+          "status": "passed"
+        },
+        {
+          "name": "testPostCondition_ErrorAlertDisplay",
+          "status": "passed"
+        },
+        {
+          "name": "testStep4_DisplayCommissionsTableAndPagination",
+          "status": "passed"
+        },
+        {
+          "name": "testAlternative10dAnd11d_CancelAction",
+          "status": "passed"
+        },
+        {
+          "name": "testAlternative5To8bc_DeleteAndRestoreCommissionFlow",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.AdminDeliveryManagementUseCaseTests",
+      "testcases": [
+        {
+          "name": "testStep4_DisplayDeliveriesTableAndPagination",
+          "status": "passed"
+        },
+        {
+          "name": "testStep5To11_CreateNewDeliveryWithConfirmModal",
+          "status": "passed"
+        },
+        {
+          "name": "testPreCondition_CustomerDeniedAccessToAdminDeliveries",
+          "status": "passed"
+        },
+        {
+          "name": "testAlternative10dAnd11d_CancelActions",
+          "status": "passed"
+        },
+        {
+          "name": "testAlternative5aAnd6a_EditDelivery",
+          "status": "passed"
+        },
+        {
+          "name": "testAlternative5To8bAnd5To8c_DeleteAndRestoreDelivery",
+          "status": "passed"
+        },
+        {
+          "name": "testPostCondition_ErrorNotificationWhenDataLoadFails",
+          "status": "passed"
+        },
+        {
+          "name": "testStep1To3_NavigateFromDashboardToDeliveries",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.AdminNewStoresStatisticsUseCaseTests",
+      "testcases": [
+        {
+          "name": "testStep5_DisplayTopPointStoresBesideChart",
+          "status": "passed"
+        },
+        {
+          "name": "testStep1And2_DisplayTotalStoresOnAdminDashboard",
+          "status": "passed"
+        },
+        {
+          "name": "testStep3_ViewStoresChartSectionExists",
+          "status": "passed"
+        },
+        {
+          "name": "testStep4_SelectChartTypeAndTimeRange",
+          "status": "passed"
+        },
+        {
+          "name": "testPreCondition_CustomerDeniedAccessToAdminDashboard",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.AdminNewUsersStatisticsUseCaseTests",
+      "testcases": [
+        {
+          "name": "testStep3_ViewUsersChartSectionExists",
+          "status": "passed"
+        },
+        {
+          "name": "testStep4_SelectChartTypeAndTimeRange",
+          "status": "passed"
+        },
+        {
+          "name": "testPreCondition_CustomerDeniedAccessToAdminDashboard",
+          "status": "passed"
+        },
+        {
+          "name": "testStep5_DisplayTopPointUsersBesideChart",
+          "status": "passed"
+        },
+        {
+          "name": "testStep1And2_DisplayTotalUsersOnAdminDashboard",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.AdminOrdersManagementUseCaseTests",
+      "testcases": [
+        {
+          "name": "testPreCondition_CustomerDeniedAccessToAdminOrders",
+          "status": "passed"
+        },
+        {
+          "name": "testStep5_PaginationNextPreviousAndDirectPage",
+          "status": "passed"
+        },
+        {
+          "name": "testStep4_DisplayOrdersTable",
+          "status": "passed"
+        },
+        {
+          "name": "testStep10And11_UpdateOrderStatusConfirmSuccess",
+          "status": "passed"
+        },
+        {
+          "name": "testPostCondition_ErrorNotificationWhenDataLoadFails",
+          "status": "passed"
+        },
+        {
+          "name": "testStep6To9AndAlternative10a_ViewOrderDetailAndCheckStatusControls",
+          "status": "passed"
+        },
+        {
+          "name": "testStep3_SelectAllAndDeliveryServiceTabs",
+          "status": "passed"
+        },
+        {
+          "name": "testStep1And2_NavigateFromDashboardToOrders",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.AdminProductsManagementUseCaseTests",
+      "testcases": [
+        {
+          "name": "testStep3_SelectLicensedAndUnlicensedProductsTabs",
+          "status": "passed"
+        },
+        {
+          "name": "testSoftDeleteProduct",
+          "status": "passed"
+        },
+        {
+          "name": "testEditProduct_ShowFormWithExistingData",
+          "status": "passed"
+        },
+        {
+          "name": "testStep5_PaginationNextPreviousAndDirectPage",
+          "status": "passed"
+        },
+        {
+          "name": "testPostCondition_ErrorNotificationWhenDataLoadFails",
+          "status": "passed"
+        },
+        {
+          "name": "testStep1And2_NavigateFromDashboardToProducts",
+          "status": "passed"
+        },
+        {
+          "name": "testStep4_DisplayProductsTable",
+          "status": "passed"
+        },
+        {
+          "name": "testActionColumn_DisplaysStickyAndAllActions",
+          "status": "passed"
+        },
+        {
+          "name": "testEditProduct_SaveUpdatesAndRedirectToReturnUrl",
+          "status": "passed"
+        },
+        {
+          "name": "testToggleSellingProduct",
+          "status": "passed"
+        },
+        {
+          "name": "testPreCondition_CustomerDeniedAccessToAdminProducts",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.AdminStoreLevelManagementUseCaseTests",
+      "testcases": [
+        {
+          "name": "testStep4And5_DisplayStoreLevelsTableAndPagination",
+          "status": "passed"
+        },
+        {
+          "name": "testStep6To12_CreateNewStoreLevelWithConfirmModal",
+          "status": "passed"
+        },
+        {
+          "name": "testAlternative6To10bAnd6To10c_DeleteAndRestoreStoreLevel",
+          "status": "passed"
+        },
+        {
+          "name": "testStep1To3_NavigateFromDashboardToStoreLevels",
+          "status": "passed"
+        },
+        {
+          "name": "testPostCondition_ErrorNotificationWhenDataLoadFails",
+          "status": "passed"
+        },
+        {
+          "name": "testAlternative11dAnd12d_CancelActions",
+          "status": "passed"
+        },
+        {
+          "name": "testPreCondition_CustomerDeniedAccessToAdminStoreLevels",
+          "status": "passed"
+        },
+        {
+          "name": "testAlternative6aAnd7a_EditStoreLevel",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.AdminStyleManagementUseCaseTests",
+      "testcases": [
+        {
+          "name": "testStep5To11_CreateNewStyleWithConfirmModal",
+          "status": "passed"
+        },
+        {
+          "name": "testAlternative5dAnd6d1To6d3_DetailAndAddNewStyleValue",
+          "status": "passed"
+        },
+        {
+          "name": "testAlternative11hAnd12h_CancelActions",
+          "status": "passed"
+        },
+        {
+          "name": "testPreCondition_CustomerDeniedAccessToAdminStyles",
+          "status": "passed"
+        },
+        {
+          "name": "testAlternative6e2To6g_EditDeleteAndRestoreStyleValue",
+          "status": "passed"
+        },
+        {
+          "name": "testPostCondition_ErrorNotificationWhenDataLoadFails",
+          "status": "passed"
+        },
+        {
+          "name": "testAlternative5To9bAnd5To9c_DeleteAndRestoreStyle",
+          "status": "passed"
+        },
+        {
+          "name": "testStep3And4_DisplayStylesTableAndPagination",
+          "status": "passed"
+        },
+        {
+          "name": "testStep1And2_NavigateFromDashboardToStyles",
+          "status": "passed"
+        },
+        {
+          "name": "testAlternative5aAnd6a_EditStyle",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.AdminTransactionManagementUseCaseTests",
+      "testcases": [
+        {
+          "name": "testStep4_PaginationNextPreviousAndSpecificPage",
+          "status": "passed"
+        },
+        {
+          "name": "testStep1To3_NavigateFromDashboardToTransactions",
+          "status": "passed"
+        },
+        {
+          "name": "testPreCondition_CustomerDeniedAccessToAdminTransactions",
+          "status": "passed"
+        },
+        {
+          "name": "testPostConditions_SuccessTableAndErrorMessage",
+          "status": "passed"
+        },
+        {
+          "name": "testTransactionSearchByKeyword",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.AdminUserLevelManagementUseCaseTests",
+      "testcases": [
+        {
+          "name": "testStep1To3_NavigateFromDashboardToUserLevels",
+          "status": "passed"
+        },
+        {
+          "name": "testStep4And5_DisplayUserLevelsTableAndPagination",
+          "status": "passed"
+        },
+        {
+          "name": "testAlternative6To10bAnd6To10c_DeleteAndRestoreUserLevel",
+          "status": "passed"
+        },
+        {
+          "name": "testPreCondition_CustomerDeniedAccessToAdminUserLevels",
+          "status": "passed"
+        },
+        {
+          "name": "testStep6To12_CreateNewUserLevelWithConfirmModal",
+          "status": "passed"
+        },
+        {
+          "name": "testPostCondition_ErrorNotificationWhenDataLoadFails",
+          "status": "passed"
+        },
+        {
+          "name": "testAlternative11dAnd12d_CancelActions",
+          "status": "passed"
+        },
+        {
+          "name": "testAlternative6aAnd7a_EditUserLevel",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.AdminUsersManagementUseCaseTests",
+      "testcases": [
+        {
+          "name": "testPreCondition_CustomerDeniedAccessToAdminUsers",
+          "status": "passed"
+        },
+        {
+          "name": "testStep3_DisplayAllUsersTable",
+          "status": "passed"
+        },
+        {
+          "name": "testStep4_PaginationNextPreviousAndDirectPage",
+          "status": "passed"
+        },
+        {
+          "name": "testPostCondition_ErrorNotificationWhenDataLoadFails",
+          "status": "passed"
+        },
+        {
+          "name": "testStep1And2_NavigateFromDashboardToUsers",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 61,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.BusinessRegressionTests",
+      "testcases": [
+        {
+          "name": "quoteRejectsInactiveDeliveryAndWrongBranchVoucherButPickupHasNoShipping",
+          "status": "passed"
+        },
+        {
+          "name": "lockingCustomerCancelsUnpaidPickupButNeverCancelsHandedOverDelivery",
+          "status": "passed"
+        },
+        {
+          "name": "quoteRejectsForeignItemsDeletedProductsAndInvalidPrices",
+          "status": "passed"
+        },
+        {
+          "name": "crossStoreProductMutationIsForbidden",
+          "status": "passed"
+        },
+        {
+          "name": "adminCancellationOfPaidOrderRequiresExplicitRefundAndDoesNotCreateRevenue",
+          "status": "passed"
+        },
+        {
+          "name": "customerPaymentCompatibilityRouteCannotSelfConfirmBankTransfer",
+          "status": "passed"
+        },
+        {
+          "name": "invalidManagerPriceAndCartQuantityDoNotChangeData",
+          "status": "passed"
+        },
+        {
+          "name": "lockingPaidCustomerRequiresRefundAndReturnsStockOnlyOnce",
+          "status": "passed"
+        },
+        {
+          "name": "confirmedBankPaymentCanCompletePickup",
+          "status": "passed"
+        },
+        {
+          "name": "deletingPaidMomoCustomerKeepsReceiptAndRequiresRefund",
+          "status": "passed"
+        },
+        {
+          "name": "lockedAccountCannotUseOldSessionCartCheckoutOrMockPayment",
+          "status": "passed"
+        },
+        {
+          "name": "deliveryRequiresCombinedStockForDuplicateProductLines",
+          "status": "passed"
+        },
+        {
+          "name": "newStoreHasNoInventedRevenue",
+          "status": "passed"
+        },
+        {
+          "name": "staffAndCheckoutTemplatesRenderWithCsrf",
+          "status": "passed"
+        },
+        {
+          "name": "paidPickupOrderOffersCompletionAndRejectsDeliveryWithoutChangingPayment",
+          "status": "passed"
+        },
+        {
+          "name": "emptyAdminProductFormAndManagerMissingPricesHaveUsefulErrors",
+          "status": "passed"
+        },
+        {
+          "name": "deliveryFallsBackToAStoreWithStockAndQuoteMatchesCheckout",
+          "status": "passed"
+        },
+        {
+          "name": "productServiceRejectsBadInputBeforeAnyDatabaseWrite",
+          "status": "passed"
+        },
+        {
+          "name": "missingInventoryIsRejected",
+          "status": "passed"
+        },
+        {
+          "name": "refundRequestDoesNotPretendThatMoneyHasBeenReturned",
+          "status": "passed"
+        },
+        {
+          "name": "repairedPagesRenderWithRealModelsAndRetainPaymentActions",
+          "status": "passed"
+        },
+        {
+          "name": "blankAuthFormsDoNotAuthenticateOrCreateUsers",
+          "status": "passed"
+        },
+        {
+          "name": "adminCanConfirmBankPaymentFromDetailAndCustomerSeesUpdatedStatus",
+          "status": "passed"
+        },
+        {
+          "name": "checkoutReservesRealStockAndLeavesBankPaymentPending",
+          "status": "passed"
+        },
+        {
+          "name": "managerDeliveryAndCompletionCreditExactlyOnce",
+          "status": "passed"
+        },
+        {
+          "name": "adminProductBindingRejectsNegativeTextAndHugePricesWithoutSaving",
+          "status": "passed"
+        },
+        {
+          "name": "checkoutRejectsAnotherStoresVoucher",
+          "status": "passed"
+        },
+        {
+          "name": "deliveryDropdownDoesNotOfferSkippingDeliveryOrCancellingAfterHandover",
+          "status": "passed"
+        },
+        {
+          "name": "productVietnameseTextSurvivesDatabaseReloadAndHtmlRendering",
+          "status": "passed"
+        },
+        {
+          "name": "newProductRespectsBranchAndBlocksExternalReturnUrl",
+          "status": "passed"
+        },
+        {
+          "name": "momoMockRequiresOwnerAndCsrfAndDoesNotUsePublicCallbackToPay",
+          "status": "passed"
+        },
+        {
+          "name": "demoStoreLookupHandlesDuplicateNamesWithoutDeletingStores",
+          "status": "passed"
+        },
+        {
+          "name": "retiredRoleCannotBeRequestedOrUseTheDeliveryPortal",
+          "status": "passed"
+        },
+        {
+          "name": "prepaidDeliveryCannotStartUntilPaymentIsConfirmed",
+          "status": "passed"
+        },
+        {
+          "name": "bankCheckoutRedirectsToInstructionsWithoutRecordingPaid",
+          "status": "passed"
+        },
+        {
+          "name": "adminBankConfirmationIsHiddenAndRejectedForCancelledOrders",
+          "status": "passed"
+        },
+        {
+          "name": "momoMockCannotPayCancelledOrders",
+          "status": "passed"
+        },
+        {
+          "name": "validOtpIsConsumedAndNeverExposedByPublicPages",
+          "status": "passed"
+        },
+        {
+          "name": "bankTransferNeedsExplicitConfirmationBeforePickupCompletion",
+          "status": "passed"
+        },
+        {
+          "name": "paymentGatewaysAndClosedStoresAreRejected",
+          "status": "passed"
+        },
+        {
+          "name": "renderedOrderPagesShowPendingRefundAndPaymentActions",
+          "status": "passed"
+        },
+        {
+          "name": "quoteAndOrderUseTheSameShippingPriceWithoutMutatingCart",
+          "status": "passed"
+        },
+        {
+          "name": "insufficientStockNeverCreatesAnOrderOrRestocks",
+          "status": "passed"
+        },
+        {
+          "name": "routesRenderAndRequireCsrfAndCorrectRoles",
+          "status": "passed"
+        },
+        {
+          "name": "resetPasswordRejectsMissingAndIncorrectOtp",
+          "status": "passed"
+        },
+        {
+          "name": "freeShippingVoucherAlsoWorksWhenProductHasNoMargin",
+          "status": "passed"
+        },
+        {
+          "name": "customerCannotUpdateDeliveryStatus",
+          "status": "passed"
+        },
+        {
+          "name": "withdrawalCannotExceedAvailableFunds",
+          "status": "passed"
+        },
+        {
+          "name": "cartAndProductShowRealStockAndServerRejectsExcessQuantity",
+          "status": "passed"
+        },
+        {
+          "name": "cancellationRestoresStockOnce",
+          "status": "passed"
+        },
+        {
+          "name": "refundDeductsRevenueOnceWithoutDeductingOtherOrders",
+          "status": "passed"
+        },
+        {
+          "name": "quoteEndpointRequiresCsrfAndDeliverySelection",
+          "status": "passed"
+        },
+        {
+          "name": "withdrawalReservesFundsAndRejectionRestoresThem",
+          "status": "passed"
+        },
+        {
+          "name": "bankInstructionsUseOrderTotalAndOnlyOwnerCanReadPaymentStatus",
+          "status": "passed"
+        },
+        {
+          "name": "adminTransactionsHaveStableOrderAndValidatePageSize",
+          "status": "passed"
+        },
+        {
+          "name": "resetOtpLocksAfterFiveFailedAttempts",
+          "status": "passed"
+        },
+        {
+          "name": "checkoutBlankRequiredFieldsAndMalformedSelectionNeverReserveStock",
+          "status": "passed"
+        },
+        {
+          "name": "managerCannotChangeAnotherStoresOrder",
+          "status": "passed"
+        },
+        {
+          "name": "voucherValidationChecksExpiryUsageAndShipping",
+          "status": "passed"
+        },
+        {
+          "name": "newCustomerCanRegisterVerifyLoginAndPlaceABankOrderWithoutDeliveryRole",
+          "status": "passed"
+        },
+        {
+          "name": "removedCategoryCannotBeUsedToCreateProductsAndValidCreationHasStock",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.CatalogFilterTests",
+      "testcases": [
+        {
+          "name": "testSearchByKeyword",
+          "status": "passed"
+        },
+        {
+          "name": "testPaginationKeepsFilters",
+          "status": "passed"
+        },
+        {
+          "name": "testFilterBoHoa_RendersProductsAndPaginationWithoutCrash",
+          "status": "passed"
+        },
+        {
+          "name": "testAllProducts_DisplaysFilterBarAndProductGrid",
+          "status": "passed"
+        },
+        {
+          "name": "testNoResultsDisplay",
+          "status": "passed"
+        },
+        {
+          "name": "testCombinedMultiFilter_PreservesAllTagsAndRenders",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "name": "com.finalproject.CloudinaryServiceTests",
+      "testcases": [
+        {
+          "name": "uploadPreservesCloudUrlAndPublicIdAndRejectsNonImageFiles",
+          "status": "passed"
+        },
+        {
+          "name": "uploadToConfiguredAccountAndRemoveOnlyTheTestImage",
+          "status": "skipped"
+        },
+        {
+          "name": "cloudFailureIsReportedInsteadOfSilentlySavingLocally",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.ConcurrencyRegressionTests",
+      "testcases": [
+        {
+          "name": "accountLockAndCheckoutCannotLeaveAnOpenOrderForDisabledCustomer",
+          "status": "passed"
+        },
+        {
+          "name": "simultaneousCancellationsRestoreAllReservedStock",
+          "status": "passed"
+        },
+        {
+          "name": "simultaneousWithdrawalsCannotOverdrawWallet",
+          "status": "passed"
+        },
+        {
+          "name": "submittingTheSameCartTwiceCreatesOneOrder",
+          "status": "passed"
+        },
+        {
+          "name": "simultaneousCheckoutCannotSellTheSameLastItemTwice",
+          "status": "passed"
+        },
+        {
+          "name": "twoCheckoutsCannotConsumeTheLastVoucherTwice",
+          "status": "passed"
+        },
+        {
+          "name": "failedOtpAttemptsRemainRecordedAfterTheRequestRollsBack",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.FinalprojectApplicationTests",
+      "testcases": [
+        {
+          "name": "contextLoads",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.ManagerProductCloudinaryTests",
+      "testcases": [
+        {
+          "name": "updateUsesNewPhotoAsMainAndUploadFailureDoesNotChangeProduct",
+          "status": "passed"
+        },
+        {
+          "name": "creatingWithUploadedPhotoSavesCloudUrlPublicIdAndBranchStock",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.MomoConfigTests",
+      "testcases": [
+        {
+          "name": "mockNeedsNoKeysButSandboxRequiresOwnKeysAndNeverAllowsProductionEndpoint",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.MomoSandboxSecurityTests",
+      "testcases": [
+        {
+          "name": "failedOrAuthorizedResultDoesNotBecomePaid",
+          "status": "passed"
+        },
+        {
+          "name": "sandboxCannotUseMockButtonAndAnotherCustomerCannotViewOrder",
+          "status": "passed"
+        },
+        {
+          "name": "validIpnIsIdempotentAndDoesNotReviveRefundedOrder",
+          "status": "passed"
+        },
+        {
+          "name": "tamperedOrMissingSignatureCannotPay",
+          "status": "passed"
+        },
+        {
+          "name": "cancelledOrdersCannotBePaidByIpn",
+          "status": "passed"
+        },
+        {
+          "name": "evenSignedResponseMustMatchStoredAttempt(String)[1]",
+          "status": "passed"
+        },
+        {
+          "name": "evenSignedResponseMustMatchStoredAttempt(String)[2]",
+          "status": "passed"
+        },
+        {
+          "name": "evenSignedResponseMustMatchStoredAttempt(String)[3]",
+          "status": "passed"
+        },
+        {
+          "name": "evenSignedResponseMustMatchStoredAttempt(String)[4]",
+          "status": "passed"
+        },
+        {
+          "name": "evenSignedResponseMustMatchStoredAttempt(String)[5]",
+          "status": "passed"
+        },
+        {
+          "name": "evenSignedResponseMustMatchStoredAttempt(String)[6]",
+          "status": "passed"
+        },
+        {
+          "name": "evenSignedResponseMustMatchStoredAttempt(String)[7]",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.RetiredDeliveryRoleTests",
+      "testcases": [
+        {
+          "name": "disablesOldAccountAndKeepsOrdersRequestsAuditAndOtherRoles",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.StoreManagementEwalletUseCaseTests",
+      "testcases": [
+        {
+          "name": "testViewWalletAsNonOwnerHidesWithdrawButton",
+          "status": "passed"
+        },
+        {
+          "name": "testWithdrawFailsWithIncorrectPassword",
+          "status": "passed"
+        },
+        {
+          "name": "testWithdrawSuccessWithCorrectPassword",
+          "status": "passed"
+        },
+        {
+          "name": "testPaginationOnTransactions",
+          "status": "passed"
+        },
+        {
+          "name": "testViewWalletSuccessAsOwner",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.StoreManagementOrderUseCaseTests",
+      "testcases": [
+        {
+          "name": "testPaginationOnOrders",
+          "status": "passed"
+        },
+        {
+          "name": "testListProcessedOrders",
+          "status": "passed"
+        },
+        {
+          "name": "testUpdateOrderStatusSuccess",
+          "status": "passed"
+        },
+        {
+          "name": "testListProcessingOrders",
+          "status": "passed"
+        },
+        {
+          "name": "testViewOrderDetail",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.StoreManagementRevenueUseCaseTests",
+      "testcases": [
+        {
+          "name": "testStep1To6_DisplayTotalProductsAndOrders",
+          "status": "passed"
+        },
+        {
+          "name": "testMainFlow_GoToDashboardButton",
+          "status": "passed"
+        },
+        {
+          "name": "testStep8_TopSellingProductsAndRecentOrdersCards",
+          "status": "passed"
+        },
+        {
+          "name": "testStep7_FilterByCriteriaTimeRangeAndChartType",
+          "status": "passed"
+        },
+        {
+          "name": "testAlternative1_5a_AdminDashboardRevenueStatistics",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "tests": 28,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.finalproject.StoreUseCaseAuditTests",
+      "testcases": [
+        {
+          "name": "uc020OwnerAddsAndRemovesCandidate",
+          "status": "passed"
+        },
+        {
+          "name": "uc018LicenseMustPreserveStoredProductChoice",
+          "status": "passed"
+        },
+        {
+          "name": "uc018BanDisablesStoreAndProducts",
+          "status": "passed"
+        },
+        {
+          "name": "uc020MixedInvalidBatchMustNotPartiallyAssignStaff",
+          "status": "passed"
+        },
+        {
+          "name": "uc019FeaturedImageAddEditDelete",
+          "status": "passed"
+        },
+        {
+          "name": "uc021CreatesEditsAndStoresProduct",
+          "status": "passed"
+        },
+        {
+          "name": "uc019RejectsInvalidImageFile",
+          "status": "passed"
+        },
+        {
+          "name": "uc018ListsOnlyAccessibleStoresAndSupportsPaging",
+          "status": "passed"
+        },
+        {
+          "name": "uc017RequiresLoginAndCsrf",
+          "status": "passed"
+        },
+        {
+          "name": "uc019BasicInfoSaveMustPreserveOpenStatus",
+          "status": "passed"
+        },
+        {
+          "name": "uc025DateOnlyHistoryMustNotAppearAsMidnightRegistration",
+          "status": "passed"
+        },
+        {
+          "name": "uc020PartnerCanJoinMultipleStoresWithoutMovingLegacyAssignment",
+          "status": "passed"
+        },
+        {
+          "name": "uc018SelectionIsPerSessionAndCannotRestoreRevokedMembership",
+          "status": "passed"
+        },
+        {
+          "name": "uc023RetryDebitsExactlyOnce",
+          "status": "passed"
+        },
+        {
+          "name": "uc021SellingTabMustExcludeStoredProducts",
+          "status": "passed"
+        },
+        {
+          "name": "uc024CountsActualSoldQuantitiesAndExcludesUnpaidForeignOrders",
+          "status": "passed"
+        },
+        {
+          "name": "uc020PartnerCannotAddStaffAndCanLeave",
+          "status": "passed"
+        },
+        {
+          "name": "uc017CreatesStoreWithSelectedCommission",
+          "status": "passed"
+        },
+        {
+          "name": "uc019RejectsFileWithSpoofedImageContentType",
+          "status": "passed"
+        },
+        {
+          "name": "uc025LimitsNewUserSampleTo1000WithinSelectedRange",
+          "status": "passed"
+        },
+        {
+          "name": "uc018BanBlocksPublicDetailCartAndQuoteEvenWithOtherStoreStock",
+          "status": "passed"
+        },
+        {
+          "name": "uc018ClampsOutOfRangePageAndRejectsUnboundedSize",
+          "status": "passed"
+        },
+        {
+          "name": "uc017MustRejectDeletedCommission",
+          "status": "passed"
+        },
+        {
+          "name": "uc017RetryCreatesExactlyOneStoreAndDoesNotChangeAssignment",
+          "status": "passed"
+        },
+        {
+          "name": "uc017RejectsInvalidPhoneWithoutCreatingStore",
+          "status": "passed"
+        },
+        {
+          "name": "uc023MustNotAcceptStoredPasswordHashAsConfirmation",
+          "status": "passed"
+        },
+        {
+          "name": "uc023PartnerCannotWithdrawEvenWithOwnCorrectPassword",
+          "status": "passed"
+        },
+        {
+          "name": "uc020MustNotStealStaffFromAnotherStore",
+          "status": "passed"
+        }
+      ]
+    }
+  ]
+}

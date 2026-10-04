@@ -12,20 +12,22 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
+    <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
 
     <style>
-        /* ── Design tokens ─────────────────────────────────────────── */
+        /* ── Design tokens đồng bộ Floral Theme ─────────────────────── */
         :root {
-            --bg-page:     #F5F3EE;
+            --bg-page:     #FFF0F3;
             --surface:     #FFFFFF;
-            --brand:       #1C3A2B;
-            --brand-mid:   #2D5040;
-            --brand-light: #E6EEE9;
-            --text:        #1C3A2B;
-            --text-muted:  #6B7280;
-            --border:      #DDE5DA;
+            --brand:       #355447;
+            --brand-mid:   #284136;
+            --brand-light: #F3E6E1;
+            --accent-rose: #A64060;
+            --text:        #293B32;
+            --text-muted:  #64748B;
+            --border:      #E7DED4;
             --radius:      16px;
-            --shadow:      0 2px 14px rgba(28,58,43,.07);
+            --shadow:      0 2px 14px rgba(53,84,71,.07);
         }
 
         *, *::before, *::after { box-sizing: border-box; }
@@ -33,7 +35,7 @@
         body {
             font-family: 'Nunito', sans-serif;
             font-size: 16px;
-            background: var(--bg-page);
+            background-color: var(--bg-page) !important;
             color: var(--text);
             min-height: 100vh;
         }
@@ -41,7 +43,7 @@
 
         /* ── Sidebar ───────────────────────────────────────────────── */
         .sidebar {
-            background: #162B1F;
+            background: #1C2D24;
             min-height: 100vh;
             width: 230px;
             flex-shrink: 0;
@@ -89,7 +91,7 @@
         .btn-logout-sb:hover { background: rgba(248,113,113,.12); color: #EF4444; }
 
         /* ── Main ──────────────────────────────────────────────────── */
-        .main { flex: 1; min-width: 0; padding: 32px 28px; }
+        .main { flex: 1; min-width: 0; padding: 32px 28px; background-color: var(--bg-page); }
 
         /* ── Page title ────────────────────────────────────────────── */
         .page-title { font-size: 28px; font-weight: 800; color: var(--brand); margin: 0; }
@@ -224,7 +226,7 @@
 </head>
 <body>
 
-<div style="display:flex; min-height:100vh;">
+<div style="display:flex; min-height:100vh; background-color: var(--bg-page);">
 
     <!-- ── SIDEBAR ──────────────────────────────────────────────── -->
     <aside class="sidebar">
@@ -351,8 +353,9 @@
                             <div class="info-line">
                                 <i class="bi bi-clock-fill"></i>
                                 <span>
-                                    <span th:if="${s.isOpen}" class="fw-700" style="color:#166534; font-weight:700;">Đang mở cửa – tiếp nhận đơn hàng</span>
-                                    <span th:unless="${s.isOpen}" style="color:#6B7280; font-weight:600;">Đã đóng cửa – không nhận đơn</span>
+                                    <span th:if="${s.status and s.isOpen}" class="fw-700" style="color:#166534; font-weight:700;">Đang mở cửa – tiếp nhận đơn hàng</span>
+                                    <span th:if="${!s.status}" style="color:#DC2626; font-weight:700;">Bị cấm hoạt động (Admin đình chỉ) – Ngừng tiếp nhận đơn</span>
+                                    <span th:if="${s.status and !s.isOpen}" style="color:#6B7280; font-weight:600;">Đã đóng cửa – không nhận đơn</span>
                                 </span>
                             </div>
                         </div>
@@ -378,11 +381,11 @@
 
                         <!-- Nút hành động -->
                         <div class="d-flex align-items-center gap-2 flex-wrap">
-                            <a th:href="@{'/manager/stores/switch/' + ${s.id}}"
+                            <form th:action="@{'/manager/stores/switch/' + ${s.id}}" method="post"><button type="submit"
                                class="btn-dash"
                                th:id="'btnGoDashboard_' + ${s.id}">
                                 <i class="bi bi-speedometer2"></i> Xem tổng quan
-                            </a>
+                            </button></form>
                             <a th:href="@{/manager/profile}"
                                class="btn-edit"
                                th:id="'btnEdit_' + ${s.id}">
@@ -446,8 +449,9 @@
                             <div class="info-line">
                                 <i class="bi bi-clock-fill"></i>
                                 <span style="font-size:14px;">
-                                    <span th:if="${s.isOpen}" style="color:#166534; font-weight:700;">Đang mở cửa</span>
-                                    <span th:unless="${s.isOpen}" style="color:#6B7280;">Đã đóng cửa</span>
+                                    <span th:if="${s.status and s.isOpen}" style="color:#166534; font-weight:700;">Đang mở cửa</span>
+                                    <span th:if="${!s.status}" style="color:#DC2626; font-weight:700;">Bị đình chỉ</span>
+                                    <span th:if="${s.status and !s.isOpen}" style="color:#6B7280;">Đã đóng cửa</span>
                                 </span>
                             </div>
                         </div>
@@ -475,11 +479,11 @@
 
                         <!-- Buttons -->
                         <div class="d-flex gap-2 flex-wrap">
-                            <a th:href="@{'/manager/stores/switch/' + ${s.id}}"
+                            <form th:action="@{'/manager/stores/switch/' + ${s.id}}" method="post"><button type="submit"
                                class="btn-dash" style="height:40px; font-size:14px; padding:0 16px;"
                                th:id="'btnGoDashboard_' + ${s.id}">
                                 <i class="bi bi-speedometer2"></i> Xem tổng quan
-                            </a>
+                            </button></form>
                             <a th:href="@{/manager/profile}"
                                class="btn-edit" style="height:40px; font-size:14px; padding:0 14px;"
                                th:id="'btnEdit_' + ${s.id}">

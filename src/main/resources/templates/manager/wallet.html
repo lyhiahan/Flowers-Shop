@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
@@ -16,7 +16,26 @@
         .sidebar a { color: #A9BCB3; text-decoration: none; padding: 10px 16px; border-radius: 10px; display: flex; align-items: center; gap: 10px; font-weight: 500; transition: all 0.2s ease; }
         .sidebar a:hover { background: rgba(255, 255, 255, 0.08); color: #ffffff; }
         .sidebar a.active { background: var(--brand-green); color: #ffffff; font-weight: 600; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
+        #withdrawModal .form-control, #withdrawModal .form-select { border-radius: 10px; min-height: 46px; }
+        #withdrawModal .modal-title { color: #20382E; }
+        .withdraw-summary { background: #EBF3EE; display: grid; grid-template-columns: 1fr 1.3fr; gap: 12px; }
+        .withdraw-summary dt { font-weight: 500; color: #66736B; }
+        .withdraw-summary dd { margin: 0; overflow-wrap: anywhere; color: #20382E; }
+        @media (max-width: 575.98px) { .withdraw-summary { grid-template-columns: 1fr; gap: 4px; } .withdraw-summary dd { margin-bottom: 12px; } }
         .wallet-card { background: linear-gradient(135deg, #20382E 0%, #162820 100%); color: white; border-radius: 20px; }
+        /* Ẩn nút tăng giảm (spinner) trên ô nhập số tiền rút */
+        #inputWithdrawAmount::-webkit-outer-spin-button,
+        #inputWithdrawAmount::-webkit-inner-spin-button,
+        input.no-spinner::-webkit-outer-spin-button,
+        input.no-spinner::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        #inputWithdrawAmount[type=number],
+        input.no-spinner[type=number] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
     </style>
 </head>
 <body>
@@ -103,7 +122,7 @@
                                     data-bs-toggle="modal" 
                                     data-bs-target="#withdrawModal"
                                     style="color: #20382E; height: 44px; font-size: 15px;">
-                                <i class="bi bi-arrow-up-right-circle"></i> Withdraw
+                                <i class="bi bi-arrow-up-right-circle"></i> Rút tiền
                             </button>
                             <div th:if="${!isOwner}" class="badge bg-white text-dark px-3 py-2 rounded-pill shadow-sm" style="font-size: 13px;">
                                 <i class="bi bi-shield-lock me-1 text-secondary"></i> Chỉ chủ cửa hàng mới có quyền rút tiền
@@ -234,31 +253,35 @@
 
 <!-- ================= MODALS CHO USE CASE UC_023 ================= -->
 
-<!-- Bước 10: Hiển thị form rút tiền -->
-<!-- Bước 11: Nhập số tiền và xác nhận mật khẩu -->
+<!-- One dialog keeps focus, draft values and validation through both steps. -->
 <div class="modal fade" id="withdrawModal" tabindex="-1" aria-labelledby="withdrawModalLabel" aria-hidden="true" th:if="${isOwner}">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
-        <div class="modal-content rounded-4 border-0 shadow">
-            <form id="formWithdraw" th:action="@{/manager/wallet/withdraw}" method="post">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title font-serif fw-bold text-dark" id="withdrawModalLabel">
-                        🪙 Yêu Cầu Rút Tiền GD Coins
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 560px;">
+        <form id="formWithdraw" class="modal-content rounded-4 border-0 shadow" th:action="@{/manager/wallet/withdraw}" method="post" data-inline-validation novalidate>
+            <input type="hidden" name="requestId" th:value="${requestId}">
+            <div class="modal-header px-4 pt-4 border-0">
+                <div>
+                    <h5 class="modal-title fw-bold" id="withdrawModalLabel"><i class="bi bi-bank me-2" aria-hidden="true"></i>Rút tiền về ngân hàng</h5>
+                    <p class="small text-secondary mb-0 mt-2" id="withdrawStep">Bước 1/2 · Thông tin rút tiền</p>
                 </div>
-                <div class="modal-body py-3">
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">Số tiền muốn rút (VNĐ):</label>
-                        <input type="number" name="amount" id="inputWithdrawAmount" class="form-control" placeholder="Tối thiểu 50.000" min="50000" required style="border-radius: 10px;">
-                    </div>
-                    <!-- Bước 11: Xác nhận mật khẩu -->
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">Xác nhận mật khẩu tài khoản:</label>
-                        <input type="password" name="password" id="inputWithdrawPassword" class="form-control" placeholder="Nhập mật khẩu tài khoản của bạn" required style="border-radius: 10px;">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body px-4">
+                <div id="withdrawFields">
+                    <div class="p-3 rounded-3 mb-4" style="background: #EBF3EE; color: #20382E;">
+                        <span class="small">Số dư khả dụng</span>
+                        <strong class="d-block mt-1" th:text="${store.eWallet != null ? #numbers.formatDecimal(store.eWallet, 0, 'POINT', 0, 'COMMA') + ' ₫' : '0 ₫'}">0 ₫</strong>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">Tên ngân hàng thụ hưởng:</label>
-                        <select name="bankName" id="inputBankName" class="form-select" required style="border-radius: 10px;">
+                        <label for="inputWithdrawAmount" class="form-label fw-semibold">Số tiền muốn rút <span class="text-danger">*</span></label>
+                        <input type="number" name="amount" id="inputWithdrawAmount" class="form-control no-spinner" placeholder="Ví dụ: 500000" min="50000" step="0.01" required
+                               th:attr="data-balance=${store.eWallet != null ? store.eWallet : 0}"
+                               data-error-required="Vui lòng nhập số tiền muốn rút." data-error-min="Số tiền rút tối thiểu là 50.000 ₫." data-error-step="Số tiền chỉ được có tối đa 2 chữ số thập phân." aria-describedby="withdrawAmountHelp">
+                        <div class="form-text" id="withdrawAmountHelp">Đơn vị VND · Tối thiểu 50.000 ₫, không vượt quá số dư khả dụng.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputBankName" class="form-label fw-semibold">Ngân hàng thụ hưởng <span class="text-danger">*</span></label>
+                        <select name="bankName" id="inputBankName" class="form-select" required data-error-required="Vui lòng chọn ngân hàng thụ hưởng.">
+                            <option value="">Chọn ngân hàng</option>
                             <option value="Vietcombank">Vietcombank</option>
                             <option value="Techcombank">Techcombank</option>
                             <option value="MBBank">MBBank (Quân Đội)</option>
@@ -268,53 +291,38 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">Số tài khoản ngân hàng:</label>
-                        <input type="text" name="accountNumber" id="inputAccountNumber" class="form-control" placeholder="VD: 1012345678" required style="border-radius: 10px;">
+                        <label for="inputAccountNumber" class="form-label fw-semibold">Số tài khoản <span class="text-danger">*</span></label>
+                        <input type="text" name="accountNumber" id="inputAccountNumber" class="form-control" placeholder="Nhập số tài khoản ngân hàng" inputmode="numeric" pattern="[0-9]{6,30}" maxlength="30" required
+                               data-error-required="Vui lòng nhập số tài khoản." data-error-pattern="Số tài khoản phải gồm 6–30 chữ số." autocomplete="off">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">Tên chủ tài khoản (In hoa không dấu):</label>
-                        <input type="text" name="accountHolder" id="inputAccountHolder" class="form-control" placeholder="VD: NGUYEN VAN A" required style="border-radius: 10px;">
+                        <label for="inputAccountHolder" class="form-label fw-semibold">Tên chủ tài khoản <span class="text-danger">*</span></label>
+                        <input type="text" name="accountHolder" id="inputAccountHolder" class="form-control" placeholder="Ví dụ: NGUYEN VAN A" maxlength="100" required data-error-required="Vui lòng nhập tên chủ tài khoản." autocomplete="name" aria-describedby="accountHolderHelp">
+                        <div class="form-text" id="accountHolderHelp">Nhập đúng tên đã đăng ký với ngân hàng.</div>
+                    </div>
+                    <div class="mb-0">
+                        <label for="inputWithdrawPassword" class="form-label fw-semibold">Mật khẩu tài khoản <span class="text-danger">*</span></label>
+                        <input type="password" name="password" id="inputWithdrawPassword" class="form-control" placeholder="Nhập mật khẩu để xác nhận" required data-error-required="Vui lòng nhập mật khẩu xác nhận." autocomplete="current-password">
                     </div>
                 </div>
-                <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
-                    <!-- Nút kích hoạt Bước 12: Hiển thị thông báo xác nhận -->
-                    <button type="button" class="btn btn-primary rounded-pill px-4 fw-semibold" id="btnOpenConfirmWithdraw" onclick="triggerConfirmWithdrawModal()">
-                        Tiếp tục
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Bước 12: Hiển thị thông báo xác nhận -->
-<div class="modal fade" id="confirmWithdrawModal" tabindex="-1" aria-labelledby="confirmWithdrawModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
-        <div class="modal-content rounded-4 border-0 shadow">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title font-serif fw-bold text-dark" id="confirmWithdrawModalLabel">
-                    🌸 Xác Nhận Rút Tiền
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body py-3 text-secondary">
-                <p class="mb-2">Bạn có chắc chắn muốn gửi yêu cầu rút số tiền sau từ ví cửa hàng không?</p>
-                <div class="alert alert-info py-2 px-3 fw-bold text-center mb-0" id="displayConfirmAmount" style="border-radius: 10px; font-size: 18px; color: #20382E;">
-                    0 VNĐ
+                <div id="withdrawReview" hidden tabindex="-1" aria-labelledby="withdrawReviewTitle">
+                    <h6 id="withdrawReviewTitle" class="fw-bold mb-3">Kiểm tra thông tin trước khi gửi</h6>
+                    <dl class="withdraw-summary p-3 rounded-3 mb-3">
+                        <dt>Số tiền rút</dt><dd id="displayConfirmAmount" class="fw-bold"></dd>
+                        <dt>Ngân hàng</dt><dd id="displayConfirmBank"></dd>
+                        <dt>Số tài khoản</dt><dd id="displayConfirmAccount"></dd>
+                        <dt>Chủ tài khoản</dt><dd id="displayConfirmHolder"></dd>
+                    </dl>
+                    <p class="small text-secondary mb-0">Số tiền sẽ được trừ khỏi số dư khả dụng khi gửi yêu cầu và chờ quản trị viên xử lý.</p>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
-                <!-- 14a. Bấm nút Cancel -> 15a. Hủy thao tác -->
-                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCancel" data-testid="btnCancel">
-                    Cancel
-                </button>
-                <!-- 13. Bấm nút Confirm -> 14. Thông báo thành công -->
-                <button type="button" class="btn btn-primary rounded-pill px-4 fw-semibold text-white" id="btnConfirm" data-testid="btnConfirm" onclick="submitWithdrawForm()">
-                    Confirm
-                </button>
+            <div class="modal-footer px-4 pb-4 border-0 gap-2">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" id="btnCloseWithdraw">Hủy</button>
+                <button type="button" class="btn btn-light rounded-pill px-4" id="btnCancel" data-testid="btnCancel" hidden>Quay lại</button>
+                <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold" id="btnOpenConfirmWithdraw">Tiếp tục</button>
+                <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold" id="btnConfirm" data-testid="btnConfirm" hidden>Xác nhận rút tiền</button>
             </div>
-        </div>
+        </form>
     </div>
 </div>
 
@@ -346,39 +354,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    // Hàm kích hoạt modal xác nhận rút tiền (Bước 12)
-    function triggerConfirmWithdrawModal() {
-        const form = document.getElementById('formWithdraw');
-        if (!form.checkValidity()) {
-            form.reportValidity();
-            return;
-        }
-
-        const amountInput = document.getElementById('inputWithdrawAmount');
-        const amountVal = amountInput ? parseFloat(amountInput.value) : 0;
-        document.getElementById('displayConfirmAmount').innerText = amountVal.toLocaleString('vi-VN') + ' VNĐ';
-
-        // Ẩn modal form rút tiền
-        const withdrawModalEl = document.getElementById('withdrawModal');
-        const withdrawModal = bootstrap.Modal.getInstance(withdrawModalEl);
-        if (withdrawModal) {
-            withdrawModal.hide();
-        }
-
-        // Hiện modal xác nhận (Bước 12)
-        const confirmModal = new bootstrap.Modal(document.getElementById('confirmWithdrawModal'));
-        confirmModal.show();
-    }
-
-    // Hàm submit form khi bấm nút Confirm (Bước 13)
-    function submitWithdrawForm() {
-        const form = document.getElementById('formWithdraw');
-        if (form) {
-            form.submit();
-        }
-    }
-</script>
+<script th:src="@{/js/store-confirm.js}"></script>
+<script th:src="@{/js/store-wallet.js}"></script>
 <script th:src="@{/js/global-modal.js}"></script>
 </body>
 </html>

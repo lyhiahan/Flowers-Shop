@@ -340,8 +340,9 @@
                 <div class="flex-grow-1">
                     <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-start gap-2 mb-2">
                         <h1 class="fw-bold mb-0" style="font-size: 24px; color: var(--flower-text-heading);" th:text="${store.name}">Tên Chi Nhánh</h1>
-                        <span th:if="${store.isOpen != null and store.isOpen}" class="badge-open">Đang mở cửa</span>
-                        <span th:if="${store.isOpen == null or !store.isOpen}" class="badge-closed">Tạm đóng</span>
+                        <span th:if="${(store.status == null or store.status) and (store.isOpen != null and store.isOpen)}" class="badge-open">Đang mở cửa</span>
+                        <span th:if="${store.status != null and !store.status}" class="badge-closed" style="background:#fee2e2; color:#b91c1c;">Tạm ngưng hoạt động</span>
+                        <span th:if="${(store.status == null or store.status) and (store.isOpen == null or !store.isOpen)}" class="badge-closed">Tạm đóng</span>
                         <span class="badge-rating" th:if="${store.rating != null}">
                             <i class="bi bi-star-fill text-warning me-1"></i><span th:text="${store.rating}">5.0</span>
                         </span>
@@ -535,8 +536,9 @@
                         <div class="p-4 bg-light rounded-4 border h-100">
                             <h6 class="fw-bold mb-2 text-dark"><i class="bi bi-clock-fill text-warning me-2"></i>Thời Gian Hoạt Động</h6>
                             <p class="text-muted small mb-2">Mở cửa từ 07:00 - 21:00 các ngày trong tuần</p>
-                            <span th:if="${store.isOpen != null and store.isOpen}" class="badge-open">Đang mở cửa</span>
-                            <span th:if="${store.isOpen == null or !store.isOpen}" class="badge-closed">Tạm đóng</span>
+                            <span th:if="${(store.status == null or store.status) and (store.isOpen != null and store.isOpen)}" class="badge-open">Đang mở cửa</span>
+                            <span th:if="${store.status != null and !store.status}" class="badge-closed" style="background:#fee2e2; color:#b91c1c;">Tạm ngưng hoạt động</span>
+                            <span th:if="${(store.status == null or store.status) and (store.isOpen == null or !store.isOpen)}" class="badge-closed">Tạm đóng</span>
                         </div>
                     </div>
                     <div class="col-md-6">

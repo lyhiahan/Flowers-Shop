@@ -141,7 +141,8 @@ class StoreManagementEwalletUseCaseTests {
                 .andExpect(content().string(containsString("Thu nhập đơn hoa #101")))
                 .andExpect(content().string(containsString("btnWithdraw")))
                 .andExpect(content().string(containsString("withdrawModal")))
-                .andExpect(content().string(containsString("confirmWithdrawModal")))
+                .andExpect(content().string(containsString("id=\"withdrawReview\"")))
+                .andExpect(content().string(containsString("data-inline-validation")))
                 .andExpect(content().string(containsString("btnConfirm")))
                 .andExpect(content().string(containsString("btnCancel")));
     }

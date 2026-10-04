@@ -35,6 +35,7 @@ public class CatalogFilterTests {
 
     @Autowired
     private CategoryRepository categoryRepository;
+    @Autowired private com.finalproject.repository.StoreRepository stores;
 
     @BeforeEach
     void setupTestData() {
@@ -43,6 +44,7 @@ public class CatalogFilterTests {
                 .description("Các mẫu hoa sinh nhật đẹp")
                 .build());
 
+        var shop = stores.save(com.finalproject.entity.Store.builder().name("Catalog fixture").address("123 Test street").status(true).isOpen(true).build());
         // Tạo 15 sản phẩm để kiểm tra phân trang (size = 12 -> 2 trang)
         for (int i = 1; i <= 15; i++) {
             productRepository.save(Product.builder()
@@ -52,7 +54,7 @@ public class CatalogFilterTests {
                     .priceBuy(BigDecimal.valueOf(300000 + i * 20000))
                     .priceRentPerDay(new BigDecimal("50000"))
                     .depositFee(new BigDecimal("100000"))
-                    .category(cat)
+                    .category(cat).store(shop)
                     .isActive(true)
                     .isSelling(true)
                     .isDeleted(false)
@@ -71,7 +73,7 @@ public class CatalogFilterTests {
         String html = result.getResponse().getContentAsString();
 
         // Kiểm tra lưới sản phẩm
-        assertThat(html).contains("class=\"product-grid\"");
+        assertThat(html).contains("id=\"productGrid\"");
         // Kiểm tra đầy đủ các nút thanh lọc
         assertThat(html).contains("Tất cả bộ lọc");
         assertThat(html).contains("Kiểu dáng");
@@ -94,7 +96,7 @@ public class CatalogFilterTests {
         assertThat(html).contains("Bó hoa");
         assertThat(html).contains("filter-pill-tag");
         // Kiểm tra sản phẩm được render đầy đủ không bị đứt quãng
-        assertThat(html).contains("class=\"product-grid\"");
+        assertThat(html).contains("id=\"productGrid\"");
         assertThat(html).contains("Bó Hoa Hồng Đỏ Tươi 1");
         // Kiểm tra phân trang được hiển thị (vì có 15 sản phẩm, size 12)
         assertThat(html).contains("custom-pagination");
@@ -110,7 +112,7 @@ public class CatalogFilterTests {
         String html = result.getResponse().getContentAsString();
 
         assertThat(html).contains("Kết quả cho “Bó Hoa Hồng Đỏ Tươi 1”");
-        assertThat(html).contains("class=\"product-grid\"");
+        assertThat(html).contains("id=\"productGrid\"");
         assertThat(html).contains("Bó Hoa Hồng Đỏ Tươi 1");
     }
 
@@ -130,7 +132,7 @@ public class CatalogFilterTests {
         assertThat(html).contains("Hoa hồng");
         assertThat(html).contains("Đỏ");
         assertThat(html).contains("Sinh nhật");
-        assertThat(html).contains("class=\"product-grid\"");
+        assertThat(html).contains("id=\"productGrid\"");
         assertThat(html).contains("custom-pagination");
     }
 
@@ -145,7 +147,7 @@ public class CatalogFilterTests {
 
         // Trang 2
         assertThat(html).contains("Hiển thị trang");
-        assertThat(html).contains("class=\"product-grid\"");
+        assertThat(html).contains("id=\"productGrid\"");
         // Link về trang 1 vẫn giữ flowerStyle
         assertThat(html).contains("flowerStyle=B%C3%B3%20hoa");
     }

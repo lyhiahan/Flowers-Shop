@@ -32,6 +32,8 @@ public class ProductDetailController {
     public String viewProductDetail(@PathVariable("id") Long id, Principal principal, Model model) {
         Product product = productService.getProductById(id);
 
+        if (!com.finalproject.service.ProductAvailability.isPublic(product)) throw new com.finalproject.exception.ResourceNotFoundException("Sản phẩm không còn được bán.");
+
         // Tăng lượt xem
         product.setViewCount(product.getViewCount() != null ? product.getViewCount() + 1 : 1);
         productRepository.save(product);
@@ -75,7 +77,7 @@ public class ProductDetailController {
         model.addAttribute("eligibleOrderId", eligibleOrderId);
         model.addAttribute("isFollowed", isLiked);
         model.addAttribute("relatedProducts", product.getCategory() != null 
-                ? productRepository.findByCategoryId(product.getCategory().getId()).stream().limit(4).toList() 
+                ? productRepository.findByCategoryId(product.getCategory().getId()).stream().filter(com.finalproject.service.ProductAvailability::isPublic).limit(4).toList()
                 : java.util.List.of());
 
         return "customer/product-detail";

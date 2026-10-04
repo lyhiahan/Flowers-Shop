@@ -13,6 +13,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/admin/stores")
 @RequiredArgsConstructor
+@org.springframework.transaction.annotation.Transactional
 public class AdminStoreController {
 
     private final StoreRepository storeRepository;
@@ -24,43 +25,24 @@ public class AdminStoreController {
     public String listStores(@RequestParam(value = "keyword", required = false) String keyword,
                              @RequestParam(value = "tab", required = false, defaultValue = "ALL") String tab,
                              @RequestParam(value = "status", required = false) String statusStr,
-                             Model model) {
-        List<Store> allStores = storeRepository.findAll();
-
-        long countAll = allStores.size();
-        long countApproved = allStores.stream().filter(s -> Boolean.TRUE.equals(s.getStatus())).count();
-        long countBanned = allStores.stream().filter(s -> !Boolean.TRUE.equals(s.getStatus())).count();
-
-        List<Store> stores = allStores;
-
-        // Lọc theo tab: ALL, LICENSED (APPROVED), UNLICENSED (BANNED) theo UC_018 Bước 2a1
-        if ("APPROVED".equalsIgnoreCase(tab) || "LICENSED".equalsIgnoreCase(tab)) {
-            stores = stores.stream().filter(s -> Boolean.TRUE.equals(s.getStatus())).toList();
-        } else if ("BANNED".equalsIgnoreCase(tab) || "UNLICENSED".equalsIgnoreCase(tab)) {
-            stores = stores.stream().filter(s -> !Boolean.TRUE.equals(s.getStatus())).toList();
-        }
-
-        // Lọc theo từ khóa
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            String kw = keyword.trim().toLowerCase();
-            stores = stores.stream()
-                    .filter(s -> (s.getName() != null && s.getName().toLowerCase().contains(kw))
-                              || (s.getAddress() != null && s.getAddress().toLowerCase().contains(kw))
-                              || (s.getPhone() != null && s.getPhone().contains(kw))
-                              || (s.getOwner() != null && s.getOwner().getFullName() != null && s.getOwner().getFullName().toLowerCase().contains(kw)))
-                    .toList();
-        }
-
-        // Lọc theo select status (nếu có dùng thêm)
-        if (statusStr != null && !statusStr.trim().isEmpty() && !"ALL".equalsIgnoreCase(statusStr)) {
-            if ("ACTIVE".equalsIgnoreCase(statusStr) || "APPROVED".equalsIgnoreCase(statusStr)) {
-                stores = stores.stream().filter(s -> Boolean.TRUE.equals(s.getStatus())).toList();
-            } else if ("PAUSED".equalsIgnoreCase(statusStr) || "BANNED".equalsIgnoreCase(statusStr)) {
-                stores = stores.stream().filter(s -> !Boolean.TRUE.equals(s.getStatus())).toList();
-            }
-        }
-
-        model.addAttribute("stores", stores);
+                             @RequestParam(value="page", defaultValue="0") int page,
+                             @RequestParam(value="size", defaultValue="8") int size, Model model) {
+        Boolean licensed = java.util.Set.of("LICENSED", "APPROVED").contains(tab.toUpperCase()) ? true
+                : java.util.Set.of("UNLICENSED", "BANNED").contains(tab.toUpperCase()) ? false : null;
+        if (licensed == null && statusStr != null && java.util.Set.of("ACTIVE", "APPROVED", "PAUSED", "BANNED").contains(statusStr.toUpperCase())) licensed = java.util.Set.of("ACTIVE", "APPROVED").contains(statusStr.toUpperCase());
+        Boolean filterStatus = licensed;
+        String kw = keyword == null ? "" : keyword.trim().toLowerCase();
+        var result = com.finalproject.utils.StorePages.load(page, size, pageable -> storeRepository.findAll((root, query, cb) -> {
+            var predicates = new java.util.ArrayList<jakarta.persistence.criteria.Predicate>();
+            if (filterStatus != null) predicates.add(cb.equal(root.get("status"), filterStatus));
+            if (!kw.isEmpty()) predicates.add(cb.or(cb.like(cb.lower(root.get("name")), "%" + kw + "%"), cb.like(cb.lower(root.get("address")), "%" + kw + "%"), cb.like(root.get("phone"), "%" + kw + "%"), cb.like(cb.lower(root.join("owner", jakarta.persistence.criteria.JoinType.LEFT).get("fullName")), "%" + kw + "%")));
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        }, pageable));
+        model.addAttribute("stores", result.getContent());
+        com.finalproject.utils.StorePages.model(model, result);
+        long countAll = storeRepository.count();
+        long countApproved = storeRepository.countByStatus(true);
+        long countBanned = countAll - countApproved;
         model.addAttribute("keyword", keyword);
         model.addAttribute("currentTab", tab != null ? tab.toUpperCase() : "ALL");
         model.addAttribute("currentStatus", statusStr != null ? statusStr : "ALL");
@@ -80,12 +62,12 @@ public class AdminStoreController {
                                    @RequestParam(value = "storeLevelId", required = false) Long storeLevelId,
                                    @RequestParam(value = "commissionId", required = false) Long commissionId,
                                    RedirectAttributes ra) {
-        Store store = storeRepository.findById(id).orElseThrow();
+        Store store = storeRepository.findLockedById(id).orElseThrow();
         if (storeLevelId != null) {
-            store.setStoreLevel(storeLevelRepository.findById(storeLevelId).orElse(null));
+            store.setStoreLevel(storeLevelRepository.findById(storeLevelId).filter(l -> !Boolean.TRUE.equals(l.getIsDeleted())).orElseThrow(() -> new IllegalArgumentException("Cấp cửa hàng không hợp lệ.")));
         }
         if (commissionId != null) {
-            store.setCommission(commissionRepository.findById(commissionId).orElse(null));
+            store.setCommission(commissionRepository.findById(commissionId).filter(c -> !Boolean.TRUE.equals(c.getIsDeleted())).orElseThrow(() -> new IllegalArgumentException("Chính sách hoa hồng không hợp lệ.")));
         }
         storeRepository.save(store);
         ra.addFlashAttribute("successMessage", "Đã cập nhật cấp bậc và chính sách hoa hồng cho chi nhánh [" + store.getName() + "] thành công!");
@@ -98,19 +80,9 @@ public class AdminStoreController {
      */
     @PostMapping("/approve/{id}")
     public String approveStore(@PathVariable("id") Long id, RedirectAttributes ra) {
-        Store store = storeRepository.findById(id).orElseThrow();
+        Store store = storeRepository.findLockedById(id).orElseThrow();
         store.setStatus(true);
         storeRepository.save(store);
-
-        // Kích hoạt lại toàn bộ sản phẩm của cửa hàng
-        var products = productRepository.findByStoreIdOrderByCreatedAtDesc(id);
-        if (products != null && !products.isEmpty()) {
-            for (var p : products) {
-                p.setIsActive(true);
-                p.setIsSelling(true);
-            }
-            productRepository.saveAll(products);
-        }
 
         ra.addFlashAttribute("successMessage", "Đã CẤP PHÉP (License) hoạt động cho cửa hàng [" + store.getName() + "]. Cửa hàng và tất cả sản phẩm đã được mở bán trên toàn hệ thống.");
         return "redirect:/admin/stores";
@@ -122,19 +94,9 @@ public class AdminStoreController {
      */
     @PostMapping("/ban/{id}")
     public String banStore(@PathVariable("id") Long id, RedirectAttributes ra) {
-        Store store = storeRepository.findById(id).orElseThrow();
+        Store store = storeRepository.findLockedById(id).orElseThrow();
         store.setStatus(false);
         storeRepository.save(store);
-
-        // Vô hiệu hóa toàn bộ sản phẩm của cửa hàng
-        var products = productRepository.findByStoreIdOrderByCreatedAtDesc(id);
-        if (products != null && !products.isEmpty()) {
-            for (var p : products) {
-                p.setIsActive(false);
-                p.setIsSelling(false);
-            }
-            productRepository.saveAll(products);
-        }
 
         ra.addFlashAttribute("successMessage", "Đã CẤM (Ban) hoạt động đối với cửa hàng [" + store.getName() + "]. Cửa hàng và toàn bộ sản phẩm liên quan đã bị ngừng kinh doanh trên toàn hệ thống.");
         return "redirect:/admin/stores";
@@ -145,19 +107,10 @@ public class AdminStoreController {
      */
     @PostMapping("/toggle-status/{id}")
     public String toggleStoreStatus(@PathVariable("id") Long id, RedirectAttributes ra) {
-        Store store = storeRepository.findById(id).orElseThrow();
+        Store store = storeRepository.findLockedById(id).orElseThrow();
         boolean newStatus = !Boolean.TRUE.equals(store.getStatus());
         store.setStatus(newStatus);
         storeRepository.save(store);
-
-        var products = productRepository.findByStoreIdOrderByCreatedAtDesc(id);
-        if (products != null && !products.isEmpty()) {
-            for (var p : products) {
-                p.setIsActive(newStatus);
-                p.setIsSelling(newStatus);
-            }
-            productRepository.saveAll(products);
-        }
 
         if (newStatus) {
             ra.addFlashAttribute("successMessage", "Đã CẤP PHÉP (License) cho cửa hàng [" + store.getName() + "] và kích hoạt lại toàn bộ sản phẩm.");

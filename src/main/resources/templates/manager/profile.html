@@ -12,20 +12,21 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
+    <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
 
     <style>
         /* ── Design tokens ─────────────────────────────────────────── */
         :root {
-            --bg-page:        #F5F3EE;   /* nền xám kem */
+            --bg-page:        #FFF0F3;   /* nền hồng pastel đồng bộ hệ thống */
             --surface:        #FFFFFF;
             --brand:          #1C3A2B;   /* xanh đậm */
             --brand-mid:      #2D5040;
-            --brand-light:    #E6EEE9;
+            --brand-light:    #F3E6E1;
             --rose:           #A64060;
-            --rose-soft:      #F9EBEF;
+            --rose-soft:      #F3E6E1;
             --text:           #1C3A2B;
             --text-muted:     #6B7280;
-            --border:         #DDE5DA;
+            --border:         #E7DED4;
             --radius-card:    18px;
             --radius-btn:     10px;
             --shadow-card:    0 2px 16px rgba(28,58,43,.07);
@@ -37,7 +38,7 @@
         body {
             font-family: 'Nunito', sans-serif;
             font-size: 16px;
-            background: var(--bg-page);
+            background-color: var(--bg-page) !important;
             color: var(--text);
             min-height: 100vh;
         }
@@ -45,7 +46,7 @@
 
         /* ── Sidebar ───────────────────────────────────────────────── */
         .sidebar {
-            background: #162B1F;
+            background: #1C2D24;
             min-height: 100vh;
             width: 230px;
             flex-shrink: 0;
@@ -100,7 +101,7 @@
         .btn-logout-sidebar:hover { background: rgba(248,113,113,.12); color: #EF4444; }
 
         /* ── Main content ──────────────────────────────────────────── */
-        .main-content { flex: 1; min-width: 0; padding: 32px 28px; }
+        .main-content { flex: 1; min-width: 0; padding: 32px 28px; background-color: var(--bg-page); }
 
         /* ── Page header ───────────────────────────────────────────── */
         .page-title {
@@ -345,7 +346,7 @@
 <!-- ════════════════════════════════════════════════════════════ -->
 <!--  APP SHELL                                                  -->
 <!-- ════════════════════════════════════════════════════════════ -->
-<div style="display:flex; min-height:100vh;">
+<div style="display:flex; min-height:100vh; background-color: var(--bg-page);">
 
     <!-- ── SIDEBAR ──────────────────────────────────────────── -->
     <aside class="sidebar">
@@ -433,38 +434,50 @@
             <!-- ─── LEFT COLUMN: Forms ─────────────────────────── -->
             <div style="flex:1; min-width:0;">
 
-                <!-- ① THÔNG TIN CƠ BẢN -->
+                <!-- ① THÔNG TIN CƠ BẢN (UC_019 Bước 8e - 10e) -->
                 <div class="section-card">
-                    <div class="section-title">
-                        <div class="section-icon"><i class="bi bi-info-circle-fill"></i></div>
-                        Thông tin cơ bản
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="section-title mb-0">
+                            <div class="section-icon"><i class="bi bi-info-circle-fill"></i></div>
+                            Thông tin cơ bản
+                        </div>
+                        <!-- Bước 8e: Chọn nút hình cây bút ở phần thông tin cửa hàng -->
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 d-inline-flex align-items-center gap-1"
+                                id="btnEditBasicInfo" onclick="enableBasicEdit()" title="Chỉnh sửa thông tin cửa hàng">
+                            <i class="bi bi-pencil-fill text-primary"></i> <span>Chỉnh sửa</span>
+                        </button>
                     </div>
                     <form th:action="@{/manager/profile/info}" method="post" id="formBasicInfo">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                         <div class="mb-3">
                             <label class="form-label-custom" for="inputName">
-                                Tên chi nhánh <span class="text-danger">*</span>
+                                Tên chi nhánh (Name) <span class="text-danger">*</span>
                             </label>
-                            <input type="text" id="inputName" name="name" class="form-control"
-                                   th:value="${store.name}" required
+                            <input type="text" id="inputName" name="name" class="form-control bg-light"
+                                   th:value="${store.name}" required readonly
                                    placeholder="Vui lòng điền tên chi nhánh…">
                         </div>
                         <div class="mb-3">
                             <label class="form-label-custom" for="inputPhone">Số điện thoại liên hệ</label>
-                            <input type="tel" id="inputPhone" name="phone" class="form-control"
-                                   th:value="${store.phone}" placeholder="Ví dụ: 0901234567 hoặc 02838123456" maxlength="15">
+                            <input type="tel" id="inputPhone" name="phone" class="form-control bg-light"
+                                   th:value="${store.phone}" placeholder="Ví dụ: 0901234567 hoặc 02838123456" maxlength="15" readonly>
                             <p class="form-hint" style="font-size:12.5px;">Định dạng chuẩn Việt Nam: 10 số di động (đầu 03, 05, 07, 08, 09) hoặc 11 số máy bàn (đầu 02x).</p>
                         </div>
                         <div class="mb-4">
-                            <label class="form-label-custom" for="inputBio">Giới thiệu chi nhánh</label>
-                            <textarea id="inputBio" name="bio" class="form-control" rows="3"
+                            <label class="form-label-custom" for="inputBio">Giới thiệu chi nhánh (Bio)</label>
+                            <textarea id="inputBio" name="bio" class="form-control bg-light" rows="3" readonly
                                       th:text="${store.bio}"
                                       placeholder="Mô tả ngắn về không gian, phong cách và thế mạnh của chi nhánh…"></textarea>
                             <p class="form-hint">Hiển thị cho khách hàng trên trang chi nhánh.</p>
                         </div>
-                        <div class="d-flex justify-content-end">
-                            <button type="submit" class="btn-primary-custom" id="btnSaveBasic">
-                                <i class="bi bi-floppy2-fill"></i> Lưu thay đổi
+                        <!-- Nút lưu và hủy: chỉ hiển thị sau khi người dùng bấm nút Chỉnh sửa -->
+                        <div class="d-flex justify-content-end gap-2" id="basicInfoActions" style="display: none !important;">
+                            <button type="button" class="btn btn-outline-secondary rounded-pill px-3" id="btnCancelBasic" onclick="cancelBasicEdit()">
+                                <i class="bi bi-x-circle me-1"></i> Hủy
+                            </button>
+                            <!-- Bước 9e1: Bấm nút Save -->
+                            <button type="button" class="btn-primary-custom" id="btnSaveBasic" onclick="openConfirmBasicModal()">
+                                <i class="bi bi-floppy2-fill"></i> Save (Lưu thay đổi)
                             </button>
                         </div>
                     </form>
@@ -472,9 +485,15 @@
 
                 <!-- ② ĐỊA CHỈ & GIỜ HOẠT ĐỘNG -->
                 <div class="section-card">
-                    <div class="section-title">
-                        <div class="section-icon"><i class="bi bi-clock-fill"></i></div>
-                        Địa chỉ và giờ hoạt động
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="section-title mb-0">
+                            <div class="section-icon"><i class="bi bi-clock-fill"></i></div>
+                            Địa chỉ và giờ hoạt động
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 d-inline-flex align-items-center gap-1"
+                                id="btnEditAddressHours" onclick="enableAddressEdit()" title="Chỉnh sửa địa chỉ và giờ hoạt động">
+                            <i class="bi bi-pencil-fill text-primary"></i> <span>Chỉnh sửa</span>
+                        </button>
                     </div>
                     <form th:action="@{/manager/profile/info}" method="post" id="formAddressHours">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
@@ -485,21 +504,21 @@
 
                         <div class="mb-3">
                             <label class="form-label-custom" for="inputAddress">Địa chỉ cụ thể</label>
-                            <input type="text" id="inputAddress" name="address" class="form-control"
-                                   th:value="${store.address}"
+                            <input type="text" id="inputAddress" name="address" class="form-control bg-light"
+                                   th:value="${store.address}" readonly
                                    placeholder="Số nhà, tên đường, phường/xã, quận/huyện…">
                         </div>
 
                         <div class="row g-3 mb-4">
                             <div class="col-sm-6">
                                 <label class="form-label-custom" for="inputOpenTime">Giờ mở cửa</label>
-                                <input type="time" id="inputOpenTime" class="form-control" value="08:00"
+                                <input type="time" id="inputOpenTime" class="form-control bg-light" value="08:00" disabled
                                        title="Tính năng giờ mở cửa đang cập nhật">
                                 <p class="form-hint">Ví dụ: 08:00</p>
                             </div>
                             <div class="col-sm-6">
                                 <label class="form-label-custom" for="inputCloseTime">Giờ đóng cửa</label>
-                                <input type="time" id="inputCloseTime" class="form-control" value="21:00"
+                                <input type="time" id="inputCloseTime" class="form-control bg-light" value="21:00" disabled
                                        title="Tính năng giờ đóng cửa đang cập nhật">
                                 <p class="form-hint">Ví dụ: 21:00</p>
                             </div>
@@ -519,7 +538,11 @@
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-end">
+                        <!-- Nút lưu và hủy địa chỉ / giờ hoạt động: chỉ hiển thị sau khi bấm Chỉnh sửa -->
+                        <div class="d-flex justify-content-end gap-2" id="addressActions" style="display: none !important;">
+                            <button type="button" class="btn btn-outline-secondary rounded-pill px-3" id="btnCancelAddress" onclick="cancelAddressEdit()">
+                                <i class="bi bi-x-circle me-1"></i> Hủy
+                            </button>
                             <button type="submit" class="btn-primary-custom" id="btnSaveAddress">
                                 <i class="bi bi-floppy2-fill"></i> Lưu thay đổi
                             </button>
@@ -552,8 +575,9 @@
                         <div class="info-row">
                             <span class="info-label">Trạng thái cửa</span>
                             <span>
-                                <span th:if="${store.isOpen}" class="badge-pill badge-open"><i class="bi bi-door-open-fill"></i> Đang mở cửa</span>
-                                <span th:unless="${store.isOpen}" class="badge-pill badge-closed"><i class="bi bi-door-closed-fill"></i> Tạm đóng cửa</span>
+                                <span th:if="${store.status and store.isOpen}" class="badge-pill badge-open"><i class="bi bi-door-open-fill"></i> Đang mở cửa</span>
+                                <span th:if="${!store.status}" class="badge-pill badge-banned"><i class="bi bi-slash-circle"></i> Bị tạm dừng tiếp nhận đơn</span>
+                                <span th:if="${store.status and !store.isOpen}" class="badge-pill badge-closed"><i class="bi bi-door-closed-fill"></i> Tạm đóng cửa</span>
                             </span>
                         </div>
                         <div class="info-row">
@@ -610,9 +634,16 @@
 
                     <hr style="border-color:var(--border);">
 
-                    <!-- --- ẢNH BÌA --- -->
+                    <!-- --- ẢNH BÌA (UC_019 Bước 8a) --- -->
                     <div class="mb-4">
-                        <label class="form-label-custom mb-2">Ảnh bìa</label>
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <label class="form-label-custom mb-0">Ảnh bìa</label>
+                            <button type="button" class="btn btn-link p-0 text-decoration-none small fw-bold"
+                                    data-bs-toggle="modal" data-bs-target="#modalCover" id="btnEditCoverPhoto"
+                                    style="color: var(--brand); font-size: 13px;">
+                                <i class="bi bi-pencil-square me-1"></i>Edit Cover Photo
+                            </button>
+                        </div>
                         <div class="cover-preview-wrap"
                              data-bs-toggle="modal" data-bs-target="#modalCover">
                             <img id="coverDisplay"
@@ -620,7 +651,7 @@
                                  class="cover-preview-img" alt="Ảnh bìa">
                             <div class="cover-overlay">
                                 <i class="bi bi-camera fs-4"></i>
-                                <span>Tải ảnh bìa mới</span>
+                                <span>Edit Cover Photo</span>
                             </div>
                         </div>
                         <p class="form-hint mt-2">Khuyến nghị: 1200×400 px, tỷ lệ 3:1</p>
@@ -656,16 +687,16 @@
                                 </div>
                             </div>
 
-                            <!-- Nút thêm ảnh -->
-                            <button type="button" class="btn-add-photo"
+                            <!-- Nút thêm ảnh đặc trưng mới (Bước 8b: New Featured Image) -->
+                            <button type="button" class="btn-add-photo" id="btnNewFeaturedImage"
                                     data-bs-toggle="modal" data-bs-target="#modalAddFeatured">
                                 <i class="bi bi-plus-lg"></i>
-                                <span>Thêm ảnh</span>
+                                <span>New Featured Image</span>
                             </button>
                         </div>
 
                         <div th:if="${featuredImages == null or featuredImages.isEmpty()}" class="text-center py-3">
-                            <p class="text-muted" style="font-size:13px;">Chưa có ảnh thư viện. Nhấn <strong>+ Thêm ảnh</strong> để bắt đầu.</p>
+                            <p class="text-muted" style="font-size:13px;">Chưa có ảnh đặc trưng. Nhấn <strong>New Featured Image</strong> để bắt đầu.</p>
                         </div>
                     </div>
                 </div><!-- /section-card images -->
@@ -784,7 +815,7 @@
                 <h5 class="modal-title" id="modalAddFeaturedLabel"><i class="bi bi-plus-circle-fill me-2"></i>Thêm ảnh thư viện</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form th:action="@{/manager/profile/featured/add}" method="post" enctype="multipart/form-data" id="formAddFeatured">
+            <form th:action="@{/manager/profile/featured/add}" method="post" enctype="multipart/form-data" id="formAddFeatured" data-confirm="Xác nhận thêm ảnh đặc trưng?">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <div class="modal-body">
                     <div class="mb-3">
@@ -880,11 +911,34 @@
                 <input type="hidden" name="index" id="deleteFeaturedIndex" value="0">
                 <div class="d-flex justify-content-center gap-2 pb-2">
                     <button type="button" class="btn-secondary-custom" data-bs-dismiss="modal">Huỷ</button>
-                    <button type="submit" class="btn-primary-custom" style="background:#EF4444; box-shadow:none;">
-                        <i class="bi bi-trash3"></i> Xóa ảnh
+                    <!-- Bước 9d: Bấm nút Confirm -->
+                    <button type="submit" class="btn-primary-custom" id="btnConfirmDeleteFeatured" style="background:#EF4444; box-shadow:none;">
+                        <i class="bi bi-trash3"></i> Confirm
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Xác nhận lưu thông tin cửa hàng (Bước 9e2 & 9e3 theo UC_019) -->
+<div class="modal fade" id="modalConfirmSaveBasic" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header" style="background:#1C3A2B; color:#fff;">
+                <h5 class="modal-title fs-6 fw-bold"><i class="bi bi-shield-check me-2"></i>Xác nhận cập nhật thông tin</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="mb-0 text-dark" style="font-size: 15px;">Bạn có chắc chắn muốn lưu các thay đổi về tên chi nhánh và mô tả cửa hàng này không?</p>
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                <!-- Bước 9e3: Bấm nút Confirm -->
+                <button type="button" class="btn btn-success rounded-pill px-4 fw-bold" id="btnConfirmSaveBasic" onclick="document.getElementById('formBasicInfo').submit();">
+                    <i class="bi bi-check2-circle me-1"></i> Confirm
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -1010,6 +1064,160 @@
         });
     }
 
+    /* ── UC_019 Bước 8e & 9e2-9e3: Chỉnh sửa và xác nhận thông tin cơ bản ── */
+    const initialBasicValues = {
+        name: document.getElementById('inputName') ? document.getElementById('inputName').value : '',
+        phone: document.getElementById('inputPhone') ? document.getElementById('inputPhone').value : '',
+        bio: document.getElementById('inputBio') ? document.getElementById('inputBio').value : ''
+    };
+
+    function enableBasicEdit() {
+        const inputName = document.getElementById('inputName');
+        const inputPhone = document.getElementById('inputPhone');
+        const inputBio = document.getElementById('inputBio');
+        const actions = document.getElementById('basicInfoActions');
+        const btnEdit = document.getElementById('btnEditBasicInfo');
+
+        [inputName, inputPhone, inputBio].forEach(el => {
+            if (el) {
+                el.removeAttribute('readonly');
+                el.classList.remove('bg-light');
+            }
+        });
+
+        if (actions) actions.style.setProperty('display', 'flex', 'important');
+        if (btnEdit) btnEdit.style.display = 'none';
+
+        if (inputName) {
+            inputName.focus();
+            inputName.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    function cancelBasicEdit() {
+        const inputName = document.getElementById('inputName');
+        const inputPhone = document.getElementById('inputPhone');
+        const inputBio = document.getElementById('inputBio');
+        const actions = document.getElementById('basicInfoActions');
+        const btnEdit = document.getElementById('btnEditBasicInfo');
+
+        if (inputName) inputName.value = initialBasicValues.name;
+        if (phoneInputBasic) phoneInputBasic.value = initialBasicValues.phone;
+        if (inputBio) inputBio.value = initialBasicValues.bio;
+
+        [inputName, inputPhone, inputBio].forEach(el => {
+            if (el) {
+                el.setAttribute('readonly', 'readonly');
+                el.classList.add('bg-light');
+                el.classList.remove('is-invalid');
+            }
+        });
+
+        if (actions) actions.style.setProperty('display', 'none', 'important');
+        if (btnEdit) btnEdit.style.display = 'inline-flex';
+    }
+
+    function focusBasicEdit() {
+        enableBasicEdit();
+    }
+
+    /* ── Chỉnh sửa địa chỉ và giờ hoạt động ── */
+    const initialAddressValues = {
+        address: document.getElementById('inputAddress') ? document.getElementById('inputAddress').value : '',
+        openTime: document.getElementById('inputOpenTime') ? document.getElementById('inputOpenTime').value : '08:00',
+        closeTime: document.getElementById('inputCloseTime') ? document.getElementById('inputCloseTime').value : '21:00',
+        isOpen: document.getElementById('toggleIsOpen') ? document.getElementById('toggleIsOpen').checked : true
+    };
+
+    function enableAddressEdit() {
+        const inputAddress = document.getElementById('inputAddress');
+        const inputOpen = document.getElementById('inputOpenTime');
+        const inputClose = document.getElementById('inputCloseTime');
+        const actions = document.getElementById('addressActions');
+        const btnEdit = document.getElementById('btnEditAddressHours');
+
+        if (inputAddress) {
+            inputAddress.removeAttribute('readonly');
+            inputAddress.classList.remove('bg-light');
+            inputAddress.focus();
+        }
+        if (inputOpen) {
+            inputOpen.removeAttribute('disabled');
+            inputOpen.classList.remove('bg-light');
+        }
+        if (inputClose) {
+            inputClose.removeAttribute('disabled');
+            inputClose.classList.remove('bg-light');
+        }
+
+        if (actions) actions.style.setProperty('display', 'flex', 'important');
+        if (btnEdit) btnEdit.style.display = 'none';
+    }
+
+    function cancelAddressEdit() {
+        const inputAddress = document.getElementById('inputAddress');
+        const inputOpen = document.getElementById('inputOpenTime');
+        const inputClose = document.getElementById('inputCloseTime');
+        const toggle = document.getElementById('toggleIsOpen');
+        const actions = document.getElementById('addressActions');
+        const btnEdit = document.getElementById('btnEditAddressHours');
+
+        if (inputAddress) {
+            inputAddress.value = initialAddressValues.address;
+            inputAddress.setAttribute('readonly', 'readonly');
+            inputAddress.classList.add('bg-light');
+        }
+        if (inputOpen) {
+            inputOpen.value = initialAddressValues.openTime;
+            inputOpen.setAttribute('disabled', 'disabled');
+            inputOpen.classList.add('bg-light');
+        }
+        if (inputClose) {
+            inputClose.value = initialAddressValues.closeTime;
+            inputClose.setAttribute('disabled', 'disabled');
+            inputClose.classList.add('bg-light');
+        }
+        if (toggle) {
+            toggle.checked = initialAddressValues.isOpen;
+        }
+
+        if (actions) actions.style.setProperty('display', 'none', 'important');
+        if (btnEdit) btnEdit.style.display = 'inline-flex';
+    }
+
+    document.getElementById('toggleIsOpen')?.addEventListener('change', function() {
+        const actions = document.getElementById('addressActions');
+        if (actions) actions.style.setProperty('display', 'flex', 'important');
+    });
+
+    function openConfirmBasicModal() {
+        const nameInput = document.getElementById('inputName');
+        const nameVal = nameInput ? nameInput.value.trim() : '';
+        if (!nameVal || nameVal.length < 3 || nameVal.length > 120) {
+            alert('Tên cửa hàng phải có độ dài từ 3 đến 120 ký tự!');
+            if (nameInput) nameInput.focus();
+            return;
+        }
+
+        const phoneVal = (phoneInputBasic ? phoneInputBasic.value.trim() : '').replace(/[\s.-]/g, '');
+        if (phoneVal) {
+            const regexVN = /^(?:\+84|84|0)(?:(?:3[2-9]|5[25689]|7[06-9]|8[1-9]|9[0-9])\d{7}|2\d{9})$/;
+            if (!regexVN.test(phoneVal)) {
+                alert('Số điện thoại không đúng chuẩn Việt Nam! Vui lòng nhập số hợp lệ.');
+                if (phoneInputBasic) phoneInputBasic.focus();
+                return;
+            }
+        }
+
+        const modalEl = document.getElementById('modalConfirmSaveBasic');
+        if (modalEl) {
+            const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            modal.show();
+        } else {
+            document.getElementById('formBasicInfo')?.submit();
+        }
+    }
+
     document.getElementById('formBasicInfo')?.addEventListener('submit', function(e) {
         const phoneVal = (phoneInputBasic ? phoneInputBasic.value.trim() : '').replace(/[\s.-]/g, '');
         if (phoneVal) {
@@ -1033,5 +1241,5 @@
     }, 5000);
 </script>
 <script th:src="@{/js/global-modal.js}"></script>
-</body>
+<script src="/js/store-confirm.js"></script></body>
 </html>

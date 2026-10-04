@@ -63,7 +63,7 @@ public class ProductServiceImpl implements ProductService {
         if (topProductIds != null && !topProductIds.isEmpty()) {
             List<Product> productsFromOrders = productRepository.findAllById(topProductIds);
             java.util.Map<Long, Product> productMap = productsFromOrders.stream()
-                    .filter(p -> Boolean.TRUE.equals(p.getIsActive()) && Boolean.TRUE.equals(p.getIsSelling()))
+                    .filter(com.finalproject.service.ProductAvailability::isPublic)
                     .collect(java.util.stream.Collectors.toMap(Product::getId, java.util.function.Function.identity()));
             for (Long id : topProductIds) {
                 Product p = productMap.get(id);
@@ -78,7 +78,7 @@ public class ProductServiceImpl implements ProductService {
             java.util.Set<Long> existingIds = result.stream().map(Product::getId).collect(java.util.stream.Collectors.toSet());
             List<Product> additional = productRepository.findTopBestSellers(org.springframework.data.domain.PageRequest.of(0, 16));
             for (Product p : additional) {
-                if (!existingIds.contains(p.getId())) {
+                if (com.finalproject.service.ProductAvailability.isPublic(p) && !existingIds.contains(p.getId())) {
                     result.add(p);
                     existingIds.add(p.getId());
                     if (result.size() >= 8) {
@@ -94,23 +94,23 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Product> getTop20Newest() {
-        return productRepository.findTop20ByIsActiveTrueAndIsSellingTrueOrderByCreatedAtDesc();
+        return productRepository.findTop20ByIsActiveTrueAndIsSellingTrueOrderByCreatedAtDesc().stream().filter(com.finalproject.service.ProductAvailability::isPublic).toList();
     }
 
     @Override
     public List<Product> getTop20BestSelling() {
-        return productRepository.findTop20ByIsActiveTrueAndIsSellingTrueOrderBySoldDesc();
+        return productRepository.findTop20ByIsActiveTrueAndIsSellingTrueOrderBySoldDesc().stream().filter(com.finalproject.service.ProductAvailability::isPublic).toList();
     }
 
     @Override
     public List<Product> getTop20TopRated() {
-        return productRepository.findTop20ByIsActiveTrueAndIsSellingTrueOrderByRatingDesc();
+        return productRepository.findTop20ByIsActiveTrueAndIsSellingTrueOrderByRatingDesc().stream().filter(com.finalproject.service.ProductAvailability::isPublic).toList();
     }
 
     @Override
     public List<Product> getTop20Wishlisted() {
         // Lấy danh sách sản phẩm bán chạy hoặc rating cao làm top yêu thích
-        return productRepository.findTop20ByIsActiveTrueAndIsSellingTrueOrderByRatingDesc();
+        return productRepository.findTop20ByIsActiveTrueAndIsSellingTrueOrderByRatingDesc().stream().filter(com.finalproject.service.ProductAvailability::isPublic).toList();
     }
 
     @Override

@@ -236,6 +236,7 @@
             </div>
 
             <!-- BƯỚC 8 & 10: Tabs Chọn Shop owner hoặc Shop staffs -->
+            <form th:if="${isOwner}" method="get" action="/manager/staff" class="d-flex gap-2 mb-3"><input name="candidateKeyword" th:value="${candidateKeyword}" class="form-control" placeholder="Tìm ứng viên theo tên hoặc username"><button type="submit" class="btn btn-outline-success">Tìm ứng viên</button><a th:if="${candidatePage > 0}" th:href="@{/manager/staff(candidateKeyword=${candidateKeyword},candidatePage=${candidatePage - 1})}">Previous</a><span th:text="${(candidatePage + 1) + '/' + candidatePages}"></span><a th:if="${candidatePage + 1 < candidatePages}" th:href="@{/manager/staff(candidateKeyword=${candidateKeyword},candidatePage=${candidatePage + 1})}">Next</a></form><p th:if="${isOwner}" class="small text-muted">Sau khi tìm, bấm Add staff để chọn ứng viên. Chọn vai trò PARTNER cho tài khoản Vendor/Manager; STAFF cho nhân viên.</p>
             <ul class="nav nav-tabs nav-tabs-custom mb-4" id="staffTabs" role="tablist">
                 <!-- Bước 10: Chọn Shop staffs -->
                 <li class="nav-item" role="presentation">
@@ -464,7 +465,8 @@
                         </div>
                     </div>
 
-                    <!-- Hoặc tạo mới nhanh nhân viên -->
+                    <div class="row g-2"><div class="col-md-6"><label class="form-label">Email cho tài khoản mới</label><input type="email" name="email" maxlength="100" class="form-control"></div><div class="col-md-6"><label class="form-label">Mật khẩu cho tài khoản mới</label><input type="password" name="password" minlength="8" maxlength="72" autocomplete="new-password" class="form-control"></div></div>
+<!-- Hoặc tạo mới nhanh nhân viên -->
                     <div class="pt-3 border-top">
                         <label class="form-label fw-bold text-dark mb-1">
                             <i class="bi bi-person-badge text-primary me-1"></i>Hoặc tạo mới / phân công nhanh theo tên đăng nhập:
@@ -485,7 +487,7 @@
                             <div class="col-md-6 mb-2">
                                 <label class="form-label small fw-semibold">Vai trò:</label>
                                 <select name="role" class="form-select">
-                                    <option value="STAFF">Nhân viên cửa hàng (STAFF)</option>
+                                    <option value="STAFF">Nhân viên cửa hàng (STAFF)</option><option value="PARTNER">Đối tác (tài khoản Vendor/Manager có sẵn)</option>
                                 </select>
                             </div>
                         </div>

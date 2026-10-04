@@ -23,6 +23,50 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     private final UserRepository users;
     private final StoreRepository stores;
     private final TransactionRepository transactions;
+    private final ProductRepository products;
+    private final Clock clock;
+    private final OrderDetailRepository details;
+
+    private boolean recognized(Order o) {
+        return "PAID".equals(o.getPaymentStatus()) && (o.getStatus() == OrderStatus.DELIVERED || o.getStatus() == OrderStatus.COMPLETED
+                || (o.getStatus() == OrderStatus.REFUND_REQUESTED && !transactions.findAllByOrderIdAndType(o.getId(), "ORDER_PAYMENT").isEmpty()));
+    }
+
+    @Override
+    public Map<String, Object> dashboard(Long storeId, String timeframe, String criteria) {
+        if (!Set.of("hour", "day", "month", "year").contains(timeframe) || !Set.of("revenue", "orders", "products").contains(criteria)) throw new IllegalArgumentException("Bộ lọc thống kê không hợp lệ.");
+        var today = LocalDate.now(clock);
+        LocalDateTime start = switch (timeframe) {
+            case "hour" -> today.atStartOfDay();
+            case "month" -> LocalDate.of(today.getYear(), 1, 1).atStartOfDay();
+            case "year" -> LocalDate.of(today.getYear()-4, 1, 1).atStartOfDay();
+            default -> today.minusDays(6).atStartOfDay();
+        };
+        var end = rangeEnd(timeframe);
+        org.springframework.data.jpa.domain.Specification<Order> scope = (root, query, cb) -> storeId == null ? cb.conjunction() : cb.equal(root.get("pickupStore").get("id"), storeId);
+        var range = scope.and((root, query, cb) -> cb.and(cb.greaterThanOrEqualTo(root.get("createdAt"), start), cb.lessThan(root.get("createdAt"), end)));
+        var sorted = org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt", "id"));
+        var sampled = orders.findAll(range, sorted);
+        var latest = orders.findAll(scope, sorted).getContent();
+        var orderPoints = sampled.stream().map(o -> new Point(o.getCreatedAt(), BigDecimal.ONE)).toList();
+        var revenuePoints = sampled.stream().filter(this::recognized).map(o -> new Point(o.getCreatedAt(), o.getTotalAmount())).toList();
+        var quantityPoints = sampled.stream().filter(this::recognized).map(o -> new Point(o.getCreatedAt(), BigDecimal.valueOf((o.getOrderDetails() == null ? java.util.List.<com.finalproject.entity.OrderDetail>of() : o.getOrderDetails()).stream().mapToLong(d -> d.getQuantity() == null ? 0 : d.getQuantity()).sum()))).toList();
+        var revenue = chart(timeframe, revenuePoints); var orderChart = chart(timeframe, orderPoints); var quantityChart = chart(timeframe, quantityPoints);
+        var scopeProducts = products.findAll((root, query, cb) -> cb.and(cb.isFalse(root.get("isDeleted")), storeId == null ? cb.conjunction() : cb.equal(root.get("store").get("id"), storeId)),
+                org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "sold", "id")));
+        var result = new HashMap<String, Object>();
+        result.put("totalProductsCount", scopeProducts.getTotalElements()); result.put("totalOrdersCount", orders.count(scope));
+        result.put("chartLabels", revenue.getLabels()); result.put("chartRevenueValues", revenue.getData());
+        result.put("chartOrderValues", orderChart.getData()); result.put("chartProductValues", quantityChart.getData());
+        result.put("chartValues", "orders".equals(criteria) ? orderChart.getData() : "products".equals(criteria) ? quantityChart.getData() : revenue.getData());
+        result.put("chartUnit", "orders".equals(criteria) ? "Đơn hàng" : "products".equals(criteria) ? "Số sản phẩm bán" : "Doanh thu (VNĐ)");
+        result.put("flowerRevenue", orders.recognizedRevenue(storeId, start, end));
+        result.put("topProducts", details.rankSales(storeId, start, end, org.springframework.data.domain.PageRequest.of(0, 1000))); result.put("recentOrders", latest);
+        result.put("sampleCount", sampled.getNumberOfElements()); result.put("rangeOrdersCount", sampled.getTotalElements());
+        result.put("hasRevenueData", sampled.hasContent()); result.put("dataLoadError", false);
+        return result;
+    }
+
 
     private List<Order> paidOrders(Long storeId) {
         return (storeId == null ? orders.findAll() : orders.findByPickupStoreIdOrderByCreatedAtDesc(storeId)).stream()
@@ -34,8 +78,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
     @Override
     public RevenueChartDto getStoreRevenueStats(Long storeId) {
-        BigDecimal total = paidOrders(storeId).stream().map(Order::getTotalAmount).filter(Objects::nonNull)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal total = orders.recognizedRevenue(storeId, null, null);
         return RevenueChartDto.builder().totalBuyRevenue(total).totalRentRevenue(BigDecimal.ZERO).totalFineRevenue(BigDecimal.ZERO).build();
     }
 
@@ -48,14 +91,17 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
     @Override
     public ChartSeriesDto getNewUsersChart(String timeframe) {
-        return chart(timeframe, users.findAll().stream()
-                .filter(u -> u.getCreatedDate() != null).map(u -> new Point(u.getCreatedDate().atStartOfDay(), BigDecimal.ONE)).toList());
+        var newest = users.findAll((root, query, cb) -> cb.and(cb.greaterThanOrEqualTo(root.get("createdAt"), rangeStart(timeframe)), cb.lessThan(root.get("createdAt"), rangeEnd(timeframe)), "hour".equals(timeframe) ? cb.isTrue(root.get("creationTimeKnown")) : cb.conjunction()), org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt", "id")));
+        return chart(timeframe, newest.stream().filter(u -> u.getCreatedAt() != null)
+                .filter(u -> !"hour".equals(timeframe) || Boolean.TRUE.equals(u.getCreationTimeKnown()))
+                .map(u -> new Point(u.getCreatedAt(), BigDecimal.ONE)).toList());
     }
 
     @Override
     public ChartSeriesDto getNewStoresChart(String timeframe) {
-        return chart(timeframe, stores.findAll().stream().filter(s -> s.getCreatedAt() != null)
-                .map(s -> new Point(s.getCreatedAt(), BigDecimal.ONE)).toList());
+        return chart(timeframe, stores.findAll((root, query, cb) -> cb.and(cb.greaterThanOrEqualTo(root.get("createdAt"), rangeStart(timeframe)), cb.lessThan(root.get("createdAt"), rangeEnd(timeframe))), org.springframework.data.domain.PageRequest.of(0, 1000,
+                org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt", "id"))).stream()
+                .filter(s -> s.getCreatedAt() != null).map(s -> new Point(s.getCreatedAt(), BigDecimal.ONE)).toList());
     }
 
     @Override
@@ -84,11 +130,26 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                 .data(values).total(values.stream().reduce(BigDecimal.ZERO, BigDecimal::add)).build();
     }
 
+    private LocalDateTime rangeStart(String timeframe) {
+        var today = LocalDate.now(clock);
+        return switch (timeframe == null ? "day" : timeframe) {
+            case "hour" -> today.atStartOfDay();
+            case "month" -> LocalDate.of(today.getYear(), 1, 1).atStartOfDay();
+            case "year" -> LocalDate.of(today.getYear() - 4, 1, 1).atStartOfDay();
+            default -> today.minusDays(6).atStartOfDay();
+        };
+    }
+    private LocalDateTime rangeEnd(String timeframe) {
+        var today = LocalDate.now(clock);
+        return ("month".equals(timeframe) || "year".equals(timeframe))
+                ? LocalDate.of(today.getYear() + 1, 1, 1).atStartOfDay() : today.plusDays(1).atStartOfDay();
+    }
+
     private record Point(LocalDateTime time, BigDecimal value) {}
 
     private ChartSeriesDto chart(String requested, List<Point> points) {
         String timeframe = Set.of("hour", "day", "month", "year").contains(requested == null ? "" : requested) ? requested : "day";
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
         int count = switch (timeframe) { case "hour" -> 24; case "month" -> 12; case "year" -> 5; default -> 7; };
         List<String> labels = new ArrayList<>();
         List<BigDecimal> values = new ArrayList<>();

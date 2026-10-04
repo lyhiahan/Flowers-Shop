@@ -469,8 +469,9 @@
                         <div class="flex-grow-1 overflow-hidden">
                             <a th:href="@{/stores/{id}(id=${s.id})}" class="store-title text-truncate d-block" th:text="${s.name}">Tên Chi Nhánh</a>
                             <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
-                                <span th:if="${s.isOpen != null and s.isOpen}" class="badge-open">Đang mở cửa</span>
-                                <span th:if="${s.isOpen == null or !s.isOpen}" class="badge-closed">Tạm đóng</span>
+                                <span th:if="${(s.status == null or s.status) and (s.isOpen != null and s.isOpen)}" class="badge-open">Đang mở cửa</span>
+                                <span th:if="${s.status != null and !s.status}" class="badge-closed" style="background:#fee2e2; color:#b91c1c;">Tạm ngưng</span>
+                                <span th:if="${(s.status == null or s.status) and (s.isOpen == null or !s.isOpen)}" class="badge-closed">Tạm đóng</span>
                                 <span class="badge-rating" th:if="${s.rating != null}">
                                     <i class="bi bi-star-fill text-warning me-1"></i><span th:text="${s.rating}">5.0</span>
                                 </span>

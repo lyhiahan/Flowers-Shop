@@ -35,7 +35,7 @@ public class ManagerVoucherController {
 
         List<Voucher> vouchers = voucherService.getVouchersByStore(storeId);
         model.addAttribute("vouchers", vouchers);
-        model.addAttribute("store", user.getStore());
+        model.addAttribute("store", storeAccess.assignedStore());
         return "manager/vouchers";
     }
 

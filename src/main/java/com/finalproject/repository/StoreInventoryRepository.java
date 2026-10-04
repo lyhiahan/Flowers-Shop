@@ -11,6 +11,8 @@ import java.util.Optional;
 
 @Repository
 public interface StoreInventoryRepository extends JpaRepository<StoreInventory, Long> {
+    List<StoreInventory> findByStoreIdAndProductIdIn(Long storeId, List<Long> productIds);
+
     Optional<StoreInventory> findByStoreIdAndProductId(Long storeId, Long productId);
 
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
