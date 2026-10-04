@@ -16,7 +16,13 @@
 <body>
 <header th:fragment="mobileHeader" class="manager-mobile-header">
     <a th:href="@{/manager/dashboard}" class="manager-mobile-brand"><img th:src="@{/images/flower-logo.png}" alt="" width="32" height="32">Kênh cửa hàng</a>
-    <button class="btn btn-outline-success" type="button" id="managerMenuToggle" aria-controls="managerSidebar" aria-expanded="false" aria-label="Mở menu quản lý"><i class="bi bi-list" aria-hidden="true"></i></button>
+    <div class="d-flex align-items-center gap-2">
+        <a th:href="@{/manager/notifications}" class="btn btn-sm btn-outline-success position-relative" aria-label="Thông báo">
+            <i class="bi bi-bell" aria-hidden="true"></i>
+            <span id="mobileNotifBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display:none; font-size:9px;">0</span>
+        </a>
+        <button class="btn btn-outline-success" type="button" id="managerMenuToggle" aria-controls="managerSidebar" aria-expanded="false" aria-label="Mở menu quản lý"><i class="bi bi-list" aria-hidden="true"></i></button>
+    </div>
 </header>
 <aside th:fragment="sidebar(active)" class="manager-shell-sidebar" id="managerSidebar" aria-label="Điều hướng quản lý cửa hàng">
     <div class="manager-brand">
@@ -34,7 +40,7 @@
         <a th:href="@{/manager/analytics}" id="sidebarAnalytics" th:classappend="${active == 'analytics'} ? 'active'" th:attr="aria-current=${active == 'analytics' ? 'page' : null}"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i>Báo cáo doanh thu</a>
         <a th:href="@{/manager/stores}" id="sidebarStores" th:classappend="${active == 'stores'} ? 'active'" th:attr="aria-current=${active == 'stores' ? 'page' : null}"><i class="bi bi-shop" aria-hidden="true"></i>Cửa hàng của tôi</a>
         <a th:href="@{/manager/profile}" id="sidebarProfile" th:classappend="${active == 'profile'} ? 'active'" th:attr="aria-current=${active == 'profile' ? 'page' : null}"><i class="bi bi-person-badge" aria-hidden="true"></i>Thông tin cửa hàng</a>
-        <a th:href="@{/notifications}" id="sidebarNotifications"><i class="bi bi-bell" aria-hidden="true"></i>Thông báo</a>
+        <a th:href="@{/manager/notifications}" id="sidebarNotifications" th:classappend="${active == 'notifications'} ? 'active'" th:attr="aria-current=${active == 'notifications' ? 'page' : null}"><i class="bi bi-bell" aria-hidden="true"></i>Thông báo <span id="sidebarNotifBadge" class="badge rounded-pill bg-danger ms-auto" style="display:none; font-size:11px;">0</span></a>
     </nav>
     <div class="manager-shell-sidebar-footer">
         <a th:href="@{/}" target="_blank" rel="noopener" title="Mở trang chủ bán hàng để kiểm tra giao diện"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>Xem website</a>
@@ -52,6 +58,9 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script th:src="@{/js/manager-layout.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script th:src="@{/js/notifications-realtime.js}"></script>
 </th:block>
 </body>
 </html>

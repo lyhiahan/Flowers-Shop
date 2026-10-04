@@ -32,9 +32,10 @@
                     <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Theo dõi tiến độ cắm hoa, điều phối giao hàng và cập nhật trạng thái đơn hàng của chi nhánh.</p>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    <a th:href="@{/notifications}" class="btn btn-sm btn-outline-success rounded-pill px-3 shadow-sm d-flex align-items-center gap-1.5" style="border-color: #20382E; color: #20382E;">
+                    <a th:href="@{/manager/notifications}" class="btn btn-sm btn-outline-success rounded-pill px-3 shadow-sm d-flex align-items-center gap-1.5 position-relative" style="border-color: #20382E; color: #20382E;">
                         <i class="bi bi-bell-fill"></i>
                         <span>Thông Báo</span>
+                        <span id="ordersNotifBadge" class="badge rounded-pill bg-danger ms-1" style="display:none; font-size:10px;">0</span>
                     </a>
                 </div>
             </div>

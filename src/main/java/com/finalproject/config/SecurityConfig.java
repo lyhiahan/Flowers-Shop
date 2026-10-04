@@ -55,6 +55,7 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
             )
             .csrf(csrf -> csrf.ignoringRequestMatchers(
+                "/ws",
                 "/ws/**",
                 "/register",
                 "/verify-otp",
@@ -63,6 +64,7 @@ public class SecurityConfig {
                 "/reset-password",
                 "/api/auth/login",
                 "/api/auth/refresh",
+                "/api/notifications/**",
                 "/checkout/momo/ipn"
             ))
             .authorizeHttpRequests(auth -> auth
@@ -73,8 +75,10 @@ public class SecurityConfig {
                 .requestMatchers("/manager", "/manager/**", "/vendor", "/vendor/**", "/api/manager/**", "/api/vendor/**").hasAnyRole("ADMIN", "MANAGER", "VENDOR")
                 // Retired delivery portal must not accept old sessions.
                 .requestMatchers("/shipper", "/shipper/**").denyAll()
-                // Quyền Staff & WebSocket
-                .requestMatchers("/staff", "/staff/**", "/ws", "/ws/**").hasAnyRole("ADMIN", "MANAGER", "VENDOR", "STAFF")
+                // Quyền Staff
+                .requestMatchers("/staff", "/staff/**").hasAnyRole("ADMIN", "MANAGER", "VENDOR", "STAFF")
+                // Endpoint WebSocket SockJS
+                .requestMatchers("/ws", "/ws/**").authenticated()
                 // MoMo Callback & IPN Webhook (cho phép chuyển hướng và webhook không bị chặn)
                 .requestMatchers("/checkout/momo/callback", "/checkout/momo/ipn").permitAll()
                 // Quyền Khách hàng

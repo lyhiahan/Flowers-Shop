@@ -2,8 +2,10 @@ package com.finalproject.controller.common;
 
 import com.finalproject.entity.Notification;
 import com.finalproject.entity.User;
+import com.finalproject.enums.Role;
 import com.finalproject.repository.UserRepository;
 import com.finalproject.service.NotificationService;
+import com.finalproject.service.StoreAccessService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -21,11 +23,12 @@ public class NotificationController {
 
     private final NotificationService notificationService;
     private final UserRepository userRepository;
+    private final StoreAccessService storeAccess;
 
     /**
-     * Trang xem toàn bộ thông báo của người dùng
+     * Trang xem toàn bộ thông báo của người dùng (tự động hiển thị layout Quản lý nếu có quyền Manager/Vendor)
      */
-    @GetMapping("/notifications")
+    @GetMapping({"/notifications", "/manager/notifications"})
     public String viewAllNotifications(Principal principal, Model model) {
         if (principal == null) return "redirect:/login";
 
@@ -39,19 +42,35 @@ public class NotificationController {
         model.addAttribute("unreadCount", unreadCount);
         model.addAttribute("user", user);
 
+        if (user.getRole() == Role.MANAGER || user.getRole() == Role.VENDOR) {
+            try {
+                if (storeAccess != null) {
+                    model.addAttribute("managerStore", storeAccess.selectedStore());
+                }
+            } catch (Exception ignored) {}
+            return "manager/notifications";
+        }
+
         return "customer/notifications";
     }
 
     /**
-     * API lấy số lượng thông báo chưa đọc cho chuông thông báo (Bell Badge)
+     * API lấy số lượng thông báo chưa đọc và thông tin người dùng cho chuông thông báo & WebSocket
      */
     @GetMapping("/api/notifications/unread-count")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> getUnreadCount(Principal principal) {
-        if (principal == null) return ResponseEntity.ok(Map.of("unreadCount", 0));
+        if (principal == null) return ResponseEntity.ok(Map.of("unreadCount", 0L));
         return userRepository.findByUsername(principal.getName())
-                .map(u -> ResponseEntity.ok(Map.<String, Object>of("unreadCount", notificationService.getUnreadCount(u.getId()))))
-                .orElse(ResponseEntity.ok(Map.of("unreadCount", 0)));
+                .map(u -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("unreadCount", notificationService.getUnreadCount(u.getId()));
+                    map.put("userId", u.getId());
+                    map.put("username", u.getUsername());
+                    map.put("isManager", u.getRole() == Role.MANAGER || u.getRole() == Role.VENDOR);
+                    return ResponseEntity.ok(map);
+                })
+                .orElse(ResponseEntity.ok(Map.of("unreadCount", 0L)));
     }
 
     /**

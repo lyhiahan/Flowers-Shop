@@ -42,20 +42,32 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 }
                 if (command == org.springframework.messaging.simp.stomp.StompCommand.SUBSCRIBE) {
                     String destination = headers.getDestination();
-                    if (headers.getUser() == null || destination == null || !destination.matches("/topic/store/[0-9]+/orders")) {
+                    if (headers.getUser() == null || destination == null) {
                         throw new org.springframework.security.access.AccessDeniedException("Kênh thông báo không hợp lệ.");
                     }
                     var user = users.findByUsername(headers.getUser().getName()).orElseThrow();
-                    Long storeId = Long.valueOf(destination.split("/")[3]);
-                    var store = stores.findById(storeId).orElseThrow();
-                    boolean roleAllowed = user.getRole() == com.finalproject.enums.Role.ADMIN
-                            || user.getRole() == com.finalproject.enums.Role.MANAGER || user.getRole() == com.finalproject.enums.Role.VENDOR
-                            || user.getRole() == com.finalproject.enums.Role.STAFF;
-                    boolean allowed = user.getRole() == com.finalproject.enums.Role.ADMIN
-                            || (user.getStore() != null && storeId.equals(user.getStore().getId()))
-                            || (store.getOwner() != null && user.getId().equals(store.getOwner().getId()));
-                    if (!Boolean.TRUE.equals(user.getIsActive()) || !roleAllowed || !allowed) {
-                        throw new org.springframework.security.access.AccessDeniedException("Không có quyền nhận thông báo chi nhánh này.");
+                    if (!Boolean.TRUE.equals(user.getIsActive())) {
+                        throw new org.springframework.security.access.AccessDeniedException("Tài khoản chưa được kích hoạt.");
+                    }
+                    if (destination.matches("^/topic/store/[0-9]+/orders$")) {
+                        Long storeId = Long.valueOf(destination.split("/")[3]);
+                        var store = stores.findById(storeId).orElseThrow();
+                        boolean roleAllowed = user.getRole() == com.finalproject.enums.Role.ADMIN
+                                || user.getRole() == com.finalproject.enums.Role.MANAGER || user.getRole() == com.finalproject.enums.Role.VENDOR
+                                || user.getRole() == com.finalproject.enums.Role.STAFF;
+                        boolean allowed = user.getRole() == com.finalproject.enums.Role.ADMIN
+                                || (user.getStore() != null && storeId.equals(user.getStore().getId()))
+                                || (store.getOwner() != null && user.getId().equals(store.getOwner().getId()));
+                        if (!roleAllowed || !allowed) {
+                            throw new org.springframework.security.access.AccessDeniedException("Không có quyền nhận thông báo chi nhánh này.");
+                        }
+                    } else if (destination.matches("^/topic/user/[0-9]+/notifications$")) {
+                        Long targetUserId = Long.valueOf(destination.split("/")[3]);
+                        if (!user.getId().equals(targetUserId) && user.getRole() != com.finalproject.enums.Role.ADMIN) {
+                            throw new org.springframework.security.access.AccessDeniedException("Không có quyền nhận thông báo của tài khoản khác.");
+                        }
+                    } else {
+                        throw new org.springframework.security.access.AccessDeniedException("Kênh thông báo không hợp lệ.");
                     }
                 }
                 return message;
