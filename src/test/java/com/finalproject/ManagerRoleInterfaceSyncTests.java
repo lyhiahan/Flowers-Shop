@@ -43,8 +43,6 @@ public class ManagerRoleInterfaceSyncTests {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    private User managerUser;
-
     @BeforeEach
     void setup() {
         Store testStore = storeRepository.save(Store.builder()
@@ -56,7 +54,7 @@ public class ManagerRoleInterfaceSyncTests {
                 .eWallet(new BigDecimal("5000000"))
                 .build());
 
-        managerUser = userRepository.save(User.builder()
+        userRepository.save(User.builder()
                 .username("test_manager_sync")
                 .password("$2a$10$abcdefghijklmnopqrstuv")
                 .email("manager_sync@flower.vn")
