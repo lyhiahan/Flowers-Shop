@@ -316,6 +316,7 @@ class StoreUseCaseAuditTests {
     @Autowired OrderDetailRepository orderDetails;
     @Autowired java.time.Clock clock;
 
+    @SuppressWarnings("unchecked")
     @Test void uc024CountsActualSoldQuantitiesAndExcludesUnpaidForeignOrders() {
         var p = product("Actual bestseller", true);
         p.setSold(9999); products.save(p);

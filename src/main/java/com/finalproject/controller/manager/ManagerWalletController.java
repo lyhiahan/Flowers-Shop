@@ -3,8 +3,6 @@ package com.finalproject.controller.manager;
 import com.finalproject.entity.Store;
 import com.finalproject.entity.Transaction;
 import com.finalproject.entity.User;
-import com.finalproject.enums.Role;
-import com.finalproject.repository.StoreRepository;
 import com.finalproject.repository.TransactionRepository;
 import com.finalproject.repository.UserRepository;
 import com.finalproject.service.StoreAccessService;
@@ -19,7 +17,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.security.Principal;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -33,7 +30,6 @@ public class ManagerWalletController {
     private final UserRepository userRepository;
     private final WalletService walletService;
     private final StoreAccessService storeAccess;
-    private final StoreRepository storeRepository;
     private final TransactionRepository transactionRepository;
     private final PasswordEncoder passwordEncoder;
 

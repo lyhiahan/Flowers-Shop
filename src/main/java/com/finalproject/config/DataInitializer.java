@@ -86,7 +86,7 @@ public class DataInitializer implements CommandLineRunner {
                                 .build())));
 
         // 2. Tạo các tài khoản mẫu cho từng Role (mật khẩu mặc định: 123456)
-        User admin = userRepository.findByUsername("admin").orElseGet(() -> userRepository.save(User.builder()
+        userRepository.findByUsername("admin").orElseGet(() -> userRepository.save(User.builder()
                 .username("admin")
                 .password(passwordEncoder.encode("123456"))
                 .fullName("Quản Trị Viên Toàn Hệ Thống")

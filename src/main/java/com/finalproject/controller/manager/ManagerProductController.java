@@ -3,12 +3,9 @@ package com.finalproject.controller.manager;
 import com.finalproject.entity.Category;
 import com.finalproject.entity.Product;
 import com.finalproject.entity.Store;
-import com.finalproject.entity.User;
 import com.finalproject.repository.CategoryRepository;
 import com.finalproject.repository.ProductRepository;
-import com.finalproject.repository.StoreRepository;
 import com.finalproject.repository.UserRepository;
-import com.finalproject.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,7 +27,6 @@ public class ManagerProductController {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final com.finalproject.service.StoreAccessService storeAccess;
-    private final StoreRepository storeRepository;
     private final com.finalproject.service.CloudinaryService cloudinaryService;
     private final com.finalproject.repository.ProductImageRepository productImages;
 
@@ -57,7 +53,7 @@ public class ManagerProductController {
             @RequestParam(value="tab", defaultValue="selling") String tab,
             @RequestParam(value="page", defaultValue="0") int page,
             @RequestParam(value="size", defaultValue="8") int size) {
-        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
+        userRepository.findByUsername(principal.getName()).orElseThrow();
         Long storeId = storeAccess.assignedStore().getId();
 
         if (!java.util.Set.of("selling", "stored").contains(tab)) throw new IllegalArgumentException("Tab sản phẩm không hợp lệ.");
@@ -90,7 +86,7 @@ public class ManagerProductController {
                              @RequestParam(value = "imageFile", required = false) org.springframework.web.multipart.MultipartFile imageFile,
                              @RequestParam(value = "description", required = false) String description,
                              RedirectAttributes ra) {
-        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
+        userRepository.findByUsername(principal.getName()).orElseThrow();
         Store store = storeAccess.assignedStore();
         storeAccess.requireManager(store);
         Category category = categoryRepository.findById(categoryId).orElseThrow();

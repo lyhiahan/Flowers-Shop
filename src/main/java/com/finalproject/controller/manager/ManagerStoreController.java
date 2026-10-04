@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
-import java.util.List;
 
 @Controller
 @RequestMapping({"/manager/stores", "/vendor/stores"})
@@ -27,7 +26,6 @@ public class ManagerStoreController {
     private final UserRepository userRepository;
     private final com.finalproject.service.StoreAccessService storeAccess;
     private final com.finalproject.repository.CommissionRepository commissionRepository;
-    private final com.finalproject.repository.StoreLevelRepository storeLevelRepository;
 
     @GetMapping
     public String listStores(@RequestParam(value = "page", defaultValue = "0") int page,
@@ -47,7 +45,7 @@ public class ManagerStoreController {
      */
     @PostMapping({"/switch/{id}", "/go-dashboard/{id}"})
     public String goToStoreDashboard(@PathVariable("id") Long id, Principal principal, RedirectAttributes ra) {
-        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
+        userRepository.findByUsername(principal.getName()).orElseThrow();
         Store store = storeRepository.findById(id).orElseThrow();
         storeAccess.requireStore(store);
 

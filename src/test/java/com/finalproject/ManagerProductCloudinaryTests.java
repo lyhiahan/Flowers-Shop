@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Optional;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.ArgumentMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 class ManagerProductCloudinaryTests {
@@ -26,7 +25,6 @@ class ManagerProductCloudinaryTests {
     @Mock CategoryRepository categories;
     @Mock UserRepository users;
     @Mock StoreAccessService access;
-    @Mock StoreRepository stores;
     @Mock CloudinaryService cloud;
     @Mock ProductImageRepository images;
     @InjectMocks ManagerProductController controller;

@@ -2,7 +2,6 @@ package com.finalproject.controller.customer;
 
 import com.finalproject.entity.Cart;
 import com.finalproject.entity.CartItem;
-import com.finalproject.entity.Order;
 import com.finalproject.entity.User;
 import com.finalproject.enums.PaymentMethod;
 import com.finalproject.repository.UserRepository;

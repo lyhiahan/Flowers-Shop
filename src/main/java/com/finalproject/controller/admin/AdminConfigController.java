@@ -17,7 +17,6 @@ import java.time.LocalDate;
 public class AdminConfigController {
 
     private final CategoryRepository categoryRepository;
-    private final ProductRepository productRepository;
     private final CommissionRepository commissionRepository;
     private final DeliveryRepository deliveryRepository;
     private final VoucherRepository voucherRepository;

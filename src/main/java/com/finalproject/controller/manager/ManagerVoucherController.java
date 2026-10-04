@@ -1,10 +1,7 @@
 package com.finalproject.controller.manager;
 
 import com.finalproject.entity.Store;
-import com.finalproject.entity.User;
 import com.finalproject.entity.Voucher;
-import com.finalproject.repository.StoreRepository;
-import com.finalproject.repository.UserRepository;
 import com.finalproject.service.VoucherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -24,13 +21,10 @@ public class ManagerVoucherController {
 
     private final VoucherService voucherService;
     private final com.finalproject.repository.VoucherRepository voucherRepository;
-    private final UserRepository userRepository;
     private final com.finalproject.service.StoreAccessService storeAccess;
-    private final StoreRepository storeRepository;
 
     @GetMapping
     public String listVouchers(Principal principal, Model model) {
-        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         Long storeId = storeAccess.assignedStore().getId();
 
         List<Voucher> vouchers = voucherService.getVouchersByStore(storeId);

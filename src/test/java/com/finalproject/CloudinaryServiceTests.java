@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Properties;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.ArgumentMatchers.*;
 
 class CloudinaryServiceTests {
     @Test void cloudFailureIsReportedInsteadOfSilentlySavingLocally() throws Exception {

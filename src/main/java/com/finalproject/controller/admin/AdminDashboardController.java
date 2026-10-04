@@ -65,20 +65,6 @@ public class AdminDashboardController {
             List<com.finalproject.entity.RoleRequest> pendingRoleRequests = roleRequestRepository.findByStatusOrderByCreatedAtDesc(com.finalproject.enums.RoleRequestStatus.PENDING);
             List<com.finalproject.entity.Product> pendingApprovalProducts = productRepository.findAll().stream().filter(p -> Boolean.FALSE.equals(p.getIsActive())).limit(10).toList();
 
-            List<Order> recentOrders;
-            try {
-                recentOrders = orderRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"))).getContent();
-            } catch (Exception e) {
-                recentOrders = orderRepository.findTop10ByOrderByCreatedAtDesc();
-            }
-
-            List<com.finalproject.entity.Product> topProducts;
-            try {
-                topProducts = productRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "sold"))).getContent();
-            } catch (Exception e) {
-                topProducts = java.util.Collections.emptyList();
-            }
-
             // UC_025: Top người dùng điểm cao nhất hệ thống (lên đến 1000 người dùng)
             List<User> topPointUsers;
             try {

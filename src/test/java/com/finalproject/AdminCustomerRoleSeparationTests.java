@@ -22,7 +22,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest(properties = "spring.datasource.url=jdbc:h2:mem:role-separation-test;MODE=MSSQLServer;DB_CLOSE_DELAY=-1")
 @ActiveProfiles("test")
 @Transactional
+@SuppressWarnings("unused")
 class AdminCustomerRoleSeparationTests {
 
     @Autowired
@@ -164,7 +164,7 @@ class AdminCustomerRoleSeparationTests {
                 .isActive(true)
                 .build());
 
-        assertThatThrownBy(() -> orderService.checkout(admin.getUsername(), Collections.emptyList(), PaymentMethod.COD))
+        assertThatThrownBy(() -> orderService.checkout(admin.getUsername(), java.util.List.of(), PaymentMethod.COD))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessageContaining("Quản trị viên");
     }

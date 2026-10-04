@@ -1,9 +1,6 @@
 package com.finalproject.controller.auth;
 
 import com.finalproject.dto.request.RegisterRequest;
-import com.finalproject.enums.OtpType;
-import com.finalproject.repository.OtpVerificationRepository;
-import com.finalproject.repository.UserRepository;
 import com.finalproject.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,15 +10,11 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDateTime;
-
 @Controller
 @RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
-    private final UserRepository userRepository;
-    private final OtpVerificationRepository otpRepository;
 
     @GetMapping("/login")
     public String showLoginForm(@RequestParam(value = "error", required = false) String error,

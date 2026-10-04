@@ -31,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @org.springframework.transaction.annotation.Transactional
+@SuppressWarnings("unused")
 class AdminTransactionManagementUseCaseTests {
 
     @Autowired

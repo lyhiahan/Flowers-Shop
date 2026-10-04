@@ -3,20 +3,17 @@ package com.finalproject.controller.manager;
 import com.finalproject.entity.Store;
 import com.finalproject.entity.User;
 import com.finalproject.enums.Role;
-import com.finalproject.repository.StoreRepository;
 import com.finalproject.repository.UserRepository;
 import com.finalproject.service.StoreAccessService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,8 +27,6 @@ public class ManagerStaffController {
 
     private final UserRepository userRepository;
     private final StoreAccessService storeAccess;
-    private final StoreRepository storeRepository;
-    private final PasswordEncoder passwordEncoder;
     private final com.finalproject.service.StoreStaffManagementService staffManagement;
 
     /**

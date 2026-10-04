@@ -1,8 +1,6 @@
 package com.finalproject.controller.manager;
 
 import com.finalproject.dto.response.ChartSeriesDto;
-import com.finalproject.entity.User;
-import com.finalproject.repository.UserRepository;
 import com.finalproject.service.AnalyticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -19,7 +17,6 @@ import java.security.Principal;
 public class ManagerAnalyticsController {
 
     private final AnalyticsService analyticsService;
-    private final UserRepository userRepository;
     private final com.finalproject.service.StoreAccessService storeAccess;
 
     @GetMapping
@@ -27,7 +24,6 @@ public class ManagerAnalyticsController {
                                 @RequestParam(value = "type", defaultValue = "order") String type,
                                 Principal principal,
                                 Model model) {
-        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         Long storeId = storeAccess.assignedStore().getId();
 
         ChartSeriesDto revenueChart;

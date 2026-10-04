@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,7 +23,6 @@ public class OrderServiceImpl implements OrderService {
 
     private final CartService cartService;
     private final com.finalproject.service.OrderWorkflowService workflow;
-    private final com.finalproject.service.StoreAccessService access;
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final OrderRepository orderRepository;
@@ -36,7 +34,6 @@ public class OrderServiceImpl implements OrderService {
     private final com.finalproject.repository.ShippingTariffRepository shippingTariffRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final com.finalproject.service.VoucherService voucherService;
-    private final TransactionRepository transactionRepository;
     private final com.finalproject.service.NotificationService notificationService;
     private final jakarta.persistence.EntityManager entityManager;
 

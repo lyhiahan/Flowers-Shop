@@ -4,7 +4,6 @@ import com.finalproject.dto.request.AddToCartRequest;
 import com.finalproject.entity.Cart;
 import com.finalproject.enums.PaymentMethod;
 import com.finalproject.service.CartService;
-import com.finalproject.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -22,7 +21,6 @@ import java.util.Map;
 public class CartController {
 
     private final CartService cartService;
-    private final OrderService orderService;
     private final com.finalproject.repository.StoreInventoryRepository storeInventoryRepository;
 
     @GetMapping

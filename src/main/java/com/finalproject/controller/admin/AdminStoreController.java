@@ -8,8 +8,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
-
 @Controller
 @RequestMapping("/admin/stores")
 @RequiredArgsConstructor
@@ -19,7 +17,6 @@ public class AdminStoreController {
     private final StoreRepository storeRepository;
     private final com.finalproject.repository.StoreLevelRepository storeLevelRepository;
     private final com.finalproject.repository.CommissionRepository commissionRepository;
-    private final com.finalproject.repository.ProductRepository productRepository;
 
     @GetMapping
     public String listStores(@RequestParam(value = "keyword", required = false) String keyword,
@@ -27,10 +24,22 @@ public class AdminStoreController {
                              @RequestParam(value = "status", required = false) String statusStr,
                              @RequestParam(value="page", defaultValue="0") int page,
                              @RequestParam(value="size", defaultValue="8") int size, Model model) {
-        Boolean licensed = java.util.Set.of("LICENSED", "APPROVED").contains(tab.toUpperCase()) ? true
-                : java.util.Set.of("UNLICENSED", "BANNED").contains(tab.toUpperCase()) ? false : null;
-        if (licensed == null && statusStr != null && java.util.Set.of("ACTIVE", "APPROVED", "PAUSED", "BANNED").contains(statusStr.toUpperCase())) licensed = java.util.Set.of("ACTIVE", "APPROVED").contains(statusStr.toUpperCase());
-        Boolean filterStatus = licensed;
+        Boolean status = null;
+        if (tab != null && !tab.equalsIgnoreCase("ALL")) {
+            if ("LICENSED".equalsIgnoreCase(tab) || "APPROVED".equalsIgnoreCase(tab)) {
+                status = true;
+            } else if ("UNLICENSED".equalsIgnoreCase(tab) || "BANNED".equalsIgnoreCase(tab)) {
+                status = false;
+            }
+        }
+        if (status == null && statusStr != null && !statusStr.equalsIgnoreCase("ALL")) {
+            if ("ACTIVE".equalsIgnoreCase(statusStr) || "APPROVED".equalsIgnoreCase(statusStr)) {
+                status = true;
+            } else if ("PAUSED".equalsIgnoreCase(statusStr) || "BANNED".equalsIgnoreCase(statusStr)) {
+                status = false;
+            }
+        }
+        final Boolean filterStatus = status;
         String kw = keyword == null ? "" : keyword.trim().toLowerCase();
         var result = com.finalproject.utils.StorePages.load(page, size, pageable -> storeRepository.findAll((root, query, cb) -> {
             var predicates = new java.util.ArrayList<jakarta.persistence.criteria.Predicate>();

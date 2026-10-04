@@ -3,7 +3,6 @@ package com.finalproject.service.impl;
 import com.finalproject.entity.Notification;
 import com.finalproject.entity.Store;
 import com.finalproject.entity.User;
-import com.finalproject.enums.Role;
 import com.finalproject.repository.NotificationRepository;
 import com.finalproject.repository.StoreRepository;
 import com.finalproject.repository.UserRepository;

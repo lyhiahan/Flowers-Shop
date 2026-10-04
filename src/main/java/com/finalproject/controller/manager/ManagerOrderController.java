@@ -5,7 +5,6 @@ import com.finalproject.entity.Store;
 import com.finalproject.entity.User;
 import com.finalproject.enums.OrderStatus;
 import com.finalproject.enums.Role;
-import com.finalproject.repository.StoreRepository;
 import com.finalproject.repository.UserRepository;
 import com.finalproject.service.OrderService;
 import com.finalproject.service.OrderWorkflowService;
@@ -34,7 +33,6 @@ public class ManagerOrderController {
     private final OrderWorkflowService workflow;
     private final UserRepository userRepository;
     private final StoreAccessService storeAccess;
-    private final StoreRepository storeRepository;
     private final com.finalproject.repository.OrderRepository orders;
 
     private static final Set<OrderStatus> PROCESSING_STATUSES = Set.of(
