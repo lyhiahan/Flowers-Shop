@@ -54,7 +54,7 @@ public class HomeController {
             @RequestParam(value = "minRating", required = false) Double minRating,
             @RequestParam(value = "storeId", required = false) Long storeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "size", required = false, defaultValue = "12") int size,
+            @RequestParam(value = "size", required = false, defaultValue = "8") int size,
             Principal principal,
             Model model) {
 
@@ -102,16 +102,16 @@ public class HomeController {
                 sortObj = Sort.by(Sort.Direction.DESC, "id");
             }
 
-            // Tabs theo tiêu chí (Bán chạy nhất phân trang 12 sản phẩm/trang)
+            // Tabs theo tiêu chí (Tối đa 8 sản phẩm/trang, 2 hàng x 4 cột)
             if ("newest".equalsIgnoreCase(tab)) {
                 sortObj = Sort.by(Sort.Direction.DESC, "createdAt");
-                size = 12;
+                size = 8;
             } else if ("bestseller".equalsIgnoreCase(tab)) {
                 sortObj = Sort.by(Sort.Direction.DESC, "sold");
-                size = 12;
+                size = 8;
             } else if ("toprated".equalsIgnoreCase(tab)) {
                 sortObj = Sort.by(Sort.Direction.DESC, "rating");
-                size = 12;
+                size = 8;
             }
 
             // 2. Phân trang (Pagination)
@@ -166,43 +166,60 @@ public class HomeController {
             );
             Page<Product> productPage = productRepository.findAll(spec, pageable);
 
-            // Xác định tiêu đề hiển thị chuẩn xác
-            String activeFilterTitle = "Tất cả mẫu hoa";
+            // Xác định tiêu đề hiển thị chuẩn xác theo yêu cầu:
+            // - Không có điều kiện: “Tất cả sản phẩm”
+            // - Tìm bằng từ khóa: “Kết quả tìm kiếm: ‘hoa hướng dương’”
+            // - Chọn danh mục: “Bó hoa” (hoặc tên danh mục)
+            // - Chỉ lọc thuộc tính: “Kết quả lọc sản phẩm”
+            String activeFilterTitle;
             if (trimmedKeyword != null) {
-                activeFilterTitle = "Kết quả cho “" + trimmedKeyword + "”";
+                activeFilterTitle = "Kết quả tìm kiếm: ‘" + trimmedKeyword + "’";
+            } else if (selectedCategory != null) {
+                activeFilterTitle = selectedCategory.getName();
+            } else if (!cleanStyles.isEmpty() && cleanStyles.size() == 1) {
+                activeFilterTitle = cleanStyles.get(0);
+            } else if (!cleanStyles.isEmpty() || !cleanTypes.isEmpty() || !cleanColors.isEmpty() || !cleanOccasions.isEmpty() || minPrice != null || maxPrice != null || minRating != null) {
+                activeFilterTitle = "Kết quả lọc sản phẩm";
             } else if ("bestseller".equalsIgnoreCase(tab)) {
-                activeFilterTitle = "Hoa bán chạy nhất";
+                activeFilterTitle = "Hoa bán chạy";
             } else if ("newest".equalsIgnoreCase(tab)) {
                 activeFilterTitle = "Hoa mới nhất";
             } else if ("toprated".equalsIgnoreCase(tab)) {
                 activeFilterTitle = "Hoa đánh giá cao";
-            } else if (!cleanStyles.isEmpty()) {
-                activeFilterTitle = String.join(", ", cleanStyles);
-            } else if (selectedCategory != null) {
-                activeFilterTitle = selectedCategory.getName();
-            } else if (!cleanTypes.isEmpty()) {
-                activeFilterTitle = String.join(", ", cleanTypes);
-            } else if (!cleanOccasions.isEmpty()) {
-                activeFilterTitle = "Hoa " + String.join(", ", cleanOccasions);
+            } else {
+                activeFilterTitle = "Tất cả sản phẩm";
             }
 
-            boolean hasActiveFilter = (!cleanStyles.isEmpty())
+            boolean hasAttributeFilters = (!cleanStyles.isEmpty())
                     || (!cleanTypes.isEmpty())
                     || (!cleanColors.isEmpty())
                     || (!cleanOccasions.isEmpty())
-                    || (categoryId != null && categoryId > 0)
-                    || (trimmedKeyword != null)
                     || (minPrice != null)
                     || (maxPrice != null)
-                    || (minRating != null)
+                    || (minRating != null);
+
+            boolean hasActiveFilter = hasAttributeFilters
+                    || (categoryId != null && categoryId > 0)
+                    || (trimmedKeyword != null)
                     || (tab != null && !tab.trim().isEmpty());
+
+            long totalItems = productPage.getTotalElements();
+            int totalPages = productPage.getTotalPages();
+            long startIndex = 0;
+            long endIndex = 0;
+            if (totalItems > 0) {
+                startIndex = (long) (page - 1) * size + 1;
+                endIndex = Math.min((long) page * size, totalItems);
+            }
 
             // 5. Đưa dữ liệu sang View
             model.addAttribute("productPage", productPage);
             model.addAttribute("products", productPage.getContent());
             model.addAttribute("currentPage", page);
-            model.addAttribute("totalPages", productPage.getTotalPages());
-            model.addAttribute("totalItems", productPage.getTotalElements());
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("totalItems", totalItems);
+            model.addAttribute("startIndex", startIndex);
+            model.addAttribute("endIndex", endIndex);
 
             model.addAttribute("keyword", trimmedKeyword);
             model.addAttribute("flowerStyles", cleanStyles);
@@ -215,6 +232,7 @@ public class HomeController {
             model.addAttribute("flowerOccasion", cleanOccasions.isEmpty() ? null : String.join(", ", cleanOccasions));
             model.addAttribute("activeFilterTitle", activeFilterTitle);
             model.addAttribute("hasActiveFilter", hasActiveFilter);
+            model.addAttribute("hasAttributeFilters", hasAttributeFilters);
 
             model.addAttribute("categoryId", categoryId);
             model.addAttribute("selectedCategory", selectedCategory);

@@ -31,8 +31,10 @@ public class CartController {
         java.util.Map<com.finalproject.entity.Store, java.util.List<com.finalproject.entity.CartItem>> itemsByStore = new java.util.LinkedHashMap<>();
         java.util.Map<Long, Integer> itemStockMap = new java.util.HashMap<>();
 
+        int totalQuantity = 0;
         if (cart != null && cart.getItems() != null) {
             for (com.finalproject.entity.CartItem item : cart.getItems()) {
+                totalQuantity += (item.getQuantity() != null ? item.getQuantity() : 0);
                 com.finalproject.entity.Store store = item.getStore();
                 itemsByStore.computeIfAbsent(store, k -> new java.util.ArrayList<>()).add(item);
 
@@ -47,6 +49,7 @@ public class CartController {
         }
         model.addAttribute("itemsByStore", itemsByStore);
         model.addAttribute("itemStockMap", itemStockMap);
+        model.addAttribute("totalQuantity", totalQuantity);
         model.addAttribute("paymentMethods", PaymentMethod.values());
         return "customer/cart";
     }
