@@ -56,8 +56,6 @@ public class ProfileController {
     public String submitRoleRequest(Principal principal,
                                     @RequestParam("targetRole") com.finalproject.enums.Role targetRole,
                                     @RequestParam(value = "phone", required = false) String phone,
-                                    @RequestParam(value = "workArea", required = false) String workArea,
-                                    @RequestParam(value = "vehicleType", required = false) String vehicleType,
                                     @RequestParam(value = "targetStoreId", required = false) Long targetStoreId,
                                     @RequestParam(value = "shopName", required = false) String shopName,
                                     @RequestParam(value = "shopAddress", required = false) String shopAddress,
@@ -66,7 +64,7 @@ public class ProfileController {
                                     RedirectAttributes ra) {
         try {
             User user = userRepository.findByUsername(principal.getName()).orElseThrow();
-            roleManagementService.submitRoleRequest(user.getId(), targetRole, phone, workArea, vehicleType,
+            roleManagementService.submitRoleRequest(user.getId(), targetRole, phone,
                     targetStoreId, shopName, shopAddress, contactInfo, experienceNote);
             ra.addFlashAttribute("successMessage", "Gửi yêu cầu đăng ký vai trò thành công! Vui lòng chờ quản trị viên xét duyệt.");
         } catch (Exception ex) {
@@ -239,7 +237,7 @@ public class ProfileController {
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
-        return "redirect:/customer/profile";
+        return "redirect:/customer/profile?tab=address";
     }
 
     @PostMapping({"/address/update/{id}", "/profile/address/update/{id}"})
@@ -257,7 +255,7 @@ public class ProfileController {
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
-        return "redirect:/customer/profile";
+        return "redirect:/customer/profile?tab=address";
     }
 
     @PostMapping({"/address/delete/{id}", "/profile/address/delete/{id}"})
@@ -269,7 +267,7 @@ public class ProfileController {
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
-        return "redirect:/customer/profile";
+        return "redirect:/customer/profile?tab=address";
     }
 
     @PostMapping({"/address/set-default/{id}", "/profile/address/set-default/{id}"})
@@ -281,7 +279,7 @@ public class ProfileController {
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
-        return "redirect:/customer/profile";
+        return "redirect:/customer/profile?tab=address";
     }
 
     @GetMapping({"/wishlist", "/profile/wishlist"})

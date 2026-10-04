@@ -42,9 +42,18 @@ public class Order {
     private BigDecimal totalDeposit;
     private BigDecimal fineAmount; // Tiền phạt quá hạn/hư hỏng
 
+    // Snapshot: subsequent delivery tariff changes must not change existing orders.
+    @Column(name = "shipping_fee", precision = 18, scale = 2)
+    @Builder.Default
+    private BigDecimal shippingFee = BigDecimal.ZERO;
+
+    @Column(name = "delivery_unit_id")
+    private Long deliveryUnitId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shipper_id")
-    private User shipper;
+    // Historical delivery contact only; no assignment or account role.
+    private User legacyDeliveryContact;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "voucher_id")
@@ -68,12 +77,15 @@ public class Order {
 
     // Thông tin giao hoa & thiệp chúc mừng
     private java.time.LocalDate deliveryDate;
+    @org.hibernate.annotations.Nationalized
     @Column(length = 500)
     private String greetingMessage; // Lời chúc trên thiệp/banner
+    @org.hibernate.annotations.Nationalized
     @Column(length = 100)
     private String recipientName; // Tên người nhận hoa
     @Column(length = 20)
     private String recipientPhone; // SĐT người nhận hoa
+    @org.hibernate.annotations.Nationalized
     @Column(length = 255)
     private String recipientAddress; // Địa chỉ giao hoa
 

@@ -32,9 +32,12 @@ public class OrderServiceImpl implements OrderService {
     private final PaymentRepository paymentRepository;
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
+    private final DeliveryRepository deliveryRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final com.finalproject.service.VoucherService voucherService;
     private final TransactionRepository transactionRepository;
+    private final com.finalproject.service.NotificationService notificationService;
+    private final jakarta.persistence.EntityManager entityManager;
 
     @Override
     @Transactional
@@ -69,13 +72,24 @@ public class OrderServiceImpl implements OrderService {
     public List<Order> checkout(String username, List<Long> selectedCartItemIds, PaymentMethod paymentMethod,
                                  String recipientName, String recipientPhone, String recipientAddress, String greetingMessage, String voucherCode,
                                  java.time.LocalDate deliveryDate, String shippingMethod, Long pickupStoreId) {
-        if (paymentMethod != PaymentMethod.COD && paymentMethod != PaymentMethod.BANK_TRANSFER) {
+        // Preserve the existing service API for callers that do not select a delivery unit.
+        return checkout(username, selectedCartItemIds, paymentMethod, recipientName, recipientPhone, recipientAddress,
+                greetingMessage, voucherCode, deliveryDate, shippingMethod, pickupStoreId, null);
+    }
+
+    @Override
+    @Transactional
+    public List<Order> checkout(String username, List<Long> selectedCartItemIds, PaymentMethod paymentMethod,
+                               String recipientName, String recipientPhone, String recipientAddress, String greetingMessage, String voucherCode,
+                               LocalDate deliveryDate, String shippingMethod, Long pickupStoreId, Long deliveryUnitId) {
+        if (paymentMethod != PaymentMethod.COD && paymentMethod != PaymentMethod.BANK_TRANSFER && paymentMethod != PaymentMethod.MOMO) {
             throw new IllegalArgumentException("Phương thức thanh toán chưa được hỗ trợ.");
         }
         if (!"PICKUP".equals(shippingMethod) && !"DELIVERY".equals(shippingMethod)) {
             throw new IllegalArgumentException("Hình thức nhận hàng không hợp lệ.");
         }
         User customer = userRepository.findByUsername(username).orElseThrow();
+        requireActiveCustomer(customer);
         Cart cart = cartRepository.findLockedByUserId(customer.getId())
                 .orElseThrow(() -> new IllegalStateException("Giỏ hàng đang trống."));
         List<CartItem> allItems = cartItemRepository.findByCartId(cart.getId());
@@ -86,6 +100,8 @@ public class OrderServiceImpl implements OrderService {
 
         List<CartItem> items;
         if (selectedCartItemIds != null && !selectedCartItemIds.isEmpty()) {
+            Set<Long> ownedIds = allItems.stream().map(CartItem::getId).collect(Collectors.toSet());
+            if (!ownedIds.containsAll(selectedCartItemIds)) throw new IllegalArgumentException("Sản phẩm được chọn không thuộc giỏ hàng của bạn.");
             items = allItems.stream()
                     .filter(i -> selectedCartItemIds.contains(i.getId()))
                     .collect(Collectors.toList());
@@ -135,6 +151,9 @@ public class OrderServiceImpl implements OrderService {
                 || finalRecipientAddress == null || finalRecipientAddress.isBlank()) {
             throw new IllegalArgumentException("Vui lòng nhập đầy đủ tên, số điện thoại và địa chỉ nhận hàng.");
         }
+        if (finalRecipientName.length() > 100 || finalRecipientAddress.length() > 255 || (finalGreeting != null && finalGreeting.length() > 500))
+            throw new IllegalArgumentException("Tên tối đa 100, địa chỉ 255 và lời chúc 500 ký tự.");
+        if (!finalRecipientPhone.matches("^(0|\\+?84)[35789][0-9]{8}$")) throw new IllegalArgumentException("Số điện thoại người nhận không hợp lệ.");
         Order order = Order.builder()
                 .shippingMethod(shippingMethod)
                 .user(user)
@@ -149,23 +168,33 @@ public class OrderServiceImpl implements OrderService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
+        // Lock each stock row once, in the same product order for all checkouts.
+        // Delivery selection may already have loaded stale stock into this persistence context.
+        Map<Long, StoreInventory> lockedStock = new HashMap<>();
+        for (Long productId : items.stream().map(i -> i.getProduct().getId()).distinct().sorted().toList()) {
+            StoreInventory stock = storeInventoryRepository.findLockedStock(assignedStore.getId(), productId)
+                    .orElseThrow(() -> new IllegalStateException("Chi nhánh không có hàng."));
+            entityManager.refresh(stock, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+            lockedStock.put(productId, stock);
+        }
         for (CartItem item : items) {
             Product product = item.getProduct();
 
             if (item.getOrderType() != OrderType.BUY || item.getQuantity() == null || item.getQuantity() <= 0) {
                 throw new IllegalArgumentException("Giỏ hàng chỉ hỗ trợ mua hoa với số lượng dương.");
             }
-            if (!Boolean.TRUE.equals(product.getIsActive()) || !Boolean.TRUE.equals(product.getIsSelling())) {
+            if (Boolean.TRUE.equals(product.getIsDeleted()) || !Boolean.TRUE.equals(product.getIsActive()) || !Boolean.TRUE.equals(product.getIsSelling())) {
                 throw new IllegalStateException("Sản phẩm đã ngừng bán: " + product.getName());
             }
-            StoreInventory inventory = storeInventoryRepository.findByStoreIdAndProductId(assignedStore.getId(), product.getId())
-                    .orElseThrow(() -> new IllegalStateException("Chi nhánh không có hàng: " + product.getName()));
+            StoreInventory inventory = lockedStock.get(product.getId());
             if (inventory.getQuantity() < item.getQuantity()) {
                 throw new IllegalStateException("Không đủ tồn kho: " + product.getName());
             }
             inventory.setQuantity(inventory.getQuantity() - item.getQuantity());
             storeInventoryRepository.save(inventory);
             BigDecimal unitPrice = product.getSellingPrice();
+            if (unitPrice == null || unitPrice.signum() <= 0 || unitPrice.stripTrailingZeros().scale() > 2)
+                throw new IllegalStateException("Giá sản phẩm không hợp lệ: " + product.getName());
             BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
             totalAmount = totalAmount.add(lineTotal);
 
@@ -187,20 +216,23 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // Áp dụng voucher nếu có (Đảm bảo giá sau giảm không bao giờ thấp hơn tổng giá nhập)
-        BigDecimal discount = BigDecimal.ZERO;
+        com.finalproject.service.CheckoutQuote amounts = calculateAmounts(totalAmount, totalImportPrice,
+                assignedStore, voucherCode, shippingMethod, deliveryUnitId);
+        BigDecimal discount = amounts.discount();
         if (voucherCode != null && !voucherCode.trim().isEmpty()) {
             Voucher v = voucherService.findByCode(voucherCode.trim());
             if (v == null) throw new IllegalArgumentException("Mã giảm giá không hợp lệ.");
             if (v.getStore() != null && !v.getStore().getId().equals(assignedStore.getId())) {
                 throw new IllegalArgumentException("Mã giảm giá không áp dụng cho chi nhánh này.");
             }
-            discount = voucherService.calculateDiscount(v, totalAmount, BigDecimal.ZERO, totalImportPrice);
             order.setVoucher(v);
             order.setDiscountAmount(discount);
             v.setUsedCount(v.getUsedCount() + 1);
             voucherService.createVoucher(v);
         }
-        BigDecimal finalAmount = totalAmount.subtract(discount).max(totalImportPrice).max(BigDecimal.ZERO);
+        BigDecimal finalAmount = amounts.total();
+        order.setShippingFee(amounts.shippingFee());
+        order.setDeliveryUnitId(isPickup ? null : deliveryUnitId);
         order.setTotalAmount(finalAmount);
         order.setTotalDeposit(BigDecimal.ZERO);
         order.setPaymentMethod(paymentMethod != null ? paymentMethod.name() : "COD");
@@ -221,6 +253,20 @@ public class OrderServiceImpl implements OrderService {
 
         createdOrders.add(savedOrder);
 
+        // Gửi thông báo đến tài khoản khách hàng và chủ chi nhánh
+        try {
+            notificationService.sendNotification(user,
+                    "🌸 Đặt hoa thành công!",
+                    "Đơn hoa #" + savedOrder.getId() + " trị giá " + String.format("%,d", finalAmount.longValue()) + " đ đã được tạo thành công. Tiệm hoa đang tiến hành chuẩn bị.",
+                    "ORDER_CREATED", savedOrder.getId());
+            notificationService.sendNotificationToStoreManagers(assignedStore.getId(),
+                    "🔔 Đơn hoa mới #" + savedOrder.getId(),
+                    "Có đơn hoa mới từ khách " + finalRecipientName + " (" + finalRecipientPhone + "). Tổng: " + String.format("%,d", finalAmount.longValue()) + " đ.",
+                    "ORDER_NEW", savedOrder.getId());
+        } catch (Exception ex) {
+            org.slf4j.LoggerFactory.getLogger(OrderServiceImpl.class).warn("Không gửi được notification: {}", ex.getMessage());
+        }
+
         org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
                 new org.springframework.transaction.support.TransactionSynchronization() {
                     @Override
@@ -238,6 +284,122 @@ public class OrderServiceImpl implements OrderService {
             cartService.removeCartItem(username, processedItem.getId());
         }
         return createdOrders;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public com.finalproject.service.CheckoutQuote quote(String username, List<Long> selectedCartItemIds,
+                                                       String recipientAddress, String voucherCode,
+                                                       String shippingMethod, Long pickupStoreId, Long deliveryUnitId) {
+        if (!"PICKUP".equals(shippingMethod) && !"DELIVERY".equals(shippingMethod)) {
+            throw new IllegalArgumentException("Hình thức nhận hàng không hợp lệ.");
+        }
+        User user = userRepository.findByUsername(username).orElseThrow();
+        requireActiveCustomer(user);
+        Cart cart = cartRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new IllegalStateException("Giỏ hàng đang trống."));
+        List<CartItem> items = cartItemRepository.findByCartId(cart.getId()).stream()
+                .filter(i -> selectedCartItemIds == null || selectedCartItemIds.isEmpty() || selectedCartItemIds.contains(i.getId()))
+                .toList();
+        if (selectedCartItemIds != null && !selectedCartItemIds.isEmpty()
+                && !items.stream().map(CartItem::getId).collect(Collectors.toSet()).containsAll(selectedCartItemIds)) {
+            throw new IllegalArgumentException("Sản phẩm được chọn không thuộc giỏ hàng của bạn.");
+        }
+        if (items.isEmpty()) throw new IllegalArgumentException("Vui lòng chọn sản phẩm để thanh toán.");
+        Store store;
+        if ("PICKUP".equals(shippingMethod)) {
+            if (pickupStoreId == null) throw new IllegalArgumentException("Vui lòng chọn chi nhánh nhận hàng.");
+            store = storeRepository.findById(pickupStoreId).orElseThrow(() -> new IllegalArgumentException("Chi nhánh không tồn tại."));
+        } else {
+            store = findDeliveryStore(recipientAddress != null && !recipientAddress.isBlank() ? recipientAddress : user.getAddress(), items);
+        }
+        if (!Boolean.TRUE.equals(store.getStatus()) || !Boolean.TRUE.equals(store.getIsOpen())) {
+            throw new IllegalStateException("Chi nhánh hiện không nhận đơn.");
+        }
+        BigDecimal subtotal = BigDecimal.ZERO;
+        BigDecimal importTotal = BigDecimal.ZERO;
+        for (CartItem item : items) {
+            Product p = item.getProduct();
+            if (item.getOrderType() != OrderType.BUY || item.getQuantity() == null || item.getQuantity() <= 0) {
+                throw new IllegalArgumentException("Giỏ hàng chỉ hỗ trợ mua hoa với số lượng dương.");
+            }
+            if (Boolean.TRUE.equals(p.getIsDeleted()) || !Boolean.TRUE.equals(p.getIsActive()) || !Boolean.TRUE.equals(p.getIsSelling())) {
+                throw new IllegalStateException("Sản phẩm đã ngừng bán: " + p.getName());
+            }
+            StoreInventory inventory = storeInventoryRepository.findByStoreIdAndProductId(store.getId(), p.getId())
+                    .orElseThrow(() -> new IllegalStateException("Chi nhánh không có hàng: " + p.getName()));
+            if (inventory.getQuantity() < item.getQuantity()) throw new IllegalStateException("Không đủ tồn kho: " + p.getName());
+            BigDecimal price = p.getSellingPrice();
+            if (price == null || price.signum() <= 0 || price.stripTrailingZeros().scale() > 2)
+                throw new IllegalStateException("Giá sản phẩm không hợp lệ: " + p.getName());
+            subtotal = subtotal.add(price.multiply(BigDecimal.valueOf(item.getQuantity())));
+            BigDecimal cost = p.getImportPrice() != null ? p.getImportPrice()
+                    : p.getPriceBuy() != null ? p.getPriceBuy().multiply(BigDecimal.valueOf(0.6)) : BigDecimal.ZERO;
+            importTotal = importTotal.add(cost.multiply(BigDecimal.valueOf(item.getQuantity())));
+        }
+        return calculateAmounts(subtotal, importTotal, store, voucherCode, shippingMethod, deliveryUnitId);
+    }
+
+    private com.finalproject.service.CheckoutQuote calculateAmounts(BigDecimal subtotal, BigDecimal importTotal,
+                                                                   Store store, String voucherCode,
+                                                                   String shippingMethod, Long deliveryUnitId) {
+        BigDecimal shippingFee = BigDecimal.ZERO;
+        if ("DELIVERY".equals(shippingMethod) && deliveryUnitId != null) {
+            Delivery delivery = deliveryRepository.findById(deliveryUnitId)
+                    .orElseThrow(() -> new IllegalArgumentException("Đơn vị giao hàng không tồn tại."));
+            if (!Boolean.TRUE.equals(delivery.getIsActive()) || Boolean.TRUE.equals(delivery.getIsDeleted())
+                    || delivery.getPrice() == null || delivery.getPrice().signum() < 0) {
+                throw new IllegalArgumentException("Đơn vị giao hàng hiện không khả dụng.");
+            }
+            shippingFee = delivery.getPrice();
+        }
+        BigDecimal discount = BigDecimal.ZERO;
+        if (voucherCode != null && !voucherCode.isBlank()) {
+            Voucher voucher = voucherService.findByCode(voucherCode.trim());
+            if (voucher == null) throw new IllegalArgumentException("Mã giảm giá không hợp lệ.");
+            if (voucher.getStore() != null && !voucher.getStore().getId().equals(store.getId())) {
+                throw new IllegalArgumentException("Mã giảm giá không áp dụng cho chi nhánh này.");
+            }
+            discount = voucherService.calculateDiscount(voucher, subtotal, shippingFee, importTotal);
+        }
+        BigDecimal total = subtotal.add(shippingFee).subtract(discount).max(importTotal).max(BigDecimal.ZERO);
+        return new com.finalproject.service.CheckoutQuote(subtotal, shippingFee, discount, total, store.getId());
+    }
+
+    private Store findDeliveryStore(String address, List<CartItem> items) {
+        Store nearest = findNearestStore(address);
+        java.util.Map<Long, Long> demand = new java.util.LinkedHashMap<>();
+        for (CartItem item : items) {
+            if (item.getQuantity() == null || item.getQuantity() <= 0 || item.getOrderType() != OrderType.BUY) {
+                throw new IllegalArgumentException("Giỏ hàng chỉ hỗ trợ mua hoa với số lượng dương.");
+            }
+            demand.merge(item.getProduct().getId(), item.getQuantity().longValue(), Long::sum);
+        }
+        java.util.Map<Long, Store> candidates = new java.util.LinkedHashMap<>();
+        candidates.put(nearest.getId(), nearest);
+        for (CartItem item : items) {
+            if (item.getStore() != null) candidates.putIfAbsent(item.getStore().getId(), item.getStore());
+        }
+        for (Store candidate : storeRepository.findByStatusTrue()) candidates.putIfAbsent(candidate.getId(), candidate);
+        boolean closedStoreHasStock = false;
+        for (Store candidate : candidates.values()) {
+            boolean enough = demand.entrySet().stream().allMatch(entry ->
+                    storeInventoryRepository.findByStoreIdAndProductId(candidate.getId(), entry.getKey())
+                            .map(stock -> stock.getQuantity() != null && stock.getQuantity() >= entry.getValue()).orElse(false));
+            if (!Boolean.TRUE.equals(candidate.getStatus()) || !Boolean.TRUE.equals(candidate.getIsOpen())) {
+                closedStoreHasStock |= enough;
+                continue;
+            }
+            if (enough) return candidate;
+        }
+        if (closedStoreHasStock) throw new IllegalStateException("Chi nhánh có đủ hàng hiện không nhận đơn. Vui lòng thử lại khi chi nhánh mở cửa.");
+        throw new IllegalStateException("Các chi nhánh đang mở không có hàng hoặc không đủ tồn kho cho mẫu hoa đã chọn. Vui lòng giảm số lượng hoặc chọn mẫu khác.");
+    }
+
+    private void requireActiveCustomer(User user) {
+        if (!Boolean.TRUE.equals(user.getIsActive()) || user.isRetiredDeliveryAccount()) {
+            throw new org.springframework.security.access.AccessDeniedException("Tài khoản đã bị khóa hoặc vô hiệu hóa.");
+        }
     }
 
     private Store findNearestStore(String address) {
@@ -354,31 +516,6 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public void updateOrderStatus(Long orderId, OrderStatus status) {
         workflow.transition(orderId, status);
-    }
-
-    @Override
-    @Transactional
-    public void assignShipper(Long orderId, Long shipperId) {
-        Order order = workflow.lockedOrder(orderId);
-        access.requireManager(order.getPickupStore());
-        User shipper = userRepository.findById(shipperId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhân viên giao hàng"));
-
-        if (shipper.getRole() != Role.SHIPPER || !Boolean.TRUE.equals(shipper.getIsActive())
-                || shipper.getStore() == null || !shipper.getStore().getId().equals(order.getPickupStore().getId())) {
-            throw new IllegalArgumentException("Shipper phải đang hoạt động và thuộc chi nhánh xử lý đơn.");
-        }
-        if (order.getStatus() != OrderStatus.PREPARING || "PICKUP".equals(order.getShippingMethod())) {
-            throw new IllegalStateException("Chỉ phân công giao hàng cho đơn đang chuẩn bị.");
-        }
-        if (!"COD".equals(order.getPaymentMethod()) && !"PAID".equals(order.getPaymentStatus())) {
-            throw new IllegalStateException("Cần xác nhận chuyển khoản trước khi giao đơn cho shipper.");
-        }
-        order.setShipper(shipper);
-        if (order.getStatus() == OrderStatus.CONFIRMED || order.getStatus() == OrderStatus.PREPARING) {
-            order.setStatus(OrderStatus.PICKED_UP);
-        }
-        orderRepository.save(order);
     }
 
     @Override

@@ -38,6 +38,8 @@ class ConcurrencyRegressionTests {
     @Autowired OtpVerificationRepository otps;
     @Autowired PlatformTransactionManager transactionManager;
     @Autowired JdbcTemplate jdbc;
+    @Autowired VoucherRepository vouchers;
+    @Autowired OrderWorkflowService workflow;
 
     record Fixture(Long storeId, Long productId, Long categoryId, String manager, List<String> customers, List<Long> userIds, List<Long> itemIds) {}
 
@@ -78,6 +80,7 @@ class ConcurrencyRegressionTests {
             jdbc.update("delete from products where id=?", f.productId());
             jdbc.update("delete from categories where id=?", f.categoryId());
             for (Long id : f.userIds()) {
+                jdbc.update("delete from notifications where user_id=?", id);
                 jdbc.update("delete from otp_verifications where user_id=?", id);
                 jdbc.update("delete from users where id=?", id);
             }
@@ -95,7 +98,7 @@ class ConcurrencyRegressionTests {
                     ready.countDown();
                     if (!start.await(10, TimeUnit.SECONDS)) throw new IllegalStateException("Timed out waiting for start");
                     try { action.accept(worker); return true; }
-                    catch (org.springframework.orm.ObjectOptimisticLockingFailureException | jakarta.persistence.OptimisticLockException | IllegalStateException ex) { return false; }
+                    catch (org.springframework.orm.ObjectOptimisticLockingFailureException | jakarta.persistence.OptimisticLockException | IllegalStateException | IllegalArgumentException ex) { return false; }
                     finally { SecurityContextHolder.clearContext(); }
                 }));
             }
@@ -129,6 +132,44 @@ class ConcurrencyRegressionTests {
             assertThat(successes).isEqualTo(1);
             assertThat(jdbc.queryForObject("select e_wallet from stores where id=?", BigDecimal.class, f.storeId())).isEqualByComparingTo("40000");
             assertThat(jdbc.queryForObject("select count(*) from transactions where store_id=?", Integer.class, f.storeId())).isEqualTo(1);
+        } finally { cleanup(f); }
+    }
+
+    @Test void twoCheckoutsCannotConsumeTheLastVoucherTwice() throws Exception {
+        Fixture f = fixture();
+        String code = "RACE" + UUID.randomUUID().toString().replace("-", "").toUpperCase(java.util.Locale.ROOT);
+        try {
+            new TransactionTemplate(transactionManager).executeWithoutResult(tx -> {
+                var inventory = inventories.findByStoreIdAndProductId(f.storeId(), f.productId()).orElseThrow();
+                inventory.setQuantity(2); inventories.save(inventory);
+                vouchers.save(Voucher.builder().code(code).name("Last voucher").quantity(1).discountType("FIXED_AMOUNT")
+                        .discountValue(BigDecimal.ONE).startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(1)).build());
+            });
+            int successes = race(i -> orders.checkout(f.customers().get(i), List.of(f.itemIds().get(i)), PaymentMethod.COD,
+                    "Khách", "0900000000", "Quận 1", null, code, LocalDate.now(), "PICKUP", f.storeId()));
+            assertThat(successes).isEqualTo(1);
+            assertThat(jdbc.queryForObject("select used_count from vouchers where code=?", Integer.class, code)).isEqualTo(1);
+            assertThat(jdbc.queryForObject("select quantity from store_inventories where store_id=?", Integer.class, f.storeId())).isEqualTo(1);
+            assertThat(jdbc.queryForObject("select count(*) from orders where pickup_store_id=?", Integer.class, f.storeId())).isEqualTo(1);
+        } finally { cleanup(f); jdbc.update("delete from vouchers where code=?", code); }
+    }
+
+    @Test void simultaneousCancellationsRestoreAllReservedStock() throws Exception {
+        Fixture f = fixture();
+        try {
+            new TransactionTemplate(transactionManager).executeWithoutResult(tx -> {
+                var stock = inventories.findByStoreIdAndProductId(f.storeId(), f.productId()).orElseThrow();
+                stock.setQuantity(2); inventories.save(stock);
+            });
+            List<Long> ids = new ArrayList<>();
+            for (int i = 0; i < 2; i++) ids.add(orders.checkout(f.customers().get(i), List.of(f.itemIds().get(i)), PaymentMethod.COD,
+                    "Khách", "0900000000", "Quận 1", null, null, LocalDate.now(), "PICKUP", f.storeId()).get(0).getId());
+            assertThat(race(i -> {
+                SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(f.customers().get(i), "",
+                        List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER"))));
+                workflow.cancelByCustomer(f.customers().get(i), ids.get(i));
+            })).isEqualTo(2);
+            assertThat(jdbc.queryForObject("select quantity from store_inventories where store_id=?", Integer.class, f.storeId())).isEqualTo(2);
         } finally { cleanup(f); }
     }
 

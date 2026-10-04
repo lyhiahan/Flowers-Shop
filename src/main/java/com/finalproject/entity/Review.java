@@ -28,6 +28,7 @@ public class Review {
     @JoinColumn(name = "order_id")
     private Order order;
 
+    @org.hibernate.annotations.Nationalized
     @Column(nullable = false, length = 1000)
     private String content; // Tối thiểu 50 ký tự
 

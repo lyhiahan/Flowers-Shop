@@ -107,6 +107,10 @@ public class AdminUserController {
     @PostMapping("/toggle-active/{id}")
     public String toggleActive(@PathVariable("id") Long id, RedirectAttributes ra) {
         User user = userRepository.findById(id).orElseThrow();
+        if (user.isRetiredDeliveryAccount()) {
+            ra.addFlashAttribute("errorMessage", "Tài khoản giao hàng đã ngừng sử dụng và được giữ ở trạng thái vô hiệu hóa.");
+            return "redirect:/admin/users?tab=users";
+        }
         if ("admin".equalsIgnoreCase(user.getUsername())) {
             ra.addFlashAttribute("errorMessage", "Không thể khóa tài khoản Quản trị viên tối cao!");
             return "redirect:/admin/users?tab=users";
@@ -209,7 +213,7 @@ public class AdminUserController {
 
             // 3. Chặn xóa nếu đã có đơn hàng (để bảo toàn hóa đơn và kế toán)
             boolean hasOrders = !orderRepository.findByUserIdOrderByCreatedAtDesc(id).isEmpty()
-                    || !orderRepository.findByShipperIdOrderByCreatedAtDesc(id).isEmpty();
+                    || orderRepository.existsByLegacyDeliveryContactId(id);
             if (hasOrders) {
                 ra.addFlashAttribute("errorMessage", "Tài khoản [" + user.getUsername() + "] đã phát sinh đơn hàng trong hệ thống. Nhằm bảo toàn chứng từ giao dịch, vui lòng sử dụng chức năng [Khóa] tài khoản thay vì xóa!");
                 return "redirect:/admin/users?tab=users";

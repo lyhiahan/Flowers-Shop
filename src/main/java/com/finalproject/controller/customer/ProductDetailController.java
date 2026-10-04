@@ -26,6 +26,7 @@ public class ProductDetailController {
     private final ReviewService reviewService;
     private final UserRepository userRepository;
     private final CartService cartService;
+    private final com.finalproject.repository.StoreInventoryRepository inventories;
 
     @GetMapping({"/product/{id}", "/products/{id}"})
     public String viewProductDetail(@PathVariable("id") Long id, Principal principal, Model model) {
@@ -55,6 +56,10 @@ public class ProductDetailController {
         }
 
         model.addAttribute("product", product);
+        int availableStock = product.getStore() == null ? 0 : inventories
+                .findByStoreIdAndProductId(product.getStore().getId(), product.getId())
+                .map(stock -> Math.max(0, stock.getQuantity())).orElse(0);
+        model.addAttribute("availableStock", availableStock);
         var images = productImageRepository.findByProductId(id);
         if (images.isEmpty() && product.getImageUrl() != null && !product.getImageUrl().isEmpty()) {
             images = java.util.List.of(com.finalproject.entity.ProductImage.builder()

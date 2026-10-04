@@ -119,10 +119,6 @@ public class ManagerOrderController {
         int toIndex = Math.min(fromIndex + size, totalElements);
         List<Order> pagedOrders = totalElements > 0 ? filteredOrders.subList(fromIndex, toIndex) : Collections.emptyList();
 
-        List<User> shippers = userRepository.findByRole(Role.SHIPPER).stream()
-                .filter(s -> Boolean.TRUE.equals(s.getIsActive()) && s.getStore() != null && store.getId().equals(s.getStore().getId()))
-                .toList();
-
         model.addAttribute("orders", pagedOrders);
         model.addAttribute("activeTab", activeTab);
         model.addAttribute("currentStatus", statusStr != null ? statusStr : "ALL");
@@ -133,7 +129,6 @@ public class ManagerOrderController {
         model.addAttribute("processingCount", processingCount);
         model.addAttribute("processedCount", processedCount);
         model.addAttribute("totalCount", totalCount);
-        model.addAttribute("shippers", shippers);
         model.addAttribute("store", store);
         model.addAttribute("currentUser", user);
 
@@ -172,16 +167,11 @@ public class ManagerOrderController {
         boolean isProcessing = PROCESSING_STATUSES.contains(order.getStatus());
         List<StatusOption> availableStatuses = getAvailableStatuses(order);
 
-        List<User> shippers = userRepository.findByRole(Role.SHIPPER).stream()
-                .filter(s -> Boolean.TRUE.equals(s.getIsActive()) && s.getStore() != null && store.getId().equals(s.getStore().getId()))
-                .toList();
-
         model.addAttribute("order", order);
         model.addAttribute("store", store);
         model.addAttribute("currentUser", user);
         model.addAttribute("isProcessing", isProcessing);
         model.addAttribute("availableStatuses", availableStatuses);
-        model.addAttribute("shippers", shippers);
 
         return "manager/order-detail";
     }
@@ -204,7 +194,7 @@ public class ManagerOrderController {
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
-        if (redirectUrl != null && !redirectUrl.trim().isEmpty()) {
+        if (com.finalproject.utils.SafeRedirect.isWithin(redirectUrl, "/manager/orders", "/vendor/orders")) {
             return "redirect:" + redirectUrl;
         }
         return "redirect:/manager/orders/" + id;
@@ -220,70 +210,15 @@ public class ManagerOrderController {
         } catch (RuntimeException ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
-        if (redirectUrl != null && !redirectUrl.trim().isEmpty()) {
-            return "redirect:" + redirectUrl;
-        }
-        return "redirect:/manager/orders";
-    }
-
-    @PostMapping("/assign-shipper/{id}")
-    public String assignShipper(@PathVariable("id") Long id,
-                                @RequestParam("shipperId") Long shipperId,
-                                @RequestParam(value = "redirect", required = false) String redirectUrl,
-                                RedirectAttributes ra) {
-        try {
-            orderService.assignShipper(id, shipperId);
-            ra.addFlashAttribute("successMessage", "Đã phân công Shipper cho đơn #" + id + " thành công!");
-        } catch (Exception ex) {
-            ra.addFlashAttribute("errorMessage", ex.getMessage());
-        }
-        if (redirectUrl != null && !redirectUrl.trim().isEmpty()) {
+        if (com.finalproject.utils.SafeRedirect.isWithin(redirectUrl, "/manager/orders", "/vendor/orders")) {
             return "redirect:" + redirectUrl;
         }
         return "redirect:/manager/orders";
     }
 
     private List<StatusOption> getAvailableStatuses(Order order) {
-        List<StatusOption> options = new ArrayList<>();
-        if (order == null || order.getStatus() == null) return options;
-
-        boolean isPickup = "PICKUP".equals(order.getShippingMethod());
-
-        switch (order.getStatus()) {
-            case PENDING -> {
-                options.add(new StatusOption(OrderStatus.CONFIRMED.name(), "✅ Tiếp nhận đơn hàng (CONFIRMED)"));
-                options.add(new StatusOption(OrderStatus.CANCELLED.name(), "❌ Hủy đơn hàng (CANCELLED)"));
-            }
-            case CONFIRMED -> {
-                options.add(new StatusOption(OrderStatus.PREPARING.name(), "🌸 Bắt đầu cắm hoa & Chuẩn bị (PREPARING)"));
-                options.add(new StatusOption(OrderStatus.CANCELLED.name(), "❌ Hủy đơn hàng (CANCELLED)"));
-            }
-            case PREPARING -> {
-                if (isPickup) {
-                    options.add(new StatusOption(OrderStatus.COMPLETED.name(), "🎉 Khách nhận hoa tại quầy - Hoàn tất (COMPLETED)"));
-                } else {
-                    options.add(new StatusOption(OrderStatus.DELIVERING.name(), "🚚 Đang giao hoa đến khách (DELIVERING)"));
-                }
-                options.add(new StatusOption(OrderStatus.CANCELLED.name(), "❌ Hủy đơn hàng (CANCELLED)"));
-            }
-            case PICKED_UP -> {
-                options.add(new StatusOption(OrderStatus.DELIVERING.name(), "🚚 Đang giao hoa đến khách (DELIVERING)"));
-            }
-            case DELIVERING -> {
-                options.add(new StatusOption(OrderStatus.DELIVERED.name(), "📦 Đã giao hoa thành công (DELIVERED)"));
-                options.add(new StatusOption(OrderStatus.COMPLETED.name(), "🎉 Hoàn tất đơn hàng (COMPLETED)"));
-            }
-            case DELIVERED -> {
-                options.add(new StatusOption(OrderStatus.COMPLETED.name(), "🎉 Hoàn tất đơn hàng (COMPLETED)"));
-            }
-            case REFUND_REQUESTED -> {
-                options.add(new StatusOption(OrderStatus.REFUNDED.name(), "💵 Xác nhận đã hoàn tiền cho khách (REFUNDED)"));
-            }
-            default -> {
-                // Đơn đã hoàn tất hoặc đã hủy
-            }
-        }
-        return options;
+        return workflow.availableTransitions(order).stream()
+                .map(next -> new StatusOption(next.name(), workflow.transitionLabel(order, next))).toList();
     }
 
     private Store resolveStore(User user) {

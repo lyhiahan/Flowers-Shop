@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giỏ Hàng Hoa Tươi - Chuỗi Hoa Tươi Sài Gòn</title>
@@ -375,7 +376,7 @@
                                                            name="quantity" 
                                                            th:id="'qty_' + ${item.id}"
                                                            th:value="${item.quantity}" 
-                                                           min="1" max="99" 
+                                                           min="1" th:max="${stockByItem[item.id] > 0 ? stockByItem[item.id] : 1}" 
                                                            class="qty-input"
                                                            th:disabled="${isOutOfStock}"
                                                            th:onchange="'this.form.submit()'">
@@ -475,7 +476,7 @@
                                                    name="quantity" 
                                                    th:id="'qty_' + ${item.id}"
                                                    th:value="${item.quantity}" 
-                                                   min="1" max="99" 
+                                                   min="1" th:max="${stockByItem[item.id] > 0 ? stockByItem[item.id] : 1}" 
                                                    class="qty-input"
                                                    th:disabled="${isOutOfStock}"
                                                    th:onchange="'this.form.submit()'">
@@ -739,7 +740,8 @@
             var current = parseInt(input.value) || 1;
             var newVal = current + delta;
             if (newVal < 1) newVal = 1;
-            if (newVal > 99) newVal = 99;
+            var maxQty = parseInt(input.max, 10) || 1;
+            if (newVal > maxQty) newVal = maxQty;
             input.value = newVal;
             input.form.submit();
         }

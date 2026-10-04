@@ -17,6 +17,7 @@ public class Voucher {
     @Column(nullable = false, unique = true, length = 50)
     private String code; // FLOWER10, FREESHIP, TET2026
 
+    @org.hibernate.annotations.Nationalized
     @Column(nullable = false, length = 150)
     private String name;
 

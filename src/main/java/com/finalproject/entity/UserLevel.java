@@ -13,6 +13,7 @@ public class UserLevel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @org.hibernate.annotations.Nationalized
     @Column(nullable = false, unique = true, length = 32)
     private String name; // Đồng, Bạc, Vàng, Kim Cương
 

@@ -38,8 +38,8 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // 1. Tạo hoặc cập nhật 3 chi nhánh mẫu sang tiếng Việt thuần
-        Store storeA = storeRepository.findByName("Chi Nhánh Bến Thành (Quận 1)")
-                .orElseGet(() -> storeRepository.findByName("Bloom Flower - Chi Nhánh Bến Thành (Quận 1)")
+        Store storeA = storeRepository.findFirstByNameOrderByIdAsc("Chi Nhánh Bến Thành (Quận 1)")
+                .orElseGet(() -> storeRepository.findFirstByNameOrderByIdAsc("Bloom Flower - Chi Nhánh Bến Thành (Quận 1)")
                         .map(s -> {
                             s.setName("Chi Nhánh Bến Thành (Quận 1)");
                             return storeRepository.save(s);
@@ -54,8 +54,8 @@ public class DataInitializer implements CommandLineRunner {
                                 .eWallet(new BigDecimal("15500000"))
                                 .build())));
 
-        Store storeB = storeRepository.findByName("Chi Nhánh Phú Mỹ Hưng (Quận 7)")
-                .orElseGet(() -> storeRepository.findByName("Bloom Flower - Chi Nhánh Phú Mỹ Hưng (Quận 7)")
+        Store storeB = storeRepository.findFirstByNameOrderByIdAsc("Chi Nhánh Phú Mỹ Hưng (Quận 7)")
+                .orElseGet(() -> storeRepository.findFirstByNameOrderByIdAsc("Bloom Flower - Chi Nhánh Phú Mỹ Hưng (Quận 7)")
                         .map(s -> {
                             s.setName("Chi Nhánh Phú Mỹ Hưng (Quận 7)");
                             return storeRepository.save(s);
@@ -70,8 +70,8 @@ public class DataInitializer implements CommandLineRunner {
                                 .eWallet(new BigDecimal("8200000"))
                                 .build())));
 
-        Store storeC = storeRepository.findByName("Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
-                .orElseGet(() -> storeRepository.findByName("Bloom Flower - Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
+        Store storeC = storeRepository.findFirstByNameOrderByIdAsc("Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
+                .orElseGet(() -> storeRepository.findFirstByNameOrderByIdAsc("Bloom Flower - Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
                         .map(s -> {
                             s.setName("Chi Nhánh Làng Đại Học (TP. Thủ Đức)");
                             return storeRepository.save(s);
@@ -124,18 +124,6 @@ public class DataInitializer implements CommandLineRunner {
                 .createdDate(LocalDate.now())
                 .build()));
 
-        User shipper = userRepository.findByUsername("shipper_nhanh").orElseGet(() -> userRepository.save(User.builder()
-                .username("shipper_nhanh")
-                .password(passwordEncoder.encode("123456"))
-                .fullName("Phạm Giao Hàng Hỏa Tốc")
-                .email("shipper@rentalshop.vn")
-                .phone("0933445566")
-                .role(Role.SHIPPER)
-                .isActive(true)
-                .isEmailActive(true)
-                .createdDate(LocalDate.now())
-                .build()));
-
         User customer = userRepository.findByUsername("khachhang").orElseGet(() -> userRepository.save(User.builder()
                 .username("khachhang")
                 .password(passwordEncoder.encode("123456"))
@@ -165,6 +153,30 @@ public class DataInitializer implements CommandLineRunner {
                     .phone("0909999888")
                     .addressDetail("Toà nhà Bitexco, số 2 Hải Triều, Phường Bến Nghé, Quận 1, TP.HCM")
                     .isDefault(false)
+                    .build());
+        }
+
+        User customer2 = userRepository.findByUsername("khachhang2").orElseGet(() -> userRepository.save(User.builder()
+                .username("khachhang2")
+                .password(passwordEncoder.encode("123456"))
+                .fullName("Trần Thị Hoa")
+                .email("khachhang2@gmail.com")
+                .phone("0901234567")
+                .address("123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP.HCM")
+                .role(Role.CUSTOMER)
+                .isActive(true)
+                .isEmailActive(true)
+                .eWallet(new BigDecimal("3000000"))
+                .createdDate(LocalDate.now())
+                .build()));
+
+        if (userAddressRepository.findByUserIdOrderByIsDefaultDescCreatedAtDesc(customer2.getId()).isEmpty()) {
+            userAddressRepository.save(UserAddress.builder()
+                    .user(customer2)
+                    .recipientName("Trần Thị Hoa")
+                    .phone("0901234567")
+                    .addressDetail("123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP.HCM")
+                    .isDefault(true)
                     .build());
         }
 

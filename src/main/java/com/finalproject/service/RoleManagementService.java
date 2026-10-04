@@ -12,8 +12,6 @@ public interface RoleManagementService {
     RoleRequest submitRoleRequest(Long userId,
                                   Role targetRole,
                                   String phone,
-                                  String workArea,
-                                  String vehicleType,
                                   Long targetStoreId,
                                   String shopName,
                                   String shopAddress,

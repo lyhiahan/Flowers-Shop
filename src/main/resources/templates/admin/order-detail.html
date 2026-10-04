@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
     <title>Chi Tiết Đơn Hàng - Quản Trị Hệ Thống Hoa Tươi</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -246,7 +247,7 @@
                     <div class="mb-2"><strong>Chi nhánh xử lý:</strong> <span th:text="${order.pickupStore != null ? order.pickupStore.name : 'Toàn hệ thống'}"></span></div>
                     <div class="mb-2"><strong>Hình thức:</strong> <span th:text="${order.shippingMethod == 'PICKUP' ? 'Khách nhận tại tiệm' : 'Đơn vị vận chuyển giao tận nơi'}"></span></div>
                     <div class="mb-2"><strong>Lịch nhận hoa:</strong> <span th:text="${order.deliveryDate != null ? #temporals.format(order.deliveryDate, 'dd/MM/yyyy') : 'Giao trong ngày'}"></span></div>
-                    <div th:if="${order.shipper != null}" class="mb-2"><strong>Shipper phân công:</strong> <span th:text="${order.shipper.fullName} + ' (' + ${order.shipper.phone} + ')'"></span></div>
+
                 </div>
             </div>
         </div>
@@ -285,7 +286,7 @@
             </div>
             <div class="card-footer p-3 d-flex justify-content-between align-items-center bg-white border-top" style="border-color: #E2E7E2 !important;">
                 <div>
-                    <span class="text-muted">Phương thức thanh toán: <strong><span th:text="${order.paymentMethod}">COD</span></strong></span> |
+                    <span class="text-muted">Phương thức thanh toán: <strong><span th:text="${order.paymentMethod == 'BANK_TRANSFER' ? 'Chuyển khoản ngân hàng' : order.paymentMethod}">COD</span></strong></span> |
                     <span class="text-muted">Trạng thái: <strong><span th:text="${order.paymentStatus == 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'}"></span></strong></span>
                 </div>
                 <div>
@@ -295,6 +296,20 @@
             </div>
         </div>
 
+        <section th:if="${order.paymentMethod == 'BANK_TRANSFER' and order.paymentStatus == 'UNPAID' and order.status.name() != 'CANCELLED' and order.status.name() != 'REFUNDED' and order.status.name() != 'REFUND_REQUESTED'}"
+                 id="bankPaymentConfirmation" class="card border-0 shadow-sm rounded-4 p-4 mt-3">
+            <h2 class="h5 fw-bold">Xác nhận đã nhận tiền chuyển khoản</h2>
+            <div class="d-flex flex-wrap gap-4 my-2">
+                <p class="mb-0">Số tiền cần nhận: <strong th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></strong></p>
+                <p class="mb-0">Nội dung chuyển khoản: <strong th:text="'DH' + ${order.id}"></strong></p>
+            </div>
+            <p class="text-muted small">Đối chiếu giao dịch trong tài khoản ngân hàng và chỉ xác nhận khi đã nhận đủ tiền cho đơn này.</p>
+            <form th:action="@{/admin/orders-manage/confirm-payment/{id}(id=${order.id})}" method="post"
+                  onsubmit="return confirm('Bạn đã kiểm tra ngân hàng và nhận đủ tiền, đúng nội dung chuyển khoản cho đơn này?');">
+                <input type="hidden" name="redirect" th:value="'/admin/orders-manage/' + ${order.id}">
+                <button type="submit" class="btn btn-success"><i class="bi bi-check-circle me-1"></i>Xác nhận đã nhận tiền</button>
+            </form>
+        </section>
     </div>
 </div>
 

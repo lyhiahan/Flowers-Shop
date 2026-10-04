@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/floral :: head('Thanh toán MoMo thử nghiệm')}"></head>
+<body>
+<header th:replace="~{fragments/floral :: header}"></header>
+<main class="container py-5 floral-page">
+    <div class="card mx-auto p-4 shadow-sm" style="max-width:640px;">
+        <h1 class="h3">Thanh toán MoMo thử nghiệm</h1>
+        <div class="alert alert-warning" role="status">
+            <strong th:text="${mockMode ? 'DEV — Mô phỏng local' : 'MoMo Sandbox — Môi trường test'}"></strong>
+            <p class="mb-0">Đây là thanh toán thử nghiệm cho đồ án. Không có tiền thật được chuyển.</p>
+        </div>
+        <p>Đơn hoa #<strong th:text="${order.id}"></strong></p>
+        <p>Chi nhánh: <span th:text="${order.pickupStore.name}"></span></p>
+        <p class="fs-4 fw-bold" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></p>
+        <div th:if="${order.paymentStatus == 'PAID'}" class="alert alert-success">Đơn đã hoàn tất thanh toán thử nghiệm.</div>
+        <div th:if="${order.paymentStatus == 'UNPAID' and order.status.name() != 'CANCELLED' and order.status.name() != 'REFUNDED'}">
+            <form th:if="${mockMode}" th:action="@{/checkout/momo/{id}/simulate(id=${order.id})}" method="post">
+                <p>Nhấn nút bên dưới để kiểm thử luồng thanh toán thành công. Không cần mở ứng dụng hoặc quét mã MoMo.</p>
+                <button type="submit" class="btn btn-success w-100">Mô phỏng thanh toán thành công (DEV)</button>
+            </form>
+            <div th:unless="${mockMode}">
+                <p>Thanh toán bằng ứng dụng MoMo Test trên trang sandbox. Trạng thái chỉ cập nhật sau khi xác minh kết quả từ MoMo.</p>
+                <form th:action="@{/checkout/momo/retry/{id}(id=${order.id})}" method="post">
+                    <button type="submit" class="btn btn-success w-100">Mở lại MoMo Sandbox</button>
+                </form>
+            </div>
+        </div>
+        <a th:href="@{/customer/orders}" class="btn btn-outline-secondary mt-3">Quay về đơn hàng / thanh toán sau</a>
+    </div>
+</main>
+<footer th:replace="~{fragments/floral :: footer}"></footer>
+<div th:replace="~{fragments/floral :: scripts}"></div>
+</body>
+</html>

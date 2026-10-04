@@ -31,10 +31,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     // Lọc theo User và trạng thái
     List<Order> findByUserIdAndStatusOrderByCreatedAtDesc(Long userId, OrderStatus status);
 
-    // Lọc đơn hàng cho Shipper
-    List<Order> findByShipperIdOrderByCreatedAtDesc(Long shipperId);
-    List<Order> findByShipperIdAndStatus(Long shipperId, OrderStatus status);
-    long countByShipperIdAndStatus(Long shipperId, OrderStatus status);
+    boolean existsByLegacyDeliveryContactId(Long userId);
 
     // Tìm kiếm đơn hàng theo khoảng thời gian để thống kê
     List<Order> findByCreatedAtBetween(java.time.LocalDateTime start, java.time.LocalDateTime end);

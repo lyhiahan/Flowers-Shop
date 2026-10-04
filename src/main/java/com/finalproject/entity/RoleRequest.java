@@ -24,9 +24,16 @@ public class RoleRequest {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = RoleConverter.class)
     @Column(name = "target_role", nullable = false, length = 30)
     private Role targetRole;
+
+    @Column(name = "target_role", nullable = false, length = 30, insertable = false, updatable = false)
+    private String storedTargetRole;
+
+    public boolean isRetiredRoleRequest() {
+        return "SHIPPER".equals(storedTargetRole);
+    }
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
@@ -36,28 +43,35 @@ public class RoleRequest {
     @Column(length = 20)
     private String phone;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "work_area", length = 255)
-    private String workArea;
+    private String workArea; // Retained for historical requests only.
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "vehicle_type", length = 100)
-    private String vehicleType;
+    private String vehicleType; // Retained for historical requests only.
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "target_store_id")
     private Store targetStore;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "shop_name", length = 255)
     private String shopName;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "shop_address", length = 500)
     private String shopAddress;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "contact_info", length = 255)
     private String contactInfo;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "experience_note", length = 1000)
     private String experienceNote;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "rejection_reason", length = 500)
     private String rejectionReason;
 
@@ -77,9 +91,9 @@ public class RoleRequest {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public String getTargetRoleDisplayName() {
+        if (isRetiredRoleRequest()) return "Vai trò đã ngừng sử dụng";
         if (targetRole == null) return "Chưa xác định";
         return switch (targetRole) {
-            case SHIPPER -> "Nhân viên giao hàng";
             case MANAGER -> "Quản lý chi nhánh";
             case VENDOR -> "Người bán (Đối tác)";
             case STAFF -> "Nhân viên chi nhánh";

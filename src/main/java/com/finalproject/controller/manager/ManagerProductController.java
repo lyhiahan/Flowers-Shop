@@ -64,8 +64,11 @@ public class ManagerProductController {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         Store store = storeAccess.assignedStore();
         Category category = categoryRepository.findById(categoryId).orElseThrow();
+        if (Boolean.TRUE.equals(category.getIsDeleted())) throw new IllegalArgumentException("Danh mục đã bị xóa.");
 
         validatePrice(priceBuy, promotionalPrice);
+        validateName(name);
+        if (initialStock < 0 || initialStock > 1000000) throw new IllegalArgumentException("Tồn kho phải từ 0 đến 1.000.000.");
         Product product = Product.builder()
                 .name(name)
                 .category(category)
@@ -99,9 +102,12 @@ public class ManagerProductController {
                                 @RequestParam(value = "description", required = false) String description,
                                 RedirectAttributes ra) {
         Product p = productRepository.findById(id).orElseThrow();
+        if (Boolean.TRUE.equals(p.getIsDeleted())) throw new IllegalArgumentException("Sản phẩm đã bị xóa.");
         storeAccess.requireManager(p.getStore());
         Category cat = categoryRepository.findById(categoryId).orElseThrow();
+        if (Boolean.TRUE.equals(cat.getIsDeleted())) throw new IllegalArgumentException("Danh mục đã bị xóa.");
         validatePrice(priceBuy, promotionalPrice);
+        validateName(name);
         p.setName(name);
         p.setCategory(cat);
         p.setPriceBuy(priceBuy);
@@ -132,8 +138,12 @@ public class ManagerProductController {
     }
 
     private void validatePrice(BigDecimal price, BigDecimal promotion) {
-        if (price == null || price.signum() < 0 || (promotion != null && (promotion.signum() < 0 || promotion.compareTo(price) > 0))) {
-            throw new IllegalArgumentException("Giá bán phải không âm; giá khuyến mãi không vượt quá giá bán.");
+        if (price == null || price.signum() <= 0 || price.precision() - price.scale() > 16 || price.stripTrailingZeros().scale() > 2
+                || (promotion != null && (promotion.signum() <= 0 || promotion.compareTo(price) > 0 || promotion.stripTrailingZeros().scale() > 2))) {
+            throw new IllegalArgumentException("Giá bán phải lớn hơn 0, tối đa 16 chữ số và 2 số thập phân; giá khuyến mãi không vượt quá giá bán.");
         }
+    }
+    private void validateName(String name) {
+        if (name == null || name.isBlank() || name.length() > 200) throw new IllegalArgumentException("Tên sản phẩm phải có từ 1 đến 200 ký tự.");
     }
 }

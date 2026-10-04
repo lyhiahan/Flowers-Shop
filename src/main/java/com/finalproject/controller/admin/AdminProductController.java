@@ -32,6 +32,17 @@ public class AdminProductController {
     private final ProductService productService;
     private final ProductSeederService productSeederService;
 
+    private String safeReturnUrl(String value) {
+        if (value != null && !value.contains("\\") && value.chars().noneMatch(Character::isISOControl)) {
+            try {
+                java.net.URI uri = java.net.URI.create(value);
+                if (uri.getScheme() == null && uri.getRawAuthority() == null && uri.getFragment() == null
+                        && List.of("/admin/products", "/admin/products-manage").contains(uri.getPath())) return value;
+            } catch (IllegalArgumentException ignored) {}
+        }
+        return "/admin/products-manage";
+    }
+
     public static String detectStyle(String name) {
         if (name == null) return "Bó hoa";
         String n = name.trim().toLowerCase();
@@ -429,7 +440,7 @@ public class AdminProductController {
         } else {
             ra.addFlashAttribute("errorMessage", "Không tìm thấy sản phẩm cần xóa.");
         }
-        String target = (returnUrl != null && !returnUrl.isBlank()) ? returnUrl : "/admin/products-manage";
+        String target = safeReturnUrl(returnUrl);
         return "redirect:" + target;
     }
 

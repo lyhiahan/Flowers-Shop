@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng Ký Tài Khoản - Chuỗi Cửa Hàng Hoa Tươi</title>
@@ -229,10 +230,10 @@
                                 <label for="provinceSelect" class="form-label small fw-semibold text-secondary">
                                     Tỉnh / Thành phố <span class="text-danger">(*)</span>
                                 </label>
-                                <select id="provinceSelect" th:field="*{province}" class="form-select" required>
+                                <select id="provinceSelect" th:field="*{province}" class="form-select" th:classappend="${#fields.hasErrors('province')} ? 'is-invalid' : ''" required>
                                     <option value="">-- Chọn Tỉnh / Thành phố --</option>
                                 </select>
-                                <div id="provinceFeedback" class="invalid-feedback small">
+                                <div id="provinceFeedback" class="invalid-feedback small" th:text="${#fields.hasErrors('province') ? #strings.listJoin(#fields.errors('province'), '; ') : 'Vui lòng chọn Tỉnh / Thành phố.'}">
                                     Vui lòng chọn Tỉnh / Thành phố.
                                 </div>
                             </div>
@@ -241,10 +242,10 @@
                                 <label for="districtSelect" class="form-label small fw-semibold text-secondary">
                                     Quận / Huyện <span class="text-danger">(*)</span>
                                 </label>
-                                <select id="districtSelect" th:field="*{district}" class="form-select" disabled required>
+                                <select id="districtSelect" th:field="*{district}" class="form-select" th:classappend="${#fields.hasErrors('district')} ? 'is-invalid' : ''" disabled required>
                                     <option value="">-- Chọn Quận / Huyện --</option>
                                 </select>
-                                <div id="districtFeedback" class="invalid-feedback small">
+                                <div id="districtFeedback" class="invalid-feedback small" th:text="${#fields.hasErrors('district') ? #strings.listJoin(#fields.errors('district'), '; ') : 'Vui lòng chọn Quận / Huyện.'}">
                                     Vui lòng chọn Quận / Huyện.
                                 </div>
                             </div>

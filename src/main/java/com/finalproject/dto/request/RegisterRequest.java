@@ -30,14 +30,19 @@ public class RegisterRequest {
 
     @NotBlank(message = "Vui lòng điền địa chỉ email")
     @Email(message = "Email không đúng định dạng (VD: example@domain.com)")
+    @Size(max = 100, message = "Email tối đa 100 ký tự")
     private String email;
 
     @NotBlank(message = "Vui lòng điền số điện thoại")
     @Pattern(regexp = "^(0|\\+?84)[35789][0-9]{8}$", message = "Số điện thoại không đúng chuẩn Việt Nam (10 chữ số, bắt đầu bằng 03, 05, 07, 08, 09)")
     private String phone;
 
+    @NotBlank(message = "Vui lòng chọn tỉnh / thành phố")
+    @Size(max = 100, message = "Tỉnh / thành phố tối đa 100 ký tự")
     private String province;
 
+    @NotBlank(message = "Vui lòng chọn quận / huyện")
+    @Size(max = 100, message = "Quận / huyện tối đa 100 ký tự")
     private String district;
 
     private String detailAddress;

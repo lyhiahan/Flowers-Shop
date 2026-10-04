@@ -59,7 +59,7 @@ class AdminCategoryManagementUseCaseTests {
                 .email("admin_uc30@example.com")
                 .password(encodedPass)
                 .fullName("Quản Trị Viên UC30")
-                .role(Role.ADMIN)
+                .isActive(true).role(Role.ADMIN)
                 .build());
 
         customer = userRepository.save(User.builder()
@@ -67,7 +67,7 @@ class AdminCategoryManagementUseCaseTests {
                 .email("customer_uc30@example.com")
                 .password(encodedPass)
                 .fullName("Khách Hàng UC30")
-                .role(Role.CUSTOMER)
+                .isActive(true).role(Role.CUSTOMER)
                 .build());
 
         rootCat1 = categoryRepository.save(Category.builder()

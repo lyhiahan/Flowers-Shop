@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -44,19 +43,20 @@ public class AdminTransactionController {
             @RequestParam(name = "keyword", required = false) String keyword,
             Model model) {
         try {
-            Pageable pageable = PageRequest.of(Math.max(0, page), size, Sort.by(Sort.Direction.DESC, "createdAt", "id"));
+            int pageSize = Math.max(1, Math.min(size, 100));
+            Pageable pageable = PageRequest.of(Math.max(0, page), pageSize);
             Page<Transaction> transactionPage;
             if (keyword != null && !keyword.trim().isEmpty()) {
-                transactionPage = transactionRepository.findByDescriptionContainingIgnoreCase(keyword.trim(), pageable);
+                transactionPage = transactionRepository.findByDescriptionContainingIgnoreCaseOrderByCreatedAtDescIdDesc(keyword.trim(), pageable);
             } else {
-                transactionPage = transactionRepository.findAll(pageable);
+                transactionPage = transactionRepository.findAllByOrderByCreatedAtDescIdDesc(pageable);
             }
             model.addAttribute("transactionPage", transactionPage);
             model.addAttribute("transactions", transactionPage.getContent());
             model.addAttribute("currentPage", transactionPage.getNumber());
             model.addAttribute("totalPages", transactionPage.getTotalPages());
             model.addAttribute("totalElements", transactionPage.getTotalElements());
-            model.addAttribute("pageSize", size);
+            model.addAttribute("pageSize", pageSize);
             model.addAttribute("keyword", keyword != null ? keyword : "");
         } catch (Exception ex) {
             model.addAttribute("dataLoadError", true);

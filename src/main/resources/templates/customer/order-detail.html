@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
     <title th:text="'Chi Tiết Đơn Hàng #' + ${order.id} + ' - Chuỗi Cửa Hàng Hoa Tươi'">Chi Tiết Đơn Hàng</title>
     <!-- Google Fonts & Bootstrap 5 & Icons -->
@@ -70,6 +71,9 @@
             <div class="d-flex align-items-center gap-2">
                 <a th:href="@{/customer/orders}" class="btn btn-sm btn-outline-danger rounded-pill px-3">
                     <i class="bi bi-clock-history me-1"></i> Đơn Hoa Của Tôi
+                </a>
+                <a th:href="@{/notifications}" class="btn btn-sm btn-outline-danger rounded-pill px-3" title="Thông báo">
+                    <i class="bi bi-bell-fill"></i>
                 </a>
                 <a th:href="@{/customer/profile}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
                     <i class="bi bi-person-circle me-1"></i> Tài Khoản
@@ -148,7 +152,18 @@
                             <div class="mb-1"><strong>Chi nhánh xử lý:</strong> <span th:text="${order.pickupStore.name}"></span></div>
                             <div class="mb-1"><strong>Địa chỉ shop:</strong> <span class="small text-muted" th:text="${order.pickupStore.address}"></span></div>
                             <div class="mb-1"><strong>Thời gian đặt:</strong> <span th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></span></div>
-                            <div class="mb-1"><strong>Phương thức thanh toán:</strong> <span class="badge bg-white text-dark border" th:text="${order.paymentMethod}"></span></div>
+                            <div class="mb-1"><strong>Phương thức thanh toán:</strong> 
+                                <span th:if="${order.paymentMethod == 'MOMO'}" class="badge rounded-pill text-white px-2 py-1 ms-1" style="background-color: #D82D8B;">
+                                    <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo" style="height: 14px; width: 14px; vertical-align: -2px;" class="me-1">
+                                    <span th:text="${order.paymentStatus == 'PAID' ? 'Ví MoMo - Đã thanh toán' : 'Ví MoMo - Chờ thanh toán'}"></span>
+                                </span>
+                                <span th:if="${order.paymentMethod == 'BANK_TRANSFER'}" class="badge bg-primary rounded-pill px-2 py-1 ms-1">
+                                    <span th:text="${order.paymentStatus == 'PAID' ? 'VietQR - Đã chuyển khoản' : 'VietQR - Chờ chuyển khoản'}"></span>
+                                </span>
+                                <span th:if="${order.paymentMethod == 'COD'}" class="badge bg-secondary rounded-pill px-2 py-1 ms-1">
+                                    <span>COD (Tiền mặt khi nhận hoa)</span>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -396,7 +411,8 @@
     <!-- ==============================================
          FOOTER CHUẨN ĐỒNG BỘ THEO MẪU (BOTANICAL ATELIER)
          ============================================== -->
-    <footer class="w-full border-top pt-4 pb-3 mt-5" style="background-color: #FAF4F0 !important; border-top: 1px solid #EBDED4 !important; font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif !important; color: #4A3E3D !important; width: 100%;">
+    <div class="container mb-4"><div class="card p-3"><div class="d-flex flex-wrap gap-4"><span>Phí giao hàng: <strong th:text="${#numbers.formatDecimal(order.shippingFee != null ? order.shippingFee : 0,0,'COMMA',0,'POINT')} + ' ₫'"></strong></span><span>Giảm giá: <strong th:text="${#numbers.formatDecimal(order.discountAmount != null ? order.discountAmount : 0,0,'COMMA',0,'POINT')} + ' ₫'"></strong></span></div></div></div>
+<footer class="w-full border-top pt-4 pb-3 mt-5" style="background-color: #FAF4F0 !important; border-top: 1px solid #EBDED4 !important; font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif !important; color: #4A3E3D !important; width: 100%;">
         <div style="max-width: 1240px; margin: 0 auto; padding-left: 20px; padding-right: 20px;">
             <!-- Hàng trên: 2 Cột thông tin -->
             <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 24px; padding-bottom: 24px;">
@@ -456,7 +472,8 @@
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function handleReviewInput(productId) {
             const textarea = document.getElementById('content_' + productId);

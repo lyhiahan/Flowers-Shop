@@ -5,6 +5,5 @@ public enum Role {
     MANAGER,
     VENDOR,
     STAFF,
-    CUSTOMER,
-    SHIPPER
+    CUSTOMER
 }

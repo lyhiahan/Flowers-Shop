@@ -87,7 +87,7 @@ public class CartController {
         return "redirect:/cart";
     }
 
-    @RequestMapping(value = "/remove/{id}", method = {RequestMethod.POST, RequestMethod.GET})
+    @PostMapping("/remove/{id}")
     public String handleRemoveCartItem(Principal principal,
                                        @PathVariable("id") Long id,
                                        RedirectAttributes redirectAttributes) {
@@ -105,9 +105,8 @@ public class CartController {
                                  @RequestParam("paymentMethod") PaymentMethod paymentMethod,
                                  RedirectAttributes redirectAttributes) {
         try {
-            orderService.checkout(principal.getName(), paymentMethod);
-            redirectAttributes.addFlashAttribute("successMessage", "Đặt hàng thành công! Đơn hàng của bạn đang chờ xác nhận.");
-            return "redirect:/customer/orders";
+            // Keep the legacy entry point, but collect and validate checkout details centrally.
+            return "redirect:/checkout";
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
             return "redirect:/cart";

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
     <title>Quản Lý Người Dùng & Vai Trò - Quản Trị Hệ Thống Hoa Tươi</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -70,7 +71,6 @@
         }
         .role-pill-admin { background-color: #EDE9FE; color: #5B21B6; border: 1px solid #DDD6FE; }
         .role-pill-manager { background-color: #E0F2FE; color: #0369A1; border: 1px solid #BAE6FD; }
-        .role-pill-shipper { background-color: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; }
         .role-pill-vendor { background-color: #FFEDD5; color: #C2410C; border: 1px solid #FED7AA; }
         .role-pill-customer { background-color: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
 
@@ -192,7 +192,6 @@
                             <option value="ALL" th:selected="${currentRole == 'ALL' or currentRole == null}">Tất cả vai trò</option>
                             <option value="CUSTOMER" th:selected="${currentRole == 'CUSTOMER'}">Khách hàng</option>
                             <option value="VENDOR" th:selected="${currentRole == 'VENDOR'}">Người bán (Vendor)</option>
-                            <option value="SHIPPER" th:selected="${currentRole == 'SHIPPER'}">Giao hàng (Shipper)</option>
                             <option value="MANAGER" th:selected="${currentRole == 'MANAGER'}">Quản lý (Manager)</option>
                             <option value="ADMIN" th:selected="${currentRole == 'ADMIN'}">Quản trị viên (Admin)</option>
                         </select>
@@ -248,9 +247,9 @@
                                     <div class="d-flex flex-wrap gap-1">
                                         <!-- Danh sách vai trò từ Set<Role> roles -->
                                         <span th:each="r : ${u.roles}" class="role-pill"
-                                              th:classappend="${r.name() == 'ADMIN' ? 'role-pill-admin' : (r.name() == 'MANAGER' ? 'role-pill-manager' : (r.name() == 'SHIPPER' ? 'role-pill-shipper' : (r.name() == 'VENDOR' ? 'role-pill-vendor' : 'role-pill-customer')))}">
-                                            <i class="bi" th:classappend="${r.name() == 'ADMIN' ? 'bi-shield-shaded' : (r.name() == 'MANAGER' ? 'bi-building' : (r.name() == 'SHIPPER' ? 'bi-truck' : (r.name() == 'VENDOR' ? 'bi-shop' : 'bi-person')))}"></i>
-                                            <span th:text="${r.name() == 'ADMIN' ? 'Admin' : (r.name() == 'MANAGER' ? 'Quản lý' : (r.name() == 'SHIPPER' ? 'Giao hàng' : (r.name() == 'VENDOR' ? 'Người bán' : 'Khách hàng')))}"></span>
+                                              th:classappend="${r.name() == 'ADMIN' ? 'role-pill-admin' : (r.name() == 'MANAGER' ? 'role-pill-manager' : (r.name() == 'VENDOR' ? 'role-pill-vendor' : 'role-pill-customer'))}">
+                                            <i class="bi" th:classappend="${r.name() == 'ADMIN' ? 'bi-shield-shaded' : (r.name() == 'MANAGER' ? 'bi-building' : (r.name() == 'VENDOR' ? 'bi-shop' : 'bi-person'))}"></i>
+                                            <span th:text="${r.name() == 'ADMIN' ? 'Admin' : (r.name() == 'MANAGER' ? 'Quản lý' : (r.name() == 'VENDOR' ? 'Người bán' : 'Khách hàng'))}"></span>
                                         </span>
                                         <!-- Fallback nếu user_roles chưa đồng bộ -->
                                         <span th:if="${#sets.isEmpty(u.roles) and u.role != null}" class="role-pill role-pill-customer" th:text="${u.role.name()}"></span>
@@ -406,8 +405,8 @@
                                 </td>
                                 <td>
                                     <span class="role-pill"
-                                          th:classappend="${req.targetRole.name() == 'SHIPPER' ? 'role-pill-shipper' : (req.targetRole.name() == 'MANAGER' ? 'role-pill-manager' : 'role-pill-vendor')}">
-                                        <i class="bi" th:classappend="${req.targetRole.name() == 'SHIPPER' ? 'bi-truck' : (req.targetRole.name() == 'MANAGER' ? 'bi-building' : 'bi-shop')}"></i>
+                                          th:classappend="${req.targetRole.name() == 'MANAGER' ? 'role-pill-manager' : 'role-pill-vendor'}">
+                                        <i class="bi" th:classappend="${req.targetRole.name() == 'MANAGER' ? 'bi-building' : 'bi-shop'}"></i>
                                         <span th:text="${req.targetRoleDisplayName}">Giao hàng</span>
                                     </span>
                                 </td>
@@ -474,9 +473,9 @@
                         <label class="form-label fw-bold text-dark small text-uppercase">Vai trò hiện tại đang sở hữu</label>
                         <div class="d-flex flex-wrap gap-2 mt-1">
                             <span th:each="r : ${u.roles}" class="role-pill fs-6 px-3 py-1"
-                                  th:classappend="${r.name() == 'ADMIN' ? 'role-pill-admin' : (r.name() == 'MANAGER' ? 'role-pill-manager' : (r.name() == 'SHIPPER' ? 'role-pill-shipper' : (r.name() == 'VENDOR' ? 'role-pill-vendor' : 'role-pill-customer')))}">
-                                <i class="bi" th:classappend="${r.name() == 'ADMIN' ? 'bi-shield-shaded' : (r.name() == 'MANAGER' ? 'bi-building' : (r.name() == 'SHIPPER' ? 'bi-truck' : (r.name() == 'VENDOR' ? 'bi-shop' : 'bi-person')))}"></i>
-                                <span th:text="${r.name() == 'ADMIN' ? 'Quản trị viên (Admin)' : (r.name() == 'MANAGER' ? 'Quản lý chi nhánh (Manager)' : (r.name() == 'SHIPPER' ? 'Nhân viên giao hàng (Shipper)' : (r.name() == 'VENDOR' ? 'Người bán hoa (Vendor)' : 'Khách hàng (Customer)')))}"></span>
+                                  th:classappend="${r.name() == 'ADMIN' ? 'role-pill-admin' : (r.name() == 'MANAGER' ? 'role-pill-manager' : (r.name() == 'VENDOR' ? 'role-pill-vendor' : 'role-pill-customer'))}">
+                                <i class="bi" th:classappend="${r.name() == 'ADMIN' ? 'bi-shield-shaded' : (r.name() == 'MANAGER' ? 'bi-building' : (r.name() == 'VENDOR' ? 'bi-shop' : 'bi-person'))}"></i>
+                                <span th:text="${r.name() == 'ADMIN' ? 'Quản trị viên (Admin)' : (r.name() == 'MANAGER' ? 'Quản lý chi nhánh (Manager)' : (r.name() == 'VENDOR' ? 'Người bán hoa (Vendor)' : 'Khách hàng (Customer)'))}"></span>
                             </span>
                         </div>
                         <div th:if="${u.store != null}" class="mt-2 text-primary small">
@@ -497,7 +496,6 @@
                                         <select name="role" class="form-select form-select-sm" required
                                                 th:onchange="'toggleStoreSelect(this.value, \'' + ${u.id} + '\')'">
                                             <option value="" disabled selected>-- Chọn vai trò --</option>
-                                            <option value="SHIPPER">🛵 Nhân viên giao hàng (Shipper)</option>
                                             <option value="MANAGER">🏢 Quản lý chi nhánh (Manager)</option>
                                             <option value="VENDOR">🏪 Người bán đối tác (Vendor)</option>
                                             <option value="ADMIN">🛡️ Quản trị viên (Admin)</option>
@@ -538,7 +536,7 @@
                                             <option th:each="r : ${u.roles}"
                                                     th:if="${r.name() != 'CUSTOMER'}"
                                                     th:value="${r.name()}"
-                                                    th:text="${r.name() == 'MANAGER' ? '🏢 Quản lý chi nhánh' : (r.name() == 'SHIPPER' ? '🛵 Giao hàng' : (r.name() == 'VENDOR' ? '🏪 Người bán' : '🛡️ Quản trị viên'))}"></option>
+                                                    th:text="${r.name() == 'MANAGER' ? '🏢 Quản lý chi nhánh' : (r.name() == 'VENDOR' ? '🏪 Người bán' : '🛡️ Quản trị viên')}"></option>
                                         </select>
                                     </div>
 
@@ -598,7 +596,7 @@
                         <div class="col-md-6">
                             <span class="text-muted small d-block">Vai trò xin cấp:</span>
                             <span class="role-pill fs-6 mt-1"
-                                  th:classappend="${req.targetRole.name() == 'SHIPPER' ? 'role-pill-shipper' : (req.targetRole.name() == 'MANAGER' ? 'role-pill-manager' : 'role-pill-vendor')}">
+                                  th:classappend="${req.targetRole.name() == 'MANAGER' ? 'role-pill-manager' : 'role-pill-vendor'}">
                                 <span th:text="${req.targetRoleDisplayName}">Giao hàng</span>
                             </span>
                         </div>
@@ -611,27 +609,8 @@
                     <!-- Nội dung hồ sơ chi tiết theo vai trò -->
                     <h6 class="fw-bold text-dark mb-3"><i class="bi bi-card-text text-primary me-2"></i>Chi tiết thông tin đăng ký</h6>
                     <div class="border rounded-3 p-3 mb-4 bg-white">
-                        <!-- Shipper fields -->
-                        <div th:if="${req.targetRole.name() == 'SHIPPER'}">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <span class="text-muted small d-block">Số điện thoại liên hệ:</span>
-                                    <strong class="text-dark" th:text="${req.phone != null ? req.phone : req.user.phone}"></strong>
-                                </div>
-                                <div class="col-md-6">
-                                    <span class="text-muted small d-block">Phương tiện vận chuyển:</span>
-                                    <strong class="text-dark" th:text="${req.vehicleType != null ? req.vehicleType : 'Chưa cập nhật'}"></strong>
-                                </div>
-                                <div class="col-12">
-                                    <span class="text-muted small d-block">Khu vực làm việc đăng ký:</span>
-                                    <strong class="text-primary" th:text="${req.workArea != null ? req.workArea : 'Toàn khu vực'}"></strong>
-                                </div>
-                                <div class="col-12" th:if="${req.experienceNote != null and !#strings.isEmpty(req.experienceNote)}">
-                                    <span class="text-muted small d-block">Kinh nghiệm giao hàng & bảo quản hoa:</span>
-                                    <p class="text-dark small bg-light p-2 rounded mb-0 mt-1" th:text="${req.experienceNote}"></p>
-                                </div>
-                            </div>
-                        </div>
+
+
 
                         <!-- Manager fields -->
                         <div th:if="${req.targetRole.name() == 'MANAGER'}">

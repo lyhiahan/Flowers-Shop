@@ -48,7 +48,6 @@ public class AdminDashboardController {
             long totalCustomers = userRepository.countByRole(Role.CUSTOMER);
             long totalManagers = userRepository.countByRole(Role.MANAGER);
             long totalVendors = userRepository.countByRole(Role.VENDOR);
-            long totalShippers = userRepository.countByRole(Role.SHIPPER);
 
             long totalOrders = orderRepository.count();
             long pendingOrders = orderRepository.countByStatus(OrderStatus.PENDING);
@@ -133,7 +132,6 @@ public class AdminDashboardController {
             model.addAttribute("totalCustomers", totalCustomers);
             model.addAttribute("totalManagers", totalManagers);
             model.addAttribute("totalVendors", totalVendors);
-            model.addAttribute("totalShippers", totalShippers);
             model.addAttribute("totalOrders", totalOrders);
             model.addAttribute("totalOrdersCount", totalOrders);
             model.addAttribute("pendingOrders", pendingOrders);
