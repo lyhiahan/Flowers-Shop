@@ -64,6 +64,7 @@ public class ManagerProductController {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         Store store = storeAccess.assignedStore();
         Category category = categoryRepository.findById(categoryId).orElseThrow();
+        if (Boolean.TRUE.equals(category.getIsDeleted())) throw new IllegalArgumentException("Danh mục đã bị xóa.");
 
         validatePrice(priceBuy, promotionalPrice);
         validateName(name);
@@ -101,8 +102,10 @@ public class ManagerProductController {
                                 @RequestParam(value = "description", required = false) String description,
                                 RedirectAttributes ra) {
         Product p = productRepository.findById(id).orElseThrow();
+        if (Boolean.TRUE.equals(p.getIsDeleted())) throw new IllegalArgumentException("Sản phẩm đã bị xóa.");
         storeAccess.requireManager(p.getStore());
         Category cat = categoryRepository.findById(categoryId).orElseThrow();
+        if (Boolean.TRUE.equals(cat.getIsDeleted())) throw new IllegalArgumentException("Danh mục đã bị xóa.");
         validatePrice(priceBuy, promotionalPrice);
         validateName(name);
         p.setName(name);

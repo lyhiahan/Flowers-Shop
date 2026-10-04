@@ -34,7 +34,6 @@ public class OrderWorkflowService {
             case PENDING -> java.util.List.of(OrderStatus.CONFIRMED, OrderStatus.CANCELLED);
             case CONFIRMED -> java.util.List.of(OrderStatus.PREPARING, OrderStatus.CANCELLED);
             case PREPARING -> pickup ? java.util.List.of(OrderStatus.COMPLETED, OrderStatus.CANCELLED)
-                    : order.getShipper() != null ? java.util.List.of(OrderStatus.PICKED_UP, OrderStatus.DELIVERING, OrderStatus.CANCELLED)
                     : java.util.List.of(OrderStatus.DELIVERING, OrderStatus.CANCELLED);
             case PICKED_UP -> java.util.List.of(OrderStatus.DELIVERING);
             case DELIVERING -> java.util.List.of(OrderStatus.DELIVERED);
@@ -61,22 +60,18 @@ public class OrderWorkflowService {
     @Transactional
     public Order transition(Long id, OrderStatus next) {
         Order order = lockedOrder(id);
-        User actor = access.currentUser();
-        if (actor.getRole() == Role.SHIPPER) {
-            if (order.getShipper() == null || !actor.getId().equals(order.getShipper().getId())
-                    || (next != OrderStatus.DELIVERING && next != OrderStatus.DELIVERED)) {
-                throw new AccessDeniedException("Bạn chỉ được cập nhật giao hàng cho đơn được phân công.");
-            }
-        } else {
-            access.requireStore(order.getPickupStore());
-            if (next == OrderStatus.REFUNDED) access.requireManager(order.getPickupStore());
-        }
+        access.requireStore(order.getPickupStore());
+        if (next == OrderStatus.REFUNDED) access.requireManager(order.getPickupStore());
         OrderStatus previous = order.getStatus();
         if (previous == next) return order;
         if ("PICKUP".equals(order.getShippingMethod()) && (next == OrderStatus.PICKED_UP || next == OrderStatus.DELIVERING || next == OrderStatus.DELIVERED))
             throw new IllegalStateException("Đơn khách nhận tại tiệm không có bước vận chuyển. Khi khách đã nhận hoa, chọn 'Khách nhận hoa tại quầy - Hoàn tất'.");
         boolean allowed = availableTransitions(order).contains(next);
         if (!allowed) throw new IllegalStateException("Không thể chuyển đơn từ " + previous + " sang " + next);
+        if (next == OrderStatus.DELIVERING && !"COD".equals(order.getPaymentMethod())
+                && !"CASH".equals(order.getPaymentMethod()) && !"PAID".equals(order.getPaymentStatus())) {
+            throw new IllegalStateException("Cần xác nhận đã nhận thanh toán trước khi giao hoa.");
+        }
         if (next == OrderStatus.CANCELLED) return cancel(order);
         if (next == OrderStatus.REFUNDED) refund(order);
         if ((next == OrderStatus.DELIVERED || next == OrderStatus.COMPLETED) && previous != OrderStatus.DELIVERED) {
@@ -265,10 +260,9 @@ public class OrderWorkflowService {
                             "ORDER_PREPARING", orderId);
                 }
                 case DELIVERING -> {
-                    String shipperInfo = order.getShipper() != null ? (" cùng tài xế " + order.getShipper().getFullName()) : "";
                     notificationService.sendNotification(order.getUser(),
                             "🚀 Đơn hoa #" + orderId + " đang được giao",
-                            "Đơn hoa của bạn đang trên đường vận chuyển" + shipperInfo + ". Vui lòng để ý điện thoại nhé!",
+                            "Đơn hoa của bạn đang trên đường vận chuyển. Vui lòng để ý điện thoại nhé!",
                             "ORDER_DELIVERING", orderId);
                 }
                 case DELIVERED, COMPLETED -> {

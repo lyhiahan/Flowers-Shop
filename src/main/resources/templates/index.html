@@ -1162,10 +1162,8 @@
                                         <span class="badge rounded-pill" style="background-color: #E3F2FD; color: #1565C0; border: 1px solid #BBDEFB; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')">
                                             Quản lý chi nhánh
                                         </span>
-                                        <span class="badge rounded-pill" style="background-color: #FFF3E0; color: #E65100; border: 1px solid #FFE0B2; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="hasRole('SHIPPER') and !hasRole('ADMIN')">
-                                            Giao hàng
-                                        </span>
-                                        <span class="badge rounded-pill" style="background-color: #F5F5F5; color: #424242; border: 1px solid #E0E0E0; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="!hasAnyRole('ADMIN', 'MANAGER', 'SHIPPER')">
+
+                                        <span class="badge rounded-pill" style="background-color: #F5F5F5; color: #424242; border: 1px solid #E0E0E0; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="!hasAnyRole('ADMIN', 'MANAGER')">
                                             Khách hàng
                                         </span>
                                     </div>
@@ -1194,14 +1192,8 @@
                                     </a>
                                 </li>
 
-                                <!-- Nút Kênh Giao hàng (cho Shipper) -->
-                                <li sec:authorize="hasRole('SHIPPER') and !hasRole('ADMIN')" class="px-2 mb-2">
-                                    <a th:href="@{/shipper/orders}" class="btn btn-sm btn-outline-warning w-100 fw-bold d-flex align-items-center justify-content-center gap-2"
-                                       style="border-radius: 8px; padding: 6px 12px; font-size: 13.5px;">
-                                        <i class="bi bi-bicycle"></i>
-                                        <span>Kênh giao hàng</span>
-                                    </a>
-                                </li>
+
+
 
                                 <!-- Hồ sơ cá nhân -->
                                 <li>

@@ -31,7 +31,6 @@ public interface OrderService {
     List<Order> getAllOrders();
     Order getOrderById(Long orderId);
     void updateOrderStatus(Long orderId, com.finalproject.enums.OrderStatus status);
-    void assignShipper(Long orderId, Long shipperId);
     void cancelOrder(String username, Long orderId);
     void requestRefund(String username, Long orderId);
     void scanAndMarkOverdueOrders(); // Cho Scheduler quét định kỳ

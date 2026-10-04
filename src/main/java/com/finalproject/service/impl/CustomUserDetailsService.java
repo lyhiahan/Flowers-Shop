@@ -20,13 +20,12 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String input) throws UsernameNotFoundException {
         if (input == null || input.trim().isEmpty()) {
-            throw new UsernameNotFoundException("Vui lòng nhập email, số điện thoại hoặc tên đăng nhập");
+            throw new UsernameNotFoundException("Vui lòng nhập email hoặc tên đăng nhập");
         }
         String cleanInput = input.trim();
         User user = userRepository.findByUsername(cleanInput)
                 .or(() -> userRepository.findByEmail(cleanInput))
-                .or(() -> userRepository.findByPhone(cleanInput))
-                .orElseThrow(() -> new UsernameNotFoundException("Email, số điện thoại hoặc mật khẩu không chính xác: " + cleanInput));
+                .orElseThrow(() -> new UsernameNotFoundException("Email, tên đăng nhập hoặc mật khẩu không chính xác: " + cleanInput));
 
         java.util.Set<org.springframework.security.core.GrantedAuthority> authorities = new java.util.HashSet<>();
         // Mọi người dùng đang hoạt động luôn giữ quyền Khách hàng để mua hoa và sử dụng tính năng thông thường

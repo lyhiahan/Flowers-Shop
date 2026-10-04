@@ -89,6 +89,7 @@ public class OrderServiceImpl implements OrderService {
             throw new IllegalArgumentException("Hình thức nhận hàng không hợp lệ.");
         }
         User customer = userRepository.findByUsername(username).orElseThrow();
+        requireActiveCustomer(customer);
         Cart cart = cartRepository.findLockedByUserId(customer.getId())
                 .orElseThrow(() -> new IllegalStateException("Giỏ hàng đang trống."));
         List<CartItem> allItems = cartItemRepository.findByCartId(cart.getId());
@@ -293,11 +294,16 @@ public class OrderServiceImpl implements OrderService {
             throw new IllegalArgumentException("Hình thức nhận hàng không hợp lệ.");
         }
         User user = userRepository.findByUsername(username).orElseThrow();
+        requireActiveCustomer(user);
         Cart cart = cartRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new IllegalStateException("Giỏ hàng đang trống."));
         List<CartItem> items = cartItemRepository.findByCartId(cart.getId()).stream()
                 .filter(i -> selectedCartItemIds == null || selectedCartItemIds.isEmpty() || selectedCartItemIds.contains(i.getId()))
                 .toList();
+        if (selectedCartItemIds != null && !selectedCartItemIds.isEmpty()
+                && !items.stream().map(CartItem::getId).collect(Collectors.toSet()).containsAll(selectedCartItemIds)) {
+            throw new IllegalArgumentException("Sản phẩm được chọn không thuộc giỏ hàng của bạn.");
+        }
         if (items.isEmpty()) throw new IllegalArgumentException("Vui lòng chọn sản phẩm để thanh toán.");
         Store store;
         if ("PICKUP".equals(shippingMethod)) {
@@ -316,13 +322,16 @@ public class OrderServiceImpl implements OrderService {
             if (item.getOrderType() != OrderType.BUY || item.getQuantity() == null || item.getQuantity() <= 0) {
                 throw new IllegalArgumentException("Giỏ hàng chỉ hỗ trợ mua hoa với số lượng dương.");
             }
-            if (!Boolean.TRUE.equals(p.getIsActive()) || !Boolean.TRUE.equals(p.getIsSelling())) {
+            if (Boolean.TRUE.equals(p.getIsDeleted()) || !Boolean.TRUE.equals(p.getIsActive()) || !Boolean.TRUE.equals(p.getIsSelling())) {
                 throw new IllegalStateException("Sản phẩm đã ngừng bán: " + p.getName());
             }
             StoreInventory inventory = storeInventoryRepository.findByStoreIdAndProductId(store.getId(), p.getId())
                     .orElseThrow(() -> new IllegalStateException("Chi nhánh không có hàng: " + p.getName()));
             if (inventory.getQuantity() < item.getQuantity()) throw new IllegalStateException("Không đủ tồn kho: " + p.getName());
-            subtotal = subtotal.add(p.getSellingPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
+            BigDecimal price = p.getSellingPrice();
+            if (price == null || price.signum() <= 0 || price.stripTrailingZeros().scale() > 2)
+                throw new IllegalStateException("Giá sản phẩm không hợp lệ: " + p.getName());
+            subtotal = subtotal.add(price.multiply(BigDecimal.valueOf(item.getQuantity())));
             BigDecimal cost = p.getImportPrice() != null ? p.getImportPrice()
                     : p.getPriceBuy() != null ? p.getPriceBuy().multiply(BigDecimal.valueOf(0.6)) : BigDecimal.ZERO;
             importTotal = importTotal.add(cost.multiply(BigDecimal.valueOf(item.getQuantity())));
@@ -384,6 +393,12 @@ public class OrderServiceImpl implements OrderService {
         }
         if (closedStoreHasStock) throw new IllegalStateException("Chi nhánh có đủ hàng hiện không nhận đơn. Vui lòng thử lại khi chi nhánh mở cửa.");
         throw new IllegalStateException("Các chi nhánh đang mở không có hàng hoặc không đủ tồn kho cho mẫu hoa đã chọn. Vui lòng giảm số lượng hoặc chọn mẫu khác.");
+    }
+
+    private void requireActiveCustomer(User user) {
+        if (!Boolean.TRUE.equals(user.getIsActive()) || user.isRetiredDeliveryAccount()) {
+            throw new org.springframework.security.access.AccessDeniedException("Tài khoản đã bị khóa hoặc vô hiệu hóa.");
+        }
     }
 
     private Store findNearestStore(String address) {
@@ -468,45 +483,6 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public void updateOrderStatus(Long orderId, OrderStatus status) {
         workflow.transition(orderId, status);
-    }
-
-    @Override
-    @Transactional
-    public void assignShipper(Long orderId, Long shipperId) {
-        Order order = workflow.lockedOrder(orderId);
-        access.requireManager(order.getPickupStore());
-        User shipper = userRepository.findById(shipperId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhân viên giao hàng"));
-
-        if (shipper.getRole() != Role.SHIPPER || !Boolean.TRUE.equals(shipper.getIsActive())
-                || shipper.getStore() == null || !shipper.getStore().getId().equals(order.getPickupStore().getId())) {
-            throw new IllegalArgumentException("Shipper phải đang hoạt động và thuộc chi nhánh xử lý đơn.");
-        }
-        if (order.getStatus() != OrderStatus.PREPARING || "PICKUP".equals(order.getShippingMethod())) {
-            throw new IllegalStateException("Chỉ phân công giao hàng cho đơn đang chuẩn bị.");
-        }
-        if (!"COD".equals(order.getPaymentMethod()) && !"PAID".equals(order.getPaymentStatus())) {
-            throw new IllegalStateException("Cần xác nhận chuyển khoản trước khi giao đơn cho shipper.");
-        }
-        order.setShipper(shipper);
-        if (order.getStatus() == OrderStatus.CONFIRMED || order.getStatus() == OrderStatus.PREPARING) {
-            order.setStatus(OrderStatus.PICKED_UP);
-        }
-        orderRepository.save(order);
-
-        // Gửi thông báo cho tài xế và khách hàng
-        try {
-            notificationService.sendNotification(shipper,
-                    "🛵 Nhận đơn giao hoa #" + order.getId(),
-                    "Bạn được phân công giao đơn hoa #" + order.getId() + " đến: " + order.getRecipientAddress() + " (Khách: " + order.getRecipientName() + " - " + order.getRecipientPhone() + ").",
-                    "ORDER_ASSIGNED", order.getId());
-            notificationService.sendNotification(order.getUser(),
-                    "🚚 Đơn hoa #" + order.getId() + " đã có tài xế",
-                    "Đơn hoa của bạn đã được bàn giao cho tài xế " + shipper.getFullName() + " (" + shipper.getPhone() + ") để đi giao.",
-                    "ORDER_ASSIGNED", order.getId());
-        } catch (Exception ex) {
-            org.slf4j.LoggerFactory.getLogger(OrderServiceImpl.class).warn("Không gửi được notification gán shipper: {}", ex.getMessage());
-        }
     }
 
     @Override

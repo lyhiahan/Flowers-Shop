@@ -70,7 +70,7 @@ class AdminStyleManagementUseCaseTests {
                 .email("admin_uc31@example.com")
                 .password(encodedPass)
                 .fullName("Quản Trị Viên UC31")
-                .role(Role.ADMIN)
+                .isActive(true).role(Role.ADMIN)
                 .build());
 
         customer = userRepository.save(User.builder()
@@ -78,7 +78,7 @@ class AdminStyleManagementUseCaseTests {
                 .email("customer_uc31@example.com")
                 .password(encodedPass)
                 .fullName("Khách Hàng UC31")
-                .role(Role.CUSTOMER)
+                .isActive(true).role(Role.CUSTOMER)
                 .build());
 
         category = categoryRepository.save(Category.builder()

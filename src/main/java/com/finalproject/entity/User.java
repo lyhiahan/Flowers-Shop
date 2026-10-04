@@ -67,13 +67,30 @@ public class User {
     @JoinColumn(name = "user_level_id")
     private UserLevel userLevel;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = RoleConverter.class)
     @Column(nullable = false, length = 20)
     private Role role;
 
+    @Column(name = "role", nullable = false, length = 20, insertable = false, updatable = false)
+    private String storedRole;
+
+    @Column(name = "retired_delivery_account")
+    @Builder.Default
+    private Boolean retiredDeliveryAccount = false;
+
+    public boolean isRetiredDeliveryAccount() {
+        return Boolean.TRUE.equals(retiredDeliveryAccount) || "SHIPPER".equals(storedRole);
+    }
+
+    @PostLoad
+    private void disableRetiredDeliveryAccount() {
+        if ("SHIPPER".equals(storedRole)) retiredDeliveryAccount = true;
+        if (isRetiredDeliveryAccount()) isActive = false;
+    }
+
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = RoleConverter.class)
     @Column(name = "role", nullable = false, length = 30)
     @Builder.Default
     private java.util.Set<Role> roles = new java.util.HashSet<>();
@@ -115,4 +132,4 @@ public class User {
             }
         }
     }
-}
+}

@@ -247,7 +247,7 @@
                     <div class="mb-2"><strong>Chi nhánh xử lý:</strong> <span th:text="${order.pickupStore != null ? order.pickupStore.name : 'Toàn hệ thống'}"></span></div>
                     <div class="mb-2"><strong>Hình thức:</strong> <span th:text="${order.shippingMethod == 'PICKUP' ? 'Khách nhận tại tiệm' : 'Đơn vị vận chuyển giao tận nơi'}"></span></div>
                     <div class="mb-2"><strong>Lịch nhận hoa:</strong> <span th:text="${order.deliveryDate != null ? #temporals.format(order.deliveryDate, 'dd/MM/yyyy') : 'Giao trong ngày'}"></span></div>
-                    <div th:if="${order.shipper != null}" class="mb-2"><strong>Shipper phân công:</strong> <span th:text="${order.shipper.fullName} + ' (' + ${order.shipper.phone} + ')'"></span></div>
+
                 </div>
             </div>
         </div>

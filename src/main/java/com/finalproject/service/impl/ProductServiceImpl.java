@@ -211,6 +211,7 @@ public class ProductServiceImpl implements ProductService {
         // Kiểm tra danh mục
         Category category = categoryRepository.findById(form.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Danh mục không tồn tại"));
+        if (Boolean.TRUE.equals(category.getIsDeleted())) throw new IllegalArgumentException("Danh mục đã bị xóa.");
 
         // Chống bán lỗ: Nếu giá bán < giá nhập mà chưa xác nhận bán lỗ thì ném lỗi
         if (form.getPriceBuy().compareTo(form.getImportPrice()) < 0 && !form.isConfirmSellAtLoss()) {
@@ -281,6 +282,7 @@ public class ProductServiceImpl implements ProductService {
 
         Category category = categoryRepository.findById(form.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Danh mục không tồn tại"));
+        if (Boolean.TRUE.equals(category.getIsDeleted())) throw new IllegalArgumentException("Danh mục đã bị xóa.");
 
         // Chống bán lỗ: Nếu giá bán < giá nhập mà chưa xác nhận bán lỗ thì ném cảnh báo
         if (form.getPriceBuy() != null && form.getImportPrice() != null

@@ -63,7 +63,7 @@ class AdminTransactionManagementUseCaseTests {
                 .email("admin_uc36@example.com")
                 .password(encodedPass)
                 .fullName("Quản Trị Viên UC36")
-                .role(Role.ADMIN)
+                .isActive(true).role(Role.ADMIN)
                 .build());
 
         customer = userRepository.save(User.builder()
@@ -71,7 +71,7 @@ class AdminTransactionManagementUseCaseTests {
                 .email("customer_uc36@example.com")
                 .password(encodedPass)
                 .fullName("Khách Hàng UC36")
-                .role(Role.CUSTOMER)
+                .isActive(true).role(Role.CUSTOMER)
                 .build());
 
         store = storeRepository.save(Store.builder()

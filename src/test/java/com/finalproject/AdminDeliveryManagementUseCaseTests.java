@@ -60,7 +60,7 @@ class AdminDeliveryManagementUseCaseTests {
                 .email("admin_uc34@example.com")
                 .password(encodedPass)
                 .fullName("Quản Trị Viên UC34")
-                .role(Role.ADMIN)
+                .isActive(true).role(Role.ADMIN)
                 .build());
 
         customer = userRepository.save(User.builder()
@@ -68,7 +68,7 @@ class AdminDeliveryManagementUseCaseTests {
                 .email("customer_uc34@example.com")
                 .password(encodedPass)
                 .fullName("Khách Hàng UC34")
-                .role(Role.CUSTOMER)
+                .isActive(true).role(Role.CUSTOMER)
                 .build());
 
         delivery1 = deliveryRepository.save(Delivery.builder()

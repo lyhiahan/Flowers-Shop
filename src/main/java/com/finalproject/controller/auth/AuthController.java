@@ -29,7 +29,7 @@ public class AuthController {
                                 @RequestParam(value = "activated", required = false) String activated,
                                 Model model) {
         if (error != null) {
-            model.addAttribute("errorMessage", "Đăng nhập thất bại: Email, số điện thoại hoặc mật khẩu không chính xác!");
+            model.addAttribute("errorMessage", "Đăng nhập thất bại: Email, tên đăng nhập hoặc mật khẩu không chính xác!");
         }
         if (logout != null) {
             model.addAttribute("successMessage", "Bạn đã đăng xuất thành công.");

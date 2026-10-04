@@ -27,6 +27,7 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final CustomAuthenticationSuccessHandler successHandler;
+    private final com.finalproject.repository.UserRepository userRepository;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -48,6 +49,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            .addFilterBefore(new com.finalproject.security.AccountStatusFilter(userRepository),
+                    org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
             )
@@ -68,8 +71,8 @@ public class SecurityConfig {
                 .requestMatchers("/admin", "/admin/**", "/api/admin/**").hasRole("ADMIN")
                 // Quyền Quản lý / Vendor
                 .requestMatchers("/manager", "/manager/**", "/vendor", "/vendor/**", "/api/manager/**", "/api/vendor/**").hasAnyRole("ADMIN", "MANAGER", "VENDOR")
-                // Quyền Shipper
-                .requestMatchers("/shipper", "/shipper/**").hasRole("SHIPPER")
+                // Retired delivery portal must not accept old sessions.
+                .requestMatchers("/shipper", "/shipper/**").denyAll()
                 // Quyền Staff & WebSocket
                 .requestMatchers("/staff", "/staff/**", "/ws", "/ws/**").hasAnyRole("ADMIN", "MANAGER", "VENDOR", "STAFF")
                 // MoMo Callback & IPN Webhook (cho phép chuyển hướng và webhook không bị chặn)
@@ -80,6 +83,7 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/", "/products/**", "/product/**", "/stores/**", "/users/**",
                     "/login", "/register", "/verify-otp", "/resend-otp", "/forgot-password", "/reset-password",
+                    "/api/auth/login", "/api/auth/refresh",
                     "/api/inventory/check", "/api/public/**",
                     "/css/**", "/js/**", "/images/**", "/upload/**", "/error", "/favicon.ico", "/webjars/**"
                 ).permitAll()

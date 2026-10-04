@@ -34,8 +34,6 @@ public class RoleManagementServiceImpl implements RoleManagementService {
     public RoleRequest submitRoleRequest(Long userId,
                                          Role targetRole,
                                          String phone,
-                                         String workArea,
-                                         String vehicleType,
                                          Long targetStoreId,
                                          String shopName,
                                          String shopAddress,
@@ -73,8 +71,6 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                 .targetRole(targetRole)
                 .status(RoleRequestStatus.PENDING)
                 .phone(phone != null ? phone.trim() : user.getPhone())
-                .workArea(workArea != null ? workArea.trim() : null)
-                .vehicleType(vehicleType != null ? vehicleType.trim() : null)
                 .targetStore(targetStore)
                 .shopName(shopName != null ? shopName.trim() : null)
                 .shopAddress(shopAddress != null ? shopAddress.trim() : null)
@@ -125,6 +121,10 @@ public class RoleManagementServiceImpl implements RoleManagementService {
     public RoleRequest approveRoleRequest(Long requestId, Long adminId, Long assignedStoreId) {
         RoleRequest req = roleRequestRepository.findById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy yêu cầu #" + requestId));
+
+        if (req.isRetiredRoleRequest()) {
+            throw new IllegalArgumentException("Vai trò này đã được ngừng sử dụng, không thể cấp lại.");
+        }
 
         if (req.getStatus() != RoleRequestStatus.PENDING) {
             throw new IllegalArgumentException("Yêu cầu này không ở trạng thái 'Chờ duyệt'!");

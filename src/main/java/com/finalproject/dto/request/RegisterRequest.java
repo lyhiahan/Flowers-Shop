@@ -30,6 +30,7 @@ public class RegisterRequest {
 
     @NotBlank(message = "Vui lòng điền địa chỉ email")
     @Email(message = "Email không đúng định dạng (VD: example@domain.com)")
+    @Size(max = 100, message = "Email tối đa 100 ký tự")
     private String email;
 
     @NotBlank(message = "Vui lòng điền số điện thoại")

@@ -75,26 +75,8 @@
                                             </td>
                                         </tr>
 
-                                        <!-- Vai trò đã cấp: Giao hàng -->
-                                        <tr th:if="${user.hasRole(T(com.finalproject.enums.Role).SHIPPER)}">
-                                            <td class="ps-3">
-                                                <div class="fw-bold text-dark">Nhân viên giao hàng</div>
-                                                <small class="text-muted">Được phân quyền giao hàng</small>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-3 py-2 rounded-pill">
-                                                    <i class="bi bi-check-circle-fill me-1"></i> Đang hoạt động
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="small text-secondary">Tiếp nhận và giao các đơn hoa tươi</span>
-                                            </td>
-                                            <td class="text-end pe-3">
-                                                <a th:href="@{/shipper/orders}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">
-                                                    <i class="bi bi-truck me-1"></i> Chuyển giao diện
-                                                </a>
-                                            </td>
-                                        </tr>
+
+
 
                                         <!-- Vai trò đã cấp: Quản lý chi nhánh -->
                                         <tr th:if="${user.hasRole(T(com.finalproject.enums.Role).MANAGER)}">
@@ -162,10 +144,7 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <div th:if="${req.targetRole.name() == 'SHIPPER'}" class="small text-secondary">
-                                                    <span>Khu vực: <strong th:text="${req.workArea != null ? req.workArea : 'Linh hoạt'}"></strong></span> ·
-                                                    <span>Phương tiện: <strong th:text="${req.vehicleType != null ? req.vehicleType : 'Xe máy'}"></strong></span>
-                                                </div>
+
                                                 <div th:if="${req.targetRole.name() == 'MANAGER'}" class="small text-secondary">
                                                     <span>Chi nhánh mong muốn: <strong th:text="${req.targetStore != null ? req.targetStore.name : 'Tất cả chi nhánh'}"></strong></span>
                                                 </div>
@@ -223,39 +202,14 @@
                             <label class="form-label fw-bold text-dark">Vai trò xin cấp <span class="text-danger">(*)</span></label>
                             <select name="targetRole" id="selectTargetRole" class="form-select form-select-lg rounded-3 fs-6" required onchange="handleRoleChange(this.value)">
                                 <option value="" disabled selected>-- Chọn vai trò bạn muốn xin cấp --</option>
-                                <option value="SHIPPER">🛵 Nhân viên giao hàng (Shipper)</option>
                                 <option value="MANAGER">🏢 Quản lý chi nhánh (Store Manager)</option>
                                 <option value="VENDOR">🏪 Người bán / Đối tác cung ứng hoa (Vendor)</option>
                             </select>
                             <div class="form-text text-muted small">Lưu ý: Không được tự đăng ký vai trò Quản trị viên (Admin).</div>
                         </div>
 
-                        <!-- Form chi tiết cho Giao hàng (SHIPPER) -->
-                        <div id="sectionShipper" class="role-section border rounded-3 p-3 mb-3 bg-light" style="display: none;">
-                            <h6 class="fw-bold text-dark mb-3"><i class="bi bi-truck text-primary me-2"></i>Thông tin bổ sung - Nhân viên giao hàng</h6>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold">Số điện thoại liên hệ (*)</label>
-                                    <input type="text" name="phone" class="form-control" th:value="${user.phone}" placeholder="Nhập số điện thoại...">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold">Loại phương tiện di chuyển (*)</label>
-                                    <select name="vehicleType" class="form-select">
-                                        <option value="Xe máy có thùng giữ nhiệt">Xe máy có thùng giữ nhiệt bảo quản hoa</option>
-                                        <option value="Xe máy phổ thông">Xe máy phổ thông</option>
-                                        <option value="Xe tải nhỏ / Ô tô vận chuyển hoa">Xe tải nhỏ / Ô tô vận chuyển hoa</option>
-                                    </select>
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label small fw-semibold">Khu vực làm việc (*)</label>
-                                    <input type="text" name="workArea" class="form-control" placeholder="Ví dụ: Quận 1, Quận 3, Quận 7, TP. Thủ Đức, Bình Thạnh...">
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label small fw-semibold">Kinh nghiệm hoặc ghi chú giao hoa</label>
-                                    <textarea name="experienceNote" class="form-control" rows="2" placeholder="Ví dụ: Đã có 2 năm kinh nghiệm giao hàng hoa tươi, am hiểu kỹ thuật bọc nước giữ ẩm..."></textarea>
-                                </div>
-                            </div>
-                        </div>
+
+
 
                         <!-- Form chi tiết cho Quản lý chi nhánh (MANAGER) -->
                         <div id="sectionManager" class="role-section border rounded-3 p-3 mb-3 bg-light" style="display: none;">

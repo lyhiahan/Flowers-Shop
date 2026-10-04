@@ -191,6 +191,9 @@ public class CartServiceImpl implements CartService {
 
     private Cart getCartForUpdate(String username) {
         User user = userRepository.findByUsername(username).orElseThrow();
+        if (!Boolean.TRUE.equals(user.getIsActive()) || user.isRetiredDeliveryAccount()) {
+            throw new org.springframework.security.access.AccessDeniedException("Tài khoản đã bị khóa hoặc vô hiệu hóa.");
+        }
         Cart cart = cartRepository.findLockedByUserId(user.getId())
                 .orElseGet(() -> cartRepository.save(Cart.builder().user(user).items(new ArrayList<>()).build()));
         return cart;

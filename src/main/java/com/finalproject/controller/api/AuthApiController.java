@@ -71,7 +71,7 @@ public class AuthApiController {
             String accessToken = jwtTokenProvider.generateAccessToken(authentication);
 
             // Tạo refresh token và lưu DB
-            RefreshToken refreshToken = refreshTokenService.createRefreshToken(request.username().trim());
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(authentication.getName());
 
             String roles = authentication.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority)
@@ -84,7 +84,7 @@ public class AuthApiController {
                     "refreshToken", refreshToken.getToken(),
                     "tokenType", "Bearer",
                     "expiresIn", 900,                   // giây
-                    "username", request.username().trim(),
+                    "username", authentication.getName(),
                     "roles", roles
             ));
 
