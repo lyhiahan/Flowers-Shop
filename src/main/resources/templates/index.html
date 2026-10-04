@@ -2013,33 +2013,33 @@
 
                 <!-- Kiểu dáng -->
                 <th:block th:if="${flowerStyles != null}">
-                    <span th:each="st : ${flowerStyles}" class="active-filter-badge">
+                    <span th:each="st : ${flowerStyles}" class="active-filter-badge filter-pill-tag">
                         <span>Kiểu dáng: <strong th:text="${st}"></strong></span>
-                        <button type="button" class="btn-remove-filter" th:onclick="'removeSingleFilter(\'flowerStyle\', \'' + ${st} + '\')'" title="Bỏ điều kiện này">×</button>
+                        <button type="button" class="btn-remove-filter" th:attr="data-group='flowerStyle',data-val=${st}" onclick="removeSingleFilter(this.getAttribute('data-group'), this.getAttribute('data-val'))" title="Bỏ điều kiện này">×</button>
                     </span>
                 </th:block>
 
                 <!-- Loại hoa -->
                 <th:block th:if="${flowerTypes != null}">
-                    <span th:each="tp : ${flowerTypes}" class="active-filter-badge">
+                    <span th:each="tp : ${flowerTypes}" class="active-filter-badge filter-pill-tag">
                         <span>Loại hoa: <strong th:text="${tp}"></strong></span>
-                        <button type="button" class="btn-remove-filter" th:onclick="'removeSingleFilter(\'flowerType\', \'' + ${tp} + '\')'" title="Bỏ điều kiện này">×</button>
+                        <button type="button" class="btn-remove-filter" th:attr="data-group='flowerType',data-val=${tp}" onclick="removeSingleFilter(this.getAttribute('data-group'), this.getAttribute('data-val'))" title="Bỏ điều kiện này">×</button>
                     </span>
                 </th:block>
 
                 <!-- Màu sắc -->
                 <th:block th:if="${flowerColors != null}">
-                    <span th:each="cl : ${flowerColors}" class="active-filter-badge">
+                    <span th:each="cl : ${flowerColors}" class="active-filter-badge filter-pill-tag">
                         <span>Màu sắc: <strong th:text="${cl}"></strong></span>
-                        <button type="button" class="btn-remove-filter" th:onclick="'removeSingleFilter(\'flowerColor\', \'' + ${cl} + '\')'" title="Bỏ điều kiện này">×</button>
+                        <button type="button" class="btn-remove-filter" th:attr="data-group='flowerColor',data-val=${cl}" onclick="removeSingleFilter(this.getAttribute('data-group'), this.getAttribute('data-val'))" title="Bỏ điều kiện này">×</button>
                     </span>
                 </th:block>
 
                 <!-- Dịp tặng -->
                 <th:block th:if="${flowerOccasions != null}">
-                    <span th:each="oc : ${flowerOccasions}" class="active-filter-badge">
+                    <span th:each="oc : ${flowerOccasions}" class="active-filter-badge filter-pill-tag">
                         <span>Dịp tặng: <strong th:text="${oc}"></strong></span>
-                        <button type="button" class="btn-remove-filter" th:onclick="'removeSingleFilter(\'flowerOccasion\', \'' + ${oc} + '\')'" title="Bỏ điều kiện này">×</button>
+                        <button type="button" class="btn-remove-filter" th:attr="data-group='flowerOccasion',data-val=${oc}" onclick="removeSingleFilter(this.getAttribute('data-group'), this.getAttribute('data-val'))" title="Bỏ điều kiện này">×</button>
                     </span>
                 </th:block>
 
@@ -2073,11 +2073,11 @@
         <div th:if="${#lists.isEmpty(products)}" class="card filter-card p-5 text-center my-4" style="background-color: #FAF7F2; border: 1.5px dashed #D6C8B8; border-radius: 16px;">
             <div class="fs-1 mb-2" style="color: #A64060;"><i class="bi bi-search"></i></div>
             <h4 class="fw-bold mb-2" style="font-family: 'Nunito', sans-serif; color: #20382E; font-size: 20px;">
-                <span th:if="${keyword != null and !keyword.isEmpty()}" th:text="'Không tìm thấy sản phẩm cho “' + ${keyword} + '”'">Không tìm thấy sản phẩm</span>
-                <span th:if="${keyword == null or keyword.isEmpty()}">Không tìm thấy sản phẩm phù hợp</span>
+                <span th:if="${keyword != null and !keyword.isEmpty()}" th:text="'Không tìm thấy mẫu hoa phù hợp cho “' + ${keyword} + '”'">Không tìm thấy mẫu hoa phù hợp</span>
+                <span th:if="${keyword == null or keyword.isEmpty()}">Không tìm thấy mẫu hoa phù hợp</span>
             </h4>
             <p class="text-secondary small mb-3" style="max-width: 520px; margin: 0 auto;">
-                Rất tiếc, không có mẫu hoa nào khớp với tiêu chí tìm kiếm hiện tại. Quý khách vui lòng thử bỏ bớt bộ lọc hoặc chọn tiêu chí khác.
+                Không có sản phẩm nào khớp với điều kiện lọc hiện tại. Quý khách vui lòng thử bỏ bớt bộ lọc hoặc chọn tiêu chí khác.
             </p>
             <div class="d-flex align-items-center justify-content-center gap-2 flex-wrap">
                 <button th:if="${hasAttributeFilters}" type="button" onclick="resetAttributeFiltersOnly()" class="btn btn-outline-secondary rounded-pill px-4 btn-sm fw-semibold">
@@ -2090,7 +2090,7 @@
         </div>
 
         <!-- LƯỚI SẢN PHẨM ĐỒNG NHẤT (Quy chuẩn 1 & 5: 2 hàng × 4 cột máy tính, tối đa 8 sản phẩm/trang) -->
-        <div th:if="${not #lists.isEmpty(products)}" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="productListGrid">
+        <div th:if="${not #lists.isEmpty(products)}" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="productGrid">
             <div class="col" th:each="p : ${products}">
                 <div class="flower-card h-100 position-relative">
                     <!-- Nút theo dõi / Yêu thích nhanh 36x36px ở góc trên bên phải -->
