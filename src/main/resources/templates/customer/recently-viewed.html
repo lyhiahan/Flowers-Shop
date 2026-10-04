@@ -543,23 +543,29 @@
 
     // Clear history action
     document.getElementById('clearHistoryBtn')?.addEventListener('click', function() {
-      if (confirm('Bạn có chắc chắn muốn xóa toàn bộ danh sách hoa đã xem gần đây không?')) {
-        const grid = document.getElementById('productGrid');
-        const emptyState = document.getElementById('emptyRecentState');
-        const countBadge = document.getElementById('recentCountBadge');
+      window.showGlobalConfirmModal({
+        title: 'Xác Nhận Xóa Lịch Sử',
+        message: 'Bạn có chắc chắn muốn xóa toàn bộ danh sách hoa đã xem gần đây không?',
+        isDanger: true,
+        confirmText: 'Xác nhận xóa',
+        onConfirm: function() {
+          const grid = document.getElementById('productGrid');
+          const emptyState = document.getElementById('emptyRecentState');
+          const countBadge = document.getElementById('recentCountBadge');
 
-        if (grid) {
-          grid.style.opacity = '0';
-          grid.style.transform = 'scale(0.95)';
-          grid.style.transition = 'all 0.3s ease';
-          setTimeout(() => {
-            grid.remove();
-            if (emptyState) emptyState.classList.remove('hidden');
-            if (countBadge) countBadge.textContent = '0 mẫu hoa';
-            showToast('Đã xóa lịch sử xem gần đây thành công!');
-          }, 300);
+          if (grid) {
+            grid.style.opacity = '0';
+            grid.style.transform = 'scale(0.95)';
+            grid.style.transition = 'all 0.3s ease';
+            setTimeout(() => {
+              grid.remove();
+              if (emptyState) emptyState.classList.remove('hidden');
+              if (countBadge) countBadge.textContent = '0 mẫu hoa';
+              showToast('Đã xóa lịch sử xem gần đây thành công!');
+            }, 300);
+          }
         }
-      }
+      });
     });
 
     // Quick follow toggle
@@ -600,5 +606,6 @@
       });
     }
   </script>
+  <script th:src="@{/js/global-modal.js}"></script>
 </body>
 </html>

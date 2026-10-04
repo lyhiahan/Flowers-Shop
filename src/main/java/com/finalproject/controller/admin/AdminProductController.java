@@ -145,6 +145,10 @@ public class AdminProductController {
             int totalElements = filtered.size();
             int totalPages = (int) Math.ceil((double) totalElements / size);
             if (totalPages == 0) totalPages = 1;
+            // Nếu page vượt quá số trang hiện có (ví dụ vừa xóa sản phẩm cuối cùng của trang) thì tự động lùi về trang cuối
+            if (page >= totalPages) {
+                page = Math.max(0, totalPages - 1);
+            }
             int fromIndex = Math.min(page * size, totalElements);
             int toIndex = Math.min(fromIndex + size, totalElements);
             List<Product> pagedProducts = filtered.subList(fromIndex, toIndex);
@@ -190,37 +194,61 @@ public class AdminProductController {
         return "admin/products-manage";
     }
 
+    private String buildReturnUrl(String returnUrl, String tab, String keyword, String style, String status, Integer page, Integer size) {
+        if (returnUrl != null && !returnUrl.isBlank()) {
+            return returnUrl;
+        }
+        org.springframework.web.util.UriComponentsBuilder builder = org.springframework.web.util.UriComponentsBuilder.fromPath("/admin/products-manage");
+        if (tab != null && !tab.isBlank()) builder.queryParam("tab", tab);
+        if (keyword != null && !keyword.isBlank()) builder.queryParam("keyword", keyword);
+        if (style != null && !style.isBlank()) builder.queryParam("style", style);
+        if (status != null && !status.isBlank()) builder.queryParam("status", status);
+        if (page != null) builder.queryParam("page", page);
+        if (size != null) builder.queryParam("size", size);
+        return builder.toUriString();
+    }
+
     /**
      * Cấp phép / Duyệt bán sản phẩm trong toàn hệ thống
      */
     @PostMapping("/approve/{id}")
-    public String approveProduct(@PathVariable("id") Long id, RedirectAttributes ra) {
+    public String approveProduct(@PathVariable("id") Long id,
+                                 @RequestParam(value = "returnUrl", required = false) String returnUrl,
+                                 RedirectAttributes ra) {
         Product product = productRepository.findById(id).orElseThrow();
         product.setIsActive(true);
         productRepository.save(product);
 
         ra.addFlashAttribute("successMessage", "Đã CẤP PHÉP / DUYỆT BÁN cho sản phẩm [" + product.getName() + "]. Sản phẩm hiện đã đủ điều kiện kinh doanh trên toàn hệ thống.");
-        return "redirect:/admin/products-manage";
+        ra.addFlashAttribute("highlightProductId", id);
+        String target = (returnUrl != null && !returnUrl.isBlank()) ? returnUrl : "/admin/products-manage";
+        return "redirect:" + target;
     }
 
     /**
      * Cấm / Thu hồi giấy phép kinh doanh sản phẩm trong toàn hệ thống
      */
     @PostMapping("/ban/{id}")
-    public String banProduct(@PathVariable("id") Long id, RedirectAttributes ra) {
+    public String banProduct(@PathVariable("id") Long id,
+                             @RequestParam(value = "returnUrl", required = false) String returnUrl,
+                             RedirectAttributes ra) {
         Product product = productRepository.findById(id).orElseThrow();
         product.setIsActive(false);
         productRepository.save(product);
 
         ra.addFlashAttribute("successMessage", "Đã CẤM / THU HỒI giấy phép của sản phẩm [" + product.getName() + "]. Sản phẩm đã bị ngừng bán trên toàn hệ thống.");
-        return "redirect:/admin/products-manage";
+        ra.addFlashAttribute("highlightProductId", id);
+        String target = (returnUrl != null && !returnUrl.isBlank()) ? returnUrl : "/admin/products-manage";
+        return "redirect:" + target;
     }
 
     /**
      * Chuyển đổi trạng thái cấp phép (tương thích ngược)
      */
     @PostMapping("/toggle-active/{id}")
-    public String toggleProductActive(@PathVariable("id") Long id, RedirectAttributes ra) {
+    public String toggleProductActive(@PathVariable("id") Long id,
+                                      @RequestParam(value = "returnUrl", required = false) String returnUrl,
+                                      RedirectAttributes ra) {
         Product product = productRepository.findById(id).orElseThrow();
         boolean newActive = !Boolean.TRUE.equals(product.getIsActive());
         product.setIsActive(newActive);
@@ -231,7 +259,9 @@ public class AdminProductController {
         } else {
             ra.addFlashAttribute("successMessage", "Đã CẤM / THU HỒI giấy phép của sản phẩm [" + product.getName() + "].");
         }
-        return "redirect:/admin/products-manage";
+        ra.addFlashAttribute("highlightProductId", id);
+        String target = (returnUrl != null && !returnUrl.isBlank()) ? returnUrl : "/admin/products-manage";
+        return "redirect:" + target;
     }
 
     /**
@@ -239,8 +269,8 @@ public class AdminProductController {
      */
     @PostMapping("/toggle-selling/{id}")
     public String toggleProductSelling(@PathVariable("id") Long id,
-                                       @RequestParam(value = "returnUrl", required = false) String returnUrl,
-                                       RedirectAttributes ra) {
+                                        @RequestParam(value = "returnUrl", required = false) String returnUrl,
+                                        RedirectAttributes ra) {
         Product product = productRepository.findById(id).orElseThrow();
         boolean newSelling = !Boolean.TRUE.equals(product.getIsSelling());
         product.setIsSelling(newSelling);
@@ -251,15 +281,24 @@ public class AdminProductController {
         } else {
             ra.addFlashAttribute("successMessage", "Đã tạm ngừng bán sản phẩm [" + product.getName() + "].");
         }
+        ra.addFlashAttribute("highlightProductId", id);
         String target = (returnUrl != null && !returnUrl.isBlank()) ? returnUrl : "/admin/products-manage";
         return "redirect:" + target;
     }
 
     @GetMapping("/create")
-    public String showCreateForm(@RequestParam(value = "returnUrl", required = false) String returnUrl, Model model) {
+    public String showCreateForm(
+            @RequestParam(value = "returnUrl", required = false) String returnUrl,
+            @RequestParam(value = "page", required = false) Integer page,
+            @RequestParam(value = "tab", required = false) String tab,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "style", required = false) String style,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "size", required = false) Integer size,
+            Model model) {
         if (!model.containsAttribute("productForm")) {
             ProductForm form = new ProductForm();
-            form.setReturnUrl(returnUrl != null && !returnUrl.isBlank() ? returnUrl : "/admin/products-manage");
+            form.setReturnUrl(buildReturnUrl(returnUrl, tab, keyword, style, status, page, size));
             model.addAttribute("productForm", form);
         }
         model.addAttribute("isEdit", false);
@@ -282,8 +321,11 @@ public class AdminProductController {
         }
 
         try {
-            productService.createProduct(form);
+            Product created = productService.createProduct(form);
             redirectAttributes.addFlashAttribute("successMessage", "Thêm sản phẩm mới [" + form.getName() + "] thành công!");
+            if (created != null && created.getId() != null) {
+                redirectAttributes.addFlashAttribute("highlightProductId", created.getId());
+            }
             String target = (form.getReturnUrl() != null && !form.getReturnUrl().isBlank())
                     ? form.getReturnUrl() : "/admin/products-manage";
             return "redirect:" + target;
@@ -305,6 +347,12 @@ public class AdminProductController {
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable("id") Long id,
                                @RequestParam(value = "returnUrl", required = false) String returnUrl,
+                               @RequestParam(value = "page", required = false) Integer page,
+                               @RequestParam(value = "tab", required = false) String tab,
+                               @RequestParam(value = "keyword", required = false) String keyword,
+                               @RequestParam(value = "style", required = false) String style,
+                               @RequestParam(value = "status", required = false) String status,
+                               @RequestParam(value = "size", required = false) Integer size,
                                Model model,
                                RedirectAttributes ra) {
         Product product = productRepository.findById(id).orElse(null);
@@ -325,7 +373,7 @@ public class AdminProductController {
         form.setIsActive(product.getIsActive() != null ? product.getIsActive() : true);
         form.setImageUrl(product.getImageUrl());
         form.setSold(product.getSold() != null ? product.getSold() : 0);
-        form.setReturnUrl(returnUrl != null && !returnUrl.isBlank() ? returnUrl : "/admin/products-manage");
+        form.setReturnUrl(buildReturnUrl(returnUrl, tab, keyword, style, status, page, size));
 
         model.addAttribute("productForm", form);
         model.addAttribute("isEdit", true);
@@ -351,6 +399,7 @@ public class AdminProductController {
         try {
             productService.updateProduct(id, form);
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật sản phẩm [" + form.getName() + "] thành công!");
+            redirectAttributes.addFlashAttribute("highlightProductId", id);
             String target = (form.getReturnUrl() != null && !form.getReturnUrl().isBlank())
                     ? form.getReturnUrl() : "/admin/products-manage";
             return "redirect:" + target;

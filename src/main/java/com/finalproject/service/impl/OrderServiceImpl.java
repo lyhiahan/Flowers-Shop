@@ -113,7 +113,8 @@ public class OrderServiceImpl implements OrderService {
             finalRecipientAddress = "Nhận tại chi nhánh: " + assignedStore.getName() + " - " + assignedStore.getAddress();
         } else {
             finalRecipientAddress = (recipientAddress != null && !recipientAddress.trim().isEmpty()) ? recipientAddress.trim() : user.getAddress();
-            assignedStore = findNearestStore(finalRecipientAddress);
+            Store preferredStore = (items != null && !items.isEmpty() && items.get(0).getStore() != null) ? items.get(0).getStore() : null;
+            assignedStore = findBestFulfillmentStore(finalRecipientAddress, preferredStore, items);
         }
 
         if (!Boolean.TRUE.equals(assignedStore.getStatus()) || !Boolean.TRUE.equals(assignedStore.getIsOpen())) {
@@ -282,6 +283,38 @@ public class OrderServiceImpl implements OrderService {
         }
 
         return stores.get(0);
+    }
+
+    private Store findBestFulfillmentStore(String address, Store preferredStore, List<CartItem> items) {
+        Store nearest = findNearestStore(address);
+        if (hasSufficientStock(nearest, items)) {
+            return nearest;
+        }
+        if (preferredStore != null && Boolean.TRUE.equals(preferredStore.getStatus()) && Boolean.TRUE.equals(preferredStore.getIsOpen())) {
+            if (hasSufficientStock(preferredStore, items)) {
+                return preferredStore;
+            }
+        }
+        List<Store> allStores = storeRepository.findByStatusTrue().stream()
+                .filter(s -> Boolean.TRUE.equals(s.getIsOpen()))
+                .toList();
+        for (Store s : allStores) {
+            if (hasSufficientStock(s, items)) {
+                return s;
+            }
+        }
+        return preferredStore != null ? preferredStore : nearest;
+    }
+
+    private boolean hasSufficientStock(Store store, List<CartItem> items) {
+        if (store == null || items == null || items.isEmpty()) return false;
+        for (CartItem item : items) {
+            java.util.Optional<StoreInventory> invOpt = storeInventoryRepository.findByStoreIdAndProductId(store.getId(), item.getProduct().getId());
+            if (invOpt.isEmpty() || invOpt.get().getQuantity() == null || invOpt.get().getQuantity() < item.getQuantity()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

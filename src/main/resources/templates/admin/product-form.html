@@ -249,6 +249,24 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script th:inline="javascript">
     /*<![CDATA[*/
+    document.addEventListener('DOMContentLoaded', function () {
+        var firstInvalid = document.querySelector('.is-invalid');
+        if (firstInvalid) {
+            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            firstInvalid.focus();
+        }
+    });
+
+    var formEl = document.getElementById('productForm');
+    if (formEl) {
+        formEl.addEventListener('submit', function() {
+            var idInput = document.querySelector('input[name="id"]');
+            if (idInput && idInput.value) {
+                sessionStorage.setItem('admin_product_target_id', idInput.value);
+            }
+        });
+    }
+
     var showModal = /*[[${showLossWarningModal}]]*/ false;
     if (showModal) {
         var modalElement = new bootstrap.Modal(document.getElementById('lossWarningModal'));

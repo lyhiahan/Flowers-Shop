@@ -99,7 +99,7 @@
                                     Chưa có mẫu hoa nào trong danh mục. Hãy thêm mẫu mới!
                                 </td>
                             </tr>
-                            <tr th:each="p : ${products}">
+                            <tr th:each="p : ${products}" th:id="'product-row-' + ${p.id}">
                                 <!-- 1. Mã -->
                                 <td class="ps-4" style="white-space: nowrap;">
                                     <span class="badge" style="background-color: #F0F6F2; color: #20382E; font-weight: 700; font-size: 13.5px; border: 1px solid #D1E5DA; padding: 5px 9px; border-radius: 6px;" th:text="'#' + ${p.id}">#1</span>
@@ -141,7 +141,8 @@
 
                                 <!-- 6. Tồn kho & Cập nhật nhanh -->
                                 <td class="text-center" style="white-space: nowrap;">
-                                    <form th:action="@{/manager/products/stock/{id}(id=${p.id})}" method="post" class="d-inline-flex align-items-center gap-1 m-0">
+                                    <form th:action="@{/manager/products/stock/{id}(id=${p.id})}" method="post" class="d-inline-flex align-items-center gap-1 m-0"
+                                          th:data-id="${p.id}" onsubmit="sessionStorage.setItem('manager_product_scroll_pos', window.scrollY); sessionStorage.setItem('manager_product_target_id', this.getAttribute('data-id'));">
                                         <input type="number" name="quantity" min="0" max="1000000" th:value="${stock != null and stock[p.id] != null ? stock[p.id] : 0}" 
                                                class="form-control form-control-sm text-center fw-bold" style="width: 70px; height: 32px; border-radius: 6px; border: 1px solid #D1E5DA; font-size: 14px;" required>
                                         <button type="submit" class="btn btn-sm btn-outline-secondary" style="height: 32px; padding: 0 8px; border-radius: 6px;" title="Lưu số lượng tồn kho">
@@ -168,7 +169,8 @@
                                                 style="height: 32px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px; border: 1px solid #D1E5DA; background-color: #FFFFFF; color: #20382E;">
                                             <i class="bi bi-pencil"></i> Sửa
                                         </button>
-                                        <form th:action="@{'/manager/products/toggle-selling/' + ${p.id}}" method="post" class="d-inline m-0">
+                                        <form th:action="@{'/manager/products/toggle-selling/' + ${p.id}}" method="post" class="d-inline m-0"
+                                              th:data-id="${p.id}" onsubmit="sessionStorage.setItem('manager_product_scroll_pos', window.scrollY); sessionStorage.setItem('manager_product_target_id', this.getAttribute('data-id'));">
                                             <button type="submit" class="btn btn-sm d-inline-flex align-items-center gap-1"
                                                     th:classappend="${p.isSelling == null or p.isSelling ? 'btn-outline-danger' : 'btn-outline-success'}"
                                                     style="height: 32px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px;">
@@ -181,7 +183,8 @@
                                     <div class="modal fade text-start" th:id="'editProductModal_' + ${p.id}" tabindex="-1">
                                         <div class="modal-dialog modal-lg modal-dialog-centered">
                                             <div class="modal-content">
-                                                <form th:action="@{'/manager/products/update/' + ${p.id}}" method="post">
+                                                <form th:action="@{'/manager/products/update/' + ${p.id}}" method="post"
+                                                      th:data-id="${p.id}" onsubmit="sessionStorage.setItem('manager_product_scroll_pos', window.scrollY); sessionStorage.setItem('manager_product_target_id', this.getAttribute('data-id'));">
                                                     <div class="modal-header">
                                                         <h5 class="modal-title font-serif">🌸 Chỉnh Sửa Mẫu Hoa</h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -291,6 +294,32 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var targetId = sessionStorage.getItem('manager_product_target_id');
+        var savedScroll = sessionStorage.getItem('manager_product_scroll_pos');
+
+        sessionStorage.removeItem('manager_product_target_id');
+        sessionStorage.removeItem('manager_product_scroll_pos');
+
+        if (targetId) {
+            var row = document.getElementById('product-row-' + targetId);
+            if (row) {
+                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                row.style.transition = 'background-color 0.5s';
+                row.style.backgroundColor = '#FEF3C7';
+                setTimeout(function () {
+                    row.style.backgroundColor = '';
+                }, 2000);
+                return;
+            }
+        }
+
+        if (savedScroll !== null) {
+            window.scrollTo({ top: parseInt(savedScroll, 10), behavior: 'instant' });
+        }
+    });
+</script>
     <!-- Modal Xác Nhận Đăng Xuất (Sign Out Modal) -->
     <div class="modal fade" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
@@ -315,5 +344,6 @@
             </div>
         </div>
     </div>
+    <script th:src="@{/js/global-modal.js}"></script>
 </body>
 </html>

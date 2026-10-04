@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
@@ -219,14 +219,23 @@
                         <i class="bi bi-arrow-left me-1"></i> Back to Purchase History
                     </a>
 
-                    <!-- Nút ký hiệu cấm để hủy đơn hàng (UC_011 Alternative 7a) -->
-                    <button th:if="${order.isCancellable()}" type="button" 
-                            class="btn btn-outline-danger rounded-pill px-4 fw-semibold" 
-                            title="Hủy đơn hàng"
-                            data-bs-toggle="modal" 
-                            th:data-bs-target="'#confirmCancelOrderModal_' + ${order.id}">
-                        <i class="bi bi-slash-circle me-1"></i> Hủy Đơn Hàng
-                    </button>
+                    <div class="d-flex align-items-center gap-2">
+                        <!-- Nút Thanh Toán Ngay (cho đơn chuyển khoản chưa thanh toán) -->
+                        <a th:if="${order.paymentMethod == 'BANK_TRANSFER' and order.paymentStatus != 'PAID' and order.status.name() != 'CANCELLED'}"
+                           th:href="@{'/customer/payment/' + ${order.id}}"
+                           class="btn btn-success rounded-pill px-4 fw-bold shadow-xs">
+                            <i class="bi bi-credit-card me-1"></i> Thanh Toán Ngay
+                        </a>
+
+                        <!-- Nút ký hiệu cấm để hủy đơn hàng (UC_011 Alternative 7a) -->
+                        <button th:if="${order.isCancellable()}" type="button" 
+                                class="btn btn-outline-danger rounded-pill px-4 fw-semibold" 
+                                title="Hủy đơn hàng"
+                                data-bs-toggle="modal" 
+                                th:data-bs-target="'#confirmCancelOrderModal_' + ${order.id}">
+                            <i class="bi bi-slash-circle me-1"></i> Hủy Đơn Hàng
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -514,5 +523,6 @@
             form.submit();
         }
     </script>
+    <script th:src="@{/js/global-modal.js}"></script>
 </body>
 </html>

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Component
 @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "app.demo-data.enabled", havingValue = "true")
@@ -606,6 +607,26 @@ public class DataInitializer implements CommandLineRunner {
                 productRepository.save(p);
             }
         });
+
+        // 9. Đảm bảo toàn bộ sản phẩm đang bán đều có tồn kho tại tất cả chi nhánh hoạt động
+        ensureStoreInventoriesForAllBranches();
+    }
+
+    public void ensureStoreInventoriesForAllBranches() {
+        List<Store> activeStores = storeRepository.findByStatusTrue();
+        List<Product> allProducts = productRepository.findAll();
+        for (Product prod : allProducts) {
+            if (Boolean.TRUE.equals(prod.getIsDeleted())) continue;
+            for (Store st : activeStores) {
+                if (storeInventoryRepository.findByStoreIdAndProductId(st.getId(), prod.getId()).isEmpty()) {
+                    storeInventoryRepository.save(StoreInventory.builder()
+                            .store(st)
+                            .product(prod)
+                            .quantity(25)
+                            .build());
+                }
+            }
+        }
     }
 
     /**

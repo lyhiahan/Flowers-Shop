@@ -20,6 +20,7 @@ public class CartServiceImpl implements CartService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final StoreRepository storeRepository;
+    private final StoreInventoryRepository storeInventoryRepository;
 
     @Override
     public Cart getCartByUsername(String username) {
@@ -48,6 +49,14 @@ public class CartServiceImpl implements CartService {
         Long storeId = request.getStoreId() != null ? request.getStoreId() : (product.getStore() != null ? product.getStore().getId() : 1L);
         Store store = storeRepository.findById(storeId)
                 .orElseGet(() -> storeRepository.findAll().stream().findFirst().orElseThrow(() -> new ResourceNotFoundException("Chi nhánh không tồn tại")));
+
+        // Kiểm tra tồn kho tại chi nhánh: Không cho phép thêm nếu hết hàng hoặc không có hàng
+        StoreInventory inventory = storeInventoryRepository.findByStoreIdAndProductId(store.getId(), product.getId())
+                .orElse(null);
+        int availableStock = (inventory != null && inventory.getQuantity() != null) ? inventory.getQuantity() : 0;
+        if (availableStock <= 0) {
+            throw new IllegalStateException("Mẫu hoa '" + product.getName() + "' hiện đang tạm hết hàng tại " + store.getName() + ". Quý khách vui lòng chọn chi nhánh khác hoặc mẫu hoa khác.");
+        }
 
         int addQty = (request.getQuantity() != null && request.getQuantity() > 0) ? request.getQuantity() : 1;
         java.time.LocalDate startDate = request.getRentStartDate();
@@ -92,7 +101,11 @@ public class CartServiceImpl implements CartService {
         }
 
         if (existingItem != null) {
-            existingItem.setQuantity(existingItem.getQuantity() + addQty);
+            int newTotal = existingItem.getQuantity() + addQty;
+            if (newTotal > availableStock) {
+                throw new IllegalStateException("Tổng số lượng trong giỏ (" + newTotal + " bó) vượt quá tồn kho còn lại (" + availableStock + " bó) tại " + store.getName() + ".");
+            }
+            existingItem.setQuantity(newTotal);
             if (greetingMsg != null && !greetingMsg.isBlank()) {
                 existingItem.setGreetingMessage(greetingMsg);
             }
@@ -133,6 +146,12 @@ public class CartServiceImpl implements CartService {
             cartItemRepository.flush();
         } else {
             if (quantity > 10000) throw new IllegalArgumentException("Số lượng không hợp lệ.");
+            StoreInventory inventory = storeInventoryRepository.findByStoreIdAndProductId(item.getStore().getId(), item.getProduct().getId())
+                    .orElse(null);
+            int availableStock = (inventory != null && inventory.getQuantity() != null) ? inventory.getQuantity() : 0;
+            if (availableStock > 0 && quantity > availableStock) {
+                throw new IllegalStateException("Số lượng cập nhật (" + quantity + " bó) vượt quá tồn kho còn lại (" + availableStock + " bó) tại " + item.getStore().getName() + ".");
+            }
             item.setQuantity(quantity);
             cartItemRepository.save(item);
         }

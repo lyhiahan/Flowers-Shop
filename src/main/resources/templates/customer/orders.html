@@ -609,6 +609,15 @@
 
             <!-- Action buttons -->
             <div class="flex items-center gap-2 self-end sm:self-auto">
+              <!-- Nút Thanh Toán Ngay (cho đơn chuyển khoản chưa thanh toán) -->
+              <a th:if="${o.paymentMethod == 'BANK_TRANSFER' and o.paymentStatus != 'PAID' and o.status.name() != 'CANCELLED'}"
+                th:href="@{'/customer/payment/' + ${o.id}}"
+                class="inline-flex items-center gap-1 px-4 py-2 rounded-full bg-[#1E453E] hover:bg-[#15322D] text-white text-[13px] font-bold transition-all shadow-xs"
+                title="Tiến hành thanh toán chuyển khoản">
+                <span class="material-symbols-outlined text-[16px]">credit_card</span>
+                <span>Thanh Toán Ngay</span>
+              </a>
+
               <!-- Nút Chi Tiết Đơn -->
               <a th:href="@{'/customer/orders/detail/' + ${o.id}}"
                 class="inline-flex items-center gap-1 px-4 py-2 rounded-full border border-[#E2D7D1] hover:border-[#1E453E] text-[#1E453E] hover:bg-[#E9F3EE] text-[13px] font-bold transition-all shadow-xs"
@@ -847,6 +856,7 @@
       }
     });
   </script>
+  <script th:src="@{/js/global-modal.js}"></script>
 </body>
 
 </html>

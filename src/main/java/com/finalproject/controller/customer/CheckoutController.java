@@ -2,6 +2,7 @@ package com.finalproject.controller.customer;
 
 import com.finalproject.entity.Cart;
 import com.finalproject.entity.CartItem;
+import com.finalproject.entity.Order;
 import com.finalproject.entity.User;
 import com.finalproject.enums.PaymentMethod;
 import com.finalproject.repository.UserRepository;
@@ -33,6 +34,7 @@ public class CheckoutController {
     private final com.finalproject.repository.DeliveryRepository deliveryRepository;
     private final com.finalproject.service.UserService userService;
     private final com.finalproject.service.VoucherService voucherService;
+    private final com.finalproject.repository.StoreInventoryRepository storeInventoryRepository;
 
     @GetMapping
     public String showCheckoutPage(
@@ -60,6 +62,19 @@ public class CheckoutController {
             }
         } else {
             checkoutItems = new ArrayList<>(allItems);
+        }
+
+        // Kiểm tra tồn kho tại chi nhánh: Chặn thanh toán nếu có sản phẩm hết hàng
+        for (CartItem ci : checkoutItems) {
+            if (ci.getStore() != null && ci.getProduct() != null) {
+                int stock = storeInventoryRepository.findByStoreIdAndProductId(ci.getStore().getId(), ci.getProduct().getId())
+                        .map(com.finalproject.entity.StoreInventory::getQuantity)
+                        .orElse(0);
+                if (stock <= 0) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Mẫu hoa '" + ci.getProduct().getName() + "' hiện đang tạm hết hàng tại " + ci.getStore().getName() + ". Vui lòng bỏ chọn để thanh toán các sản phẩm khác.");
+                    return "redirect:/cart";
+                }
+            }
         }
 
         BigDecimal subtotalRentAndBuy = BigDecimal.ZERO;
@@ -107,7 +122,10 @@ public class CheckoutController {
             RedirectAttributes redirectAttributes) {
 
         try {
-            orderService.checkout(principal.getName(), selectedItemIds, paymentMethod, recipientName, recipientPhone, recipientAddress, greetingMessage, voucherCode, deliveryDate, shippingMethod, pickupStoreId);
+            List<Order> createdOrders = orderService.checkout(principal.getName(), selectedItemIds, paymentMethod, recipientName, recipientPhone, recipientAddress, greetingMessage, voucherCode, deliveryDate, shippingMethod, pickupStoreId);
+            if (paymentMethod == PaymentMethod.BANK_TRANSFER && createdOrders != null && !createdOrders.isEmpty()) {
+                return "redirect:/customer/payment/" + createdOrders.get(0).getId();
+            }
             redirectAttributes.addFlashAttribute("successMessage", "🌸 Đặt hoa thành công! Đơn hàng của bạn đã được chuyển đến chi nhánh cắm hoa để chuẩn bị.");
             return "redirect:/customer/orders";
         } catch (Exception ex) {
