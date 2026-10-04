@@ -193,7 +193,7 @@ public class CartServiceImpl implements CartService {
         cartItemRepository.flush();
     }
     private void requireAvailableStock(Cart cart, Product product, Store store, Long excludedItemId, int quantity) {
-        int available = inventories.findByStoreIdAndProductId(store.getId(), product.getId())
+        int available = storeInventoryRepository.findByStoreIdAndProductId(store.getId(), product.getId())
                 .map(stock -> Math.max(0, stock.getQuantity())).orElse(0);
         long requested = quantity;
         for (CartItem line : cart.getItems()) {

@@ -35,6 +35,7 @@ public class CheckoutController {
     private final com.finalproject.service.UserService userService;
     private final com.finalproject.service.VoucherService voucherService;
     private final com.finalproject.repository.StoreInventoryRepository storeInventoryRepository;
+    private final com.finalproject.config.MomoConfig momoConfig;
 
     @GetMapping
     public String showCheckoutPage(
