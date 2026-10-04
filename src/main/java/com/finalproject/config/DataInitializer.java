@@ -33,6 +33,7 @@ public class DataInitializer implements CommandLineRunner {
     private final ReviewRepository reviewRepository;
     private final PasswordEncoder passwordEncoder;
     private final ProductSeederService productSeederService;
+    private final com.finalproject.service.VendorDataSeederService vendorDataSeederService;
 
     @Override
     public void run(String... args) throws Exception {
@@ -575,6 +576,7 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         productSeederService.seedMissingProductsForStores();
+        vendorDataSeederService.seedVendorDemoData();
 
         // 8. Tự động chuẩn hóa toàn bộ tên sản phẩm và sửa ảnh sản phẩm chính xác theo loài hoa
         productRepository.findAll().forEach(p -> {
