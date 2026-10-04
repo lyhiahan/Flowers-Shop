@@ -320,6 +320,7 @@
 
                             <!-- 3. Người nhận: Họ tên và số điện thoại -->
                             <td>
+                                <div th:if="${o.cancellationReason != null}" class="small text-danger mb-1" th:text="${o.cancellationReason}"></div>
                                 <div class="fw-semibold" style="font-size: 15.5px; color: #24332C;"
                                      th:text="${o.recipientName != null and !o.recipientName.isEmpty() ? o.recipientName : (o.user != null ? o.user.fullName : 'Khách vãng lai')}">Gia Hân</div>
                                 <div style="font-size: 14px; color: #66736B; margin-top: 3px;">

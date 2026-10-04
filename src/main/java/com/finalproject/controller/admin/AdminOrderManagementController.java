@@ -196,8 +196,12 @@ public class AdminOrderManagementController {
                 case DELIVERED -> "Đã giao tới";
                 case COMPLETED -> "Hoàn thành";
                 case CANCELLED -> "Đã hủy";
+                case REFUNDED -> "Đã xác nhận hoàn tiền";
                 default -> status.name();
             };
+            if (status == OrderStatus.CANCELLED && orderService.getOrderById(id).getStatus() == OrderStatus.REFUND_REQUESTED) {
+                statusLabel = "Đã hủy, chờ hoàn tiền — vui lòng hoàn tiền lại cho khách hàng";
+            }
             ra.addFlashAttribute("successMessage", "Cập nhật trạng thái đơn #" + id + " thành [" + statusLabel + "] thành công!");
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());

@@ -45,7 +45,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
-                Boolean.TRUE.equals(user.getIsActive()), // enabled = true chỉ khi đã xác thực OTP
+                Boolean.TRUE.equals(user.getIsActive()) && !Boolean.TRUE.equals(user.getAccountDisabledByAdmin())
+                        && !user.isRetiredDeliveryAccount(),
                 true, // accountNonExpired
                 true, // credentialsNonExpired
                 true, // accountNonLocked

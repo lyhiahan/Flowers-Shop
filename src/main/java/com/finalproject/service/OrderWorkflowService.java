@@ -72,8 +72,20 @@ public class OrderWorkflowService {
                 && !"CASH".equals(order.getPaymentMethod()) && !"PAID".equals(order.getPaymentStatus())) {
             throw new IllegalStateException("Cần xác nhận đã nhận thanh toán trước khi giao hoa.");
         }
-        if (next == OrderStatus.CANCELLED) return cancel(order);
-        if (next == OrderStatus.REFUNDED) refund(order);
+        if (next == OrderStatus.CANCELLED) {
+            order.setCancellationReason("Chi nhánh/quản trị viên đã hủy đơn hàng. "
+                    + ("PAID".equals(order.getPaymentStatus()) ? "Vui lòng hoàn tiền lại cho khách hàng; chưa ghi nhận đã hoàn tiền." : "Đơn chưa thanh toán đã được hủy."));
+            Order saved = cancel(order);
+            notifyOrderStatusChange(saved, previous, saved.getStatus());
+            return saved;
+        }
+        if (next == OrderStatus.REFUNDED) {
+            refund(order);
+            if (order.getCancellationReason() != null) {
+                order.setCancellationReason(order.getCancellationReason().split("Vui lòng hoàn tiền", 2)[0]
+                        + "Đã xác nhận hoàn tiền cho khách hàng.");
+            }
+        }
         if ((next == OrderStatus.DELIVERED || next == OrderStatus.COMPLETED) && previous != OrderStatus.DELIVERED) {
             if ("COD".equals(order.getPaymentMethod()) || "CASH".equals(order.getPaymentMethod())) {
                 markPaid(order);
@@ -198,6 +210,24 @@ public class OrderWorkflowService {
     }
 
     @Transactional
+    public Order cancelForUnavailableCustomer(Long id, String accountAction) {
+        if (!access.currentUser().hasRole(Role.ADMIN)) throw new AccessDeniedException("Chỉ quản trị viên được xử lý tài khoản.");
+        Order order = lockedOrder(id);
+        entityManager.refresh(order, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        if (order.getStatus() != OrderStatus.PENDING && order.getStatus() != OrderStatus.CONFIRMED
+                && order.getStatus() != OrderStatus.PREPARING) return order;
+        if (Boolean.TRUE.equals(order.getUser().getIsActive())) throw new IllegalStateException("Khách hàng vẫn đang hoạt động.");
+        boolean paid = "PAID".equals(order.getPaymentStatus());
+        String reason = "Khách hàng đã bị " + accountAction + ". Đơn hàng không thành công. "
+                + (paid ? "Vui lòng hoàn tiền lại cho khách hàng; chưa ghi nhận đã hoàn tiền." : "Đơn đã tự động hủy vì chưa bàn giao hoa.");
+        order.setCancellationReason(reason);
+        Order saved = cancel(order);
+        notificationService.sendNotificationToStoreManagers(order.getPickupStore().getId(),
+                paid ? "Đơn cần hoàn tiền" : "Đơn tự động hủy", reason, "ORDER_UPDATE", order.getId());
+        return saved;
+    }
+
+    @Transactional
     public void requestRefund(String username, Long id) {
         Order order = lockedOrder(id);
         requireCustomer(order, username);
@@ -290,10 +320,14 @@ public class OrderWorkflowService {
                     }
                 }
                 case REFUND_REQUESTED -> {
+                    notificationService.sendNotification(order.getUser(), "Đơn #" + orderId + " đang chờ hoàn tiền",
+                            order.getCancellationReason() != null ? order.getCancellationReason() : "Yêu cầu hoàn tiền đang chờ chi nhánh xử lý.",
+                            "REFUND_REQUESTED", orderId);
                     if (order.getPickupStore() != null) {
                         notificationService.sendNotificationToStoreManagers(order.getPickupStore().getId(),
                                 "📩 Yêu cầu hoàn tiền đơn #" + orderId,
-                                "Khách hàng " + order.getUser().getFullName() + " vừa gửi yêu cầu Trả hàng / Hoàn tiền cho đơn #" + orderId + ".",
+                                order.getCancellationReason() != null ? order.getCancellationReason()
+                                        : "Khách hàng " + order.getUser().getFullName() + " vừa gửi yêu cầu Trả hàng / Hoàn tiền cho đơn #" + orderId + ".",
                                 "REFUND_REQUESTED", orderId);
                     }
                 }

@@ -84,6 +84,7 @@
 
     <div class="container py-4" style="max-width: 900px;">
         <!-- Thông báo kết quả phản hồi, đánh giá (UC_014 Post-conditions) -->
+        <div th:if="${order.cancellationReason != null}" class="alert alert-warning" role="alert" th:text="${order.cancellationReason}"></div>
         <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-4 mb-4 shadow-sm border-0" role="alert">
             <i class="bi bi-check-circle-fill me-2"></i><span th:text="${successMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -155,10 +156,10 @@
                             <div class="mb-1"><strong>Phương thức thanh toán:</strong> 
                                 <span th:if="${order.paymentMethod == 'MOMO'}" class="badge rounded-pill text-white px-2 py-1 ms-1" style="background-color: #D82D8B;">
                                     <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo" style="height: 14px; width: 14px; vertical-align: -2px;" class="me-1">
-                                    <span th:text="${order.paymentStatus == 'PAID' ? 'Ví MoMo - Đã thanh toán' : 'Ví MoMo - Chờ thanh toán'}"></span>
+                                    <span th:text="${order.paymentStatus == 'REFUNDED' ? 'Ví MoMo - Đã hoàn tiền' : (order.paymentStatus == 'PAID' ? 'Ví MoMo - Đã thanh toán' : 'Ví MoMo - Chờ thanh toán')}"></span>
                                 </span>
                                 <span th:if="${order.paymentMethod == 'BANK_TRANSFER'}" class="badge bg-primary rounded-pill px-2 py-1 ms-1">
-                                    <span th:text="${order.paymentStatus == 'PAID' ? 'VietQR - Đã chuyển khoản' : 'VietQR - Chờ chuyển khoản'}"></span>
+                                    <span th:text="${order.paymentStatus == 'REFUNDED' ? 'VietQR - Đã hoàn tiền' : (order.paymentStatus == 'PAID' ? 'VietQR - Đã chuyển khoản' : 'VietQR - Chờ chuyển khoản')}"></span>
                                 </span>
                                 <span th:if="${order.paymentMethod == 'COD'}" class="badge bg-secondary rounded-pill px-2 py-1 ms-1">
                                     <span>COD (Tiền mặt khi nhận hoa)</span>
@@ -238,7 +239,7 @@
                         <a th:if="${order.paymentMethod == 'BANK_TRANSFER' and order.paymentStatus == 'UNPAID' and order.status.name() != 'CANCELLED' and order.status.name() != 'REFUNDED'}"
                            th:href="@{/checkout/bank/{id}(id=${order.id})}" class="btn btn-outline-success rounded-pill px-3">Hướng dẫn chuyển khoản</a>
                         <!-- Nút thanh toán MoMo nếu chưa thanh toán và đơn chưa hủy -->
-                        <a th:if="${order.paymentMethod == 'MOMO' and order.paymentStatus != 'PAID' and order.status.name() != 'CANCELLED'}"
+                        <a th:if="${order.paymentMethod == 'MOMO' and order.paymentStatus == 'UNPAID' and order.status.name() != 'CANCELLED' and order.status.name() != 'REFUND_REQUESTED' and order.status.name() != 'REFUNDED'}"
                            th:href="@{'/checkout/momo/' + ${order.id}}" 
                            class="btn rounded-pill px-4 text-white fw-bold shadow-sm" 
                            style="background-color: #D82D8B;"

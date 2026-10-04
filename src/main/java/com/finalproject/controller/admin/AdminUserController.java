@@ -29,6 +29,7 @@ import java.util.List;
 public class AdminUserController {
 
     private final UserRepository userRepository;
+    private final com.finalproject.service.CustomerAccountClosureService accountClosure;
     private final StoreRepository storeRepository;
     private final RoleRequestRepository roleRequestRepository;
     private final RoleManagementService roleManagementService;
@@ -115,7 +116,13 @@ public class AdminUserController {
             ra.addFlashAttribute("errorMessage", "Không thể khóa tài khoản Quản trị viên tối cao!");
             return "redirect:/admin/users?tab=users";
         }
-        user.setIsActive(!Boolean.TRUE.equals(user.getIsActive()));
+        if (Boolean.TRUE.equals(user.getIsActive())) {
+            var result = accountClosure.disable(id, false);
+            ra.addFlashAttribute("successMessage", "Đã khóa tài khoản [" + user.getUsername() + "]. " + result.message());
+            return "redirect:/admin/users?tab=users";
+        }
+        user.setIsActive(true);
+        user.setAccountDisabledByAdmin(false);
         userRepository.save(user);
         ra.addFlashAttribute("successMessage", "Đã cập nhật trạng thái tài khoản [" + user.getUsername() + "] thành [" + (user.getIsActive() ? "Hoạt động" : "Bị khóa") + "]");
         return "redirect:/admin/users?tab=users";
@@ -189,11 +196,12 @@ public class AdminUserController {
     @org.springframework.transaction.annotation.Transactional
     public String deleteUser(@PathVariable("id") Long id, Principal principal, RedirectAttributes ra) {
         try {
-            User user = userRepository.findById(id).orElse(null);
+            User user = userRepository.findLockedById(id).orElse(null);
             if (user == null) {
                 ra.addFlashAttribute("errorMessage", "Không tìm thấy người dùng #" + id);
                 return "redirect:/admin/users?tab=users";
             }
+            entityManager.refresh(user, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
 
             // 1. Chặn xóa admin tối cao hoặc chính mình
             if ("admin".equalsIgnoreCase(user.getUsername()) || (user.getRole() != null && user.getRole() == Role.ADMIN)) {
@@ -215,7 +223,9 @@ public class AdminUserController {
             boolean hasOrders = !orderRepository.findByUserIdOrderByCreatedAtDesc(id).isEmpty()
                     || orderRepository.existsByLegacyDeliveryContactId(id);
             if (hasOrders) {
-                ra.addFlashAttribute("errorMessage", "Tài khoản [" + user.getUsername() + "] đã phát sinh đơn hàng trong hệ thống. Nhằm bảo toàn chứng từ giao dịch, vui lòng sử dụng chức năng [Khóa] tài khoản thay vì xóa!");
+                var result = accountClosure.disable(id, true);
+                ra.addFlashAttribute("successMessage", "Đã vô hiệu hóa tài khoản [" + user.getUsername()
+                        + "] theo yêu cầu xóa; giữ hồ sơ để bảo toàn chứng từ. " + result.message());
                 return "redirect:/admin/users?tab=users";
             }
 

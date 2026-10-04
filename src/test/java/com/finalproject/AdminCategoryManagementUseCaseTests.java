@@ -32,6 +32,40 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 class AdminCategoryManagementUseCaseTests {
 
+    @Test
+    @WithMockUser(username = "admin_uc30", roles = {"ADMIN"})
+    void deletedCategoriesDisappearFromCustomerListsAndOldLinksAndReturnAfterRestore() throws Exception {
+        mockMvc.perform(post("/admin/categories/delete/" + subCat1.getId()).with(csrf()))
+                .andExpect(status().is3xxRedirection());
+        var parentView = mockMvc.perform(get("/products").param("categoryId", rootCat1.getId().toString()))
+                .andExpect(status().isOk()).andReturn().getModelAndView();
+        assertThat((java.util.List<?>) parentView.getModel().get("subCategories")).isEmpty();
+
+        for (Category root : java.util.List.of(rootCat1, rootCat2)) {
+            mockMvc.perform(post("/admin/categories/delete/" + root.getId()).with(csrf()))
+                    .andExpect(status().is3xxRedirection());
+        }
+        for (String path : java.util.List.of("/", "/products", "/search")) {
+            var view = mockMvc.perform(get(path)).andExpect(status().isOk()).andReturn().getModelAndView();
+            assertThat((java.util.List<?>) view.getModel().get("categories")).isEmpty();
+            assertThat((java.util.List<?>) view.getModel().get("discoverCategories")).isEmpty();
+        }
+        mockMvc.perform(get("/products").param("categoryId", rootCat1.getId().toString()))
+                .andExpect(redirectedUrl("/products"));
+        assertThat(categoryRepository.findById(rootCat1.getId())).isPresent();
+
+        mockMvc.perform(post("/admin/categories/restore/" + rootCat1.getId()).with(csrf()))
+                .andExpect(status().is3xxRedirection());
+        mockMvc.perform(post("/admin/categories/update/" + rootCat1.getId()).with(csrf())
+                        .param("name", "Danh mục đã đổi tên").param("description", "Mô tả mới"))
+                .andExpect(status().is3xxRedirection());
+        var restoredView = mockMvc.perform(get("/products")).andExpect(status().isOk())
+                .andExpect(content().string(containsString("Danh mục đã đổi tên")))
+                .andReturn().getModelAndView();
+        assertThat((java.util.List<?>) restoredView.getModel().get("categories"))
+                .extracting("id").containsExactly(rootCat1.getId());
+    }
+
     @Autowired
     private MockMvc mockMvc;
 

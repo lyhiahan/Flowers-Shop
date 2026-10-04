@@ -126,12 +126,15 @@ public class HomeController {
 
             if (categoryId != null && categoryId > 0) {
                 selectedCategory = categoryRepository.findById(categoryId).orElse(null);
+                if (selectedCategory == null || Boolean.TRUE.equals(selectedCategory.getIsDeleted())) {
+                    return "redirect:/products";
+                }
                 if (selectedCategory != null) {
                     filterCategoryIds = new ArrayList<>();
                     filterCategoryIds.add(selectedCategory.getId());
 
                     // Lấy các danh mục con của category được chọn
-                    List<Category> children = categoryRepository.findByParentId(selectedCategory.getId());
+                    List<Category> children = categoryRepository.findActiveChildren(selectedCategory.getId());
                     if (children != null && !children.isEmpty()) {
                         subCategories.addAll(children);
                         for (Category child : children) {
@@ -140,10 +143,10 @@ public class HomeController {
                     }
 
                     // Nếu category hiện tại là category con -> lấy category cha của nó
-                    if (selectedCategory.getParent() != null) {
+                    if (selectedCategory.getParent() != null && !Boolean.TRUE.equals(selectedCategory.getParent().getIsDeleted())) {
                         parentCategory = selectedCategory.getParent();
                         // Đồng thời lấy các sub-category cùng cấp để người dùng dễ chọn
-                        List<Category> siblings = categoryRepository.findByParentId(parentCategory.getId());
+                        List<Category> siblings = categoryRepository.findActiveChildren(parentCategory.getId());
                         if (siblings != null && !siblings.isEmpty()) {
                             subCategories = siblings;
                         }
@@ -230,12 +233,12 @@ public class HomeController {
             model.addAttribute("size", size);
 
             // Discover Categories: Danh mục gốc (parent_id IS NULL)
-            List<Category> rootCategories = categoryRepository.findByParentIsNull();
+            List<Category> rootCategories = categoryRepository.findActiveRootCategories();
             if (rootCategories == null || rootCategories.isEmpty()) {
-                rootCategories = categoryRepository.findAll();
+                rootCategories = categoryRepository.findActiveCategories();
             }
             model.addAttribute("discoverCategories", rootCategories);
-            model.addAttribute("categories", categoryRepository.findAll());
+            model.addAttribute("categories", categoryRepository.findActiveCategories());
             model.addAttribute("stores", storeRepository.findByStatusTrue());
 
             if (principal != null) {

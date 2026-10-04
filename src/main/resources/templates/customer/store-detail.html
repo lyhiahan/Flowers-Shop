@@ -442,7 +442,7 @@
                                  class="product-card-img" alt="Hoa tươi">
                         </a>
                         <div class="p-3 d-flex flex-column flex-grow-1">
-                            <span class="badge bg-danger-subtle text-danger align-self-start rounded-pill mb-2 px-2 py-1" style="font-size: 11px;" th:text="${p.category != null ? p.category.name : 'Hoa tươi'}">Hoa tươi</span>
+                            <span class="badge bg-danger-subtle text-danger align-self-start rounded-pill mb-2 px-2 py-1" style="font-size: 11px;" th:text="${p.category != null and p.category.isDeleted != true ? p.category.name : 'Hoa tươi'}">Hoa tươi</span>
                             <a th:href="@{/products/{id}(id=${p.id})}" class="product-title mb-2" th:text="${p.name}">Tên hoa</a>
                             <p class="text-muted small mb-3 flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" th:text="${p.description}"></p>
                             <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">

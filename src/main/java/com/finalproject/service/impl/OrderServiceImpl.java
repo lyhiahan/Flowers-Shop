@@ -89,6 +89,8 @@ public class OrderServiceImpl implements OrderService {
             throw new IllegalArgumentException("Hình thức nhận hàng không hợp lệ.");
         }
         User customer = userRepository.findByUsername(username).orElseThrow();
+        customer = userRepository.findLockedById(customer.getId()).orElseThrow();
+        entityManager.refresh(customer, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
         requireActiveCustomer(customer);
         Cart cart = cartRepository.findLockedByUserId(customer.getId())
                 .orElseThrow(() -> new IllegalStateException("Giỏ hàng đang trống."));

@@ -37,6 +37,14 @@ public class ManagerDashboardController {
     private final ProductRepository productRepository;
     private final StoreRepository storeRepository;
     private final StoreAccessService storeAccess;
+    private final TransactionRepository transactions;
+
+    private boolean isRecognizedRevenue(Order order) {
+        return "PAID".equalsIgnoreCase(order.getPaymentStatus())
+                && (order.getStatus() == OrderStatus.DELIVERED || order.getStatus() == OrderStatus.COMPLETED
+                || (order.getStatus() == OrderStatus.REFUND_REQUESTED
+                && !transactions.findAllByOrderIdAndType(order.getId(), "ORDER_PAYMENT").isEmpty()));
+    }
 
     public record TopFlowerDto(
             Long id,
@@ -209,19 +217,13 @@ public class ManagerDashboardController {
 
             // Doanh thu bán hoa (đã trừ hoàn tiền)
             BigDecimal grossFlowerRevenue = rangeOrders.stream()
-                    .filter(o -> "PAID".equalsIgnoreCase(o.getPaymentStatus()) &&
-                            (o.getStatus() == OrderStatus.DELIVERED || o.getStatus() == OrderStatus.COMPLETED))
+                    .filter(this::isRecognizedRevenue)
                     .map(Order::getTotalAmount)
                     .filter(Objects::nonNull)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            BigDecimal refundAmount = rangeOrders.stream()
-                    .filter(o -> o.getStatus() == OrderStatus.REFUNDED)
-                    .map(Order::getTotalAmount)
-                    .filter(Objects::nonNull)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-            BigDecimal flowerRevenue = grossFlowerRevenue.subtract(refundAmount).max(BigDecimal.ZERO);
+            // Refunded orders are already excluded above; never subtract them a second time.
+            BigDecimal flowerRevenue = grossFlowerRevenue;
 
             long completedOrdersCount = rangeOrders.stream()
                     .filter(o -> o.getStatus() == OrderStatus.DELIVERED || o.getStatus() == OrderStatus.COMPLETED)
@@ -259,8 +261,7 @@ public class ManagerDashboardController {
                             .toList();
 
                     BigDecimal hRev = hOrders.stream()
-                            .filter(o -> "PAID".equalsIgnoreCase(o.getPaymentStatus()) &&
-                                    (o.getStatus() == OrderStatus.DELIVERED || o.getStatus() == OrderStatus.COMPLETED))
+                            .filter(this::isRecognizedRevenue)
                             .map(Order::getTotalAmount).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add);
                     chartRevenueValues.add(hRev);
 
@@ -288,8 +289,7 @@ public class ManagerDashboardController {
                             .toList();
 
                     BigDecimal dRev = dOrders.stream()
-                            .filter(o -> "PAID".equalsIgnoreCase(o.getPaymentStatus()) &&
-                                    (o.getStatus() == OrderStatus.DELIVERED || o.getStatus() == OrderStatus.COMPLETED))
+                            .filter(this::isRecognizedRevenue)
                             .map(Order::getTotalAmount).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add);
                     chartRevenueValues.add(dRev);
                     chartOrderValues.add((long) dOrders.size());
@@ -311,8 +311,7 @@ public class ManagerDashboardController {
                             .toList();
 
                     BigDecimal mRev = mOrders.stream()
-                            .filter(o -> "PAID".equalsIgnoreCase(o.getPaymentStatus()) &&
-                                    (o.getStatus() == OrderStatus.DELIVERED || o.getStatus() == OrderStatus.COMPLETED))
+                            .filter(this::isRecognizedRevenue)
                             .map(Order::getTotalAmount).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add);
                     chartRevenueValues.add(mRev);
                     chartOrderValues.add((long) mOrders.size());
@@ -337,8 +336,7 @@ public class ManagerDashboardController {
                             .toList();
 
                     BigDecimal dRev = dOrders.stream()
-                            .filter(o -> "PAID".equalsIgnoreCase(o.getPaymentStatus()) &&
-                                    (o.getStatus() == OrderStatus.DELIVERED || o.getStatus() == OrderStatus.COMPLETED))
+                            .filter(this::isRecognizedRevenue)
                             .map(Order::getTotalAmount).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add);
                     chartRevenueValues.add(dRev);
                     chartOrderValues.add((long) dOrders.size());
@@ -361,7 +359,7 @@ public class ManagerDashboardController {
             Map<Long, Product> productMap = new HashMap<>();
 
             for (Order o : allCurrentStoreOrders) {
-                if ((o.getStatus() == OrderStatus.DELIVERED || o.getStatus() == OrderStatus.COMPLETED) && o.getOrderDetails() != null) {
+                if (isRecognizedRevenue(o) && o.getOrderDetails() != null) {
                     for (OrderDetail d : o.getOrderDetails()) {
                         if (d != null && d.getProduct() != null) {
                             Long pId = d.getProduct().getId();

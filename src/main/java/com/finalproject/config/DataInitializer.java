@@ -155,30 +155,6 @@ public class DataInitializer implements CommandLineRunner {
                     .build());
         }
 
-        User customer2 = userRepository.findByUsername("khachhang2").orElseGet(() -> userRepository.save(User.builder()
-                .username("khachhang2")
-                .password(passwordEncoder.encode("123456"))
-                .fullName("Trần Thị Hoa")
-                .email("khachhang2@gmail.com")
-                .phone("0901234567")
-                .address("123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP.HCM")
-                .role(Role.CUSTOMER)
-                .isActive(true)
-                .isEmailActive(true)
-                .eWallet(new BigDecimal("3000000"))
-                .createdDate(LocalDate.now())
-                .build()));
-
-        if (userAddressRepository.findByUserIdOrderByIsDefaultDescCreatedAtDesc(customer2.getId()).isEmpty()) {
-            userAddressRepository.save(UserAddress.builder()
-                    .user(customer2)
-                    .recipientName("Trần Thị Hoa")
-                    .phone("0901234567")
-                    .addressDetail("123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP.HCM")
-                    .isDefault(true)
-                    .build());
-        }
-
         // 3. Đơn vị vận chuyển (Deliveries)
         if (deliveryRepository.count() == 0) {
             deliveryRepository.save(Delivery.builder()

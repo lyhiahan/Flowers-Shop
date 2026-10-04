@@ -40,8 +40,6 @@ public class CloudinaryServiceImpl implements CloudinaryService {
 
     private final Cloudinary cloudinary;
 
-    @Value("${cloudinary.api-key:123456789}")
-    private String apiKey;
 
     // ─── Upload ───────────────────────────────────────────────────────────────
 
@@ -65,7 +63,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
                                 "folder", folder != null ? folder : "rental_shop_general",
                                 "resource_type", "image",
                                 "allowed_formats", new String[]{"jpg", "jpeg", "png", "webp", "gif"},
-                                "transformation", ObjectUtils.asMap("quality", "auto", "fetch_format", "auto")
+                                "transformation", new com.cloudinary.Transformation().quality("auto")
                         )
                 );
                 if (uploadResult != null
@@ -76,11 +74,13 @@ public class CloudinaryServiceImpl implements CloudinaryService {
                     log.info("Cloudinary upload OK: publicId={}, url={}", publicId, secureUrl);
                     return new UploadResult(secureUrl, publicId);
                 }
+                throw new IOException("Cloudinary không trả về thông tin ảnh hợp lệ.");
             } catch (Exception ex) {
-                log.warn("Cloudinary upload failed ({}), falling back to local storage", ex.getMessage());
+                log.warn("Cloudinary upload failed: {}", ex.getMessage());
+                throw new IOException("Không thể tải ảnh lên Cloudinary. Vui lòng kiểm tra cấu hình hoặc thử lại.", ex);
             }
         } else {
-            log.warn("Cloudinary chưa cấu hình (api-key={}...). Dùng lưu cục bộ.", apiKey.substring(0, Math.min(4, apiKey.length())));
+            log.warn("Cloudinary chưa cấu hình. Dùng lưu cục bộ.");
         }
 
         // 3. Fallback: lưu cục bộ (chỉ cho môi trường phát triển)
@@ -148,7 +148,10 @@ public class CloudinaryServiceImpl implements CloudinaryService {
             Object key = cloudinary.config.apiKey;
             if (key == null) return false;
             String keyStr = key.toString().trim();
-            return !keyStr.isEmpty()
+            return cloudinary.config.cloudName != null && !cloudinary.config.cloudName.isBlank()
+                    && cloudinary.config.apiSecret != null && !cloudinary.config.apiSecret.isBlank()
+                    && !"placeholder_secret".equals(cloudinary.config.apiSecret)
+                    && !keyStr.isEmpty()
                     && !"123456789".equals(keyStr)
                     && !"test".equals(keyStr)
                     && !"placeholder".equals(keyStr);

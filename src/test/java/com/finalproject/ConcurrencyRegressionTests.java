@@ -40,6 +40,7 @@ class ConcurrencyRegressionTests {
     @Autowired JdbcTemplate jdbc;
     @Autowired VoucherRepository vouchers;
     @Autowired OrderWorkflowService workflow;
+    @Autowired CustomerAccountClosureService accountClosure;
 
     record Fixture(Long storeId, Long productId, Long categoryId, String manager, List<String> customers, List<Long> userIds, List<Long> itemIds) {}
 
@@ -107,6 +108,30 @@ class ConcurrencyRegressionTests {
             for (Future<Boolean> future : futures) if (future.get(20, TimeUnit.SECONDS)) successes++;
             return successes;
         }
+    }
+
+    @Test void accountLockAndCheckoutCannotLeaveAnOpenOrderForDisabledCustomer() throws Exception {
+        Fixture f = fixture();
+        try {
+            new TransactionTemplate(transactionManager).executeWithoutResult(tx -> {
+                User admin = users.findByUsername(f.manager()).orElseThrow(); admin.setRole(Role.ADMIN); users.save(admin);
+            });
+            race(i -> {
+                if (i == 0) {
+                    try {
+                        orders.checkout(f.customers().get(0), List.of(f.itemIds().get(0)), PaymentMethod.COD,
+                                "Khách", "0900000000", "Quận 1", null, null, LocalDate.now(), "PICKUP", f.storeId());
+                    } catch (org.springframework.security.access.AccessDeniedException expected) { }
+                } else {
+                    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(f.manager(), "",
+                            List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))));
+                    accountClosure.disable(f.userIds().get(0), false);
+                }
+            });
+            assertThat(jdbc.queryForObject("select is_active from users where id=?", Boolean.class, f.userIds().get(0))).isFalse();
+            assertThat(jdbc.queryForObject("select count(*) from orders where user_id=? and status <> 'CANCELLED'", Integer.class, f.userIds().get(0))).isZero();
+            assertThat(jdbc.queryForObject("select quantity from store_inventories where store_id=?", Integer.class, f.storeId())).isEqualTo(1);
+        } finally { cleanup(f); }
     }
 
     @Test void simultaneousCheckoutCannotSellTheSameLastItemTwice() throws Exception {

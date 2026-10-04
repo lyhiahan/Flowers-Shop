@@ -484,7 +484,7 @@
         <nav aria-label="breadcrumb" class="mb-3">
             <ol class="breadcrumb mb-0" style="font-size: 13.5px;">
                 <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none text-muted">Trang chủ</a></li>
-                <li class="breadcrumb-item"><a th:href="@{/(categoryId=${product.category != null ? product.category.id : 0})}" class="text-decoration-none text-muted" th:text="${product.category != null ? product.category.name : 'Hoa tươi'}">Hoa tươi</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/(categoryId=${product.category != null and product.category.isDeleted != true ? product.category.id : 0})}" class="text-decoration-none text-muted" th:text="${product.category != null and product.category.isDeleted != true ? product.category.name : 'Hoa tươi'}">Hoa tươi</a></li>
                 <li class="breadcrumb-item active text-danger" aria-current="page" th:text="${product.name}">Tên hoa</li>
             </ol>
         </nav>
@@ -616,7 +616,7 @@
                     <div class="flower-info-table mb-4">
                         <!-- Dòng 1: Loại hoa -->
                         <div class="flower-info-row"
-                             th:with="flowerType=${product.name.contains('Hướng Dương') ? 'Hoa hướng dương' : (product.name.contains('Mẫu Đơn') ? 'Hoa mẫu đơn' : (product.name.contains('Hồng') ? 'Hoa hồng cao cấp' : (product.name.contains('Cẩm Tú Cầu') ? 'Hoa cẩm tú cầu' : (product.name.contains('Tulip') ? 'Hoa tulip Hà Lan' : (product.name.contains('Lan') or product.name.contains('Hồ Điệp') ? 'Lan hồ điệp' : (product.name.contains('Baby') ? 'Hoa baby' : (product.name.contains('Sen') ? 'Hoa sen' : (product.name.contains('Đồng Tiền') or product.name.contains('Hồng Môn') ? 'Hồng môn, đồng tiền' : (product.category != null ? product.category.name : 'Hoa tươi tự nhiên')))))))))}">
+                             th:with="flowerType=${product.name.contains('Hướng Dương') ? 'Hoa hướng dương' : (product.name.contains('Mẫu Đơn') ? 'Hoa mẫu đơn' : (product.name.contains('Hồng') ? 'Hoa hồng cao cấp' : (product.name.contains('Cẩm Tú Cầu') ? 'Hoa cẩm tú cầu' : (product.name.contains('Tulip') ? 'Hoa tulip Hà Lan' : (product.name.contains('Lan') or product.name.contains('Hồ Điệp') ? 'Lan hồ điệp' : (product.name.contains('Baby') ? 'Hoa baby' : (product.name.contains('Sen') ? 'Hoa sen' : (product.name.contains('Đồng Tiền') or product.name.contains('Hồng Môn') ? 'Hồng môn, đồng tiền' : (product.category != null and product.category.isDeleted != true ? product.category.name : 'Hoa tươi tự nhiên')))))))))}">
                             <span class="flower-info-label">Loại hoa</span>
                             <span class="flower-info-value" th:text="${flowerType}">Hoa tươi tự nhiên</span>
                         </div>

@@ -274,7 +274,7 @@ public class AdminProductController {
             model.addAttribute("productForm", form);
         }
         model.addAttribute("isEdit", false);
-        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("categories", categoryRepository.findActiveCategories());
         model.addAttribute("stores", storeRepository.findAll());
         return "admin/product-form";
     }
@@ -285,7 +285,7 @@ public class AdminProductController {
                                       Model model,
                                       RedirectAttributes redirectAttributes) {
         model.addAttribute("isEdit", false);
-        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("categories", categoryRepository.findActiveCategories());
         model.addAttribute("stores", storeRepository.findAll());
 
         if (bindingResult.hasErrors()) {
@@ -339,7 +339,7 @@ public class AdminProductController {
 
         model.addAttribute("productForm", form);
         model.addAttribute("isEdit", true);
-        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("categories", categoryRepository.findActiveCategories());
         model.addAttribute("stores", storeRepository.findAll());
         return "admin/product-form";
     }
@@ -351,7 +351,7 @@ public class AdminProductController {
                                     Model model,
                                     RedirectAttributes redirectAttributes) {
         model.addAttribute("isEdit", true);
-        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("categories", categoryRepository.findActiveCategories());
         model.addAttribute("stores", storeRepository.findAll());
 
         if (bindingResult.hasErrors()) {
