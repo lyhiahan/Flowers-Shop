@@ -69,7 +69,7 @@ class AdminCommissionManagementUseCaseTests {
                 .email("customer_uc35@example.com")
                 .password(encodedPass)
                 .fullName("Khách Hàng UC35")
-                .isActive(true).role(Role.CUSTOMER)
+                .isActive(true).role(Role.USER)
                 .build());
 
         commission1 = commissionRepository.save(Commission.builder()
@@ -91,7 +91,7 @@ class AdminCommissionManagementUseCaseTests {
      * Pre-condition: Chỉ người dùng có quyền Admin mới được phép truy cập
      */
     @Test
-    @WithMockUser(username = "customer_uc35", roles = {"CUSTOMER"})
+    @WithMockUser(username = "customer_uc35", roles = {"USER"})
     void testPreCondition_CustomerDeniedAccessToAdminCommissions() throws Exception {
         mockMvc.perform(get("/admin/commissions"))
                 .andExpect(status().isForbidden());

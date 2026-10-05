@@ -19,7 +19,7 @@ public class StoreCreationService {
     @Transactional
     public Store create(Store input, Long commissionId, String requestId) {
         var current = access.currentUser();
-        if (!current.hasRole(com.finalproject.enums.Role.VENDOR) && !current.hasRole(com.finalproject.enums.Role.MANAGER)
+        if (!current.hasRole(com.finalproject.enums.Role.MANAGER)
                 && !current.hasRole(com.finalproject.enums.Role.ADMIN)) throw new org.springframework.security.access.AccessDeniedException("Chức năng dành cho người bán.");
         var owner = users.findLockedById(current.getId()).orElseThrow();
         String key = requestId == null || requestId.isBlank() ? null : owner.getId() + ":" + java.util.UUID.fromString(requestId);

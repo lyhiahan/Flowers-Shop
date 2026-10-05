@@ -39,15 +39,15 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                                          String shopAddress,
                                          String contactInfo,
                                          String experienceNote) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findLockedById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy thông tin người dùng."));
 
-        if (!Boolean.TRUE.equals(user.getIsActive())) {
+        if (!Boolean.TRUE.equals(user.getIsActive()) || Boolean.TRUE.equals(user.getAccountDisabledByAdmin()) || user.isRetiredDeliveryAccount()) {
             throw new IllegalArgumentException("Tài khoản của bạn đang bị khóa, không thể gửi yêu cầu vai trò.");
         }
 
-        if (targetRole == Role.ADMIN) {
-            throw new IllegalArgumentException("Người dùng không được phép đăng ký vai trò Quản trị viên (Admin).");
+        if (targetRole != Role.MANAGER) {
+            throw new IllegalArgumentException("Chỉ được gửi yêu cầu trở thành quản lý / chủ cửa hàng.");
         }
 
         if (user.hasRole(targetRole)) {
@@ -62,8 +62,16 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         }
 
         Store targetStore = null;
+        validateLength(phone, 20, "Số điện thoại");
+        validateLength(shopName, 255, "Tên cửa hàng");
+        validateLength(shopAddress, 500, "Địa chỉ cửa hàng");
+        validateLength(contactInfo, 255, "Thông tin liên hệ");
+        validateLength(experienceNote, 1000, "Kinh nghiệm");
         if (targetStoreId != null) {
-            targetStore = storeRepository.findById(targetStoreId).orElse(null);
+            targetStore = storeRepository.findById(targetStoreId).filter(s -> Boolean.TRUE.equals(s.getStatus())).orElseThrow(() -> new IllegalArgumentException("Chi nhánh đăng ký không còn hoạt động."));
+        } else if (shopName == null || shopName.isBlank() || shopAddress == null || shopAddress.isBlank()
+                || contactInfo == null || contactInfo.isBlank()) {
+            throw new IllegalArgumentException("Chọn chi nhánh hoặc nhập đủ tên, địa chỉ và thông tin liên hệ cửa hàng mới.");
         }
 
         RoleRequest req = RoleRequest.builder()
@@ -85,7 +93,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
     @Override
     @Transactional
     public void cancelRoleRequest(Long requestId, Long userId) {
-        RoleRequest req = roleRequestRepository.findById(requestId)
+        RoleRequest req = roleRequestRepository.findLockedById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy yêu cầu vai trò #" + requestId));
 
         if (!req.getUser().getId().equals(userId)) {
@@ -119,7 +127,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
     @Override
     @Transactional
     public RoleRequest approveRoleRequest(Long requestId, Long adminId, Long assignedStoreId) {
-        RoleRequest req = roleRequestRepository.findById(requestId)
+        RoleRequest req = roleRequestRepository.findLockedById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy yêu cầu #" + requestId));
 
         if (req.isRetiredRoleRequest()) {
@@ -132,18 +140,25 @@ public class RoleManagementServiceImpl implements RoleManagementService {
 
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new IllegalArgumentException("Quản trị viên xét duyệt không tồn tại."));
+        requireAdmin(admin);
         User user = req.getUser();
+        if (!Boolean.TRUE.equals(user.getIsActive()) || Boolean.TRUE.equals(user.getAccountDisabledByAdmin()) || user.isRetiredDeliveryAccount())
+            throw new IllegalArgumentException("Không thể cấp quyền cho tài khoản bị khóa.");
 
         Store storeToAssign = null;
         if (req.getTargetRole() == Role.MANAGER) {
             Long storeId = assignedStoreId != null ? assignedStoreId : (req.getTargetStore() != null ? req.getTargetStore().getId() : null);
-            if (storeId == null) {
+            if (storeId == null && (req.getShopName() == null || req.getShopName().isBlank()
+                    || req.getShopAddress() == null || req.getShopAddress().isBlank()
+                    || req.getContactInfo() == null || req.getContactInfo().isBlank())) {
                 throw new IllegalArgumentException("Khi duyệt vai trò Quản lý chi nhánh, quản trị viên bắt buộc phải chỉ định chi nhánh được quản lý!");
             }
+            if (storeId != null) {
             storeToAssign = storeRepository.findById(storeId)
                     .orElseThrow(() -> new IllegalArgumentException("Chi nhánh phân công không tồn tại."));
             user.setStore(storeToAssign);
             req.setAssignedStore(storeToAssign);
+            }
         }
 
         user.addRole(req.getTargetRole());
@@ -174,7 +189,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
     @Override
     @Transactional
     public RoleRequest rejectRoleRequest(Long requestId, Long adminId, String reason) {
-        RoleRequest req = roleRequestRepository.findById(requestId)
+        RoleRequest req = roleRequestRepository.findLockedById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy yêu cầu #" + requestId));
 
         if (req.getStatus() != RoleRequestStatus.PENDING) {
@@ -187,6 +202,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
 
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new IllegalArgumentException("Quản trị viên xét duyệt không tồn tại."));
+        requireAdmin(admin);
 
         req.setStatus(RoleRequestStatus.REJECTED);
         req.setRejectionReason(reason.trim());
@@ -208,16 +224,14 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng."));
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản quản trị viên."));
+        requireAdmin(admin);
 
         if (role == Role.ADMIN && !"admin".equalsIgnoreCase(admin.getUsername())) {
             throw new IllegalArgumentException("Chỉ Quản trị viên tối cao mới có quyền cấp vai trò Admin.");
         }
 
         Store store = null;
-        if (role == Role.MANAGER) {
-            if (storeId == null) {
-                throw new IllegalArgumentException("Vai trò Quản lý bắt buộc phải gắn với một chi nhánh cụ thể!");
-            }
+        if (role == Role.MANAGER && storeId != null) {
             store = storeRepository.findById(storeId)
                     .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy chi nhánh được phân công."));
             user.setStore(store);
@@ -248,12 +262,13 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng."));
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản quản trị viên."));
+        requireAdmin(admin);
 
         if ("admin".equalsIgnoreCase(user.getUsername()) && role == Role.ADMIN) {
             throw new IllegalArgumentException("Không thể thu hồi vai trò của Quản trị viên tối cao!");
         }
 
-        if (role == Role.CUSTOMER) {
+        if (role == Role.USER) {
             throw new IllegalArgumentException("Không thể thu hồi vai trò Khách hàng cơ bản của tài khoản!");
         }
 
@@ -282,4 +297,16 @@ public class RoleManagementServiceImpl implements RoleManagementService {
     public List<RoleAuditLog> getAuditLogsForUser(Long userId) {
         return roleAuditLogRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
+    private void requireAdmin(User admin) {
+        if (!admin.hasRole(Role.ADMIN) || !Boolean.TRUE.equals(admin.getIsActive())
+                || Boolean.TRUE.equals(admin.getAccountDisabledByAdmin())) {
+            throw new org.springframework.security.access.AccessDeniedException("Chỉ quản trị viên đang hoạt động được thay đổi quyền.");
+        }
+    }
+
+    private void validateLength(String value, int max, String field) {
+        if (value != null && value.trim().length() > max)
+            throw new IllegalArgumentException(field + " không được vượt quá " + max + " ký tự.");
+    }
+
 }

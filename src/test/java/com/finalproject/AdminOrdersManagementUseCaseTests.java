@@ -94,7 +94,7 @@ class AdminOrdersManagementUseCaseTests {
                 .email("customer_uc29@example.com")
                 .password(encodedPass)
                 .fullName("Khách Hàng UC29")
-                .role(Role.CUSTOMER)
+                .role(Role.USER)
                 .isActive(true)
                 .createdDate(LocalDate.now())
                 .build());
@@ -194,10 +194,10 @@ class AdminOrdersManagementUseCaseTests {
 
     /**
      * Pre-condition: Chỉ người dùng có vai trò ADMIN mới được truy cập vào trang Quản lý đơn hàng.
-     * Người dùng vai trò CUSTOMER sẽ bị từ chối truy cập (403 Forbidden).
+     * Người dùng vai trò USER sẽ bị từ chối truy cập (403 Forbidden).
      */
     @Test
-    @WithMockUser(username = "customer_denied_uc29", roles = {"CUSTOMER"})
+    @WithMockUser(username = "customer_denied_uc29", roles = {"USER"})
     void testPreCondition_CustomerDeniedAccessToAdminOrders() throws Exception {
         mockMvc.perform(get("/admin/orders-manage"))
                 .andExpect(status().isForbidden());

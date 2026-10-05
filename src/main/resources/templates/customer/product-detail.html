@@ -517,13 +517,13 @@
                             <li class="px-3 py-1 text-muted small border-bottom mb-1">
                                 Xin chào, <strong class="text-dark" sec:authentication="name"></strong>
                             </li>
-                            <li sec:authorize="hasRole('CUSTOMER')">
+                            <li sec:authorize="hasRole('USER')">
                                 <a class="dropdown-item py-2" th:href="@{/customer/profile}"><i class="bi bi-person me-2 text-secondary"></i> Hồ sơ của tôi</a>
                             </li>
-                            <li sec:authorize="hasRole('CUSTOMER')">
+                            <li sec:authorize="hasRole('USER')">
                                 <a class="dropdown-item py-2" th:href="@{/following}"><i class="bi bi-heart me-2 text-danger"></i> Đang theo dõi</a>
                             </li>
-                            <li sec:authorize="hasRole('CUSTOMER')">
+                            <li sec:authorize="hasRole('USER')">
                                 <a class="dropdown-item py-2" th:href="@{/customer/orders}"><i class="bi bi-box2-heart me-2 text-secondary"></i> Đơn hoa đã đặt</a>
                             </li>
                             <li sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')">
@@ -632,7 +632,7 @@
 
                 <!-- CỘT PHẢI: THÔNG TIN (~45% CHIỀU RỘNG, THỨ TỰ CHUẨN XÁC) -->
                 <div class="product-info-col">
-                    
+
                     <!-- 1. TÊN SẢN PHẨM: Nunito 26–28 px | 700 đậm | Xanh đậm #293B32, đỉnh ngang với đỉnh ảnh -->
                     <h1 class="product-title" th:text="${product.name}">Bó hoa tươi</h1>
 
@@ -642,8 +642,8 @@
                     <div class="product-price-block">
                         <span class="product-price" th:text="${product.sellingPrice != null ? #numbers.formatDecimal(product.sellingPrice, 0, 'COMMA', 0, 'POINT') + ' ₫' : (product.priceBuy != null ? #numbers.formatDecimal(product.priceBuy, 0, 'COMMA', 0, 'POINT') + ' ₫' : 'Liên hệ')}">850.000 ₫</span>
 
-                        <span th:if="${product.promotionalPrice != null and product.priceBuy != null and product.promotionalPrice.compareTo(product.priceBuy) < 0}" 
-                              class="product-original-price" 
+                        <span th:if="${product.promotionalPrice != null and product.priceBuy != null and product.promotionalPrice.compareTo(product.priceBuy) < 0}"
+                              class="product-original-price"
                               th:text="${#numbers.formatDecimal(product.priceBuy, 0, 'COMMA', 0, 'POINT') + ' ₫'}">
                             950.000 ₫
                         </span>
@@ -663,19 +663,19 @@
                         </span>
 
                         <!-- Nút Theo dõi nhanh -->
-                        <form sec:authorize="hasRole('CUSTOMER')" 
-                              th:action="@{/customer/following/toggle/{id}(id=${product.id})}" 
-                              method="post" 
-                              class="m-0 d-inline-block ms-1" 
+                        <form sec:authorize="hasRole('USER')"
+                              th:action="@{/customer/following/toggle/{id}(id=${product.id})}"
+                              method="post"
+                              class="m-0 d-inline-block ms-1"
                               onsubmit="toggleDetailFollowAjax(event, this)">
-                            <button type="submit" id="btnDetailFollow" 
+                            <button type="submit" id="btnDetailFollow"
                                     class="btn rounded-pill px-3 py-1 fw-medium d-inline-flex align-items-center gap-1.5 transition-all shadow-xs"
                                     th:style="${isFollowed} ? 'background-color: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5; font-size: 13px;' : 'background-color: #FFF1F2; color: #E11D48; border: 1px solid #FECDD3; font-size: 13px;'">
                                 <i class="bi" th:classappend="${isFollowed} ? 'bi-check-circle-fill' : 'bi-plus-circle'" style="font-size: 14px;"></i>
                                 <span th:text="${isFollowed} ? 'Đang theo dõi' : 'Theo dõi'">Theo dõi</span>
                             </button>
                         </form>
-                        <a sec:authorize="!hasRole('CUSTOMER')" th:href="@{/login}" 
+                        <a sec:authorize="!hasRole('USER')" th:href="@{/login}"
                            class="btn rounded-pill px-3 py-1 fw-medium d-inline-flex align-items-center gap-1.5 shadow-xs ms-1"
                            style="background-color: #FFF1F2; color: #E11D48; border: 1px solid #FECDD3; font-size: 13px;">
                             <i class="bi bi-plus-circle" style="font-size: 14px;"></i>
@@ -730,12 +730,12 @@
                     </p>
 
                     <!-- 5. MUA HÀNG: Số lượng và nút mua cùng một hàng, cách nhau 12 px -->
-                    <!-- Khi đã đăng nhập với vai trò Khách hàng (CUSTOMER) -->
-                    <form sec:authorize="hasRole('CUSTOMER')" action="/cart/add" method="post"
+                    <!-- Khi đã đăng nhập với vai trò Khách hàng (USER) -->
+                    <form sec:authorize="hasRole('USER')" action="/cart/add" method="post"
                           class="product-buy-form ajax-add-to-cart" id="detailAddToCartForm">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <input type="hidden" name="productId" th:value="${product.id}">
-                        <input type="hidden" name="storeId" th:value="${product.store != null ? product.store.id : 1}">
+                        <input type="hidden" name="storeId" th:value="${purchaseStore != null ? purchaseStore.id : ''}">
                         <input type="hidden" name="orderType" value="BUY">
 
                         <div class="quantity-stepper m-0 flex-shrink-0">
@@ -800,7 +800,7 @@
                     <!-- 7. THAO TÁC PHỤ: Nút Theo dõi & Yêu thích -->
                     <div class="action-sub-row d-flex align-items-center gap-2 flex-wrap pt-2">
                         <!-- Follow / Following button -->
-                        <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/customer/following/toggle/{productId}(productId=${product.id})}" method="post" class="d-inline m-0">
+                        <form sec:authorize="hasRole('USER')" th:action="@{/customer/following/toggle/{productId}(productId=${product.id})}" method="post" class="d-inline m-0">
                             <button type="submit" id="btnFollowProductTop"
                                     class="btn btn-sm rounded-pill px-3 py-1 border d-inline-flex align-items-center gap-2 shadow-sm"
                                     style="font-size: 14.5px;"
@@ -816,9 +816,9 @@
                         </a>
 
                         <!-- Nút Yêu thích -->
-                        <form th:if="${#authorization.expression('isAuthenticated()')}" 
-                              action="/customer/profile/wishlist/toggle" 
-                              th:action="@{/customer/profile/wishlist/toggle/{id}(id=${product.id})}" 
+                        <form th:if="${#authorization.expression('isAuthenticated()')}"
+                              action="/customer/profile/wishlist/toggle"
+                              th:action="@{/customer/profile/wishlist/toggle/{id}(id=${product.id})}"
                               method="post" class="d-inline m-0">
                             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <button type="submit" class="btn btn-sm rounded-pill px-3 py-1 border d-inline-flex align-items-center gap-2"
@@ -827,7 +827,7 @@
                                 <span th:text="${isLiked} ? 'Đã lưu yêu thích' : 'Lưu vào yêu thích'">Lưu vào yêu thích</span>
                             </button>
                         </form>
-                        <a th:unless="${#authorization.expression('isAuthenticated()')}" th:href="@{/login}" 
+                        <a th:unless="${#authorization.expression('isAuthenticated()')}" th:href="@{/login}"
                            class="btn btn-sm rounded-pill px-3 py-1 border d-inline-flex align-items-center gap-2"
                            style="font-size: 14.5px; border-color: var(--flower-border) !important; color: var(--flower-text-main); background: #ffffff;">
                             <i class="bi bi-heart"></i>
@@ -850,9 +850,9 @@
             </div>
 
             <h2 class="section-below-title mb-4">Thông tin chi tiết về sản phẩm</h2>
-            
+
             <div class="accordion flower-accordion" id="flowerDetailAccordion">
-                
+
                 <!-- MỤC 1: CHI TIẾT SẢN PHẨM (Đặc điểm thiết kế & Ý nghĩa) -->
                 <div class="accordion-item">
                     <h3 class="accordion-header" id="headingDetail">
@@ -985,7 +985,7 @@
             </div>
 
             <!-- Case 2B: Khách hàng chưa đủ điều kiện đánh giá -->
-            <div sec:authorize="hasRole('CUSTOMER')" th:if="${canReview != true}" class="p-4 bg-light rounded-4 border mb-4 text-center">
+            <div sec:authorize="hasRole('USER')" th:if="${canReview != true}" class="p-4 bg-light rounded-4 border mb-4 text-center">
                 <div class="fs-2 mb-2">📦</div>
                 <h6 class="fw-bold text-dark mb-2">Chưa Thể Đánh Giá Mẫu Hoa Này</h6>
                 <p class="text-muted small mb-0" style="max-width: 600px; margin: 0 auto;">
@@ -1179,7 +1179,7 @@
             if (!toast || !toastMsg) return;
             toastMsg.textContent = msg;
             toast.style.display = 'inline-flex';
-            
+
             if (detailToastTimer) clearTimeout(detailToastTimer);
             detailToastTimer = setTimeout(() => {
                 toast.style.display = 'none';
@@ -1195,7 +1195,7 @@
             const url = formEl.getAttribute('action');
             const csrfInput = formEl.querySelector('input[name="_csrf"]');
             const csrfToken = csrfInput ? csrfInput.value : '';
-            
+
             const headers = {
                 'X-Requested-With': 'XMLHttpRequest'
             };
@@ -1364,5 +1364,6 @@
         });
     })();
     </script>
+<th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
 </body>
 </html>

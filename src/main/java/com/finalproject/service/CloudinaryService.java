@@ -24,6 +24,8 @@ public interface CloudinaryService {
      * @throws IllegalArgumentException nếu file không hợp lệ (sai định dạng/kích thước)
      */
     UploadResult upload(MultipartFile file, String folder) throws IOException;
+    /** Chat attachments require cloud storage; there is no local fallback. */
+    UploadResult uploadToCloud(MultipartFile file, String folder) throws IOException;
 
     /**
      * Xóa ảnh cũ trên Cloudinary theo public_id.

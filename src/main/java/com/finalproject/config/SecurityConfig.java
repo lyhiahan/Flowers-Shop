@@ -72,17 +72,17 @@ public class SecurityConfig {
                 // Quyền Admin
                 .requestMatchers("/admin", "/admin/**", "/api/admin/**").hasRole("ADMIN")
                 // Quyền Quản lý / Vendor
-                .requestMatchers("/manager", "/manager/**", "/vendor", "/vendor/**", "/api/manager/**", "/api/vendor/**").hasAnyRole("ADMIN", "MANAGER", "VENDOR")
+                .requestMatchers("/manager", "/manager/**", "/vendor", "/vendor/**", "/api/manager/**", "/api/vendor/**").hasAnyRole("ADMIN", "MANAGER")
                 // Retired delivery portal must not accept old sessions.
                 .requestMatchers("/shipper", "/shipper/**").denyAll()
                 // Quyền Staff
-                .requestMatchers("/staff", "/staff/**").hasAnyRole("ADMIN", "MANAGER", "VENDOR", "STAFF")
+                .requestMatchers("/staff", "/staff/**").hasAnyRole("ADMIN", "MANAGER")
                 // Endpoint WebSocket SockJS
-                .requestMatchers("/ws", "/ws/**").authenticated()
+                .requestMatchers("/ws", "/ws/**", "/ws-chat", "/api/chat/**").authenticated()
                 // MoMo Callback & IPN Webhook (cho phép chuyển hướng và webhook không bị chặn)
                 .requestMatchers("/checkout/momo/callback", "/checkout/momo/ipn").permitAll()
                 // Quyền Khách hàng
-                .requestMatchers("/customer/**", "/cart", "/cart/**", "/checkout", "/checkout/**", "/following", "/api/customer/**").hasRole("CUSTOMER")
+                .requestMatchers("/customer/**", "/cart", "/cart/**", "/checkout", "/checkout/**", "/following", "/api/customer/**").hasRole("USER")
                 // Các tài nguyên công khai
                 .requestMatchers(
                     "/", "/products/**", "/product/**", "/stores/**", "/users/**",

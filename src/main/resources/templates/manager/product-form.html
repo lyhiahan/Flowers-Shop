@@ -18,6 +18,12 @@
     </header>
     <form th:action="${product.id == null} ? @{/manager/products/add} : @{/manager/products/update/{id}(id=${product.id})}" method="post" enctype="multipart/form-data" data-confirm="Xác nhận lưu thông tin sản phẩm?" class="card">
         <div class="manager-form-grid">
+<div class="full-width"><label class="form-label" for="productAttributes">Thuộc tính hoa (giữ Ctrl để chọn nhiều)</label>
+                <input type="hidden" name="attributesSubmitted" value="true">
+                <select id="productAttributes" name="styleValueIds" multiple class="form-select" size="6">
+                    <option th:each="v : ${attributeValues}" th:value="${v.id}" th:text="${v.style.name + ': ' + v.name}" th:selected="${product.styleValues.contains(v)}"></option>
+                </select></div>
+
             <div class="full-width"><label for="productName" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label><input id="productName" name="name" th:value="${product.name}" required maxlength="200" class="form-control" placeholder="Nhập tên mẫu hoa"></div>
             <div><label for="productCategory" class="form-label">Danh mục <span class="text-danger">*</span></label><select id="productCategory" name="categoryId" required class="form-select"><option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}" th:selected="${product.category != null and product.category.id == c.id}"></option></select></div>
             <div th:if="${product.id == null}"><label for="productStock" class="form-label">Tồn kho ban đầu <span class="text-danger">*</span></label><input id="productStock" name="initialStock" type="number" min="0" max="1000000" value="0" required class="form-control"></div>
@@ -36,5 +42,6 @@
 <th:block th:replace="~{fragments/manager-layout :: footer}"></th:block>
 <script src="/js/store-confirm.js"></script>
 <script th:src="@{/js/global-modal.js}"></script>
+<th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
 </body>
 </html>

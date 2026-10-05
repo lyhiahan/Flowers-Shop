@@ -64,7 +64,7 @@ class AdminUsersManagementUseCaseTests {
                 .email("user1_uc27@example.com")
                 .password(encodedPass)
                 .fullName("Người Dùng Một")
-                .role(Role.CUSTOMER)
+                .role(Role.USER)
                 .isActive(true)
                 .createdDate(LocalDate.now())
                 .build());
@@ -74,7 +74,7 @@ class AdminUsersManagementUseCaseTests {
                 .email("user2_uc27@example.com")
                 .password(encodedPass)
                 .fullName("Người Dùng Hai")
-                .role(Role.CUSTOMER)
+                .role(Role.USER)
                 .isActive(true)
                 .createdDate(LocalDate.now())
                 .build());
@@ -84,7 +84,7 @@ class AdminUsersManagementUseCaseTests {
                 .email("user3_uc27@example.com")
                 .password(encodedPass)
                 .fullName("Người Dùng Ba")
-                .role(Role.CUSTOMER)
+                .role(Role.USER)
                 .isActive(true)
                 .createdDate(LocalDate.now())
                 .build());
@@ -94,7 +94,7 @@ class AdminUsersManagementUseCaseTests {
                 .email("user4_uc27@example.com")
                 .password(encodedPass)
                 .fullName("Người Dùng Bốn")
-                .role(Role.CUSTOMER)
+                .role(Role.USER)
                 .isActive(true)
                 .createdDate(LocalDate.now())
                 .build());
@@ -102,10 +102,10 @@ class AdminUsersManagementUseCaseTests {
 
     /**
      * Pre-condition: Chỉ người dùng có vai trò ADMIN mới được truy cập vào trang Quản lý người dùng.
-     * Người dùng vai trò CUSTOMER sẽ bị từ chối truy cập (403 Forbidden).
+     * Người dùng vai trò USER sẽ bị từ chối truy cập (403 Forbidden).
      */
     @Test
-    @WithMockUser(username = "customer_denied_uc27", roles = {"CUSTOMER"})
+    @WithMockUser(username = "customer_denied_uc27", roles = {"USER"})
     void testPreCondition_CustomerDeniedAccessToAdminUsers() throws Exception {
         mockMvc.perform(get("/admin/users"))
                 .andExpect(status().isForbidden());

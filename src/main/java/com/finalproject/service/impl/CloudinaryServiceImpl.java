@@ -87,6 +87,11 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     }
 
     // ─── Delete ───────────────────────────────────────────────────────────────
+    @Override
+    public UploadResult uploadToCloud(MultipartFile file, String folder) throws IOException {
+        if (!isCloudinaryConfigured()) throw new IOException("Cloudinary chưa được cấu hình. Không thể gửi ảnh lúc này.");
+        return upload(file, folder);
+    }
 
     @Override
     public void delete(String publicId) {

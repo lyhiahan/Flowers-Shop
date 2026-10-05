@@ -45,9 +45,10 @@ public class ProductSpecification {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isTrue(root.get("isActive")));
             predicates.add(cb.isTrue(root.get("isSelling")));
-            predicates.add(cb.isFalse(root.get("isDeleted")));
-            predicates.add(cb.isTrue(root.get("store").get("status")));
-            predicates.add(cb.isTrue(root.get("store").get("isOpen")));
+            // Legacy rows predate soft deletion; NULL means not deleted, as in Product.getIsDeleted().
+            predicates.add(cb.or(cb.isFalse(root.get("isDeleted")), cb.isNull(root.get("isDeleted"))));
+            var ownerStore = root.join("store", jakarta.persistence.criteria.JoinType.LEFT);
+            predicates.add(cb.or(cb.isNull(ownerStore.get("id")), cb.and(cb.isTrue(ownerStore.get("status")), cb.isTrue(ownerStore.get("isOpen")))));
 
             if (categoryIds != null && !categoryIds.isEmpty()) {
                 predicates.add(root.get("category").get("id").in(categoryIds));
@@ -67,12 +68,12 @@ public class ProductSpecification {
                 }
             }
 
-            if (minPrice != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("priceBuy"), minPrice));
-            }
-            if (maxPrice != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("priceBuy"), maxPrice));
-            }
+            var sellingPrice = cb.<BigDecimal>selectCase().when(cb.and(cb.isNotNull(root.get("promotionalPrice")),
+                    cb.greaterThanOrEqualTo(root.get("promotionalPrice"), BigDecimal.ZERO),
+                    cb.lessThanOrEqualTo(root.get("promotionalPrice"), root.get("priceBuy"))), root.<BigDecimal>get("promotionalPrice"))
+                    .otherwise(root.<BigDecimal>get("priceBuy"));
+            if (minPrice != null) predicates.add(cb.greaterThanOrEqualTo(sellingPrice, minPrice));
+            if (maxPrice != null) predicates.add(cb.lessThanOrEqualTo(sellingPrice, maxPrice));
             if (minRating != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("rating"), minRating));
             }
@@ -89,7 +90,7 @@ public class ProductSpecification {
                     }
                 }
                 if (!stylePredicates.isEmpty()) {
-                    predicates.add(cb.or(stylePredicates.toArray(new Predicate[0])));
+                    predicates.add(attributeFilter(root, query, cb, List.of("kiểu dáng", "kiểu dáng cắm", "kiểu dáng hoa", "phong cách cắm"), flowerStyles, cb.or(stylePredicates.toArray(new Predicate[0]))));
                 }
             }
 
@@ -102,7 +103,7 @@ public class ProductSpecification {
                     }
                 }
                 if (!typePredicates.isEmpty()) {
-                    predicates.add(cb.or(typePredicates.toArray(new Predicate[0])));
+                    predicates.add(attributeFilter(root, query, cb, List.of("loại hoa"), flowerTypes, cb.or(typePredicates.toArray(new Predicate[0]))));
                 }
             }
 
@@ -115,7 +116,7 @@ public class ProductSpecification {
                     }
                 }
                 if (!occasionPredicates.isEmpty()) {
-                    predicates.add(cb.or(occasionPredicates.toArray(new Predicate[0])));
+                    predicates.add(attributeFilter(root, query, cb, List.of("dịp tặng"), flowerOccasions, cb.or(occasionPredicates.toArray(new Predicate[0]))));
                 }
             }
 
@@ -128,12 +129,31 @@ public class ProductSpecification {
                     }
                 }
                 if (!colorPredicates.isEmpty()) {
-                    predicates.add(cb.or(colorPredicates.toArray(new Predicate[0])));
+                    predicates.add(attributeFilter(root, query, cb, List.of("màu sắc", "tone màu hoa", "tone màu thiết kế"), flowerColors, cb.or(colorPredicates.toArray(new Predicate[0]))));
                 }
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };
+    }
+
+    private static Predicate attributeFilter(jakarta.persistence.criteria.Root<Product> root,
+            jakarta.persistence.criteria.CriteriaQuery<?> query, jakarta.persistence.criteria.CriteriaBuilder cb,
+            List<String> groups, List<String> selected, Predicate legacy) {
+        var any = query.subquery(Long.class);
+        var source = any.from(Product.class);
+        var assigned = source.join("styleValues");
+        any.select(source.get("id")).where(cb.equal(source.get("id"), root.get("id")),
+                cb.lower(assigned.get("style").get("name")).in(groups));
+        var matching = query.subquery(Long.class);
+        var product = matching.from(Product.class);
+        var value = product.join("styleValues");
+        matching.select(product.get("id")).where(cb.equal(product.get("id"), root.get("id")),
+                cb.lower(value.get("style").get("name")).in(groups),
+                cb.lower(value.get("name")).in(selected.stream().map(v -> v.trim().toLowerCase(java.util.Locale.ROOT)).toList()),
+                cb.isFalse(value.get("isDeleted")), cb.isFalse(value.get("style").get("isDeleted")));
+        // Explicit attributes take precedence. Legacy products remain searchable until classified.
+        return cb.or(cb.exists(matching), cb.and(cb.not(cb.exists(any)), legacy));
     }
 
     private static Predicate buildStylePredicate(jakarta.persistence.criteria.CriteriaBuilder cb, jakarta.persistence.criteria.Root<Product> root, String s) {

@@ -132,9 +132,9 @@ public class User {
         if (this.roles == null) this.roles = new java.util.HashSet<>();
         this.roles.add(newRole);
         if (hasRole(Role.ADMIN) || this.role == Role.ADMIN) {
-            this.roles.remove(Role.CUSTOMER); // Admin không bao giờ giữ vai trò Khách hàng
+            this.roles.remove(Role.USER); // Admin không bao giờ giữ vai trò Khách hàng
         } else {
-            this.roles.add(Role.CUSTOMER); // Quản lý và Người bán vẫn giữ quyền khách hàng
+            this.roles.add(Role.USER); // Quản lý và Người bán vẫn giữ quyền khách hàng
         }
     }
 
@@ -142,19 +142,19 @@ public class User {
         if (this.roles != null) {
             this.roles.remove(targetRole);
             if (hasRole(Role.ADMIN) || this.role == Role.ADMIN) {
-                this.roles.remove(Role.CUSTOMER);
+                this.roles.remove(Role.USER);
             } else {
-                this.roles.add(Role.CUSTOMER);
+                this.roles.add(Role.USER);
             }
         }
         if (this.role == targetRole) {
             if (this.roles != null && !this.roles.isEmpty()) {
                 this.role = this.roles.stream()
-                        .filter(r -> r != Role.CUSTOMER)
+                        .filter(r -> r != Role.USER)
                         .findFirst()
-                        .orElse(Role.CUSTOMER);
+                        .orElse(Role.USER);
             } else {
-                this.role = Role.CUSTOMER;
+                this.role = Role.USER;
             }
         }
     }

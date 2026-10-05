@@ -84,7 +84,7 @@ public class StoreAccessService {
 
     public void requireManager(Store store) {
         User user = currentUser();
-        if (!user.hasRole(Role.ADMIN) && !user.hasRole(Role.MANAGER) && !user.hasRole(Role.VENDOR)) {
+        if (!user.hasRole(Role.ADMIN) && !user.hasRole(Role.MANAGER)) {
             throw new AccessDeniedException("Chức năng chỉ dành cho quản lý.");
         }
         requireStore(store);
@@ -107,7 +107,7 @@ public class StoreAccessService {
     public void requireStore(Store store) {
         User user = currentUser();
         if (user.hasRole(Role.ADMIN)) return;
-        if (store == null || (!user.hasRole(Role.MANAGER) && !user.hasRole(Role.VENDOR) && !user.hasRole(Role.STAFF))) {
+        if (store == null || !user.hasRole(Role.MANAGER)) {
             throw new AccessDeniedException("Bạn không có quyền xử lý chi nhánh này.");
         }
         if (!canAccess(user, store)) throw new AccessDeniedException("Bạn không có quyền xử lý chi nhánh khác.");

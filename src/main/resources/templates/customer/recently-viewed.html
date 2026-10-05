@@ -114,7 +114,7 @@
   <!-- 2. THANH ĐIỀU HƯỚNG CHÍNH (Main Header) -->
   <header class="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-[#EBDED4]/80 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
     <div class="max-w-7xl mx-auto px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4 lg:gap-8">
-      
+
       <!-- Logo -->
       <a class="flex items-center gap-2.5 shrink-0 group" th:href="@{/}">
         <div class="w-10 h-10 rounded-full bg-botanic-subtle flex items-center justify-center text-botanic-rose text-2xl shadow-xs group-hover:scale-105 transition-transform">
@@ -132,7 +132,7 @@
           <div class="flex items-center gap-1 text-xs font-bold text-[#444] pr-3 border-r border-[#E5E5E5] shrink-0">
             <span class="text-botanic-rose text-sm">🌸</span> Mẫu hoa
           </div>
-          <input name="keyword" class="w-full bg-transparent px-3 py-1.5 text-xs sm:text-[13.5px] font-medium text-botanic-dark placeholder-[#888] border-none focus:ring-0 focus:outline-none" 
+          <input name="keyword" class="w-full bg-transparent px-3 py-1.5 text-xs sm:text-[13.5px] font-medium text-botanic-dark placeholder-[#888] border-none focus:ring-0 focus:outline-none"
                  placeholder="Tìm hoa hồng, mẫu đơn, hướng dương..." type="text">
           <button class="bg-[#264E43] hover:bg-[#1E433A] text-white text-xs font-bold px-4 py-2 rounded-full flex items-center gap-1 transition-colors shrink-0 shadow-xs" type="submit">
             <span class="material-symbols-outlined text-[15px]">search</span>Tìm
@@ -143,19 +143,19 @@
       <!-- Cụm nút tiện ích bên phải -->
       <div class="flex items-center gap-2 sm:gap-3 shrink-0">
         <!-- Wishlist -->
-        <a class="w-9 h-9 rounded-full border border-[#EBE3DC] flex items-center justify-center text-[#555] hover:text-botanic-rose hover:border-botanic-rose transition-colors" 
+        <a class="w-9 h-9 rounded-full border border-[#EBE3DC] flex items-center justify-center text-[#555] hover:text-botanic-rose hover:border-botanic-rose transition-colors"
            th:href="@{/customer/wishlist}" title="Hoa yêu thích">
           <span class="material-symbols-outlined text-[19px]">favorite_border</span>
         </a>
 
         <!-- Following -->
-        <a class="w-9 h-9 rounded-full border border-[#EBE3DC] flex items-center justify-center text-[#555] hover:text-botanic-green hover:border-botanic-green transition-colors" 
+        <a class="w-9 h-9 rounded-full border border-[#EBE3DC] flex items-center justify-center text-[#555] hover:text-botanic-green hover:border-botanic-green transition-colors"
            th:href="@{/following}" title="Following">
           <span class="material-symbols-outlined text-[19px]">bookmark_border</span>
         </a>
 
         <!-- Giỏ hàng -->
-        <a class="relative w-9 h-9 rounded-full border border-[#EBE3DC] flex items-center justify-center text-[#555] hover:text-botanic-green hover:border-botanic-green transition-colors" 
+        <a class="relative w-9 h-9 rounded-full border border-[#EBE3DC] flex items-center justify-center text-[#555] hover:text-botanic-green hover:border-botanic-green transition-colors"
            th:href="@{/cart}" title="Giỏ hàng">
           <span class="material-symbols-outlined text-[19px]">shopping_bag</span>
           <span class="absolute -top-1 -right-1 bg-botanic-rose text-white text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shadow-xs"
@@ -225,7 +225,7 @@
             <a th:href="@{/}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#264E43] hover:bg-[#1E433A] text-white text-xs sm:text-sm font-bold transition-all shadow-sm">
               <span>Tiếp tục khám phá 🌸</span>
             </a>
-            <button id="clearHistoryBtn" type="button" 
+            <button id="clearHistoryBtn" type="button"
                     class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white hover:bg-[#FAF0E8] border border-[#E5D7CD] text-[#555] hover:text-botanic-rose text-xs sm:text-sm font-bold transition-all shadow-xs">
               <span class="material-symbols-outlined text-[17px]">delete_sweep</span>
               <span>Xóa lịch sử đã xem</span>
@@ -238,23 +238,23 @@
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-3.5 sm:p-4 rounded-xl bg-white border border-[#EBDED4] mb-8 shadow-xs">
         <!-- Filter Chips -->
         <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0" id="filterContainer">
-          <button class="filter-chip active-filter px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#264E43] text-white shadow-xs whitespace-nowrap" 
+          <button class="filter-chip active-filter px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#264E43] text-white shadow-xs whitespace-nowrap"
                   data-filter="all" onclick="filterCategory('all', this)">
             Tất cả
           </button>
-          <button class="filter-chip px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#FAF6F0] text-[#555] hover:bg-[#F2E7DC] hover:text-botanic-dark whitespace-nowrap" 
+          <button class="filter-chip px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#FAF6F0] text-[#555] hover:bg-[#F2E7DC] hover:text-botanic-dark whitespace-nowrap"
                   data-filter="sinh-nhat" onclick="filterCategory('sinh-nhat', this)">
             🎂 Sinh Nhật
           </button>
-          <button class="filter-chip px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#FAF6F0] text-[#555] hover:bg-[#F2E7DC] hover:text-botanic-dark whitespace-nowrap" 
+          <button class="filter-chip px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#FAF6F0] text-[#555] hover:bg-[#F2E7DC] hover:text-botanic-dark whitespace-nowrap"
                   data-filter="tinh-yeu" onclick="filterCategory('tinh-yeu', this)">
             💖 Tình Yêu
           </button>
-          <button class="filter-chip px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#FAF6F0] text-[#555] hover:bg-[#F2E7DC] hover:text-botanic-dark whitespace-nowrap" 
+          <button class="filter-chip px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#FAF6F0] text-[#555] hover:bg-[#F2E7DC] hover:text-botanic-dark whitespace-nowrap"
                   data-filter="khai-truong" onclick="filterCategory('khai-truong', this)">
             🎉 Khai Trương
           </button>
-          <button class="filter-chip px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#FAF6F0] text-[#555] hover:bg-[#F2E7DC] hover:text-botanic-dark whitespace-nowrap" 
+          <button class="filter-chip px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#FAF6F0] text-[#555] hover:bg-[#F2E7DC] hover:text-botanic-dark whitespace-nowrap"
                   data-filter="khac" onclick="filterCategory('khac', this)">
             ✨ Khác
           </button>
@@ -279,21 +279,21 @@
       </div>
 
       <!-- 5. LƯỚI SẢN PHẨM ĐÃ XEM (Product Grid 4 Cột) -->
-      <div th:if="${!#lists.isEmpty(recentProducts)}" 
+      <div th:if="${!#lists.isEmpty(recentProducts)}"
            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10" id="productGrid">
-        
-        <div th:each="p : ${recentProducts}" 
+
+        <div th:each="p : ${recentProducts}"
              class="product-item group flex flex-col rounded-2xl bg-white border border-[#EFE8E1] overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-card shadow-xs"
              th:data-id="${p.id}"
              th:data-price="${p.priceBuy != null ? p.priceBuy : (p.sellingPrice != null ? p.sellingPrice : 0)}"
              th:data-rating="${p.rating != null ? p.rating : 5.0}"
              th:data-category="${p.name != null and (p.name.toLowerCase().contains('sinh nhật') or p.name.toLowerCase().contains('sn')) ? 'sinh-nhat' : (p.name != null and (p.name.toLowerCase().contains('tình yêu') or p.name.toLowerCase().contains('yêu') or p.name.toLowerCase().contains('hồng') or p.name.toLowerCase().contains('rose') or p.name.toLowerCase().contains('cưới')) ? 'tinh-yeu' : (p.name != null and (p.name.toLowerCase().contains('khai trương') or p.name.toLowerCase().contains('kệ') or p.name.toLowerCase().contains('chúc mừng') or p.name.toLowerCase().contains('lẵng')) ? 'khai-truong' : 'khac'))}">
-          
+
           <!-- Image Thumbnail & Badges -->
           <div class="relative aspect-[4/5] overflow-hidden bg-[#F7EFE9]">
             <a th:href="@{/products/{id}(id=${p.id})}" class="block w-full h-full">
               <img th:src="${p.imageUrl != null ? p.imageUrl : 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=600'}"
-                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                    th:alt="${p.name}"
                    onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800&amp;q=80';">
             </a>
@@ -308,13 +308,13 @@
             </div>
 
             <!-- Quick Follow / Wishlist Button -->
-            <form sec:authorize="hasRole('CUSTOMER')" 
-                  th:action="@{/customer/following/toggle/{productId}(productId=${p.id})}" 
+            <form sec:authorize="hasRole('USER')"
+                  th:action="@{/customer/following/toggle/{productId}(productId=${p.id})}"
                   method="post"
                   class="absolute top-3 right-3 m-0"
                   onsubmit="toggleRecentlyViewedFollowAjax(event, this)">
-              <button type="submit" 
-                      class="w-8 h-8 rounded-full bg-white/90 backdrop-blur-xs text-[#555] hover:text-botanic-rose flex items-center justify-center transition-colors shadow-xs cursor-pointer" 
+              <button type="submit"
+                      class="w-8 h-8 rounded-full bg-white/90 backdrop-blur-xs text-[#555] hover:text-botanic-rose flex items-center justify-center transition-colors shadow-xs cursor-pointer"
                       title="Theo dõi mẫu hoa này">
                 <span class="material-symbols-outlined text-[18px]">favorite_border</span>
               </button>
@@ -353,17 +353,17 @@
 
             <!-- Action Buttons Row -->
             <div class="flex items-center gap-2 pt-2 border-t border-[#F0E6DE]">
-              <a th:href="@{/products/{id}(id=${p.id})}" 
+              <a th:href="@{/products/{id}(id=${p.id})}"
                  class="flex-1 py-2 px-3 rounded-full bg-[#264E43] hover:bg-[#1E433A] text-white text-xs font-bold text-center transition-colors shadow-xs">
                 Xem Chi Tiết
               </a>
-              
+
               <!-- Quick Add to Cart Form -->
               <form th:action="@{/cart/add}" method="post" class="m-0">
                 <input type="hidden" name="productId" th:value="${p.id}">
                 <input type="hidden" name="quantity" value="1">
-                <button type="submit" 
-                        class="w-9 h-9 rounded-full bg-[#FAF6F0] hover:bg-[#F2E8DF] text-botanic-rose flex items-center justify-center transition-colors border border-[#EBDED4] cursor-pointer" 
+                <button type="submit"
+                        class="w-9 h-9 rounded-full bg-[#FAF6F0] hover:bg-[#F2E8DF] text-botanic-rose flex items-center justify-center transition-colors border border-[#EBDED4] cursor-pointer"
                         title="Thêm vào giỏ hàng">
                   <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
                 </button>
@@ -398,10 +398,10 @@
        ============================================== -->
   <footer class="w-full border-top pt-4 pb-3 mt-12" style="background-color: #FAF4F0 !important; border-top: 1px solid #EBDED4 !important; font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif !important; color: #4A3E3D !important; width: 100%;">
     <div style="max-width: 1240px; margin: 0 auto; padding-left: 20px; padding-right: 20px;">
-      
+
       <!-- Hàng trên: 2 Cột thông tin -->
       <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 24px; padding-bottom: 24px;">
-        
+
         <!-- Cột 1: Thương hiệu & Liên hệ -->
         <div style="flex: 1 1 320px; max-width: 480px;">
           <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
@@ -461,7 +461,7 @@
   </footer>
 
   <!-- Floating Toast Notification -->
-  <div id="recentToast" 
+  <div id="recentToast"
        class="fixed top-6 right-6 z-50 transform -translate-y-4 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2.5 px-5 py-3 rounded-full bg-[#264E43] text-white shadow-2xl text-xs sm:text-sm font-bold border border-white/20">
     <span class="material-symbols-outlined text-[18px] text-[#97F5CC]">check_circle</span>
     <span id="recentToastMsg">Thao tác thành công</span>
@@ -476,7 +476,7 @@
       toastMsg.textContent = message;
       toast.classList.remove('-translate-y-4', 'opacity-0', 'pointer-events-none');
       toast.classList.add('translate-y-0', 'opacity-100');
-      
+
       if (toastTimeout) clearTimeout(toastTimeout);
       toastTimeout = setTimeout(() => {
         toast.classList.remove('translate-y-0', 'opacity-100');
@@ -498,7 +498,7 @@
       products.forEach(p => {
         const cat = (p.getAttribute('data-category') || '').toLowerCase();
         const name = (p.querySelector('h3 a')?.textContent || '').toLowerCase();
-        
+
         let match = false;
         if (category === 'all') {
           match = true;
@@ -607,5 +607,6 @@
     }
   </script>
   <script th:src="@{/js/global-modal.js}"></script>
+<th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
 </body>
 </html>

@@ -78,18 +78,7 @@ public class CheckoutController {
         }
 
         // Kiểm tra tồn kho tại chi nhánh: Chặn thanh toán nếu có sản phẩm hết hàng
-        for (CartItem ci : checkoutItems) {
-            if (ci.getStore() != null && ci.getProduct() != null) {
-                int stock = storeInventoryRepository.findByStoreIdAndProductId(ci.getStore().getId(), ci.getProduct().getId())
-                        .map(com.finalproject.entity.StoreInventory::getQuantity)
-                        .orElse(0);
-                if (stock <= 0) {
-                    redirectAttributes.addFlashAttribute("errorMessage", "Mẫu hoa '" + ci.getProduct().getName() + "' hiện đang tạm hết hàng tại " + ci.getStore().getName() + ". Vui lòng bỏ chọn để thanh toán các sản phẩm khác.");
-                    return "redirect:/cart";
-                }
-            }
-        }
-
+        // Verify stock for the selected fulfillment branch in quote and transactional checkout.
         BigDecimal subtotalRentAndBuy = BigDecimal.ZERO;
         BigDecimal totalDeposit = BigDecimal.ZERO;
 
@@ -108,7 +97,7 @@ public class CheckoutController {
         model.addAttribute("customer", customer);
         model.addAttribute("addresses", customer != null ? userService.getUserAddresses(customer.getId()) : List.of());
         model.addAttribute("vouchers", voucherService.getAvailableVouchers(null));
-        model.addAttribute("stores", storeRepository.findByStatusTrue());
+        model.addAttribute("stores", storeRepository.findByStatusTrue().stream().filter(store -> Boolean.TRUE.equals(store.getIsOpen())).toList());
         model.addAttribute("deliveries", deliveryRepository.findAll().stream()
                 .filter(d -> Boolean.TRUE.equals(d.getIsActive()) && !Boolean.TRUE.equals(d.getIsDeleted())).toList());
         model.addAttribute("checkoutItems", checkoutItems);
@@ -132,6 +121,8 @@ public class CheckoutController {
             @RequestParam(value = "greetingMessage", required = false) String greetingMessage,
             @RequestParam(value = "voucherCode", required = false) String voucherCode,
             @RequestParam(value = "deliveryDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate deliveryDate,
+            @RequestParam(value = "deliveryTime", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) java.time.LocalTime deliveryTime,
+            @RequestParam(value = "deliveryTimeSlot", required = false) String[] deliveryTimeSlot,
             @RequestParam(value = "shippingMethod", required = false, defaultValue = "DELIVERY") String shippingMethod,
             @RequestParam(value = "pickupStoreId", required = false) Long pickupStoreId,
             @RequestParam(value = "deliveryUnitId", required = false) Long deliveryUnitId,
@@ -145,12 +136,19 @@ public class CheckoutController {
         try {
             if (selectedItemIds == null || selectedItemIds.isEmpty()) throw new IllegalArgumentException("Vui lòng chọn sản phẩm để thanh toán.");
             if (deliveryDate == null) throw new IllegalArgumentException("Vui lòng chọn ngày nhận hàng.");
+            if (deliveryTime == null) {
+                String slot = deliveryTimeSlot == null ? null : java.util.Arrays.stream(deliveryTimeSlot)
+                        .filter(value -> value != null && !value.isBlank()).findFirst().orElse(null);
+                if (slot == null || !java.util.Set.of("07:00-09:00", "09:00-11:00", "11:00-13:00", "13:00-15:00", "15:00-17:00", "17:00-20:00").contains(slot))
+                    throw new IllegalArgumentException("Vui lòng chọn khung giờ nhận hoa hợp lệ.");
+                deliveryTime = java.time.LocalTime.parse(slot.substring(0, 5));
+            }
             if (finalRecipientName == null || finalRecipientName.isBlank() || finalRecipientPhone == null || finalRecipientPhone.isBlank())
                 throw new IllegalArgumentException("Vui lòng nhập tên và số điện thoại người nhận.");
             if ("DELIVERY".equals(shippingMethod) && (finalRecipientAddress == null || finalRecipientAddress.isBlank()))
                 throw new IllegalArgumentException("Vui lòng nhập địa chỉ giao hàng.");
             validateDeliverySelection(shippingMethod, deliveryUnitId);
-            List<com.finalproject.entity.Order> createdOrders = orderService.checkout(principal.getName(), selectedItemIds, paymentMethod, finalRecipientName, finalRecipientPhone, finalRecipientAddress, greetingMessage, voucherCode, deliveryDate, shippingMethod, pickupStoreId, deliveryUnitId);
+            List<com.finalproject.entity.Order> createdOrders = orderService.checkout(principal.getName(), selectedItemIds, paymentMethod, finalRecipientName, finalRecipientPhone, finalRecipientAddress, greetingMessage, voucherCode, deliveryDate, shippingMethod, pickupStoreId, deliveryUnitId, deliveryTime);
             if (paymentMethod == PaymentMethod.MOMO && createdOrders != null && !createdOrders.isEmpty()) {
                 com.finalproject.entity.Order firstOrder = createdOrders.get(0);
                 try {

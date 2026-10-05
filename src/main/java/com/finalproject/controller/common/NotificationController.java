@@ -42,7 +42,7 @@ public class NotificationController {
         model.addAttribute("unreadCount", unreadCount);
         model.addAttribute("user", user);
 
-        if (user.getRole() == Role.MANAGER || user.getRole() == Role.VENDOR) {
+        if (user.getRole() == Role.MANAGER) {
             try {
                 if (storeAccess != null) {
                     model.addAttribute("managerStore", storeAccess.selectedStore());
@@ -67,7 +67,7 @@ public class NotificationController {
                     map.put("unreadCount", notificationService.getUnreadCount(u.getId()));
                     map.put("userId", u.getId());
                     map.put("username", u.getUsername());
-                    map.put("isManager", u.getRole() == Role.MANAGER || u.getRole() == Role.VENDOR);
+                    map.put("isManager", u.getRole() == Role.MANAGER);
                     return ResponseEntity.ok(map);
                 })
                 .orElse(ResponseEntity.ok(Map.of("unreadCount", 0L)));

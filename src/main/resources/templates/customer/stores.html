@@ -395,14 +395,11 @@
                             <li class="px-3 py-1 text-muted small border-bottom mb-1">
                                 Xin chào, <strong style="color: var(--flower-text-main);" sec:authentication="name"></strong>
                             </li>
-                            <li sec:authorize="hasRole('CUSTOMER')">
+                            <li sec:authorize="hasRole('USER')">
                                 <a class="dropdown-item py-2" th:href="@{/customer/profile}"><i class="bi bi-person me-2 text-secondary"></i> Hồ sơ của tôi</a>
                             </li>
-                            <li sec:authorize="hasRole('CUSTOMER')">
+                            <li sec:authorize="hasRole('USER')">
                                 <a class="dropdown-item py-2" th:href="@{/customer/orders}"><i class="bi bi-box2-heart me-2 text-secondary"></i> Đơn hoa đã đặt</a>
-                            </li>
-                            <li sec:authorize="hasRole('STAFF')">
-                                <a class="dropdown-item py-2" th:href="@{/staff/dashboard}"><i class="bi bi-speedometer2 me-2 text-secondary"></i> Trang quản lý đơn</a>
                             </li>
                             <li sec:authorize="hasRole('MANAGER')">
                                 <a class="dropdown-item py-2 fw-semibold text-success" th:href="@{/manager/dashboard}"><i class="bi bi-shop me-2"></i> Kênh Quản lý cửa hàng</a>
@@ -501,7 +498,7 @@
                             <i class="bi bi-shop me-1"></i> Tham Quan
                         </a>
                         <!-- Nút Follow / Following trên store card (UC_015 Alternative 1a) -->
-                        <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/stores/{id}/follow(id=${s.id})}" method="post" class="m-0">
+                        <form sec:authorize="hasRole('USER')" th:action="@{/stores/{id}/follow(id=${s.id})}" method="post" class="m-0">
                             <button type="submit" class="btn btn-sm rounded-pill px-3 py-2 fw-bold shadow-sm text-nowrap"
                                     th:classappend="${followedStoreIds != null and followedStoreIds.contains(s.id)} ? 'btn-danger' : 'btn-outline-danger'"
                                     th:title="${followedStoreIds != null and followedStoreIds.contains(s.id)} ? 'Bấm để hủy theo dõi' : 'Bấm để theo dõi cửa hàng'">
@@ -608,5 +605,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script th:src="@{/js/global-modal.js}"></script>
+<th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
 </body>
 </html>

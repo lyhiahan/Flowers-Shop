@@ -29,6 +29,7 @@ public class ProductServiceImpl implements ProductService {
     private final UserRepository userRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final jakarta.validation.Validator validator;
+    private final com.finalproject.service.ProductAttributeService attributes;
 
     private void validateForm(ProductForm form) {
         if (form == null) throw new IllegalArgumentException("Thông tin sản phẩm không hợp lệ.");
@@ -233,6 +234,7 @@ public class ProductServiceImpl implements ProductService {
                 .sold(0)
                 .rating(5.0)
                 .build();
+        attributes.assign(product, form.getStyleValueIds(), form.isAttributesSubmitted());
         Product savedProduct = productRepository.save(product);
 
         // 2. Upload danh sách ảnh lên Cloudinary
@@ -292,6 +294,7 @@ public class ProductServiceImpl implements ProductService {
 
         product.setName(form.getName());
         product.setCategory(category);
+        attributes.assign(product, form.getStyleValueIds(), form.isAttributesSubmitted());
         product.setDescription(form.getDescription());
         product.setImportPrice(form.getImportPrice());
         product.setPriceBuy(form.getPriceBuy());

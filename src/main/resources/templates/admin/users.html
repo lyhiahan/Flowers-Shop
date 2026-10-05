@@ -381,8 +381,7 @@
                     <div style="min-width: 170px; max-width: 200px;">
                         <select name="role" class="form-select form-select-sm" style="height: 38px; border-color: #E2E7E2; border-radius: 8px; font-size: 13.5px; color: #20382E; font-weight: 600;">
                             <option value="ALL" th:selected="${currentRole == 'ALL' or currentRole == null}">Tất cả vai trò</option>
-                            <option value="CUSTOMER" th:selected="${currentRole == 'CUSTOMER'}">Khách hàng</option>
-                            <option value="VENDOR" th:selected="${currentRole == 'VENDOR'}">Người bán (Vendor)</option>
+                            <option value="USER" th:selected="${currentRole == 'USER'}">Khách hàng</option>
                             <option value="MANAGER" th:selected="${currentRole == 'MANAGER'}">Quản lý (Manager)</option>
                             <option value="ADMIN" th:selected="${currentRole == 'ADMIN'}">Quản trị viên (Admin)</option>
                         </select>
@@ -453,16 +452,16 @@
                                     <div class="d-flex flex-wrap gap-1 align-items-center">
                                         <th:block th:if="${not #sets.isEmpty(u.roles)}">
                                             <span th:each="r : ${u.roles}" class="role-pill"
-                                                  th:classappend="${r.name() == 'ADMIN' ? 'role-pill-admin' : (r.name() == 'MANAGER' ? 'role-pill-manager' : (r.name() == 'VENDOR' ? 'role-pill-vendor' : 'role-pill-customer'))}">
-                                                <i class="bi" th:classappend="${r.name() == 'ADMIN' ? 'bi-shield-shaded' : (r.name() == 'MANAGER' ? 'bi-building' : (r.name() == 'VENDOR' ? 'bi-shop' : 'bi-person'))}"></i>
-                                                <span th:text="${r.name() == 'ADMIN' ? 'Admin' : (r.name() == 'MANAGER' ? 'Quản lý' : (r.name() == 'VENDOR' ? 'Người bán' : 'Khách hàng'))}"></span>
+                                                  th:classappend="${r.name() == 'ADMIN' ? 'role-pill-admin' : (r.name() == 'MANAGER' ? 'role-pill-manager' : 'role-pill-customer')}">
+                                                <i class="bi" th:classappend="${r.name() == 'ADMIN' ? 'bi-shield-shaded' : (r.name() == 'MANAGER' ? 'bi-building' : 'bi-person')}"></i>
+                                                <span th:text="${r.name() == 'ADMIN' ? 'Admin' : (r.name() == 'MANAGER' ? 'Quản lý' : 'Khách hàng')}"></span>
                                             </span>
                                         </th:block>
                                         <th:block th:if="${#sets.isEmpty(u.roles) and u.role != null}">
                                             <span class="role-pill"
-                                                  th:classappend="${u.role.name() == 'ADMIN' ? 'role-pill-admin' : (u.role.name() == 'MANAGER' ? 'role-pill-manager' : (u.role.name() == 'VENDOR' ? 'role-pill-vendor' : 'role-pill-customer'))}">
-                                                <i class="bi" th:classappend="${u.role.name() == 'ADMIN' ? 'bi-shield-shaded' : (u.role.name() == 'MANAGER' ? 'bi-building' : (u.role.name() == 'VENDOR' ? 'bi-shop' : 'bi-person'))}"></i>
-                                                <span th:text="${u.role.name() == 'ADMIN' ? 'Admin' : (u.role.name() == 'MANAGER' ? 'Quản lý' : (u.role.name() == 'VENDOR' ? 'Người bán' : 'Khách hàng'))}"></span>
+                                                  th:classappend="${u.role.name() == 'ADMIN' ? 'role-pill-admin' : (u.role.name() == 'MANAGER' ? 'role-pill-manager' : 'role-pill-customer')}">
+                                                <i class="bi" th:classappend="${u.role.name() == 'ADMIN' ? 'bi-shield-shaded' : (u.role.name() == 'MANAGER' ? 'bi-building' : 'bi-person')}"></i>
+                                                <span th:text="${u.role.name() == 'ADMIN' ? 'Admin' : (u.role.name() == 'MANAGER' ? 'Quản lý' : 'Khách hàng')}"></span>
                                             </span>
                                         </th:block>
                                         <span th:if="${#sets.isEmpty(u.roles) and u.role == null}" class="text-muted" style="font-size: 12.5px;">Chưa gán</span>
@@ -713,9 +712,9 @@
                         <label class="form-label fw-bold text-dark small text-uppercase">Vai trò hiện tại đang sở hữu</label>
                         <div class="d-flex flex-wrap gap-2 mt-1">
                             <span th:each="r : ${u.roles}" class="role-pill fs-6 px-3 py-1"
-                                  th:classappend="${r.name() == 'ADMIN' ? 'role-pill-admin' : (r.name() == 'MANAGER' ? 'role-pill-manager' : (r.name() == 'VENDOR' ? 'role-pill-vendor' : 'role-pill-customer'))}">
-                                <i class="bi" th:classappend="${r.name() == 'ADMIN' ? 'bi-shield-shaded' : (r.name() == 'MANAGER' ? 'bi-building' : (r.name() == 'VENDOR' ? 'bi-shop' : 'bi-person'))}"></i>
-                                <span th:text="${r.name() == 'ADMIN' ? 'Quản trị viên (Admin)' : (r.name() == 'MANAGER' ? 'Quản lý chi nhánh (Manager)' : (r.name() == 'VENDOR' ? 'Người bán hoa (Vendor)' : 'Khách hàng (Customer)'))}"></span>
+                                  th:classappend="${r.name() == 'ADMIN' ? 'role-pill-admin' : (r.name() == 'MANAGER' ? 'role-pill-manager' : 'role-pill-customer')}">
+                                <i class="bi" th:classappend="${r.name() == 'ADMIN' ? 'bi-shield-shaded' : (r.name() == 'MANAGER' ? 'bi-building' : 'bi-person')}"></i>
+                                <span th:text="${r.name() == 'ADMIN' ? 'Quản trị viên (Admin)' : (r.name() == 'MANAGER' ? 'Quản lý chi nhánh (Manager)' : 'Khách hàng (User)')}"></span>
                             </span>
                         </div>
                         <div th:if="${u.store != null}" class="mt-2 text-primary small">
@@ -737,7 +736,6 @@
                                                 th:onchange="'toggleStoreSelect(this.value, \'' + ${u.id} + '\')'">
                                             <option value="" disabled selected>-- Chọn vai trò --</option>
                                             <option value="MANAGER">🏢 Quản lý chi nhánh (Manager)</option>
-                                            <option value="VENDOR">🏪 Người bán đối tác (Vendor)</option>
                                             <option value="ADMIN">🛡️ Quản trị viên (Admin)</option>
                                         </select>
                                     </div>
@@ -774,9 +772,9 @@
                                         <select name="role" class="form-select form-select-sm" required>
                                             <option value="" disabled selected>-- Chọn vai trò cần gỡ --</option>
                                             <option th:each="r : ${u.roles}"
-                                                    th:if="${r.name() != 'CUSTOMER'}"
+                                                    th:if="${r.name() != 'USER'}"
                                                     th:value="${r.name()}"
-                                                    th:text="${r.name() == 'MANAGER' ? '🏢 Quản lý chi nhánh' : (r.name() == 'VENDOR' ? '🏪 Người bán' : '🛡️ Quản trị viên')}"></option>
+                                                    th:text="${r.name() == 'MANAGER' ? '🏢 Quản lý chi nhánh' : '🛡️ Quản trị viên'}"></option>
                                         </select>
                                     </div>
 
@@ -870,8 +868,8 @@
                             </div>
                         </div>
 
-                        <!-- Vendor fields -->
-                        <div th:if="${req.targetRole.name() == 'VENDOR'}">
+                        <!-- Store owner application details -->
+                        <div th:if="${req.targetRole.name() == 'MANAGER' and req.shopName != null}">
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <span class="text-muted small d-block">Tên cửa hàng đối tác:</span>
@@ -903,7 +901,7 @@
                                     <p class="text-muted small mb-3">Người dùng sẽ được cấp quyền truy cập các chức năng của vai trò này ngay lập tức.</p>
                                     <form th:action="@{'/admin/users/role-request/approve/' + ${req.id}}" method="post">
                                         <!-- Nếu là Quản lý chi nhánh: Bắt buộc chọn chi nhánh phân công -->
-                                        <div th:if="${req.targetRole.name() == 'MANAGER'}" class="mb-3">
+                                        <div th:if="${req.targetRole.name() == 'MANAGER' and req.targetStore != null}" class="mb-3">
                                             <label class="form-label small fw-bold text-dark">Xác định chi nhánh được quản lý (*)</label>
                                             <select name="assignedStoreId" class="form-select form-select-sm" required>
                                                 <option value="">-- Chọn chi nhánh phân công --</option>
@@ -989,5 +987,6 @@
     }
 </script>
 <script th:src="@{/js/global-modal.js}"></script>
+<th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
 </body>
 </html>

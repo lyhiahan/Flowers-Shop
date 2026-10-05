@@ -8,9 +8,30 @@
         <i class="bi bi-check-circle text-success fs-1"></i><h1 class="h2 mb-0">Đặt hàng thành công</h1>
     </div>
     <p class="text-muted mb-4">Mã đơn hàng #<strong th:text="${transferContent}"></strong></p>
+    <div th:if="${errorMessage != null}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+    <div th:if="${bank.mock}" class="alert alert-info small">Giao dịch thử nghiệm, không phát sinh chuyển tiền thật.</div>
+    <div th:if="${bankReceipt != null}" class="alert alert-success" role="status">Thanh toán thử nghiệm thành công. Mã giao dịch: <strong th:text="${bankReceipt}"></strong>. Đơn đang chờ cửa hàng xử lý.</div>
     <section class="card shadow-sm overflow-hidden">
         <div class="card-header bg-white text-center py-3"><h2 class="h5 mb-0">Hướng dẫn thanh toán qua chuyển khoản ngân hàng</h2></div>
-        <div class="row g-0" id="bankTransferInstructions" th:if="${order.paymentStatus == 'UNPAID' and order.status.name() != 'CANCELLED' and order.status.name() != 'REFUNDED'}">
+        <div id="bankTransferInstructions" th:if="${order.paymentStatus == 'UNPAID' and order.status.name() != 'CANCELLED' and order.status.name() != 'REFUNDED' and order.status.name() != 'REFUND_REQUESTED'}">
+        <div th:if="${bank.mock}" class="p-4 text-center">
+            <div class="border rounded p-4 mx-auto mb-3" style="max-width:260px;" role="img" aria-label="Phiếu thanh toán thử nghiệm, không phải mã chuyển khoản">
+                <img th:src="@{/images/bank-sandbox.svg}" alt="Mã QR minh họa thử nghiệm, không dùng để chuyển tiền" width="180" height="180">
+                <div class="fw-bold mt-2">NGÂN HÀNG THỬ NGHIỆM</div>
+                <div class="small text-muted">Phiếu mô phỏng · Không dùng để chuyển tiền</div>
+            </div>
+            <p>Số tiền: <strong th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></strong></p>
+            <p>Nội dung: <strong th:text="${transferContent}"></strong></p>
+            <form th:if="${bankToken != null}" id="bankSandboxForm" th:data-expires-at="${bankExpiresAt}" th:action="@{/checkout/bank/{id}/simulate(id=${order.id})}" method="post">
+                <input type="hidden" name="token" th:value="${bankToken}">
+                <input type="hidden" name="amount" th:value="${order.totalAmount}">
+                <p class="small text-muted">Phiên thử nghiệm có hiệu lực 15 phút. Máy chủ sẽ kiểm tra số tiền và trạng thái đơn trước khi xác nhận.</p>
+                <p id="bankCountdown" class="small text-muted" role="timer"></p>
+                <button class="btn btn-success" type="submit" id="simulateBankPayment">Xác nhận thanh toán thử nghiệm</button>
+            </form>
+            <p th:if="${bankToken == null}" class="text-muted">Đơn không còn đủ điều kiện tạo phiên thanh toán thử nghiệm.</p>
+        </div>
+        <div class="row g-0" th:unless="${bank.mock}">
             <div class="col-md-6 p-4 text-center border-end">
                 <h3 class="h6 fw-bold">Cách 1: Mở ứng dụng ngân hàng và quét mã QR</h3>
                 <div class="bank-qr-crop mx-auto my-4" role="img" aria-label="Mã QR tài khoản Techcombank BUI THANH PHUC 3337110941">
@@ -31,6 +52,7 @@
                 <div class="alert alert-light border small">Giữ nguyên nội dung <strong th:text="${transferContent}"></strong> để cửa hàng đối chiếu giao dịch. Thanh toán được xác nhận sau khi cửa hàng nhận và kiểm tra tiền.</div>
             </div>
         </div>
+        </div>
         <div class="card-footer bg-white p-3 text-center">
             <p id="bankPaymentStatus" class="mb-2 fw-semibold" role="status" aria-live="polite"
                th:data-status-url="@{/checkout/bank/{id}/status(id=${order.id})}"
@@ -43,5 +65,6 @@
 <footer th:replace="~{fragments/floral :: footer}"></footer>
 <div th:replace="~{fragments/floral :: scripts}"></div>
 <script th:src="@{/js/bank-payment.js}"></script>
+<th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
 </body>
 </html>

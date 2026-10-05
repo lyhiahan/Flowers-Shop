@@ -2,6 +2,7 @@
 -- Additive, repeatable migration; no guessed historical hours or product selling states.
 SET XACT_ABORT ON;
 BEGIN TRANSACTION;
+IF COL_LENGTH('dbo.orders','delivery_time') IS NULL ALTER TABLE dbo.orders ADD delivery_time TIME NULL;
 IF OBJECT_ID('dbo.store_memberships', 'U') IS NULL
 BEGIN
     CREATE TABLE dbo.store_memberships (
@@ -33,4 +34,13 @@ IF NOT EXISTS(SELECT 1 FROM sys.indexes WHERE name='ux_transaction_request' AND 
     EXEC(N'CREATE UNIQUE INDEX ux_transaction_request ON dbo.transactions(request_key) WHERE request_key IS NOT NULL;');
 IF NOT EXISTS(SELECT 1 FROM sys.indexes WHERE name='ix_user_created_at' AND object_id=OBJECT_ID('dbo.users'))
     EXEC(N'CREATE INDEX ix_user_created_at ON dbo.users(created_at DESC,id DESC);');
+IF OBJECT_ID('dbo.product_style_values', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.product_style_values (
+        product_id BIGINT NOT NULL REFERENCES dbo.products(id),
+        style_value_id BIGINT NOT NULL REFERENCES dbo.style_values(id),
+        CONSTRAINT pk_product_style_values PRIMARY KEY(product_id,style_value_id)
+    );
+    CREATE INDEX ix_product_style_value ON dbo.product_style_values(style_value_id,product_id);
+END;
 COMMIT;

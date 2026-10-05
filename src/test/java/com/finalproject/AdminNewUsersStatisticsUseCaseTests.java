@@ -64,7 +64,7 @@ class AdminNewUsersStatisticsUseCaseTests {
                 .email("top1_uc25@example.com")
                 .password(encodedPass)
                 .fullName("Khách Hàng Vip Nhất")
-                .role(Role.CUSTOMER)
+                .role(Role.USER)
                 .point(9800)
                 .isActive(true)
                 .createdDate(LocalDate.now())
@@ -75,7 +75,7 @@ class AdminNewUsersStatisticsUseCaseTests {
                 .email("top2_uc25@example.com")
                 .password(encodedPass)
                 .fullName("Khách Hàng Vip Nhì")
-                .role(Role.CUSTOMER)
+                .role(Role.USER)
                 .point(7500)
                 .isActive(true)
                 .createdDate(LocalDate.now().minusDays(1))
@@ -86,7 +86,7 @@ class AdminNewUsersStatisticsUseCaseTests {
                 .email("top3_uc25@example.com")
                 .password(encodedPass)
                 .fullName("Khách Hàng Vip Ba")
-                .role(Role.CUSTOMER)
+                .role(Role.USER)
                 .point(4200)
                 .isActive(true)
                 .createdDate(LocalDate.now().minusDays(2))
@@ -192,7 +192,7 @@ class AdminNewUsersStatisticsUseCaseTests {
      * - Nếu chưa đăng nhập hoặc không có quyền Admin: không thể vào dashboard
      */
     @Test
-    @WithMockUser(username = "customer_normal", roles = {"CUSTOMER"})
+    @WithMockUser(username = "customer_normal", roles = {"USER"})
     void testPreCondition_CustomerDeniedAccessToAdminDashboard() throws Exception {
         mockMvc.perform(get("/admin/dashboard"))
                 .andExpect(status().isForbidden());

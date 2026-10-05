@@ -72,7 +72,7 @@ class AdminTransactionManagementUseCaseTests {
                 .email("customer_uc36@example.com")
                 .password(encodedPass)
                 .fullName("Khách Hàng UC36")
-                .isActive(true).role(Role.CUSTOMER)
+                .isActive(true).role(Role.USER)
                 .build());
 
         store = storeRepository.save(Store.builder()
@@ -111,7 +111,7 @@ class AdminTransactionManagementUseCaseTests {
      * Pre-condition: Chỉ người dùng có quyền Admin mới được phép truy cập
      */
     @Test
-    @WithMockUser(username = "customer_uc36", roles = {"CUSTOMER"})
+    @WithMockUser(username = "customer_uc36", roles = {"USER"})
     void testPreCondition_CustomerDeniedAccessToAdminTransactions() throws Exception {
         mockMvc.perform(get("/admin/transactions"))
                 .andExpect(status().isForbidden());

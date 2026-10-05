@@ -57,7 +57,7 @@ class ConcurrencyRegressionTests {
             for (int i = 0; i < 3; i++) {
                 String name = prefix + i;
                 User user = users.save(User.builder().username(name).email(name + "@test.local").fullName(name).password("unused")
-                        .role(i == 2 ? Role.MANAGER : Role.CUSTOMER).isActive(true).store(i == 2 ? store : null).build());
+                        .role(i == 2 ? Role.MANAGER : Role.USER).isActive(true).store(i == 2 ? store : null).build());
                 if (i == 2) { store.setOwner(user); stores.save(store); }
                 userIds.add(user.getId());
                 if (i < 2) {
@@ -193,7 +193,7 @@ class ConcurrencyRegressionTests {
                     "Khách", "0900000000", "Quận 1", null, null, LocalDate.now(), "PICKUP", f.storeId()).get(0).getId());
             assertThat(race(i -> {
                 SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(f.customers().get(i), "",
-                        List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER"))));
+                        List.of(new SimpleGrantedAuthority("ROLE_USER"))));
                 workflow.cancelByCustomer(f.customers().get(i), ids.get(i));
             })).isEqualTo(2);
             assertThat(jdbc.queryForObject("select quantity from store_inventories where store_id=?", Integer.class, f.storeId())).isEqualTo(2);

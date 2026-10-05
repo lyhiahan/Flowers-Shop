@@ -94,9 +94,7 @@ public class RoleRequest {
         if (isRetiredRoleRequest()) return "Vai trò đã ngừng sử dụng";
         if (targetRole == null) return "Chưa xác định";
         return switch (targetRole) {
-            case MANAGER -> "Quản lý chi nhánh";
-            case VENDOR -> "Người bán (Đối tác)";
-            case STAFF -> "Nhân viên chi nhánh";
+            case MANAGER -> "Quản lý / chủ cửa hàng";
             default -> targetRole.name();
         };
     }

@@ -220,13 +220,13 @@
                             <li class="px-3 py-1 text-muted small border-bottom mb-1">
                                 Xin chào, <strong class="text-dark" sec:authentication="name"></strong>
                             </li>
-                            <li sec:authorize="hasRole('CUSTOMER')">
+                            <li sec:authorize="hasRole('USER')">
                                 <a class="dropdown-item py-2" th:href="@{/customer/profile}"><i class="bi bi-person me-2 text-secondary"></i> Hồ sơ của tôi</a>
                             </li>
-                            <li sec:authorize="hasRole('CUSTOMER')">
+                            <li sec:authorize="hasRole('USER')">
                                 <a class="dropdown-item py-2" th:href="@{/following}"><i class="bi bi-heart me-2 text-danger"></i> Đang theo dõi</a>
                             </li>
-                            <li sec:authorize="hasRole('CUSTOMER')">
+                            <li sec:authorize="hasRole('USER')">
                                 <a class="dropdown-item py-2" th:href="@{/customer/orders}"><i class="bi bi-box2-heart me-2 text-secondary"></i> Đơn hoa đã đặt</a>
                             </li>
                             <li sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')">
@@ -957,6 +957,7 @@
             }
         });
     </script>
+<th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
 </body>
 
 </html>

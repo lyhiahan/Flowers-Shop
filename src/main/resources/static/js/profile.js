@@ -1,7 +1,7 @@
 /* Profile interactions using the project's Bootstrap bundle and vanilla JS. */
 (function () {
     window.handleRoleChange = function (role) {
-        const sections = { MANAGER: 'sectionManager', VENDOR: 'sectionVendor' };
+        const sections = { MANAGER: 'sectionManager', MANAGER: 'sectionVendor' };
         Object.entries(sections).forEach(([value, id]) => {
             const section = document.getElementById(id);
             if (!section) return;

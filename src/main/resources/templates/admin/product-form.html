@@ -90,7 +90,12 @@
                     </div>
 
                     <div class="col-12">
-                        <label class="form-label">Mô tả chi tiết & Công thức phối hoa</label>
+                        <label class="form-label" for="productAttributes">Thuộc tính hoa (giữ Ctrl để chọn nhiều)</label>
+                          <input type="hidden" name="attributesSubmitted" value="true">
+                          <select id="productAttributes" th:field="*{styleValueIds}" multiple class="form-select mb-3" size="6">
+                              <option th:each="v : ${attributeValues}" th:value="${v.id}" th:text="${v.style.name + ': ' + v.name}"></option>
+                          </select>
+<label class="form-label">Mô tả chi tiết & Công thức phối hoa</label>
                         <textarea th:field="*{description}" class="form-control" rows="4" 
                                   placeholder="Mô tả ý nghĩa bó hoa, loại hoa chính, phụ kiện đính kèm và lưu ý bảo quản..."></textarea>
                     </div>
@@ -293,5 +298,6 @@
     }
     /*]]>*/
 </script>
+<th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
 </body>
 </html>

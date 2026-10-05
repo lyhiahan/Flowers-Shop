@@ -46,27 +46,27 @@ class RetiredDeliveryRoleTests {
                 + "AND t.CONSTRAINT_TYPE = 'CHECK'");
         for (var check : checks) {
             String clause = check.get("CHECK_CLAUSE").toString();
-            if (!clause.contains("'CUSTOMER'")) continue;
+            if (!clause.contains("'USER'")) continue;
             String table = check.get("TABLE_NAME").toString();
             String name = check.get("CONSTRAINT_NAME").toString();
             jdbc.execute("ALTER TABLE " + table + " DROP CONSTRAINT " + name);
             jdbc.execute("ALTER TABLE " + table + " ADD CONSTRAINT " + name + " CHECK ("
-                    + clause.replace("'CUSTOMER'", "'CUSTOMER', 'SHIPPER'") + ")");
+                    + clause.replace("'USER'", "'USER', 'SHIPPER'") + ")");
         }
     }
 
     @Test
     void disablesOldAccountAndKeepsOrdersRequestsAuditAndOtherRoles() {
         User retired = users.save(User.builder().username("retired-delivery").password("encoded")
-                .fullName("Tài khoản cũ").email("retired@example.test").role(Role.CUSTOMER).isActive(true).build());
-        retired.getRoles().add(Role.CUSTOMER);
+                .fullName("Tài khoản cũ").email("retired@example.test").role(Role.USER).isActive(true).build());
+        retired.getRoles().add(Role.USER);
         User manager = users.save(User.builder().username("manager-kept").password("encoded")
                 .fullName("Quản lý").email("manager@example.test").role(Role.MANAGER).isActive(true).build());
         Store store = stores.save(Store.builder().name("Chi nhánh").address("Quận 1").build());
         Order order = orders.save(Order.builder().user(manager).orderType(OrderType.BUY).pickupStore(store)
                 .status(OrderStatus.PICKED_UP).legacyDeliveryContact(retired).build());
-        RoleRequest request = requests.save(RoleRequest.builder().user(retired).targetRole(Role.STAFF).build());
-        RoleAuditLog audit = audits.save(RoleAuditLog.builder().user(retired).role(Role.STAFF).action("GRANT").performedBy(manager).build());
+        RoleRequest request = requests.save(RoleRequest.builder().user(retired).targetRole(Role.MANAGER).build());
+        RoleAuditLog audit = audits.save(RoleAuditLog.builder().user(retired).role(Role.MANAGER).action("GRANT").performedBy(manager).build());
         em.flush();
         jdbc.update("UPDATE users SET role = 'SHIPPER' WHERE id = ?", retired.getId());
         jdbc.update("INSERT INTO user_roles(user_id, role) VALUES (?, 'SHIPPER')", retired.getId());
@@ -79,7 +79,7 @@ class RetiredDeliveryRoleTests {
         assertThat(users.findById(retired.getId()).orElseThrow().getIsActive()).isFalse();
         var details = userDetails.loadUserByUsername("retired-delivery");
         assertThat(details.isEnabled()).isFalse();
-        assertThat(details.getAuthorities()).extracting("authority").doesNotContain("ROLE_SHIPPER", "ROLE_STAFF");
+        assertThat(details.getAuthorities()).extracting("authority").doesNotContain("ROLE_SHIPPER", "ROLE_MANAGER");
         assertThat(users.findById(manager.getId()).orElseThrow().getIsActive()).isTrue();
         assertThat(users.findById(manager.getId()).orElseThrow().getRole()).isEqualTo(Role.MANAGER);
         Order saved = orders.findById(order.getId()).orElseThrow();

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<th:block th:fragment="widget">
+    <div id="flowerChat" sec:authorize="isAuthenticated()" th:data-csrf-token="${_csrf != null ? _csrf.token : ''}" th:data-csrf-header="${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}">
+        <link rel="stylesheet" th:href="@{/css/chat-widget.css}">
+        <button id="chatLauncher" class="chat-launcher" type="button" aria-controls="chatPanel" aria-expanded="false"><span aria-hidden="true">💬</span> Nhắn tin <span id="chatBadge" hidden>0</span></button>
+        <section id="chatPanel" class="chat-panel" aria-labelledby="chatHeading" hidden>
+            <header class="chat-header"><strong id="chatHeading">Chat hỗ trợ</strong><button id="chatClose" type="button" aria-label="Đóng chat">×</button></header>
+            <div class="chat-status" role="status" aria-live="polite"><span id="chatStatus">Đang kết nối…</span><button id="chatReconnect" type="button" hidden>Kết nối lại</button></div>
+            <form id="chatStartForm" class="chat-start" hidden><label for="chatDestination">Chọn nơi nhắn tin</label><div><select id="chatDestination" required><option value="">Chọn chi nhánh hoặc Admin</option></select><button type="submit">Bắt đầu</button></div></form>
+            <div class="chat-inbox"><div class="chat-inbox-heading">Hội thoại của bạn <button id="chatRefresh" type="button">Làm mới</button></div><div id="chatConversations"></div><button id="chatMoreConversations" type="button" hidden>Xem thêm hội thoại</button></div>
+            <div id="chatCurrentTitle" class="chat-current-title">Chọn hội thoại để xem tin nhắn</div>
+            <button id="chatOlder" class="chat-older" type="button" hidden>Tải tin nhắn cũ hơn</button>
+            <div id="chatMessages" class="chat-messages" role="log" aria-label="Lịch sử tin nhắn" aria-live="polite"></div>
+            <form id="chatSendForm" class="chat-send"><label class="chat-sr-only" for="chatText">Nội dung tin nhắn</label><textarea id="chatText" rows="2" maxlength="2000" placeholder="Nhập tin nhắn…" disabled></textarea><div class="chat-send-actions"><label class="chat-file-label">📎 Gửi ảnh<input id="chatImage" type="file" accept="image/jpeg,image/png,image/webp,image/gif" disabled></label><span id="chatFileName"></span><button id="chatRemoveImage" type="button" hidden aria-label="Bỏ ảnh đã chọn">×</button><button id="chatSend" type="submit" disabled>Gửi</button></div></form>
+        </section>
+        <script th:src="@{/js/chat-widget.js}" defer></script>
+    </div>
+</th:block>
+</body>
+</html>

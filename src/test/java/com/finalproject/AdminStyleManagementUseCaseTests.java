@@ -79,7 +79,7 @@ class AdminStyleManagementUseCaseTests {
                 .email("customer_uc31@example.com")
                 .password(encodedPass)
                 .fullName("Khách Hàng UC31")
-                .isActive(true).role(Role.CUSTOMER)
+                .isActive(true).role(Role.USER)
                 .build());
 
         category = categoryRepository.save(Category.builder()
@@ -110,7 +110,7 @@ class AdminStyleManagementUseCaseTests {
      * Pre-condition: Chỉ người dùng có quyền Admin mới được phép truy cập
      */
     @Test
-    @WithMockUser(username = "customer_uc31", roles = {"CUSTOMER"})
+    @WithMockUser(username = "customer_uc31", roles = {"USER"})
     void testPreCondition_CustomerDeniedAccessToAdminStyles() throws Exception {
         mockMvc.perform(get("/admin/styles"))
                 .andExpect(status().isForbidden());

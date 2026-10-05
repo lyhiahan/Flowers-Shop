@@ -508,6 +508,7 @@ public class AdminProductController {
         ProductForm form = new ProductForm();
         form.setId(product.getId());
         form.setName(product.getName());
+        form.setStyleValueIds(product.getStyleValues().stream().map(com.finalproject.entity.StyleValue::getId).toList());
         form.setCategoryId(product.getCategory() != null ? product.getCategory().getId() : null);
         form.setDescription(product.getDescription());
         form.setImportPrice(product.getImportPrice());

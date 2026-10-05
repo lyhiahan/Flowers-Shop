@@ -127,11 +127,15 @@ public class ManagerStoreController {
             return "redirect:/manager/stores/edit/" + id;
         }
 
+        if (formStore.getBio() != null && formStore.getBio().length() > 500) {
+            ra.addFlashAttribute("errorMessage", "Bio tối đa 500 ký tự.");
+            return "redirect:/manager/stores/edit/" + id;
+        }
         store.setName(name);
         store.setPhone(cleanPhone);
         store.setAddress(address);
-        store.setBio(formStore.getBio() != null ? formStore.getBio().trim() : null);
-        store.setIsOpen(formStore.getIsOpen());
+        if (formStore.getBio() != null) store.setBio(formStore.getBio().trim());
+        if (formStore.getIsOpen() != null) store.setIsOpen(formStore.getIsOpen());
 
         storeRepository.save(store);
         ra.addFlashAttribute("successMessage", "Cập nhật thông tin cửa hàng thành công!");

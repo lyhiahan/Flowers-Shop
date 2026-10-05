@@ -25,6 +25,7 @@ public class ManagerProductController {
     private final com.finalproject.repository.StoreInventoryRepository inventories;
     private final com.finalproject.service.InventoryService inventoryService;
     private final CategoryRepository categoryRepository;
+    private final com.finalproject.service.ProductAttributeService attributes;
     private final UserRepository userRepository;
     private final com.finalproject.service.StoreAccessService storeAccess;
     private final com.finalproject.service.CloudinaryService cloudinaryService;
@@ -85,6 +86,8 @@ public class ManagerProductController {
                              @RequestParam(value = "imageUrl", required = false) String imageUrl,
                              @RequestParam(value = "imageFile", required = false) org.springframework.web.multipart.MultipartFile imageFile,
                              @RequestParam(value = "description", required = false) String description,
+                             @RequestParam(value = "styleValueIds", required = false) java.util.List<Long> styleValueIds,
+                             @RequestParam(value = "attributesSubmitted", defaultValue = "false") boolean attributesSubmitted,
                              RedirectAttributes ra) {
         userRepository.findByUsername(principal.getName()).orElseThrow();
         Store store = storeAccess.assignedStore();
@@ -115,6 +118,7 @@ public class ManagerProductController {
                 .isSelling(true)
                 .build();
 
+        if (attributesSubmitted) attributes.assign(product, styleValueIds, true);
         productRepository.save(product);
         saveUploadedImage(product, uploaded);
         inventoryService.setStock(product.getId(), initialStock);
@@ -132,6 +136,8 @@ public class ManagerProductController {
                                 @RequestParam(value = "imageUrl", required = false) String imageUrl,
                                 @RequestParam(value = "imageFile", required = false) org.springframework.web.multipart.MultipartFile imageFile,
                                 @RequestParam(value = "description", required = false) String description,
+                                @RequestParam(value = "styleValueIds", required = false) java.util.List<Long> styleValueIds,
+                                @RequestParam(value = "attributesSubmitted", defaultValue = "false") boolean attributesSubmitted,
                                 RedirectAttributes ra) {
         Product p = productRepository.findById(id).orElseThrow();
         if (Boolean.TRUE.equals(p.getIsDeleted())) throw new IllegalArgumentException("Sản phẩm đã bị xóa.");
@@ -145,6 +151,7 @@ public class ManagerProductController {
         var uploaded = uploadProductImage(imageFile);
         p.setName(name);
         p.setCategory(cat);
+        if (attributesSubmitted) attributes.assign(p, styleValueIds, true);
         p.setPriceBuy(priceBuy);
         p.setPromotionalPrice(promotionalPrice != null ? promotionalPrice : priceBuy);
         if (uploaded != null) {

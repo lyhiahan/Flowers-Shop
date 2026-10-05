@@ -293,14 +293,11 @@
                             <li class="px-3 py-1 text-muted small border-bottom mb-1">
                                 Xin chào, <strong class="text-dark" sec:authentication="name"></strong>
                             </li>
-                            <li sec:authorize="hasRole('CUSTOMER')">
+                            <li sec:authorize="hasRole('USER')">
                                 <a class="dropdown-item py-2" th:href="@{/customer/profile}"><i class="bi bi-person me-2 text-secondary"></i> Hồ sơ của tôi</a>
                             </li>
-                            <li sec:authorize="hasRole('CUSTOMER')">
+                            <li sec:authorize="hasRole('USER')">
                                 <a class="dropdown-item py-2" th:href="@{/customer/orders}"><i class="bi bi-box2-heart me-2 text-secondary"></i> Đơn hoa đã đặt</a>
-                            </li>
-                            <li sec:authorize="hasRole('STAFF')">
-                                <a class="dropdown-item py-2" th:href="@{/staff/dashboard}"><i class="bi bi-speedometer2 me-2 text-secondary"></i> Trang quản lý đơn</a>
                             </li>
                             <li sec:authorize="hasRole('MANAGER')">
                                 <a class="dropdown-item py-2 fw-semibold text-success" th:href="@{/manager/dashboard}"><i class="bi bi-shop me-2"></i> Kênh Quản lý cửa hàng</a>
@@ -363,7 +360,7 @@
                     </p>
                 </div>
                 <div class="d-flex flex-column gap-2 flex-shrink-0">
-                    <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/stores/{id}/follow(id=${store.id})}" method="post">
+                    <form sec:authorize="hasRole('USER')" th:action="@{/stores/{id}/follow(id=${store.id})}" method="post">
                         <button type="submit" id="btnToggleFollowStoreHeader" class="btn btn-sm rounded-pill px-4 py-2 w-100 fw-bold shadow-sm"
                                 th:classappend="${isFollowed} ? 'btn-danger' : 'btn-outline-danger'">
                             <i class="bi me-1" th:classappend="${isFollowed} ? 'bi-check-circle-fill' : 'bi-plus-circle'"></i>
@@ -397,7 +394,7 @@
                 </a>
             </div>
 
-            <form sec:authorize="hasRole('CUSTOMER')" th:action="@{/stores/{id}/follow(id=${store.id})}" method="post" class="m-0">
+            <form sec:authorize="hasRole('USER')" th:action="@{/stores/{id}/follow(id=${store.id})}" method="post" class="m-0">
                 <button type="submit" id="btnToggleFollowStoreNav" class="btn rounded-pill px-4 py-2 fw-bold shadow-sm d-flex align-items-center gap-2"
                         th:classappend="${isFollowed} ? 'btn-danger' : 'btn-outline-danger'"
                         title="Bấm để theo dõi hoặc hủy theo dõi cửa hàng">
@@ -559,5 +556,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script th:src="@{/js/global-modal.js}"></script>
+<th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
 </body>
 </html>

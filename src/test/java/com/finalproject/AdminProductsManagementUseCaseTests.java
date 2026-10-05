@@ -160,10 +160,10 @@ class AdminProductsManagementUseCaseTests {
 
     /**
      * Pre-condition: Chỉ người dùng có vai trò ADMIN mới được truy cập vào trang Quản lý sản phẩm.
-     * Người dùng vai trò CUSTOMER sẽ bị từ chối truy cập (403 Forbidden).
+     * Người dùng vai trò USER sẽ bị từ chối truy cập (403 Forbidden).
      */
     @Test
-    @WithMockUser(username = "customer_denied_uc28", roles = {"CUSTOMER"})
+    @WithMockUser(username = "customer_denied_uc28", roles = {"USER"})
     void testPreCondition_CustomerDeniedAccessToAdminProducts() throws Exception {
         mockMvc.perform(get("/admin/products-manage"))
                 .andExpect(status().isForbidden());

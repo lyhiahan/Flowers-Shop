@@ -66,7 +66,7 @@ public class CartBadgeAjaxUpdateTests {
                 .password(passwordEncoder.encode("123456"))
                 .email("cartbadge@flower.vn")
                 .fullName("Khách Hàng Test Giỏ")
-                .role(Role.CUSTOMER)
+                .role(Role.USER)
                 .isActive(true)
                 .build());
 
@@ -106,7 +106,7 @@ public class CartBadgeAjaxUpdateTests {
 
     @Test
     @DisplayName("1. Giỏ trống -> thêm 1 -> API trả về count=1 ngay lập tức")
-    @WithMockUser(username = "test_cart_badge_user", roles = {"CUSTOMER"})
+    @WithMockUser(username = "test_cart_badge_user", roles = {"USER"})
     void emptyCart_addOneItem_returnsCountOne() throws Exception {
         mockMvc.perform(post("/cart/add")
                         .header("X-Requested-With", "XMLHttpRequest")
@@ -122,7 +122,7 @@ public class CartBadgeAjaxUpdateTests {
 
     @Test
     @DisplayName("2. Giỏ có 2 -> thêm 1 -> API trả về count=3")
-    @WithMockUser(username = "test_cart_badge_user", roles = {"CUSTOMER"})
+    @WithMockUser(username = "test_cart_badge_user", roles = {"USER"})
     void cartHasTwo_addOneItem_returnsCountThree() throws Exception {
         // Khởi tạo giỏ có 2 sản phẩm
         mockMvc.perform(post("/cart/add")
@@ -150,7 +150,7 @@ public class CartBadgeAjaxUpdateTests {
 
     @Test
     @DisplayName("3. Giỏ có 2 -> chọn số lượng 3 rồi thêm -> API trả về count=5")
-    @WithMockUser(username = "test_cart_badge_user", roles = {"CUSTOMER"})
+    @WithMockUser(username = "test_cart_badge_user", roles = {"USER"})
     void cartHasTwo_addThreeItems_returnsCountFive() throws Exception {
         // Khởi tạo giỏ có 2 sản phẩm
         mockMvc.perform(post("/cart/add")
@@ -178,7 +178,7 @@ public class CartBadgeAjaxUpdateTests {
 
     @Test
     @DisplayName("4. Trang chi tiết sản phẩm chứa các ID, class và script cập nhật số nhỏ màu đỏ")
-    @WithMockUser(username = "test_cart_badge_user", roles = {"CUSTOMER"})
+    @WithMockUser(username = "test_cart_badge_user", roles = {"USER"})
     void productDetailPage_containsCartBadgeElementsAndScript() throws Exception {
         mockMvc.perform(get("/product/" + product.getId()))
                 .andExpect(status().isOk())
@@ -190,7 +190,7 @@ public class CartBadgeAjaxUpdateTests {
 
     @Test
     @DisplayName("5. Thêm thất bại (sản phẩm không tồn tại) -> Trả về lỗi 400, không cập nhật count")
-    @WithMockUser(username = "test_cart_badge_user", roles = {"CUSTOMER"})
+    @WithMockUser(username = "test_cart_badge_user", roles = {"USER"})
     void addFailed_returnsBadRequest() throws Exception {
         mockMvc.perform(post("/cart/add")
                         .header("X-Requested-With", "XMLHttpRequest")

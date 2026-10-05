@@ -132,13 +132,13 @@ public class AuthServiceImpl implements AuthService {
                     .email(req.getEmail())
                     .phone(req.getPhone())
                     .address(req.getAddress())
-                    .role(Role.CUSTOMER)
+                    .role(Role.USER)
                     .isActive(true)
                     .createdDate(LocalDate.now(java.time.ZoneId.of("Asia/Bangkok")))
                     .createdAt(java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Bangkok")))
                     .creationTimeKnown(true)
                     .build();
-            user.addRole(Role.CUSTOMER);
+            user.addRole(Role.USER);
             userRepository.save(user);
 
             // Khởi tạo giỏ hàng cho tài khoản vừa được kích hoạt

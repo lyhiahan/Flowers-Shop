@@ -152,7 +152,7 @@
             </div>
 
             <!-- BƯỚC 8 & 10: Tabs Chọn Shop owner hoặc Shop staffs -->
-            <form th:if="${isOwner}" method="get" action="/manager/staff" class="d-flex gap-2 mb-3"><input name="candidateKeyword" th:value="${candidateKeyword}" class="form-control" placeholder="Tìm ứng viên theo tên hoặc username"><button type="submit" class="btn btn-outline-success">Tìm ứng viên</button><a th:if="${candidatePage > 0}" th:href="@{/manager/staff(candidateKeyword=${candidateKeyword},candidatePage=${candidatePage - 1})}">Trang trước</a><span th:text="${(candidatePage + 1) + '/' + candidatePages}"></span><a th:if="${candidatePage + 1 < candidatePages}" th:href="@{/manager/staff(candidateKeyword=${candidateKeyword},candidatePage=${candidatePage + 1})}">Trang sau</a></form><p th:if="${isOwner}" class="small text-muted">Sau khi tìm, bấm Add staff để chọn ứng viên. Chọn vai trò PARTNER cho tài khoản Vendor/Manager; STAFF cho nhân viên.</p>
+            <form th:if="${isOwner}" method="get" action="/manager/staff" class="d-flex gap-2 mb-3"><input name="candidateKeyword" th:value="${candidateKeyword}" class="form-control" placeholder="Tìm ứng viên theo tên hoặc username"><button type="submit" class="btn btn-outline-success">Tìm ứng viên</button><a th:if="${candidatePage > 0}" th:href="@{/manager/staff(candidateKeyword=${candidateKeyword},candidatePage=${candidatePage - 1})}">Trang trước</a><span th:text="${(candidatePage + 1) + '/' + candidatePages}"></span><a th:if="${candidatePage + 1 < candidatePages}" th:href="@{/manager/staff(candidateKeyword=${candidateKeyword},candidatePage=${candidatePage + 1})}">Trang sau</a></form><p th:if="${isOwner}" class="small text-muted">Sau khi tìm, bấm Add staff để chọn ứng viên. Chọn vai trò PARTNER cho tài khoản Vendor/Manager; MANAGER cho nhân viên.</p>
             <ul class="nav nav-tabs nav-tabs-custom mb-4" id="staffTabs" role="tablist">
                 <!-- Bước 10: Chọn Shop staffs -->
                 <li class="nav-item" role="presentation">
@@ -217,11 +217,8 @@
                                         <!-- 3. Vai trò -->
                                         <td style="white-space: nowrap;">
 
-                                            <span th:if="${s.role.name() == 'STAFF'}" class="badge" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA; padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 12px;">
-                                                <i class="bi bi-person-badge me-1"></i>STAFF
-                                            </span>
-                                            <span th:if="${s.role.name() == 'MANAGER' or s.role.name() == 'VENDOR'}" class="badge" style="background-color: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 12px;">
-                                                <i class="bi bi-people me-1"></i>PARTNER
+                                            <span th:if="${s.role.name() == 'MANAGER'}" class="badge" style="background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA; padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 12px;">
+                                                <i class="bi bi-person-badge me-1"></i>MANAGER
                                             </span>
                                         </td>
 
@@ -371,7 +368,7 @@
                                             </div>
                                         </label>
                                     </div>
-                                    <span class="badge" style="background-color: #E5EEE8; color: #20382E; border: 1px solid #D1E5DA; font-weight: 700;" th:text="${cand.role}">STAFF</span>
+                                    <span class="badge" style="background-color: #E5EEE8; color: #20382E; border: 1px solid #D1E5DA; font-weight: 700;" th:text="${cand.role}">MANAGER</span>
                                 </div>
                             </div>
                         </div>
@@ -399,7 +396,6 @@
                             <div class="col-md-6 mb-2">
                                 <label class="form-label small fw-semibold">Vai trò:</label>
                                 <select name="role" class="form-select">
-                                    <option value="STAFF">Nhân viên cửa hàng (STAFF)</option><option value="PARTNER">Đối tác (tài khoản Vendor/Manager có sẵn)</option>
                                 </select>
                             </div>
                         </div>
@@ -507,5 +503,6 @@
     }
 </script>
 <script th:src="@{/js/global-modal.js}"></script>
+<th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
 </body>
 </html>

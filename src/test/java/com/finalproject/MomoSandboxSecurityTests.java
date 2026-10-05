@@ -40,7 +40,7 @@ class MomoSandboxSecurityTests {
 
     @BeforeEach void setup() {
         User user = users.save(User.builder().username("momo-customer").email("momo@test.local")
-                .fullName("MoMo Test").password("unused-test-password").isActive(true).role(Role.CUSTOMER).build());
+                .fullName("MoMo Test").password("unused-test-password").isActive(true).role(Role.USER).build());
         Store store = stores.save(Store.builder().name("Sandbox store").address("Test address").build());
         order = orders.saveAndFlush(Order.builder().user(user).pickupStore(store).orderType(OrderType.BUY)
                 .status(OrderStatus.PENDING).paymentMethod("MOMO").paymentStatus("UNPAID").totalAmount(new BigDecimal("100000")).build());
@@ -118,8 +118,8 @@ class MomoSandboxSecurityTests {
 
     @Test void sandboxCannotUseMockButtonAndAnotherCustomerCannotViewOrder() throws Exception {
         assertThatThrownBy(() -> momo.simulatePayment(order.getId(), "momo-customer")).hasMessageContaining("chế độ mock");
-        mvc.perform(get("/checkout/momo/"+order.getId()).with(user("momo-customer").roles("CUSTOMER")))
+        mvc.perform(get("/checkout/momo/"+order.getId()).with(user("momo-customer").roles("USER")))
                 .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("/simulate"))));
-        mvc.perform(get("/checkout/momo/"+order.getId()).with(user("other-customer").roles("CUSTOMER"))).andExpect(status().isForbidden());
+        mvc.perform(get("/checkout/momo/"+order.getId()).with(user("other-customer").roles("USER"))).andExpect(status().isForbidden());
     }
 }

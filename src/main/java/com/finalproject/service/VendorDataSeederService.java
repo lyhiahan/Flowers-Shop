@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Service khởi tạo dữ liệu mẫu phong phú và toàn diện cho vai trò VENDOR (Người bán / Đối tác cửa hàng).
+ * Service khởi tạo dữ liệu mẫu phong phú và toàn diện cho vai trò MANAGER (Người bán / Đối tác cửa hàng).
  * Đảm bảo mọi mục trong thanh điều hướng của Vendor/Manager đều có dữ liệu thực tế và sinh động:
  * 1. Tổng Quan Chi Nhánh & Báo Cáo Doanh Thu (Doanh thu, biểu đồ ngày/giờ, top sản phẩm bán chạy, đơn gần đây)
  * 2. Quản Lý Đơn Hàng (Đơn đang xử lý: PENDING, CONFIRMED, PREPARING, DELIVERING, DELIVERED; Đơn đã xử lý: COMPLETED, CANCELLED)
@@ -50,7 +50,7 @@ public class VendorDataSeederService {
 
     @Transactional
     public void seedVendorDemoData() {
-        log.info("--- Bắt đầu khởi tạo dữ liệu mẫu cho vai trò VENDOR ---");
+        log.info("--- Bắt đầu khởi tạo dữ liệu mẫu cho vai trò MANAGER ---");
 
         final Store storeB = resolveVendorStore();
         if (storeB == null) {
@@ -84,22 +84,22 @@ public class VendorDataSeederService {
                 .findFirst()
                 .ifPresent(storeB::setStoreLevel);
 
-        // 2. Tài khoản VENDOR chính: vendor_flower & tài khoản phụ vendor
+        // 2. Tài khoản MANAGER chính: vendor_flower & tài khoản phụ vendor
         User vendorFlower = userRepository.findByUsername("vendor_flower").orElseGet(() -> userRepository.save(User.builder()
                 .username("vendor_flower")
                 .password(passwordEncoder.encode("123456"))
                 .fullName("Trần Đối Tác Vườn Hoa Đà Lạt")
                 .email("vendor@rentalshop.vn")
                 .phone("0988776655")
-                .role(Role.VENDOR)
+                .role(Role.MANAGER)
                 .store(storeB)
                 .isActive(true)
                 .isEmailActive(true)
                 .createdDate(LocalDate.now().minusMonths(6))
                 .build()));
 
-        vendorFlower.setRole(Role.VENDOR);
-        vendorFlower.addRole(Role.VENDOR);
+        vendorFlower.setRole(Role.MANAGER);
+        vendorFlower.addRole(Role.MANAGER);
         vendorFlower.setStore(storeB);
         vendorFlower.setIsActive(true);
         vendorFlower.setIsEmailActive(true);
@@ -119,14 +119,14 @@ public class VendorDataSeederService {
                 .fullName("Trần Đối Tác (Vendor)")
                 .email("vendor.demo@rentalshop.vn")
                 .phone("0988776699")
-                .role(Role.VENDOR)
+                .role(Role.MANAGER)
                 .store(storeB)
                 .isActive(true)
                 .isEmailActive(true)
                 .createdDate(LocalDate.now().minusMonths(4))
                 .build()));
-        vendorAlias.setRole(Role.VENDOR);
-        vendorAlias.addRole(Role.VENDOR);
+        vendorAlias.setRole(Role.MANAGER);
+        vendorAlias.addRole(Role.MANAGER);
         vendorAlias.setStore(storeB);
         userRepository.save(vendorAlias);
 
@@ -153,7 +153,7 @@ public class VendorDataSeederService {
         // 5. Khởi tạo đơn hàng mẫu & lịch sử ví cửa hàng (Đơn Hàng, Báo Cáo Doanh Thu, Ví Cửa Hàng)
         initStoreOrdersAndTransactions(storeB, vendorFlower);
 
-        log.info("--- Hoàn tất khởi tạo dữ liệu mẫu cho vai trò VENDOR ---");
+        log.info("--- Hoàn tất khởi tạo dữ liệu mẫu cho vai trò MANAGER ---");
     }
 
     private void initStoreStaff(Store storeB, User partnerVendor) {
@@ -175,21 +175,21 @@ public class VendorDataSeederService {
                 .fullName("Nguyễn Thị Mai Lan - Nghệ Nhân Cắm Hoa Chính")
                 .email("mailan.florist@rentalshop.vn")
                 .phone("0938112233")
-                .role(Role.STAFF)
+                .role(Role.MANAGER)
                 .store(storeB)
                 .isActive(true)
                 .isEmailActive(true)
                 .createdDate(LocalDate.now().minusMonths(5))
                 .build()));
         staff1.setStore(storeB);
-        staff1.setRole(Role.STAFF);
-        staff1.addRole(Role.STAFF);
+        staff1.setRole(Role.MANAGER);
+        staff1.addRole(Role.MANAGER);
         userRepository.save(staff1);
         if (storeMembershipRepository.findByUserIdAndStoreId(staff1.getId(), storeB.getId()).isEmpty()) {
             storeMembershipRepository.save(StoreMembership.builder()
                     .user(staff1)
                     .store(storeB)
-                    .accessRole("STAFF")
+                    .accessRole("PARTNER")
                     .active(true)
                     .joinedAt(LocalDateTime.now().minusMonths(5))
                     .build());
@@ -202,21 +202,21 @@ public class VendorDataSeederService {
                 .fullName("Trần Bảo Phúc - Tiếp Nhận & Điều Phối Đơn Hàng")
                 .email("baophuc.orders@rentalshop.vn")
                 .phone("0938223344")
-                .role(Role.STAFF)
+                .role(Role.MANAGER)
                 .store(storeB)
                 .isActive(true)
                 .isEmailActive(true)
                 .createdDate(LocalDate.now().minusMonths(3))
                 .build()));
         staff2.setStore(storeB);
-        staff2.setRole(Role.STAFF);
-        staff2.addRole(Role.STAFF);
+        staff2.setRole(Role.MANAGER);
+        staff2.addRole(Role.MANAGER);
         userRepository.save(staff2);
         if (storeMembershipRepository.findByUserIdAndStoreId(staff2.getId(), storeB.getId()).isEmpty()) {
             storeMembershipRepository.save(StoreMembership.builder()
                     .user(staff2)
                     .store(storeB)
-                    .accessRole("STAFF")
+                    .accessRole("PARTNER")
                     .active(true)
                     .joinedAt(LocalDateTime.now().minusMonths(3))
                     .build());
@@ -229,21 +229,21 @@ public class VendorDataSeederService {
                 .fullName("Lê Hoàng Khôi - Thủ Kho & Kiểm Soát Hoa Tươi")
                 .email("hoangkhoi.stock@rentalshop.vn")
                 .phone("0938334455")
-                .role(Role.STAFF)
+                .role(Role.MANAGER)
                 .store(storeB)
                 .isActive(true)
                 .isEmailActive(true)
                 .createdDate(LocalDate.now().minusMonths(2))
                 .build()));
         staff3.setStore(storeB);
-        staff3.setRole(Role.STAFF);
-        staff3.addRole(Role.STAFF);
+        staff3.setRole(Role.MANAGER);
+        staff3.addRole(Role.MANAGER);
         userRepository.save(staff3);
         if (storeMembershipRepository.findByUserIdAndStoreId(staff3.getId(), storeB.getId()).isEmpty()) {
             storeMembershipRepository.save(StoreMembership.builder()
                     .user(staff3)
                     .store(storeB)
-                    .accessRole("STAFF")
+                    .accessRole("PARTNER")
                     .active(true)
                     .joinedAt(LocalDateTime.now().minusMonths(2))
                     .build());
@@ -329,7 +329,7 @@ public class VendorDataSeederService {
                 .fullName("Lê Khách Hàng")
                 .email("khachhang@gmail.com")
                 .phone("0909999888")
-                .role(Role.CUSTOMER)
+                .role(Role.USER)
                 .isActive(true)
                 .isEmailActive(true)
                 .createdDate(LocalDate.now().minusMonths(6))
@@ -342,7 +342,7 @@ public class VendorDataSeederService {
                 .email("bichtram.flower@gmail.com")
                 .phone("0908776655")
                 .address("Khu biệt thự Chateau, Phú Mỹ Hưng, Quận 7, TP.HCM")
-                .role(Role.CUSTOMER)
+                .role(Role.USER)
                 .isActive(true)
                 .isEmailActive(true)
                 .createdDate(LocalDate.now().minusMonths(3))
@@ -355,7 +355,7 @@ public class VendorDataSeederService {
                 .email("contact@namsaigontech.vn")
                 .phone("02873009988")
                 .address("Tòa nhà MapleTree, 1060 Nguyễn Văn Linh, Tân Phong, Quận 7, TP.HCM")
-                .role(Role.CUSTOMER)
+                .role(Role.USER)
                 .isActive(true)
                 .isEmailActive(true)
                 .createdDate(LocalDate.now().minusMonths(4))

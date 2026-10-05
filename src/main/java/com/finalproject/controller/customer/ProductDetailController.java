@@ -58,9 +58,13 @@ public class ProductDetailController {
         }
 
         model.addAttribute("product", product);
-        int availableStock = product.getStore() == null ? 0 : inventories
-                .findByStoreIdAndProductId(product.getStore().getId(), product.getId())
-                .map(stock -> Math.max(0, stock.getQuantity())).orElse(0);
+        var branchStock = inventories.findByProductId(product.getId()).stream()
+                .filter(s -> Boolean.TRUE.equals(s.getStore().getStatus()) && Boolean.TRUE.equals(s.getStore().getIsOpen()))
+                .filter(s -> product.getStore() == null || product.getStore().getId().equals(s.getStore().getId()))
+                .sorted(java.util.Comparator.comparing(s -> s.getStore().getId())).toList();
+        var selected = branchStock.stream().filter(s -> s.getQuantity() != null && s.getQuantity() > 0).findFirst().orElse(null);
+        int availableStock = selected == null ? 0 : selected.getQuantity();
+        model.addAttribute("purchaseStore", selected == null ? product.getStore() : selected.getStore());
         model.addAttribute("availableStock", availableStock);
         var images = productImageRepository.findByProductId(id);
         if (images.isEmpty() && product.getImageUrl() != null && !product.getImageUrl().isEmpty()) {

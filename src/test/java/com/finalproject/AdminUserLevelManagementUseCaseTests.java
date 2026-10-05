@@ -69,7 +69,7 @@ class AdminUserLevelManagementUseCaseTests {
                 .email("customer_uc32@example.com")
                 .password(encodedPass)
                 .fullName("Khách Hàng UC32")
-                .isActive(true).role(Role.CUSTOMER)
+                .isActive(true).role(Role.USER)
                 .build());
 
         level1 = userLevelRepository.save(UserLevel.builder()
@@ -91,7 +91,7 @@ class AdminUserLevelManagementUseCaseTests {
      * Pre-condition: Chỉ người dùng có quyền Admin mới được phép truy cập
      */
     @Test
-    @WithMockUser(username = "customer_uc32", roles = {"CUSTOMER"})
+    @WithMockUser(username = "customer_uc32", roles = {"USER"})
     void testPreCondition_CustomerDeniedAccessToAdminUserLevels() throws Exception {
         mockMvc.perform(get("/admin/user-levels"))
                 .andExpect(status().isForbidden());

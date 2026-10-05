@@ -539,7 +539,7 @@
                 <div class="d-flex align-items-center gap-3 ms-auto">
                     <span class="d-none d-md-inline"><i class="bi bi-telephone me-1"></i>028 1111 222</span>
                     <span class="d-none d-lg-inline"><i class="bi bi-clock me-1"></i>Giao nhanh 60–90 phút</span>
-                    <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/following}"><i class="bi bi-bookmark-heart me-1"></i>Following</a>
+                    <a sec:authorize="hasRole('USER')" th:href="@{/following}"><i class="bi bi-bookmark-heart me-1"></i>Following</a>
                     <a th:href="@{/stores}"><i class="bi bi-shop me-1"></i>Hệ thống cửa hàng</a>
                     <a th:href="@{/users}"><i class="bi bi-people me-1"></i>Người dùng</a>
                 </div>
@@ -588,12 +588,12 @@
                     <!-- Giỏ Hàng + Tài Khoản -->
                     <div class="col-lg-3 col-md-3 col-6 order-2 order-md-3 d-flex align-items-center justify-content-end gap-3">
                         <!-- Following shortcut -->
-                        <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/following}" class="header-cart-link" title="Bộ sưu tập theo dõi">
+                        <a sec:authorize="hasRole('USER')" th:href="@{/following}" class="header-cart-link" title="Bộ sưu tập theo dõi">
                             <i class="bi bi-bookmark-heart"></i>
                         </a>
 
                         <!-- Giỏ hàng kèm số lượng -->
-                        <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/cart}" class="header-cart-link" title="Giỏ hoa của bạn">
+                        <a sec:authorize="hasRole('USER')" th:href="@{/cart}" class="header-cart-link" title="Giỏ hoa của bạn">
                             <i class="bi bi-cart3"></i>
                             <span th:if="${cartItemCount != null and cartItemCount > 0}" class="cart-badge-pill"
                                 th:text="${cartItemCount}">0</span>
@@ -623,10 +623,10 @@
                                         <span class="badge rounded-pill" style="background-color: #E3F2FD; color: #1565C0; border: 1px solid #BBDEFB; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')">
                                             Quản lý chi nhánh
                                         </span>
-                                        <span class="badge rounded-pill" style="background-color: #FFF3E0; color: #E65100; border: 1px solid #FFE0B2; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="hasRole('VENDOR') and !hasAnyRole('ADMIN', 'MANAGER')">
+                                        <span class="badge rounded-pill" style="background-color: #FFF3E0; color: #E65100; border: 1px solid #FFE0B2; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="hasRole('MANAGER') and !hasAnyRole('ADMIN', 'MANAGER')">
                                             Đối tác bán hoa
                                         </span>
-                                        <span class="badge rounded-pill" style="background-color: #F5F5F5; color: #424242; border: 1px solid #E0E0E0; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="!hasAnyRole('ADMIN', 'MANAGER', 'VENDOR')">
+                                        <span class="badge rounded-pill" style="background-color: #F5F5F5; color: #424242; border: 1px solid #E0E0E0; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="!hasAnyRole('ADMIN', 'MANAGER')">
                                             Khách hàng
                                         </span>
                                     </div>
@@ -664,7 +664,7 @@
                                 </li>
 
                                 <!-- Nút Shop Manager (Vendor) -->
-                                <li sec:authorize="hasRole('VENDOR') and !hasAnyRole('ADMIN', 'MANAGER')" class="px-2 mb-2">
+                                <li sec:authorize="hasRole('MANAGER') and !hasAnyRole('ADMIN', 'MANAGER')" class="px-2 mb-2">
                                     <a th:href="@{/manager/stores}" class="btn btn-sm w-100 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
                                        id="navVendorStoresDropdownProfile"
                                        style="background-color: #20382E; color: #FFFFFF; border-radius: 8px; padding: 7px 12px; font-size: 13.5px; text-decoration: none;">
@@ -702,7 +702,7 @@
                                 </li>
 
                                 <!-- Đơn hàng của tôi -->
-                                <li sec:authorize="hasRole('CUSTOMER')">
+                                <li sec:authorize="hasRole('USER')">
                                     <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/customer/orders}">
                                         <i class="bi bi-bag-check text-secondary"></i>
                                         <span>Đơn hàng của tôi</span>
@@ -718,7 +718,7 @@
                                 </li>
 
                                 <!-- Yêu thích -->
-                                <li sec:authorize="hasRole('CUSTOMER')">
+                                <li sec:authorize="hasRole('USER')">
                                     <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/customer/wishlist}">
                                         <i class="bi bi-heart text-danger"></i>
                                         <span>Yêu thích</span>
@@ -1148,7 +1148,7 @@
                                     </tr>
 
                                     <!-- Vai trò đã cấp: Người bán -->
-                                    <tr th:if="${user.hasRole(T(com.finalproject.enums.Role).VENDOR)}">
+                                    <tr th:if="${user.hasRole(T(com.finalproject.enums.Role).MANAGER)}">
                                         <td class="ps-3">
                                             <div class="fw-bold text-dark">Người bán</div>
                                             <small class="text-muted">Cửa hàng hoa đối tác</small>
@@ -1192,7 +1192,7 @@
                                             <div th:if="${req.targetRole.name() == 'MANAGER'}" class="small text-secondary">
                                                 <span>Chi nhánh: <strong th:text="${req.targetStore != null ? req.targetStore.name : 'Tất cả chi nhánh'}"></strong></span>
                                             </div>
-                                            <div th:if="${req.targetRole.name() == 'VENDOR'}" class="small text-secondary">
+                                            <div th:if="${req.targetRole.name() == 'MANAGER'}" class="small text-secondary">
                                                 <span>Cửa hàng: <strong th:text="${req.shopName != null ? req.shopName : 'Đối tác'}"></strong></span>
                                             </div>
                                             <div th:if="${req.status.name() == 'REJECTED' and req.rejectionReason != null}" class="text-danger small mt-1">
@@ -1263,12 +1263,18 @@
                             <label class="form-label fw-bold text-dark">Vai trò muốn xin cấp <span class="text-danger">*</span></label>
                             <select name="targetRole" id="selectTargetRole" class="form-select form-select-lg rounded-3 fs-6" required onchange="handleRoleChange(this.value)">
                                 <option value="" disabled selected>-- Chọn vai trò bạn muốn xin cấp --</option>
-                                <option value="MANAGER">🏢 Quản lý chi nhánh (Store Manager)</option>
-                                <option value="VENDOR">🏪 Người bán / Đối tác cung ứng hoa (Vendor)</option>
+                                <option value="MANAGER">🏢 Quản lý / chủ cửa hàng</option>
                             </select>
                             <div class="form-text text-muted small">Lưu ý: Không được tự đăng ký vai trò Quản trị viên (Admin).</div>
                         </div>
 
+                        <div id="managerRequestKind" class="mb-3" style="display: none;">
+                            <label class="form-label fw-semibold" for="managerRequestMode">Hình thức đăng ký</label>
+                            <select id="managerRequestMode" class="form-select" onchange="handleRoleChange(document.getElementById('selectTargetRole').value)">
+                                <option value="branch">Quản lý chi nhánh có sẵn</option>
+                                <option value="shop">Mở / quản lý cửa hàng của tôi</option>
+                            </select>
+                        </div>
                         <!-- Form chi tiết cho Quản lý chi nhánh (MANAGER) -->
                         <div id="sectionManager" class="role-section border rounded-3 p-3 mb-3 bg-light" style="display: none;">
                             <h6 class="fw-bold text-dark mb-3"><i class="bi bi-building text-primary me-2"></i>Thông tin bổ sung - Quản lý chi nhánh</h6>
@@ -1291,7 +1297,7 @@
                             </div>
                         </div>
 
-                        <!-- Form chi tiết cho Người bán (VENDOR) -->
+                        <!-- Form chi tiết cho Người bán (MANAGER) -->
                         <div id="sectionVendor" class="role-section border rounded-3 p-3 mb-3 bg-light" style="display: none;">
                             <h6 class="fw-bold text-dark mb-3"><i class="bi bi-shop text-primary me-2"></i>Thông tin bổ sung - Người bán (Cửa hàng đối tác)</h6>
                             <div class="row g-3">
@@ -1511,16 +1517,23 @@
             if (secManager) secManager.style.display = 'none';
             if (secVendor) secVendor.style.display = 'none';
 
-            if (role === 'MANAGER') {
-                if (secManager) secManager.style.display = 'block';
-                if (btnSubmit) btnSubmit.disabled = false;
-            } else if (role === 'VENDOR') {
-                if (secVendor) secVendor.style.display = 'block';
-                if (btnSubmit) btnSubmit.disabled = false;
-            } else {
-                if (btnSubmit) btnSubmit.disabled = true;
-            }
+            const enabled = role === 'MANAGER';
+            const kind = document.getElementById('managerRequestKind');
+            const mode = document.getElementById('managerRequestMode');
+            if (kind) kind.style.display = enabled ? 'block' : 'none';
+            const shop = mode && mode.value === 'shop';
+            [secManager, secVendor].forEach((section, index) => {
+                if (!section) return;
+                const selected = enabled && (index === 1 ? shop : !shop);
+                section.style.display = selected ? 'block' : 'none';
+                section.querySelectorAll('input,select,textarea').forEach(input => {
+                    input.disabled = !selected;
+                    input.required = selected && ['targetStoreId','shopName','shopAddress','contactInfo'].includes(input.name);
+                });
+            });
+            if (btnSubmit) btnSubmit.disabled = !enabled;
         }
+        document.addEventListener('DOMContentLoaded', () => handleRoleChange(document.getElementById('selectTargetRole')?.value || ''));
 
         // Mở modal sửa địa chỉ
         function openEditAddressModal(id, recipientName, phone, addressDetail, isDefault) {
@@ -1710,6 +1723,7 @@
             });
         });
     </script>
+<th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
 </body>
 
 </html>

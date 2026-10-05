@@ -68,7 +68,7 @@ class AdminNewStoresStatisticsUseCaseTests {
                 .email("vendor_uc26@example.com")
                 .password(encodedPass)
                 .fullName("Chủ Cửa Hàng UC26")
-                .role(Role.VENDOR)
+                .role(Role.MANAGER)
                 .isActive(true)
                 .build());
 
@@ -187,10 +187,10 @@ class AdminNewStoresStatisticsUseCaseTests {
 
     /**
      * Pre-condition: Chỉ người dùng có vai trò ADMIN mới được truy cập Dashboard Admin.
-     * Người dùng vai trò CUSTOMER hoặc VENDOR không có quyền truy cập vào /admin/dashboard (403 Forbidden).
+     * Người dùng vai trò USER hoặc MANAGER không có quyền truy cập vào /admin/dashboard (403 Forbidden).
      */
     @Test
-    @WithMockUser(username = "customer_denied", roles = {"CUSTOMER"})
+    @WithMockUser(username = "customer_denied", roles = {"USER"})
     void testPreCondition_CustomerDeniedAccessToAdminDashboard() throws Exception {
         mockMvc.perform(get("/admin/dashboard"))
                 .andExpect(status().isForbidden());

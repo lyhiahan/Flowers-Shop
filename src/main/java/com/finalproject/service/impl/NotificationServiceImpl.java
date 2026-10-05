@@ -41,12 +41,16 @@ public class NotificationServiceImpl implements NotificationService {
                 .build();
         Notification saved = notificationRepository.save(notif);
 
-        // Bắn WebSocket thời gian thực nếu người dùng đang online
-        try {
-            messagingTemplate.convertAndSend("/topic/user/" + user.getId() + "/notifications", saved);
-        } catch (Exception ex) {
-            log.debug("WebSocket push notification bypassed: {}", ex.getMessage());
-        }
+        Runnable publish = () -> {
+            try { messagingTemplate.convertAndSend("/topic/user/" + user.getId() + "/notifications", saved); }
+            catch (Exception ex) { log.debug("WebSocket push notification bypassed: {}", ex.getMessage()); }
+        };
+        if (org.springframework.transaction.support.TransactionSynchronizationManager.isSynchronizationActive()) {
+            org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+                    new org.springframework.transaction.support.TransactionSynchronization() {
+                        @Override public void afterCommit() { publish.run(); }
+                    });
+        } else publish.run();
         return saved;
     }
 

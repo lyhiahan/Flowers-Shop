@@ -88,7 +88,7 @@ class CheckoutPhoneValidationTests {
     @DisplayName("Khi xảy ra lỗi checkout, hệ thống phải redirect về /checkout thay vì /cart")
     void testCheckoutErrorRedirectsToCheckout() {
         OrderService orderService = mock(OrderService.class);
-        when(orderService.checkout(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+        when(orderService.checkout(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenThrow(new IllegalArgumentException("Số điện thoại người nhận không hợp lệ."));
 
         CheckoutController controller = new CheckoutController(
@@ -117,6 +117,8 @@ class CheckoutPhoneValidationTests {
                 "Lời chúc",
                 null,
                 LocalDate.now(),
+                java.time.LocalTime.NOON,
+                null,
                 "DELIVERY",
                 null,
                 1L,

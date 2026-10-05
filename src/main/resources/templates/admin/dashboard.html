@@ -11,4 +11,5 @@ var usersData = /*[[${usersChart}]]*/ {};
 var storesData = /*[[${storesChart}]]*/ {};
 drawStoreChart('adminUsersChart', usersData, /*[[${userChartType}]]*/ 'line', 'Người dùng mới');
 drawStoreChart('adminStoresChart', storesData, /*[[${storeChartType}]]*/ 'bar', 'Cửa hàng mới');
-</script></body></html>
+</script><th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
+</body></html>

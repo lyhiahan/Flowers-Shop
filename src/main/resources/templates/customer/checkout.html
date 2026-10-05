@@ -550,7 +550,7 @@
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label-custom">Khung giờ giao</label>
-                                            <select name="deliveryTimeSlot" class="form-select-custom w-100">
+                                            <select required name="deliveryTimeSlot" class="form-select-custom w-100">
                                                 <option value="">-- Chọn khung giờ --</option>
                                                 <option value="07:00-09:00">07:00 – 09:00</option>
                                                 <option value="09:00-11:00">09:00 – 11:00</option>
@@ -633,7 +633,7 @@
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label-custom">Khung giờ đến lấy</label>
-                                            <select name="deliveryTimeSlot" class="form-select-custom w-100">
+                                            <select required name="deliveryTimeSlot" class="form-select-custom w-100">
                                                 <option value="">-- Chọn khung giờ --</option>
                                                 <option value="07:00-09:00">07:00 – 09:00</option>
                                                 <option value="09:00-11:00">09:00 – 11:00</option>
@@ -1299,5 +1299,6 @@
     </script>
     <script th:src="@{/js/checkout-quote.js}"></script>
 <script th:src="@{/js/global-modal.js}"></script>
+<th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
 </body>
 </html>

@@ -81,6 +81,7 @@ public class Order {
 
     // Thông tin giao hoa & thiệp chúc mừng
     private java.time.LocalDate deliveryDate;
+    private java.time.LocalTime deliveryTime;
     @org.hibernate.annotations.Nationalized
     @Column(length = 500)
     private String greetingMessage; // Lời chúc trên thiệp/banner

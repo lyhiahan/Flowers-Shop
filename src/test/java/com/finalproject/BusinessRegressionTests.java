@@ -71,7 +71,7 @@ class BusinessRegressionTests {
     void setup() {
         store = stores.save(Store.builder().name("Quận 1").address("Quận 1").eWallet(BigDecimal.ZERO).build());
         otherStore = stores.save(Store.builder().name("Quận 7").address("Quận 7").build());
-        customer = createUser("customer", Role.CUSTOMER, null);
+        customer = createUser("customer", Role.USER, null);
         manager = createUser("manager", Role.MANAGER, store);
         store.setOwner(manager); stores.save(store);
         outsider = createUser("outsider", Role.MANAGER, otherStore);
@@ -271,13 +271,13 @@ class BusinessRegressionTests {
     }
 
     @Test void retiredRoleCannotBeRequestedOrUseTheDeliveryPortal() throws Exception {
-        mvc.perform(post("/customer/role-request").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf())
+        mvc.perform(post("/customer/role-request").with(user(customer.getUsername()).roles("USER")).with(csrf())
                 .param("targetRole", "SHIPPER")).andExpect(status().isBadRequest());
         mvc.perform(get("/shipper/orders").with(user(customer.getUsername()).roles("SHIPPER")))
                 .andExpect(status().isForbidden());
         mvc.perform(post("/shipper/orders/update-status/1").with(user(manager.getUsername()).roles("ADMIN")).with(csrf())
                 .param("status", "DELIVERED")).andExpect(status().isForbidden());
-        mvc.perform(get("/customer/profile").with(user(customer.getUsername()).roles("CUSTOMER")))
+        mvc.perform(get("/customer/profile").with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("value=\"SHIPPER\""))));
     }
 
@@ -308,7 +308,7 @@ class BusinessRegressionTests {
     @Test void lockedAccountCannotUseOldSessionCartCheckoutOrMockPayment() throws Exception {
         Order order = checkout(PaymentMethod.MOMO);
         customer.setIsActive(false); users.saveAndFlush(customer);
-        mvc.perform(post("/checkout/momo/" + order.getId() + "/simulate").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf()))
+        mvc.perform(post("/checkout/momo/" + order.getId() + "/simulate").with(user(customer.getUsername()).roles("USER")).with(csrf()))
                 .andExpect(status().isForbidden());
         assertThatThrownBy(() -> momo.simulatePayment(order.getId(), customer.getUsername()))
                 .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
@@ -360,7 +360,7 @@ class BusinessRegressionTests {
         String otp = auth.registerCustomer(request);
         assertThat(auth.verifyOtp(request.getEmail(), otp)).isTrue();
         User created = users.findByUsername(request.getUsername()).orElseThrow();
-        assertThat(created.getRole()).isEqualTo(Role.CUSTOMER); assertThat(created.getIsActive()).isTrue();
+        assertThat(created.getRole()).isEqualTo(Role.USER); assertThat(created.getIsActive()).isTrue();
         assertThat(created.getPhone()).isEqualTo(customer.getPhone());
         var detailsService = new com.finalproject.service.impl.CustomUserDetailsService(users);
         assertThat(detailsService.loadUserByUsername(created.getEmail()).getUsername()).isEqualTo(created.getUsername());
@@ -465,7 +465,7 @@ class BusinessRegressionTests {
                 .andExpect(status().isOk()).andExpect(view().name("manager/orders"));
         mvc.perform(post("/manager/staff/remove/1").with(user(manager.getUsername()).roles("MANAGER")))
                 .andExpect(status().isForbidden());
-        mvc.perform(get("/staff/orders").with(user(customer.getUsername()).roles("CUSTOMER")))
+        mvc.perform(get("/staff/orders").with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isForbidden());
         mvc.perform(get("/manager/products").with(user(manager.getUsername()).roles("MANAGER")))
                 .andExpect(status().isOk());
@@ -495,15 +495,15 @@ class BusinessRegressionTests {
         assertThat(notifications.count()).isEqualTo(notificationCount);
         login(customer); orderService.cancelOrder(customer.getUsername(), order.getId());
         assertThat(order.getStatus()).isEqualTo(OrderStatus.REFUND_REQUESTED);
-        mvc.perform(get("/customer/orders").with(user(customer.getUsername()).roles("CUSTOMER")))
+        mvc.perform(get("/customer/orders").with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("Chờ hoàn tiền")));
     }
 
     @Test void staffAndCheckoutTemplatesRenderWithCsrf() throws Exception {
-        User staff = createUser("staff", Role.STAFF, store);
-        mvc.perform(get("/staff/orders").with(user(staff.getUsername()).roles("STAFF")))
+        User staff = createUser("staff", Role.MANAGER, store);
+        mvc.perform(get("/staff/orders").with(user(staff.getUsername()).roles("MANAGER")))
                 .andExpect(status().isOk());
-        mvc.perform(get("/checkout").with(user(customer.getUsername()).roles("CUSTOMER")))
+        mvc.perform(get("/checkout").with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("name=\"_csrf\"")));
         mvc.perform(get("/admin/transactions").with(user(createUser("admin", Role.ADMIN, null).getUsername()).roles("ADMIN")))
                 .andExpect(status().isOk());
@@ -568,11 +568,11 @@ class BusinessRegressionTests {
 
     @Test void quoteEndpointRequiresCsrfAndDeliverySelection() throws Exception {
         Delivery delivery = deliveries.save(Delivery.builder().name("Endpoint delivery").price(new BigDecimal("30000")).build());
-        mvc.perform(post("/checkout/quote").with(user(customer.getUsername()).roles("CUSTOMER")))
+        mvc.perform(post("/checkout/quote").with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isForbidden());
-        mvc.perform(post("/checkout/quote").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf()))
+        mvc.perform(post("/checkout/quote").with(user(customer.getUsername()).roles("USER")).with(csrf()))
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").exists());
-        mvc.perform(post("/checkout/quote").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf())
+        mvc.perform(post("/checkout/quote").with(user(customer.getUsername()).roles("USER")).with(csrf())
                         .param("selectedItemIds", item.getId().toString()).param("deliveryUnitId", delivery.getId().toString()).param("recipientAddress", "Quận 1"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.total").value(190000));
     }
@@ -586,7 +586,7 @@ class BusinessRegressionTests {
                 "/customer/profile/wishlist", "/customer/profile/recently-viewed", "/customer/profile/followed-stores",
                 "/users", "/users/" + customer.getId(), "/products/" + product.getId(), "/stores", "/stores/" + store.getId(),
                 "/checkout", "/customer/orders", "/customer/following", "/notifications")) {
-            String html = mvc.perform(get(route).with(user(customer.getUsername()).roles("CUSTOMER")))
+            String html = mvc.perform(get(route).with(user(customer.getUsername()).roles("USER")))
                     .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("viewport")))
                     .andReturn().getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
             java.nio.file.Path output = java.nio.file.Path.of("target/frontend-smoke", route.replaceAll("[^a-zA-Z0-9]", "_") + ".html");
@@ -594,9 +594,9 @@ class BusinessRegressionTests {
             java.nio.file.Files.writeString(output, html);
         }
         Order order = checkout(PaymentMethod.MOMO);
-        mvc.perform(get("/customer/orders").with(user(customer.getUsername()).roles("CUSTOMER")))
+        mvc.perform(get("/customer/orders").with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("/checkout/momo/" + order.getId())));
-        mvc.perform(get("/customer/orders/detail/" + order.getId()).with(user(customer.getUsername()).roles("CUSTOMER")))
+        mvc.perform(get("/customer/orders/detail/" + order.getId()).with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("Phí giao hàng")));
     }
 
@@ -611,7 +611,7 @@ class BusinessRegressionTests {
         Product loaded = products.findById(id).orElseThrow();
         assertThat(loaded.getName()).isEqualTo(name);
         assertThat(loaded.getDescription()).isEqualTo(description);
-        mvc.perform(get("/products/" + id).with(user(customer.getUsername()).roles("CUSTOMER")))
+        mvc.perform(get("/products/" + id).with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString(name)))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(description)));
     }
@@ -623,15 +623,15 @@ class BusinessRegressionTests {
         assertThat(order.getPaymentStatus()).isEqualTo("UNPAID");
         mvc.perform(post("/checkout/momo/ipn").contentType("application/json").content("{\"resultCode\":0}"))
                 .andExpect(status().isForbidden());
-        mvc.perform(get("/checkout/momo/" + order.getId()).with(user(customer.getUsername()).roles("CUSTOMER")))
+        mvc.perform(get("/checkout/momo/" + order.getId()).with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("Mô phỏng local")))
                 .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("api.qrserver.com"))));
-        mvc.perform(post("/checkout/momo/" + order.getId() + "/simulate").with(user(customer.getUsername()).roles("CUSTOMER")))
+        mvc.perform(post("/checkout/momo/" + order.getId() + "/simulate").with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isForbidden());
         assertThatThrownBy(() -> momo.simulatePayment(order.getId(), "not-owner"))
                 .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
         mvc.perform(post("/checkout/momo/" + order.getId() + "/simulate")
-                .with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf())).andExpect(status().is3xxRedirection());
+                .with(user(customer.getUsername()).roles("USER")).with(csrf())).andExpect(status().is3xxRedirection());
         assertThat(order.getPaymentStatus()).isEqualTo("PAID");
         Payment paid = payments.findByOrderId(order.getId()).get(0);
         assertThat(paid.getMomoEnvironment()).isEqualTo("mock");
@@ -644,7 +644,7 @@ class BusinessRegressionTests {
     @Test void bankInstructionsUseOrderTotalAndOnlyOwnerCanReadPaymentStatus() throws Exception {
         Order order = checkout(PaymentMethod.BANK_TRANSFER);
         String route = "/checkout/bank/" + order.getId();
-        mvc.perform(get(route).with(user(customer.getUsername()).roles("CUSTOMER")))
+        mvc.perform(get(route).with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("3337110941")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("BUI THANH PHUC")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("160,000")))
@@ -652,44 +652,44 @@ class BusinessRegressionTests {
                 .andExpect(model().attribute("order", order));
         assertThat(order.getPaymentStatus()).isEqualTo("UNPAID");
         for (String suffix : List.of("", "/status")) {
-            mvc.perform(get(route + suffix).with(user("another-customer").roles("CUSTOMER"))).andExpect(status().isForbidden());
+            mvc.perform(get(route + suffix).with(user("another-customer").roles("USER"))).andExpect(status().isForbidden());
         }
-        mvc.perform(get(route + "/status").with(user(customer.getUsername()).roles("CUSTOMER")))
+        mvc.perform(get(route + "/status").with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.paymentStatus").value("UNPAID"));
         login(manager); workflow.confirmPayment(order.getId());
-        mvc.perform(get(route + "/status").with(user(customer.getUsername()).roles("CUSTOMER")))
+        mvc.perform(get(route + "/status").with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.paymentStatus").value("PAID"));
-        mvc.perform(get(route).with(user(customer.getUsername()).roles("CUSTOMER")))
+        mvc.perform(get(route).with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("bank-qr-source"))));
     }
 
     @Test void customerPaymentCompatibilityRouteCannotSelfConfirmBankTransfer() throws Exception {
         Order order = checkout(PaymentMethod.BANK_TRANSFER);
         String route = "/customer/payment/" + order.getId();
-        mvc.perform(get(route).with(user(customer.getUsername()).roles("CUSTOMER")))
+        mvc.perform(get(route).with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/checkout/bank/" + order.getId()));
-        mvc.perform(post(route + "/process").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf()))
+        mvc.perform(post(route + "/process").with(user(customer.getUsername()).roles("USER")).with(csrf()))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.pending").value(true));
         em.flush(); em.clear();
         assertThat(orders.findById(order.getId()).orElseThrow().getPaymentStatus()).isEqualTo("UNPAID");
         assertThat(payments.findByOrderId(order.getId())).allMatch(p -> p.getStatus() == PaymentStatus.PENDING);
-        mvc.perform(post(route + "/process").with(user("another-customer").roles("CUSTOMER")).with(csrf()))
+        mvc.perform(post(route + "/process").with(user("another-customer").roles("USER")).with(csrf()))
                 .andExpect(status().isForbidden());
         login(manager); workflow.confirmPayment(order.getId());
-        mvc.perform(post(route + "/process").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf()))
+        mvc.perform(post(route + "/process").with(user(customer.getUsername()).roles("USER")).with(csrf()))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true));
         login(customer); orderService.cancelOrder(customer.getUsername(), order.getId());
-        mvc.perform(post(route + "/process").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf()))
+        mvc.perform(post(route + "/process").with(user(customer.getUsername()).roles("USER")).with(csrf()))
                 .andExpect(status().isBadRequest());
         assertThat(orders.findById(order.getId()).orElseThrow().getStatus()).isEqualTo(OrderStatus.REFUND_REQUESTED);
     }
 
     @Test void bankCheckoutRedirectsToInstructionsWithoutRecordingPaid() throws Exception {
-        var response = mvc.perform(post("/checkout").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf())
+        var response = mvc.perform(post("/checkout").with(user(customer.getUsername()).roles("USER")).with(csrf())
                 .param("selectedItemIds", item.getId().toString()).param("paymentMethod", "BANK_TRANSFER")
                 .param("recipientName", "Khách").param("recipientPhone", "0900000000")
-                .param("deliveryDate", LocalDate.now().toString())
+                .param("deliveryDate", LocalDate.now().plusDays(1).toString()).param("deliveryTimeSlot", "09:00-11:00")
                 .param("shippingMethod", "PICKUP").param("pickupStoreId", store.getId().toString()))
                 .andExpect(status().is3xxRedirection()).andReturn().getResponse();
         assertThat(response.getRedirectedUrl()).startsWith("/checkout/bank/");
@@ -783,17 +783,17 @@ class BusinessRegressionTests {
             params.add("deliveryDate", LocalDate.now().toString());
             params.add("shippingMethod", "recipientAddress".equals(field) ? "DELIVERY" : "PICKUP"); params.add("pickupStoreId", store.getId().toString());
             params.set(field, "");
-            int result = mvc.perform(post("/checkout").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf()).params(params))
+            int result = mvc.perform(post("/checkout").with(user(customer.getUsername()).roles("USER")).with(csrf()).params(params))
                     .andReturn().getResponse().getStatus();
             assertThat(result).isIn(302, 400);
         }
-        mvc.perform(post("/checkout").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf()))
+        mvc.perform(post("/checkout").with(user(customer.getUsername()).roles("USER")).with(csrf()))
                 .andExpect(status().isBadRequest());
-        mvc.perform(post("/cart/add").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf())
+        mvc.perform(post("/cart/add").with(user(customer.getUsername()).roles("USER")).with(csrf())
                 .param("productId", product.getId().toString()).param("quantity", "abc")).andExpect(status().isBadRequest());
-        mvc.perform(post("/cart/add").with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf()))
+        mvc.perform(post("/cart/add").with(user(customer.getUsername()).roles("USER")).with(csrf()))
                 .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("errorMessage"));
-        mvc.perform(get("/cart/remove/" + item.getId()).with(user(customer.getUsername()).roles("CUSTOMER"))).andExpect(status().isMethodNotAllowed());
+        mvc.perform(get("/cart/remove/" + item.getId()).with(user(customer.getUsername()).roles("USER"))).andExpect(status().isMethodNotAllowed());
         assertThat(orders.count()).isEqualTo(before);
         assertThat(items.existsById(item.getId())).isTrue();
         assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(10);
@@ -855,7 +855,7 @@ class BusinessRegressionTests {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("DH" + order.getId())))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("160,000")));
         mvc.perform(post(confirm).with(user(admin.getUsername()).roles("ADMIN"))).andExpect(status().isForbidden());
-        mvc.perform(post(confirm).with(user(customer.getUsername()).roles("CUSTOMER")).with(csrf())).andExpect(status().isForbidden());
+        mvc.perform(post(confirm).with(user(customer.getUsername()).roles("USER")).with(csrf())).andExpect(status().isForbidden());
         assertThat(order.getPaymentStatus()).isEqualTo("UNPAID");
         mvc.perform(post(confirm).with(user(admin.getUsername()).roles("ADMIN")).with(csrf()).param("redirect", detail))
                 .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl(detail)).andExpect(flash().attributeExists("successMessage"));
@@ -868,7 +868,7 @@ class BusinessRegressionTests {
         assertThat(notifications.count()).isEqualTo(count);
         mvc.perform(get(detail).with(user(admin.getUsername()).roles("ADMIN"))).andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("bankPaymentConfirmation"))));
-        mvc.perform(get("/checkout/bank/" + order.getId() + "/status").with(user(customer.getUsername()).roles("CUSTOMER")))
+        mvc.perform(get("/checkout/bank/" + order.getId() + "/status").with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.paymentStatus").value("PAID"));
     }
 
@@ -904,9 +904,9 @@ class BusinessRegressionTests {
     }
 
     @Test void cartAndProductShowRealStockAndServerRejectsExcessQuantity() throws Exception {
-        mvc.perform(get("/cart").with(user(customer.getUsername()).roles("CUSTOMER")))
+        mvc.perform(get("/cart").with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("Còn 10 mẫu tại chi nhánh")));
-        mvc.perform(get("/products/" + product.getId()).with(user(customer.getUsername()).roles("CUSTOMER")))
+        mvc.perform(get("/products/" + product.getId()).with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("Còn 10 mẫu tại chi nhánh")));
         assertThatThrownBy(() -> cartService.updateQuantity(customer.getUsername(), item.getId(), 11)).hasMessageContaining("tồn kho");
         var request = new com.finalproject.dto.request.AddToCartRequest();

@@ -15,6 +15,10 @@ public class RoleConverter implements AttributeConverter<Role, String> {
     @Override
     public Role convertToEntityAttribute(String value) {
         if (value == null) return null;
-        return "SHIPPER".equals(value) ? Role.CUSTOMER : Role.valueOf(value);
+        return switch (value) {
+            case "CUSTOMER", "SHIPPER" -> Role.USER;
+            case "VENDOR", "STAFF" -> Role.MANAGER;
+            default -> Role.valueOf(value);
+        };
     }
 }

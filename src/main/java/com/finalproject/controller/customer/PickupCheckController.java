@@ -5,112 +5,68 @@ import com.finalproject.entity.StoreInventory;
 import com.finalproject.repository.CartItemRepository;
 import com.finalproject.repository.StoreInventoryRepository;
 import com.finalproject.repository.StoreRepository;
+import com.finalproject.service.ProductAvailability;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
-
 import java.security.Principal;
 import java.util.*;
 
-/**
- * API kiểm tra tồn kho chi nhánh khi khách chọn "Đến lấy tại cửa hàng".
- * Endpoint: GET /api/customer/pickup-check?storeId=X&itemIds=1,2,3
- *
- * Trả về JSON:
- * {
- *   "ok": true,          // chi nhánh đủ hàng cho tất cả sản phẩm
- *   "message": "...",    // mô tả trạng thái
- *   "items": [           // danh sách kết quả từng sản phẩm
- *     {
- *       "cartItemId": 5,
- *       "productName": "Bó hoa hồng đỏ",
- *       "needed": 2,
- *       "available": 10,
- *       "ok": true
- *     }, ...
- *   ]
- * }
- */
 @RestController
 @RequestMapping("/api/customer/pickup-check")
 @RequiredArgsConstructor
 public class PickupCheckController {
-
     private final CartItemRepository cartItemRepository;
     private final StoreInventoryRepository storeInventoryRepository;
     private final StoreRepository storeRepository;
 
     @GetMapping
-    public ResponseEntity<Map<String, Object>> check(
-            Principal principal,
-            @RequestParam("storeId") Long storeId,
-            @RequestParam("itemIds") List<Long> itemIds) {
+    public ResponseEntity<Map<String, Object>> check(Principal principal,
+            @RequestParam("storeId") Long storeId, @RequestParam("itemIds") List<Long> itemIds) {
+        if (principal == null) throw new AccessDeniedException("Vui lòng đăng nhập.");
+        if (itemIds == null || itemIds.isEmpty() || itemIds.stream().anyMatch(id -> id == null || id <= 0))
+            return invalid("Vui lòng chọn sản phẩm hợp lệ.");
+        var store = storeRepository.findById(storeId).orElse(null);
+        if (store == null || !Boolean.TRUE.equals(store.getStatus()) || !Boolean.TRUE.equals(store.getIsOpen()))
+            return invalid("Chi nhánh hiện không nhận đơn.");
 
-        Map<String, Object> response = new LinkedHashMap<>();
-
-        // Kiểm tra chi nhánh tồn tại và đang hoạt động
-        var storeOpt = storeRepository.findById(storeId);
-        if (storeOpt.isEmpty() || !Boolean.TRUE.equals(storeOpt.get().getStatus())) {
-            response.put("ok", false);
-            response.put("message", "Chi nhánh này hiện không hoạt động.");
-            response.put("items", List.of());
-            return ResponseEntity.ok(response);
+        List<CartItem> selected = new ArrayList<>();
+        Map<Long, Long> neededByProduct = new LinkedHashMap<>();
+        for (Long id : new LinkedHashSet<>(itemIds)) {
+            var item = cartItemRepository.findById(id).orElse(null);
+            if (item == null) return invalid("Sản phẩm đã chọn không còn trong giỏ.");
+            if (item.getCart() == null || !principal.getName().equals(item.getCart().getUser().getUsername()))
+                throw new AccessDeniedException("Bạn không có quyền truy cập giỏ hàng này.");
+            if (item.getQuantity() == null || item.getQuantity() <= 0 || !ProductAvailability.isPublic(item.getProduct()))
+                return invalid("Sản phẩm không còn khả dụng.");
+            selected.add(item);
+            neededByProduct.merge(item.getProduct().getId(), item.getQuantity().longValue(), Long::sum);
         }
-
-        List<Map<String, Object>> itemResults = new ArrayList<>();
+        Map<Long, Integer> stock = new HashMap<>();
+        for (Long productId : neededByProduct.keySet()) {
+            stock.put(productId, storeInventoryRepository.findByStoreIdAndProductId(storeId, productId)
+                    .map(StoreInventory::getQuantity).map(q -> Math.max(0, q)).orElse(0));
+        }
         boolean allOk = true;
-        int shortfallCount = 0;
-
-        for (Long cartItemId : itemIds) {
-            Optional<CartItem> ciOpt = cartItemRepository.findById(cartItemId);
-            if (ciOpt.isEmpty()) continue;
-
-            CartItem ci = ciOpt.get();
-            // Bảo vệ: chỉ cho phép kiểm tra giỏ của chính khách đang đăng nhập
-            if (principal != null && ci.getCart() != null
-                    && !ci.getCart().getUser().getUsername().equals(principal.getName())) {
-                continue;
-            }
-
-            Long productId = ci.getProduct().getId();
-            int needed = ci.getQuantity() != null ? ci.getQuantity() : 1;
-
-            int available = storeInventoryRepository
-                    .findByStoreIdAndProductId(storeId, productId)
-                    .map(StoreInventory::getQuantity)
-                    .orElse(0);
-
-            boolean itemOk = available >= needed;
-            if (!itemOk) {
-                allOk = false;
-                shortfallCount++;
-            }
-
-            Map<String, Object> itemMap = new LinkedHashMap<>();
-            itemMap.put("cartItemId", cartItemId);
-            itemMap.put("productName", ci.getProduct().getName());
-            itemMap.put("needed", needed);
-            itemMap.put("available", available);
-            itemMap.put("ok", itemOk);
-            if (!itemOk) {
-                int shortage = needed - available;
-                itemMap.put("reason", available == 0
-                        ? "Hết hàng tại chi nhánh này"
-                        : "Thiếu " + shortage + " sản phẩm (còn " + available + ")");
-            }
-            itemResults.add(itemMap);
+        List<Map<String, Object>> results = new ArrayList<>();
+        for (CartItem item : selected) {
+            Long productId = item.getProduct().getId();
+            long needed = neededByProduct.get(productId);
+            int available = stock.get(productId);
+            boolean ok = available >= needed;
+            allOk &= ok;
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("cartItemId", item.getId()); row.put("productName", item.getProduct().getName());
+            row.put("needed", needed); row.put("available", available); row.put("ok", ok);
+            if (!ok) row.put("reason", "Tồn kho không đủ tổng số lượng đã chọn (cần " + needed + ", còn " + available + ").");
+            results.add(row);
         }
+        return ResponseEntity.ok(Map.of("ok", allOk, "items", results, "message",
+                allOk ? "Có đủ sản phẩm đã chọn." : "Chi nhánh không đủ tổng số lượng đã chọn."));
+    }
 
-        response.put("ok", allOk);
-        if (allOk) {
-            response.put("message", "Có đủ sản phẩm đã chọn ✓");
-        } else {
-            response.put("message", shortfallCount == 1
-                    ? "Có 1 sản phẩm không đủ hàng tại chi nhánh này."
-                    : "Có " + shortfallCount + " sản phẩm không đủ hàng tại chi nhánh này.");
-        }
-        response.put("items", itemResults);
-
-        return ResponseEntity.ok(response);
+    private ResponseEntity<Map<String, Object>> invalid(String message) {
+        return ResponseEntity.ok(Map.of("ok", false, "items", List.of(), "message", message));
     }
 }

@@ -78,7 +78,7 @@ public class ManagerRoleInterfaceSyncTests {
     }
 
     @Test
-    @WithMockUser(username = "test_manager_sync", roles = {"MANAGER", "CUSTOMER"})
+    @WithMockUser(username = "test_manager_sync", roles = {"MANAGER", "USER"})
     @DisplayName("1. Trang chủ hiển thị đồng bộ chế độ quản lý cửa hàng và nút vào dashboard cho Manager")
     void testIndexPage_ShowsManagerDashboardLinkAndStatus() throws Exception {
         MvcResult result = mockMvc.perform(get("/"))
@@ -104,7 +104,7 @@ public class ManagerRoleInterfaceSyncTests {
     }
 
     @Test
-    @WithMockUser(username = "test_manager_sync", roles = {"MANAGER", "CUSTOMER"})
+    @WithMockUser(username = "test_manager_sync", roles = {"MANAGER", "USER"})
     @DisplayName("2. Trang hồ sơ khách hàng hiển thị nút Kênh Quản lý cửa hàng cho Manager")
     void testProfilePage_ShowsManagerDashboardLink() throws Exception {
         MvcResult result = mockMvc.perform(get("/customer/profile"))
@@ -118,7 +118,7 @@ public class ManagerRoleInterfaceSyncTests {
     }
 
     @Test
-    @WithMockUser(username = "test_manager_sync", roles = {"MANAGER", "CUSTOMER"})
+    @WithMockUser(username = "test_manager_sync", roles = {"MANAGER", "USER"})
     @DisplayName("3. Trang danh sách cửa hàng hiển thị link Quản lý cửa hàng chuẩn role MANAGER")
     void testStoresPage_ShowsManagerDashboardLink() throws Exception {
         MvcResult result = mockMvc.perform(get("/stores"))

@@ -72,7 +72,12 @@ public class CartServiceImpl implements CartService {
         if (!com.finalproject.service.ProductAvailability.isPublic(product)) throw new IllegalStateException("Sản phẩm đã ngừng bán.");
         if (request.getQuantity() == null || request.getQuantity() <= 0 || request.getQuantity() > 10000) throw new IllegalArgumentException("Số lượng không hợp lệ.");
         if (request.getDeliveryDate() != null && request.getDeliveryDate().isBefore(java.time.LocalDate.now())) throw new IllegalArgumentException("Ngày nhận hàng không được ở quá khứ.");
-        Long storeId = request.getStoreId() != null ? request.getStoreId() : (product.getStore() != null ? product.getStore().getId() : 1L);
+        Long storeId = request.getStoreId() != null ? request.getStoreId() : (product.getStore() != null ? product.getStore().getId()
+                : storeInventoryRepository.findByProductId(product.getId()).stream()
+                    .filter(s -> Boolean.TRUE.equals(s.getStore().getStatus()) && Boolean.TRUE.equals(s.getStore().getIsOpen())
+                            && s.getQuantity() != null && s.getQuantity() >= addQty)
+                    .sorted(java.util.Comparator.comparing(s -> s.getStore().getId())).map(s -> s.getStore().getId()).findFirst()
+                    .orElseThrow(() -> new IllegalStateException("Không có chi nhánh đang mở đủ tồn kho cho sản phẩm này.")));
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Chi nhánh không tồn tại"));
 
@@ -98,6 +103,10 @@ public class CartServiceImpl implements CartService {
                 cart.getId(), product.getId(), storeId,
                 com.finalproject.enums.OrderType.BUY, delivDate).orElse(null);
 
+        long alreadyInCart = cartItemRepository.sumQtyByCartProductStore(cart.getId(), product.getId(), storeId);
+        if (alreadyInCart + addQty > availableStock) {
+            throw new IllegalArgumentException("Số lượng vượt quá tồn kho; chỉ còn " + availableStock + " sản phẩm tại chi nhánh này.");
+        }
         if (existingItem != null) {
             int newTotal = existingItem.getQuantity() + addQty;
             if (newTotal > availableStock) {
@@ -112,10 +121,6 @@ public class CartServiceImpl implements CartService {
             cartItemRepository.save(existingItem);
         } else {
             // --- Ưu tiên 3: Kiểm tra tồn kho tổng hợp: SL đã có + SL mới thêm ---
-            long alreadyInCart = cartItemRepository.sumQtyByCartProductStore(cart.getId(), product.getId(), storeId);
-            if (alreadyInCart + addQty > availableStock) {
-                throw new IllegalStateException("Chỉ còn " + availableStock + " sản phẩm tại chi nhánh này.");
-            }
             CartItem cartItem = CartItem.builder()
                     .cart(cart)
                     .product(product)
@@ -200,7 +205,7 @@ public class CartServiceImpl implements CartService {
                 requested += line.getQuantity();
             }
         }
-        if (requested > available) throw new IllegalArgumentException("Chỉ còn " + available
+        if (requested > available) throw new IllegalArgumentException("Số lượng vượt quá tồn kho; chỉ còn " + available
                 + " sản phẩm tại chi nhánh này");
     }
 
@@ -220,7 +225,6 @@ public class CartServiceImpl implements CartService {
     private boolean isAdminUser(User user) {
         if (user == null) return false;
         return user.getRole() == com.finalproject.enums.Role.ADMIN
-                || (user.getRoles() != null && user.getRoles().contains(com.finalproject.enums.Role.ADMIN))
-                || "admin".equalsIgnoreCase(user.getUsername());
+                || (user.getRoles() != null && user.getRoles().contains(com.finalproject.enums.Role.ADMIN));
     }
 }

@@ -50,9 +50,9 @@ public class AdminDashboardController {
             long totalStores = storeRepository.count();
             long activeStores = storeRepository.countByStatus(true);
             long totalUsers = userRepository.count();
-            long totalCustomers = userRepository.countByRole(Role.CUSTOMER);
+            long totalCustomers = userRepository.countByRole(Role.USER);
             long totalManagers = userRepository.countByRole(Role.MANAGER);
-            long totalVendors = userRepository.countByRole(Role.VENDOR);
+            long totalVendors = userRepository.countByRole(Role.MANAGER);
 
             long totalOrders = orderRepository.count();
             long pendingOrders = orderRepository.countByStatus(OrderStatus.PENDING);

@@ -58,6 +58,7 @@ public class HomeController {
             Principal principal,
             Model model) {
 
+        size = 8;
         try {
             model.addAttribute("hasActiveFilter", false);
 
@@ -176,11 +177,11 @@ public class HomeController {
             // - Chỉ lọc thuộc tính: “Kết quả lọc sản phẩm”
             String activeFilterTitle;
             if (trimmedKeyword != null) {
-                activeFilterTitle = "Kết quả cho “" + trimmedKeyword + "”";
+                activeFilterTitle = "Kết quả tìm kiếm: “" + trimmedKeyword + "”";
             } else if (selectedCategory != null) {
                 activeFilterTitle = selectedCategory.getName();
             } else if (!cleanStyles.isEmpty() && cleanStyles.size() == 1) {
-                activeFilterTitle = cleanStyles.get(0);
+                activeFilterTitle = "Kết quả lọc sản phẩm";
             } else if (!cleanStyles.isEmpty() || !cleanTypes.isEmpty() || !cleanColors.isEmpty() || !cleanOccasions.isEmpty() || minPrice != null || maxPrice != null || minRating != null) {
                 activeFilterTitle = "Kết quả lọc sản phẩm";
             } else if ("bestseller".equalsIgnoreCase(tab)) {

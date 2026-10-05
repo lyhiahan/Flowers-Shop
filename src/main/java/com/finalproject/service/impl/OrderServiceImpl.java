@@ -155,9 +155,7 @@ public class OrderServiceImpl implements OrderService {
         }
         if (finalRecipientName.length() > 100 || finalRecipientAddress.length() > 255 || (finalGreeting != null && finalGreeting.length() > 500))
             throw new IllegalArgumentException("Tên tối đa 100, địa chỉ 255 và lời chúc 500 ký tự.");
-        if (!isValidPhoneNumber(finalRecipientPhone)) {
-            throw new IllegalArgumentException("Số điện thoại người nhận không hợp lệ (vui lòng nhập 10 chữ số, ví dụ: 0901234567).");
-        }
+        if (!isValidPhoneNumber(finalRecipientPhone)) throw new IllegalArgumentException("Số điện thoại người nhận không hợp lệ.");
         Order order = Order.builder()
                 .shippingMethod(shippingMethod)
                 .user(user)
@@ -322,6 +320,11 @@ public class OrderServiceImpl implements OrderService {
         }
         BigDecimal subtotal = BigDecimal.ZERO;
         BigDecimal importTotal = BigDecimal.ZERO;
+        Map<Long, Long> required = new HashMap<>();
+        for (CartItem line : items) {
+            if (line.getQuantity() == null || line.getQuantity() <= 0) throw new IllegalArgumentException("Số lượng phải lớn hơn 0.");
+            required.merge(line.getProduct().getId(), line.getQuantity().longValue(), Long::sum);
+        }
         for (CartItem item : items) {
             Product p = item.getProduct();
             if (item.getOrderType() != OrderType.BUY || item.getQuantity() == null || item.getQuantity() <= 0) {
@@ -332,7 +335,7 @@ public class OrderServiceImpl implements OrderService {
             }
             StoreInventory inventory = storeInventoryRepository.findByStoreIdAndProductId(store.getId(), p.getId())
                     .orElseThrow(() -> new IllegalStateException("Chi nhánh không có hàng: " + p.getName()));
-            if (inventory.getQuantity() < item.getQuantity()) throw new IllegalStateException("Không đủ tồn kho: " + p.getName());
+            if (inventory.getQuantity() == null || inventory.getQuantity() < required.get(p.getId())) throw new IllegalStateException("Không đủ tổng tồn kho: " + p.getName());
             BigDecimal price = p.getSellingPrice();
             if (price == null || price.signum() <= 0 || price.stripTrailingZeros().scale() > 2)
                 throw new IllegalStateException("Giá sản phẩm không hợp lệ: " + p.getName());
@@ -342,6 +345,19 @@ public class OrderServiceImpl implements OrderService {
             importTotal = importTotal.add(cost.multiply(BigDecimal.valueOf(item.getQuantity())));
         }
         return calculateAmounts(subtotal, importTotal, store, voucherCode, shippingMethod, deliveryUnitId);
+    }
+
+    @Override @Transactional
+    public List<Order> checkout(String username, List<Long> ids, PaymentMethod method, String name, String phone,
+            String address, String greeting, String voucher, LocalDate date, String shipping, Long storeId, Long deliveryId,
+            java.time.LocalTime time) {
+        if (date == null || time == null) throw new IllegalArgumentException("Vui lòng chọn ngày và giờ nhận hoa.");
+        if (java.time.LocalDateTime.of(date, time).isBefore(java.time.LocalDateTime.now()))
+            throw new IllegalArgumentException("Ngày giờ nhận hoa không được ở quá khứ.");
+        var created = checkout(username, ids, method, name, phone, address, greeting, voucher, date, shipping, storeId, deliveryId);
+        created.forEach(order -> order.setDeliveryTime(time));
+        orderRepository.saveAll(created);
+        return created;
     }
 
     private com.finalproject.service.CheckoutQuote calculateAmounts(BigDecimal subtotal, BigDecimal importTotal,
@@ -355,18 +371,8 @@ public class OrderServiceImpl implements OrderService {
                     || delivery.getPrice() == null || delivery.getPrice().signum() < 0) {
                 throw new IllegalArgumentException("Đơn vị giao hàng hiện không khả dụng.");
             }
-            // Ưu tiên tính phí theo Biểu phí giao hàng (Shipping Tariff) đã cấu hình cho chi nhánh
-            BigDecimal customTariffFee = null;
-            if (store != null && store.getId() != null) {
-                List<com.finalproject.entity.ShippingTariff> tariffs = shippingTariffRepository.findByStoreIdAndIsDeletedFalse(store.getId());
-                for (com.finalproject.entity.ShippingTariff t : tariffs) {
-                    if (Boolean.TRUE.equals(t.getIsActive()) && t.getDelivery() != null && t.getDelivery().getId().equals(deliveryUnitId)) {
-                        customTariffFee = t.getBaseFee();
-                        break;
-                    }
-                }
-            }
-            shippingFee = customTariffFee != null ? customTariffFee : delivery.getPrice();
+            // Checkout selects a delivery unit, not a tariff/area. Use its displayed fee consistently.
+            shippingFee = delivery.getPrice();
         }
         BigDecimal discount = BigDecimal.ZERO;
         if (voucherCode != null && !voucherCode.isBlank()) {
@@ -416,8 +422,7 @@ public class OrderServiceImpl implements OrderService {
             throw new org.springframework.security.access.AccessDeniedException("Tài khoản đã bị khóa hoặc vô hiệu hóa.");
         }
         boolean isAdmin = (user.getRole() == Role.ADMIN)
-                || (user.getRoles() != null && user.getRoles().contains(Role.ADMIN))
-                || "admin".equalsIgnoreCase(user.getUsername());
+                || (user.getRoles() != null && user.getRoles().contains(Role.ADMIN));
         if (isAdmin) {
             throw new org.springframework.security.access.AccessDeniedException("Tài khoản Quản trị viên không thể thực hiện tạo đơn hoặc mua hàng.");
         }
@@ -539,7 +544,6 @@ public class OrderServiceImpl implements OrderService {
                     "Đơn thuê #" + order.getId() + " của khách " + order.getUser().getFullName() + " đã QUÁ HẠN!");
         }
     }
-
     private String extractFirstNonBlank(String input) {
         if (input == null) return null;
         if (input.contains(",")) {

@@ -382,5 +382,6 @@ function drawStoreChart(id, data, type, label) {
 drawStoreChart('revenueTrendChart', revData, revType, /*[[${chartUnit}]]*/ 'Doanh thu');
 </script>
 <script th:src="@{/js/global-modal.js}"></script>
+<th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
 </body>
 </html>

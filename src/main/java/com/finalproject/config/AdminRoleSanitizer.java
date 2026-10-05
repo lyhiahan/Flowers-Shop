@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  * Rà soát và tách bạch quyền tài khoản Quản trị viên (Admin) khi hệ thống khởi động:
- * 1. Đảm bảo mọi tài khoản Admin không còn chứa vai trò CUSTOMER trong bảng user_roles.
+ * 1. Đảm bảo mọi tài khoản Admin không còn chứa vai trò USER trong bảng user_roles.
  * 2. Bảo toàn tuyệt đối lịch sử đơn hàng, thông tin tài khoản và nhật ký giao dịch cũ.
  */
 @Component
@@ -34,29 +34,27 @@ public class AdminRoleSanitizer implements ApplicationRunner {
         try {
             // 1. Dùng SQL trực tiếp làm sạch bảng user_roles đối với mọi tài khoản Admin
             int removedCount = jdbcTemplate.update(
-                    "DELETE FROM user_roles WHERE role = 'CUSTOMER' AND user_id IN (" +
-                    "  SELECT id FROM users WHERE role = 'ADMIN' OR LOWER(username) = 'admin'" +
+                    "DELETE FROM user_roles WHERE role = 'USER' AND user_id IN (" +
+                    "  SELECT id FROM users WHERE role = 'ADMIN'" +
                     ")"
             );
             if (removedCount > 0) {
-                log.info("AdminRoleSanitizer: Đã thu hồi {} quyền CUSTOMER gán nhầm cho tài khoản Quản trị viên trong database.", removedCount);
+                log.info("AdminRoleSanitizer: Đã thu hồi {} quyền USER gán nhầm cho tài khoản Quản trị viên trong database.", removedCount);
             }
 
             // 2. Rà soát lại entity User để đảm bảo cache JPA đồng bộ
             List<User> adminUsers = userRepository.findAll().stream()
-                    .filter(u -> u.getRole() == Role.ADMIN 
-                            || "admin".equalsIgnoreCase(u.getUsername()) 
-                            || (u.getRoles() != null && u.getRoles().contains(Role.ADMIN)))
+                    .filter(u -> u.getRole() == Role.ADMIN || (u.getRoles() != null && u.getRoles().contains(Role.ADMIN)))
                     .toList();
 
             for (User admin : adminUsers) {
                 boolean changed = false;
-                if (admin.getRoles() != null && admin.getRoles().contains(Role.CUSTOMER)) {
-                    admin.getRoles().remove(Role.CUSTOMER);
+                if (admin.getRoles() != null && admin.getRoles().contains(Role.USER)) {
+                    admin.getRoles().remove(Role.USER);
                     changed = true;
                 }
                 if (admin.getRole() == null || admin.getRole() != Role.ADMIN) {
-                    if ("admin".equalsIgnoreCase(admin.getUsername()) || (admin.getRoles() != null && admin.getRoles().contains(Role.ADMIN))) {
+                    if ((admin.getRoles() != null && admin.getRoles().contains(Role.ADMIN))) {
                         admin.setRole(Role.ADMIN);
                         changed = true;
                     }

@@ -23,7 +23,7 @@ public class StoreStaffManagementService {
                    String phone, String password, String requestedRole) {
         access.requireOwner(store);
         boolean partner = "PARTNER".equalsIgnoreCase(requestedRole);
-        if (!partner && !"STAFF".equalsIgnoreCase(requestedRole)) throw new IllegalArgumentException("Vai trò nhân viên không hợp lệ.");
+        if (!partner && !"MANAGER".equalsIgnoreCase(requestedRole)) throw new IllegalArgumentException("Vai trò nhân viên không hợp lệ.");
         Set<Long> selected = new TreeSet<>(ids == null ? List.of() : ids);
         String name = username == null ? "" : username.trim();
         User fresh = null;
@@ -40,7 +40,7 @@ public class StoreStaffManagementService {
                 String display = fullName == null || fullName.isBlank() ? name : fullName.trim();
                 if (display.length() > 100) throw new IllegalArgumentException("Họ tên tối đa 100 ký tự.");
                 fresh = User.builder().username(name).email(email.trim()).fullName(display).phone(phone)
-                        .password(encoder.encode(password)).role(Role.STAFF).isActive(true).isEmailActive(true).build();
+                        .password(encoder.encode(password)).role(Role.MANAGER).isActive(true).isEmailActive(true).build();
             }
         }
         List<User> candidates = new ArrayList<>();
@@ -49,10 +49,10 @@ public class StoreStaffManagementService {
             if (!Boolean.TRUE.equals(candidate.getIsActive()) || candidate.isRetiredDeliveryAccount()
                     || Boolean.TRUE.equals(candidate.getAccountDisabledByAdmin())
                     || candidate.getId().equals(access.currentUser().getId()) || candidate.hasRole(Role.ADMIN)
-                    || (partner ? !(candidate.hasRole(Role.VENDOR) || candidate.hasRole(Role.MANAGER))
+                    || (partner ? !candidate.hasRole(Role.MANAGER)
                         : (candidate.getStore() != null || memberships.existsByUserIdAndActiveTrue(candidate.getId())
-                            || (candidate.getRole() != Role.CUSTOMER && candidate.getRole() != Role.STAFF)
-                            || candidate.hasRole(Role.VENDOR) || candidate.hasRole(Role.MANAGER)))
+                            || (candidate.getRole() != Role.USER && candidate.getRole() != Role.MANAGER)
+                            ))
                     || memberships.findByUserIdAndStoreId(candidate.getId(), store.getId()).filter(m -> Boolean.TRUE.equals(m.getActive())).isPresent()) {
                 throw new IllegalArgumentException("Ứng viên không hợp lệ hoặc đã thuộc cửa hàng khác.");
             }
@@ -63,13 +63,13 @@ public class StoreStaffManagementService {
         for (User candidate : candidates) {
             if (!partner) {
                 candidate.setStore(store);
-                if (candidate.getRole() == Role.CUSTOMER) candidate.setRole(Role.STAFF);
-                candidate.addRole(Role.STAFF);
+                if (candidate.getRole() == Role.USER) candidate.setRole(Role.MANAGER);
+                candidate.addRole(Role.MANAGER);
             }
             users.save(candidate);
             var member = memberships.findByUserIdAndStoreId(candidate.getId(), store.getId()).orElseGet(() ->
                     com.finalproject.entity.StoreMembership.builder().user(candidate).store(store).build());
-            member.setAccessRole(partner ? "PARTNER" : "STAFF"); member.setActive(true); memberships.save(member);
+            member.setAccessRole("PARTNER"); member.setActive(true); memberships.save(member);
         }
         return candidates.size();
     }

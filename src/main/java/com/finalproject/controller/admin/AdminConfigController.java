@@ -690,6 +690,19 @@ public class AdminConfigController {
         return "redirect:/admin/deliveries";
     }
 
+    private void validateTariff(String area, String service, BigDecimal fee, BigDecimal surcharge, Long storeId, Long deliveryId) {
+        if (area == null || area.isBlank() || area.trim().length() > 150 || service == null || service.isBlank() || service.trim().length() > 100)
+            throw new IllegalArgumentException("Vui lòng nhập khu vực và dịch vụ hợp lệ.");
+        if (fee == null || fee.signum() < 0 || surcharge == null || surcharge.signum() < 0
+                || fee.compareTo(new BigDecimal("1000000000")) > 0 || surcharge.compareTo(new BigDecimal("1000000000")) > 0
+                || fee.stripTrailingZeros().scale() > 2 || surcharge.stripTrailingZeros().scale() > 2)
+            throw new IllegalArgumentException("Phí và phụ phí phải từ 0 đến 1.000.000.000 đồng.");
+        if (storeId != null && (storeId <= 0 || !storeRepository.existsById(storeId)))
+            throw new IllegalArgumentException("Chi nhánh không tồn tại.");
+        if (deliveryId != null && (deliveryId <= 0 || !deliveryRepository.existsById(deliveryId)))
+            throw new IllegalArgumentException("Đơn vị giao hàng không tồn tại.");
+    }
+
     // --- Biểu phí giao hàng (Shipping Tariffs) ---
     @PostMapping("/deliveries/tariffs/add")
     public String addTariff(@RequestParam(value = "storeId", required = false) Long storeId,
@@ -702,6 +715,7 @@ public class AdminConfigController {
                             @RequestParam(value = "note", required = false) String note,
                             RedirectAttributes ra) {
         try {
+            validateTariff(destinationArea, serviceName, baseFee, bulkySurcharge, storeId, deliveryId);
             Store store = (storeId != null && storeId > 0) ? storeRepository.findById(storeId).orElse(null) : null;
             Delivery delivery = (deliveryId != null && deliveryId > 0) ? deliveryRepository.findById(deliveryId).orElse(null) : null;
             ShippingTariff tariff = ShippingTariff.builder()
@@ -736,6 +750,7 @@ public class AdminConfigController {
                                @RequestParam(value = "note", required = false) String note,
                                RedirectAttributes ra) {
         try {
+            validateTariff(destinationArea, serviceName, baseFee, bulkySurcharge, storeId, deliveryId);
             ShippingTariff tariff = shippingTariffRepository.findById(id).orElseThrow();
             Store store = (storeId != null && storeId > 0) ? storeRepository.findById(storeId).orElse(null) : null;
             Delivery delivery = (deliveryId != null && deliveryId > 0) ? deliveryRepository.findById(deliveryId).orElse(null) : null;

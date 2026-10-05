@@ -53,7 +53,7 @@ class AdminCustomerRoleSeparationTests {
     private JdbcTemplate jdbcTemplate;
 
     @Test
-    @DisplayName("1. Admin khi đăng nhập chỉ nhận ROLE_ADMIN, tuyệt đối KHÔNG có ROLE_CUSTOMER")
+    @DisplayName("1. Admin khi đăng nhập chỉ nhận ROLE_ADMIN, tuyệt đối KHÔNG có ROLE_USER")
     void adminUser_receivesOnlyAdminAuthority_notCustomer() {
         User admin = userRepository.save(User.builder()
                 .username("test_admin_sep")
@@ -70,18 +70,18 @@ class AdminCustomerRoleSeparationTests {
                 .collect(Collectors.toSet());
 
         assertThat(authNames).contains("ROLE_ADMIN");
-        assertThat(authNames).doesNotContain("ROLE_CUSTOMER");
+        assertThat(authNames).doesNotContain("ROLE_USER");
     }
 
     @Test
-    @DisplayName("2. Khách hàng, Quản lý, Người bán khi đăng nhập vẫn giữ ROLE_CUSTOMER bình thường")
+    @DisplayName("2. Khách hàng, Quản lý, Người bán khi đăng nhập vẫn giữ ROLE_USER bình thường")
     void normalUsers_retainCustomerAuthority() {
         User customer = userRepository.save(User.builder()
                 .username("test_cust_sep")
                 .password("$2a$10$abcdefghijklmnopqrstuv")
                 .email("cust_sep@flower.vn")
                 .fullName("Khách Hàng Mua Hoa")
-                .role(Role.CUSTOMER)
+                .role(Role.USER)
                 .isActive(true)
                 .build());
 
@@ -89,14 +89,14 @@ class AdminCustomerRoleSeparationTests {
         Set<String> custAuths = custDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toSet());
-        assertThat(custAuths).contains("ROLE_CUSTOMER");
+        assertThat(custAuths).contains("ROLE_USER");
 
         User vendor = userRepository.save(User.builder()
                 .username("test_vendor_sep")
                 .password("$2a$10$abcdefghijklmnopqrstuv")
                 .email("vendor_sep@flower.vn")
                 .fullName("Người Bán Hoa")
-                .role(Role.VENDOR)
+                .role(Role.MANAGER)
                 .isActive(true)
                 .build());
 
@@ -104,24 +104,24 @@ class AdminCustomerRoleSeparationTests {
         Set<String> vendorAuths = vendorDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toSet());
-        assertThat(vendorAuths).contains("ROLE_CUSTOMER", "ROLE_VENDOR");
+        assertThat(vendorAuths).contains("ROLE_USER", "ROLE_MANAGER");
     }
 
     @Test
-    @DisplayName("3. Entity User loại bỏ vai trò CUSTOMER khi gán vai trò ADMIN")
+    @DisplayName("3. Entity User loại bỏ vai trò USER khi gán vai trò ADMIN")
     void userEntity_removesCustomerRole_whenAdminAssigned() {
         User user = User.builder()
                 .username("test_promote_admin")
-                .role(Role.CUSTOMER)
-                .roles(new java.util.HashSet<>(java.util.List.of(Role.CUSTOMER)))
+                .role(Role.USER)
+                .roles(new java.util.HashSet<>(java.util.List.of(Role.USER)))
                 .build();
 
         user.addRole(Role.ADMIN);
         user.setRole(Role.ADMIN);
 
-        assertThat(user.getRoles()).doesNotContain(Role.CUSTOMER);
+        assertThat(user.getRoles()).doesNotContain(Role.USER);
         assertThat(user.hasRole(Role.ADMIN)).isTrue();
-        assertThat(user.hasRole(Role.CUSTOMER)).isFalse();
+        assertThat(user.hasRole(Role.USER)).isFalse();
     }
 
     @Test
@@ -170,7 +170,7 @@ class AdminCustomerRoleSeparationTests {
     }
 
     @Test
-    @DisplayName("6. AdminRoleSanitizer tự động rà soát và xóa role CUSTOMER cũ khỏi tài khoản Admin trong DB")
+    @DisplayName("6. AdminRoleSanitizer tự động rà soát và xóa role USER cũ khỏi tài khoản Admin trong DB")
     void adminRoleSanitizer_cleansCustomerRoleFromDatabase() {
         User legacyAdmin = userRepository.save(User.builder()
                 .username("legacy_admin")
@@ -181,11 +181,11 @@ class AdminCustomerRoleSeparationTests {
                 .isActive(true)
                 .build());
 
-        // Cố tình ghi thêm vai trò CUSTOMER vào bảng user_roles cho legacyAdmin
-        jdbcTemplate.update("INSERT INTO user_roles (user_id, role) VALUES (?, ?)", legacyAdmin.getId(), "CUSTOMER");
+        // Cố tình ghi thêm vai trò USER vào bảng user_roles cho legacyAdmin
+        jdbcTemplate.update("INSERT INTO user_roles (user_id, role) VALUES (?, ?)", legacyAdmin.getId(), "USER");
 
         Integer countBefore = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM user_roles WHERE user_id = ? AND role = 'CUSTOMER'",
+                "SELECT COUNT(*) FROM user_roles WHERE user_id = ? AND role = 'USER'",
                 Integer.class, legacyAdmin.getId()
         );
         assertThat(countBefore).isEqualTo(1);
@@ -194,7 +194,7 @@ class AdminCustomerRoleSeparationTests {
         adminRoleSanitizer.run(new DefaultApplicationArguments(new String[0]));
 
         Integer countAfter = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM user_roles WHERE user_id = ? AND role = 'CUSTOMER'",
+                "SELECT COUNT(*) FROM user_roles WHERE user_id = ? AND role = 'USER'",
                 Integer.class, legacyAdmin.getId()
         );
         assertThat(countAfter).isEqualTo(0);

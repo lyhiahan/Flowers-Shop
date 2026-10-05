@@ -12,6 +12,10 @@ import java.util.List;
 @Repository
 public interface RoleRequestRepository extends JpaRepository<RoleRequest, Long> {
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("select r from RoleRequest r where r.id = :id")
+    java.util.Optional<RoleRequest> findLockedById(@org.springframework.data.repository.query.Param("id") Long id);
+
     List<RoleRequest> findByUserOrderByCreatedAtDesc(User user);
 
     List<RoleRequest> findByUserIdOrderByCreatedAtDesc(Long userId);

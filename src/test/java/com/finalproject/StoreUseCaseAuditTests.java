@@ -41,9 +41,9 @@ class StoreUseCaseAuditTests {
     Category category;
 
     @BeforeEach void setup() {
-        owner = account("audit_owner", Role.VENDOR);
-        partner = account("audit_partner", Role.VENDOR);
-        User otherOwner = account("audit_other", Role.VENDOR);
+        owner = account("audit_owner", Role.MANAGER);
+        partner = account("audit_partner", Role.MANAGER);
+        User otherOwner = account("audit_other", Role.MANAGER);
         store = stores.save(Store.builder().name("Audit flower shop").owner(owner)
                 .address("123 Test street").phone("0901234567").status(true).isOpen(true)
                 .eWallet(new BigDecimal("200000")).build());
@@ -51,7 +51,7 @@ class StoreUseCaseAuditTests {
                 .status(true).isOpen(true).build());
         owner.setStore(store); users.save(owner);
         partner.setStore(store); users.save(partner);
-        foreignStaff = account("audit_foreign_staff", Role.STAFF);
+        foreignStaff = account("audit_foreign_staff", Role.MANAGER);
         foreignStaff.setStore(foreignStore); users.save(foreignStaff);
         commission = commissions.save(Commission.builder().name("AUDIT_COMMISSION").cost(BigDecimal.TEN).build());
         category = categories.save(Category.builder().name("Audit category").build());
@@ -89,7 +89,7 @@ class StoreUseCaseAuditTests {
         routes.put("/manager/stores/create", "sidebarStores");
         routes.put("/manager/stores/edit/" + store.getId(), "sidebarStores");
         for (var route : routes.entrySet()) {
-            String html = mvc.perform(get(route.getKey()).with(user(owner.getUsername()).roles("VENDOR")))
+            String html = mvc.perform(get(route.getKey()).with(user(owner.getUsername()).roles("MANAGER")))
                     .andExpect(status().isOk()).andExpect(model().attribute("managerStore", store))
                     .andReturn().getResponse().getContentAsString();
             assertThat(html).as(route.getKey()).contains("/css/manager-layout.css", "/js/manager-layout.js", "Audit flower shop");
@@ -106,7 +106,7 @@ class StoreUseCaseAuditTests {
     }
 
     @Test void uc017CreatesStoreWithSelectedCommission() throws Exception {
-        mvc.perform(post("/manager/stores/create").with(user(owner.getUsername()).roles("VENDOR")).with(csrf())
+        mvc.perform(post("/manager/stores/create").with(user(owner.getUsername()).roles("MANAGER")).with(csrf())
                 .param("name", "New audit shop").param("phone", "0901234567").param("address", "123 Test street")
                 .param("commissionId", commission.getId().toString()))
                 .andExpect(redirectedUrl("/manager/dashboard")).andExpect(flash().attributeExists("successMessage"));
@@ -116,7 +116,7 @@ class StoreUseCaseAuditTests {
     }
     @Test void uc017RejectsInvalidPhoneWithoutCreatingStore() throws Exception {
         long before = stores.count();
-        mvc.perform(post("/manager/stores/create").with(user(owner.getUsername()).roles("VENDOR")).with(csrf())
+        mvc.perform(post("/manager/stores/create").with(user(owner.getUsername()).roles("MANAGER")).with(csrf())
                 .param("name", "Invalid audit shop").param("phone", "123").param("address", "123 Test street"))
                 .andExpect(redirectedUrl("/manager/stores/create")).andExpect(flash().attributeExists("errorMessage"));
         assertThat(stores.count()).isEqualTo(before);
@@ -124,22 +124,22 @@ class StoreUseCaseAuditTests {
     @Test void uc017MustRejectDeletedCommission() throws Exception {
         commission.setIsDeleted(true); commissions.save(commission);
         long before = stores.count();
-        mvc.perform(post("/manager/stores/create").with(user(owner.getUsername()).roles("VENDOR")).with(csrf())
+        mvc.perform(post("/manager/stores/create").with(user(owner.getUsername()).roles("MANAGER")).with(csrf())
                 .param("name", "Deleted commission shop").param("phone", "0901234567").param("address", "123 Test street")
                 .param("commissionId", commission.getId().toString()));
         assertThat(stores.count()).as("Deleted commission must not create a store").isEqualTo(before);
     }
     @Test void uc017RequiresLoginAndCsrf() throws Exception {
         mvc.perform(get("/manager/stores/create")).andExpect(status().is3xxRedirection());
-        mvc.perform(post("/manager/stores/create").with(user(owner.getUsername()).roles("VENDOR")))
+        mvc.perform(post("/manager/stores/create").with(user(owner.getUsername()).roles("MANAGER")))
                 .andExpect(status().isForbidden());
     }
     @Test void uc018ListsOnlyAccessibleStoresAndSupportsPaging() throws Exception {
         stores.save(Store.builder().name("Second owned store").owner(owner).address("789 Test street").build());
-        mvc.perform(get("/manager/stores").with(user(owner.getUsername()).roles("VENDOR")).param("size", "1").param("page", "1"))
+        mvc.perform(get("/manager/stores").with(user(owner.getUsername()).roles("MANAGER")).param("size", "1").param("page", "1"))
                 .andExpect(status().isOk()).andExpect(model().attribute("totalElements", 2))
                 .andExpect(model().attribute("totalPages", 2)).andExpect(model().attribute("currentPage", 1));
-        mvc.perform(get("/manager/stores/switch/" + foreignStore.getId()).with(user(owner.getUsername()).roles("VENDOR")))
+        mvc.perform(get("/manager/stores/switch/" + foreignStore.getId()).with(user(owner.getUsername()).roles("MANAGER")))
                 .andExpect(status().isForbidden());
     }
     @Test void uc018BanDisablesStoreAndProducts() throws Exception {
@@ -158,71 +158,71 @@ class StoreUseCaseAuditTests {
                 .as("License must not silently sell a previously stored product").isFalse();
     }
     @Test void uc019FeaturedImageAddEditDelete() throws Exception {
-        mvc.perform(post("/manager/profile/featured/add").with(user(owner.getUsername()).roles("VENDOR")).with(csrf())
+        mvc.perform(post("/manager/profile/featured/add").with(user(owner.getUsername()).roles("MANAGER")).with(csrf())
                 .param("imageUrl", "https://example.com/flower.png")).andExpect(flash().attributeExists("successMessage"));
         assertThat(store.getFeaturedImages()).contains("flower.png");
-        mvc.perform(post("/manager/profile/featured/edit").with(user(owner.getUsername()).roles("VENDOR")).with(csrf())
+        mvc.perform(post("/manager/profile/featured/edit").with(user(owner.getUsername()).roles("MANAGER")).with(csrf())
                 .param("index", "0").param("editUrl", "https://example.com/rose.png"));
         assertThat(store.getFeaturedImages()).contains("rose.png").doesNotContain("flower.png");
-        mvc.perform(post("/manager/profile/featured/delete").with(user(owner.getUsername()).roles("VENDOR")).with(csrf()).param("index", "0"));
+        mvc.perform(post("/manager/profile/featured/delete").with(user(owner.getUsername()).roles("MANAGER")).with(csrf()).param("index", "0"));
         assertThat(store.getFeaturedImages()).isEmpty();
     }
     @Test void uc019RejectsInvalidImageFile() throws Exception {
         mvc.perform(multipart("/manager/profile/avatar")
                 .file(new MockMultipartFile("avatarFile", "bad.txt", "text/plain", "not an image".getBytes()))
-                .with(user(owner.getUsername()).roles("VENDOR")).with(csrf()))
+                .with(user(owner.getUsername()).roles("MANAGER")).with(csrf()))
                 .andExpect(flash().attributeExists("errorMessage"));
         assertThat(store.getAvatar()).isNull();
     }
     @Test void uc019BasicInfoSaveMustPreserveOpenStatus() throws Exception {
-        mvc.perform(post("/manager/profile/info").with(user(owner.getUsername()).roles("VENDOR")).with(csrf())
+        mvc.perform(post("/manager/profile/info").with(user(owner.getUsername()).roles("MANAGER")).with(csrf())
                 .param("name", "Renamed audit shop").param("bio", "Updated bio").param("phone", "0901234567"))
                 .andExpect(flash().attributeExists("successMessage"));
         assertThat(store.getName()).isEqualTo("Renamed audit shop");
         assertThat(store.getIsOpen()).as("Basic info form does not submit isOpen; saving must preserve it").isTrue();
     }
     @Test void uc020OwnerAddsAndRemovesCandidate() throws Exception {
-        User candidate = account("audit_candidate", Role.CUSTOMER);
-        mvc.perform(post("/manager/staff/add").with(user(owner.getUsername()).roles("VENDOR")).with(csrf())
+        User candidate = account("audit_candidate", Role.USER);
+        mvc.perform(post("/manager/staff/add").with(user(owner.getUsername()).roles("MANAGER")).with(csrf())
                 .param("selectedUserIds", candidate.getId().toString())).andExpect(flash().attributeExists("successMessage"));
         assertThat(candidate.getStore().getId()).isEqualTo(store.getId());
-        assertThat(candidate.getRole()).isEqualTo(Role.STAFF);
-        mvc.perform(post("/manager/staff/remove/" + candidate.getId()).with(user(owner.getUsername()).roles("VENDOR")).with(csrf()));
+        assertThat(candidate.getRole()).isEqualTo(Role.MANAGER);
+        mvc.perform(post("/manager/staff/remove/" + candidate.getId()).with(user(owner.getUsername()).roles("MANAGER")).with(csrf()));
         assertThat(candidate.getStore()).isNull();
     }
     @Test void uc020PartnerCannotAddStaffAndCanLeave() throws Exception {
-        mvc.perform(post("/manager/staff/add").with(user(partner.getUsername()).roles("VENDOR")).with(csrf())
+        mvc.perform(post("/manager/staff/add").with(user(partner.getUsername()).roles("MANAGER")).with(csrf())
                 .param("selectedUserIds", foreignStaff.getId().toString())).andExpect(status().isForbidden());
-        mvc.perform(post("/manager/staff/out-shop").with(user(partner.getUsername()).roles("VENDOR")).with(csrf()))
+        mvc.perform(post("/manager/staff/out-shop").with(user(partner.getUsername()).roles("MANAGER")).with(csrf()))
                 .andExpect(redirectedUrl("/manager/stores"));
         assertThat(partner.getStore()).isNull();
     }
     @Test void uc020MustNotStealStaffFromAnotherStore() throws Exception {
-        mvc.perform(post("/manager/staff/add").with(user(owner.getUsername()).roles("VENDOR")).with(csrf())
+        mvc.perform(post("/manager/staff/add").with(user(owner.getUsername()).roles("MANAGER")).with(csrf())
                 .param("selectedUserIds", foreignStaff.getId().toString()));
         assertThat(foreignStaff.getStore().getId()).as("Foreign staff assignment must remain intact").isEqualTo(foreignStore.getId());
     }
     @Test void uc021CreatesEditsAndStoresProduct() throws Exception {
-        mvc.perform(post("/manager/products/add").with(user(owner.getUsername()).roles("VENDOR")).with(csrf())
+        mvc.perform(post("/manager/products/add").with(user(owner.getUsername()).roles("MANAGER")).with(csrf())
                 .param("name", "Created audit flower").param("categoryId", category.getId().toString())
                 .param("priceBuy", "100000").param("initialStock", "5")).andExpect(flash().attributeExists("successMessage"));
         Product p = products.findByStoreIdOrderByCreatedAtDesc(store.getId()).stream().filter(x -> x.getName().equals("Created audit flower")).findFirst().orElseThrow();
-        mvc.perform(post("/manager/products/update/" + p.getId()).with(user(owner.getUsername()).roles("VENDOR")).with(csrf())
+        mvc.perform(post("/manager/products/update/" + p.getId()).with(user(owner.getUsername()).roles("MANAGER")).with(csrf())
                 .param("name", "Edited audit flower").param("categoryId", category.getId().toString()).param("priceBuy", "120000"));
         assertThat(p.getName()).isEqualTo("Edited audit flower");
-        mvc.perform(post("/manager/products/toggle-selling/" + p.getId()).with(user(owner.getUsername()).roles("VENDOR")).with(csrf()));
+        mvc.perform(post("/manager/products/toggle-selling/" + p.getId()).with(user(owner.getUsername()).roles("MANAGER")).with(csrf()));
         assertThat(p.getIsSelling()).isFalse();
     }
     @Test void uc021SellingTabMustExcludeStoredProducts() throws Exception {
         product("Selling audit flower", true); product("Stored audit flower", false);
-        var result = mvc.perform(get("/manager/products").with(user(owner.getUsername()).roles("VENDOR"))
+        var result = mvc.perform(get("/manager/products").with(user(owner.getUsername()).roles("MANAGER"))
                 .param("tab", "selling").param("size", "1").param("page", "0"))
                 .andExpect(status().isOk()).andReturn();
         var displayed = (List<?>) result.getModelAndView().getModel().get("products");
         assertThat(displayed).as("Selling tab with size=1 must only return the selling product").hasSize(1);
     }
     @Test void uc023MustNotAcceptStoredPasswordHashAsConfirmation() throws Exception {
-        mvc.perform(post("/manager/wallet/withdraw").with(user(owner.getUsername()).roles("VENDOR")).with(csrf())
+        mvc.perform(post("/manager/wallet/withdraw").with(user(owner.getUsername()).roles("MANAGER")).with(csrf())
                 .param("amount", "50000").param("password", owner.getPassword())
                 .param("bankName", "Test bank").param("accountNumber", "123456789").param("accountHolder", "Audit owner"));
         assertThat(store.getEWallet()).as("A password hash is not a valid plaintext password").isEqualByComparingTo("200000");
@@ -234,7 +234,7 @@ class StoreUseCaseAuditTests {
         String key = java.util.UUID.randomUUID().toString();
         long before = stores.count();
         for (int i = 0; i < 2; i++) mvc.perform(post("/manager/stores/create")
-                .with(user(owner.getUsername()).roles("VENDOR")).with(csrf())
+                .with(user(owner.getUsername()).roles("MANAGER")).with(csrf())
                 .param("name", "Idempotent store").param("phone", "0901234567").param("address", "123 Test street")
                 .param("commissionId", commission.getId().toString()).param("requestId", key))
                 .andExpect(flash().attributeExists("successMessage"));
@@ -243,12 +243,12 @@ class StoreUseCaseAuditTests {
     }
 
     @Test void uc020PartnerCanJoinMultipleStoresWithoutMovingLegacyAssignment() throws Exception {
-        mvc.perform(post("/manager/staff/add").with(user(owner.getUsername()).roles("VENDOR")).with(csrf())
+        mvc.perform(post("/manager/staff/add").with(user(owner.getUsername()).roles("MANAGER")).with(csrf())
                 .param("selectedUserIds", partner.getId().toString()).param("role", "PARTNER"))
                 .andExpect(flash().attributeExists("successMessage"));
         User otherOwner = foreignStore.getOwner();
         otherOwner.setStore(foreignStore); users.save(otherOwner);
-        mvc.perform(post("/manager/staff/add").with(user(otherOwner.getUsername()).roles("VENDOR")).with(csrf())
+        mvc.perform(post("/manager/staff/add").with(user(otherOwner.getUsername()).roles("MANAGER")).with(csrf())
                 .param("selectedUserIds", partner.getId().toString()).param("role", "PARTNER"))
                 .andExpect(flash().attributeExists("successMessage"));
         assertThat(memberships.findByUserIdAndActiveTrue(partner.getId())).hasSize(2);
@@ -256,8 +256,8 @@ class StoreUseCaseAuditTests {
     }
 
     @Test void uc020MixedInvalidBatchMustNotPartiallyAssignStaff() throws Exception {
-        User candidate = account("audit_batch", Role.CUSTOMER);
-        mvc.perform(post("/manager/staff/add").with(user(owner.getUsername()).roles("VENDOR")).with(csrf())
+        User candidate = account("audit_batch", Role.USER);
+        mvc.perform(post("/manager/staff/add").with(user(owner.getUsername()).roles("MANAGER")).with(csrf())
                 .param("selectedUserIds", candidate.getId().toString(), foreignStaff.getId().toString()))
                 .andExpect(flash().attributeExists("errorMessage"));
         assertThat(candidate.getStore()).isNull();
@@ -269,12 +269,12 @@ class StoreUseCaseAuditTests {
         var first = new org.springframework.mock.web.MockHttpSession();
         var second = new org.springframework.mock.web.MockHttpSession();
         mvc.perform(post("/manager/stores/switch/" + foreignStore.getId()).with(csrf()).session(first)
-                .with(user(partner.getUsername()).roles("VENDOR"))).andExpect(status().is3xxRedirection());
+                .with(user(partner.getUsername()).roles("MANAGER"))).andExpect(status().is3xxRedirection());
         assertThat(first.getAttribute("activeStoreId")).isEqualTo(foreignStore.getId());
         assertThat(second.getAttribute("activeStoreId")).isNull();
         var member = memberships.findByUserIdAndStoreId(partner.getId(), foreignStore.getId()).orElseThrow();
         member.setActive(false); memberships.save(member);
-        mvc.perform(get("/manager/dashboard").session(first).with(user(partner.getUsername()).roles("VENDOR")))
+        mvc.perform(get("/manager/dashboard").session(first).with(user(partner.getUsername()).roles("MANAGER")))
                 .andExpect(model().attribute("store", store));
         assertThat(first.getAttribute("activeStoreId")).isNull();
     }
@@ -282,7 +282,7 @@ class StoreUseCaseAuditTests {
     @Test void uc023RetryDebitsExactlyOnce() throws Exception {
         String key = java.util.UUID.randomUUID().toString();
         for (int i = 0; i < 2; i++) mvc.perform(post("/manager/wallet/withdraw")
-                .with(user(owner.getUsername()).roles("VENDOR")).with(csrf())
+                .with(user(owner.getUsername()).roles("MANAGER")).with(csrf())
                 .param("amount", "50000").param("password", "auditPassword123")
                 .param("bankName", "Bank").param("accountNumber", "123456789").param("accountHolder", "Owner")
                 .param("requestId", key)).andExpect(flash().attributeExists("successMessage"));
@@ -290,7 +290,7 @@ class StoreUseCaseAuditTests {
     }
 
     @Test void uc023PartnerCannotWithdrawEvenWithOwnCorrectPassword() throws Exception {
-        mvc.perform(post("/manager/wallet/withdraw").with(user(partner.getUsername()).roles("VENDOR")).with(csrf())
+        mvc.perform(post("/manager/wallet/withdraw").with(user(partner.getUsername()).roles("MANAGER")).with(csrf())
                 .param("amount", "50000").param("password", "auditPassword123")
                 .param("bankName", "Bank").param("accountNumber", "123456789").param("accountHolder", "Partner"));
         assertThat(store.getEWallet()).isEqualByComparingTo("200000");
@@ -299,15 +299,15 @@ class StoreUseCaseAuditTests {
     @Test void uc019RejectsFileWithSpoofedImageContentType() throws Exception {
         mvc.perform(multipart("/manager/profile/avatar")
                 .file(new MockMultipartFile("avatarFile", "fake.png", "image/png", "not an image".getBytes()))
-                .with(user(owner.getUsername()).roles("VENDOR")).with(csrf()))
+                .with(user(owner.getUsername()).roles("MANAGER")).with(csrf()))
                 .andExpect(flash().attributeExists("errorMessage"));
         assertThat(store.getAvatar()).isNull();
     }
 
     @Test void uc018ClampsOutOfRangePageAndRejectsUnboundedSize() throws Exception {
-        mvc.perform(get("/manager/stores").with(user(owner.getUsername()).roles("VENDOR")).param("page", "999"))
+        mvc.perform(get("/manager/stores").with(user(owner.getUsername()).roles("MANAGER")).param("page", "999"))
                 .andExpect(status().isOk()).andExpect(model().attribute("currentPage", 0));
-        mvc.perform(get("/manager/stores").with(user(owner.getUsername()).roles("VENDOR")).param("size", "10001"))
+        mvc.perform(get("/manager/stores").with(user(owner.getUsername()).roles("MANAGER")).param("size", "10001"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -340,7 +340,7 @@ class StoreUseCaseAuditTests {
     @Test void uc025DateOnlyHistoryMustNotAppearAsMidnightRegistration() {
         long before = analytics.getNewUsersChart("hour").getTotal().longValueExact();
         users.save(User.builder().username("audit_date_only").email("date_only@test.local")
-                .password("unused").fullName("Audit sample").role(Role.CUSTOMER).createdDate(java.time.LocalDate.now(clock)).build());
+                .password("unused").fullName("Audit sample").role(Role.USER).createdDate(java.time.LocalDate.now(clock)).build());
         assertThat(analytics.getNewUsersChart("hour").getTotal().longValueExact()).isEqualTo(before);
         assertThat(analytics.getNewUsersChart("day").getTotal()).isGreaterThan(BigDecimal.ZERO);
     }
@@ -349,7 +349,7 @@ class StoreUseCaseAuditTests {
         var now = java.time.LocalDateTime.now(clock);
         var bulk = new java.util.ArrayList<User>();
         for (int i = 0; i < 1001; i++) bulk.add(User.builder().username("audit_sample_" + i).email("sample_" + i + "@test.local")
-                .password("unused").fullName("Audit sample").role(Role.CUSTOMER).createdAt(now).createdDate(now.toLocalDate()).creationTimeKnown(true).build());
+                .password("unused").fullName("Audit sample").role(Role.USER).createdAt(now).createdDate(now.toLocalDate()).creationTimeKnown(true).build());
         users.saveAllAndFlush(bulk);
         assertThat(analytics.getNewUsersChart("hour").getTotal()).isEqualByComparingTo("1000");
     }

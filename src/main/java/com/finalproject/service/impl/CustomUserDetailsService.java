@@ -26,17 +26,16 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("Email, tên đăng nhập hoặc mật khẩu không chính xác: " + cleanInput));
 
         boolean isAdmin = (user.getRole() == com.finalproject.enums.Role.ADMIN)
-                || (user.getRoles() != null && user.getRoles().contains(com.finalproject.enums.Role.ADMIN))
-                || "admin".equalsIgnoreCase(user.getUsername());
+                || (user.getRoles() != null && user.getRoles().contains(com.finalproject.enums.Role.ADMIN));
 
         java.util.Set<org.springframework.security.core.GrantedAuthority> authorities = new java.util.HashSet<>();
 
         if (isAdmin) {
-            // ADMIN: Không được tự động cấp ROLE_CUSTOMER (Tách bạch quản trị và mua hàng)
+            // ADMIN: Không được tự động cấp ROLE_USER (Tách bạch quản trị và mua hàng)
             authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         } else {
             // Người dùng thông thường (Customer, Vendor, Manager) giữ quyền Khách hàng
-            authorities.add(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
+            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
             if (user.getRole() != null) {
                 authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
             }

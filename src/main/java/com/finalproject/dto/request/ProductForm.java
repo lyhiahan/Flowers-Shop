@@ -19,6 +19,8 @@ import java.util.List;
 public class ProductForm {
 
     private Long id;
+    private List<Long> styleValueIds;
+    private boolean attributesSubmitted;
 
     @NotNull(message = "Vui lòng chọn danh mục sản phẩm")
     private Long categoryId;
