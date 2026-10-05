@@ -38,3 +38,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Archives and export packages
+*.zip
+*.rar
+*.7z
+*.tar.gz
