@@ -25,6 +25,7 @@ public class ManagerProductController {
     private final com.finalproject.repository.StoreInventoryRepository inventories;
     private final com.finalproject.service.InventoryService inventoryService;
     private final CategoryRepository categoryRepository;
+    private final com.finalproject.service.CategoryService categoryService;
     private final com.finalproject.service.ProductAttributeService attributes;
     private final UserRepository userRepository;
     private final com.finalproject.service.StoreAccessService storeAccess;
@@ -93,7 +94,7 @@ public class ManagerProductController {
         Store store = storeAccess.assignedStore();
         storeAccess.requireManager(store);
         Category category = categoryRepository.findById(categoryId).orElseThrow();
-        if (Boolean.TRUE.equals(category.getIsDeleted())) throw new IllegalArgumentException("Danh mục đã bị xóa.");
+        if (!categoryService.visible(category)) throw new IllegalArgumentException("Danh mục hoặc danh mục cha đã bị ẩn.");
 
         validatePrice(priceBuy, promotionalPrice);
         validateName(name);
@@ -143,7 +144,7 @@ public class ManagerProductController {
         if (Boolean.TRUE.equals(p.getIsDeleted())) throw new IllegalArgumentException("Sản phẩm đã bị xóa.");
         storeAccess.requireManager(p.getStore());
         Category cat = categoryRepository.findById(categoryId).orElseThrow();
-        if (Boolean.TRUE.equals(cat.getIsDeleted())) throw new IllegalArgumentException("Danh mục đã bị xóa.");
+        if (!categoryService.visible(cat)) throw new IllegalArgumentException("Danh mục hoặc danh mục cha đã bị ẩn.");
         validatePrice(priceBuy, promotionalPrice);
         validateName(name);
         if (imageUrl != null && !imageUrl.isBlank() && !com.finalproject.utils.ImageUrls.valid(imageUrl)) throw new IllegalArgumentException("URL ảnh không hợp lệ.");

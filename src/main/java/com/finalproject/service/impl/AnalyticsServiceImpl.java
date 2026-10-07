@@ -46,13 +46,13 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         org.springframework.data.jpa.domain.Specification<Order> scope = (root, query, cb) -> storeId == null ? cb.conjunction() : cb.equal(root.get("pickupStore").get("id"), storeId);
         var range = scope.and((root, query, cb) -> cb.and(cb.greaterThanOrEqualTo(root.get("createdAt"), start), cb.lessThan(root.get("createdAt"), end)));
         var sorted = org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt", "id"));
-        var sampled = orders.findAll(range, sorted);
+        var sampled = orders.findAll(range, sorted.getSort());
         var latest = orders.findAll(scope, sorted).getContent();
         var orderPoints = sampled.stream().map(o -> new Point(o.getCreatedAt(), BigDecimal.ONE)).toList();
         var revenuePoints = sampled.stream().filter(this::recognized).map(o -> new Point(o.getCreatedAt(), o.getTotalAmount())).toList();
         var quantityPoints = sampled.stream().filter(this::recognized).map(o -> new Point(o.getCreatedAt(), BigDecimal.valueOf((o.getOrderDetails() == null ? java.util.List.<com.finalproject.entity.OrderDetail>of() : o.getOrderDetails()).stream().mapToLong(d -> d.getQuantity() == null ? 0 : d.getQuantity()).sum()))).toList();
         var revenue = chart(timeframe, revenuePoints); var orderChart = chart(timeframe, orderPoints); var quantityChart = chart(timeframe, quantityPoints);
-        var scopeProducts = products.findAll((root, query, cb) -> cb.and(cb.isFalse(root.get("isDeleted")), storeId == null ? cb.conjunction() : cb.equal(root.get("store").get("id"), storeId)),
+        var scopeProducts = products.findAll((root, query, cb) -> cb.and(cb.or(cb.isFalse(root.get("isDeleted")),cb.isNull(root.get("isDeleted"))), storeId == null ? cb.conjunction() : cb.equal(root.get("store").get("id"), storeId)),
                 org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "sold", "id")));
         var result = new HashMap<String, Object>();
         result.put("totalProductsCount", scopeProducts.getTotalElements()); result.put("totalOrdersCount", orders.count(scope));
@@ -62,8 +62,8 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         result.put("chartUnit", "orders".equals(criteria) ? "Đơn hàng" : "products".equals(criteria) ? "Số sản phẩm bán" : "Doanh thu (VNĐ)");
         result.put("flowerRevenue", orders.recognizedRevenue(storeId, start, end));
         result.put("topProducts", details.rankSales(storeId, start, end, org.springframework.data.domain.PageRequest.of(0, 1000))); result.put("recentOrders", latest);
-        result.put("sampleCount", sampled.getNumberOfElements()); result.put("rangeOrdersCount", sampled.getTotalElements());
-        result.put("hasRevenueData", sampled.hasContent()); result.put("dataLoadError", false);
+        result.put("sampleCount", sampled.size()); result.put("rangeOrdersCount", orders.count(range));
+        result.put("hasRevenueData", !sampled.isEmpty()); result.put("dataLoadError", false);
         return result;
     }
 
@@ -91,7 +91,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
     @Override
     public ChartSeriesDto getNewUsersChart(String timeframe) {
-        var newest = users.findAll((root, query, cb) -> cb.and(cb.greaterThanOrEqualTo(root.get("createdAt"), rangeStart(timeframe)), cb.lessThan(root.get("createdAt"), rangeEnd(timeframe)), "hour".equals(timeframe) ? cb.isTrue(root.get("creationTimeKnown")) : cb.conjunction()), org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt", "id")));
+        var newest = users.findAll((root, query, cb) -> cb.and(cb.greaterThanOrEqualTo(root.get("createdAt"), rangeStart(timeframe)), cb.lessThan(root.get("createdAt"), rangeEnd(timeframe)), "hour".equals(timeframe) ? cb.isTrue(root.get("creationTimeKnown")) : cb.conjunction()), org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt", "id"));
         return chart(timeframe, newest.stream().filter(u -> u.getCreatedAt() != null)
                 .filter(u -> !"hour".equals(timeframe) || Boolean.TRUE.equals(u.getCreationTimeKnown()))
                 .map(u -> new Point(u.getCreatedAt(), BigDecimal.ONE)).toList());
@@ -99,8 +99,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
     @Override
     public ChartSeriesDto getNewStoresChart(String timeframe) {
-        return chart(timeframe, stores.findAll((root, query, cb) -> cb.and(cb.greaterThanOrEqualTo(root.get("createdAt"), rangeStart(timeframe)), cb.lessThan(root.get("createdAt"), rangeEnd(timeframe))), org.springframework.data.domain.PageRequest.of(0, 1000,
-                org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt", "id"))).stream()
+        return chart(timeframe, stores.findAll((root, query, cb) -> cb.and(cb.greaterThanOrEqualTo(root.get("createdAt"), rangeStart(timeframe)), cb.lessThan(root.get("createdAt"), rangeEnd(timeframe))), org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt", "id")).stream()
                 .filter(s -> s.getCreatedAt() != null).map(s -> new Point(s.getCreatedAt(), BigDecimal.ONE)).toList());
     }
 

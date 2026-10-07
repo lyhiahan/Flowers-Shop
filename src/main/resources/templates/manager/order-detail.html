@@ -272,7 +272,7 @@
                         </div>
 
                         <!-- Xác nhận thanh toán chuyển khoản nếu cần -->
-                        <form th:if="${order.paymentMethod == 'BANK_TRANSFER' and order.paymentStatus == 'UNPAID' and order.status.name() != 'CANCELLED'}"
+                        <form th:if="${order.paymentMethod == 'BANK_TRANSFER' and order.paymentStatus == 'UNPAID' and (order.status.name() != 'CANCELLED' or order.paymentExpired == true)}"
                               th:action="@{/manager/orders/confirm-payment/{id}(id=${order.id})}"
                               method="post" onsubmit="return confirm('Bạn đã kiểm tra và nhận đủ tiền chuyển khoản?');">
                             <input type="hidden" name="redirect" th:value="'/manager/orders/' + ${order.id}">

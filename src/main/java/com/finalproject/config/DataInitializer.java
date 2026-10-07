@@ -37,6 +37,11 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        if (userRepository.count() > 0 || storeRepository.count() > 0 || productRepository.count() > 0) {
+            initOrUpdateStylesAndValues();
+            productSeederService.seedMissingProductsForStores();
+            return;
+        }
         // 1. Tạo hoặc cập nhật 3 chi nhánh mẫu sang tiếng Việt thuần
         Store storeA = storeRepository.findFirstByNameOrderByIdAsc("Chi Nhánh Bến Thành (Quận 1)")
                 .orElseGet(() -> storeRepository.findFirstByNameOrderByIdAsc("Bloom Flower - Chi Nhánh Bến Thành (Quận 1)")
@@ -238,30 +243,6 @@ public class DataInitializer implements CommandLineRunner {
             storeLevelRepository.save(StoreLevel.builder().name("Tiêu chuẩn").minPoint(0).discount(BigDecimal.ZERO).isDeleted(false).build());
             storeLevelRepository.save(StoreLevel.builder().name("Cửa hàng uy tín").minPoint(10000000).discount(new BigDecimal("5")).isDeleted(false).build());
             storeLevelRepository.save(StoreLevel.builder().name("Cửa hàng xuất sắc").minPoint(30000000).discount(new BigDecimal("10")).isDeleted(false).build());
-        } else {
-            // Đồng bộ dữ liệu cũ nếu chưa chuẩn hóa
-            for (StoreLevel sl : storeLevelRepository.findAll()) {
-                String n = sl.getName().toLowerCase();
-                if (n.contains("chuẩn") || (sl.getMinPoint() != null && sl.getMinPoint() == 0)) {
-                    if (!sl.getName().equals("Tiêu chuẩn") || sl.getMinPoint() != 0) {
-                        sl.setName("Tiêu chuẩn");
-                        sl.setMinPoint(0);
-                        storeLevelRepository.save(sl);
-                    }
-                } else if (n.contains("bạc") || n.contains("uy tín")) {
-                    sl.setName("Cửa hàng uy tín");
-                    sl.setMinPoint(10000000);
-                    sl.setDiscount(new BigDecimal("5"));
-                    sl.setIsDeleted(false);
-                    storeLevelRepository.save(sl);
-                } else if (n.contains("vàng") || n.contains("xuất sắc")) {
-                    sl.setName("Cửa hàng xuất sắc");
-                    sl.setMinPoint(30000000);
-                    sl.setDiscount(new BigDecimal("10"));
-                    sl.setIsDeleted(false);
-                    storeLevelRepository.save(sl);
-                }
-            }
         }
 
 
@@ -630,21 +611,7 @@ public class DataInitializer implements CommandLineRunner {
      * Đồng bộ và bổ sung an toàn 4 nhóm thuộc tính cốt lõi và các giá trị tiêu chuẩn khớp bộ lọc khách hàng
      */
     public void initOrUpdateStylesAndValues() {
-        // 1. Chuẩn hóa tên các nhóm cũ sang tên mới thống nhất
-        styleRepository.findAll().forEach(s -> {
-            String n = s.getName().trim();
-            if (n.equalsIgnoreCase("Tone màu hoa") || n.equalsIgnoreCase("Tone màu thiết kế")) {
-                s.setName("Màu sắc");
-                styleRepository.save(s);
-            } else if (n.equalsIgnoreCase("Kiểu dáng cắm") || n.equalsIgnoreCase("Kiểu dáng hoa")) {
-                s.setName("Kiểu dáng");
-                styleRepository.save(s);
-            } else if (n.equalsIgnoreCase("Kích cỡ bó hoa") || n.equalsIgnoreCase("Kích cỡ thiết kế")) {
-                s.setName("Kích cỡ");
-                styleRepository.save(s);
-            }
-        });
-
+        // Existing names and deletion status are managed by users; only supplement missing defaults.
         // 2. Định nghĩa 4 nhóm chính và các nhóm bổ sung cùng giá trị chuẩn
         java.util.Map<String, java.util.List<String>> defaultGroups = new java.util.LinkedHashMap<>();
         defaultGroups.put("Loại hoa", java.util.List.of(
@@ -672,12 +639,17 @@ public class DataInitializer implements CommandLineRunner {
             java.util.List<String> values = entry.getValue();
 
             Style style = styleRepository.findAll().stream()
-                    .filter(s -> s.getName().equalsIgnoreCase(groupName))
+                    .filter(s -> s.getName().equalsIgnoreCase(groupName)
+                            || groupName.equals("Kiểu dáng") && java.util.Set.of("kiểu dáng cắm", "kiểu dáng hoa", "phong cách cắm").contains(s.getName().trim().toLowerCase(java.util.Locale.ROOT))
+                            || groupName.equals("Màu sắc") && java.util.Set.of("tone màu hoa", "tone màu thiết kế").contains(s.getName().trim().toLowerCase(java.util.Locale.ROOT))
+                            || groupName.equals("Kích cỡ") && java.util.Set.of("kích cỡ bó hoa", "kích cỡ thiết kế").contains(s.getName().trim().toLowerCase(java.util.Locale.ROOT)))
                     .findFirst()
                     .orElseGet(() -> styleRepository.save(Style.builder()
                             .name(groupName)
                             .isDeleted(false)
                             .build()));
+
+            if (Boolean.TRUE.equals(style.getIsDeleted())) continue;
 
             java.util.List<StyleValue> existingValues = styleValueRepository.findByStyleId(style.getId());
             java.util.Set<String> existingNames = existingValues.stream()

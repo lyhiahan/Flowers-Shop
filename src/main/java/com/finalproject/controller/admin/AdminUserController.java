@@ -221,7 +221,11 @@ public class AdminUserController {
 
             // 3. Chặn xóa nếu đã có đơn hàng (để bảo toàn hóa đơn và kế toán)
             boolean hasOrders = !orderRepository.findByUserIdOrderByCreatedAtDesc(id).isEmpty()
-                    || orderRepository.existsByLegacyDeliveryContactId(id);
+                    || orderRepository.existsByLegacyDeliveryContactId(id)
+                    || ((Number) entityManager.createNativeQuery("SELECT COUNT(*) FROM chat_conversations WHERE customer_id = :uid")
+                        .setParameter("uid", id).getSingleResult()).longValue() > 0
+                    || ((Number) entityManager.createNativeQuery("SELECT COUNT(*) FROM chat_messages WHERE sender_id = :uid")
+                        .setParameter("uid", id).getSingleResult()).longValue() > 0;
             if (hasOrders) {
                 var result = accountClosure.disable(id, true);
                 ra.addFlashAttribute("successMessage", "Đã vô hiệu hóa tài khoản [" + user.getUsername()

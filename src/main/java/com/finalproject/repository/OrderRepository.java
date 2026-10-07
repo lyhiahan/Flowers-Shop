@@ -12,6 +12,15 @@ import java.util.List;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long>, org.springframework.data.jpa.repository.JpaSpecificationExecutor<Order> {
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("""
+        update Order o set o.paymentExpiresAt = case when o.paymentMethod = 'MOMO' then :momoDeadline else :bankDeadline end
+        where o.paymentExpiresAt is null and o.paymentStatus = 'UNPAID'
+        and o.paymentMethod in ('MOMO','BANK_TRANSFER')
+        and o.status in (com.finalproject.enums.OrderStatus.PENDING,com.finalproject.enums.OrderStatus.CONFIRMED)
+        """)
+    int initializeLegacyPaymentDeadlines(@Param("momoDeadline") java.time.LocalDateTime momoDeadline,
+                                        @Param("bankDeadline") java.time.LocalDateTime bankDeadline);
     @Query("""
         select coalesce(sum(o.totalAmount), 0) from Order o
         where (:storeId is null or o.pickupStore.id = :storeId)

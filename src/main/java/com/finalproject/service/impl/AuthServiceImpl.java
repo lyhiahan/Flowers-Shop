@@ -47,7 +47,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public String registerCustomer(RegisterRequest request) {
+    public synchronized String registerCustomer(RegisterRequest request) {
         if (request == null) throw new IllegalArgumentException("Vui lòng điền thông tin đăng ký.");
         // 1. Chuẩn hóa dữ liệu đầu vào
         String username = request.getUsername() != null ? request.getUsername().trim() : "";
@@ -59,6 +59,8 @@ public class AuthServiceImpl implements AuthService {
             phone = "0" + phone.substring(2);
         }
         request.setUsername(username);
+        request.setEmail(email);
+        request.setPhone(phone);
         var validationErrors = validator.validate(request);
         if (!validationErrors.isEmpty()) throw new IllegalArgumentException(validationErrors.stream()
                 .map(jakarta.validation.ConstraintViolation::getMessage).sorted().collect(java.util.stream.Collectors.joining("; ")));
@@ -90,7 +92,9 @@ public class AuthServiceImpl implements AuthService {
                 .resendCount(0)
                 .build();
 
-        pendingRegistrations.put(request.getEmail().toLowerCase().trim(), pending);
+        pendingRegistrations.entrySet().removeIf(entry -> entry.getValue().getExpiredAt().isBefore(now));
+        if (pendingRegistrations.putIfAbsent(request.getEmail().toLowerCase().trim(), pending) != null)
+            throw new IllegalArgumentException("Email đang chờ xác thực. Vui lòng dùng mã đã gửi hoặc yêu cầu gửi lại.");
 
         // 3. Gửi mã OTP xác thực qua email (và in ra console)
         try {
@@ -103,7 +107,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public boolean verifyOtp(String email, String otpCode) {
+    public synchronized boolean verifyOtp(String email, String otpCode) {
+        if (email == null || email.isBlank() || otpCode == null || !otpCode.trim().matches("[0-9]{6}")) return false;
+        otpCode = otpCode.trim();
         String key = email.toLowerCase().trim();
         PendingRegistration pending = pendingRegistrations.get(key);
 
@@ -113,7 +119,9 @@ public class AuthServiceImpl implements AuthService {
                 pendingRegistrations.remove(key);
                 return false;
             }
+            if (pending.getFailedAttempts() >= 5) return false;
             if (!pending.getOtpCode().equals(otpCode)) {
+                pending.setFailedAttempts(pending.getFailedAttempts() + 1);
                 return false;
             }
 
@@ -133,6 +141,7 @@ public class AuthServiceImpl implements AuthService {
                     .phone(req.getPhone())
                     .address(req.getAddress())
                     .role(Role.USER)
+                    .isEmailActive(true)
                     .isActive(true)
                     .createdDate(LocalDate.now(java.time.ZoneId.of("Asia/Bangkok")))
                     .createdAt(java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Bangkok")))
@@ -164,23 +173,28 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // Hỗ trợ trường hợp tài khoản đã tồn tại ở DB nhưng chưa kích hoạt
-        User user = userRepository.findByEmail(email).orElse(null);
+        User user = userRepository.findByEmail(key).orElse(null);
         if (user != null) {
             lockAndRefreshUser(user);
             if (user.isRetiredDeliveryAccount() || Boolean.TRUE.equals(user.getAccountDisabledByAdmin())) return false;
             OtpVerification otp = otpRepository
-                    .findTopByUserIdAndCodeAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
-                            user.getId(), otpCode, OtpType.ACTIVATE_ACCOUNT)
+                    .findTopByUserIdAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
+                            user.getId(), OtpType.ACTIVATE_ACCOUNT)
                     .orElse(null);
 
-            if (otp == null || otp.getExpiredAt().isBefore(LocalDateTime.now())) {
+            if (otp == null || otp.getExpiredAt().isBefore(LocalDateTime.now()) || otp.getFailedAttempts() >= 5) {
                 return false;
             }
 
+            if (!otp.getCode().equals(otpCode)) {
+                otp.setFailedAttempts(otp.getFailedAttempts() + 1);
+                otpRepository.save(otp); return false;
+            }
             otp.setIsUsed(true);
             otpRepository.save(otp);
 
             user.setIsActive(true);
+            user.setIsEmailActive(true);
             userRepository.save(user);
             return true;
         }
@@ -190,16 +204,21 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public String resendOtp(String email) {
+    public synchronized String resendOtp(String email) {
+        if (email == null || email.isBlank()) throw new IllegalArgumentException("Vui lòng nhập email.");
         String key = email.toLowerCase().trim();
         PendingRegistration pending = pendingRegistrations.get(key);
 
         if (pending != null) {
+            if (pending.getCreatedAt().isBefore(LocalDateTime.now().minusMinutes(10))) {
+                pending.setCreatedAt(LocalDateTime.now()); pending.setResendCount(0);
+            }
             if (pending.getResendCount() >= 3) {
                 throw new IllegalStateException("Bạn đã yêu cầu gửi mã quá 3 lần. Vui lòng đăng ký lại.");
             }
             String newCode = OtpUtil.generateOtp();
             pending.setOtpCode(newCode);
+            pending.setFailedAttempts(0);
             pending.setExpiredAt(LocalDateTime.now().plusMinutes(5));
             pending.setResendCount(pending.getResendCount() + 1);
 
@@ -264,7 +283,7 @@ public class AuthServiceImpl implements AuthService {
                         user.getId(), otpCode != null ? otpCode.trim() : "", OtpType.RESET_PASSWORD)
                 .orElse(null);
 
-        return otp != null && !otp.getExpiredAt().isBefore(LocalDateTime.now());
+        return otp != null && otp.getFailedAttempts() < 5 && !otp.getExpiredAt().isBefore(LocalDateTime.now());
     }
 
     @Override

@@ -366,7 +366,7 @@
                                         CHƯA THANH TOÁN
                                     </span>
                                     <!-- Nút xác nhận nhận tiền chuyển khoản -->
-                                    <form th:if="${o.paymentMethod == 'BANK_TRANSFER' and o.paymentStatus == 'UNPAID' and o.status.name() != 'CANCELLED' and o.status.name() != 'REFUNDED' and o.status.name() != 'REFUND_REQUESTED'}"
+                                    <form th:if="${o.paymentMethod == 'BANK_TRANSFER' and o.paymentStatus == 'UNPAID' and (o.status.name() != 'CANCELLED' or o.paymentExpired == true) and o.status.name() != 'REFUNDED' and o.status.name() != 'REFUND_REQUESTED'}"
                                           th:action="@{/admin/orders-manage/confirm-payment/{id}(id=${o.id})}" method="post" 
                                           onsubmit="return confirm('Đã kiểm tra và nhận đủ tiền chuyển khoản cho đơn hàng này?');" class="d-inline m-0">
                                         <button type="submit" class="btn btn-sm btn-outline-success px-2" style="font-size: 12px;">Xác nhận đã nhận tiền</button>

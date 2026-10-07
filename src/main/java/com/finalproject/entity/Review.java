@@ -5,7 +5,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "reviews")
+@Table(name = "reviews") // Filtered unique index is installed by ReviewIntegrityMigration; legacy NULL order IDs remain valid.
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class Review {
     @Id

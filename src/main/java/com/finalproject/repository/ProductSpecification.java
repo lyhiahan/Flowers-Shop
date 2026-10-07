@@ -78,7 +78,10 @@ public class ProductSpecification {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("rating"), minRating));
             }
             if (storeId != null) {
-                predicates.add(cb.equal(root.get("store").get("id"), storeId));
+                var inventory = query.subquery(Long.class);
+                var stock = inventory.from(com.finalproject.entity.StoreInventory.class);
+                inventory.select(stock.get("id")).where(cb.equal(stock.get("product").get("id"), root.get("id")), cb.equal(stock.get("store").get("id"), storeId));
+                predicates.add(cb.or(cb.equal(ownerStore.get("id"), storeId), cb.and(cb.isNull(ownerStore.get("id")), cb.exists(inventory))));
             }
 
             // 1. Lọc theo Kiểu dáng (Bó hoa, Giỏ hoa, Hộp hoa, Bình hoa / Lọ hoa, Chậu hoa, Kệ hoa) - Trong nhóm dùng OR
@@ -144,14 +147,17 @@ public class ProductSpecification {
         var source = any.from(Product.class);
         var assigned = source.join("styleValues");
         any.select(source.get("id")).where(cb.equal(source.get("id"), root.get("id")),
-                cb.lower(assigned.get("style").get("name")).in(groups));
+                cb.lower(assigned.get("style").get("name")).in(groups),
+                cb.or(cb.isFalse(assigned.get("isDeleted")), cb.isNull(assigned.get("isDeleted"))),
+                cb.or(cb.isFalse(assigned.get("style").get("isDeleted")), cb.isNull(assigned.get("style").get("isDeleted"))));
         var matching = query.subquery(Long.class);
         var product = matching.from(Product.class);
         var value = product.join("styleValues");
         matching.select(product.get("id")).where(cb.equal(product.get("id"), root.get("id")),
                 cb.lower(value.get("style").get("name")).in(groups),
                 cb.lower(value.get("name")).in(selected.stream().map(v -> v.trim().toLowerCase(java.util.Locale.ROOT)).toList()),
-                cb.isFalse(value.get("isDeleted")), cb.isFalse(value.get("style").get("isDeleted")));
+                cb.or(cb.isFalse(value.get("isDeleted")), cb.isNull(value.get("isDeleted"))),
+                cb.or(cb.isFalse(value.get("style").get("isDeleted")), cb.isNull(value.get("style").get("isDeleted"))));
         // Explicit attributes take precedence. Legacy products remain searchable until classified.
         return cb.or(cb.exists(matching), cb.and(cb.not(cb.exists(any)), legacy));
     }

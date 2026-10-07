@@ -26,7 +26,8 @@ public class StoreAccessService {
             throw new AccessDeniedException("Vui lòng đăng nhập.");
         }
         return userRepository.findByUsername(authentication.getName())
-                .filter(user -> Boolean.TRUE.equals(user.getIsActive()))
+                .filter(user -> Boolean.TRUE.equals(user.getIsActive()) && !user.isRetiredDeliveryAccount()
+                        && !Boolean.TRUE.equals(user.getAccountDisabledByAdmin()))
                 .orElseThrow(() -> new AccessDeniedException("Tài khoản không hợp lệ."));
     }
 

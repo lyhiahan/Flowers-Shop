@@ -220,7 +220,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
     @Override
     @Transactional
     public void directlyAssignRole(Long userId, Role role, Long storeId, String reason, Long adminId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findLockedById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng."));
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản quản trị viên."));
@@ -258,7 +258,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
     @Override
     @Transactional
     public void directlyRevokeRole(Long userId, Role role, String reason, Long adminId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findLockedById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng."));
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản quản trị viên."));

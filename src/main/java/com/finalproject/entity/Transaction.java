@@ -36,6 +36,9 @@ public class Transaction {
     @Builder.Default
     private String type = "ORDER_PAYMENT"; // ORDER_PAYMENT, WITHDRAWAL, COMMISSION_FEE, REFUND
 
+    @Column(name="earned_points")
+    private Integer earnedPoints;
+
     @org.hibernate.annotations.Nationalized
     @Column(length = 500)
     private String description;

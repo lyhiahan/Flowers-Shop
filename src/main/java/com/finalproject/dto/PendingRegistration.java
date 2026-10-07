@@ -18,4 +18,5 @@ public class PendingRegistration {
     private LocalDateTime expiredAt;
     private LocalDateTime createdAt;
     private int resendCount;
+    private int failedAttempts;
 }

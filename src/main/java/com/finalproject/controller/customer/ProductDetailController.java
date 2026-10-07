@@ -35,8 +35,7 @@ public class ProductDetailController {
         if (!com.finalproject.service.ProductAvailability.isPublic(product)) throw new com.finalproject.exception.ResourceNotFoundException("Sản phẩm không còn được bán.");
 
         // Tăng lượt xem
-        product.setViewCount(product.getViewCount() != null ? product.getViewCount() + 1 : 1);
-        productRepository.save(product);
+        productRepository.incrementViewCount(id);
 
         // Ghi nhận sản phẩm đã xem nếu đã đăng nhập
         boolean isLiked = false;

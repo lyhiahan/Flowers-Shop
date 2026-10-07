@@ -50,6 +50,7 @@ public class VendorDataSeederService {
 
     @Transactional
     public void seedVendorDemoData() {
+        if (userRepository.findByUsername("vendor_flower").isPresent()) return;
         log.info("--- Bắt đầu khởi tạo dữ liệu mẫu cho vai trò MANAGER ---");
 
         final Store storeB = resolveVendorStore();
@@ -58,6 +59,7 @@ public class VendorDataSeederService {
             return;
         }
 
+        if (storeB.getOwner() != null) return;
         // Cập nhật thông tin chi nhánh Phú Mỹ Hưng đầy đủ, sang trọng và chuẩn thương hiệu
         storeB.setName("Chi Nhánh Phú Mỹ Hưng (Quận 7)");
         storeB.setAddress("456 Nguyễn Thị Thập, Tân Hưng, Quận 7, TP.HCM");

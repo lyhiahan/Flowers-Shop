@@ -231,7 +231,7 @@
                                         </a>
 
                                         <!-- Quick actions -->
-                                        <form th:if="${o.paymentMethod == 'BANK_TRANSFER' and o.paymentStatus == 'UNPAID' and o.status.name() != 'CANCELLED'}"
+                                        <form th:if="${o.paymentMethod == 'BANK_TRANSFER' and o.paymentStatus == 'UNPAID' and (o.status.name() != 'CANCELLED' or o.paymentExpired == true)}"
                                               th:action="@{/manager/orders/confirm-payment/{id}(id=${o.id})}"
                                               method="post" class="d-inline" onsubmit="return confirm('Bạn đã kiểm tra và nhận đủ tiền chuyển khoản?');">
                                             <input type="hidden" name="redirect" th:value="@{/manager/orders(tab=${activeTab}, status=${currentStatus}, page=${currentPage})}">

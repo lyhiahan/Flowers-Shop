@@ -36,6 +36,7 @@ public class OrderServiceImpl implements OrderService {
     private final com.finalproject.service.VoucherService voucherService;
     private final com.finalproject.service.NotificationService notificationService;
     private final jakarta.persistence.EntityManager entityManager;
+    private final java.time.Clock clock;
 
     @Override
     @Transactional
@@ -145,7 +146,7 @@ public class OrderServiceImpl implements OrderService {
         String rawRecipientPhone = (recipientPhone != null && !recipientPhone.trim().isEmpty()) ? recipientPhone.trim() : user.getPhone();
         String finalGreeting = (greetingMessage != null && !greetingMessage.trim().isEmpty()) ? greetingMessage.trim() : null;
 
-        String finalRecipientName = extractFirstNonBlank(rawRecipientName);
+        String finalRecipientName = rawRecipientName == null ? null : rawRecipientName.trim();
         String finalRecipientPhone = cleanPhone(rawRecipientPhone);
 
         if (finalDelivDate.isBefore(LocalDate.now())) throw new IllegalArgumentException("Ngày nhận hàng không được ở quá khứ.");
@@ -167,7 +168,7 @@ public class OrderServiceImpl implements OrderService {
                 .recipientName(finalRecipientName)
                 .recipientPhone(finalRecipientPhone)
                 .recipientAddress(finalRecipientAddress)
-                .createdAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now(clock))
                 .build();
 
         // Lock each stock row once, in the same product order for all checkouts.
@@ -239,6 +240,8 @@ public class OrderServiceImpl implements OrderService {
         order.setTotalDeposit(BigDecimal.ZERO);
         order.setPaymentMethod(paymentMethod != null ? paymentMethod.name() : "COD");
         order.setPaymentStatus("UNPAID");
+        if (paymentMethod == PaymentMethod.MOMO) order.setPaymentExpiresAt(LocalDateTime.now(clock).plusMinutes(30));
+        if (paymentMethod == PaymentMethod.BANK_TRANSFER) order.setPaymentExpiresAt(LocalDateTime.now(clock).plusHours(24));
         order.setOrderDetails(orderDetails);
         Order savedOrder = orderRepository.save(order);
 
@@ -352,7 +355,7 @@ public class OrderServiceImpl implements OrderService {
             String address, String greeting, String voucher, LocalDate date, String shipping, Long storeId, Long deliveryId,
             java.time.LocalTime time) {
         if (date == null || time == null) throw new IllegalArgumentException("Vui lòng chọn ngày và giờ nhận hoa.");
-        if (java.time.LocalDateTime.of(date, time).isBefore(java.time.LocalDateTime.now()))
+        if (java.time.LocalDateTime.of(date, time).isBefore(java.time.LocalDateTime.now(clock)))
             throw new IllegalArgumentException("Ngày giờ nhận hoa không được ở quá khứ.");
         var created = checkout(username, ids, method, name, phone, address, greeting, voucher, date, shipping, storeId, deliveryId);
         created.forEach(order -> order.setDeliveryTime(time));
@@ -383,7 +386,7 @@ public class OrderServiceImpl implements OrderService {
             }
             discount = voucherService.calculateDiscount(voucher, subtotal, shippingFee, importTotal);
         }
-        BigDecimal total = subtotal.add(shippingFee).subtract(discount).max(importTotal).max(BigDecimal.ZERO);
+        BigDecimal total = subtotal.add(shippingFee).subtract(discount).max(BigDecimal.ZERO);
         return new com.finalproject.service.CheckoutQuote(subtotal, shippingFee, discount, total, store.getId());
     }
 
@@ -523,7 +526,7 @@ public class OrderServiceImpl implements OrderService {
     public void cancelOrder(String username, Long orderId) {
         Order order = getOrderById(orderId);
         // UC_011: Đơn hàng chỉ có thể hủy trong vòng 1 tiếng sau khi đặt
-        if (order.getCreatedAt() != null && java.time.Duration.between(order.getCreatedAt(), java.time.LocalDateTime.now()).toHours() >= 1) {
+        if (order.getCreatedAt() != null && java.time.Duration.between(order.getCreatedAt(), java.time.LocalDateTime.now(clock)).toHours() >= 1) {
             throw new IllegalStateException("Đơn hàng đã được đặt quá 1 tiếng, không thể hủy!");
         }
         workflow.cancelByCustomer(username, orderId);
@@ -547,11 +550,9 @@ public class OrderServiceImpl implements OrderService {
     private String extractFirstNonBlank(String input) {
         if (input == null) return null;
         if (input.contains(",")) {
-            for (String part : input.split(",")) {
-                if (part != null && !part.trim().isEmpty()) {
-                    return part.trim();
-                }
-            }
+            var values = java.util.Arrays.stream(input.split(",")).map(String::trim).filter(value -> !value.isEmpty()).distinct().toList();
+            if (values.size() == 1) return values.get(0);
+            return input.trim(); // Conflicting numbers must fail validation, never silently select one.
         }
         return input.trim();
     }
@@ -571,6 +572,6 @@ public class OrderServiceImpl implements OrderService {
 
     private boolean isValidPhoneNumber(String phone) {
         if (phone == null) return false;
-        return phone.matches("^0[235789][0-9]{8,9}$");
+        return phone.matches("^0(?:[35789][0-9]{8}|2[0-9]{9})$");
     }
 }

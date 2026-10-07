@@ -20,6 +20,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final StoreRepository storeRepository;
+    private final jakarta.persistence.EntityManager entityManager;
 
     @Override
     @Transactional
@@ -30,8 +31,8 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
         // 1. Kiểm tra validation text tối thiểu 50 ký tự theo yêu cầu đề cương
-        if (content == null || content.trim().length() < 50) {
-            throw new IllegalArgumentException("Bình luận đánh giá sản phẩm bắt buộc phải có tối thiểu 50 ký tự!");
+        if (content == null || (content.trim().length() < 50 || content.trim().length() > 1000)) {
+            throw new IllegalArgumentException("Bình luận đánh giá sản phẩm phải có từ 50 đến 1.000 ký tự!");
         }
 
         if (rating < 1 || rating > 5) {
@@ -43,6 +44,7 @@ public class ReviewServiceImpl implements ReviewService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại"));
 
+        userRepository.findLockedById(userId).orElseThrow();
         Order order = null;
         if (orderId == null) {
             orderId = getEligibleOrderId(userId, productId);
@@ -65,10 +67,17 @@ public class ReviewServiceImpl implements ReviewService {
         if (reviewRepository.existsByUserIdAndProductIdAndOrderId(userId, productId, order.getId())) {
             throw new IllegalStateException("Bạn đã đánh giá sản phẩm trong đơn này.");
         }
+        // Serialize averages and refresh managed rows so rating writes preserve concurrent price/wallet edits.
+        if (order.getPickupStore() != null) {
+            Store branch = storeRepository.findLockedById(order.getPickupStore().getId()).orElseThrow();
+            entityManager.refresh(branch, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        }
+        product = productRepository.findLockedById(productId).orElseThrow();
+        entityManager.refresh(product, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
         Review review = Review.builder()
                 .user(user)
                 .product(product)
-                .store(product.getStore())
+                .store(order.getPickupStore())
                 .order(order)
                 .rating(rating)
                 .content(content.trim())
@@ -84,8 +93,8 @@ public class ReviewServiceImpl implements ReviewService {
         productRepository.save(product);
 
         // Cập nhật rating trung bình của cửa hàng (Post-condition UC_014)
-        if (product.getStore() != null) {
-            Store store = product.getStore();
+        if (order.getPickupStore() != null) {
+            Store store = order.getPickupStore();
             List<Review> storeReviews = reviewRepository.findByStoreIdOrderByCreatedAtDesc(store.getId());
             double storeAvg = storeReviews.stream().mapToInt(Review::getRating).average().orElse(5.0);
             store.setRating(Math.round(storeAvg * 10.0) / 10.0);

@@ -16,18 +16,6 @@ IF COL_LENGTH('dbo.stores', 'avatar_public_id') IS NULL
 IF COL_LENGTH('dbo.stores', 'cover_public_id') IS NULL
     ALTER TABLE dbo.stores ADD cover_public_id NVARCHAR(255) NULL;
 
--- Refresh token table for JWT
-IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'refresh_tokens')
-CREATE TABLE dbo.refresh_tokens (
-    id           BIGINT IDENTITY(1,1) PRIMARY KEY,
-    user_id      BIGINT NOT NULL,
-    token        NVARCHAR(500) NOT NULL UNIQUE,
-    expires_at   DATETIME2 NOT NULL,
-    revoked      BIT NOT NULL DEFAULT 0,
-    created_at   DATETIME2 NOT NULL DEFAULT GETDATE(),
-    CONSTRAINT FK_rt_user FOREIGN KEY (user_id) REFERENCES dbo.users(id)
-);
-
 IF COL_LENGTH('dbo.otp_verifications', 'failed_attempts') IS NULL
     ALTER TABLE dbo.otp_verifications ADD failed_attempts INT NOT NULL CONSTRAINT DF_otp_failed_attempts DEFAULT 0;
 

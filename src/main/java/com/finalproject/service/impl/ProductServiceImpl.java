@@ -30,6 +30,7 @@ public class ProductServiceImpl implements ProductService {
     private final OrderDetailRepository orderDetailRepository;
     private final jakarta.validation.Validator validator;
     private final com.finalproject.service.ProductAttributeService attributes;
+    private final com.finalproject.service.CategoryService categoryService;
 
     private void validateForm(ProductForm form) {
         if (form == null) throw new IllegalArgumentException("Thông tin sản phẩm không hợp lệ.");
@@ -213,6 +214,7 @@ public class ProductServiceImpl implements ProductService {
         Category category = categoryRepository.findById(form.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Danh mục không tồn tại"));
         if (Boolean.TRUE.equals(category.getIsDeleted())) throw new IllegalArgumentException("Danh mục đã bị xóa.");
+        if (!categoryService.visible(category)) throw new IllegalArgumentException("Danh mục cha đã bị ẩn.");
 
         // Chống bán lỗ: Nếu giá bán < giá nhập mà chưa xác nhận bán lỗ thì ném lỗi
         if (form.getPriceBuy().compareTo(form.getImportPrice()) < 0 && !form.isConfirmSellAtLoss()) {
@@ -285,6 +287,7 @@ public class ProductServiceImpl implements ProductService {
         Category category = categoryRepository.findById(form.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Danh mục không tồn tại"));
         if (Boolean.TRUE.equals(category.getIsDeleted())) throw new IllegalArgumentException("Danh mục đã bị xóa.");
+        if (!categoryService.visible(category)) throw new IllegalArgumentException("Danh mục cha đã bị ẩn.");
 
         // Chống bán lỗ: Nếu giá bán < giá nhập mà chưa xác nhận bán lỗ thì ném cảnh báo
         if (form.getPriceBuy() != null && form.getImportPrice() != null

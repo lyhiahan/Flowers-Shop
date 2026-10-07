@@ -41,6 +41,7 @@ class StoreUseCaseAuditTests {
     Category category;
 
     @BeforeEach void setup() {
+        account("admin", Role.ADMIN);
         owner = account("audit_owner", Role.MANAGER);
         partner = account("audit_partner", Role.MANAGER);
         User otherOwner = account("audit_other", Role.MANAGER);
@@ -345,13 +346,14 @@ class StoreUseCaseAuditTests {
         assertThat(analytics.getNewUsersChart("day").getTotal()).isGreaterThan(BigDecimal.ZERO);
     }
 
-    @Test void uc025LimitsNewUserSampleTo1000WithinSelectedRange() {
+    @Test void uc025CountsAllNewUsersWithinSelectedRange() {
         var now = java.time.LocalDateTime.now(clock);
+        var previous = analytics.getNewUsersChart("hour").getTotal();
         var bulk = new java.util.ArrayList<User>();
         for (int i = 0; i < 1001; i++) bulk.add(User.builder().username("audit_sample_" + i).email("sample_" + i + "@test.local")
                 .password("unused").fullName("Audit sample").role(Role.USER).createdAt(now).createdDate(now.toLocalDate()).creationTimeKnown(true).build());
         users.saveAllAndFlush(bulk);
-        assertThat(analytics.getNewUsersChart("hour").getTotal()).isEqualByComparingTo("1000");
+        assertThat(analytics.getNewUsersChart("hour").getTotal()).isEqualByComparingTo(previous.add(new BigDecimal("1001")));
     }
 
     @Autowired com.finalproject.service.CartService cartService;

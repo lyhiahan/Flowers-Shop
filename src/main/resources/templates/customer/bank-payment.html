@@ -8,6 +8,8 @@
         <i class="bi bi-check-circle text-success fs-1"></i><h1 class="h2 mb-0">Đặt hàng thành công</h1>
     </div>
     <p class="text-muted mb-4">Mã đơn hàng #<strong th:text="${transferContent}"></strong></p>
+    <p th:if="${order.paymentExpiresAt != null and order.paymentStatus == 'UNPAID' and (order.status.name() == 'PENDING' or order.status.name() == 'CONFIRMED')}" class="alert alert-warning small">Thanh toán trước <strong th:text="${#temporals.format(order.paymentExpiresAt, 'HH:mm dd/MM/yyyy')}"></strong>. Quá hạn, đơn tự hủy và tồn kho được trả lại chi nhánh.</p>
+    <p th:if="${order.paymentExpired == true}" class="alert alert-danger">Đơn đã hết thời hạn thanh toán. Nếu đã chuyển tiền, liên hệ cửa hàng để đối chiếu và hoàn tiền.</p>
     <div th:if="${errorMessage != null}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
     <div th:if="${bank.mock}" class="alert alert-info small">Giao dịch thử nghiệm, không phát sinh chuyển tiền thật.</div>
     <div th:if="${bankReceipt != null}" class="alert alert-success" role="status">Thanh toán thử nghiệm thành công. Mã giao dịch: <strong th:text="${bankReceipt}"></strong>. Đơn đang chờ cửa hàng xử lý.</div>

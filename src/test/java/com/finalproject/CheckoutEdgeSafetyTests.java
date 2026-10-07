@@ -37,6 +37,7 @@ class CheckoutEdgeSafetyTests {
     @Autowired MockMvc mvc;
     User customer; Store store; Product product; Cart cart; CartItem first;
     @BeforeEach void setup() {
+        users.save(User.builder().username("edge_admin").email("edge-admin@test.local").password("unused").fullName("Admin").role(Role.ADMIN).isActive(true).build());
         customer=users.save(User.builder().username("edge_customer").email("edge@test.local").password("unused")
                 .fullName("Test").role(Role.USER).isActive(true).build());
         store=stores.save(Store.builder().name("Edge store").address("123 Test street").status(true).isOpen(true).build());

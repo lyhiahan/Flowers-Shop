@@ -37,6 +37,8 @@ public class HomeController {
     private final StoreRepository storeRepository;
     private final CartService cartService;
     private final ProductService productService;
+    private final com.finalproject.service.ProductAttributeService attributes;
+    private final com.finalproject.service.CategoryService categoryService;
     private final com.finalproject.repository.UserRepository userRepository;
 
     @GetMapping({"/", "/products", "/search"})
@@ -59,6 +61,12 @@ public class HomeController {
             Model model) {
 
         size = 8;
+        page = Math.max(1, page);
+        if (minPrice != null && minPrice.signum() < 0 || maxPrice != null && maxPrice.signum() < 0
+                || minPrice != null && maxPrice != null && minPrice.compareTo(maxPrice) > 0
+                || minRating != null && (!Double.isFinite(minRating) || minRating < 0 || minRating > 5))
+            throw new IllegalArgumentException("Khoảng giá hoặc điểm đánh giá không hợp lệ.");
+        model.addAttribute("catalogAttributeGroups", attributes.catalogGroups());
         try {
             model.addAttribute("hasActiveFilter", false);
 
@@ -127,7 +135,7 @@ public class HomeController {
 
             if (categoryId != null && categoryId > 0) {
                 selectedCategory = categoryRepository.findById(categoryId).orElse(null);
-                if (selectedCategory == null || Boolean.TRUE.equals(selectedCategory.getIsDeleted())) {
+                if (!categoryService.visible(selectedCategory)) {
                     return "redirect:/products";
                 }
                 if (selectedCategory != null) {
@@ -135,7 +143,7 @@ public class HomeController {
                     filterCategoryIds.add(selectedCategory.getId());
 
                     // Lấy các danh mục con của category được chọn
-                    List<Category> children = categoryRepository.findActiveChildren(selectedCategory.getId());
+                    List<Category> children = categoryService.descendants(selectedCategory.getId());
                     if (children != null && !children.isEmpty()) {
                         subCategories.addAll(children);
                         for (Category child : children) {
@@ -254,10 +262,10 @@ public class HomeController {
             // Discover Categories: Danh mục gốc (parent_id IS NULL)
             List<Category> rootCategories = categoryRepository.findActiveRootCategories();
             if (rootCategories == null || rootCategories.isEmpty()) {
-                rootCategories = categoryRepository.findActiveCategories();
+                rootCategories = categoryRepository.findActiveCategories().stream().filter(categoryService::visible).toList();
             }
             model.addAttribute("discoverCategories", rootCategories);
-            model.addAttribute("categories", categoryRepository.findActiveCategories());
+            model.addAttribute("categories", categoryRepository.findActiveCategories().stream().filter(categoryService::visible).toList());
             model.addAttribute("stores", storeRepository.findByStatusTrue());
 
             if (principal != null) {
@@ -268,7 +276,7 @@ public class HomeController {
             }
 
             return "index";
-        } catch (Throwable t) {
+        } catch (RuntimeException t) {
             log.error("Lỗi khi tải danh sách sản phẩm", t);
             model.addAttribute("loadError", "Không thể tải danh sách mẫu hoa vào lúc này. Vui lòng tải lại trang hoặc thử lại sau.");
             model.addAttribute("products", Collections.emptyList());

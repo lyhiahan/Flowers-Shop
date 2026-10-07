@@ -31,6 +31,8 @@ public class MomoServiceImpl implements MomoService {
     private final NotificationService notifications;
     private final PlatformTransactionManager transactionManager;
     private final EntityManager em;
+    private final java.time.Clock clock;
+    private final OrderWorkflowService workflow;
 
     @Override
     public String createPaymentUrl(Order input, HttpServletRequest request) {
@@ -115,10 +117,23 @@ public class MomoServiceImpl implements MomoService {
             if (!transactionId.equals(attempt.getTransactionId())) throw new IllegalArgumentException("Transaction mismatch");
             return true; // Replayed IPN must not re-send notifications or revive refunded orders.
         }
-        validatePayable(order);
+        workflow.expireUnpaid(order.getId(), LocalDateTime.now(clock));
+        boolean expired = Boolean.TRUE.equals(order.getPaymentExpired()) && order.getStatus() == OrderStatus.CANCELLED;
+        if (!expired) validatePayable(order);
         Payment payment = payment(order);
         if (!"sandbox".equals(payment.getMomoEnvironment())) throw new IllegalArgumentException("Wrong payment mode");
+        if (expired) {
+            if (payment.getStatus() != PaymentStatus.FAILED) throw new IllegalStateException("Thanh toán hết hạn không hợp lệ.");
+            payment.setStatus(PaymentStatus.PENDING);
+        }
         complete(order, payment, transactionId, "sandbox");
+        if (expired) {
+            order.setStatus(OrderStatus.REFUND_REQUESTED);
+            order.setCancellationReason("MoMo xác nhận tiền sau khi đơn hết hạn. Cần hoàn tiền; không tiếp tục giao hàng.");
+            orders.save(order);
+            notifications.sendNotification(order.getUser(), "Đơn hết hạn cần hoàn tiền",
+                    order.getCancellationReason(), "REFUND_REQUESTED", order.getId());
+        }
         attempt.setCompleted(true); attempt.setTransactionId(transactionId); attempts.save(attempt);
         return true;
     }
@@ -145,6 +160,9 @@ public class MomoServiceImpl implements MomoService {
     }
 
     private void validatePayable(Order order) {
+        if ((order.getStatus() == OrderStatus.PENDING || order.getStatus() == OrderStatus.CONFIRMED)
+                && order.getPaymentExpiresAt() != null && !order.getPaymentExpiresAt().isAfter(LocalDateTime.now(clock)))
+            throw new IllegalStateException("Đơn đã hết thời hạn thanh toán.");
         if (!"MOMO".equals(order.getPaymentMethod()) || !"UNPAID".equals(order.getPaymentStatus())
                 || EnumSet.of(OrderStatus.CANCELLED, OrderStatus.REFUNDED, OrderStatus.REFUND_REQUESTED, OrderStatus.COMPLETED).contains(order.getStatus()))
             throw new IllegalStateException("Đơn không còn chờ thanh toán MoMo.");
@@ -168,7 +186,7 @@ public class MomoServiceImpl implements MomoService {
     private void complete(Order order, Payment payment, String transactionId, String environment) {
         if (payment.getStatus() != PaymentStatus.PENDING) throw new IllegalStateException("Giao dịch không còn chờ thanh toán.");
         order.setPaymentStatus("PAID"); orders.save(order);
-        payment.setStatus(PaymentStatus.SUCCESS); payment.setPaidAt(LocalDateTime.now());
+        payment.setStatus(PaymentStatus.SUCCESS); payment.setPaidAt(LocalDateTime.now(clock));
         payment.setTransactionCode(transactionId); payment.setMomoEnvironment(environment); payments.save(payment);
         String label = "mock".equals(environment) ? "[DEV - mô phỏng]" : "[MoMo Test]";
         notifications.sendNotification(order.getUser(), label + " Thanh toán thành công",

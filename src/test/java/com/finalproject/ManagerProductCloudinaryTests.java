@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 class ManagerProductCloudinaryTests {
+    @org.mockito.Spy CategoryService categoryService = new CategoryService(mock(CategoryRepository.class), mock(jakarta.persistence.EntityManager.class));
     @Mock ProductRepository products;
     @Mock StoreInventoryRepository stocks;
     @Mock InventoryService inventory;

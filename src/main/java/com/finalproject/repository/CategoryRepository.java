@@ -8,6 +8,9 @@ import java.util.Optional;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("select c from Category c order by c.id")
+    java.util.List<Category> findAllForUpdate();
     @org.springframework.data.jpa.repository.Query("select c from Category c where c.isDeleted = false or c.isDeleted is null")
     java.util.List<Category> findActiveCategories();
 

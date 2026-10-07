@@ -23,6 +23,7 @@ public class BankSandboxService {
     private final OrderRepository orders;
     private final PaymentRepository payments;
     private final EntityManager entityManager;
+    private final java.time.Clock clock;
     private final NotificationService notifications;
 
     @Transactional
@@ -43,6 +44,9 @@ public class BankSandboxService {
                 || amount.compareTo(order.getTotalAmount()) != 0
                 || !EnumSet.of(OrderStatus.PENDING, OrderStatus.CONFIRMED, OrderStatus.PREPARING).contains(order.getStatus()))
             throw new IllegalStateException("Thông tin giao dịch hoặc trạng thái đơn không hợp lệ.");
+        if ("UNPAID".equals(order.getPaymentStatus()) && (order.getStatus() == OrderStatus.PENDING || order.getStatus() == OrderStatus.CONFIRMED) && order.getPaymentExpiresAt() != null
+                && !order.getPaymentExpiresAt().isAfter(LocalDateTime.now(clock)))
+            throw new IllegalStateException("Đơn đã hết thời hạn thanh toán.");
         var records = payments.findByOrderId(id);
         if (records.size() != 1) throw new IllegalStateException("Không xác minh được bản ghi thanh toán.");
         Payment payment = records.get(0);
@@ -53,7 +57,7 @@ public class BankSandboxService {
         if (!"UNPAID".equals(order.getPaymentStatus()) || payment.getStatus() != PaymentStatus.PENDING)
             throw new IllegalStateException("Giao dịch không còn chờ thanh toán.");
         String receipt = "DEV-BANK-" + id;
-        payment.setTransactionCode(receipt); payment.setStatus(PaymentStatus.SUCCESS); payment.setPaidAt(LocalDateTime.now());
+        payment.setTransactionCode(receipt); payment.setStatus(PaymentStatus.SUCCESS); payment.setPaidAt(LocalDateTime.now(clock));
         order.setPaymentStatus("PAID"); payments.save(payment); orders.save(order);
         notifications.sendNotification(actor, "Thanh toán thử nghiệm thành công", "Đơn #" + id
                 + " đã thanh toán thử nghiệm; không phát sinh chuyển tiền thật.", "PAYMENT_SUCCESS", id);

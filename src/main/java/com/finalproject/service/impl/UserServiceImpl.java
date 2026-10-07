@@ -21,6 +21,35 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserAddressRepository userAddressRepository;
     private final PasswordEncoder passwordEncoder;
+    private final com.finalproject.service.CloudinaryService cloud;
+    private final jakarta.persistence.EntityManager entityManager;
+
+    @Override @Transactional(rollbackFor=java.io.IOException.class)
+    public User updateProfileImages(String username, String name, String phone, String address,
+            org.springframework.web.multipart.MultipartFile avatar, org.springframework.web.multipart.MultipartFile cover) throws java.io.IOException {
+        User user = findByUsername(username);
+        userRepository.findLockedById(user.getId()).orElseThrow();
+        entityManager.refresh(user, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        if (!Boolean.TRUE.equals(user.getIsActive()) || Boolean.TRUE.equals(user.getAccountDisabledByAdmin()) || user.isRetiredDeliveryAccount())
+            throw new org.springframework.security.access.AccessDeniedException("Tài khoản đã bị vô hiệu hóa.");
+        // Only submitted fields change. Uploads and removal of previous images share this transaction.
+        if (name == null || name.isBlank() || name.trim().length() > 100
+                || phone != null && !phone.trim().matches("0[35789][0-9]{8}")
+                || address != null && (address.isBlank() || address.trim().length() > 255))
+            throw new IllegalArgumentException("Họ tên, số điện thoại hoặc địa chỉ không hợp lệ.");
+        user.setFullName(name.trim());
+        if (phone != null) user.setPhone(phone.trim());
+        if (address != null) user.setAddress(address.trim());
+        if (avatar != null && !avatar.isEmpty()) {
+            var uploaded = cloud.upload(avatar,"rental_shop_avatars");
+            if (uploaded != null) { cloud.delete(user.getAvatarPublicId()); user.setAvatarUrl(uploaded.secureUrl()); user.setAvatarPublicId(uploaded.publicId()); }
+        }
+        if (cover != null && !cover.isEmpty()) {
+            var uploaded = cloud.upload(cover,"rental_shop_covers");
+            if (uploaded != null) { cloud.delete(user.getCoverPublicId()); user.setCover(uploaded.secureUrl()); user.setCoverPublicId(uploaded.publicId()); }
+        }
+        return userRepository.save(user);
+    }
 
     @Override
     public User findByUsername(String username) {
@@ -32,6 +61,8 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User updateProfile(String username, String fullName, String phone, String address, String avatarUrl, String cover) {
         User user = findByUsername(username);
+        if (fullName == null || fullName.isBlank() || fullName.trim().length() > 100 || phone == null || !phone.trim().matches("0[35789][0-9]{8}") || address == null || address.isBlank() || address.trim().length() > 255)
+            throw new IllegalArgumentException("Họ tên, số điện thoại hoặc địa chỉ không hợp lệ.");
         if (fullName != null && !fullName.trim().isEmpty()) {
             user.setFullName(fullName.trim());
         }
@@ -75,7 +106,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserAddress addAddress(Long userId, String recipientName, String phone, String addressDetail, Boolean isDefault) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findLockedById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Người dùng không tồn tại"));
 
         if (recipientName == null || recipientName.trim().isEmpty() ||
@@ -89,6 +120,7 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Thông báo thêm thất bại: Số điện thoại không hợp lệ (phải đúng 10 chữ số)");
         }
 
+        validateAddress(recipientName, phone, addressDetail);
         String normDetail = normalizeAddress(addressDetail);
         List<UserAddress> existing = userAddressRepository.findByUserIdOrderByIsDefaultDescCreatedAtDesc(userId);
         boolean duplicate = existing.stream().anyMatch(a ->
@@ -119,6 +151,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserAddress updateAddress(Long addressId, Long userId, String recipientName, String phone, String addressDetail, Boolean isDefault) {
+        userRepository.findLockedById(userId).orElseThrow();
         UserAddress address = userAddressRepository.findById(addressId)
                 .orElseThrow(() -> new IllegalArgumentException("Địa chỉ không tồn tại"));
 
@@ -126,14 +159,17 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Không có quyền chỉnh sửa địa chỉ này");
         }
 
+        validateAddress(recipientName, phone, addressDetail);
+        if (userAddressRepository.findByUserIdOrderByIsDefaultDescCreatedAtDesc(userId).stream().anyMatch(a -> !a.getId().equals(addressId) && normalizeAddress(a.getAddressDetail()).equals(normalizeAddress(addressDetail))))
+            throw new IllegalArgumentException("Địa chỉ này đã tồn tại.");
         if (Boolean.TRUE.equals(isDefault)) {
             clearDefaultAddress(userId);
             address.setIsDefault(true);
         }
 
-        address.setRecipientName(recipientName);
-        address.setPhone(phone);
-        address.setAddressDetail(addressDetail);
+        address.setRecipientName(recipientName.trim());
+        address.setPhone(phone.trim());
+        address.setAddressDetail(addressDetail.trim());
 
         return userAddressRepository.save(address);
     }
@@ -141,6 +177,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteAddress(Long addressId, Long userId) {
+        userRepository.findLockedById(userId).orElseThrow();
         UserAddress address = userAddressRepository.findById(addressId)
                 .orElseThrow(() -> new IllegalArgumentException("Địa chỉ không tồn tại"));
 
@@ -148,12 +185,16 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Không có quyền xóa địa chỉ này");
         }
 
+        boolean wasDefault = Boolean.TRUE.equals(address.getIsDefault());
         userAddressRepository.delete(address);
+        userAddressRepository.flush();
+        if (wasDefault) userAddressRepository.findByUserIdOrderByIsDefaultDescCreatedAtDesc(userId).stream().findFirst().ifPresent(next -> {next.setIsDefault(true); userAddressRepository.save(next);});
     }
 
     @Override
     @Transactional
     public void setDefaultAddress(Long addressId, Long userId) {
+        userRepository.findLockedById(userId).orElseThrow();
         UserAddress address = userAddressRepository.findById(addressId)
                 .orElseThrow(() -> new IllegalArgumentException("Địa chỉ không tồn tại"));
 
@@ -166,9 +207,14 @@ public class UserServiceImpl implements UserService {
         userAddressRepository.save(address);
     }
 
+    private void validateAddress(String name, String phone, String detail) {
+        if (name == null || name.isBlank() || name.trim().length() > 100 || phone == null || !phone.trim().matches("0[35789][0-9]{8}") || detail == null || detail.isBlank() || detail.trim().length() > 255)
+            throw new IllegalArgumentException("Nhập đầy đủ tên (tối đa 100), số điện thoại Việt Nam và địa chỉ (tối đa 255 ký tự).");
+    }
+
     private void clearDefaultAddress(Long userId) {
-        userAddressRepository.findByUserIdAndIsDefaultTrue(userId)
-                .ifPresent(addr -> {
+        userAddressRepository.findByUserIdOrderByIsDefaultDescCreatedAtDesc(userId).stream().filter(a -> Boolean.TRUE.equals(a.getIsDefault()))
+                .forEach(addr -> {
                     addr.setIsDefault(false);
                     userAddressRepository.save(addr);
                 });

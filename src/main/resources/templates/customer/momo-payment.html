@@ -13,7 +13,9 @@
         <p>Đơn hoa #<strong th:text="${order.id}"></strong></p>
         <p>Chi nhánh: <span th:text="${order.pickupStore.name}"></span></p>
         <p class="fs-4 fw-bold" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></p>
-        <div th:if="${order.paymentStatus == 'PAID'}" class="alert alert-success">Đơn đã hoàn tất thanh toán thử nghiệm.</div>
+        <p th:if="${order.paymentExpiresAt != null and order.paymentStatus == 'UNPAID' and (order.status.name() == 'PENDING' or order.status.name() == 'CONFIRMED')}" class="alert alert-warning small">Thanh toán trước <strong th:text="${#temporals.format(order.paymentExpiresAt, 'HH:mm dd/MM/yyyy')}"></strong>. Quá hạn, đơn tự hủy và tồn kho được trả lại chi nhánh.</p>
+    <p th:if="${order.paymentExpired == true}" class="alert alert-danger">Đơn đã hết thời hạn thanh toán. Nếu đã chuyển tiền, liên hệ cửa hàng để đối chiếu và hoàn tiền.</p>
+    <div th:if="${order.paymentStatus == 'PAID'}" class="alert alert-success">Đơn đã hoàn tất thanh toán thử nghiệm.</div>
         <div th:if="${order.paymentStatus == 'UNPAID' and order.status.name() != 'CANCELLED' and order.status.name() != 'REFUNDED'}">
             <form th:if="${mockMode}" th:action="@{/checkout/momo/{id}/simulate(id=${order.id})}" method="post">
                 <p>Nhấn nút bên dưới để kiểm thử luồng thanh toán thành công. Không cần mở ứng dụng hoặc quét mã MoMo.</p>

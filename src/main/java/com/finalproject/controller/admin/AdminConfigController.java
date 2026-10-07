@@ -15,6 +15,7 @@ import java.time.LocalDate;
 @RequestMapping("/admin")
 @RequiredArgsConstructor
 public class AdminConfigController {
+    private final com.finalproject.service.CategoryService categoryService;
 
     private final CategoryRepository categoryRepository;
     private final CommissionRepository commissionRepository;
@@ -119,17 +120,7 @@ public class AdminConfigController {
                               @RequestParam(value = "parentId", required = false) Long parentId,
                               RedirectAttributes ra) {
         try {
-            Category parent = null;
-            if (parentId != null && parentId > 0) {
-                parent = categoryRepository.findById(parentId).orElse(null);
-            }
-            Category cat = Category.builder()
-                    .name(name)
-                    .description(description)
-                    .parent(parent)
-                    .isDeleted(false)
-                    .build();
-            categoryRepository.save(cat);
+            categoryService.save(null, name, description, parentId);
             ra.addFlashAttribute("successMessage", "Thêm mới loại sản phẩm [" + name + "] thành công!");
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", "Không thể thêm loại sản phẩm: " + ex.getMessage());
@@ -147,15 +138,7 @@ public class AdminConfigController {
                                  @RequestParam(value = "parentId", required = false) Long parentId,
                                  RedirectAttributes ra) {
         try {
-            Category cat = categoryRepository.findById(id).orElseThrow();
-            cat.setName(name);
-            cat.setDescription(description);
-            if (parentId != null && parentId > 0 && !parentId.equals(id)) {
-                cat.setParent(categoryRepository.findById(parentId).orElse(null));
-            } else if (parentId != null && parentId == 0) {
-                cat.setParent(null);
-            }
-            categoryRepository.save(cat);
+            categoryService.save(id, name, description, parentId);
             ra.addFlashAttribute("successMessage", "Cập nhật loại sản phẩm [" + name + "] thành công!");
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", "Không thể cập nhật loại sản phẩm: " + ex.getMessage());
@@ -337,7 +320,7 @@ public class AdminConfigController {
     /**
      * Alternative 5a: Cập nhật chính sách hoa hồng
      */
-    @RequestMapping(value = "/commissions/update/{id}", method = {RequestMethod.GET, RequestMethod.POST})
+    @PostMapping("/commissions/update/{id}")
     public String updateCommission(@PathVariable("id") Long id,
                                    @RequestParam("name") String name,
                                    @RequestParam(value = "cost", defaultValue = "0") BigDecimal cost,
@@ -370,7 +353,7 @@ public class AdminConfigController {
     /**
      * Alternative 5-8b: Xóa chính sách hoa hồng (soft delete)
      */
-    @RequestMapping(value = "/commissions/delete/{id}", method = {RequestMethod.GET, RequestMethod.POST})
+    @PostMapping("/commissions/delete/{id}")
     public String deleteCommission(@PathVariable("id") Long id, RedirectAttributes ra) {
         try {
             Commission c = commissionRepository.findById(id).orElseThrow();
@@ -591,7 +574,7 @@ public class AdminConfigController {
     /**
      * Alternative 5a: Cập nhật đơn vị vận chuyển
      */
-    @RequestMapping(value = "/deliveries/update/{id}", method = {RequestMethod.GET, RequestMethod.POST})
+    @PostMapping("/deliveries/update/{id}")
     public String updateDelivery(@PathVariable("id") Long id,
                                  @RequestParam("name") String name,
                                  @RequestParam(value = "price", defaultValue = "0") BigDecimal price,
@@ -634,7 +617,7 @@ public class AdminConfigController {
     /**
      * Alternative 5-8b: Xóa đơn vị vận chuyển (soft delete)
      */
-    @RequestMapping(value = "/deliveries/delete/{id}", method = {RequestMethod.GET, RequestMethod.POST})
+    @PostMapping("/deliveries/delete/{id}")
     public String deleteDelivery(@PathVariable("id") Long id, RedirectAttributes ra) {
         try {
             Delivery d = deliveryRepository.findById(id).orElseThrow();
@@ -998,7 +981,7 @@ public class AdminConfigController {
         return "redirect:/admin/vouchers";
     }
 
-    @RequestMapping(value = "/vouchers/toggle/{id}", method = {RequestMethod.GET, RequestMethod.POST})
+    @PostMapping("/vouchers/toggle/{id}")
     public String togglePlatformVoucher(@PathVariable("id") Long id, RedirectAttributes ra) {
         Voucher v = voucherRepository.findById(id).orElse(null);
         if (v == null) {
@@ -1012,7 +995,7 @@ public class AdminConfigController {
         return "redirect:/admin/vouchers";
     }
 
-    @RequestMapping(value = "/vouchers/delete/{id}", method = {RequestMethod.GET, RequestMethod.POST})
+    @PostMapping("/vouchers/delete/{id}")
     public String deletePlatformVoucher(@PathVariable("id") Long id, RedirectAttributes ra) {
         try {
             Voucher v = voucherRepository.findById(id).orElse(null);
@@ -1322,7 +1305,7 @@ public class AdminConfigController {
     /**
      * Alternative 6a: Cập nhật store level
      */
-    @RequestMapping(value = "/store-levels/update/{id}", method = {RequestMethod.GET, RequestMethod.POST})
+    @PostMapping("/store-levels/update/{id}")
     public String updateStoreLevel(@PathVariable("id") Long id,
                                    @RequestParam("name") String name,
                                    @RequestParam("minPoint") Integer minPoint,
@@ -1357,7 +1340,7 @@ public class AdminConfigController {
     /**
      * Alternative 6-10b: Xóa level (isDeleted = true)
      */
-    @RequestMapping(value = "/store-levels/delete/{id}", method = {RequestMethod.GET, RequestMethod.POST})
+    @PostMapping("/store-levels/delete/{id}")
     public String deleteStoreLevel(@PathVariable("id") Long id, RedirectAttributes ra) {
         try {
             StoreLevel sl = storeLevelRepository.findById(id).orElseThrow();

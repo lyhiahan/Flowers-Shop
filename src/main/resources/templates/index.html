@@ -293,6 +293,7 @@
 
         .nav-categories-bar .flower-container > div {
             flex-wrap: nowrap !important;
+            justify-content: flex-start !important;
             overflow-x: auto;
             scrollbar-width: none;
             -ms-overflow-style: none;
@@ -302,6 +303,7 @@
             display: none;
         }
 
+        .nav-categories-bar .flower-container > div > * { flex-shrink: 0; }
         .cat-nav-link {
             color: var(--flower-text-main);
             text-decoration: none;
@@ -385,8 +387,8 @@
 
         /* Bảng Danh Mục: Nền trắng ngà, bo góc 12–16 px, bóng nhẹ, mở nổi phía trên nội dung */
         .flower-mega-menu-panel {
-            position: absolute;
-            top: calc(100% + 8px);
+            position: fixed;
+            top: 100px;
             left: 0;
             background: #FFFCF8; /* Trắng ngà */
             border: 1px solid #E7DED4;
@@ -1586,7 +1588,7 @@
         <!-- Dòng Thanh Điều Hướng Tinh Gọn: Danh mục hoa · Tất cả mẫu hoa · Danh mục chính · Bán chạy · Cửa hàng · Kênh Quản lý -->
         <div class="nav-categories-bar position-relative">
             <div class="container flower-container">
-                <div class="d-flex align-items-center justify-content-center gap-4 flex-wrap">
+                <div class="d-flex align-items-center justify-content-start gap-4 flex-wrap">
 
                     <!-- 1. Nút Danh Mục Hoa ở đầu (mở Mega-Menu đầy đủ 3 nhóm) -->
                     <div class="position-relative d-inline-block" id="navbarCategoryDropdownWrapper">
@@ -1691,134 +1693,16 @@
             </div>
 
             <!-- Vùng Danh Mục Các Ô Hình Ảnh -->
-            <div class="mega-menu-body">
-                <!-- Tab 1: Kiểu dáng (Mặc định mở) -->
-                <div class="mega-tab-pane active" id="paneKieuDang" role="tabpanel">
-                    <div class="mega-catalog-grid">
-                        <a th:href="@{/products(flowerStyle='Bó hoa')} + '#product-catalog'" class="mega-cat-card" data-name="bó hoa bo hoa" onclick="closeFlowerMegaMenu()">
-                            <div class="mega-cat-thumb">
-                                <img src="https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=240&h=240&fit=crop&q=80" alt="Bó hoa" loading="lazy">
-                            </div>
-                            <span class="mega-cat-name">Bó hoa</span>
-                        </a>
-                        <a th:href="@{/products(flowerStyle='Giỏ hoa')} + '#product-catalog'" class="mega-cat-card" data-name="giỏ hoa gio hoa" onclick="closeFlowerMegaMenu()">
-                            <div class="mega-cat-thumb">
-                                <img th:src="@{/images/gio_hoa_basket.jpg}" src="/images/gio_hoa_basket.jpg" alt="Giỏ hoa" loading="lazy">
-                            </div>
-                            <span class="mega-cat-name">Giỏ hoa</span>
-                        </a>
-                        <a th:href="@{/products(flowerStyle='Hộp hoa')} + '#product-catalog'" class="mega-cat-card" data-name="hộp hoa hop hoa" onclick="closeFlowerMegaMenu()">
-                            <div class="mega-cat-thumb">
-                                <img src="https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?w=240&h=240&fit=crop&q=80" alt="Hộp hoa" loading="lazy">
-                            </div>
-                            <span class="mega-cat-name">Hộp hoa</span>
-                        </a>
-                        <a th:href="@{/products(flowerStyle='Bình hoa')} + '#product-catalog'" class="mega-cat-card" data-name="bình hoa binh hoa lọ hoa" onclick="closeFlowerMegaMenu()">
-                            <div class="mega-cat-thumb">
-                                <img th:src="@{/images/binh_hoa_vase.jpg}" src="/images/binh_hoa_vase.jpg" alt="Bình hoa" loading="lazy">
-                            </div>
-                            <span class="mega-cat-name">Bình hoa</span>
-                        </a>
-                        <a th:href="@{/products(flowerStyle='Chậu hoa')} + '#product-catalog'" class="mega-cat-card" data-name="chậu hoa chau hoa" onclick="closeFlowerMegaMenu()">
-                            <div class="mega-cat-thumb">
-                                <img src="https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=240&h=240&fit=crop&q=80" alt="Chậu hoa" loading="lazy">
-                            </div>
-                            <span class="mega-cat-name">Chậu hoa</span>
-                        </a>
-                        <a th:href="@{/products(flowerStyle='Kệ hoa')} + '#product-catalog'" class="mega-cat-card" data-name="kệ hoa ke hoa 2 tầng" onclick="closeFlowerMegaMenu()">
-                            <div class="mega-cat-thumb">
-                                <img th:src="@{/images/ke_hoa_stand.jpg}" src="/images/ke_hoa_stand.jpg" alt="Kệ hoa" loading="lazy">
-                            </div>
-                            <span class="mega-cat-name">Kệ hoa</span>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Tab 2: Dịp tặng -->
-                <div class="mega-tab-pane" id="paneDipTang" role="tabpanel">
-                    <div class="mega-catalog-grid">
-                        <a th:href="@{/products(flowerOccasion='Sinh nhật')} + '#product-catalog'" class="mega-cat-card" data-name="sinh nhật sinh nhat birthday" onclick="closeFlowerMegaMenu()">
-                            <div class="mega-cat-thumb">
-                                <img src="https://images.unsplash.com/photo-1513151233558-d860c5398176?w=240&h=240&fit=crop&q=80" alt="Sinh nhật" loading="lazy">
-                            </div>
-                            <span class="mega-cat-name">Sinh nhật</span>
-                        </a>
-                        <a th:href="@{/products(flowerOccasion='Khai trương')} + '#product-catalog'" class="mega-cat-card" data-name="khai trương khai truong opening" onclick="closeFlowerMegaMenu()">
-                            <div class="mega-cat-thumb">
-                                <img th:src="@{/images/ke_hoa_stand.jpg}" src="/images/ke_hoa_stand.jpg" alt="Khai trương" loading="lazy">
-                            </div>
-                            <span class="mega-cat-name">Khai trương</span>
-                        </a>
-                        <a th:href="@{/products(flowerOccasion='Tình yêu')} + '#product-catalog'" class="mega-cat-card" data-name="tình yêu tinh yeu valentine" onclick="closeFlowerMegaMenu()">
-                            <div class="mega-cat-thumb">
-                                <img src="https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=240&h=240&fit=crop&q=80" alt="Tình yêu" loading="lazy">
-                            </div>
-                            <span class="mega-cat-name">Tình yêu</span>
-                        </a>
-                        <a th:href="@{/products(flowerOccasion='Kỷ niệm')} + '#product-catalog'" class="mega-cat-card" data-name="kỷ niệm ky niem anniversary" onclick="closeFlowerMegaMenu()">
-                            <div class="mega-cat-thumb">
-                                <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=240&h=240&fit=crop&q=80" alt="Kỷ niệm" loading="lazy">
-                            </div>
-                            <span class="mega-cat-name">Kỷ niệm</span>
-                        </a>
-                        <a th:href="@{/products(flowerOccasion='Chúc mừng')} + '#product-catalog'" class="mega-cat-card" data-name="chúc mừng chuc mung congratulations" onclick="closeFlowerMegaMenu()">
-                            <div class="mega-cat-thumb">
-                                <img src="https://images.unsplash.com/photo-1533616688419-b7a585564566?w=240&h=240&fit=crop&q=80" alt="Chúc mừng" loading="lazy">
-                            </div>
-                            <span class="mega-cat-name">Chúc mừng</span>
-                        </a>
-                        <a th:href="@{/products(flowerOccasion='Tốt nghiệp')} + '#product-catalog'" class="mega-cat-card" data-name="tốt nghiệp tot nghiep graduation" onclick="closeFlowerMegaMenu()">
-                            <div class="mega-cat-thumb">
-                                <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=240&h=240&fit=crop&q=80" alt="Tốt nghiệp" loading="lazy">
-                            </div>
-                            <span class="mega-cat-name">Tốt nghiệp</span>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Tab 3: Loại hoa -->
-                <div class="mega-tab-pane" id="paneLoaiHoa" role="tabpanel">
-                    <div class="mega-catalog-grid">
-                        <a th:href="@{/products(flowerType='Hoa hồng')} + '#product-catalog'" class="mega-cat-card" data-name="hoa hồng hoa hong rose" onclick="closeFlowerMegaMenu()">
-                            <div class="mega-cat-thumb">
-                                <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=240&h=240&fit=crop&q=80" alt="Hoa hồng" loading="lazy">
-                            </div>
-                            <span class="mega-cat-name">Hoa hồng</span>
-                        </a>
-                        <a th:href="@{/products(flowerType='Tulip')} + '#product-catalog'" class="mega-cat-card" data-name="hoa tulip" onclick="closeFlowerMegaMenu()">
-                            <div class="mega-cat-thumb">
-                                <img src="https://images.unsplash.com/photo-1520763185298-1b434c919102?w=240&h=240&fit=crop&q=80" alt="Tulip" loading="lazy">
-                            </div>
-                            <span class="mega-cat-name">Tulip</span>
-                        </a>
-                        <a th:href="@{/products(flowerType='Hướng dương')} + '#product-catalog'" class="mega-cat-card" data-name="hoa hướng dương huong duong sunflower" onclick="closeFlowerMegaMenu()">
-                            <div class="mega-cat-thumb">
-                                <img src="https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=240&h=240&fit=crop&q=80" alt="Hướng dương" loading="lazy">
-                            </div>
-                            <span class="mega-cat-name">Hướng dương</span>
-                        </a>
-                        <a th:href="@{/products(flowerType='Lan hồ điệp')} + '#product-catalog'" class="mega-cat-card" data-name="lan hồ điệp lan ho diep orchid" onclick="closeFlowerMegaMenu()">
-                            <div class="mega-cat-thumb">
-                                <img src="https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?w=240&h=240&fit=crop&q=80" alt="Lan hồ điệp" loading="lazy">
-                            </div>
-                            <span class="mega-cat-name">Lan hồ điệp</span>
-                        </a>
-                        <a th:href="@{/products(flowerType='Cẩm tú cầu')} + '#product-catalog'" class="mega-cat-card" data-name="hoa cẩm tú cầu cam tu cau hydrangea" onclick="closeFlowerMegaMenu()">
-                            <div class="mega-cat-thumb">
-                                <img src="https://images.unsplash.com/photo-1508610048659-a06b669e3321?w=240&h=240&fit=crop&q=80" alt="Cẩm tú cầu" loading="lazy">
-                            </div>
-                            <span class="mega-cat-name">Cẩm tú cầu</span>
-                        </a>
-                        <a th:href="@{/products(flowerType='Baby')} + '#product-catalog'" class="mega-cat-card" data-name="hoa baby bi" onclick="closeFlowerMegaMenu()">
-                            <div class="mega-cat-thumb">
-                                <img src="https://images.unsplash.com/photo-1563245372-f21724e3856d?w=240&h=240&fit=crop&q=80" alt="Hoa baby" loading="lazy">
-                            </div>
-                            <span class="mega-cat-name">Hoa baby</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
+            <div class="mega-menu-body"><div class="mega-tab-pane active" id="paneKieuDang" role="tabpanel"><div class="mega-catalog-grid">
+    <a th:each="value : ${catalogAttributeGroups['Kiểu dáng']}" th:href="@{/products(flowerStyle=${value.name})} + '#product-catalog'" class="mega-cat-card" th:data-name="${value.name}" onclick="closeFlowerMegaMenu()">
+        <img class="mega-cat-thumb" th:src="${#strings.containsIgnoreCase(value.name, 'kệ') ? '/images/ke_hoa_stand.jpg' : (#strings.containsIgnoreCase(value.name, 'bình') ? '/images/binh_hoa_vase.jpg' : '/images/gio_hoa_basket.jpg')}" th:alt="${value.name}" loading="lazy"><span class="mega-cat-name" th:text="${value.name}"></span>
+    </a></div><p th:if="${#lists.isEmpty(catalogAttributeGroups['Kiểu dáng'])}" class="text-muted p-3">Chưa có lựa chọn trong nhóm này.</p></div><div class="mega-tab-pane" id="paneDipTang" role="tabpanel"><div class="mega-catalog-grid">
+    <a th:each="value : ${catalogAttributeGroups['Dịp tặng']}" th:href="@{/products(flowerOccasion=${value.name})} + '#product-catalog'" class="mega-cat-card" th:data-name="${value.name}" onclick="closeFlowerMegaMenu()">
+        <img class="mega-cat-thumb" th:src="${#strings.containsIgnoreCase(value.name, 'kệ') ? '/images/ke_hoa_stand.jpg' : (#strings.containsIgnoreCase(value.name, 'bình') ? '/images/binh_hoa_vase.jpg' : '/images/gio_hoa_basket.jpg')}" th:alt="${value.name}" loading="lazy"><span class="mega-cat-name" th:text="${value.name}"></span>
+    </a></div><p th:if="${#lists.isEmpty(catalogAttributeGroups['Dịp tặng'])}" class="text-muted p-3">Chưa có lựa chọn trong nhóm này.</p></div><div class="mega-tab-pane" id="paneLoaiHoa" role="tabpanel"><div class="mega-catalog-grid">
+    <a th:each="value : ${catalogAttributeGroups['Loại hoa']}" th:href="@{/products(flowerType=${value.name})} + '#product-catalog'" class="mega-cat-card" th:data-name="${value.name}" onclick="closeFlowerMegaMenu()">
+        <img class="mega-cat-thumb" th:src="${#strings.containsIgnoreCase(value.name, 'kệ') ? '/images/ke_hoa_stand.jpg' : (#strings.containsIgnoreCase(value.name, 'bình') ? '/images/binh_hoa_vase.jpg' : '/images/gio_hoa_basket.jpg')}" th:alt="${value.name}" loading="lazy"><span class="mega-cat-name" th:text="${value.name}"></span>
+    </a></div><p th:if="${#lists.isEmpty(catalogAttributeGroups['Loại hoa'])}" class="text-muted p-3">Chưa có lựa chọn trong nhóm này.</p></div></div>
             <!-- Chân bảng: Bỏ dòng quảng cáo cuối menu để tiết kiệm chiều cao; giữ “Xem tất cả sản phẩm →” -->
             <div class="mega-menu-footer">
                 <a th:href="@{/products} + '#product-catalog'" class="mega-footer-link" onclick="closeFlowerMegaMenu()">
@@ -2502,26 +2386,16 @@
                 return;
             }
 
-            // Gắn bảng danh mục vào container tương ứng để bảng mở ngay dưới nút được bấm
-            if (targetWrapper && panel.parentElement !== targetWrapper) {
-                targetWrapper.appendChild(panel);
-            }
+            document.body.appendChild(panel);
             panel.setAttribute('data-opened-from', chosenSource);
-
-            // Tính toán vị trí và chiều rộng tối đa, đảm bảo không tràn lề màn hình
-            panel.style.top = 'calc(100% + 8px)';
-            if (targetWrapper) {
-                var rect = targetWrapper.getBoundingClientRect();
-                var availWidth = Math.min(1060, window.innerWidth - 32);
-                panel.style.width = availWidth + 'px';
-                var overflowRight = (rect.left + availWidth) - (window.innerWidth - 16);
-                if (overflowRight > 0) {
-                    var shift = Math.min(overflowRight, Math.max(0, rect.left - 16));
-                    panel.style.left = (-shift) + 'px';
-                } else {
-                    panel.style.left = '0';
-                }
-            }
+            var rect = targetWrapper ? targetWrapper.getBoundingClientRect() : {left:16,bottom:80};
+            var width = Math.min(1060, window.innerWidth - 32);
+            var top = Math.max(16, Math.min(rect.bottom + 8, window.innerHeight - 320));
+            panel.style.width = width + 'px';
+            panel.style.left = Math.max(16, Math.min(rect.left, window.innerWidth - width - 16)) + 'px';
+            panel.style.top = top + 'px';
+            panel.style.maxHeight = Math.max(160, window.innerHeight - top - 16) + 'px';
+            panel.style.overflowY = 'auto';
 
             panel.classList.add('is-open');
             if (backdrop) backdrop.classList.add('is-open');
@@ -2604,11 +2478,11 @@
         }
 
         function filterMegaMenu(query) {
-            var q = (query || '').trim().toLowerCase();
+            var q = (query || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd');
             var allCards = document.querySelectorAll('.mega-cat-card');
 
             allCards.forEach(function(card) {
-                var dataName = (card.getAttribute('data-name') || '').toLowerCase();
+                var dataName = (card.getAttribute('data-name') || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd');
                 var cardText = (card.querySelector('.mega-cat-name') ? card.querySelector('.mega-cat-name').textContent : '').toLowerCase();
                 if (!q || dataName.indexOf(q) !== -1 || cardText.indexOf(q) !== -1) {
                     card.style.display = '';
@@ -2619,6 +2493,7 @@
         }
 
         // Đóng bảng danh mục khi nhấn ESC hoặc bấm ngoài bảng
+        window.addEventListener('resize', closeFlowerMegaMenu);
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' || e.key === 'Esc') {
                 closeFlowerMegaMenu();

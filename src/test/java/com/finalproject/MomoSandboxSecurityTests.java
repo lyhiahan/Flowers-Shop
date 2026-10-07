@@ -122,4 +122,17 @@ class MomoSandboxSecurityTests {
                 .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("/simulate"))));
         mvc.perform(get("/checkout/momo/"+order.getId()).with(user("other-customer").roles("USER"))).andExpect(status().isForbidden());
     }
+
+    @Test void verifiedLatePaymentRequiresRefundAndReplayDoesNotReviveOrder() {
+        order.setPaymentExpiresAt(java.time.LocalDateTime.now().minusMinutes(1));orders.saveAndFlush(order);
+        var notification=payload();
+        assertThat(momo.processNotification(notification)).isTrue();
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.REFUND_REQUESTED);
+        assertThat(order.getPaymentStatus()).isEqualTo("PAID");
+        assertThat(order.getPaymentExpired()).isTrue();
+        long count=notifications.count();
+        assertThat(momo.processNotification(notification)).isTrue();
+        assertThat(notifications.count()).isEqualTo(count);
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.REFUND_REQUESTED);
+    }
 }

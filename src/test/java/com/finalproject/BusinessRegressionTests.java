@@ -72,6 +72,7 @@ class BusinessRegressionTests {
         store = stores.save(Store.builder().name("Quận 1").address("Quận 1").eWallet(BigDecimal.ZERO).build());
         otherStore = stores.save(Store.builder().name("Quận 7").address("Quận 7").build());
         customer = createUser("customer", Role.USER, null);
+        createUser("admin-test", Role.ADMIN, null);
         manager = createUser("manager", Role.MANAGER, store);
         store.setOwner(manager); stores.save(store);
         outsider = createUser("outsider", Role.MANAGER, otherStore);
@@ -204,6 +205,8 @@ class BusinessRegressionTests {
         login(manager); workflow.transition(refunded.getId(), OrderStatus.REFUNDED);
         workflow.transition(refunded.getId(), OrderStatus.REFUNDED);
         assertThat(store.getEWallet()).isEqualByComparingTo("72000");
+        assertThat(store.getPoint()).isEqualTo(8);
+        assertThat(transactions.findAllByOrderIdAndType(refunded.getId(), "ORDER_PAYMENT").get(0).getEarnedPoints()).isEqualTo(16);
         assertThat(transactions.findAllByOrderIdAndType(refunded.getId(), "REFUND")).hasSize(1);
         assertThat(analytics.getStoreRevenueStats(store.getId()).getTotalBuyRevenue()).isEqualByComparingTo("80000");
         var view = mvc.perform(get("/manager/dashboard").with(user(manager.getUsername()).roles("MANAGER")))
@@ -371,7 +374,7 @@ class BusinessRegressionTests {
                 .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/"));
         mvc.perform(post("/api/auth/login").contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                 .content("{\"username\":\"" + created.getEmail() + "\",\"password\":\"newpassword\"}"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.username").value(created.getUsername()));
+                .andExpect(status().isForbidden()); // JWT login endpoint has been retired; session form above remains supported.
         var add = new com.finalproject.dto.request.AddToCartRequest(); add.setProductId(product.getId());
         add.setStoreId(store.getId()); add.setQuantity(1); add.setOrderType(OrderType.BUY);
         cartService.addToCart(created.getUsername(), add);
@@ -818,11 +821,11 @@ class BusinessRegressionTests {
         login(manager); workflow.transition(order.getId(), OrderStatus.CONFIRMED); workflow.transition(order.getId(), OrderStatus.PREPARING);
         for (String route : List.of("/admin/orders-manage/" + order.getId(), "/manager/orders/" + order.getId())) {
             String role = route.startsWith("/admin") ? "ADMIN" : "MANAGER";
-            var result = mvc.perform(get(route).with(user(manager.getUsername()).roles(role))).andExpect(status().isOk()).andReturn();
+            var result = mvc.perform(get(route).with(user("ADMIN".equals(role) ? "admin-test" : manager.getUsername()).roles(role))).andExpect(status().isOk()).andReturn();
             var options = (List<?>) result.getModelAndView().getModel().get("availableStatuses");
             assertThat(options).extracting("value").contains("COMPLETED", "CANCELLED").doesNotContain("DELIVERING", "PICKED_UP", "DELIVERED");
         }
-        mvc.perform(post("/admin/orders-manage/update-status/" + order.getId()).with(user(manager.getUsername()).roles("ADMIN")).with(csrf())
+        mvc.perform(post("/admin/orders-manage/update-status/" + order.getId()).with(user("admin-test").roles("ADMIN")).with(csrf())
                 .param("status", "DELIVERING")).andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("errorMessage", org.hamcrest.Matchers.containsString("nhận tại tiệm")));
         assertThat(order.getStatus()).isEqualTo(OrderStatus.PREPARING);
@@ -836,7 +839,7 @@ class BusinessRegressionTests {
         Order order = deliveryOrder();
         for (String route : List.of("/admin/orders-manage/" + order.getId(), "/manager/orders/" + order.getId())) {
             String role = route.startsWith("/admin") ? "ADMIN" : "MANAGER";
-            var result = mvc.perform(get(route).with(user(manager.getUsername()).roles(role))).andExpect(status().isOk()).andReturn();
+            var result = mvc.perform(get(route).with(user("ADMIN".equals(role) ? "admin-test" : manager.getUsername()).roles(role))).andExpect(status().isOk()).andReturn();
             var options = (List<?>) result.getModelAndView().getModel().get("availableStatuses");
             assertThat(options).extracting("value").containsExactly("DELIVERED");
         }
@@ -944,5 +947,239 @@ class BusinessRegressionTests {
         assertThatThrownBy(() -> orderService.checkout(customer.getUsername(), List.of(item.getId()), PaymentMethod.COD,
                 "Khách", "0900000000", "Quận 1", null, "OTHER", LocalDate.now(), "PICKUP", store.getId()))
                 .hasMessageContaining("chi nhánh");
+    }
+
+    @Autowired CategoryService categoryService;
+    @Autowired UserService userService;
+
+    @Test void onlineOrdersHaveBankDeadlineAndExpiryRestocksOnce() {
+        LocalDateTime before = LocalDateTime.now();
+        Order order = checkout(PaymentMethod.BANK_TRANSFER);
+        assertThat(order.getPaymentExpiresAt()).isBetween(before.plusHours(24), LocalDateTime.now().plusHours(24));
+        assertThat(workflow.expireUnpaid(order.getId(), before)).isFalse();
+        assertThat(workflow.expireUnpaid(order.getId(), order.getPaymentExpiresAt())).isTrue();
+        assertThat(workflow.expireUnpaid(order.getId(), order.getPaymentExpiresAt().plusDays(1))).isFalse();
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELLED);
+        assertThat(order.getPaymentExpired()).isTrue();
+        assertThat(payments.findByOrderId(order.getId()).get(0).getStatus()).isEqualTo(PaymentStatus.FAILED);
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(10);
+    }
+
+    @Test void lateBankConfirmationRequestsRefundWithoutReservingStockAgain() throws Exception {
+        Order order = checkout(PaymentMethod.BANK_TRANSFER);
+        order.setPaymentExpiresAt(LocalDateTime.now().minusSeconds(1)); orders.saveAndFlush(order);
+        login(manager); workflow.confirmPayment(order.getId());
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.REFUND_REQUESTED);
+        assertThat(order.getPaymentStatus()).isEqualTo("PAID");
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(10);
+        assertThat(transactions.findAllByOrderIdAndType(order.getId(), "ORDER_PAYMENT")).isEmpty();
+        workflow.transition(order.getId(), OrderStatus.REFUNDED);
+        workflow.transition(order.getId(), OrderStatus.REFUNDED);
+        assertThat(store.getEWallet()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(order.getPaymentStatus()).isEqualTo("REFUNDED");
+    }
+
+    @Test void preparingAndPaidOrdersDoNotExpire() {
+        Order order = checkout(PaymentMethod.MOMO);
+        assertThat(order.getPaymentExpiresAt()).isBefore(LocalDateTime.now().plusMinutes(31));
+        order.setStatus(OrderStatus.PREPARING); order.setPaymentExpiresAt(LocalDateTime.now().minusMinutes(1)); orders.saveAndFlush(order);
+        assertThat(workflow.expireUnpaid(order.getId(), LocalDateTime.now())).isFalse();
+        momo.simulatePayment(order.getId(),customer.getUsername());
+        order.setStatus(OrderStatus.PENDING); orders.saveAndFlush(order);
+        assertThat(workflow.expireUnpaid(order.getId(), LocalDateTime.now())).isFalse();
+        assertThat(order.getPaymentStatus()).isEqualTo("PAID");
+    }
+
+    @Test void mockMomoCannotPayExpiredPendingOrder() {
+        Order order = checkout(PaymentMethod.MOMO);
+        order.setPaymentExpiresAt(LocalDateTime.now().minusMinutes(1)); orders.saveAndFlush(order);
+        assertThatThrownBy(() -> momo.simulatePayment(order.getId(),customer.getUsername())).hasMessageContaining("hết thời hạn");
+        assertThat(order.getPaymentStatus()).isEqualTo("UNPAID");
+    }
+
+    @Test void codHasNoDeadlineAndApprovedSaleBelowCostIsNotOvercharged() {
+        product.setImportPrice(new BigDecimal("150000")); products.saveAndFlush(product);
+        Order order = checkout(PaymentMethod.COD);
+        assertThat(order.getPaymentExpiresAt()).isNull();
+        assertThat(order.getTotalAmount()).isEqualByComparingTo("160000");
+    }
+
+    @Test void categoriesRejectCyclesAndHiddenAncestorsAndIncludeGrandchildren() {
+        Category root=product.getCategory();
+        Category child=categoryService.save(null,"Child",null,root.getId());
+        Category grandchild=categoryService.save(null,"Grandchild",null,child.getId());
+        assertThat(categoryService.descendants(root.getId())).extracting(Category::getId).contains(child.getId(),grandchild.getId());
+        assertThatThrownBy(() -> categoryService.save(root.getId(),root.getName(),null,grandchild.getId())).hasMessageContaining("vòng lặp");
+        child.setIsDeleted(true); categories.saveAndFlush(child);
+        assertThat(categoryService.visible(grandchild)).isFalse();
+        assertThat(categoryService.descendants(root.getId())).isEmpty();
+    }
+
+    @Test void categoryLinksRenderFromDatabaseAndLegacyGlobalProductIsSearchableInBranch() throws Exception {
+        Style group=em.merge(Style.builder().name("Kiểu dáng").isDeleted(false).build());
+        StyleValue value=em.merge(StyleValue.builder().name("Giỏ hoa kiểm thử").style(group).isDeleted(false).build());
+        product.setStyleValues(new HashSet<>(List.of(value)));product.setStore(null);products.saveAndFlush(product);
+        mvc.perform(get("/products").param("flowerStyle",value.getName()).param("storeId",store.getId().toString()))
+                .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString(product.getName())))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(value.getName())));
+        value.setIsDeleted(true);em.flush();
+        assertThat(products.findAll(ProductSpecification.filter(null,null,null,null,null,store.getId(),value.getName(),(String)null,null,null))).isEmpty();
+    }
+
+    @Test void oldSessionCannotRetainAdminPrivilegesAndMissingActorIsRejected() throws Exception {
+        mvc.perform(get("/admin/transactions").with(user(customer.getUsername()).roles("ADMIN"))).andExpect(status().isForbidden());
+        mvc.perform(get("/customer/profile").with(user("deleted-account").roles("USER"))).andExpect(status().isForbidden());
+        mvc.perform(get("/admin/vouchers/delete/123").with(user("admin-test").roles("ADMIN"))).andExpect(status().isMethodNotAllowed());
+        mvc.perform(post("/admin/vouchers/delete/123").with(user("admin-test").roles("ADMIN"))).andExpect(status().isForbidden());
+    }
+
+    @Test void activationOtpLocksAfterFiveIncorrectAttemptsForPersistedAccount() {
+        customer.setIsActive(false); users.saveAndFlush(customer);
+        OtpVerification otp=otps.saveAndFlush(OtpVerification.builder().user(customer).code("123456").type(OtpType.ACTIVATE_ACCOUNT)
+                .expiredAt(LocalDateTime.now().plusMinutes(5)).build());
+        for(int i=0;i<5;i++) assertThat(auth.verifyOtp(customer.getEmail(),"000000")).isFalse();
+        assertThat(otp.getFailedAttempts()).isEqualTo(5);
+        assertThat(auth.verifyOtp(customer.getEmail(),"123456")).isFalse();
+        assertThat(customer.getIsActive()).isFalse();
+    }
+
+    @Test void atomicViewsPreserveUpdatedPrice() {
+        product.setPriceBuy(new BigDecimal("130000"));products.saveAndFlush(product);
+        products.incrementViewCount(product.getId());products.incrementViewCount(product.getId()); em.refresh(product);
+        assertThat(product.getViewCount()).isEqualTo(2);
+        assertThat(product.getPriceBuy()).isEqualByComparingTo("130000");
+    }
+
+    @Test void blankProfileFieldsAndInvalidAddressUpdateDoNotPersist() throws Exception {
+        String original=customer.getFullName();
+        assertThatThrownBy(() -> userService.updateProfileImages(customer.getUsername()," ","0900000000","Address",null,null)).isInstanceOf(IllegalArgumentException.class);
+        assertThat(customer.getFullName()).isEqualTo(original);
+    }
+
+    @Autowired ReviewService reviewService;
+    @Autowired VendorDataSeederService vendorSeeder;
+
+    @Test void deletingCustomerWithChatPreservesHistoryAndDisablesAccount() throws Exception {
+        ChatConversation conversation=em.merge(ChatConversation.builder().conversationKey("ADMIN:"+customer.getId()).kind("ADMIN")
+                .customer(customer).createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).build());
+        ChatMessage message=em.merge(ChatMessage.builder().conversation(conversation).sender(customer).clientMessageId(UUID.randomUUID().toString())
+                .content("Help with flowers").createdAt(LocalDateTime.now()).build());em.flush();
+        mvc.perform(post("/admin/users/delete/"+customer.getId()).with(user("admin-test").roles("ADMIN")).with(csrf()))
+                .andExpect(status().is3xxRedirection());
+        assertThat(users.findById(customer.getId())).isPresent();
+        assertThat(customer.getIsActive()).isFalse();
+        assertThat(em.find(ChatMessage.class,message.getId()).getContent()).isEqualTo("Help with flowers");
+    }
+
+    @Test void reviewUsesFulfillmentBranchForGlobalProductAndRejectsOversizedOrDuplicateContent() {
+        Order order=checkout(PaymentMethod.COD);login(manager);
+        workflow.transition(order.getId(),OrderStatus.CONFIRMED);workflow.transition(order.getId(),OrderStatus.PREPARING);
+        workflow.transition(order.getId(),OrderStatus.COMPLETED);
+        product.setStore(null);products.saveAndFlush(product);
+        assertThatThrownBy(() -> reviewService.addReview(customer.getId(),product.getId(),order.getId(),5,"x".repeat(1001),null)).isInstanceOf(IllegalArgumentException.class);
+        Review review=reviewService.addReview(customer.getId(),product.getId(),order.getId(),4,"Hoa đẹp, giao đúng hẹn. ".repeat(4),null);
+        assertThat(review.getStore().getId()).isEqualTo(store.getId());
+        assertThat(store.getRating()).isEqualTo(4.0);
+        assertThatThrownBy(() -> reviewService.addReview(customer.getId(),product.getId(),order.getId(),5,"Hoa đẹp, giao đúng hẹn. ".repeat(4),null)).isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test void deletingDefaultAddressSelectsRemainingOneAndBlankUpdateCannotOverwrite() {
+        UserAddress first=userService.addAddress(customer.getId(),"Customer","0900000000","123 Main street",true);
+        UserAddress second=userService.addAddress(customer.getId(),"Customer","0900000000","456 Other street",false);
+        assertThatThrownBy(() -> userService.updateAddress(second.getId(),customer.getId()," ","abc"," ",true)).isInstanceOf(IllegalArgumentException.class);
+        assertThat(second.getAddressDetail()).isEqualTo("456 Other street");
+        userService.deleteAddress(first.getId(),customer.getId());
+        assertThat(second.getIsDefault()).isTrue();
+    }
+
+    @Test void demoSeederCannotReactivateExistingVendorOrReplenishStock() {
+        User vendor=createUser("vendor_flower",Role.MANAGER,store);
+        vendor.setIsActive(false);users.saveAndFlush(vendor);
+        var stock=inventory.findByStoreIdAndProductId(store.getId(),product.getId()).orElseThrow();stock.setQuantity(0);inventory.saveAndFlush(stock);
+        store.setEWallet(new BigDecimal("12345"));stores.saveAndFlush(store);
+        vendorSeeder.seedVendorDemoData();
+        assertThat(vendor.getIsActive()).isFalse();assertThat(stock.getQuantity()).isZero();
+        assertThat(store.getEWallet()).isEqualByComparingTo("12345");
+    }
+
+    @Test void legacyNullAttributesRemainVisibleWithoutReactivatingDeletedGroups() {
+        var repo=org.mockito.Mockito.mock(StyleValueRepository.class);
+        Style group=Style.builder().name("Kiểu dáng cắm").isDeleted(null).build();
+        StyleValue value=StyleValue.builder().name("Bó hoa").style(group).isDeleted(null).build();
+        org.mockito.Mockito.when(repo.findAll()).thenReturn(List.of(value));
+        ProductAttributeService service=new ProductAttributeService(repo);
+        assertThat(service.catalogGroups().get("Kiểu dáng")).contains(value);
+        group.setIsDeleted(true);assertThat(service.activeValues()).isEmpty();
+    }
+
+    @Test void checkoutPreservesCommaInAddressAndRecipientName() throws Exception {
+        Delivery delivery=deliveries.saveAndFlush(Delivery.builder().name("Comma address delivery").price(BigDecimal.ZERO).build());
+        String address="123 Lê Lợi, Quận 1, TP HCM";
+        String name="Nguyễn An, người nhận";
+        mvc.perform(post("/checkout").with(user(customer.getUsername()).roles("USER")).with(csrf())
+                .param("selectedItemIds",item.getId().toString()).param("paymentMethod","BANK_TRANSFER")
+                .param("recipientName",name," ").param("recipientPhone","0900000000")
+                .param("recipientAddress",address).param("shippingMethod","DELIVERY")
+                .param("deliveryUnitId",delivery.getId().toString()).param("deliveryDate",LocalDate.now().plusDays(1).toString())
+                .param("deliveryTimeSlot","09:00-11:00"))
+                .andExpect(status().is3xxRedirection()).andExpect(redirectedUrlPattern("/checkout/bank/*"));
+        Order created=orders.findByUserIdOrderByCreatedAtDesc(customer.getId()).get(0);
+        assertThat(created.getRecipientAddress()).isEqualTo(address);assertThat(created.getRecipientName()).isEqualTo(name);
+    }
+
+    @Test void conflictingRecipientFieldsCannotSilentlyCreateOrder() throws Exception {
+        mvc.perform(post("/checkout").with(user(customer.getUsername()).roles("USER")).with(csrf())
+                .param("selectedItemIds",item.getId().toString()).param("paymentMethod","BANK_TRANSFER")
+                .param("recipientName","Nguyễn An","Trần Bình").param("recipientPhone","0900000000")
+                .param("shippingMethod","PICKUP").param("pickupStoreId",store.getId().toString())
+                .param("deliveryDate",LocalDate.now().plusDays(1).toString()).param("deliveryTimeSlot","09:00-11:00"))
+                .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("errorMessage"));
+        assertThat(orders.count()).isZero();
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(),product.getId()).orElseThrow().getQuantity()).isEqualTo(10);
+    }
+
+    @Test void checkoutRejectsOverlongMobileOrConflictingPhoneNumbers() {
+        for(String phone:List.of("09000000000","0283829123","0900000000,0910000000")) {
+            assertThatThrownBy(() -> orderService.checkout(customer.getUsername(),List.of(item.getId()),PaymentMethod.COD,
+                    "Customer",phone,"Quận 1",null,null,LocalDate.now(),"PICKUP",store.getId())).hasMessageContaining("điện thoại");
+        }
+        assertThat(orders.count()).isZero();
+    }
+
+    @Test void adminCannotCreateOrEditProductUnderHiddenAncestor() throws Exception {
+        Category parent=categories.saveAndFlush(Category.builder().name("Hidden ancestor").isDeleted(true).build());
+        product.getCategory().setParent(parent);categories.saveAndFlush(product.getCategory());
+        var form=validProductForm();
+        long count=products.count();String oldName=product.getName();
+        assertThatThrownBy(() -> productService.createProduct(form)).hasMessageContaining("danh mục cha");
+        form.setName("Invalid hidden category update");
+        assertThatThrownBy(() -> productService.updateProduct(product.getId(),form)).hasMessageContaining("danh mục cha");
+        assertThat(products.count()).isEqualTo(count);assertThat(product.getName()).isEqualTo(oldName);
+    }
+
+    @Test void managerCannotAddProductUnderHiddenAncestor() throws Exception {
+        Category parent=categories.saveAndFlush(Category.builder().name("Hidden manager ancestor").isDeleted(true).build());
+        product.getCategory().setParent(parent);categories.saveAndFlush(product.getCategory());
+        long count=products.count();
+        mvc.perform(post("/manager/products/add").with(user(manager.getUsername()).roles("MANAGER")).with(csrf())
+                .param("name","Hidden category product").param("categoryId",product.getCategory().getId().toString())
+                .param("priceBuy","100000")).andExpect(status().isBadRequest());
+        assertThat(products.count()).isEqualTo(count);
+    }
+
+    @Test void legacyDeadlineBackfillNeverChangesPaidPreparingOrExistingDeadlines() {
+        Order legacy=orders.saveAndFlush(Order.builder().user(customer).pickupStore(store).orderType(OrderType.BUY)
+                .totalAmount(BigDecimal.TEN).status(OrderStatus.PENDING).paymentStatus("UNPAID").paymentMethod("MOMO").build());
+        Order paid=orders.saveAndFlush(Order.builder().user(customer).pickupStore(store).orderType(OrderType.BUY)
+                .totalAmount(BigDecimal.TEN).status(OrderStatus.PENDING).paymentStatus("PAID").paymentMethod("BANK_TRANSFER").build());
+        Order preparing=orders.saveAndFlush(Order.builder().user(customer).pickupStore(store).orderType(OrderType.BUY)
+                .totalAmount(BigDecimal.TEN).status(OrderStatus.PREPARING).paymentStatus("UNPAID").paymentMethod("BANK_TRANSFER").build());
+        LocalDateTime deadline=LocalDateTime.now().plusMinutes(30).truncatedTo(java.time.temporal.ChronoUnit.MICROS);
+        assertThat(orders.initializeLegacyPaymentDeadlines(deadline,deadline.plusHours(24))).isEqualTo(1);
+        em.refresh(legacy);em.refresh(paid);em.refresh(preparing);
+        assertThat(legacy.getPaymentExpiresAt()).isEqualTo(deadline);
+        assertThat(paid.getPaymentExpiresAt()).isNull();assertThat(preparing.getPaymentExpiresAt()).isNull();
+        assertThat(orders.initializeLegacyPaymentDeadlines(deadline.plusDays(1),deadline.plusDays(2))).isZero();
+        em.refresh(legacy);assertThat(legacy.getPaymentExpiresAt()).isEqualTo(deadline);
     }
 }

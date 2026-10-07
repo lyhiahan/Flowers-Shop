@@ -13,6 +13,13 @@ import java.util.List;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select p from Product p where p.id = :id")
+    java.util.Optional<Product> findLockedById(@Param("id") Long id);
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    @Query("update Product p set p.viewCount = coalesce(p.viewCount, 0) + 1 where p.id = :id and (p.isDeleted = false or p.isDeleted is null)")
+    int incrementViewCount(@Param("id") Long id);
     List<Product> findByCategoryId(Long categoryId);
 
     @Query("SELECT p FROM Product p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")

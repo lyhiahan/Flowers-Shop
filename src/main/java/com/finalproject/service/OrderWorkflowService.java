@@ -21,6 +21,7 @@ public class OrderWorkflowService {
     private final TransactionRepository transactions;
     private final StoreAccessService access;
     private final jakarta.persistence.EntityManager entityManager;
+    private final java.time.Clock clock;
     private final NotificationService notificationService;
 
     public Order lockedOrder(Long id) {
@@ -104,6 +105,16 @@ public class OrderWorkflowService {
     public void confirmPayment(Long id) {
         Order order = lockedOrder(id);
         access.requireManager(order.getPickupStore());
+        expireUnpaid(id, LocalDateTime.now(clock));
+        if (order.getStatus() == OrderStatus.CANCELLED && Boolean.TRUE.equals(order.getPaymentExpired())) {
+            if (!"BANK_TRANSFER".equals(order.getPaymentMethod())) throw new IllegalStateException("Chỉ xác nhận tiền chuyển khoản.");
+            markPaid(order);
+            order.setStatus(OrderStatus.REFUND_REQUESTED);
+            order.setCancellationReason("Tiền chuyển khoản đến sau khi đơn hết hạn. Vui lòng hoàn tiền cho khách; không tiếp tục giao hàng.");
+            orders.save(order);
+            notifyOrderStatusChange(order, OrderStatus.CANCELLED, OrderStatus.REFUND_REQUESTED);
+            return;
+        }
         if (order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.REFUNDED
                 || order.getStatus() == OrderStatus.REFUND_REQUESTED) {
             throw new IllegalStateException("Đơn đã hủy hoặc đang hoàn tiền.");
@@ -126,10 +137,15 @@ public class OrderWorkflowService {
         if ("PAID".equals(order.getPaymentStatus())) return;
         var records = payments.findByOrderId(order.getId());
         Payment payment;
+        if (records.size() > 1) throw new IllegalStateException("Có nhiều bản ghi thanh toán cho đơn hàng.");
         if (!records.isEmpty()) {
             payment = records.get(0);
+            if (payment.getAmount() == null || payment.getAmount().compareTo(order.getTotalAmount()) != 0
+                    || !(payment.getMethod().name().equals(order.getPaymentMethod())
+                        || payment.getMethod() == PaymentMethod.COD && "CASH".equals(order.getPaymentMethod())))
+                throw new IllegalStateException("Phương thức hoặc số tiền thanh toán không khớp đơn hàng.");
             payment.setStatus(PaymentStatus.SUCCESS);
-            payment.setPaidAt(LocalDateTime.now());
+            payment.setPaidAt(LocalDateTime.now(clock));
         } else {
             payment = Payment.builder()
                     .order(order)
@@ -137,7 +153,7 @@ public class OrderWorkflowService {
                             ("BANK_TRANSFER".equalsIgnoreCase(order.getPaymentMethod()) ? PaymentMethod.BANK_TRANSFER : PaymentMethod.COD))
                     .amount(order.getTotalAmount())
                     .status(PaymentStatus.SUCCESS)
-                    .paidAt(LocalDateTime.now())
+                    .paidAt(LocalDateTime.now(clock))
                     .build();
         }
         payments.save(payment);
@@ -158,10 +174,10 @@ public class OrderWorkflowService {
         store.setEWallet(store.getEWallet().add(income));
 
         // Tích lũy điểm thi đua cho chi nhánh (1 điểm = 10.000 ₫ doanh số hoàn tất)
-        int earnedPoints = order.getTotalAmount().divide(BigDecimal.valueOf(10000), 0, RoundingMode.FLOOR).intValue();
+        int earnedPoints = order.getTotalAmount().divide(BigDecimal.valueOf(10000), 0, RoundingMode.FLOOR).intValueExact();
         if (earnedPoints > 0) {
             int currentPoint = (store.getPoint() != null) ? store.getPoint() : 0;
-            store.setPoint(currentPoint + earnedPoints);
+            store.setPoint(Math.addExact(currentPoint, earnedPoints));
         }
         stores.save(store);
 
@@ -171,6 +187,7 @@ public class OrderWorkflowService {
 
         transactions.save(Transaction.builder().order(order).store(store).amount(income).isUp(true)
                 .type("ORDER_PAYMENT").status("COMPLETED")
+                .earnedPoints(earnedPoints)
                 .description(desc).build());
     }
 
@@ -207,6 +224,20 @@ public class OrderWorkflowService {
             });
         }
         return orders.save(order);
+    }
+
+    @Transactional
+    public boolean expireUnpaid(Long id, LocalDateTime now) {
+        Order order = lockedOrder(id);
+        entityManager.refresh(order, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        if (!"UNPAID".equals(order.getPaymentStatus()) || order.getPaymentExpiresAt() == null
+                || order.getPaymentExpiresAt().isAfter(now) || (order.getStatus() != OrderStatus.PENDING && order.getStatus() != OrderStatus.CONFIRMED)) return false;
+        if (!"MOMO".equals(order.getPaymentMethod()) && !"BANK_TRANSFER".equals(order.getPaymentMethod())) return false;
+        order.setPaymentExpired(true);
+        order.setCancellationReason("Đơn đã hết thời hạn thanh toán. Tồn kho đã được trả lại chi nhánh.");
+        cancel(order);
+        notifyOrderStatusChange(order, OrderStatus.PENDING, OrderStatus.CANCELLED);
+        return true;
     }
 
     @Transactional
@@ -254,6 +285,9 @@ public class OrderWorkflowService {
         entityManager.refresh(store, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
         transactions.findAllByOrderIdAndType(order.getId(), "ORDER_PAYMENT").forEach(income -> {
             store.setEWallet(store.getEWallet().subtract(income.getAmount()));
+            int reversedPoints = income.getEarnedPoints() != null ? income.getEarnedPoints()
+                    : order.getTotalAmount().divide(BigDecimal.valueOf(10000), 0, RoundingMode.FLOOR).intValueExact();
+            store.setPoint(Math.max(0, (store.getPoint() == null ? 0 : store.getPoint()) - reversedPoints));
             stores.save(store);
             transactions.save(Transaction.builder().order(order).store(store).amount(income.getAmount()).isUp(false)
                     .type("REFUND").status("COMPLETED").description("Hoàn thu nhập đơn #" + order.getId()).build());
@@ -264,7 +298,7 @@ public class OrderWorkflowService {
         }
         records.stream().filter(p -> p.getStatus() == PaymentStatus.SUCCESS).forEach(payment -> {
             payment.setStatus(PaymentStatus.REFUNDED);
-            payment.setRefundedAt(LocalDateTime.now());
+            payment.setRefundedAt(LocalDateTime.now(clock));
             payment.setRefundMethod("MANUAL");
             payment.setRefundNote("Quản lý xác nhận đã hoàn tiền cho khách");
             payments.save(payment);

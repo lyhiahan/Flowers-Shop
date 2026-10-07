@@ -6,6 +6,8 @@ import com.finalproject.entity.UserAddress;
 import java.util.List;
 
 public interface UserService {
+    User updateProfileImages(String username, String fullName, String phone, String address,
+            org.springframework.web.multipart.MultipartFile avatar, org.springframework.web.multipart.MultipartFile cover) throws java.io.IOException;
     User findByUsername(String username);
     User updateProfile(String username, String fullName, String phone, String address, String avatarUrl, String cover);
     void changePassword(String username, String oldPassword, String newPassword);

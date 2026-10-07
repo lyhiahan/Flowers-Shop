@@ -186,7 +186,7 @@ public class ManagerVoucherController {
         return "redirect:/manager/vouchers";
     }
 
-    @RequestMapping(value = "/toggle/{id}", method = {RequestMethod.GET, RequestMethod.POST})
+    @PostMapping("/toggle/{id}")
     public String toggleVoucher(@PathVariable("id") Long id, RedirectAttributes ra) {
         Voucher v = voucherRepository.findById(id).orElseThrow();
         storeAccess.requireManager(v.getStore());
@@ -197,7 +197,7 @@ public class ManagerVoucherController {
         return "redirect:/manager/vouchers";
     }
 
-    @RequestMapping(value = "/delete/{id}", method = {RequestMethod.GET, RequestMethod.POST})
+    @PostMapping("/delete/{id}")
     public String deleteVoucher(@PathVariable("id") Long id, RedirectAttributes ra) {
         Voucher v = voucherRepository.findById(id).orElseThrow();
         storeAccess.requireManager(v.getStore());

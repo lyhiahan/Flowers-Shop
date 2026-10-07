@@ -71,6 +71,11 @@ public class Order {
     @Builder.Default
     private String paymentStatus = "UNPAID"; // UNPAID, PAID
 
+    @Column(name="payment_expires_at")
+    private LocalDateTime paymentExpiresAt;
+    @Builder.Default @Column(name="payment_expired")
+    private Boolean paymentExpired = false;
+
     @org.hibernate.annotations.Nationalized
     @Column(name = "cancellation_reason", length = 500)
     private String cancellationReason;

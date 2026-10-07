@@ -101,37 +101,7 @@ public class ProfileController {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
 
         try {
-            String avatarUrl = user.getAvatarUrl();
-            String avatarPublicId = user.getAvatarPublicId();
-            if (avatarFile != null && !avatarFile.isEmpty()) {
-                CloudinaryService.UploadResult result = cloudinaryService.upload(avatarFile, "rental_shop_avatars");
-                if (result != null) {
-                    // Xóa ảnh cũ trên Cloudinary
-                    cloudinaryService.delete(avatarPublicId);
-                    avatarUrl = result.secureUrl();
-                    avatarPublicId = result.publicId();
-                }
-            }
-            String coverUrl = user.getCover();
-            String coverPublicId = user.getCoverPublicId();
-            if (coverFile != null && !coverFile.isEmpty()) {
-                CloudinaryService.UploadResult result = cloudinaryService.upload(coverFile, "rental_shop_covers");
-                if (result != null) {
-                    cloudinaryService.delete(coverPublicId);
-                    coverUrl = result.secureUrl();
-                    coverPublicId = result.publicId();
-                }
-            }
-
-            // Cập nhật entity
-            user.setFullName(fullName.trim());
-            if (phone != null) user.setPhone(phone.trim());
-            if (address != null) user.setAddress(address.trim());
-            user.setAvatarUrl(avatarUrl);
-            user.setAvatarPublicId(avatarPublicId);
-            user.setCover(coverUrl);
-            user.setCoverPublicId(coverPublicId);
-            userRepository.save(user);
+            userService.updateProfileImages(principal.getName(), fullName, phone, address, avatarFile, coverFile);
 
             ra.addFlashAttribute("successMessage", "Cập nhật hồ sơ thành công!");
         } catch (IllegalArgumentException ex) {

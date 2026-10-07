@@ -134,6 +134,9 @@ public class CheckoutController {
         String finalRecipientAddress = extractFirstNonBlank(recipientAddress);
 
         try {
+            finalRecipientName = resolveRecipientField(request, "recipientName", recipientName);
+            finalRecipientPhone = resolveRecipientField(request, "recipientPhone", recipientPhone);
+            finalRecipientAddress = resolveRecipientField(request, "recipientAddress", recipientAddress);
             if (selectedItemIds == null || selectedItemIds.isEmpty()) throw new IllegalArgumentException("Vui lòng chọn sản phẩm để thanh toán.");
             if (deliveryDate == null) throw new IllegalArgumentException("Vui lòng chọn ngày nhận hàng.");
             if (deliveryTime == null) {
@@ -208,14 +211,15 @@ public class CheckoutController {
     }
 
     private String extractFirstNonBlank(String input) {
-        if (input == null) return null;
-        if (input.contains(",")) {
-            for (String part : input.split(",")) {
-                if (part != null && !part.trim().isEmpty()) {
-                    return part.trim();
-                }
-            }
-        }
-        return input.trim();
+        return input == null ? null : input.trim();
+    }
+
+    private String resolveRecipientField(jakarta.servlet.http.HttpServletRequest request, String field, String fallback) {
+        String[] submitted = request.getParameterValues(field);
+        if (submitted == null) return extractFirstNonBlank(fallback);
+        var values = java.util.Arrays.stream(submitted).filter(value -> value != null && !value.isBlank())
+                .map(String::trim).distinct().toList();
+        if (values.size() > 1) throw new IllegalArgumentException("Thông tin người nhận bị gửi nhiều giá trị khác nhau. Vui lòng kiểm tra lại.");
+        return values.isEmpty() ? null : values.get(0);
     }
 }

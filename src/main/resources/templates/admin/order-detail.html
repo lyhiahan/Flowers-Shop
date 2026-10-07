@@ -297,8 +297,9 @@
             </div>
         </div>
 
-        <section th:if="${order.paymentMethod == 'BANK_TRANSFER' and order.paymentStatus == 'UNPAID' and order.status.name() != 'CANCELLED' and order.status.name() != 'REFUNDED' and order.status.name() != 'REFUND_REQUESTED'}"
+        <section th:if="${order.paymentMethod == 'BANK_TRANSFER' and order.paymentStatus == 'UNPAID' and (order.status.name() != 'CANCELLED' or order.paymentExpired == true) and order.status.name() != 'REFUNDED' and order.status.name() != 'REFUND_REQUESTED'}"
                  id="bankPaymentConfirmation" class="card border-0 shadow-sm rounded-4 p-4 mt-3">
+            <p th:if="${order.paymentExpired == true}" class="alert alert-warning">Đơn đã hết hạn và trả tồn kho. Xác nhận tiền đến muộn sẽ yêu cầu hoàn tiền, không khôi phục đơn hàng.</p>
             <h2 class="h5 fw-bold">Xác nhận đã nhận tiền chuyển khoản</h2>
             <div class="d-flex flex-wrap gap-4 my-2">
                 <p class="mb-0">Số tiền cần nhận: <strong th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></strong></p>

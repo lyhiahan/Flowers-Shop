@@ -120,14 +120,14 @@
                                 <td class="text-end pe-4" style="white-space: nowrap;">
                                     <div class="d-inline-flex align-items-center gap-2">
                                         <!-- Nút Bật / Tắt trạng thái -->
-                                        <a th:href="@{'/manager/vouchers/toggle/' + ${v.id}}"
+                                        <form method="post" th:action="@{'/manager/vouchers/toggle/' + ${v.id}}" class="d-inline"><button type="submit"
                                            class="btn btn-sm d-inline-flex align-items-center gap-1 shadow-sm"
                                            th:classappend="${v.isActive != null and v.isActive} ? 'btn-outline-warning text-dark' : 'btn-outline-success'"
                                            th:title="${v.isActive != null and v.isActive} ? 'Tạm tắt mã' : 'Bật kích hoạt'"
                                            style="border-radius: 8px; font-size: 13px; font-weight: 600; padding: 4px 10px;">
                                             <i th:class="${v.isActive != null and v.isActive} ? 'bi bi-pause-circle text-warning' : 'bi bi-play-circle text-success'"></i>
                                             <span th:text="${v.isActive != null and v.isActive} ? 'Tắt mã' : 'Bật mã'">Tắt/Bật</span>
-                                        </a>
+                                        </button></form>
 
                                         <!-- Nút Sửa -->
                                         <button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1 shadow-sm"
@@ -137,13 +137,13 @@
                                         </button>
 
                                         <!-- Nút Xóa -->
-                                        <a th:href="@{'/manager/vouchers/delete/' + ${v.id}}"
+                                        <form method="post" th:action="@{'/manager/vouchers/delete/' + ${v.id}}" class="d-inline"><button type="submit"
                                            class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1 shadow-sm"
                                            th:data-code="${v.code}"
                                            onclick="return confirm('Bạn có chắc chắn muốn xóa mã voucher [' + this.getAttribute('data-code') + ']?');"
                                            style="border-radius: 8px; font-size: 13px; font-weight: 600; padding: 4px 10px;">
                                             <i class="bi bi-trash"></i> Xóa
-                                        </a>
+                                        </button></form>
                                     </div>
                                 </td>
                             </tr>

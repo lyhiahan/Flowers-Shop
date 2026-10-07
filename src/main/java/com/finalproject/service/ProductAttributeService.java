@@ -11,8 +11,24 @@ import java.util.*;
 public class ProductAttributeService {
     private final StyleValueRepository values;
     @Transactional(readOnly=true)
+    public Map<String,List<StyleValue>> catalogGroups() {
+        Map<String,List<StyleValue>> groups = new LinkedHashMap<>();
+        for (String key : List.of("Kiểu dáng", "Dịp tặng", "Loại hoa", "Màu sắc")) groups.put(key, new ArrayList<>());
+        for (StyleValue value : activeValues()) {
+            String key = switch (value.getStyle().getName().trim().toLowerCase(Locale.ROOT)) {
+                case "kiểu dáng", "kiểu dáng cắm", "kiểu dáng hoa", "phong cách cắm" -> "Kiểu dáng";
+                case "màu sắc", "tone màu hoa", "tone màu thiết kế" -> "Màu sắc";
+                case "dịp tặng" -> "Dịp tặng";
+                case "loại hoa" -> "Loại hoa";
+                default -> value.getStyle().getName().trim();
+            };
+            if (groups.containsKey(key)) groups.get(key).add(value);
+        }
+        return groups;
+    }
+    @Transactional(readOnly=true)
     public List<StyleValue> activeValues() {
-        return values.findByIsDeletedFalse().stream().filter(v->v.getStyle()!=null && !Boolean.TRUE.equals(v.getStyle().getIsDeleted()))
+        return values.findAll().stream().filter(v->!Boolean.TRUE.equals(v.getIsDeleted()) && v.getStyle()!=null && !Boolean.TRUE.equals(v.getStyle().getIsDeleted()))
                 .sorted(Comparator.comparing((StyleValue v)->v.getStyle().getName()).thenComparing(StyleValue::getName)).toList();
     }
     @Transactional(readOnly=true)

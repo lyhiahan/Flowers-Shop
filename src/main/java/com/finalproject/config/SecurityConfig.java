@@ -62,8 +62,6 @@ public class SecurityConfig {
                 "/resend-otp",
                 "/forgot-password",
                 "/reset-password",
-                "/api/auth/login",
-                "/api/auth/refresh",
                 "/api/notifications/**",
                 "/checkout/momo/ipn"
             ))
@@ -87,8 +85,7 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/", "/products/**", "/product/**", "/stores/**", "/users/**",
                     "/login", "/register", "/verify-otp", "/resend-otp", "/forgot-password", "/reset-password",
-                    "/api/auth/login", "/api/auth/refresh",
-                    "/api/inventory/check", "/api/public/**",
+                        "/api/inventory/check", "/api/public/**",
                     "/css/**", "/js/**", "/images/**", "/upload/**", "/error", "/favicon.ico", "/webjars/**"
                 ).permitAll()
                 .anyRequest().authenticated()
