@@ -1,15 +1,410 @@
-<!DOCTYPE html><html lang="vi" xmlns:th="http://www.thymeleaf.org"><head th:replace="~{fragments/store-ui :: head('Dashboard Admin')}"></head><body><nav th:replace="~{fragments/store-ui :: nav(true)}"></nav><main class="container-fluid px-4"><h1 class="h3">Trung tâm quản trị hệ thống</h1><div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div><div th:if="${dataLoadError and errorMessage == null}" class="alert alert-danger" th:text="${errorMessage}"></div><div th:unless="${dataLoadError}"><div class="row g-3 mb-4"><div id="kpi-total-users" class="col"><div class="card p-3">Tổng người dùng <strong id="totalUsersCount" th:text="${totalUsersCount}"></strong><a id="btnViewUsersChart" href="#usersChartSection">Xem biểu đồ</a></div></div><div id="kpi-total-stores" class="col"><div class="card p-3">Tổng cửa hàng <strong id="totalStoresCount" th:text="${totalStoresCount}"></strong><a id="btnViewStoresChart" href="#storesChartSection">Xem biểu đồ</a></div></div></div><div class="row mb-4 g-3"><div id="kpi-total-products" class="col"><div class="card p-3">Tổng sản phẩm <strong id="totalProductsCount" th:text="${totalProductsCount}">0</strong></div></div><div id="kpi-total-orders" class="col"><div class="card p-3">Tổng đơn hàng <strong id="totalOrdersCount" th:text="${totalOrdersCount}">0</strong></div></div><div class="col"><div class="card p-3">Doanh thu trong khoảng (toàn bộ đơn hợp lệ)<strong th:text="${flowerRevenue}">0</strong></div></div></div><form action="/admin/dashboard" method="get" class="d-flex flex-wrap gap-3 mb-4" id="statisticsFilters"><input type="hidden" name="userChartType" th:value="${userChartType}"><input type="hidden" name="storeChartType" th:value="${storeChartType}"><label>Thống kê <select name="criteria" class="form-select" onchange="this.form.requestSubmit()"><option id="filterCriteriaRevenue" value="revenue" th:selected="${criteria == 'revenue'}">Doanh thu</option><option id="filterCriteriaOrders" value="orders" th:selected="${criteria == 'orders'}">Đơn hàng</option><option id="filterCriteriaProducts" value="products" th:selected="${criteria == 'products'}">Sản phẩm bán</option></select></label><label>Thời gian <select name="timeframe" class="form-select" onchange="this.form.requestSubmit()"><option id="filterTimeHour" value="hour" th:selected="${timeframe == 'hour'}">Giờ trong hôm nay</option><option id="filterTimeDay" value="day" th:selected="${timeframe == 'day'}">7 ngày gần nhất</option><option id="filterTimeMonth" value="month" th:selected="${timeframe == 'month'}">12 tháng năm hiện tại</option><option id="filterTimeYear" value="year" th:selected="${timeframe == 'year'}">5 năm gần nhất</option></select></label><label>Loại biểu đồ <select name="chartType" class="form-select" onchange="this.form.requestSubmit()"><option id="chartTypeLine" value="line" th:selected="${chartType == 'line'}">Đường</option><option id="chartTypeBar" value="bar" th:selected="${chartType == 'bar'}">Cột</option><option id="chartTypePie" value="pie" th:selected="${chartType == 'pie'}">Tròn</option></select></label></form><p class="text-muted">Biểu đồ dựa trên tối đa 1000 đơn mới nhất trong khoảng: <span th:text="${sampleCount}"></span> / <span th:text="${rangeOrdersCount}"></span> đơn. Tổng doanh thu dùng toàn bộ dữ liệu.</p><section class="card p-4 mb-4"><h2 class="h5" th:text="${chartUnit}"></h2><div style="height:320px"><canvas id="revenueTrendChart"></canvas></div><p th:if="${sampleCount == 0}">Chưa có dữ liệu trong khoảng thời gian này.</p></section><div class="row g-4 mb-4"><section id="topSellingProductsCard" class="col-lg-6"><div class="card p-3"><h2 class="h5">Top sản phẩm bán chạy trong khoảng</h2><div style="max-height:320px;overflow:auto"><table class="table"><tbody><tr th:each="p : ${topProducts}"><td th:text="${p.name}"></td><td th:text="${p.sold}"></td></tr></tbody></table></div><nav th:replace="~{fragments/store-ui :: pager(${topProductsPager})}"></nav></div></section><section id="topRecentOrdersCard" class="col-lg-6"><div class="card p-3"><h2 class="h5">Top đơn hàng mới nhất</h2><div style="max-height:320px;overflow:auto"><table class="table"><tbody><tr th:each="o : ${recentOrders}"><td><a th:href="@{/admin/orders/{id}(id=${o.id})}" th:text="${'#HD' + o.id}"></a></td><td th:text="${o.status}"></td><td th:text="${o.totalAmount}"></td></tr></tbody></table></div><nav th:replace="~{fragments/store-ui :: pager(${recentOrdersPager})}"></nav></div></section></div><section id="usersChartSection" class="row g-4 mb-4"><div class="col-lg-7"><div class="card p-4" id="newUserChartCard"><h2 class="h5">Người dùng mới</h2><p class="small">Khoảng thời gian dùng chung cho các biểu đồ trên dashboard.</p><form method="get" action="/admin/dashboard" class="d-flex gap-2 flex-wrap mb-3"><input type="hidden" name="criteria" th:value="${criteria}"><input type="hidden" name="chartType" th:value="${chartType}"><input type="hidden" name="storeChartType" th:value="${storeChartType}"><select name="timeframe" class="form-select w-auto" onchange="this.form.requestSubmit()"><option id="userTimeHour" value="hour" th:selected="${timeframe == 'hour'}">Giờ</option><option id="userTimeDay" value="day" th:selected="${timeframe == 'day'}">Ngày</option><option id="userTimeMonth" value="month" th:selected="${timeframe == 'month'}">Tháng</option><option id="userTimeYear" value="year" th:selected="${timeframe == 'year'}">Năm</option></select><button id="userLineBtn" class="btn btn-outline-success" name="userChartType" value="line">Đường</button><button id="userBarBtn" class="btn btn-outline-success" name="userChartType" value="bar">Cột</button><button id="userPieBtn" class="btn btn-outline-success" name="userChartType" value="pie">Tròn</button></form><p class="small text-muted">Tối đa 1000 bản ghi mới nhất; thống kê giờ chỉ gồm dữ liệu có giờ tạo chính xác.</p><div style="height:300px"><canvas id="adminUsersChart"></canvas></div></div></div><div class="col-lg-5"><div class="card p-3" id="topPointUsersCard"><h2 class="h5">Top Người Dùng Điểm Cao Nhất</h2><div style="max-height:400px;overflow:auto"><table class="table"><tbody><tr th:each="item : ${topPointUsers}"><td th:text="${item.fullName}"></td><td th:text="${item.point + ' pts'}"></td></tr></tbody></table></div><nav th:replace="~{fragments/store-ui :: pager(${topPointUsersPager})}"></nav></div></div></section><section id="storesChartSection" class="row g-4 mb-4"><div class="col-lg-7"><div class="card p-4" id="newStoreChartCard"><h2 class="h5">Cửa hàng mới</h2><form method="get" action="/admin/dashboard" class="d-flex gap-2 flex-wrap mb-3"><input type="hidden" name="criteria" th:value="${criteria}"><input type="hidden" name="chartType" th:value="${chartType}"><input type="hidden" name="userChartType" th:value="${userChartType}"><select name="timeframe" class="form-select w-auto" onchange="this.form.requestSubmit()"><option id="storeTimeHour" value="hour" th:selected="${timeframe == 'hour'}">Giờ</option><option id="storeTimeDay" value="day" th:selected="${timeframe == 'day'}">Ngày</option><option id="storeTimeMonth" value="month" th:selected="${timeframe == 'month'}">Tháng</option><option id="storeTimeYear" value="year" th:selected="${timeframe == 'year'}">Năm</option></select><button id="storeLineBtn" class="btn btn-outline-success" name="storeChartType" value="line">Đường</button><button id="storeBarBtn" class="btn btn-outline-success" name="storeChartType" value="bar">Cột</button><button id="storePieBtn" class="btn btn-outline-success" name="storeChartType" value="pie">Tròn</button></form><p class="small text-muted">Tối đa 1000 bản ghi mới nhất; thống kê giờ chỉ gồm dữ liệu có giờ tạo chính xác.</p><div style="height:300px"><canvas id="adminStoresChart"></canvas></div></div></div><div class="col-lg-5"><div class="card p-3" id="topPointStoresCard"><h2 class="h5">Top Cửa Hàng Điểm Cao Nhất</h2><div style="max-height:400px;overflow:auto"><table class="table"><tbody><tr th:each="item : ${topPointStores}"><td th:text="${item.name}"></td><td th:text="${item.point + ' pts'}"></td></tr></tbody></table></div><nav th:replace="~{fragments/store-ui :: pager(${topPointStoresPager})}"></nav></div></div></section></div></main><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script><script th:inline="javascript">
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin-layout :: assets('Dashboard Quản Trị Hệ Thống - Hoa Tươi Sài Gòn')}">
+</head>
+<body class="admin-body">
+<div class="admin-layout-wrapper">
+    <!-- Sidebar thống nhất chuẩn Quản trị viên -->
+    <aside th:replace="~{fragments/admin-layout :: sidebar('dashboard')}"></aside>
+
+    <!-- Main Content -->
+    <main class="main-wrapper-admin">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2 pb-2 border-bottom">
+            <div>
+                <h1 class="admin-page-title mb-1">Trung tâm quản trị hệ thống</h1>
+                <p class="text-muted small mb-0">Theo dõi doanh thu, tăng trưởng người dùng, cửa hàng và chỉ số vận hành toàn sàn</p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill fw-semibold">
+                    <i class="bi bi-shield-check me-1"></i> Hệ thống hoạt động bình thường
+                </span>
+            </div>
+        </div>
+
+        <!-- Alerts -->
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show rounded-3 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${dataLoadError and errorMessage == null}" class="alert alert-danger alert-dismissible fade show rounded-3 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:unless="${dataLoadError}">
+            <!-- 5 Thẻ KPI Thống kê cốt lõi -->
+            <div class="row g-3 mb-4">
+                <div id="kpi-total-users" class="col-12 col-sm-6 col-xl">
+                    <div class="kpi-card-admin">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small fw-bold text-muted">Tổng người dùng</span>
+                            <div class="rounded-3 p-2 d-flex align-items-center justify-content-center" style="background:#E0F2FE; color:#0369A1; width:36px; height:36px;">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <strong id="totalUsersCount" class="fs-3 fw-bold text-dark d-block" th:text="${totalUsersCount}">0</strong>
+                            <a id="btnViewUsersChart" href="#usersChartSection" class="small fw-semibold text-success text-decoration-none mt-1 d-inline-flex align-items-center gap-1">
+                                Xem biểu đồ <i class="bi bi-arrow-down-short"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="kpi-total-stores" class="col-12 col-sm-6 col-xl">
+                    <div class="kpi-card-admin">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small fw-bold text-muted">Tổng cửa hàng</span>
+                            <div class="rounded-3 p-2 d-flex align-items-center justify-content-center" style="background:#EDE9FE; color:#6D28D9; width:36px; height:36px;">
+                                <i class="bi bi-shop"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <strong id="totalStoresCount" class="fs-3 fw-bold text-dark d-block" th:text="${totalStoresCount}">0</strong>
+                            <a id="btnViewStoresChart" href="#storesChartSection" class="small fw-semibold text-success text-decoration-none mt-1 d-inline-flex align-items-center gap-1">
+                                Xem biểu đồ <i class="bi bi-arrow-down-short"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="kpi-total-products" class="col-12 col-sm-6 col-xl">
+                    <div class="kpi-card-admin">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small fw-bold text-muted">Tổng sản phẩm</span>
+                            <div class="rounded-3 p-2 d-flex align-items-center justify-content-center" style="background:#E5EEE8; color:#20382E; width:36px; height:36px;">
+                                <i class="bi bi-flower1"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <strong id="totalProductsCount" class="fs-3 fw-bold text-dark d-block" th:text="${totalProductsCount}">0</strong>
+                            <span class="small text-muted">Toàn hệ thống</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="kpi-total-orders" class="col-12 col-sm-6 col-xl">
+                    <div class="kpi-card-admin">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small fw-bold text-muted">Tổng đơn hàng</span>
+                            <div class="rounded-3 p-2 d-flex align-items-center justify-content-center" style="background:#FEF3C7; color:#B45309; width:36px; height:36px;">
+                                <i class="bi bi-bag-check-fill"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <strong id="totalOrdersCount" class="fs-3 fw-bold text-dark d-block" th:text="${totalOrdersCount}">0</strong>
+                            <span class="small text-muted">Đơn hàng phát sinh</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-12 col-xl">
+                    <div class="kpi-card-admin">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small fw-bold text-muted">Doanh thu trong kỳ</span>
+                            <div class="rounded-3 p-2 d-flex align-items-center justify-content-center" style="background:#F3E6E1; color:#A64060; width:36px; height:36px;">
+                                <i class="bi bi-cash-stack"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <strong class="fs-3 fw-bold d-block text-truncate" style="color: #A64060;" th:text="${flowerRevenue != null ? #numbers.formatDecimal(flowerRevenue, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">0 ₫</strong>
+                            <span class="d-none" th:text="${flowerRevenue}">0</span>
+                            <span class="small text-muted">Toàn bộ đơn hợp lệ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bộ lọc Thống kê doanh thu -->
+            <div class="card card-admin p-3 mb-4">
+                <form action="/admin/dashboard" method="get" class="d-flex flex-wrap gap-3 align-items-end" id="statisticsFilters">
+                    <input type="hidden" name="userChartType" th:value="${userChartType}">
+                    <input type="hidden" name="storeChartType" th:value="${storeChartType}">
+                    <div>
+                        <label class="form-label small fw-bold text-muted mb-1">Tiêu chí</label>
+                        <select name="criteria" class="form-select form-select-sm" style="min-width: 140px;" onchange="this.form.requestSubmit()">
+                            <option id="filterCriteriaRevenue" value="revenue" th:selected="${criteria == 'revenue'}">Doanh thu</option>
+                            <option id="filterCriteriaOrders" value="orders" th:selected="${criteria == 'orders'}">Đơn hàng</option>
+                            <option id="filterCriteriaProducts" value="products" th:selected="${criteria == 'products'}">Sản phẩm bán</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label small fw-bold text-muted mb-1">Khoảng thời gian</label>
+                        <select name="timeframe" class="form-select form-select-sm" style="min-width: 170px;" onchange="this.form.requestSubmit()">
+                            <option id="filterTimeHour" value="hour" th:selected="${timeframe == 'hour'}">Giờ trong hôm nay</option>
+                            <option id="filterTimeDay" value="day" th:selected="${timeframe == 'day'}">7 ngày gần nhất</option>
+                            <option id="filterTimeMonth" value="month" th:selected="${timeframe == 'month'}">12 tháng năm hiện tại</option>
+                            <option id="filterTimeYear" value="year" th:selected="${timeframe == 'year'}">5 năm gần nhất</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label small fw-bold text-muted mb-1">Loại biểu đồ</label>
+                        <select name="chartType" class="form-select form-select-sm" style="min-width: 130px;" onchange="this.form.requestSubmit()">
+                            <option id="chartTypeLine" value="line" th:selected="${chartType == 'line'}">Đường</option>
+                            <option id="chartTypeBar" value="bar" th:selected="${chartType == 'bar'}">Cột</option>
+                            <option id="chartTypePie" value="pie" th:selected="${chartType == 'pie'}">Tròn</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Biểu đồ Xu hướng Doanh thu -->
+            <section class="card card-admin p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                    <div>
+                        <h2 class="h5 fw-bold mb-1" style="color: #20382E;" th:text="${chartUnit}">Biểu đồ thống kê</h2>
+                        <p class="text-muted small mb-0">Biểu đồ dựa trên tối đa 1000 đơn mới nhất trong khoảng: <span class="fw-bold" th:text="${sampleCount}">0</span> / <span class="fw-bold" th:text="${rangeOrdersCount}">0</span> đơn. Tổng doanh thu dùng toàn bộ dữ liệu.</p>
+                    </div>
+                </div>
+                <div style="height:320px; position:relative;" class="mt-3">
+                    <canvas id="revenueTrendChart"></canvas>
+                </div>
+                <p th:if="${sampleCount == 0}" class="text-muted text-center py-4 mb-0">Chưa có dữ liệu trong khoảng thời gian này.</p>
+            </section>
+
+            <!-- Bảng Top Sản phẩm bán chạy & Top Đơn hàng mới nhất -->
+            <div class="row g-4 mb-4">
+                <section id="topSellingProductsCard" class="col-lg-6">
+                    <div class="card card-admin p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h2 class="h5 fw-bold mb-0" style="color: #20382E;">
+                                <i class="bi bi-fire text-danger me-2"></i>Top sản phẩm bán chạy trong khoảng
+                            </h2>
+                        </div>
+                        <div class="table-responsive" style="max-height:320px; overflow:auto">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead style="background-color: #E5EEE8;">
+                                    <tr>
+                                        <th class="py-2.5">Tên sản phẩm</th>
+                                        <th class="py-2.5 text-end">Số lượng đã bán</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:if="${#lists.isEmpty(topProducts)}">
+                                        <td colspan="2" class="text-muted text-center py-4">Chưa có dữ liệu bán hàng trong kỳ.</td>
+                                    </tr>
+                                    <tr th:each="p : ${topProducts}">
+                                        <td class="fw-medium text-dark" th:text="${p.name}"></td>
+                                        <td class="text-end fw-bold text-success" th:text="${p.sold}"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-3">
+                            <nav th:replace="~{fragments/store-ui :: pager(${topProductsPager})}"></nav>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="topRecentOrdersCard" class="col-lg-6">
+                    <div class="card card-admin p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h2 class="h5 fw-bold mb-0" style="color: #20382E;">
+                                <i class="bi bi-clock-history text-primary me-2"></i>Top đơn hàng mới nhất
+                            </h2>
+                        </div>
+                        <div class="table-responsive" style="max-height:320px; overflow:auto">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead style="background-color: #E5EEE8;">
+                                    <tr>
+                                        <th class="py-2.5">Mã đơn</th>
+                                        <th class="py-2.5">Trạng thái</th>
+                                        <th class="py-2.5 text-end">Tổng tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:if="${#lists.isEmpty(recentOrders)}">
+                                        <td colspan="3" class="text-muted text-center py-4">Chưa có đơn hàng nào.</td>
+                                    </tr>
+                                    <tr th:each="o : ${recentOrders}">
+                                        <td>
+                                            <a class="fw-bold text-decoration-none" style="color: #355447;" th:href="@{/admin/orders/{id}(id=${o.id})}" th:text="${'#HD' + o.id}">#HD</a>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border px-2 py-1" th:text="${o.status}"></span>
+                                        </td>
+                                        <td class="text-end fw-bold" th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-3">
+                            <nav th:replace="~{fragments/store-ui :: pager(${recentOrdersPager})}"></nav>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Khu vực Biểu đồ Người dùng mới & Top Điểm Người dùng -->
+            <section id="usersChartSection" class="row g-4 mb-4">
+                <div class="col-lg-7">
+                    <div class="card card-admin p-4 h-100" id="newUserChartCard">
+                        <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+                            <div>
+                                <h2 class="h5 fw-bold mb-1" style="color: #20382E;">Người dùng mới</h2>
+                                <p class="small text-muted mb-0">Khoảng thời gian dùng chung cho các biểu đồ trên dashboard.</p>
+                            </div>
+                        </div>
+                        <form method="get" action="/admin/dashboard" class="d-flex gap-2 flex-wrap mb-3 align-items-center">
+                            <input type="hidden" name="criteria" th:value="${criteria}">
+                            <input type="hidden" name="chartType" th:value="${chartType}">
+                            <input type="hidden" name="storeChartType" th:value="${storeChartType}">
+                            <select name="timeframe" class="form-select form-select-sm w-auto" onchange="this.form.requestSubmit()">
+                                <option id="userTimeHour" value="hour" th:selected="${timeframe == 'hour'}">Giờ</option>
+                                <option id="userTimeDay" value="day" th:selected="${timeframe == 'day'}">Ngày</option>
+                                <option id="userTimeMonth" value="month" th:selected="${timeframe == 'month'}">Tháng</option>
+                                <option id="userTimeYear" value="year" th:selected="${timeframe == 'year'}">Năm</option>
+                            </select>
+                            <div class="btn-group btn-group-sm">
+                                <button id="userLineBtn" class="btn" th:classappend="${userChartType == 'line' or userChartType == null} ? 'btn-success' : 'btn-outline-success'" name="userChartType" value="line">Đường</button>
+                                <button id="userBarBtn" class="btn" th:classappend="${userChartType == 'bar'} ? 'btn-success' : 'btn-outline-success'" name="userChartType" value="bar">Cột</button>
+                                <button id="userPieBtn" class="btn" th:classappend="${userChartType == 'pie'} ? 'btn-success' : 'btn-outline-success'" name="userChartType" value="pie">Tròn</button>
+                            </div>
+                        </form>
+                        <p class="small text-muted">Tối đa 1000 bản ghi mới nhất; thống kê giờ chỉ gồm dữ liệu có giờ tạo chính xác.</p>
+                        <div style="height:300px; position:relative;">
+                            <canvas id="adminUsersChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="card card-admin p-4 h-100" id="topPointUsersCard">
+                        <h2 class="h5 fw-bold mb-3" style="color: #20382E;">
+                            <i class="bi bi-trophy text-warning me-2"></i>Top Người Dùng Điểm Cao Nhất
+                        </h2>
+                        <div class="table-responsive" style="max-height:350px; overflow:auto">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead style="background-color: #E5EEE8;">
+                                    <tr>
+                                        <th class="py-2.5">Họ và tên</th>
+                                        <th class="py-2.5 text-end">Điểm tích lũy</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:if="${#lists.isEmpty(topPointUsers)}">
+                                        <td colspan="2" class="text-muted text-center py-4">Chưa có người dùng tích điểm.</td>
+                                    </tr>
+                                    <tr th:each="item : ${topPointUsers}">
+                                        <td class="fw-medium text-dark" th:text="${item.fullName}"></td>
+                                        <td class="text-end fw-bold text-success" th:text="${item.point + ' pts'}"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-3">
+                            <nav th:replace="~{fragments/store-ui :: pager(${topPointUsersPager})}"></nav>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Khu vực Biểu đồ Cửa hàng mới & Top Điểm Cửa hàng -->
+            <section id="storesChartSection" class="row g-4 mb-4">
+                <div class="col-lg-7">
+                    <div class="card card-admin p-4 h-100" id="newStoreChartCard">
+                        <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+                            <div>
+                                <h2 class="h5 fw-bold mb-1" style="color: #20382E;">Cửa hàng mới</h2>
+                                <p class="small text-muted mb-0">Khoảng thời gian dùng chung cho các biểu đồ trên dashboard.</p>
+                            </div>
+                        </div>
+                        <form method="get" action="/admin/dashboard" class="d-flex gap-2 flex-wrap mb-3 align-items-center">
+                            <input type="hidden" name="criteria" th:value="${criteria}">
+                            <input type="hidden" name="chartType" th:value="${chartType}">
+                            <input type="hidden" name="userChartType" th:value="${userChartType}">
+                            <select name="timeframe" class="form-select form-select-sm w-auto" onchange="this.form.requestSubmit()">
+                                <option id="storeTimeHour" value="hour" th:selected="${timeframe == 'hour'}">Giờ</option>
+                                <option id="storeTimeDay" value="day" th:selected="${timeframe == 'day'}">Ngày</option>
+                                <option id="storeTimeMonth" value="month" th:selected="${timeframe == 'month'}">Tháng</option>
+                                <option id="storeTimeYear" value="year" th:selected="${timeframe == 'year'}">Năm</option>
+                            </select>
+                            <div class="btn-group btn-group-sm">
+                                <button id="storeLineBtn" class="btn" th:classappend="${storeChartType == 'line'} ? 'btn-success' : 'btn-outline-success'" name="storeChartType" value="line">Đường</button>
+                                <button id="storeBarBtn" class="btn" th:classappend="${storeChartType == 'bar' or storeChartType == null} ? 'btn-success' : 'btn-outline-success'" name="storeChartType" value="bar">Cột</button>
+                                <button id="storePieBtn" class="btn" th:classappend="${storeChartType == 'pie'} ? 'btn-success' : 'btn-outline-success'" name="storeChartType" value="pie">Tròn</button>
+                            </div>
+                        </form>
+                        <p class="small text-muted">Tối đa 1000 bản ghi mới nhất; thống kê giờ chỉ gồm dữ liệu có giờ tạo chính xác.</p>
+                        <div style="height:300px; position:relative;">
+                            <canvas id="adminStoresChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="card card-admin p-4 h-100" id="topPointStoresCard">
+                        <h2 class="h5 fw-bold mb-3" style="color: #20382E;">
+                            <i class="bi bi-star-fill text-warning me-2"></i>Top Cửa Hàng Điểm Cao Nhất
+                        </h2>
+                        <div class="table-responsive" style="max-height:350px; overflow:auto">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead style="background-color: #E5EEE8;">
+                                    <tr>
+                                        <th class="py-2.5">Tên cửa hàng</th>
+                                        <th class="py-2.5 text-end">Điểm đánh giá</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:if="${#lists.isEmpty(topPointStores)}">
+                                        <td colspan="2" class="text-muted text-center py-4">Chưa có cửa hàng tích điểm.</td>
+                                    </tr>
+                                    <tr th:each="item : ${topPointStores}">
+                                        <td class="fw-medium text-dark" th:text="${item.name}"></td>
+                                        <td class="text-end fw-bold text-success" th:text="${item.point + ' pts'}"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-3">
+                            <nav th:replace="~{fragments/store-ui :: pager(${topPointStoresPager})}"></nav>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+
+<!-- Chart.js and Dashboard Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+<script th:inline="javascript">
 var revData = {labels: /*[[${chartLabels}]]*/ [], data: /*[[${chartValues}]]*/ []};
 var revType = /*[[${chartType}]]*/ 'line';
 function drawStoreChart(id, data, type, label) {
     var element = document.getElementById(id);
     if (!element || typeof Chart === 'undefined') return;
-    return new Chart(element.getContext('2d'), {type: type, data: {labels: data.labels || [], datasets: [{label: label, data: data.data || [], backgroundColor: ['#355447','#A64060','#e9ad4a','#79b7a1','#c4a8df','#db8580','#78a7d2'], borderColor:'#355447', borderWidth: 1}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:type==='pie'}}, scales:type==='pie'?{}:{y:{beginAtZero:true}}}});
+    return new Chart(element.getContext('2d'), {
+        type: type, 
+        data: {
+            labels: data.labels || [], 
+            datasets: [{
+                label: label, 
+                data: data.data || [], 
+                backgroundColor: ['#355447','#A64060','#e9ad4a','#79b7a1','#c4a8df','#db8580','#78a7d2'], 
+                borderColor:'#355447', 
+                borderWidth: 1
+            }]
+        }, 
+        options: {
+            responsive: true, 
+            maintainAspectRatio: false, 
+            plugins: {
+                legend: { display: type === 'pie' }
+            }, 
+            scales: type === 'pie' ? {} : { y: { beginAtZero: true } }
+        }
+    });
 }
 drawStoreChart('revenueTrendChart', revData, revType, /*[[${chartUnit}]]*/ 'Doanh thu');
 var usersData = /*[[${usersChart}]]*/ {};
 var storesData = /*[[${storesChart}]]*/ {};
 drawStoreChart('adminUsersChart', usersData, /*[[${userChartType}]]*/ 'line', 'Người dùng mới');
 drawStoreChart('adminStoresChart', storesData, /*[[${storeChartType}]]*/ 'bar', 'Cửa hàng mới');
-</script><th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
-</body></html>
+</script>
+
+<th:block th:replace="~{fragments/admin-layout :: footer}"></th:block>
+<th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
+</body>
+</html>

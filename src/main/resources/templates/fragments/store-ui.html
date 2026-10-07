@@ -1,1 +1,97 @@
-<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org"><head xmlns:th="http://www.thymeleaf.org" th:fragment="head(title)"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title th:text="${title}">FlowerShop</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"><link rel="stylesheet" th:href="@{/css/floral-theme.css}"></head><body><nav xmlns:th="http://www.thymeleaf.org" th:fragment="nav(admin)" class="navbar navbar-expand bg-white border-bottom mb-4 px-3"><a class="navbar-brand" th:href="@{/}">FlowerShop</a><div class="d-flex gap-3 flex-wrap"><a th:href="${admin} ? @{/admin/dashboard} : @{/manager/dashboard}">Dashboard</a><a th:href="${admin} ? @{/admin/stores} : @{/manager/stores}">Shop Manager</a><a th:if="${!admin}" th:href="@{/manager/profile}">Profile</a><a th:if="${!admin}" th:href="@{/manager/staff}">Staffs</a><a th:if="${!admin}" th:href="@{/manager/products}">Products</a><a th:href="${admin} ? @{/admin/orders} : @{/manager/orders}">Orders</a><a th:href="${admin} ? @{/admin/transactions} : @{/manager/wallet}">GD Coins</a><a th:if="${admin}" id="sidebarUsersLink" href="/admin/users">Users</a><a th:if="${admin}" id="sidebarProductsLink" href="/admin/products-manage">Products</a><a th:if="${admin}" id="sidebarOrdersLink" href="/admin/orders-manage">Orders</a><a th:if="${admin}" id="sidebarCategoriesLink" href="/admin/categories">Categories</a><a th:if="${admin}" id="sidebarCommissionsLink" href="/admin/commissions">Commissions</a><a th:if="${admin}" id="sidebarDeliveriesLink" href="/admin/deliveries">Deliveries</a><a th:if="${admin}" id="sidebarStoreLevelsLink" href="/admin/store-levels">StoreLevels</a><a th:if="${admin}" id="sidebarUserLevelsLink" href="/admin/user-levels">UserLevels</a><a th:if="${admin}" id="sidebarStylesLink" href="/admin/styles">Styles</a><a th:if="${admin}" id="sidebarTransactionsLink" href="/admin/transactions">Transactions</a><a th:if="${admin}" id="sidebarVouchersLink" href="/admin/vouchers">Vouchers</a></div></nav><nav th:fragment="pager(p)" th:if="${p != null}" class="d-flex align-items-center gap-2" aria-label="Phân trang thống kê"><a th:href="${p.previous}" class="btn btn-sm btn-outline-success" th:classappend="${p.page == 1} ? 'disabled' : ''">Previous</a><span th:text="${p.page + ' / ' + p.pages}"></span><a th:href="${p.next}" class="btn btn-sm btn-outline-success" th:classappend="${p.page == p.pages} ? 'disabled' : ''">Next</a></nav></body></html>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head xmlns:th="http://www.thymeleaf.org" th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title}">FlowerShop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
+</head>
+<body>
+
+<nav xmlns:th="http://www.thymeleaf.org" th:fragment="nav(admin)" class="navbar navbar-expand-lg bg-white border-bottom shadow-sm mb-4 px-3 py-2">
+    <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-success" th:href="@{/}">
+            <img th:src="@{/images/flower-logo.png}" alt="Logo" width="30" height="30" class="rounded">
+            <span>FlowerShop</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#storeUiNavContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="storeUiNavContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
+                <li class="nav-item">
+                    <a class="nav-link px-2 text-dark fw-semibold" th:href="${admin} ? @{/admin/dashboard} : @{/manager/dashboard}">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-2 text-dark fw-semibold" th:href="${admin} ? @{/admin/stores} : @{/manager/stores}">Cửa hàng</a>
+                </li>
+                <li class="nav-item" th:if="${!admin}">
+                    <a class="nav-link px-2 text-dark" th:href="@{/manager/profile}">Hồ sơ</a>
+                </li>
+                <li class="nav-item" th:if="${!admin}">
+                    <a class="nav-link px-2 text-dark" th:href="@{/manager/staff}">Nhân viên</a>
+                </li>
+                <li class="nav-item" th:if="${!admin}">
+                    <a class="nav-link px-2 text-dark" th:href="@{/manager/products}">Sản phẩm</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-2 text-dark fw-semibold" th:href="${admin} ? @{/admin/orders-manage} : @{/manager/orders}">Đơn hàng</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-2 text-dark fw-semibold" th:href="${admin} ? @{/admin/transactions} : @{/manager/wallet}">Giao dịch</a>
+                </li>
+                <li class="nav-item" th:if="${admin}">
+                    <a class="nav-link px-2 text-dark" id="sidebarUsersLink" href="/admin/users">Users</a>
+                </li>
+                <li class="nav-item" th:if="${admin}">
+                    <a class="nav-link px-2 text-dark" id="sidebarProductsLink" href="/admin/products-manage">Products</a>
+                </li>
+                <li class="nav-item" th:if="${admin}">
+                    <a class="nav-link px-2 text-dark" id="sidebarOrdersLink" href="/admin/orders-manage">Orders</a>
+                </li>
+                <li class="nav-item" th:if="${admin}">
+                    <a class="nav-link px-2 text-dark" id="sidebarCategoriesLink" href="/admin/categories">Categories</a>
+                </li>
+                <li class="nav-item" th:if="${admin}">
+                    <a class="nav-link px-2 text-dark" id="sidebarCommissionsLink" href="/admin/commissions">Commissions</a>
+                </li>
+                <li class="nav-item" th:if="${admin}">
+                    <a class="nav-link px-2 text-dark" id="sidebarDeliveriesLink" href="/admin/deliveries">Deliveries</a>
+                </li>
+                <li class="nav-item" th:if="${admin}">
+                    <a class="nav-link px-2 text-dark" id="sidebarStoreLevelsLink" href="/admin/store-levels">StoreLevels</a>
+                </li>
+                <li class="nav-item" th:if="${admin}">
+                    <a class="nav-link px-2 text-dark" id="sidebarUserLevelsLink" href="/admin/user-levels">UserLevels</a>
+                </li>
+                <li class="nav-item" th:if="${admin}">
+                    <a class="nav-link px-2 text-dark" id="sidebarStylesLink" href="/admin/styles">Styles</a>
+                </li>
+                <li class="nav-item" th:if="${admin}">
+                    <a class="nav-link px-2 text-dark" id="sidebarTransactionsLink" href="/admin/transactions">Transactions</a>
+                </li>
+                <li class="nav-item" th:if="${admin}">
+                    <a class="nav-link px-2 text-dark" id="sidebarVouchersLink" href="/admin/vouchers">Vouchers</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<nav th:fragment="pager(p)" th:if="${p != null}" class="d-flex align-items-center gap-2" aria-label="Phân trang thống kê">
+    <a th:href="${p.previous}" class="btn btn-sm btn-outline-success rounded-pill px-3" th:classappend="${p.page == 1} ? 'disabled' : ''">
+        <i class="bi bi-chevron-left"></i> Trước
+    </a>
+    <span class="small fw-semibold text-muted px-2" th:text="${p.page + ' / ' + p.pages}">1 / 1</span>
+    <a th:href="${p.next}" class="btn btn-sm btn-outline-success rounded-pill px-3" th:classappend="${p.page == p.pages} ? 'disabled' : ''">
+        Sau <i class="bi bi-chevron-right"></i>
+    </a>
+</nav>
+
+</body>
+</html>
