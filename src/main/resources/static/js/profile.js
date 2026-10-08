@@ -1,18 +1,5 @@
 /* Profile interactions using the project's Bootstrap bundle and vanilla JS. */
 (function () {
-    window.handleRoleChange = function (role) {
-        const sections = { MANAGER: 'sectionManager', MANAGER: 'sectionVendor' };
-        Object.entries(sections).forEach(([value, id]) => {
-            const section = document.getElementById(id);
-            if (!section) return;
-            section.hidden = value !== role;
-            section.style.display = value === role ? 'block' : 'none';
-            section.querySelectorAll('input, select, textarea').forEach(input => { input.disabled = value !== role; });
-        });
-        document.getElementById('btnSubmitRoleRequest').disabled = !sections[role];
-    };
-    const select = document.getElementById('selectTargetRole');
-    if (select) handleRoleChange(select.value);
     const tab = new URLSearchParams(location.search).get('tab');
     const tabId = tab === 'addresses' ? 'address' : tab;
     const tabButton = document.getElementById(tabId + '-tab');

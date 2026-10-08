@@ -6,7 +6,7 @@ import org.springframework.http.*;
 import org.springframework.security.access.AccessDeniedException;
 import java.security.Principal;
 import java.util.Map;
-@RestController @RequestMapping("/api/chat") @RequiredArgsConstructor
+@RestController @RequestMapping("/api/chat") @RequiredArgsConstructor @lombok.extern.slf4j.Slf4j
 public class ChatController {
  private final ChatService chat;
  public record OpenRequest(String kind,Long storeId){}
@@ -23,4 +23,14 @@ public class ChatController {
  @ExceptionHandler(AccessDeniedException.class) public ResponseEntity<Map<String,String>> denied(AccessDeniedException ex){return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error",ex.getMessage()));}
  @ExceptionHandler(IllegalArgumentException.class) public ResponseEntity<Map<String,String>> invalid(IllegalArgumentException ex){return ResponseEntity.badRequest().body(Map.of("error",ex.getMessage()));}
  @ExceptionHandler({IllegalStateException.class,org.springframework.dao.PessimisticLockingFailureException.class}) public ResponseEntity<Map<String,String>> conflict(Exception ex){return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error",ex instanceof IllegalStateException?ex.getMessage():"Hội thoại đang được xử lý. Vui lòng thử lại."));}
+ @ExceptionHandler(org.springframework.dao.DataAccessException.class)
+ public ResponseEntity<Map<String,String>> storage(Exception ex){
+  log.error("Không thể truy cập dữ liệu chat. Kiểm tra migration db/chat-schema.sql.",ex);
+  return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(Map.of("error","Chat tạm thời chưa khả dụng. Vui lòng thử lại sau.","code","CHAT_STORAGE_UNAVAILABLE"));
+ }
+ @ExceptionHandler(Exception.class)
+ public ResponseEntity<Map<String,String>> unexpected(Exception ex){
+  log.error("Không thể xử lý yêu cầu chat.",ex);
+  return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error","Không thể tải chat lúc này. Vui lòng thử lại sau."));
+ }
 }

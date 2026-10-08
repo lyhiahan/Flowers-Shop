@@ -5,17 +5,27 @@
     const el = id => document.getElementById(id);
     const panel = el('chatPanel'), text = el('chatText'), image = el('chatImage');
     let context, current, socket, connected = false, busy = false, buffer = '', retry = 0;
-    let reconnectTimer, heartbeat, pending, inboxPage = 0, unseen = 0, historyVersion = 0;
+    let reconnectTimer, heartbeat, pending, connectTimer, stopped = false, inboxPage = 0, unseen = 0, historyVersion = 0;
     const conversations = new Map();
-    function status(message, reconnect = false) { el('chatStatus').textContent = message; el('chatReconnect').hidden = !reconnect; }
+    function status(message, reconnect = false) { el('chatStatus').textContent = message; el('chatReconnect').hidden = !(reconnect || stopped); }
     async function api(path, options = {}) {
         const headers = {Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest', ...(options.headers || {})};
         if (options.method && options.method !== 'GET') headers[root.dataset.csrfHeader] = root.dataset.csrfToken;
         const response = await fetch('/api/chat' + path, {...options, headers, credentials: 'same-origin'});
-        if (response.redirected) throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+        if (response.redirected || response.status === 401) {
+            stopConnection('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+            throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+        }
         let data;
-        try { data = await response.json(); } catch (_) { throw new Error('Không thể tải chat. Vui lòng thử lại.'); }
-        if (!response.ok) throw new Error(data.error || 'Không thể thực hiện thao tác này.');
+        try { data = await response.json(); } catch (_) {
+            if (response.status === 403) stopConnection('Phiên chat không còn quyền truy cập. Vui lòng đăng nhập lại.');
+            throw new Error(response.status === 403 ? 'Phiên chat không còn quyền truy cập. Vui lòng đăng nhập lại.' : 'Không thể tải chat. Vui lòng thử lại.');
+        }
+        if (!response.ok) {
+            const message = data.error || data.message || 'Không thể thực hiện thao tác này.';
+            if (response.status === 403) stopConnection(message);
+            throw new Error(message);
+        }
         return data;
     }
     function controls() {
@@ -28,7 +38,13 @@
         if (context.role !== 'USER' && conversation.customerId !== context.userId) value += ' · ' + conversation.customerName;
         return value;
     }
+    function timestamp(value) {
+        if (!Array.isArray(value)) return typeof value === 'string' ? value : '';
+        const [year, month, day, hour = 0, minute = 0, second = 0, nano = 0] = value;
+        return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')}.${String(nano).padStart(9, '0')}`;
+    }
     function upsert(conversation) {
+        conversation = {...conversation, updatedAt: timestamp(conversation.updatedAt)};
         const previous = conversations.get(conversation.id);
         if (!previous || previous.updatedAt <= conversation.updatedAt) conversations.set(conversation.id, conversation);
     }
@@ -53,7 +69,7 @@
         if (log.querySelector('[data-message-id="' + message.id + '"]')) return;
         const item = document.createElement('div'); item.className = 'chat-message'; item.dataset.messageId = message.id;
         if (message.senderId === context.userId) item.classList.add('mine');
-        const caption = document.createElement('small'); caption.textContent = message.senderName + ' · ' + new Date(message.createdAt).toLocaleString('vi-VN'); item.append(caption);
+        const caption = document.createElement('small'); caption.textContent = message.senderName + ' · ' + new Date(timestamp(message.createdAt)).toLocaleString('vi-VN'); item.append(caption);
         if (message.content) { const body = document.createElement('p'); body.textContent = message.content; item.append(body); }
         if (message.imageUrl && message.imageUrl.startsWith('https://')) {
             const link = document.createElement('a'); link.href = message.imageUrl; link.target = '_blank'; link.rel = 'noopener noreferrer';
@@ -82,14 +98,15 @@
     }
     function fileName() { const file = image.files[0]; el('chatFileName').textContent = file?.name || ''; el('chatRemoveImage').hidden = !file; }
     function ack(message) {
-        if (pending && message.senderId === context.userId && message.clientMessageId === pending.id) {
+        if (pending && String(message.senderId) === String(context.userId) && message.clientMessageId === pending.id) {
             clearTimeout(pending.timer); pending = null; busy = false; text.value = ''; image.value = ''; fileName(); controls();
             status('Đã gửi tin nhắn.');
         }
     }
     function received(event) {
         if (event.type !== 'MESSAGE' || !event.message || !event.conversation) return;
-        upsert(event.conversation); renderInbox(); ack(event.message);
+        ack(event.message);
+        upsert(event.conversation); renderInbox();
         if (event.message.conversationId === current?.id) { bubble(event.message); el('chatMessages').scrollTop = el('chatMessages').scrollHeight; }
         if (panel.hidden && event.message.senderId !== context.userId) { unseen++; el('chatBadge').textContent = unseen; el('chatBadge').hidden = false; }
     }
@@ -97,12 +114,29 @@
         if (!socket || socket.readyState !== WebSocket.OPEN) throw new Error('Chat chưa kết nối. Vui lòng thử lại.');
         socket.send(command + '\n' + Object.entries(headers).map(([key, value]) => key + ':' + value).join('\n') + '\n\n' + body + '\0');
     }
+    function stopConnection(message) {
+        stopped = true; connected = false; busy = false;
+        clearTimeout(reconnectTimer); clearTimeout(connectTimer); clearInterval(heartbeat);
+        if (pending) clearTimeout(pending.timer);
+        const previous = socket; socket = null; previous?.close(); controls(); status(message, true);
+    }
     function connect() {
+        if (stopped) return;
         if (socket && [WebSocket.OPEN, WebSocket.CONNECTING].includes(socket.readyState)) return;
         clearTimeout(reconnectTimer); connected = false; controls(); buffer = ''; status('Đang kết nối chat…');
-        socket = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws-chat');
-        socket.onopen = () => frame('CONNECT', {'accept-version': '1.2', host: location.host, 'heart-beat': '20000,0'});
-        socket.onmessage = event => {
+        const connection = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws-chat', ['v12.stomp']);
+        socket = connection;
+        let failure;
+        connectTimer = setTimeout(() => {
+            if (socket !== connection || connected) return;
+            failure = 'Chat không phản hồi sau 10 giây. Vui lòng kết nối lại.';
+            connection.close();
+        }, 10000);
+        connection.onopen = () => {
+            if (socket === connection) frame('CONNECT', {'accept-version': '1.2', host: location.host, 'heart-beat': '20000,0'});
+        };
+        connection.onmessage = event => {
+            if (socket !== connection) return;
             buffer += event.data;
             if (buffer.length > 131072) { socket.close(); status('Dữ liệu chat không hợp lệ.'); return; }
             let end;
@@ -112,26 +146,43 @@
                 const lines = raw.slice(0, split).split('\n'), command = lines.shift(), headers = {};
                 lines.forEach(line => { const colon = line.indexOf(':'); if (colon > 0) headers[line.slice(0, colon)] = line.slice(colon + 1); });
                 if (command === 'CONNECTED') {
+                    clearTimeout(connectTimer);
                     connected = true; retry = 0; frame('SUBSCRIBE', {id: 'chat-messages', destination: '/user/queue/chat', ack: 'auto'});
                     frame('SUBSCRIBE', {id: 'chat-errors', destination: '/user/queue/chat.errors', ack: 'auto'});
+                    frame('SUBSCRIBE', {id: 'chat-acks', destination: '/user/queue/chat.acks', ack: 'auto'});
                     clearInterval(heartbeat); heartbeat = setInterval(() => { if (socket.readyState === WebSocket.OPEN) socket.send('\n'); }, 20000);
                     status('Chat đã kết nối.'); controls(); loadInbox().catch(error => status(error.message));
                     if (current) history().catch(error => status(error.message));
                 } else if (command === 'MESSAGE') {
                     try {
                         const data = JSON.parse(raw.slice(split + 2));
-                        if (headers.subscription === 'chat-errors') { if (pending) clearTimeout(pending.timer); busy = false; controls(); status(data.error || 'Không thể gửi tin nhắn.'); }
+                        if (headers.subscription === 'chat-acks') {
+                            ack(data);
+                            if (data.conversationId === current?.id) { bubble(data); el('chatMessages').scrollTop = el('chatMessages').scrollHeight; }
+                        }
+                        else if (headers.subscription === 'chat-errors') { if (pending) clearTimeout(pending.timer); busy = false; controls(); status(data.error || 'Không thể gửi tin nhắn.'); }
                         else received(data);
                     } catch (_) { status('Không thể đọc tin nhắn nhận được.'); }
-                } else if (command === 'ERROR') status('Phiên chat bị từ chối. Vui lòng đăng nhập lại.', true);
+                } else if (command === 'ERROR') {
+                    stopConnection('Server từ chối phiên chat. Vui lòng đăng nhập lại hoặc kiểm tra quyền tài khoản.');
+                    return;
+                }
             }
         };
-        socket.onclose = () => {
+        connection.onclose = () => {
+            if (socket !== connection) return;
+            socket = null; clearTimeout(connectTimer);
             connected = false; busy = false; clearInterval(heartbeat); if (pending) clearTimeout(pending.timer); controls();
-            status('Chat mất kết nối. Tin đã lưu vẫn được giữ lại.', true);
-            if (retry < 6) reconnectTimer = setTimeout(connect, Math.min(1000 * 2 ** retry++, 15000));
+            status(failure || 'Chat mất kết nối. Tin đã lưu vẫn được giữ lại.', true);
+            if (!stopped && retry < 6) reconnectTimer = setTimeout(async () => {
+                try { await api('/context'); connect(); } catch (error) { status(error.message, true); }
+            }, Math.min(1000 * 2 ** retry++, 15000));
         };
-        socket.onerror = () => status('Chưa kết nối được chat.', true);
+        connection.onerror = () => {
+            if (socket !== connection) return;
+            failure = 'Chưa kết nối được chat. Vui lòng kiểm tra kết nối hoặc phiên đăng nhập.';
+            status(failure, true);
+        };
     }
     async function ensureContext() {
             if (!context) {
@@ -151,7 +202,10 @@
     }
     el('chatLauncher').addEventListener('click', openPanel);
     el('chatClose').addEventListener('click', () => { panel.hidden = true; el('chatLauncher').setAttribute('aria-expanded', 'false'); el('chatLauncher').focus(); });
-    el('chatReconnect').addEventListener('click', () => { retry = 0; openPanel(); });
+    el('chatReconnect').addEventListener('click', async () => {
+        retry = 0; stopped = false;
+        try { await api('/context'); await openPanel(); } catch (error) { status(error.message, true); }
+    });
     el('chatRefresh').addEventListener('click', () => loadInbox().catch(error => status(error.message)));
     el('chatMoreConversations').addEventListener('click', () => loadInbox(inboxPage + 1).catch(error => status(error.message)));
     el('chatOlder').addEventListener('click', () => { const first = el('chatMessages').firstElementChild; if (first) history(first.dataset.messageId).catch(error => status(error.message)); });
@@ -168,20 +222,27 @@
         const content = text.value.trim(), file = image.files[0];
         if (!content && !file) { status('Vui lòng nhập tin nhắn hoặc chọn ảnh.'); text.focus(); return; }
         if (!pending || pending.text !== content || pending.file !== file) pending = {id: crypto.randomUUID(), text: content, file};
+        const attempt = pending, conversationId = current.id;
         busy = true; controls(); status(file ? 'Đang tải ảnh lên Cloudinary…' : 'Đang gửi tin nhắn…');
         try {
             if (file) {
-                const data = new FormData(); data.set('file', file); data.set('content', content); data.set('clientMessageId', pending.id);
-                const message = await api('/conversations/' + current.id + '/images', {method: 'POST', body: data}); ack(message);
-                bubble(message); el('chatMessages').scrollTop = el('chatMessages').scrollHeight; loadInbox().catch(() => {});
+                const data = new FormData(); data.set('file', file); data.set('content', content); data.set('clientMessageId', attempt.id);
+                const message = await api('/conversations/' + conversationId + '/images', {method: 'POST', body: data}); ack(message);
+                if (message.conversationId === current?.id) { bubble(message); el('chatMessages').scrollTop = el('chatMessages').scrollHeight; }
+                loadInbox().catch(() => {});
             } else {
-                frame('SEND', {destination: '/app/chat.send', 'content-type': 'application/json'}, JSON.stringify({conversationId: current.id, content, clientMessageId: pending.id}));
-                pending.timer = setTimeout(() => { busy = false; controls(); status('Chưa nhận được xác nhận. Bấm Gửi để thử lại, tin nhắn sẽ không bị lưu trùng.'); }, 15000);
+                frame('SEND', {destination: '/app/chat.send', 'content-type': 'application/json'}, JSON.stringify({conversationId, content, clientMessageId: attempt.id}));
+                attempt.timer = setTimeout(() => {
+                    if (pending?.id !== attempt.id) return;
+                    busy = false; controls(); status('Chưa nhận được xác nhận. Bấm Gửi để thử lại, tin nhắn sẽ không bị lưu trùng.');
+                }, 15000);
             }
-        } catch (error) { busy = false; controls(); status(error.message); }
+        } catch (error) {
+            if (pending?.id === attempt.id) { clearTimeout(attempt.timer); busy = false; controls(); status(error.message); }
+        }
     });
     text.addEventListener('keydown', event => { if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) { event.preventDefault(); el('chatSendForm').requestSubmit(); } });
     document.addEventListener('keydown', event => { if (event.key === 'Escape' && !panel.hidden) el('chatClose').click(); });
-    window.addEventListener('beforeunload', () => { clearTimeout(reconnectTimer); clearInterval(heartbeat); socket?.close(); });
+    window.addEventListener('beforeunload', () => { stopped = true; clearTimeout(reconnectTimer); clearTimeout(connectTimer); clearInterval(heartbeat); socket?.close(); });
     ensureContext().then(connect).catch(error => status(error.message, true));
 })();

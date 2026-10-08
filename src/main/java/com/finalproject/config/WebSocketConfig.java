@@ -15,6 +15,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
+        registry.setPreserveReceiveOrder(true);
         // Endpoint cho client kết nối SockJS
         registry.addEndpoint("/ws")
                 .withSockJS();
@@ -25,6 +26,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         // Topic broadcast: /topic/store/{storeId}/orders, /topic/product/{productId}/stock
         registry.enableSimpleBroker("/topic", "/queue");
+        registry.setPreservePublishOrder(true);
         registry.setApplicationDestinationPrefixes("/app");
     }
 
@@ -59,12 +61,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     if (!Boolean.TRUE.equals(user.getIsActive()) || Boolean.TRUE.equals(user.getAccountDisabledByAdmin()) || user.isRetiredDeliveryAccount()) {
                         throw new org.springframework.security.access.AccessDeniedException("Tài khoản chưa được kích hoạt.");
                     }
-                    if ("/user/queue/chat".equals(destination) || "/user/queue/chat.errors".equals(destination)) return message;
+                    if ("/user/queue/chat".equals(destination) || "/user/queue/chat.errors".equals(destination)
+                            || "/user/queue/chat.acks".equals(destination)) return message;
                     if (destination.matches("^/topic/store/[0-9]+/orders$")) {
                         Long storeId = Long.valueOf(destination.split("/")[3]);
                         var store = stores.findById(storeId).orElseThrow();
-                        boolean roleAllowed = user.getRole() == com.finalproject.enums.Role.ADMIN
-                                || user.getRole() == com.finalproject.enums.Role.MANAGER;
+                        boolean roleAllowed = user.hasRole(com.finalproject.enums.Role.ADMIN)
+                                || user.hasRole(com.finalproject.enums.Role.MANAGER);
                         boolean allowed = user.hasRole(com.finalproject.enums.Role.ADMIN)
                                 || users.findChatManagers(storeId, com.finalproject.enums.Role.MANAGER).stream().anyMatch(m -> m.getId().equals(user.getId()));
                         if (!roleAllowed || !allowed) {
@@ -72,7 +75,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         }
                     } else if (destination.matches("^/topic/user/[0-9]+/notifications$")) {
                         Long targetUserId = Long.valueOf(destination.split("/")[3]);
-                        if (!user.getId().equals(targetUserId) && user.getRole() != com.finalproject.enums.Role.ADMIN) {
+                        if (!user.getId().equals(targetUserId) && !user.hasRole(com.finalproject.enums.Role.ADMIN)) {
                             throw new org.springframework.security.access.AccessDeniedException("Không có quyền nhận thông báo của tài khoản khác.");
                         }
                     } else {

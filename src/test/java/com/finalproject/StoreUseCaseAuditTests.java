@@ -183,7 +183,7 @@ class StoreUseCaseAuditTests {
         assertThat(store.getIsOpen()).as("Basic info form does not submit isOpen; saving must preserve it").isTrue();
     }
     @Test void uc020OwnerAddsAndRemovesCandidate() throws Exception {
-        User candidate = account("audit_candidate", Role.USER);
+        User candidate = account("audit_candidate", Role.MANAGER);
         mvc.perform(post("/manager/staff/add").with(user(owner.getUsername()).roles("MANAGER")).with(csrf())
                 .param("selectedUserIds", candidate.getId().toString())).andExpect(flash().attributeExists("successMessage"));
         assertThat(candidate.getStore().getId()).isEqualTo(store.getId());

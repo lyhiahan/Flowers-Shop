@@ -4,7 +4,6 @@ import com.finalproject.config.RetiredDeliveryRoleCleanup;
 import com.finalproject.entity.*;
 import com.finalproject.enums.*;
 import com.finalproject.repository.*;
-import com.finalproject.service.RoleManagementService;
 import com.finalproject.service.AuthService;
 import com.finalproject.service.impl.CustomUserDetailsService;
 import jakarta.persistence.EntityManager;
@@ -32,7 +31,6 @@ class RetiredDeliveryRoleTests {
     @Autowired RoleAuditLogRepository audits;
     @Autowired RetiredDeliveryRoleCleanup cleanup;
     @Autowired CustomUserDetailsService userDetails;
-    @Autowired RoleManagementService roles;
     @Autowired AuthService auth;
     @Autowired OtpVerificationRepository otps;
 
@@ -89,7 +87,6 @@ class RetiredDeliveryRoleTests {
         RoleRequest savedRequest = requests.findById(request.getId()).orElseThrow();
         assertThat(savedRequest.getStatus()).isEqualTo(RoleRequestStatus.REJECTED);
         assertThat(savedRequest.getTargetRoleDisplayName()).isEqualTo("Vai trò đã ngừng sử dụng");
-        assertThatThrownBy(() -> roles.approveRoleRequest(request.getId(), manager.getId(), store.getId())).hasMessageContaining("ngừng sử dụng");
         assertThat(audits.findById(audit.getId())).hasValueSatisfying(savedAudit -> {
             assertThat(savedAudit.getStoredRole()).isEqualTo("SHIPPER");
             assertThat(savedAudit.getRoleDisplayName()).isEqualTo("Vai trò đã ngừng sử dụng");

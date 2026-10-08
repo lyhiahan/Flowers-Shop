@@ -25,7 +25,6 @@ public class AdminDashboardController {
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
-    private final RoleRequestRepository roleRequestRepository;
     private final com.finalproject.service.AnalyticsService analyticsService;
 
     @GetMapping({"", "/dashboard"})
@@ -60,8 +59,6 @@ public class AdminDashboardController {
             long completedOrders = orderRepository.countByStatus(OrderStatus.COMPLETED);
 
             // Việc cần xử lý: Yêu cầu cấp vai trò, sản phẩm chờ duyệt
-            long pendingRoleRequestsCount = roleRequestRepository.countByStatus(com.finalproject.enums.RoleRequestStatus.PENDING);
-            List<com.finalproject.entity.RoleRequest> pendingRoleRequests = roleRequestRepository.findByStatusOrderByCreatedAtDesc(com.finalproject.enums.RoleRequestStatus.PENDING);
             List<com.finalproject.entity.Product> pendingApprovalProducts = productRepository.findAll().stream().filter(p -> Boolean.FALSE.equals(p.getIsActive())).limit(10).toList();
 
             // UC_025: Top người dùng điểm cao nhất hệ thống (lên đến 1000 người dùng)
@@ -117,8 +114,6 @@ public class AdminDashboardController {
             model.addAttribute("totalProducts", totalProducts);
             model.addAttribute("totalProductsCount", totalProducts);
             model.addAttribute("pendingProducts", pendingProducts);
-            model.addAttribute("pendingRoleRequestsCount", pendingRoleRequestsCount);
-            model.addAttribute("pendingRoleRequests", pendingRoleRequests);
             model.addAttribute("pendingApprovalProducts", pendingApprovalProducts);
             model.addAttribute("totalCategories", totalCategories);
             model.addAttribute("totalUsers", totalUsers);

@@ -11,7 +11,10 @@ public class ChatSocketController {
  private final ChatService chat;
  public record SendRequest(Long conversationId,String content,String clientMessageId){}
  @MessageMapping("/chat.send")
- public void send(SendRequest input,Principal principal){chat.send(principal==null?null:principal.getName(),input.conversationId(),input.content(),input.clientMessageId());}
+ @SendToUser(destinations="/queue/chat.acks",broadcast=false)
+ public ChatService.MessageView send(SendRequest input,Principal principal){
+  return chat.send(principal==null?null:principal.getName(),input.conversationId(),input.content(),input.clientMessageId());
+ }
  @MessageExceptionHandler({IllegalArgumentException.class,IllegalStateException.class,org.springframework.security.access.AccessDeniedException.class})
  @SendToUser(destinations="/queue/chat.errors",broadcast=false)
  public Map<String,String> error(Exception ex){return Map.of("error",ex.getMessage());}

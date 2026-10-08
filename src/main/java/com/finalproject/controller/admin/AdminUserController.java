@@ -1,14 +1,9 @@
 package com.finalproject.controller.admin;
 
-import com.finalproject.entity.RoleRequest;
-import com.finalproject.entity.Store;
 import com.finalproject.entity.User;
 import com.finalproject.enums.Role;
-import com.finalproject.enums.RoleRequestStatus;
-import com.finalproject.repository.RoleRequestRepository;
 import com.finalproject.repository.StoreRepository;
 import com.finalproject.repository.UserRepository;
-import com.finalproject.service.RoleManagementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,7 +16,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.Collections;
-import java.util.List;
 
 @Controller
 @RequestMapping("/admin/users")
@@ -29,10 +23,9 @@ import java.util.List;
 public class AdminUserController {
 
     private final UserRepository userRepository;
+    private final com.finalproject.service.AccountProvisioningService provisioning;
     private final com.finalproject.service.CustomerAccountClosureService accountClosure;
     private final StoreRepository storeRepository;
-    private final RoleRequestRepository roleRequestRepository;
-    private final RoleManagementService roleManagementService;
     private final com.finalproject.repository.OrderRepository orderRepository;
     private final com.finalproject.repository.CartRepository cartRepository;
     private final com.finalproject.repository.CartItemRepository cartItemRepository;
@@ -43,7 +36,6 @@ public class AdminUserController {
     public String listUsers(@RequestParam(value = "tab", required = false, defaultValue = "users") String tab,
                             @RequestParam(value = "keyword", required = false) String keyword,
                             @RequestParam(value = "role", required = false) String roleStr,
-                            @RequestParam(value = "requestStatus", required = false) String requestStatusStr,
                             @RequestParam(value = "page", defaultValue = "0") int page,
                             @RequestParam(value = "size", defaultValue = "5") int size,
                             Model model) {
@@ -65,18 +57,7 @@ public class AdminUserController {
                 userPage = userRepository.findAll(pageable);
             }
 
-            // Tab 2: Danh sách yêu cầu vai trò
-            RoleRequestStatus statusFilter = null;
-            if (requestStatusStr != null && !requestStatusStr.trim().isEmpty() && !"ALL".equalsIgnoreCase(requestStatusStr)) {
-                try {
-                    statusFilter = RoleRequestStatus.valueOf(requestStatusStr.toUpperCase());
-                } catch (Exception ignored) {}
-            }
-            List<RoleRequest> roleRequests = roleManagementService.getAllRoleRequests(statusFilter);
-            long pendingCount = roleRequestRepository.countByStatus(RoleRequestStatus.PENDING);
-            List<Store> stores = storeRepository.findAll();
-
-            model.addAttribute("activeTab", tab);
+            model.addAttribute("activeTab", "users");
             model.addAttribute("users", userPage.getContent());
             model.addAttribute("userPage", userPage);
             model.addAttribute("currentPage", userPage.getNumber());
@@ -86,10 +67,6 @@ public class AdminUserController {
             model.addAttribute("keyword", keyword);
             model.addAttribute("currentRole", roleStr != null ? roleStr : "ALL");
             model.addAttribute("roles", Role.values());
-            model.addAttribute("roleRequests", roleRequests);
-            model.addAttribute("pendingCount", pendingCount);
-            model.addAttribute("currentRequestStatus", requestStatusStr != null ? requestStatusStr : "ALL");
-            model.addAttribute("stores", stores);
             model.addAttribute("dataLoadError", false);
         } catch (Exception ex) {
             model.addAttribute("dataLoadError", true);
@@ -128,68 +105,20 @@ public class AdminUserController {
         return "redirect:/admin/users?tab=users";
     }
 
-    @PostMapping("/role-request/approve/{id}")
-    public String approveRoleRequest(@PathVariable("id") Long requestId,
-                                     @RequestParam(value = "assignedStoreId", required = false) Long assignedStoreId,
-                                     Principal principal,
-                                     RedirectAttributes ra) {
+    @PostMapping("/create")
+    public String createAccount(Principal principal, @RequestParam(defaultValue = "") String username,
+            @RequestParam(defaultValue = "") String email, @RequestParam(defaultValue = "") String fullName,
+            @RequestParam(defaultValue = "") String phone, @RequestParam(defaultValue = "") String password,
+            @RequestParam(defaultValue = "") String role, RedirectAttributes ra) {
         try {
-            User admin = userRepository.findByUsername(principal.getName()).orElseThrow();
-            RoleRequest approved = roleManagementService.approveRoleRequest(requestId, admin.getId(), assignedStoreId);
-            ra.addFlashAttribute("successMessage", "Phê duyệt thành công yêu cầu vai trò [" + approved.getTargetRoleDisplayName()
-                    + "] cho người dùng @" + approved.getUser().getUsername() + "!");
-        } catch (Exception ex) {
-            ra.addFlashAttribute("errorMessage", "Phê duyệt thất bại: " + ex.getMessage());
+            provisioning.create(principal.getName(), username, email, fullName, phone, password, role);
+            ra.addFlashAttribute("successMessage", "Đã tạo tài khoản mới. Vai trò của tài khoản được giữ cố định.");
+        } catch (IllegalArgumentException ex) {
+            ra.addFlashAttribute("errorMessage", ex.getMessage());
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            ra.addFlashAttribute("errorMessage", "Tên đăng nhập hoặc email đã được sử dụng.");
         }
-        return "redirect:/admin/users?tab=requests";
-    }
-
-    @PostMapping("/role-request/reject/{id}")
-    public String rejectRoleRequest(@PathVariable("id") Long requestId,
-                                    @RequestParam("rejectionReason") String reason,
-                                    Principal principal,
-                                    RedirectAttributes ra) {
-        try {
-            User admin = userRepository.findByUsername(principal.getName()).orElseThrow();
-            RoleRequest rejected = roleManagementService.rejectRoleRequest(requestId, admin.getId(), reason);
-            ra.addFlashAttribute("successMessage", "Đã từ chối yêu cầu vai trò của @" + rejected.getUser().getUsername() + ". Người dùng vẫn giữ tài khoản Khách hàng bình thường.");
-        } catch (Exception ex) {
-            ra.addFlashAttribute("errorMessage", "Từ chối thất bại: " + ex.getMessage());
-        }
-        return "redirect:/admin/users?tab=requests";
-    }
-
-    @PostMapping("/assign-role/{id}")
-    public String directlyAssignRole(@PathVariable("id") Long userId,
-                                     @RequestParam("role") Role role,
-                                     @RequestParam(value = "storeId", required = false) Long storeId,
-                                     @RequestParam(value = "reason", required = false) String reason,
-                                     Principal principal,
-                                     RedirectAttributes ra) {
-        try {
-            User admin = userRepository.findByUsername(principal.getName()).orElseThrow();
-            roleManagementService.directlyAssignRole(userId, role, storeId, reason, admin.getId());
-            ra.addFlashAttribute("successMessage", "Đã gán vai trò [" + role.name() + "] cho người dùng thành công!");
-        } catch (Exception ex) {
-            ra.addFlashAttribute("errorMessage", "Lỗi gán vai trò: " + ex.getMessage());
-        }
-        return "redirect:/admin/users?tab=users";
-    }
-
-    @PostMapping("/revoke-role/{id}")
-    public String directlyRevokeRole(@PathVariable("id") Long userId,
-                                     @RequestParam("role") Role role,
-                                     @RequestParam(value = "reason", required = false) String reason,
-                                     Principal principal,
-                                     RedirectAttributes ra) {
-        try {
-            User admin = userRepository.findByUsername(principal.getName()).orElseThrow();
-            roleManagementService.directlyRevokeRole(userId, role, reason, admin.getId());
-            ra.addFlashAttribute("successMessage", "Đã thu hồi vai trò [" + role.name() + "] thành công! Tài khoản vẫn duy trì quyền Khách hàng hoạt động.");
-        } catch (Exception ex) {
-            ra.addFlashAttribute("errorMessage", "Lỗi thu hồi vai trò: " + ex.getMessage());
-        }
-        return "redirect:/admin/users?tab=users";
+        return "redirect:/admin/users";
     }
 
     @PostMapping("/delete/{id}")

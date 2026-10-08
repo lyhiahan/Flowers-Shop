@@ -23,7 +23,6 @@ class ChatSecurityTests {
     @Autowired StoreRepository stores;
     @Autowired StoreMembershipRepository members;
     @Autowired ChatMessageRepository messages;
-    @Autowired RoleManagementService roleManagement;
     @MockitoBean CloudinaryService cloud;
     User customer, outsider, manager, foreignManager, admin;
     Store store;
@@ -38,15 +37,6 @@ class ChatSecurityTests {
     }
     Long conversation() {return chat.open(customer.getUsername(),"STORE",store.getId()).id();}
     String key() {return UUID.randomUUID().toString();}
-    @Test void mergedManagerApplicationsRejectDuplicatesAndOversizedInput() {
-        assertThatThrownBy(()->roleManagement.submitRoleRequest(customer.getId(),Role.MANAGER,"0900000000",null,"x".repeat(256),"Address","Contact",null)).isInstanceOf(IllegalArgumentException.class);
-        roleManagement.submitRoleRequest(customer.getId(),Role.MANAGER,"0900000000",store.getId(),null,null,null,null);
-        assertThatThrownBy(()->roleManagement.submitRoleRequest(customer.getId(),Role.MANAGER,"0900000000",store.getId(),null,null,null,null)).isInstanceOf(IllegalArgumentException.class);
-    }
-    @Test void userCannotGrantManagerAuthorityThroughService() {
-        assertThatThrownBy(()->roleManagement.directlyAssignRole(outsider.getId(),Role.MANAGER,store.getId(),"forged",customer.getId())).isInstanceOf(AccessDeniedException.class);
-        assertThat(users.findById(outsider.getId()).orElseThrow().hasRole(Role.MANAGER)).isFalse();
-    }
     @Test void onlyThreeCanonicalRolesAndLegacyValuesRemainReadable() {
         assertThat(Role.values()).containsExactly(Role.ADMIN,Role.MANAGER,Role.USER);
         var converter=new RoleConverter();
@@ -58,6 +48,23 @@ class ChatSecurityTests {
         Long id=conversation(); assertThat(conversation()).isEqualTo(id);
         chat.send(manager.getUsername(),id,"Xin chào khách hàng",key());
         assertThat(chat.history(customer.getUsername(),id,null).messages()).hasSize(1);
+    }
+    @Test void managerCannotOpenOwnBranchButCanContactAnotherBranchOrAdmin() {
+        assertThat(chat.context(manager.getUsername()).stores()).extracting(ChatService.StoreChoice::id).doesNotContain(store.getId());
+        assertThat(chat.context(foreignManager.getUsername()).stores()).extracting(ChatService.StoreChoice::id).contains(store.getId());
+        assertThatThrownBy(()->chat.open(manager.getUsername(),"STORE",store.getId())).isInstanceOf(IllegalArgumentException.class);
+        assertThat(chat.open(foreignManager.getUsername(),"STORE",store.getId()).id()).isNotNull();
+        assertThat(chat.open(manager.getUsername(),"ADMIN",null).id()).isNotNull();
+    }
+    @Test void newlyAssignedManagerCannotSendTextOrImageToOldSelfConversation() {
+        Long id=chat.open(foreignManager.getUsername(),"STORE",store.getId()).id();
+        members.saveAndFlush(StoreMembership.builder().store(store).user(foreignManager).accessRole("PARTNER").active(true).build());
+        assertThatThrownBy(()->chat.send(foreignManager.getUsername(),id,"Tin cho chính mình",key())).isInstanceOf(IllegalArgumentException.class);
+        var file=new MockMultipartFile("file","flower.png","image/png",new byte[]{1});
+        assertThatThrownBy(()->chat.sendImage(foreignManager.getUsername(),id,"",key(),file)).isInstanceOf(IllegalArgumentException.class);
+        assertThat(messages.count()).isZero();
+        verifyNoInteractions(cloud);
+        assertThat(chat.history(foreignManager.getUsername(),id,null).messages()).isEmpty();
     }
     @Test void foreignUsersAndManagersCannotReadOrSendAndAdminCannotReadBranchChat() {
         Long id=conversation();

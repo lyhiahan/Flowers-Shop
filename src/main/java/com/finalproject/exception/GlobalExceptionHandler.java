@@ -51,6 +51,14 @@ public class GlobalExceptionHandler {
     }
 
     // 2. Xử lý lỗi không tìm thấy tài nguyên
+    @ExceptionHandler({org.springframework.web.servlet.resource.NoResourceFoundException.class,
+            org.springframework.web.servlet.NoHandlerFoundException.class})
+    @org.springframework.web.bind.annotation.ResponseStatus(org.springframework.http.HttpStatus.NOT_FOUND)
+    public String handleMissingEndpoint(Exception ex, Model model) {
+        model.addAttribute("errorMessage", "Trang hoặc chức năng này không tồn tại.");
+        return "common/error";
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     @org.springframework.web.bind.annotation.ResponseStatus(org.springframework.http.HttpStatus.NOT_FOUND)
     public String handleResourceNotFound(ResourceNotFoundException ex, Model model) {

@@ -725,13 +725,7 @@
                                     </a>
                                 </li>
 
-                                <!-- Đăng ký cấp vai trò: ẨN VỚI ADMIN VÀ MANAGER -->
-                                <li sec:authorize="!hasAnyRole('ADMIN', 'MANAGER')">
-                                    <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/customer/profile(tab='roles')}">
-                                        <i class="bi bi-person-plus text-primary"></i>
-                                        <span>Đăng ký cấp vai trò</span>
-                                    </a>
-                                </li>
+
 
                                 <li><hr class="dropdown-divider my-1"></li>
 
@@ -828,15 +822,7 @@
                         <span>Đổi mật khẩu</span>
                     </button>
                 </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="roles-tab" data-bs-toggle="pill" data-bs-target="#tab-roles"
-                            type="button" role="tab" aria-controls="tab-roles"
-                            th:classappend="${activeTab == 'roles'} ? ' active' : ''"
-                            th:aria-selected="${activeTab == 'roles'} ? 'true' : 'false'">
-                        <i class="bi bi-shield-check"></i>
-                        <span>Vai trò &amp; yêu cầu</span>
-                    </button>
-                </li>
+
             </ul>
 
             <!-- VÙNG NỘI DUNG TỪNG TAB -->
@@ -848,7 +834,7 @@
                 <section class="tab-pane fade" id="tab-info" role="tabpanel" aria-labelledby="info-tab"
                          th:classappend="${activeTab == 'info' or activeTab == null or activeTab == ''} ? ' show active' : ''">
                     <form th:action="@{/customer/profile/update}" method="post" enctype="multipart/form-data" class="flower-card" id="profileForm">
-                        
+
                         <!-- Vùng xem trước Ảnh bìa & Ảnh đại diện -->
                         <div class="profile-cover-box" id="coverContainer">
                             <img id="coverPreview" class="profile-cover-img"
@@ -910,9 +896,7 @@
                     </form>
                 </section>
 
-                <!-- ==============================================
-                     TAB 2: SỔ ĐỊA CHỈ NHẬN HÀNG
-                     ============================================== -->
+
                 <section class="tab-pane fade" id="tab-address" role="tabpanel" aria-labelledby="address-tab"
                          th:classappend="${activeTab == 'address' or activeTab == 'addresses'} ? ' show active' : ''">
                     <div class="row g-4">
@@ -940,7 +924,7 @@
                                         <div class="text-muted small" th:text="${addr.phone}">0901234567</div>
                                     </div>
                                     <p class="text-secondary small mb-3" th:text="${addr.addressDetail}">123 Đường Lê Lợi, Bến Thành, Quận 1, TP.HCM</p>
-                                    
+
                                     <div class="d-flex align-items-center gap-2 flex-wrap border-top pt-2">
                                         <form th:unless="${addr.isDefault}" th:action="@{/customer/profile/address/set-default/{id}(id=${addr.id})}" method="post">
                                             <button class="btn btn-sm btn-outline-success rounded-pill px-3" type="submit">
@@ -965,7 +949,7 @@
                         <div class="col-lg-5">
                             <form th:action="@{/customer/profile/address/add}" method="post" class="flower-card">
                                 <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-plus-circle-fill text-success me-2"></i>Thêm địa chỉ mới</h5>
-                                
+
                                 <div class="mb-3">
                                     <label for="addRecipient" class="form-label">Tên người nhận <span class="text-danger">*</span></label>
                                     <input id="addRecipient" name="recipientName" required class="form-control" placeholder="Ví dụ: Anh Tuấn, Chị Hoa...">
@@ -1052,354 +1036,12 @@
                     </div>
                 </section>
 
-                <!-- ==============================================
-                     TAB 4: VAI TRÒ & YÊU CẦU
-                     ============================================== -->
-                <section class="tab-pane fade" id="tab-roles" role="tabpanel" aria-labelledby="roles-tab"
-                         th:classappend="${activeTab == 'roles'} ? ' show active' : ''">
-                    <div class="flower-card">
-                        
-                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                            <div>
-                                <h5 class="fw-bold mb-1 text-dark"><i class="bi bi-shield-check text-success me-2"></i>Vai trò &amp; Quyền hạn của tôi</h5>
-                                <p class="text-muted small mb-0">Quản lý các vai trò trong chuỗi cửa hàng hoa và gửi hồ sơ xin cấp vai trò Quản lý / Người bán.</p>
-                            </div>
-                            <button type="button" class="btn-flower-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#registerRoleModal">
-                                <i class="bi bi-plus-circle me-1"></i> Đăng ký vai trò mới
-                            </button>
-                        </div>
-
-                        <!-- Banner thông báo khi có vai trò đã duyệt nhưng chưa đăng nhập lại để nhận quyền -->
-                        <div th:if="${hasApprovedUnactivated}" class="compact-alert"
-                             style="background: linear-gradient(135deg, #FFF7E6 0%, #FFFBF0 100%); border: 1px solid #F6AD55; color: #7B4F00;">
-                            <i class="bi bi-bell-fill fs-5 text-warning flex-shrink-0"></i>
-                            <div class="flex-grow-1">
-                                <strong class="d-block">🎉 Yêu cầu cấp vai trò của bạn đã được phê duyệt!</strong>
-                                <span class="small">Vui lòng đăng xuất và đăng nhập lại để nhận quyền truy cập mới.</span>
-                            </div>
-                            <form th:action="@{/logout}" method="post" class="flex-shrink-0 ms-2">
-                                <button type="submit" class="btn btn-warning btn-sm rounded-pill px-3 fw-bold">
-                                    <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất ngay
-                                </button>
-                            </form>
-                        </div>
-
-                        <!-- Ghi chú giải thích vai trò Khách hàng -->
-                        <div class="alert alert-info py-2 px-3 small rounded-3 mb-4 d-flex align-items-center gap-2" style="background-color: #EBF3EE; color: #20382E; border: 1px solid #D1E5DA;">
-                            <i class="bi bi-info-circle-fill fs-5 text-success flex-shrink-0"></i>
-                            <span>Tài khoản của bạn luôn giữ vai trò <strong>Khách hàng</strong> để mua hoa và nhận khuyến mãi trong thời gian chờ duyệt hồ sơ vai trò mới.</span>
-                        </div>
-
-                        <!-- Bảng Vai trò hiện tại và Các yêu cầu -->
-                        <div class="table-responsive rounded-3 border">
-                            <table class="table table-hover align-middle mb-0 table-custom-roles">
-                                <thead>
-                                    <tr>
-                                        <th class="ps-3">Vai trò</th>
-                                        <th>Trạng thái</th>
-                                        <th>Chi tiết / Phân công</th>
-                                        <th class="text-end pe-3">Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Vai trò mặc định: Khách hàng -->
-                                    <tr>
-                                        <td class="ps-3">
-                                            <div class="fw-bold text-dark">Khách hàng</div>
-                                            <small class="text-muted">Quyền mặc định khi tạo tài khoản</small>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-3 py-1.5 rounded-pill">
-                                                <i class="bi bi-check-circle-fill me-1"></i> Đang hoạt động
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="small text-secondary">Mua hoa tươi, đặt giao tận nơi, nhận ưu đãi</span>
-                                        </td>
-                                        <td class="text-end pe-3">
-                                            <a th:href="@{/}" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold">
-                                                <i class="bi bi-cart3 me-1"></i> Mua hoa
-                                            </a>
-                                        </td>
-                                    </tr>
-
-                                    <!-- Vai trò đã cấp: Quản lý chi nhánh -->
-                                    <tr th:if="${user.hasRole(T(com.finalproject.enums.Role).MANAGER)}">
-                                        <td class="ps-3">
-                                            <div class="fw-bold text-dark">Quản lý chi nhánh</div>
-                                            <small class="text-muted">Được phân quyền quản lý</small>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-3 py-1.5 rounded-pill">
-                                                <i class="bi bi-check-circle-fill me-1"></i> Đang hoạt động
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="small fw-semibold text-primary">
-                                                <i class="bi bi-shop me-1"></i>
-                                                <span th:text="${user.store != null ? user.store.name : 'Chưa phân công chi nhánh'}"></span>
-                                            </span>
-                                        </td>
-                                        <td class="text-end pe-3">
-                                            <a th:href="@{/manager/orders}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">
-                                                <i class="bi bi-building me-1"></i> Quản lý
-                                            </a>
-                                        </td>
-                                    </tr>
-
-                                    <!-- Vai trò đã cấp: Người bán -->
-                                    <tr th:if="${user.hasRole(T(com.finalproject.enums.Role).MANAGER)}">
-                                        <td class="ps-3">
-                                            <div class="fw-bold text-dark">Người bán</div>
-                                            <small class="text-muted">Cửa hàng hoa đối tác</small>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-3 py-1.5 rounded-pill">
-                                                <i class="bi bi-check-circle-fill me-1"></i> Đang hoạt động
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="small text-secondary">Kênh quản lý sản phẩm đối tác</span>
-                                        </td>
-                                        <td class="text-end pe-3">
-                                            <a th:href="@{/vendor/dashboard}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">
-                                                <i class="bi bi-shop me-1"></i> Quản lý
-                                            </a>
-                                        </td>
-                                    </tr>
-
-                                    <!-- Danh sách các yêu cầu cấp vai trò đã gửi -->
-                                    <tr th:each="req : ${roleRequests}">
-                                        <td class="ps-3">
-                                            <strong class="text-dark" th:text="${req.targetRoleDisplayName}"></strong>
-                                            <div class="text-muted small" th:text="'Ngày gửi: ' + ${#temporals.format(req.createdAt, 'dd/MM/yyyy HH:mm')}"></div>
-                                        </td>
-                                        <td>
-                                            <span th:if="${req.status.name() == 'PENDING'}" class="badge bg-warning bg-opacity-10 text-dark border border-warning px-3 py-1.5 rounded-pill">
-                                                <i class="bi bi-hourglass-split me-1 text-warning"></i> Chờ duyệt
-                                            </span>
-                                            <span th:if="${req.status.name() == 'APPROVED'}" class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-1.5 rounded-pill">
-                                                <i class="bi bi-check-circle-fill me-1"></i> Đã duyệt
-                                            </span>
-                                            <span th:if="${req.status.name() == 'REJECTED'}" class="badge bg-danger bg-opacity-10 text-danger border border-danger px-3 py-1.5 rounded-pill">
-                                                <i class="bi bi-x-circle-fill me-1"></i> Bị từ chối
-                                            </span>
-                                            <span th:if="${req.status.name() == 'CANCELLED'}" class="badge bg-secondary bg-opacity-10 text-secondary border px-3 py-1.5 rounded-pill">
-                                                Đã rút yêu cầu
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div th:if="${req.targetRole.name() == 'MANAGER'}" class="small text-secondary">
-                                                <span>Chi nhánh: <strong th:text="${req.targetStore != null ? req.targetStore.name : 'Tất cả chi nhánh'}"></strong></span>
-                                            </div>
-                                            <div th:if="${req.targetRole.name() == 'MANAGER'}" class="small text-secondary">
-                                                <span>Cửa hàng: <strong th:text="${req.shopName != null ? req.shopName : 'Đối tác'}"></strong></span>
-                                            </div>
-                                            <div th:if="${req.status.name() == 'REJECTED' and req.rejectionReason != null}" class="text-danger small mt-1">
-                                                <i class="bi bi-exclamation-circle me-1"></i><strong>Lý do:</strong> <span th:text="${req.rejectionReason}"></span>
-                                            </div>
-                                        </td>
-                                        <td class="text-end pe-3">
-                                            <div th:if="${req.status.name() == 'PENDING'}" class="d-inline-flex gap-1">
-                                                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3"
-                                                        data-bs-toggle="modal" th:data-bs-target="'#modalReqDetail' + ${req.id}">
-                                                    Xem yêu cầu
-                                                </button>
-                                                <form th:action="@{/customer/profile/role-request/cancel/{id}(id=${req.id})}" method="post" class="d-inline"
-                                                      onsubmit="return confirm('Bạn có chắc chắn muốn rút yêu cầu đăng ký vai trò này không?');">
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
-                                                        Rút yêu cầu
-                                                    </button>
-                                                </form>
-                                            </div>
-                                            <div th:if="${req.status.name() == 'REJECTED'}">
-                                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3"
-                                                        data-bs-toggle="modal" data-bs-target="#registerRoleModal">
-                                                    Đăng ký lại
-                                                </button>
-                                            </div>
-                                            <span th:if="${req.status.name() == 'APPROVED' or req.status.name() == 'CANCELLED'}" class="text-muted small">—</span>
-                                        </td>
-                                    </tr>
-
-                                    <tr th:if="${#lists.isEmpty(roleRequests)}">
-                                        <td colspan="4" class="text-center py-4 text-muted small">
-                                            Chưa có hồ sơ yêu cầu vai trò nào được gửi. Bấm nút <strong>"Đăng ký vai trò mới"</strong> phía trên để gửi hồ sơ.
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                    </div>
-                </section>
 
             </div>
 
         </div>
     </main>
 
-    <!-- ==============================================
-         MODAL 1: ĐĂNG KÝ VAI TRÒ MỚI (#registerRoleModal)
-         ============================================== -->
-    <div class="modal fade" id="registerRoleModal" tabindex="-1" aria-labelledby="registerRoleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content rounded-4 border-0 shadow">
-                <div class="modal-header border-bottom pb-3">
-                    <h5 class="modal-title fw-bold text-dark" id="registerRoleModalLabel">
-                        <i class="bi bi-person-plus-fill text-success me-2"></i>Đăng Ký Cấp Thêm Vai Trò
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form th:action="@{/customer/profile/role-request}" method="post" id="formRegisterRole">
-                    <div class="modal-body p-4">
-                        <div class="alert alert-light border small text-muted mb-4 rounded-3 d-flex align-items-center gap-2">
-                            <i class="bi bi-shield-check text-success fs-5 flex-shrink-0"></i>
-                            <span>Trong thời gian chờ duyệt, tài khoản vẫn mua hoa bình thường với vai trò <strong>Khách hàng</strong>.</span>
-                        </div>
-
-                        <!-- 1. Chọn vai trò xin cấp -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold text-dark">Vai trò muốn xin cấp <span class="text-danger">*</span></label>
-                            <select name="targetRole" id="selectTargetRole" class="form-select form-select-lg rounded-3 fs-6" required onchange="handleRoleChange(this.value)">
-                                <option value="" disabled selected>-- Chọn vai trò bạn muốn xin cấp --</option>
-                                <option value="MANAGER">🏢 Quản lý / chủ cửa hàng</option>
-                            </select>
-                            <div class="form-text text-muted small">Lưu ý: Không được tự đăng ký vai trò Quản trị viên (Admin).</div>
-                        </div>
-
-                        <div id="managerRequestKind" class="mb-3" style="display: none;">
-                            <label class="form-label fw-semibold" for="managerRequestMode">Hình thức đăng ký</label>
-                            <select id="managerRequestMode" class="form-select" onchange="handleRoleChange(document.getElementById('selectTargetRole').value)">
-                                <option value="branch">Quản lý chi nhánh có sẵn</option>
-                                <option value="shop">Mở / quản lý cửa hàng của tôi</option>
-                            </select>
-                        </div>
-                        <!-- Form chi tiết cho Quản lý chi nhánh (MANAGER) -->
-                        <div id="sectionManager" class="role-section border rounded-3 p-3 mb-3 bg-light" style="display: none;">
-                            <h6 class="fw-bold text-dark mb-3"><i class="bi bi-building text-primary me-2"></i>Thông tin bổ sung - Quản lý chi nhánh</h6>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold">Chi nhánh mong muốn (*)</label>
-                                    <select name="targetStoreId" class="form-select">
-                                        <option value="">-- Chọn chi nhánh ứng tuyển --</option>
-                                        <option th:each="st : ${availableStores}" th:value="${st.id}" th:text="${st.name} + ' (' + ${st.address} + ')'"></option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold">Số điện thoại liên hệ (*)</label>
-                                    <input type="text" name="phone" class="form-control" th:value="${user.phone}" placeholder="Nhập số điện thoại...">
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label small fw-semibold">Kinh nghiệm hoặc thông tin phân công (*)</label>
-                                    <textarea name="experienceNote" class="form-control" rows="3" placeholder="Kinh nghiệm quản lý cửa hàng hoa, điều hành nhân viên, giám sát kho bảo quản..."></textarea>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Form chi tiết cho Người bán (MANAGER) -->
-                        <div id="sectionVendor" class="role-section border rounded-3 p-3 mb-3 bg-light" style="display: none;">
-                            <h6 class="fw-bold text-dark mb-3"><i class="bi bi-shop text-primary me-2"></i>Thông tin bổ sung - Người bán (Cửa hàng đối tác)</h6>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold">Tên cửa hàng (*)</label>
-                                    <input type="text" name="shopName" class="form-control" placeholder="Ví dụ: Vườn Hoa Tươi Đà Lạt Organic...">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold">Hotline / Email liên hệ (*)</label>
-                                    <input type="text" name="contactInfo" class="form-control" placeholder="Số điện thoại / Email liên hệ...">
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label small fw-semibold">Địa chỉ cửa hàng (*)</label>
-                                    <input type="text" name="shopAddress" class="form-control" placeholder="Số nhà, tên đường, phường, quận/huyện...">
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label small fw-semibold">Giới thiệu sản phẩm cung ứng</label>
-                                    <textarea name="experienceNote" class="form-control" rows="2" placeholder="Các chủng loại hoa tươi cung ứng: Lan hồ điệp, hoa hồng nhập, cẩm chướng..."></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer border-top">
-                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Hủy bỏ</button>
-                        <button type="submit" id="btnSubmitRoleRequest" class="btn-flower-primary rounded-pill px-4" disabled>
-                            <i class="bi bi-send-fill me-1"></i> Gửi Yêu Cầu Xét Duyệt
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==============================================
-         MODAL 2: XEM CHI TIẾT YÊU CẦU (#modalReqDetail)
-         ============================================== -->
-    <div th:each="req : ${roleRequests}" class="modal fade" th:id="'modalReqDetail' + ${req.id}" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-4 border-0 shadow">
-                <div class="modal-header border-bottom">
-                    <h5 class="modal-title fw-bold text-dark">
-                        <i class="bi bi-file-earmark-person text-success me-2"></i>Hồ Sơ Yêu Cầu Vai Trò
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="mb-3 d-flex justify-content-between align-items-center">
-                        <span class="text-muted small">Vai trò xin cấp:</span>
-                        <strong class="text-dark fs-6" th:text="${req.targetRoleDisplayName}"></strong>
-                    </div>
-                    <div class="mb-3 d-flex justify-content-between align-items-center">
-                        <span class="text-muted small">Trạng thái:</span>
-                        <span class="badge bg-warning bg-opacity-10 text-dark border border-warning px-3 py-1 rounded-pill" th:text="${req.status.displayName}"></span>
-                    </div>
-                    <div class="mb-3 d-flex justify-content-between align-items-center">
-                        <span class="text-muted small">Thời gian gửi:</span>
-                        <span class="fw-semibold text-dark" th:text="${#temporals.format(req.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
-                    </div>
-
-                    <hr class="my-3">
-
-                    <div th:if="${req.phone != null and !#strings.isEmpty(req.phone)}" class="mb-2">
-                        <span class="text-muted small d-block">Số điện thoại:</span>
-                        <strong class="text-dark" th:text="${req.phone}"></strong>
-                    </div>
-
-                    <div th:if="${req.targetStore != null}" class="mb-2">
-                        <span class="text-muted small d-block">Chi nhánh mong muốn:</span>
-                        <strong class="text-primary" th:text="${req.targetStore.name} + ' (' + ${req.targetStore.address} + ')'"></strong>
-                    </div>
-
-                    <div th:if="${req.shopName != null and !#strings.isEmpty(req.shopName)}" class="mb-2">
-                        <span class="text-muted small d-block">Tên cửa hàng:</span>
-                        <strong class="text-dark" th:text="${req.shopName}"></strong>
-                    </div>
-
-                    <div th:if="${req.shopAddress != null and !#strings.isEmpty(req.shopAddress)}" class="mb-2">
-                        <span class="text-muted small d-block">Địa chỉ cửa hàng:</span>
-                        <strong class="text-dark" th:text="${req.shopAddress}"></strong>
-                    </div>
-
-                    <div th:if="${req.contactInfo != null and !#strings.isEmpty(req.contactInfo)}" class="mb-2">
-                        <span class="text-muted small d-block">Thông tin liên hệ:</span>
-                        <strong class="text-dark" th:text="${req.contactInfo}"></strong>
-                    </div>
-
-                    <div th:if="${req.experienceNote != null and !#strings.isEmpty(req.experienceNote)}" class="mb-2">
-                        <span class="text-muted small d-block">Ghi chú / Kinh nghiệm:</span>
-                        <p class="text-secondary small bg-light p-2.5 rounded-2 mb-0 border" th:text="${req.experienceNote}"></p>
-                    </div>
-
-                    <div th:if="${req.rejectionReason != null and !#strings.isEmpty(req.rejectionReason)}" class="mt-3 p-3 bg-danger bg-opacity-10 border border-danger-subtle rounded-3">
-                        <div class="text-danger small fw-bold mb-1"><i class="bi bi-x-circle me-1"></i>Lý do từ chối:</div>
-                        <div class="text-danger small" th:text="${req.rejectionReason}"></div>
-                    </div>
-                </div>
-                <div class="modal-footer border-top">
-                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- ==============================================
          MODAL 3: SỬA ĐỊA CHỈ (#modalEditAddress)
@@ -1414,6 +1056,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="formEditAddress" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <div class="modal-body p-4">
                         <div class="mb-3">
                             <label class="form-label">Tên người nhận (*)</label>
@@ -1509,33 +1152,6 @@
         }
 
         // Đổi vai trò trong modal đăng ký
-        function handleRoleChange(role) {
-            const secManager = document.getElementById('sectionManager');
-            const secVendor = document.getElementById('sectionVendor');
-            const btnSubmit = document.getElementById('btnSubmitRoleRequest');
-
-            if (secManager) secManager.style.display = 'none';
-            if (secVendor) secVendor.style.display = 'none';
-
-            const enabled = role === 'MANAGER';
-            const kind = document.getElementById('managerRequestKind');
-            const mode = document.getElementById('managerRequestMode');
-            if (kind) kind.style.display = enabled ? 'block' : 'none';
-            const shop = mode && mode.value === 'shop';
-            [secManager, secVendor].forEach((section, index) => {
-                if (!section) return;
-                const selected = enabled && (index === 1 ? shop : !shop);
-                section.style.display = selected ? 'block' : 'none';
-                section.querySelectorAll('input,select,textarea').forEach(input => {
-                    input.disabled = !selected;
-                    input.required = selected && ['targetStoreId','shopName','shopAddress','contactInfo'].includes(input.name);
-                });
-            });
-            if (btnSubmit) btnSubmit.disabled = !enabled;
-        }
-        document.addEventListener('DOMContentLoaded', () => handleRoleChange(document.getElementById('selectTargetRole')?.value || ''));
-
-        // Mở modal sửa địa chỉ
         function openEditAddressModal(id, recipientName, phone, addressDetail, isDefault) {
             const form = document.getElementById('formEditAddress');
             if (form) form.action = '/customer/profile/address/update/' + id;
@@ -1674,7 +1290,7 @@
             });
         }
 
-        // Đồng bộ tab đang chọn theo URL (?tab=roles / ?tab=address / ?tab=password)
+        // Đồng bộ tab hồ sơ theo URL; đường dẫn vai trò cũ quay về thông tin cá nhân.
         document.addEventListener('DOMContentLoaded', function () {
             // Điều chỉnh scope select width
             const scopeSel = document.getElementById('searchScopeSelect');
@@ -1689,7 +1305,7 @@
             if (tabParam) {
                 let targetTabBtnId = null;
                 if (tabParam === 'roles' || tabParam === 'tab-roles' || tabParam === 'tabRoles') {
-                    targetTabBtnId = 'roles-tab';
+                    targetTabBtnId = 'info-tab';
                 } else if (tabParam === 'address' || tabParam === 'addresses' || tabParam === 'tab-address') {
                     targetTabBtnId = 'address-tab';
                 } else if (tabParam === 'password' || tabParam === 'tab-password') {
@@ -1712,8 +1328,7 @@
                 btn.addEventListener('shown.bs.tab', function (e) {
                     const targetTarget = e.target.getAttribute('data-bs-target');
                     let newTab = 'info';
-                    if (targetTarget === '#tab-roles') newTab = 'roles';
-                    else if (targetTarget === '#tab-address') newTab = 'address';
+                    if (targetTarget === '#tab-address') newTab = 'address';
                     else if (targetTarget === '#tab-password') newTab = 'password';
 
                     const currentUrl = new URL(window.location.href);

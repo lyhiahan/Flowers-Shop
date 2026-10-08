@@ -119,7 +119,9 @@
                             <span class="badge bg-dark demo-pill p-2" onclick="fillCreds('admin', '123456')">👑 Quản Trị Viên</span>
                             <span class="badge bg-primary demo-pill p-2" onclick="fillCreds('manager_q1', '123456')">🏢 Quản Lý Chi Nhánh Q1</span>
                             <span class="badge bg-success demo-pill p-2" onclick="fillCreds('vendor_flower', '123456')">🏪 Chủ Cửa Hàng Hoa</span>
-                            <span class="badge bg-danger demo-pill p-2" onclick="fillCreds('khachhang', '123456')">🛍️ Khách Hàng</span>
+                            <span class="badge bg-danger demo-pill p-2" onclick="fillCreds('khachhang', '123456')">🛍️ Khách Hàng 1</span>
+                            <span class="badge bg-danger demo-pill p-2" onclick="fillCreds('khachhang2', '123456')">🛍️ Khách Hàng 2</span>
+                            <span class="badge bg-danger demo-pill p-2" onclick="fillCreds('khachhang3', '123456')">🛍️ Khách Hàng 3</span>
                         </div>
                     </div>
 
@@ -134,8 +136,16 @@
 
 <script>
     function fillCreds(u, p) {
-        document.getElementById('usernameInput').value = u;
-        document.getElementById('passwordInput').value = p;
+        const uInput = document.getElementById('usernameInput');
+        const pInput = document.getElementById('passwordInput');
+        if (uInput) {
+            uInput.value = u;
+            uInput.setCustomValidity('');
+        }
+        if (pInput) {
+            pInput.value = p;
+            pInput.setCustomValidity('');
+        }
     }
 
     function goToForgotPassword(e) {

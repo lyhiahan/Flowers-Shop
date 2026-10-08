@@ -60,10 +60,7 @@ public class ManagerStaffController {
         List<User> pagedStaff = result.getContent();
         com.finalproject.utils.StorePages.model(model, result);
         var candidates = com.finalproject.utils.StorePages.load(candidatePage, 20, pageable -> userRepository.findAll((root, query, cb) -> {
-            var alreadyMember = query.subquery(Long.class);
-            var member = alreadyMember.from(com.finalproject.entity.StoreMembership.class);
-            alreadyMember.select(member.get("user").get("id")).where(cb.equal(member.get("user").get("id"), root.get("id")), cb.isTrue(member.get("active")));
-            var eligibility = cb.or(root.get("role").in(Role.MANAGER), cb.and(root.get("role").in(Role.MANAGER, Role.USER), cb.isNull(root.get("store")), cb.not(cb.exists(alreadyMember))));
+            var eligibility = cb.or(cb.equal(root.get("role"), Role.MANAGER), cb.isMember(Role.MANAGER, root.get("roles")));
             String kw = "%" + candidateKeyword.trim().toLowerCase() + "%";
             return cb.and(eligibility, cb.isTrue(root.get("isActive")), cb.isFalse(root.get("accountDisabledByAdmin")), cb.notEqual(root.get("id"), user.getId()),
                     cb.or(cb.like(cb.lower(root.get("username")), kw), cb.like(cb.lower(root.get("fullName")), kw)));

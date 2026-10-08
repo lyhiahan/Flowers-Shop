@@ -28,7 +28,14 @@ public class AccountStatusFilter extends OncePerRequestFilter {
                 SecurityContextHolder.clearContext();
                 var session = request.getSession(false);
                 if (session != null) session.invalidate();
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Tài khoản đã bị khóa hoặc vô hiệu hóa.");
+                if ("XMLHttpRequest".equalsIgnoreCase(request.getHeader("X-Requested-With"))
+                        || (request.getHeader("Accept") != null && request.getHeader("Accept").contains("application/json"))) {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"success\":false,\"message\":\"Tài khoản đã bị khóa hoặc vô hiệu hóa.\"}");
+                } else {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Tài khoản đã bị khóa hoặc vô hiệu hóa.");
+                }
                 return;
             }
             var roles = new java.util.HashSet<org.springframework.security.core.GrantedAuthority>();

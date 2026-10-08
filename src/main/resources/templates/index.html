@@ -1553,13 +1553,7 @@
                                     </a>
                                 </li>
 
-                                <!-- Đăng ký cấp vai trò: ẨN VỚI ADMIN VÀ MANAGER -->
-                                <li sec:authorize="!hasAnyRole('ADMIN', 'MANAGER')">
-                                    <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/customer/profile(tab='roles')}">
-                                        <i class="bi bi-person-plus text-primary"></i>
-                                        <span>Đăng ký cấp vai trò</span>
-                                    </a>
-                                </li>
+
 
                                 <li><hr class="dropdown-divider my-1"></li>
 
@@ -2331,7 +2325,6 @@
                 })
                 .catch(err => console.error("Lỗi check tồn kho:", err));
         }
-
 
 
         // Dừng và giữ ngay lập tức tại vị trí danh sách sản phẩm (không có hiệu ứng cuộn, không bị hoa mắt)

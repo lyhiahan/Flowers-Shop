@@ -275,7 +275,7 @@ class BusinessRegressionTests {
 
     @Test void retiredRoleCannotBeRequestedOrUseTheDeliveryPortal() throws Exception {
         mvc.perform(post("/customer/role-request").with(user(customer.getUsername()).roles("USER")).with(csrf())
-                .param("targetRole", "SHIPPER")).andExpect(status().isBadRequest());
+                .param("targetRole", "SHIPPER")).andExpect(status().isNotFound());
         mvc.perform(get("/shipper/orders").with(user(customer.getUsername()).roles("SHIPPER")))
                 .andExpect(status().isForbidden());
         mvc.perform(post("/shipper/orders/update-status/1").with(user(manager.getUsername()).roles("ADMIN")).with(csrf())
@@ -1151,9 +1151,9 @@ class BusinessRegressionTests {
         product.getCategory().setParent(parent);categories.saveAndFlush(product.getCategory());
         var form=validProductForm();
         long count=products.count();String oldName=product.getName();
-        assertThatThrownBy(() -> productService.createProduct(form)).hasMessageContaining("danh mục cha");
+        assertThatThrownBy(() -> productService.createProduct(form)).hasMessageContaining("Danh mục cha");
         form.setName("Invalid hidden category update");
-        assertThatThrownBy(() -> productService.updateProduct(product.getId(),form)).hasMessageContaining("danh mục cha");
+        assertThatThrownBy(() -> productService.updateProduct(product.getId(),form)).hasMessageContaining("Danh mục cha");
         assertThat(products.count()).isEqualTo(count);assertThat(product.getName()).isEqualTo(oldName);
     }
 

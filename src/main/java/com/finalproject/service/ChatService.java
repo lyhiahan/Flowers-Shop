@@ -21,8 +21,10 @@ public class ChatService {
  private final SimpMessagingTemplate broker;
  private final Clock clock;
  private final CloudinaryService cloud;
- public record ConversationView(Long id,String kind,Long storeId,String storeName,Long customerId,String customerName,String lastMessage,LocalDateTime updatedAt){}
- public record MessageView(Long id,Long conversationId,Long senderId,String senderName,String content,String imageUrl,String clientMessageId,LocalDateTime createdAt){}
+ public record ConversationView(Long id,String kind,Long storeId,String storeName,Long customerId,String customerName,String lastMessage,
+  @com.fasterxml.jackson.annotation.JsonFormat(shape=com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING) LocalDateTime updatedAt){}
+ public record MessageView(Long id,Long conversationId,Long senderId,String senderName,String content,String imageUrl,String clientMessageId,
+  @com.fasterxml.jackson.annotation.JsonFormat(shape=com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING) LocalDateTime createdAt){}
  public record History(List<MessageView> messages,boolean hasMore){}
  public record Inbox(List<ConversationView> conversations,boolean hasMore){}
  public record StoreChoice(Long id,String name){}
@@ -39,6 +41,16 @@ public class ChatService {
  private List<User> admins() {
   return users.findByRole(Role.ADMIN).stream().filter(u->Boolean.TRUE.equals(u.getIsActive()) && !Boolean.TRUE.equals(u.getAccountDisabledByAdmin()) && !u.isRetiredDeliveryAccount()).toList();
  }
+ private boolean managesStore(User user,Store store) {
+  return store!=null && user.hasRole(Role.MANAGER)
+    && managers(store.getId()).stream().anyMatch(manager->manager.getId().equals(user.getId()));
+ }
+ private void rejectSelfConversation(User user,ChatConversation conversation) {
+  if("STORE".equals(conversation.getKind()) && user.getId().equals(conversation.getCustomer().getId())
+     && managesStore(user,conversation.getStore())) {
+   throw new IllegalArgumentException("Bạn không thể nhắn tin cho chi nhánh do chính mình quản lý.");
+  }
+ }
  private void authorize(User user,ChatConversation conversation) {
   if(user.getId().equals(conversation.getCustomer().getId()) && !user.hasRole(Role.ADMIN)) return;
   if("ADMIN".equals(conversation.getKind()) && user.hasRole(Role.ADMIN)) return;
@@ -49,7 +61,7 @@ public class ChatService {
  @Transactional(readOnly=true)
  public Context context(String username) {
   User user=activeUser(username);
-  var choices=stores.findByStatusTrue().stream().map(s->new StoreChoice(s.getId(),s.getName())).toList();
+  var choices=stores.findByStatusTrue().stream().filter(s->!managesStore(user,s)).map(s->new StoreChoice(s.getId(),s.getName())).toList();
   return new Context(user.getId(),user.hasRole(Role.ADMIN)?"ADMIN":user.hasRole(Role.MANAGER)?"MANAGER":"USER",choices);
  }
  @Transactional
@@ -62,6 +74,7 @@ public class ChatService {
   if("STORE".equals(kind)) {
    if(storeId==null) throw new IllegalArgumentException("Vui lòng chọn chi nhánh cần nhắn tin.");
    store=stores.findById(storeId).filter(s->Boolean.TRUE.equals(s.getStatus())).orElseThrow(()->new IllegalArgumentException("Chi nhánh không còn hoạt động."));
+   if(managesStore(user,store)) throw new IllegalArgumentException("Bạn không thể nhắn tin cho chi nhánh do chính mình quản lý.");
    if(managers(storeId).isEmpty()) throw new IllegalStateException("Chi nhánh chưa có quản lý hoạt động. Bạn có thể nhắn Admin.");
   } else if(admins().isEmpty()) throw new IllegalStateException("Chưa có tài khoản Admin hoạt động.");
   String key=kind+":"+user.getId()+("STORE".equals(kind)?":"+storeId:"");
@@ -123,6 +136,7 @@ public class ChatService {
   catch(IllegalArgumentException ex){throw new IllegalArgumentException("Mã tin nhắn không hợp lệ.");}
   var conversation=conversations.findLockedById(conversationId).orElseThrow(()->new IllegalArgumentException("Không tìm thấy hội thoại."));
   authorize(user,conversation);
+  rejectSelfConversation(user,conversation);
   var duplicate=messages.findByConversationIdAndSenderIdAndClientMessageId(conversationId,user.getId(),clientMessageId);
   if(duplicate.isPresent()) {
    if(!duplicate.get().getContent().equals(text) || (duplicate.get().getImageUrl()!=null)!=(image!=null)) throw new IllegalArgumentException("Mã tin nhắn đã được sử dụng cho nội dung khác.");
