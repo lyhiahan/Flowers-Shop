@@ -107,9 +107,12 @@ public class ProfileController {
         try {
             emailService.sendOtpEmail(user.getEmail(), code);
         } catch (Exception ex) {
-            log.warn("Email send failed (SMTP): {}, fallback OTP: {}", ex.getMessage(), code);
+            log.warn("Email send failed. Error type: {}", ex.getClass().getSimpleName());
+            otpRepository.delete(otp);
+            return org.springframework.http.ResponseEntity.status(503).body(java.util.Map.of(
+                    "success", false, "message", "Không thể gửi email xác thực. Vui lòng thử lại sau."));
         }
-        log.info("[OTP ĐỔI MẬT KHẨU] User: {}, Email: {}, Mã OTP: {}", user.getUsername(), user.getEmail(), code);
+        log.info("Đã xử lý yêu cầu OTP đổi mật khẩu cho tài khoản {}", user.getUsername());
 
         return org.springframework.http.ResponseEntity.ok(java.util.Map.of(
                 "success", true,

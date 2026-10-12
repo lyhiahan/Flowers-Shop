@@ -15,10 +15,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
- * Cấu hình bảo mật hoàn toàn bằng Session (Session-based Authentication):
- * - Hợp nhất toàn bộ Web UI (Thymeleaf) và REST/AJAX API (/api/**) vào chung 1 filter chain.
- * - Quản lý phiên làm việc tập trung qua Spring Session (lưu trữ trong SQL Server).
- * - Tự động nhận diện phiên người dùng qua Cookie JSESSIONID cho cả web và các request AJAX/Fetch.
+ * Session authentication for Thymeleaf and same-origin AJAX without Bearer headers.
+ * JwtSecurityConfig handles explicit JWT API requests in a separate stateless chain.
+ * Servlet HttpSession authenticates browser requests via the session cookie.
+ * Merely declaring spring-session-jdbc does not enable JDBC session persistence.
  */
 @Configuration
 @EnableMethodSecurity
@@ -47,6 +47,7 @@ public class SecurityConfig {
     }
 
     @Bean
+    @org.springframework.core.annotation.Order(2)
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .addFilterBefore(new com.finalproject.security.AccountStatusFilter(userRepository),
@@ -62,7 +63,6 @@ public class SecurityConfig {
                 "/resend-otp",
                 "/forgot-password",
                 "/reset-password",
-                "/api/notifications/**",
                 "/checkout/momo/ipn"
             ))
             .authorizeHttpRequests(auth -> auth

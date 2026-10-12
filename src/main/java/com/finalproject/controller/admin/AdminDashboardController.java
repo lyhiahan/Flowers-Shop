@@ -1,161 +1,103 @@
 package com.finalproject.controller.admin;
 
-import com.finalproject.entity.Store;
-import com.finalproject.entity.User;
-import com.finalproject.enums.OrderStatus;
-import com.finalproject.enums.Role;
+import com.finalproject.entity.*;
+import com.finalproject.enums.*;
 import com.finalproject.repository.*;
+import com.finalproject.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import java.math.BigDecimal;
+import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
-import java.util.List;
+import java.time.*;
+import java.util.*;
 
 @Controller
 @RequestMapping("/admin")
 @RequiredArgsConstructor
 public class AdminDashboardController {
-
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
-    private final com.finalproject.service.AnalyticsService analyticsService;
+    private final AnalyticsService analyticsService;
+    private final Clock clock;
 
     @GetMapping({"", "/dashboard"})
     public String showDashboard(
-            @org.springframework.web.bind.annotation.RequestParam(value = "timeframe", defaultValue = "day") String timeframe,
-            @org.springframework.web.bind.annotation.RequestParam(value = "userChartType", defaultValue = "line") String userChartType,
-            @org.springframework.web.bind.annotation.RequestParam(value = "storeChartType", defaultValue = "bar") String storeChartType,
-            @org.springframework.web.bind.annotation.RequestParam(value = "error", required = false) String error,
-            @org.springframework.web.bind.annotation.RequestParam(value = "criteria", defaultValue = "revenue") String criteria,
-            @org.springframework.web.bind.annotation.RequestParam(value = "chartType", defaultValue = "line") String chartType,
-            Principal principal,
-            Model model) {
+            @RequestParam(value = "timeframe", required = false) String timeframe,
+            @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(value = "userChartType", defaultValue = "line") String userChartType,
+            @RequestParam(value = "storeChartType", defaultValue = "bar") String storeChartType,
+            @RequestParam(value = "error", required = false) String error,
+            @RequestParam(value = "criteria", defaultValue = "revenue") String criteria,
+            @RequestParam(value = "chartType", defaultValue = "line") String chartType,
+            Principal principal, Model model) {
+        ReportRange range = ReportRange.resolve(timeframe, startDate, endDate, clock);
+        if (!Set.of("line", "bar", "pie").contains(chartType) || !Set.of("line", "bar", "pie").contains(userChartType)
+                || !Set.of("line", "bar", "pie").contains(storeChartType))
+            throw new IllegalArgumentException("Loại biểu đồ không hợp lệ.");
+        model.addAttribute("reportRange", range);
+        model.addAttribute("timeframe", timeframe == null ? range.period() : timeframe);
+        model.addAttribute("userChartType", userChartType); model.addAttribute("storeChartType", storeChartType);
+        model.addAttribute("criteria", criteria); model.addAttribute("chartType", chartType);
         try {
-            if ("admin_shopping_denied".equalsIgnoreCase(error)) {
+            if ("admin_shopping_denied".equalsIgnoreCase(error))
                 model.addAttribute("errorMessage", "Tài khoản Quản trị viên không thể thực hiện chức năng mua hàng hoặc truy cập giỏ hàng. Quý khách vui lòng quản trị hệ thống tại đây.");
-            }
-            User admin = userRepository.findByUsername(principal.getName()).orElse(null);
-
-            long totalProducts = productRepository.count();
-            long pendingProducts = productRepository.findAll().stream().filter(p -> Boolean.FALSE.equals(p.getIsActive())).count();
-            long totalCategories = categoryRepository.count();
-            long totalStores = storeRepository.count();
-            long activeStores = storeRepository.countByStatus(true);
-            long totalUsers = userRepository.count();
-            long totalCustomers = userRepository.countByRole(Role.USER);
-            long totalManagers = userRepository.countByRole(Role.MANAGER);
-            long totalVendors = userRepository.countByRole(Role.MANAGER);
-
-            long totalOrders = orderRepository.count();
-            long pendingOrders = orderRepository.countByStatus(OrderStatus.PENDING);
-            long rentingOrders = orderRepository.countByStatus(OrderStatus.RENTING);
-            long completedOrders = orderRepository.countByStatus(OrderStatus.COMPLETED);
-
-            // Việc cần xử lý: Yêu cầu cấp vai trò, sản phẩm chờ duyệt
-            List<com.finalproject.entity.Product> pendingApprovalProducts = productRepository.findAll().stream().filter(p -> Boolean.FALSE.equals(p.getIsActive())).limit(10).toList();
-
-            // UC_025: Top người dùng điểm cao nhất hệ thống (lên đến 1000 người dùng)
-            List<User> topPointUsers;
-            try {
-                topPointUsers = userRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "point", "id"))).getContent();
-            } catch (Exception e) {
-                topPointUsers = java.util.Collections.emptyList();
-            }
-
-            // UC_025: 1000 người dùng mới nhất
-            List<User> recentUsers;
-            try {
-                recentUsers = userRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt", "id"))).getContent();
-            } catch (Exception e) {
-                recentUsers = java.util.Collections.emptyList();
-            }
-
-            // UC_026: Top cửa hàng điểm cao nhất hệ thống (lên đến 1000 cửa hàng)
-            List<Store> topPointStores;
-            try {
-                topPointStores = storeRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "point", "id"))).getContent();
-            } catch (Exception e) {
-                topPointStores = java.util.Collections.emptyList();
-            }
-
-            // UC_026: 1000 cửa hàng mới nhất
-            List<Store> recentStores;
-            try {
-                recentStores = storeRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt", "id"))).getContent();
-            } catch (Exception e) {
-                recentStores = java.util.Collections.emptyList();
-            }
-
-            BigDecimal totalRevenue = analyticsService.getStoreRevenueStats(null).getTotalBuyRevenue();
-
-            // Biểu đồ đa thời gian theo đề cương
-            var revenueChart = analyticsService.getRevenueChart(timeframe, null);
-            var usersChart = analyticsService.getNewUsersChart(timeframe);
-            var storesChart = analyticsService.getNewStoresChart(timeframe);
-
-            if (!java.util.Set.of("line", "bar", "pie").contains(chartType) || !java.util.Set.of("line", "bar", "pie").contains(userChartType) || !java.util.Set.of("line", "bar", "pie").contains(storeChartType)) throw new IllegalArgumentException("Loại biểu đồ không hợp lệ.");
-            model.addAllAttributes(analyticsService.dashboard(null, timeframe, criteria));
-            model.addAttribute("criteria", criteria); model.addAttribute("chartType", chartType);
+            model.addAttribute("admin", userRepository.findByUsername(principal.getName()).orElse(null));
+            Specification<User> registered = (root, query, cb) -> cb.and(
+                    cb.greaterThanOrEqualTo(root.get("createdAt"), range.start()), cb.lessThan(root.get("createdAt"), range.endExclusive()),
+                    range.bucket() == ReportRange.Bucket.HOUR ? cb.isTrue(root.get("creationTimeKnown")) : cb.conjunction());
+            Specification<Store> createdStores = (root, query, cb) -> cb.and(
+                    cb.greaterThanOrEqualTo(root.get("createdAt"), range.start()), cb.lessThan(root.get("createdAt"), range.endExclusive()));
+            Specification<Product> createdProducts = (root, query, cb) -> cb.and(
+                    cb.greaterThanOrEqualTo(root.get("createdAt"), range.start()), cb.lessThan(root.get("createdAt"), range.endExclusive()),
+                    cb.or(cb.isFalse(root.get("isDeleted")), cb.isNull(root.get("isDeleted"))));
+            Specification<Order> createdOrders = (root, query, cb) -> cb.and(
+                    cb.greaterThanOrEqualTo(root.get("createdAt"), range.start()), cb.lessThan(root.get("createdAt"), range.endExclusive()));
+            var latest = PageRequest.of(0, 1000, Sort.by(Sort.Direction.DESC, "createdAt", "id"));
+            var byPoints = PageRequest.of(0, 1000, Sort.by(Sort.Direction.DESC, "point", "id"));
+            model.addAllAttributes(analyticsService.dashboard(null, range, criteria));
+            long totalUsers = userRepository.count(registered), totalStores = storeRepository.count(createdStores);
+            model.addAttribute("totalUsers", totalUsers); model.addAttribute("totalUsersCount", totalUsers);
+            model.addAttribute("totalStores", totalStores); model.addAttribute("totalStoresCount", totalStores);
+            model.addAttribute("activeStores", storeRepository.count(createdStores.and((r, q, cb) -> cb.isTrue(r.get("status")))));
+            model.addAttribute("totalProducts", model.getAttribute("totalProductsCount"));
+            model.addAttribute("totalOrders", model.getAttribute("totalOrdersCount"));
+            model.addAttribute("totalCustomers", userRepository.count(registered.and((r, q, cb) -> cb.equal(r.get("role"), Role.USER))));
+            long managers = userRepository.count(registered.and((r, q, cb) -> cb.equal(r.get("role"), Role.MANAGER)));
+            model.addAttribute("totalManagers", managers); model.addAttribute("totalVendors", managers);
+            model.addAttribute("pendingOrders", orderRepository.count(createdOrders.and((r, q, cb) -> cb.equal(r.get("status"), OrderStatus.PENDING))));
+            model.addAttribute("completedOrders", orderRepository.count(createdOrders.and((r, q, cb) -> cb.equal(r.get("status"), OrderStatus.COMPLETED))));
+            model.addAttribute("rentingOrders", orderRepository.count(createdOrders.and((r, q, cb) -> cb.equal(r.get("status"), OrderStatus.RENTING))));
+            var pendingProducts = createdProducts.and((r, q, cb) -> cb.isFalse(r.get("isActive")));
+            model.addAttribute("pendingProducts", productRepository.count(pendingProducts));
+            model.addAttribute("pendingApprovalProducts", productRepository.findAll(pendingProducts, PageRequest.of(0, 10)).getContent());
+            model.addAttribute("totalCategories", categoryRepository.count());
+            model.addAttribute("topPointUsers", userRepository.findAll(registered, byPoints).getContent());
+            model.addAttribute("recentUsers", userRepository.findAll(registered, latest).getContent());
+            model.addAttribute("topPointStores", storeRepository.findAll(createdStores, byPoints).getContent());
+            model.addAttribute("recentStores", storeRepository.findAll(createdStores, latest).getContent());
+            model.addAttribute("revenueChart", analyticsService.getRevenueChart(range, null));
+            model.addAttribute("usersChart", analyticsService.getNewUsersChart(range));
+            model.addAttribute("storesChart", analyticsService.getNewStoresChart(range));
+            model.addAttribute("products", productRepository.findAll(createdProducts, latest).getContent());
+            model.addAttribute("stores", storeRepository.findAll(createdStores, latest).getContent());
             model.addAttribute("dataLoadError", false);
-            model.addAttribute("admin", admin);
-            model.addAttribute("timeframe", timeframe);
-            model.addAttribute("userChartType", userChartType != null ? userChartType.toLowerCase() : "line");
-            model.addAttribute("storeChartType", storeChartType != null ? storeChartType.toLowerCase() : "bar");
-            model.addAttribute("totalStores", totalStores);
-            model.addAttribute("totalStoresCount", totalStores);
-            model.addAttribute("activeStores", activeStores);
-            model.addAttribute("totalProducts", totalProducts);
-            model.addAttribute("totalProductsCount", totalProducts);
-            model.addAttribute("pendingProducts", pendingProducts);
-            model.addAttribute("pendingApprovalProducts", pendingApprovalProducts);
-            model.addAttribute("totalCategories", totalCategories);
-            model.addAttribute("totalUsers", totalUsers);
-            model.addAttribute("totalUsersCount", totalUsers);
-            model.addAttribute("totalCustomers", totalCustomers);
-            model.addAttribute("totalManagers", totalManagers);
-            model.addAttribute("totalVendors", totalVendors);
-            model.addAttribute("totalOrders", totalOrders);
-            model.addAttribute("totalOrdersCount", totalOrders);
-            model.addAttribute("pendingOrders", pendingOrders);
-            model.addAttribute("rentingOrders", rentingOrders);
-            model.addAttribute("completedOrders", completedOrders);
-            model.addAttribute("totalRevenue", totalRevenue);
-
-
-            model.addAttribute("topPointUsers", topPointUsers);
-            model.addAttribute("recentUsers", recentUsers);
-            model.addAttribute("topPointStores", topPointStores);
-            model.addAttribute("recentStores", recentStores);
-            model.addAttribute("revenueChart", revenueChart);
-            model.addAttribute("usersChart", usersChart);
-            model.addAttribute("storesChart", storesChart);
-            model.addAttribute("products", productRepository.findAll());
-            model.addAttribute("stores", storeRepository.findAll());
-
-        } catch (IllegalArgumentException ex) {
-            throw ex;
-        } catch (Exception ex) {
+        } catch (IllegalArgumentException ex) { throw ex; }
+        catch (Exception ex) {
             model.addAttribute("dataLoadError", true);
             model.addAttribute("errorMessage", "Không thể tải dữ liệu thống kê hệ thống. Vui lòng thử lại!");
-            model.addAttribute("totalUsers", 0L);
-            model.addAttribute("totalUsersCount", 0L);
-            model.addAttribute("totalStores", 0L);
-            model.addAttribute("totalStoresCount", 0L);
-            model.addAttribute("topPointUsers", java.util.Collections.emptyList());
-            model.addAttribute("recentUsers", java.util.Collections.emptyList());
-            model.addAttribute("topPointStores", java.util.Collections.emptyList());
-            model.addAttribute("recentStores", java.util.Collections.emptyList());
+            for (String name : List.of("topProducts", "recentOrders", "topPointUsers", "recentUsers", "topPointStores", "recentStores"))
+                model.addAttribute(name, Collections.emptyList());
         }
-
-
-        for (String ranking : java.util.List.of("topProducts", "recentOrders", "topPointUsers", "topPointStores")) com.finalproject.utils.DashboardPages.apply(model, ranking);
+        for (String name : List.of("topProducts", "recentOrders", "topPointUsers", "topPointStores"))
+            com.finalproject.utils.DashboardPages.apply(model, name);
         return "admin/dashboard";
     }
 }

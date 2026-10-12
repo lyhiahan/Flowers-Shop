@@ -200,6 +200,29 @@ class ConcurrencyRegressionTests {
         } finally { cleanup(f); }
     }
 
+    @Test void cancellationAndStartingDeliveryCannotBothSucceed() throws Exception {
+        Fixture f = fixture();
+        try {
+            Long orderId = orders.checkout(f.customers().get(0), List.of(f.itemIds().get(0)), PaymentMethod.COD,
+                    "Khách", "0900000000", "Quận 1", null, null, LocalDate.now(), "PICKUP", f.storeId()).getFirst().getId();
+            new TransactionTemplate(transactionManager).executeWithoutResult(tx -> {
+                var order = jdbc.update("update orders set status='PREPARING', shipping_method='DELIVERY' where id=?", orderId);
+                assertThat(order).isEqualTo(1);
+            });
+            assertThat(race(i -> {
+                String actor = i == 0 ? f.manager() : f.customers().get(0);
+                SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(actor, "",
+                        List.of(new SimpleGrantedAuthority(i == 0 ? "ROLE_MANAGER" : "ROLE_USER"))));
+                if (i == 0) workflow.transition(orderId, OrderStatus.DELIVERING);
+                else orders.cancelOrder(actor, orderId);
+            })).isEqualTo(1);
+            String state = jdbc.queryForObject("select status from orders where id=?", String.class, orderId);
+            assertThat(state).isIn("CANCELLED", "DELIVERING");
+            assertThat(jdbc.queryForObject("select quantity from store_inventories where store_id=?", Integer.class, f.storeId()))
+                    .isEqualTo("CANCELLED".equals(state) ? 1 : 0);
+        } finally { cleanup(f); }
+    }
+
     @Test void submittingTheSameCartTwiceCreatesOneOrder() throws Exception {
         Fixture f = fixture();
         try {

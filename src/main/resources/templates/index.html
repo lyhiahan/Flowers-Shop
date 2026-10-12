@@ -1758,7 +1758,8 @@
 
             <!-- Lưới sản phẩm: 4 sản phẩm mỗi hàng trên máy tính, 2 trên điện thoại, khoảng cách 24px (g-4) -->
             <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
-                <div class="col" th:each="fp : ${guestFeaturedProducts}">
+                <div class="col" th:each="fp : ${guestFeaturedProducts}"
+                     th:with="stock=${catalogStock[fp.id]}, remaining=${stock != null ? stock.quantity : 0}">
                     <a th:href="@{/product/{id}(id=${fp.id})}" class="text-decoration-none">
                         <div class="card flower-card h-100">
                             <!-- Ảnh sản phẩm: tỷ lệ 1:1, bo góc đồng đều, bỏ nhãn 'Đã bán ...' trên ảnh -->
@@ -1770,6 +1771,7 @@
                             <div class="flower-card-body">
                                 <!-- Tên sản phẩm: tối đa 2 dòng -->
                                 <h3 class="flower-card-title" th:title="${fp.name}" th:text="${fp.name}"></h3>
+                                <div th:replace="~{fragments/catalog-stock :: stock(${remaining})}"></div>
                                 <!-- Giá và đánh giá có vị trí thống nhất -->
                                 <div class="flower-card-meta">
                                     <span class="flower-price"
@@ -2077,7 +2079,8 @@
 
         <!-- LƯỚI SẢN PHẨM ĐỒNG NHẤT (Quy chuẩn 1 & 5: 2 hàng × 4 cột máy tính, tối đa 8 sản phẩm/trang) -->
         <div th:if="${not #lists.isEmpty(products)}" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="productGrid">
-            <div class="col" th:each="p : ${products}">
+            <div class="col" th:each="p : ${products}"
+                 th:with="stock=${catalogStock[p.id]}, remaining=${stock != null ? stock.quantity : 0}">
                 <div class="flower-card h-100 position-relative">
                     <!-- Nút theo dõi / Yêu thích nhanh 36x36px ở góc trên bên phải -->
                     <form sec:authorize="hasRole('USER')"
@@ -2111,6 +2114,7 @@
                         <!-- Tên sản phẩm: Nunito 18 px, đậm 600–700, tối đa 2 dòng (48px) -->
                         <a th:href="@{/product/{id}(id=${p.id})}" class="flower-card-title"
                             th:title="${p.name}" th:text="${p.name}"></a>
+                        <div th:replace="~{fragments/catalog-stock :: stock(${remaining})}"></div>
 
                         <!-- Giá (22–24 px, đậm 800, hồng trầm #A64060, dạng 390.000 ₫) và Đánh giá thực tế -->
                         <div class="flower-card-meta">
@@ -2127,11 +2131,12 @@
                         <form sec:authorize="hasRole('USER')" th:action="@{/cart/add}" method="post" class="mt-auto ajax-add-to-cart">
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <input type="hidden" name="productId" th:value="${p.id}">
-                            <input type="hidden" name="storeId" th:value="${p.store != null ? p.store.id : 1}">
+                            <input type="hidden" name="storeId" th:value="${stock != null ? stock.purchaseStoreId : null}">
                             <input type="hidden" name="orderType" value="BUY">
                             <input type="hidden" name="quantity" value="1">
-                            <button type="submit" class="btn-add-cart">
-                                <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+                            <button type="submit" class="btn-add-cart" th:disabled="${remaining <= 0}">
+                                <i class="bi" th:classappend="${remaining > 0} ? 'bi-cart-plus' : 'bi-x-circle'"></i>
+                                <span th:text="${remaining > 0} ? 'Thêm vào giỏ' : 'Hết hàng'"></span>
                             </button>
                             <p class="ajax-cart-error" style="display:none; font-size:13px; color:#c0392b; margin:4px 0 0; text-align:center;"></p>
                         </form>
@@ -2146,9 +2151,12 @@
 
                         <!-- 3. Dành cho Khách vãng lai chưa đăng nhập: Chuyển hướng đăng nhập -->
                         <div sec:authorize="isAnonymous()" class="mt-auto">
-                            <a th:href="@{/login}" class="btn-add-cart text-decoration-none d-flex align-items-center justify-content-center gap-1.5">
+                            <a th:if="${remaining > 0}" th:href="@{/login}" class="btn-add-cart text-decoration-none d-flex align-items-center justify-content-center gap-1.5">
                                 <i class="bi bi-cart-plus"></i> Thêm vào giỏ
                             </a>
+                            <button th:unless="${remaining > 0}" type="button" class="btn-add-cart" disabled>
+                                <i class="bi bi-x-circle"></i> Hết hàng
+                            </button>
                         </div>
                     </div>
                 </div>

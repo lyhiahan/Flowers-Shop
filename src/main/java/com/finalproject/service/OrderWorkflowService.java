@@ -194,9 +194,16 @@ public class OrderWorkflowService {
     @Transactional
     public void cancelByCustomer(String username, Long id) {
         Order order = lockedOrder(id);
+        // Re-read after acquiring the lock: delivery may have started since the page loaded.
+        entityManager.refresh(order, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
         requireCustomer(order, username);
-        if (order.getStatus() == OrderStatus.CANCELLED) return;
-        if (order.getStatus() != OrderStatus.PENDING) throw new IllegalStateException("Chỉ hủy được đơn chờ xác nhận.");
+        if (order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.REFUND_REQUESTED) return;
+        if (!order.isCancellable())
+            throw new IllegalStateException("Không thể hủy đơn đã bắt đầu giao hàng hoặc đã kết thúc. Bạn có thể hủy khi đơn đang chờ xác nhận, đã xác nhận hoặc đang chuẩn bị.");
+        order.setCancellationReason("Khách hàng đã hủy đơn trước khi giao hàng. "
+                + ("PAID".equals(order.getPaymentStatus())
+                ? "Vui lòng hoàn tiền lại cho khách hàng; chưa ghi nhận đã hoàn tiền."
+                : "Đơn chưa thanh toán đã được hủy."));
         cancel(order);
     }
 

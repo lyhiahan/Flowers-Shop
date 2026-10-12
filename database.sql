@@ -1,3 +1,5 @@
+-- LEGACY RESET SCRIPT: drops existing tables. Not used by application startup.
+-- New installations and upgrades use Flyway; see README.md before running SQL manually.
 -- ============================================================================
 -- HỆ THỐNG QUẢN LÝ BÁN HÀNG THEO MÔ HÌNH CHUỖI CỬA HÀNG HOA TƯƠI (FLOWER SHOP CHAIN)
 -- HỆ QUẢN TRỊ CƠ SỞ DỮ LIỆU: MICROSOFT SQL SERVER

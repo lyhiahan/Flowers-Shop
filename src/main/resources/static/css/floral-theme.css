@@ -1110,3 +1110,24 @@ h2.section-title, h3.section-title, .h2-title {
   .floral-product-image { height: 220px; }
   .card-body { min-width: 0; }
 }
+.catalog-stock {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    min-height: 24px;
+    margin-bottom: .6rem;
+    color: #237345;
+    font-size: .875rem;
+    font-weight: 600;
+}
+.catalog-stock.is-out-of-stock {
+    color: #b42336;
+    font-weight: 700;
+}
+.flower-card .btn-add-cart:disabled {
+    background-color: #e9ecef !important;
+    color: #495057 !important;
+    cursor: not-allowed;
+    box-shadow: none !important;
+    transform: none !important;
+}

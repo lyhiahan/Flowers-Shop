@@ -38,7 +38,7 @@
                 <div id="kpi-total-users" class="col-12 col-sm-6 col-xl">
                     <div class="kpi-card-admin">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="small fw-bold text-muted">Tổng người dùng</span>
+                            <span class="small fw-bold text-muted">Người dùng mới trong kỳ</span>
                             <div class="rounded-3 p-2 d-flex align-items-center justify-content-center" style="background:#E0F2FE; color:#0369A1; width:36px; height:36px;">
                                 <i class="bi bi-people-fill"></i>
                             </div>
@@ -55,7 +55,7 @@
                 <div id="kpi-total-stores" class="col-12 col-sm-6 col-xl">
                     <div class="kpi-card-admin">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="small fw-bold text-muted">Tổng cửa hàng</span>
+                            <span class="small fw-bold text-muted">Cửa hàng mới trong kỳ</span>
                             <div class="rounded-3 p-2 d-flex align-items-center justify-content-center" style="background:#EDE9FE; color:#6D28D9; width:36px; height:36px;">
                                 <i class="bi bi-shop"></i>
                             </div>
@@ -72,14 +72,14 @@
                 <div id="kpi-total-products" class="col-12 col-sm-6 col-xl">
                     <div class="kpi-card-admin">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="small fw-bold text-muted">Tổng sản phẩm</span>
+                            <span class="small fw-bold text-muted">Sản phẩm mới trong kỳ</span>
                             <div class="rounded-3 p-2 d-flex align-items-center justify-content-center" style="background:#E5EEE8; color:#20382E; width:36px; height:36px;">
                                 <i class="bi bi-flower1"></i>
                             </div>
                         </div>
                         <div>
                             <strong id="totalProductsCount" class="fs-3 fw-bold text-dark d-block" th:text="${totalProductsCount}">0</strong>
-                            <span class="small text-muted">Toàn hệ thống</span>
+                            <span class="small text-muted">Trong khoảng đã chọn</span>
                         </div>
                     </div>
                 </div>
@@ -87,7 +87,7 @@
                 <div id="kpi-total-orders" class="col-12 col-sm-6 col-xl">
                     <div class="kpi-card-admin">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="small fw-bold text-muted">Tổng đơn hàng</span>
+                            <span class="small fw-bold text-muted">Đơn hàng trong kỳ</span>
                             <div class="rounded-3 p-2 d-flex align-items-center justify-content-center" style="background:#FEF3C7; color:#B45309; width:36px; height:36px;">
                                 <i class="bi bi-bag-check-fill"></i>
                             </div>
@@ -129,15 +129,7 @@
                             <option id="filterCriteriaProducts" value="products" th:selected="${criteria == 'products'}">Sản phẩm bán</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="form-label small fw-bold text-muted mb-1">Khoảng thời gian</label>
-                        <select name="timeframe" class="form-select form-select-sm" style="min-width: 170px;" onchange="this.form.requestSubmit()">
-                            <option id="filterTimeHour" value="hour" th:selected="${timeframe == 'hour'}">Giờ trong hôm nay</option>
-                            <option id="filterTimeDay" value="day" th:selected="${timeframe == 'day'}">7 ngày gần nhất</option>
-                            <option id="filterTimeMonth" value="month" th:selected="${timeframe == 'month'}">12 tháng năm hiện tại</option>
-                            <option id="filterTimeYear" value="year" th:selected="${timeframe == 'year'}">5 năm gần nhất</option>
-                        </select>
-                    </div>
+                    <div th:replace="~{fragments/report-period :: controls('timeframe', 'filterTime')}"></div>
                     <div>
                         <label class="form-label small fw-bold text-muted mb-1">Loại biểu đồ</label>
                         <select name="chartType" class="form-select form-select-sm" style="min-width: 130px;" onchange="this.form.requestSubmit()">
@@ -154,7 +146,7 @@
                 <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                     <div>
                         <h2 class="h5 fw-bold mb-1" style="color: #20382E;" th:text="${chartUnit}">Biểu đồ thống kê</h2>
-                        <p class="text-muted small mb-0">Biểu đồ dựa trên tối đa 1000 đơn mới nhất trong khoảng: <span class="fw-bold" th:text="${sampleCount}">0</span> / <span class="fw-bold" th:text="${rangeOrdersCount}">0</span> đơn. Tổng doanh thu dùng toàn bộ dữ liệu.</p>
+                        <p class="text-muted small mb-0">Thống kê toàn bộ đơn trong khoảng đã chọn: <span class="fw-bold" th:text="${sampleCount}">0</span> / <span class="fw-bold" th:text="${rangeOrdersCount}">0</span> đơn. Tổng doanh thu dùng toàn bộ dữ liệu.</p>
                     </div>
                 </div>
                 <div style="height:320px; position:relative;" class="mt-3">
@@ -250,19 +242,15 @@
                             <input type="hidden" name="criteria" th:value="${criteria}">
                             <input type="hidden" name="chartType" th:value="${chartType}">
                             <input type="hidden" name="storeChartType" th:value="${storeChartType}">
-                            <select name="timeframe" class="form-select form-select-sm w-auto" onchange="this.form.requestSubmit()">
-                                <option id="userTimeHour" value="hour" th:selected="${timeframe == 'hour'}">Giờ</option>
-                                <option id="userTimeDay" value="day" th:selected="${timeframe == 'day'}">Ngày</option>
-                                <option id="userTimeMonth" value="month" th:selected="${timeframe == 'month'}">Tháng</option>
-                                <option id="userTimeYear" value="year" th:selected="${timeframe == 'year'}">Năm</option>
-                            </select>
+                            <input type="hidden" name="userChartType" th:value="${userChartType}">
+                            <div th:replace="~{fragments/report-period :: controls('timeframe', 'userTime')}"></div>
                             <div class="btn-group btn-group-sm">
-                                <button id="userLineBtn" class="btn" th:classappend="${userChartType == 'line' or userChartType == null} ? 'btn-success' : 'btn-outline-success'" name="userChartType" value="line">Đường</button>
-                                <button id="userBarBtn" class="btn" th:classappend="${userChartType == 'bar'} ? 'btn-success' : 'btn-outline-success'" name="userChartType" value="bar">Cột</button>
-                                <button id="userPieBtn" class="btn" th:classappend="${userChartType == 'pie'} ? 'btn-success' : 'btn-outline-success'" name="userChartType" value="pie">Tròn</button>
+                                <button id="userLineBtn" class="btn" th:classappend="${userChartType == 'line' or userChartType == null} ? 'btn-success' : 'btn-outline-success'" onclick="this.form.elements.userChartType.value=this.value" value="line">Đường</button>
+                                <button id="userBarBtn" class="btn" th:classappend="${userChartType == 'bar'} ? 'btn-success' : 'btn-outline-success'" onclick="this.form.elements.userChartType.value=this.value" value="bar">Cột</button>
+                                <button id="userPieBtn" class="btn" th:classappend="${userChartType == 'pie'} ? 'btn-success' : 'btn-outline-success'" onclick="this.form.elements.userChartType.value=this.value" value="pie">Tròn</button>
                             </div>
                         </form>
-                        <p class="small text-muted">Tối đa 1000 bản ghi mới nhất; thống kê giờ chỉ gồm dữ liệu có giờ tạo chính xác.</p>
+                        <p class="small text-muted">Thống kê toàn bộ bản ghi trong khoảng đã chọn. </p>
                         <div style="height:300px; position:relative;">
                             <canvas id="adminUsersChart"></canvas>
                         </div>
@@ -274,12 +262,13 @@
                         <h2 class="h5 fw-bold mb-3" style="color: #20382E;">
                             <i class="bi bi-trophy text-warning me-2"></i>Top Người Dùng Điểm Cao Nhất
                         </h2>
+                        <p class="small text-muted">Người dùng đăng ký trong khoảng chọn; điểm tích lũy hiện tại.</p>
                         <div class="table-responsive" style="max-height:350px; overflow:auto">
                             <table class="table table-hover align-middle mb-0">
                                 <thead style="background-color: #E5EEE8;">
                                     <tr>
                                         <th class="py-2.5">Họ và tên</th>
-                                        <th class="py-2.5 text-end">Điểm tích lũy</th>
+                                        <th class="py-2.5 text-end">Điểm hiện tại</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -314,19 +303,15 @@
                             <input type="hidden" name="criteria" th:value="${criteria}">
                             <input type="hidden" name="chartType" th:value="${chartType}">
                             <input type="hidden" name="userChartType" th:value="${userChartType}">
-                            <select name="timeframe" class="form-select form-select-sm w-auto" onchange="this.form.requestSubmit()">
-                                <option id="storeTimeHour" value="hour" th:selected="${timeframe == 'hour'}">Giờ</option>
-                                <option id="storeTimeDay" value="day" th:selected="${timeframe == 'day'}">Ngày</option>
-                                <option id="storeTimeMonth" value="month" th:selected="${timeframe == 'month'}">Tháng</option>
-                                <option id="storeTimeYear" value="year" th:selected="${timeframe == 'year'}">Năm</option>
-                            </select>
+                            <input type="hidden" name="storeChartType" th:value="${storeChartType}">
+                            <div th:replace="~{fragments/report-period :: controls('timeframe', 'storeTime')}"></div>
                             <div class="btn-group btn-group-sm">
-                                <button id="storeLineBtn" class="btn" th:classappend="${storeChartType == 'line'} ? 'btn-success' : 'btn-outline-success'" name="storeChartType" value="line">Đường</button>
-                                <button id="storeBarBtn" class="btn" th:classappend="${storeChartType == 'bar' or storeChartType == null} ? 'btn-success' : 'btn-outline-success'" name="storeChartType" value="bar">Cột</button>
-                                <button id="storePieBtn" class="btn" th:classappend="${storeChartType == 'pie'} ? 'btn-success' : 'btn-outline-success'" name="storeChartType" value="pie">Tròn</button>
+                                <button id="storeLineBtn" class="btn" th:classappend="${storeChartType == 'line'} ? 'btn-success' : 'btn-outline-success'" onclick="this.form.elements.storeChartType.value=this.value" value="line">Đường</button>
+                                <button id="storeBarBtn" class="btn" th:classappend="${storeChartType == 'bar' or storeChartType == null} ? 'btn-success' : 'btn-outline-success'" onclick="this.form.elements.storeChartType.value=this.value" value="bar">Cột</button>
+                                <button id="storePieBtn" class="btn" th:classappend="${storeChartType == 'pie'} ? 'btn-success' : 'btn-outline-success'" onclick="this.form.elements.storeChartType.value=this.value" value="pie">Tròn</button>
                             </div>
                         </form>
-                        <p class="small text-muted">Tối đa 1000 bản ghi mới nhất; thống kê giờ chỉ gồm dữ liệu có giờ tạo chính xác.</p>
+                        <p class="small text-muted">Thống kê toàn bộ bản ghi trong khoảng đã chọn. </p>
                         <div style="height:300px; position:relative;">
                             <canvas id="adminStoresChart"></canvas>
                         </div>
@@ -338,12 +323,13 @@
                         <h2 class="h5 fw-bold mb-3" style="color: #20382E;">
                             <i class="bi bi-star-fill text-warning me-2"></i>Top Cửa Hàng Điểm Cao Nhất
                         </h2>
+                        <p class="small text-muted">Cửa hàng tạo trong khoảng chọn; điểm tích lũy hiện tại.</p>
                         <div class="table-responsive" style="max-height:350px; overflow:auto">
                             <table class="table table-hover align-middle mb-0">
                                 <thead style="background-color: #E5EEE8;">
                                     <tr>
                                         <th class="py-2.5">Tên cửa hàng</th>
-                                        <th class="py-2.5 text-end">Điểm đánh giá</th>
+                                        <th class="py-2.5 text-end">Điểm hiện tại</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -369,6 +355,7 @@
 
 <!-- Chart.js and Dashboard Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+<script th:src="@{/js/report-period.js}"></script>
 <script th:inline="javascript">
 var revData = {labels: /*[[${chartLabels}]]*/ [], data: /*[[${chartValues}]]*/ []};
 var revType = /*[[${chartType}]]*/ 'line';

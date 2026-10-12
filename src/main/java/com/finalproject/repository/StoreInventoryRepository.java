@@ -11,6 +11,24 @@ import java.util.Optional;
 
 @Repository
 public interface StoreInventoryRepository extends JpaRepository<StoreInventory, Long> {
+    interface CatalogStockRow {
+        Long getProductId();
+        Long getStoreId();
+        Integer getQuantity();
+    }
+
+    // One projection query for all visible cards, respecting the same branch rules as product detail.
+    @Query("""
+            SELECT p.id AS productId, s.id AS storeId, si.quantity AS quantity
+            FROM StoreInventory si JOIN si.product p JOIN si.store s LEFT JOIN p.store ownerStore
+            WHERE p.id IN :productIds AND s.status = true AND s.isOpen = true
+                AND (ownerStore.id IS NULL OR ownerStore.id = s.id)
+                AND (:storeId IS NULL OR s.id = :storeId) AND si.quantity > 0
+            ORDER BY p.id, s.id
+            """)
+    List<CatalogStockRow> findCatalogStock(@Param("productIds") List<Long> productIds,
+                                         @Param("storeId") Long storeId);
+
     List<StoreInventory> findByStoreIdAndProductIdIn(Long storeId, List<Long> productIds);
 
     Optional<StoreInventory> findByStoreIdAndProductId(Long storeId, Long productId);

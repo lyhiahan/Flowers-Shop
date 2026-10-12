@@ -524,11 +524,6 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public void cancelOrder(String username, Long orderId) {
-        Order order = getOrderById(orderId);
-        // UC_011: Đơn hàng chỉ có thể hủy trong vòng 1 tiếng sau khi đặt
-        if (order.getCreatedAt() != null && java.time.Duration.between(order.getCreatedAt(), java.time.LocalDateTime.now(clock)).toHours() >= 1) {
-            throw new IllegalStateException("Đơn hàng đã được đặt quá 1 tiếng, không thể hủy!");
-        }
         workflow.cancelByCustomer(username, orderId);
     }
 

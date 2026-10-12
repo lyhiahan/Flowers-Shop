@@ -350,9 +350,8 @@
             headers: getCsrfHeaders(),
             keepalive: true
         });
-        if (res.ok) {
-            updateBadges(currentUnreadCount - 1);
-        }
+        if (!res.ok) throw new Error('Không thể đánh dấu thông báo đã đọc.');
+        updateBadges(currentUnreadCount - 1);
     }
 
     // API: Mark all notifications read
@@ -361,9 +360,8 @@
             method: 'POST',
             headers: getCsrfHeaders()
         });
-        if (res.ok) {
-            updateBadges(0);
-        }
+        if (!res.ok) throw new Error('Không thể đánh dấu tất cả thông báo đã đọc.');
+        updateBadges(0);
     }
 
     // In-page mark single helper
@@ -411,11 +409,15 @@
                 e.preventDefault();
                 e.stopPropagation();
                 btn.disabled = true;
-                await readAllNotifications();
-                btn.disabled = false;
-                // Clear dots in dropdown
-                document.querySelectorAll('.notif-dropdown-item .badge.bg-danger').forEach(dot => dot.remove());
-                document.querySelectorAll('.notif-dropdown-item.bg-light').forEach(item => item.classList.remove('bg-light', 'bg-opacity-75'));
+                try {
+                    await readAllNotifications();
+                    document.querySelectorAll('.notif-dropdown-item .badge.bg-danger').forEach(dot => dot.remove());
+                    document.querySelectorAll('.notif-dropdown-item.bg-light').forEach(item => item.classList.remove('bg-light', 'bg-opacity-75'));
+                } catch (error) {
+                    console.error(error);
+                } finally {
+                    btn.disabled = false;
+                }
             });
         });
     }

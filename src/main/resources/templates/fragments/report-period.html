@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="controls(parameterName, idPrefix)" data-report-period-controls class="d-flex flex-wrap gap-2 align-items-end">
+    <div>
+        <label class="form-label small fw-bold mb-1" th:for="${idPrefix + 'Select'}">Khoảng thời gian</label>
+        <select data-report-period th:id="${idPrefix + 'Select'}" th:name="${parameterName}" class="form-select form-select-sm">
+            <option th:id="${idPrefix + 'Today'}" value="today" th:selected="${reportRange.period == 'today'}">Hôm nay</option>
+            <option th:id="${idPrefix + 'Day'}" value="7days" th:selected="${reportRange.period == '7days'}">7 ngày gần nhất</option>
+            <option th:id="${idPrefix + '30Days'}" value="30days" th:selected="${reportRange.period == '30days'}">30 ngày gần nhất</option>
+            <option th:id="${idPrefix + 'Custom'}" value="custom" th:selected="${reportRange.period == 'custom'}">Từ ngày… đến ngày…</option>
+            <option th:id="${idPrefix + 'Hour'}" value="hour" th:hidden="${reportRange.period != 'hour'}" th:selected="${reportRange.period == 'hour'}">Giờ trong hôm nay</option>
+            <option th:id="${idPrefix + 'Month'}" value="month" th:hidden="${reportRange.period != 'month'}" th:selected="${reportRange.period == 'month'}">12 tháng năm hiện tại</option>
+            <option th:id="${idPrefix + 'Year'}" value="year" th:hidden="${reportRange.period != 'year'}" th:selected="${reportRange.period == 'year'}">5 năm gần nhất</option>
+        </select>
+    </div>
+    <div data-report-custom th:hidden="${reportRange.period != 'custom'}">
+        <label class="form-label small mb-1" th:for="${idPrefix + 'StartDate'}">Từ ngày</label>
+        <input data-report-start type="date" name="startDate" min="0001-01-01" max="9998-12-31" class="form-control form-control-sm"
+               th:id="${idPrefix + 'StartDate'}" th:value="${reportRange.startDate}" th:disabled="${reportRange.period != 'custom'}" th:required="${reportRange.period == 'custom'}">
+    </div>
+    <div data-report-custom th:hidden="${reportRange.period != 'custom'}">
+        <label class="form-label small mb-1" th:for="${idPrefix + 'EndDate'}">Đến ngày</label>
+        <input data-report-end type="date" name="endDate" min="0001-01-01" max="9998-12-31" class="form-control form-control-sm"
+               th:id="${idPrefix + 'EndDate'}" th:value="${reportRange.endDate}" th:disabled="${reportRange.period != 'custom'}" th:required="${reportRange.period == 'custom'}">
+    </div>
+    <button data-report-custom type="submit" class="btn btn-success btn-sm" th:hidden="${reportRange.period != 'custom'}">Áp dụng</button>
+    <small class="text-muted align-self-end pb-1" th:text="${reportRange.label()}"></small>
+</div>
+</body>
+</html>

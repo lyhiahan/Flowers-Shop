@@ -14,21 +14,23 @@ public class ManagerDashboardController {
     private final StoreAccessService storeAccess;
     private final StoreRepository stores;
     private final AnalyticsService analytics;
+    private final java.time.Clock clock;
     @GetMapping({"", "/dashboard"})
     public String showManagerDashboard(@RequestParam(value="storeId", required=false) Long storeId,
-            @RequestParam(value="timeRange", defaultValue="day") String timeRange,
+            @RequestParam(value="timeRange", required=false) String timeRange,
+            @RequestParam(value="startDate", required=false) @org.springframework.format.annotation.DateTimeFormat(iso=org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate startDate,
+            @RequestParam(value="endDate", required=false) @org.springframework.format.annotation.DateTimeFormat(iso=org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate endDate,
             @RequestParam(value="criteria", defaultValue="revenue") String criteria,
             @RequestParam(value="chartType", defaultValue="line") String chartType, Principal principal, Model model) {
         var store = storeId == null ? storeAccess.selectedStore() : stores.findById(storeId).orElseThrow();
         if (store == null) return "redirect:/manager/stores";
         storeAccess.requireManager(store);
         if (!java.util.Set.of("line", "bar", "pie").contains(chartType)) throw new IllegalArgumentException("Loại biểu đồ không hợp lệ.");
-        if ("7days".equals(timeRange)) timeRange="day";
-        if ("today".equals(timeRange)) timeRange="hour";
-        model.addAllAttributes(analytics.dashboard(store.getId(), timeRange, criteria));
+        var range = ReportRange.resolve(timeRange, startDate, endDate, clock);
+        model.addAllAttributes(analytics.dashboard(store.getId(), range, criteria));
         model.addAttribute("store", store); model.addAttribute("accessibleStores", storeAccess.accessibleStores());
         model.addAttribute("currentUser", storeAccess.currentUser());
-        model.addAttribute("timeRange", timeRange); model.addAttribute("criteria", criteria); model.addAttribute("chartType", chartType);
+        model.addAttribute("timeRange", timeRange == null ? range.period() : timeRange); model.addAttribute("criteria", criteria); model.addAttribute("chartType", chartType);
 
         for (String ranking : java.util.List.of("topProducts", "recentOrders", "topPointUsers", "topPointStores")) com.finalproject.utils.DashboardPages.apply(model, ranking);
         return "manager/dashboard";

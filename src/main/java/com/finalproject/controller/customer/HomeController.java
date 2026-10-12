@@ -40,6 +40,7 @@ public class HomeController {
     private final com.finalproject.service.ProductAttributeService attributes;
     private final com.finalproject.service.CategoryService categoryService;
     private final com.finalproject.repository.UserRepository userRepository;
+    private final com.finalproject.service.CatalogStockService catalogStockService;
 
     @GetMapping({"/", "/products", "/search"})
     public String index(
@@ -212,6 +213,7 @@ public class HomeController {
 
             boolean hasActiveFilter = hasAttributeFilters
                     || (categoryId != null && categoryId > 0)
+                    || storeId != null
                     || (trimmedKeyword != null)
                     || (tab != null && !tab.trim().isEmpty());
 
@@ -225,6 +227,9 @@ public class HomeController {
             }
 
             // 5. Đưa dữ liệu sang View
+            List<Product> stockProducts = new ArrayList<>(productPage.getContent());
+            if (guestFeatured != null) stockProducts.addAll(guestFeatured);
+            model.addAttribute("catalogStock", catalogStockService.summarize(stockProducts, storeId));
             model.addAttribute("productPage", productPage);
             model.addAttribute("products", productPage.getContent());
             model.addAttribute("currentPage", page);
@@ -280,6 +285,8 @@ public class HomeController {
             log.error("Lỗi khi tải danh sách sản phẩm", t);
             model.addAttribute("loadError", "Không thể tải danh sách mẫu hoa vào lúc này. Vui lòng tải lại trang hoặc thử lại sau.");
             model.addAttribute("products", Collections.emptyList());
+            model.addAttribute("guestFeaturedProducts", Collections.emptyList());
+            model.addAttribute("catalogStock", Collections.emptyMap());
             model.addAttribute("totalItems", 0L);
             model.addAttribute("totalPages", 0);
             model.addAttribute("currentPage", 1);

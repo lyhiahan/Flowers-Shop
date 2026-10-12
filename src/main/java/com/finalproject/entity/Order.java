@@ -106,14 +106,9 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderDetail> orderDetails;
-    // UC_011 Alternative 7a: Đơn hàng được đặt dưới 1 tiếng và chưa được cửa hàng xác nhận (PENDING)
+    // Customers may cancel until fulfillment enters delivery; creation time is irrelevant.
     public boolean isCancellable() {
-        if (this.status != OrderStatus.PENDING) {
-            return false;
-        }
-        if (this.createdAt == null) {
-            return true;
-        }
-        return java.time.Duration.between(this.createdAt, LocalDateTime.now()).toHours() < 1;
+        return status == OrderStatus.PENDING || status == OrderStatus.CONFIRMED
+                || status == OrderStatus.PREPARING;
     }
 }

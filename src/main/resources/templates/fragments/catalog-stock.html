@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="stock(quantity)" class="catalog-stock"
+     th:classappend="${quantity <= 0} ? 'is-out-of-stock'">
+    <i class="bi" th:classappend="${quantity > 0} ? 'bi-box-seam' : 'bi-x-octagon-fill'" aria-hidden="true"></i>
+    <span th:if="${quantity > 0}" th:text="${'Còn ' + #numbers.formatInteger(quantity, 1, 'POINT') + ' sản phẩm'}"></span>
+    <span th:unless="${quantity > 0}">Hết hàng</span>
+</div>
+</body>
+</html>

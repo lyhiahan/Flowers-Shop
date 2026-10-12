@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Component
+@org.springframework.context.annotation.Profile("dev")
 @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "app.demo-data.enabled", havingValue = "true")
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
@@ -21,149 +22,27 @@ public class DataInitializer implements CommandLineRunner {
     private final StoreRepository storeRepository;
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
-    private final StoreInventoryRepository storeInventoryRepository;
     private final VoucherRepository voucherRepository;
     private final DeliveryRepository deliveryRepository;
-    private final UserAddressRepository userAddressRepository;
     private final UserLevelRepository userLevelRepository;
     private final StoreLevelRepository storeLevelRepository;
     private final CommissionRepository commissionRepository;
-    private final StyleRepository styleRepository;
-    private final StyleValueRepository styleValueRepository;
-    private final ReviewRepository reviewRepository;
-    private final PasswordEncoder passwordEncoder;
     private final ProductSeederService productSeederService;
     private final com.finalproject.service.VendorDataSeederService vendorDataSeederService;
+    private final com.finalproject.service.DemoBranchSeeder branchSeeder;
+    private final com.finalproject.service.DemoProductFixtureSeeder productFixtureSeeder;
+    private final com.finalproject.service.DemoStyleSeeder styleSeeder;
 
     @Override
     public void run(String... args) throws Exception {
         if (userRepository.count() > 0 || storeRepository.count() > 0 || productRepository.count() > 0) {
-            initOrUpdateStylesAndValues();
-            productSeederService.seedMissingProductsForStores();
+            // Once populated, fixture generation is an explicit admin action. Recreating
+            // templates by name would duplicate products that an operator has renamed.
             return;
         }
-        // 1. Tạo hoặc cập nhật 3 chi nhánh mẫu sang tiếng Việt thuần
-        Store storeA = storeRepository.findFirstByNameOrderByIdAsc("Chi Nhánh Bến Thành (Quận 1)")
-                .orElseGet(() -> storeRepository.findFirstByNameOrderByIdAsc("Bloom Flower - Chi Nhánh Bến Thành (Quận 1)")
-                        .map(s -> {
-                            s.setName("Chi Nhánh Bến Thành (Quận 1)");
-                            return storeRepository.save(s);
-                        })
-                        .orElseGet(() -> storeRepository.save(Store.builder()
-                                .name("Chi Nhánh Bến Thành (Quận 1)")
-                                .address("123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM")
-                                .phone("0281111222")
-                                .status(true)
-                                .isOpen(true)
-                                .rating(4.9)
-                                .eWallet(new BigDecimal("15500000"))
-                                .build())));
-
-        Store storeB = storeRepository.findFirstByNameOrderByIdAsc("Chi Nhánh Phú Mỹ Hưng (Quận 7)")
-                .orElseGet(() -> storeRepository.findFirstByNameOrderByIdAsc("Bloom Flower - Chi Nhánh Phú Mỹ Hưng (Quận 7)")
-                        .map(s -> {
-                            s.setName("Chi Nhánh Phú Mỹ Hưng (Quận 7)");
-                            return storeRepository.save(s);
-                        })
-                        .orElseGet(() -> storeRepository.save(Store.builder()
-                                .name("Chi Nhánh Phú Mỹ Hưng (Quận 7)")
-                                .address("456 Nguyễn Thị Thập, Tân Hưng, Quận 7, TP.HCM")
-                                .phone("0283333444")
-                                .status(true)
-                                .isOpen(true)
-                                .rating(4.8)
-                                .eWallet(new BigDecimal("8200000"))
-                                .build())));
-
-        Store storeC = storeRepository.findFirstByNameOrderByIdAsc("Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
-                .orElseGet(() -> storeRepository.findFirstByNameOrderByIdAsc("Bloom Flower - Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
-                        .map(s -> {
-                            s.setName("Chi Nhánh Làng Đại Học (TP. Thủ Đức)");
-                            return storeRepository.save(s);
-                        })
-                        .orElseGet(() -> storeRepository.save(Store.builder()
-                                .name("Chi Nhánh Làng Đại Học (TP. Thủ Đức)")
-                                .address("1 Võ Văn Ngân, Linh Chiểu, Thủ Đức, TP.HCM")
-                                .phone("0285555666")
-                                .status(true)
-                                .isOpen(true)
-                                .rating(4.7)
-                                .eWallet(new BigDecimal("4300000"))
-                                .build())));
-
-        // 2. Tạo các tài khoản mẫu cho từng Role (mật khẩu mặc định: 123456)
-        userRepository.findByUsername("admin").orElseGet(() -> userRepository.save(User.builder()
-                .username("admin")
-                .password(passwordEncoder.encode("123456"))
-                .fullName("Quản Trị Viên Toàn Hệ Thống")
-                .email("admin@rentalshop.vn")
-                .role(Role.ADMIN)
-                .isActive(true)
-                .isEmailActive(true)
-                .createdDate(LocalDate.now())
-                .build()));
-
-        User managerA = userRepository.findByUsername("manager_q1").orElseGet(() -> userRepository.save(User.builder()
-                .username("manager_q1")
-                .password(passwordEncoder.encode("123456"))
-                .fullName("Nguyễn Quản Lý Q1")
-                .email("manager.q1@rentalshop.vn")
-                .phone("0912345678")
-                .role(Role.MANAGER)
-                .store(storeA)
-                .isActive(true)
-                .isEmailActive(true)
-                .createdDate(LocalDate.now())
-                .build()));
-
-        User vendor = userRepository.findByUsername("vendor_flower").orElseGet(() -> userRepository.save(User.builder()
-                .username("vendor_flower")
-                .password(passwordEncoder.encode("123456"))
-                .fullName("Trần Đối Tác Vườn Hoa Đà Lạt")
-                .email("vendor@rentalshop.vn")
-                .phone("0988776655")
-                .role(Role.MANAGER)
-                .store(storeB)
-                .isActive(true)
-                .isEmailActive(true)
-                .createdDate(LocalDate.now())
-                .build()));
-
-        // Demo fixtures must identify actual shop owners for owner-only staff and wallet actions.
-        if (storeA.getOwner() == null) { storeA.setOwner(managerA); storeRepository.save(storeA); }
-        if (storeB.getOwner() == null) { storeB.setOwner(vendor); storeRepository.save(storeB); }
-
-        User customer = userRepository.findByUsername("khachhang").orElseGet(() -> userRepository.save(User.builder()
-                .username("khachhang")
-                .password(passwordEncoder.encode("123456"))
-                .fullName("Lê Khách Hàng")
-                .email("khachhang@gmail.com")
-                .phone("0909999888")
-                .address("789 Hai Bà Trưng, Phường 8, Quận 3, TP.HCM")
-                .role(Role.USER)
-                .isActive(true)
-                .isEmailActive(true)
-                .eWallet(new BigDecimal("2500000"))
-                .createdDate(LocalDate.now())
-                .build()));
-
-        // Sổ địa chỉ cho khách hàng
-        if (userAddressRepository.findByUserIdOrderByIsDefaultDescCreatedAtDesc(customer.getId()).isEmpty()) {
-            userAddressRepository.save(UserAddress.builder()
-                    .user(customer)
-                    .recipientName("Lê Khách Hàng")
-                    .phone("0909999888")
-                    .addressDetail("789 Hai Bà Trưng, Phường 8, Quận 3, TP.HCM")
-                    .isDefault(true)
-                    .build());
-            userAddressRepository.save(UserAddress.builder()
-                    .user(customer)
-                    .recipientName("Lê Khách Hàng (Văn phòng)")
-                    .phone("0909999888")
-                    .addressDetail("Toà nhà Bitexco, số 2 Hải Triều, Phường Bến Nghé, Quận 1, TP.HCM")
-                    .isDefault(false)
-                    .build());
-        }
+        var branches = branchSeeder.seed();
+        Store storeA = branches.storeA(), storeB = branches.storeB(), storeC = branches.storeC();
+        User customer = branches.customer();
 
         // 3. Đơn vị vận chuyển (Deliveries)
         if (deliveryRepository.count() == 0) {
@@ -377,294 +256,14 @@ public class DataInitializer implements CommandLineRunner {
             categoryRepository.save(subLanTrang);
         }
 
-        // Tự động dọn dẹp và hợp nhất các danh mục trùng lặp liên quan đến "Tình Yêu" / "Valentine"
-        java.util.List<Category> allLoveCats = categoryRepository.findAll().stream()
-                .filter(c -> c.getName() != null && (c.getName().contains("Tình Yêu") || c.getName().contains("Valentine")))
-                .collect(java.util.stream.Collectors.toList());
-        if (allLoveCats.size() > 1) {
-            final Category mainLoveCat = catTinhYeu;
-            for (Category dupCat : allLoveCats) {
-                if (!dupCat.getId().equals(mainLoveCat.getId())) {
-                    java.util.List<Product> prodsToReassign = productRepository.findByCategoryId(dupCat.getId());
-                    if (prodsToReassign != null) {
-                        for (Product prod : prodsToReassign) {
-                            prod.setCategory(mainLoveCat);
-                            productRepository.save(prod);
-                        }
-                    }
-                    try {
-                        categoryRepository.delete(dupCat);
-                    } catch (Exception ignored) {}
-                }
-            }
-        }
+        // Demo initialization supplements fixtures; it does not merge or delete user categories.
 
-        // Tự động dọn dẹp các danh mục lỗi font tiếng Việt (mojikake như Nháº¹t, TrÆ°Æ¡ng)
-        for (Category c : categoryRepository.findAll()) {
-            String name = c.getName();
-            if (name != null && (name.contains("Ã") || name.contains("Æ") || name.contains("º") || name.contains("¹") || name.contains("Â") || name.contains("¿"))) {
-                Category targetCat = catSinhNhat;
-                String lower = name.toLowerCase();
-                if (lower.contains("khai")) targetCat = catKhaiTruong;
-                else if (lower.contains("sinh")) targetCat = catSinhNhat;
-                else if (lower.contains("lan")) targetCat = catLanHoDiep;
-                else if (lower.contains("tình") || lower.contains("love")) targetCat = catTinhYeu;
-
-                java.util.List<Product> prods = productRepository.findByCategoryId(c.getId());
-                if (prods != null) {
-                    for (Product p : prods) {
-                        p.setCategory(targetCat);
-                        productRepository.save(p);
-                    }
-                }
-                try {
-                    categoryRepository.delete(c);
-                } catch (Exception ignored) {}
-            }
-        }
-
-        // 7. Tạo danh sách hoa mẫu phong phú có sold >= 10 phục vụ tiêu chí Khách vãng lai (Guest)
-        if (productRepository.count() < 5) {
-            Product p1 = Product.builder()
-                    .name("Bó Hoa Hồng Đỏ Ecuador Nhập Khẩu 99 Bông 'Tình Yêu Vĩnh Cửu'")
-                    .category(catTinhYeu)
-                    .store(storeA)
-                    .description("Bó hoa hồng đỏ nhập khẩu Ecuador size bông cực lớn, cánh dày nhung mịn, kết hợp lá bạc Dollar sang trọng biểu tượng tình yêu vĩnh cửu bất diệt.")
-                    .priceBuy(new BigDecimal("1200000"))
-                    .importPrice(new BigDecimal("700000"))
-                    .priceRentPerDay(new BigDecimal("150000"))
-                    .depositFee(new BigDecimal("500000"))
-                    .imageUrl("https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=800")
-                    .sold(85)
-                    .rating(4.9)
-                    .isActive(true)
-                    .isSelling(true)
-                    .build();
-
-            Product p2 = Product.builder()
-                    .name("Kệ Hoa Khai Trương 'Hồng Phát Đại Cát' 2 Tầng")
-                    .category(catKhaiTruong)
-                    .store(storeA)
-                    .description("Kệ hoa thiết kế 2 tầng kết hợp hoa đồng tiền, hoa hướng dương rực rỡ và lan hồ điệp vàng mang lại nhiều may mắn cho ngày khởi đầu kinh doanh.")
-                    .priceBuy(new BigDecimal("1850000"))
-                    .importPrice(new BigDecimal("1000000"))
-                    .priceRentPerDay(new BigDecimal("200000"))
-                    .depositFee(new BigDecimal("800000"))
-                    .imageUrl("https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=800&q=80")
-                    .sold(64)
-                    .rating(4.8)
-                    .isActive(true)
-                    .isSelling(true)
-                    .build();
-
-            Product p3 = Product.builder()
-                    .name("Hộp Hoa Sinh Nhật Tone Hồng Pastel 'Thiên Thần Ngọt Ngào'")
-                    .category(catSinhNhat)
-                    .store(storeB)
-                    .description("Hộp hoa cắm tròn xinh xắn phối giữa hoa hồng trà, hoa cẩm chướng hồng và hoa baby trắng bồng bềnh, thích hợp tặng bạn gái hoặc đồng nghiệp.")
-                    .priceBuy(new BigDecimal("650000"))
-                    .importPrice(new BigDecimal("350000"))
-                    .priceRentPerDay(new BigDecimal("80000"))
-                    .depositFee(new BigDecimal("300000"))
-                    .imageUrl("https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=800&q=80")
-                    .sold(120)
-                    .rating(5.0)
-                    .isActive(true)
-                    .isSelling(true)
-                    .build();
-
-            Product p4 = Product.builder()
-                    .name("Chậu Lan Hồ Điệp 5 Cành Tím Hoàng Gia")
-                    .category(catLanHoDiep)
-                    .store(storeC)
-                    .description("Chậu men sứ cao cấp trồng 5 cành hoa lan hồ điệp tím rực rỡ, hoa nở đều đẹp, độ bền kéo dài từ 4 đến 8 tuần thích hợp trang trí sảnh phòng khách.")
-                    .priceBuy(new BigDecimal("2200000"))
-                    .importPrice(new BigDecimal("1200000"))
-                    .priceRentPerDay(new BigDecimal("250000"))
-                    .depositFee(new BigDecimal("1000000"))
-                    .imageUrl("https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?w=800&q=80")
-                    .sold(38)
-                    .rating(4.7)
-                    .isActive(true)
-                    .isSelling(true)
-                    .build();
-
-            Product p5 = Product.builder()
-                    .name("Bó Hoa Hướng Dương 'Mặt Trời Tỏa Sáng'")
-                    .category(catSinhNhat)
-                    .store(storeA)
-                    .description("Bó hoa hướng dương 5 bông size lớn gói giấy báo vintage phối kèm hoa cúc tana, hoa phi yến trắng tượng trưng cho niềm tin và hoài bão vươn xa.")
-                    .priceBuy(new BigDecimal("480000"))
-                    .importPrice(new BigDecimal("250000"))
-                    .priceRentPerDay(new BigDecimal("60000"))
-                    .depositFee(new BigDecimal("200000"))
-                    .imageUrl("https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=800&q=80")
-                    .sold(95)
-                    .rating(4.9)
-                    .isActive(true)
-                    .isSelling(true)
-                    .build();
-
-            Product p6 = Product.builder()
-                    .name("Bó Hoa Cưới Cầm Tay Cô Dâu Tone Trắng Tinh Khôi")
-                    .category(catTinhYeu)
-                    .store(storeB)
-                    .description("Bó hoa cưới thiết kế tay cầm quấn ruy băng lụa cao cấp, phối hoa tulip Hà Lan trắng, mao lương trắng và hoa hồng Ohara thơm ngát quyến rũ.")
-                    .priceBuy(new BigDecimal("890000"))
-                    .importPrice(new BigDecimal("500000"))
-                    .priceRentPerDay(new BigDecimal("120000"))
-                    .depositFee(new BigDecimal("400000"))
-                    .imageUrl("https://images.unsplash.com/photo-1533616688419-b7a585564566?w=800&q=80")
-                    .sold(42)
-                    .rating(4.8)
-                    .isActive(true)
-                    .isSelling(true)
-                    .build();
-
-            productRepository.save(p1);
-            productRepository.save(p2);
-            productRepository.save(p3);
-            productRepository.save(p4);
-            productRepository.save(p5);
-            productRepository.save(p6);
-
-            // Cấp tồn kho cho các chi nhánh
-            storeInventoryRepository.save(StoreInventory.builder().store(storeA).product(p1).quantity(20).build());
-            storeInventoryRepository.save(StoreInventory.builder().store(storeB).product(p1).quantity(10).build());
-            storeInventoryRepository.save(StoreInventory.builder().store(storeA).product(p2).quantity(15).build());
-            storeInventoryRepository.save(StoreInventory.builder().store(storeB).product(p3).quantity(30).build());
-            storeInventoryRepository.save(StoreInventory.builder().store(storeC).product(p4).quantity(12).build());
-            storeInventoryRepository.save(StoreInventory.builder().store(storeA).product(p5).quantity(25).build());
-            storeInventoryRepository.save(StoreInventory.builder().store(storeB).product(p6).quantity(18).build());
-
-            // Review mẫu (>= 50 ký tự theo yêu cầu đề bài)
-            if (reviewRepository.count() == 0) {
-                reviewRepository.save(Review.builder()
-                        .product(p1)
-                        .user(customer)
-                        .rating(5)
-                        .content("Hoa hồng đỏ cực kỳ tươi mới và thơm ngát, gói giấy rất sang trọng và giao đúng giờ hẹn. Mình rất hài lòng về dịch vụ của cửa hàng!")
-                        .createdAt(java.time.LocalDateTime.now().minusDays(3))
-                        .build());
-                reviewRepository.save(Review.builder()
-                        .product(p3)
-                        .user(customer)
-                        .rating(5)
-                        .content("Hộp hoa tặng sinh nhật mẹ mình rất ưng ý, hoa tươi giữ được cả tuần luôn. Cảm ơn shop nhiều, sẽ tiếp tục ủng hộ lâu dài!")
-                        .createdAt(java.time.LocalDateTime.now().minusDays(1))
-                        .build());
-            }
-        }
+        productFixtureSeeder.seed(storeA, storeB, storeC, customer, catTinhYeu, catKhaiTruong, catSinhNhat, catLanHoDiep);
 
         productSeederService.seedMissingProductsForStores();
         vendorDataSeederService.seedVendorDemoData();
 
-        // 8. Tự động chuẩn hóa toàn bộ tên sản phẩm và sửa ảnh sản phẩm chính xác theo loài hoa
-        productRepository.findAll().forEach(p -> {
-            boolean changed = false;
-            if (p.getName() != null && p.getName().contains("Forever Love")) {
-                p.setName(p.getName().replace("'Forever Love'", "'Tình Yêu Vĩnh Cửu'").replace("Forever Love", "Tình Yêu Vĩnh Cửu"));
-                changed = true;
-            }
-            if (p.getName() != null && p.getName().contains("Sweet Angel")) {
-                p.setName(p.getName().replace("'Sweet Angel'", "'Thiên Thần Ngọt Ngào'").replace("Sweet Angel", "Thiên Thần Ngọt Ngào"));
-                changed = true;
-            }
-            if (p.getName() != null && p.getName().contains("Sweet Love")) {
-                p.setName(p.getName().replace("Sweet Love", "'Tình Yêu Ngọt Ngào'"));
-                changed = true;
-            }
-
-            // Sửa ảnh sản phẩm bị lỗi hoặc không khớp loài hoa
-            String nameLower = p.getName() != null ? p.getName().toLowerCase() : "";
-            String currentImg = p.getImageUrl();
-            if (currentImg == null || currentImg.trim().isEmpty() || currentImg.contains("placeholder") || currentImg.contains("via.placeholder")) {
-                p.setImageUrl("https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800&q=80");
-                changed = true;
-            } else if (nameLower.contains("hướng dương") && !currentImg.contains("photo-1597848212624")) {
-                p.setImageUrl("https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=800&q=80");
-                changed = true;
-            } else if (nameLower.contains("hồ điệp") && !currentImg.contains("photo-1525310072745")) {
-                p.setImageUrl("https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?w=800&q=80");
-                changed = true;
-            } else if ((nameLower.contains("hồng đỏ") || nameLower.contains("ecuador")) && !currentImg.contains("photo-1548094878")) {
-                p.setImageUrl("https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=800");
-                changed = true;
-            } else if ((nameLower.contains("hoa cưới") || nameLower.contains("cô dâu") || nameLower.contains("trắng")) && !currentImg.contains("photo-1533616688419")) {
-                p.setImageUrl("https://images.unsplash.com/photo-1533616688419-b7a585564566?w=800&q=80");
-                changed = true;
-            } else if (nameLower.contains("khai trương") && !currentImg.contains("photo-1526047932273")) {
-                p.setImageUrl("https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=800&q=80");
-                changed = true;
-            } else if ((nameLower.contains("sinh nhật") || nameLower.contains("pastel") || nameLower.contains("thiên thần")) && !currentImg.contains("photo-1561181286")) {
-                p.setImageUrl("https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=800&q=80");
-                changed = true;
-            }
-
-            if (changed) {
-                productRepository.save(p);
-            }
-        });
     }
 
-    /**
-     * Đồng bộ và bổ sung an toàn 4 nhóm thuộc tính cốt lõi và các giá trị tiêu chuẩn khớp bộ lọc khách hàng
-     */
-    public void initOrUpdateStylesAndValues() {
-        // Existing names and deletion status are managed by users; only supplement missing defaults.
-        // 2. Định nghĩa 4 nhóm chính và các nhóm bổ sung cùng giá trị chuẩn
-        java.util.Map<String, java.util.List<String>> defaultGroups = new java.util.LinkedHashMap<>();
-        defaultGroups.put("Loại hoa", java.util.List.of(
-                "Hướng dương", "Hoa hồng", "Tulip", "Cẩm tú cầu", "Lan hồ điệp", "Calla Lily", "Hoa Baby"
-        ));
-        defaultGroups.put("Kiểu dáng", java.util.List.of(
-                "Bó hoa", "Giỏ hoa", "Bình hoa", "Hộp hoa", "Chậu hoa", "Kệ hoa"
-        ));
-        defaultGroups.put("Màu sắc", java.util.List.of(
-                "Vàng", "Hồng", "Trắng", "Đỏ", "Tím", "Xanh", "Cam"
-        ));
-        defaultGroups.put("Dịp tặng", java.util.List.of(
-                "Sinh nhật", "Tốt nghiệp", "Khai trương", "Tình yêu", "Chúc mừng", "Đám cưới", "Chia buồn"
-        ));
-        defaultGroups.put("Phong cách thiết kế", java.util.List.of(
-                "Hàn Quốc hiện đại", "Vintage cổ điển", "Tối giản Minimalist", "Châu Âu sang trọng"
-        ));
-        defaultGroups.put("Kích cỡ", java.util.List.of(
-                "Size S (Nhỏ)", "Size M (Vừa)", "Size L (Lớn)"
-        ));
-
-        // 3. Bổ sung nhóm và giá trị còn thiếu mà không xóa hay ghi đè dữ liệu của người dùng
-        for (java.util.Map.Entry<String, java.util.List<String>> entry : defaultGroups.entrySet()) {
-            String groupName = entry.getKey();
-            java.util.List<String> values = entry.getValue();
-
-            Style style = styleRepository.findAll().stream()
-                    .filter(s -> s.getName().equalsIgnoreCase(groupName)
-                            || groupName.equals("Kiểu dáng") && java.util.Set.of("kiểu dáng cắm", "kiểu dáng hoa", "phong cách cắm").contains(s.getName().trim().toLowerCase(java.util.Locale.ROOT))
-                            || groupName.equals("Màu sắc") && java.util.Set.of("tone màu hoa", "tone màu thiết kế").contains(s.getName().trim().toLowerCase(java.util.Locale.ROOT))
-                            || groupName.equals("Kích cỡ") && java.util.Set.of("kích cỡ bó hoa", "kích cỡ thiết kế").contains(s.getName().trim().toLowerCase(java.util.Locale.ROOT)))
-                    .findFirst()
-                    .orElseGet(() -> styleRepository.save(Style.builder()
-                            .name(groupName)
-                            .isDeleted(false)
-                            .build()));
-
-            if (Boolean.TRUE.equals(style.getIsDeleted())) continue;
-
-            java.util.List<StyleValue> existingValues = styleValueRepository.findByStyleId(style.getId());
-            java.util.Set<String> existingNames = existingValues.stream()
-                    .map(v -> v.getName().toLowerCase().trim())
-                    .collect(java.util.stream.Collectors.toSet());
-
-            for (String valName : values) {
-                if (!existingNames.contains(valName.toLowerCase().trim())) {
-                    styleValueRepository.save(StyleValue.builder()
-                            .name(valName)
-                            .style(style)
-                            .isDeleted(false)
-                            .build());
-                }
-            }
-        }
-    }
+    public void initOrUpdateStylesAndValues() { styleSeeder.seed(); }
 }

@@ -96,11 +96,13 @@ public class AuthServiceImpl implements AuthService {
         if (pendingRegistrations.putIfAbsent(request.getEmail().toLowerCase().trim(), pending) != null)
             throw new IllegalArgumentException("Email đang chờ xác thực. Vui lòng dùng mã đã gửi hoặc yêu cầu gửi lại.");
 
-        // 3. Gửi mã OTP xác thực qua email (và in ra console)
+        // 3. Gửi mã OTP xác thực qua email; không ghi mã xác thực vào log.
         try {
             emailService.sendOtpEmail(request.getEmail(), code);
         } catch (Exception ex) {
-            log.warn("Không thể gửi email OTP qua SMTP đến {}: {}. Mã OTP dự phòng là: {}", request.getEmail(), ex.getMessage(), code);
+            log.warn("Không thể gửi email OTP. Loại lỗi: {}", ex.getClass().getSimpleName());
+            pendingRegistrations.remove(request.getEmail(), pending);
+            throw new IllegalStateException("Không thể gửi email xác thực. Vui lòng thử đăng ký lại sau.");
         }
         return code;
     }
@@ -217,16 +219,16 @@ public class AuthServiceImpl implements AuthService {
                 throw new IllegalStateException("Bạn đã yêu cầu gửi mã quá 3 lần. Vui lòng đăng ký lại.");
             }
             String newCode = OtpUtil.generateOtp();
+            try {
+                emailService.sendOtpEmail(email, newCode);
+            } catch (Exception ex) {
+                log.warn("Không thể gửi email OTP. Loại lỗi: {}", ex.getClass().getSimpleName());
+                throw new IllegalStateException("Không thể gửi lại email xác thực. Mã cũ vẫn còn hiệu lực nếu chưa hết hạn.");
+            }
             pending.setOtpCode(newCode);
             pending.setFailedAttempts(0);
             pending.setExpiredAt(LocalDateTime.now().plusMinutes(5));
             pending.setResendCount(pending.getResendCount() + 1);
-
-            try {
-                emailService.sendOtpEmail(email, newCode);
-            } catch (Exception ex) {
-                log.warn("Không thể gửi email OTP qua SMTP đến {}: {}. Mã OTP là: {}", email, ex.getMessage(), newCode);
-            }
             return newCode;
         }
 
@@ -341,19 +343,13 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         otpRepository.save(otp);
 
-        System.out.println("\n***************************************************************");
-        System.out.println("********** [SPRING TOOL CONSOLE - MÃ OTP " + type + "] **********");
-        System.out.println(">>> TÀI KHOẢN : " + user.getUsername());
-        System.out.println(">>> EMAIL     : " + user.getEmail());
-        System.out.println(">>> MÃ OTP    : [ " + code + " ]");
-        System.out.println(">>> HẾT HẠN   : " + otp.getExpiredAt());
-        System.out.println("***************************************************************\n");
-
         try {
             emailService.sendOtpEmail(user.getEmail(), code);
         } catch (Exception ex) {
-            log.warn("Không thể gửi email OTP qua SMTP đến {}: {}. Mã OTP là: {}", user.getEmail(), ex.getMessage(), code);
+            log.warn("Không thể gửi email OTP. Loại lỗi: {}", ex.getClass().getSimpleName());
+            throw new IllegalStateException("Không thể gửi email xác thực. Vui lòng thử lại sau.");
         }
         return code;
     }
+
 }

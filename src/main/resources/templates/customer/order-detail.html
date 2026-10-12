@@ -272,6 +272,8 @@
                     </div>
                     <div class="modal-body py-3 text-secondary">
                         Bạn có chắc chắn muốn hủy đơn hàng <strong class="text-dark" th:text="'#' + ${order.id}"></strong> này không?
+                        <p class="small mb-0 mt-2">Bạn có thể hủy trước khi đơn bắt đầu giao hàng.</p>
+                        <p th:if="${order.paymentStatus == 'PAID'}" class="small text-warning-emphasis mb-0 mt-2">Đơn đã thanh toán sẽ chuyển sang chờ cửa hàng hoàn tiền.</p>
                     </div>
                     <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
                         <!-- 9b. Bấm nút Cancel -> 9b1. Hủy thao tác -->

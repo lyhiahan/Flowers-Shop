@@ -374,7 +374,8 @@ class BusinessRegressionTests {
                 .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/"));
         mvc.perform(post("/api/auth/login").contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                 .content("{\"username\":\"" + created.getEmail() + "\",\"password\":\"newpassword\"}"))
-                .andExpect(status().isForbidden()); // JWT login endpoint has been retired; session form above remains supported.
+                .andExpect(status().isOk()).andExpect(jsonPath("$.tokenType").value("Bearer"))
+                .andExpect(jsonPath("$.accessToken").isNotEmpty());
         var add = new com.finalproject.dto.request.AddToCartRequest(); add.setProductId(product.getId());
         add.setStoreId(store.getId()); add.setQuantity(1); add.setOrderType(OrderType.BUY);
         cartService.addToCart(created.getUsername(), add);
@@ -755,6 +756,70 @@ class BusinessRegressionTests {
         assertThatThrownBy(() -> orderService.checkout(customer.getUsername(), List.of(item.getId(), Long.MAX_VALUE), PaymentMethod.COD,
                 "Khách", "0900000000", "Quận 1", null, null, LocalDate.now(), "PICKUP", store.getId())).hasMessageContaining("không thuộc");
         assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(10);
+    }
+
+    static java.util.stream.Stream<org.junit.jupiter.params.provider.Arguments> cancellableStatesAndPayments() {
+        return java.util.stream.Stream.of(OrderStatus.PENDING, OrderStatus.CONFIRMED, OrderStatus.PREPARING)
+                .flatMap(state -> java.util.stream.Stream.of(PaymentMethod.COD, PaymentMethod.BANK_TRANSFER)
+                        .map(payment -> org.junit.jupiter.params.provider.Arguments.of(state, payment)));
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.MethodSource("cancellableStatesAndPayments")
+    void customerCanCancelBeforeDeliveryRegardlessOfAge(OrderStatus state, PaymentMethod method) throws Exception {
+        Order order = checkout(method);
+        login(manager);
+        if (method == PaymentMethod.BANK_TRANSFER) workflow.confirmPayment(order.getId());
+        if (state != OrderStatus.PENDING) workflow.transition(order.getId(), OrderStatus.CONFIRMED);
+        if (state == OrderStatus.PREPARING) workflow.transition(order.getId(), OrderStatus.PREPARING);
+        order.setCreatedAt(LocalDateTime.now().minusDays(2));
+        orders.saveAndFlush(order);
+        assertThat(order.isCancellable()).isTrue();
+        for (String path : List.of("/customer/orders", "/customer/orders/" + order.getId())) {
+            mvc.perform(get(path).with(user(customer.getUsername()).roles("USER")))
+                    .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString(
+                            "id=\"confirmCancelOrderModal_" + order.getId() + "\"")));
+        }
+        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()))
+                .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("successMessage"));
+        assertThat(order.getStatus()).isEqualTo(method == PaymentMethod.BANK_TRANSFER ? OrderStatus.REFUND_REQUESTED : OrderStatus.CANCELLED);
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(10);
+        login(customer);
+        orderService.cancelOrder(customer.getUsername(), order.getId());
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(10);
+        if (method == PaymentMethod.BANK_TRANSFER) {
+            assertThat(order.getPaymentStatus()).isEqualTo("PAID");
+            assertThat(payments.findByOrderId(order.getId())).allMatch(p -> p.getStatus() == PaymentStatus.SUCCESS);
+            assertThat(order.getCancellationReason()).contains("chưa ghi nhận đã hoàn tiền");
+        }
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.EnumSource(value = OrderStatus.class,
+            names = {"DELIVERING", "DELIVERED", "COMPLETED", "PICKED_UP", "RENTING", "RETURNED", "OVERDUE", "REFUNDED"})
+    void cancellationIsBlockedOnceDeliveryStartedOrOrderEnded(OrderStatus state) throws Exception {
+        Order order = checkout(PaymentMethod.COD);
+        order.setStatus(state); orders.saveAndFlush(order);
+        assertThat(order.isCancellable()).isFalse();
+        for (String path : List.of("/customer/orders", "/customer/orders/" + order.getId())) {
+            mvc.perform(get(path).with(user(customer.getUsername()).roles("USER")))
+                    .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString(
+                            "id=\"confirmCancelOrderModal_" + order.getId() + "\""))));
+        }
+        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()))
+                .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("errorMessage"));
+        assertThat(order.getStatus()).isEqualTo(state);
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(8);
+    }
+
+    @Test void confirmedOrderStillCannotBeCancelledByAnotherCustomer() {
+        Order order = checkout(PaymentMethod.COD);
+        login(manager); workflow.transition(order.getId(), OrderStatus.CONFIRMED);
+        login(outsider);
+        assertThatThrownBy(() -> orderService.cancelOrder(outsider.getUsername(), order.getId()))
+                .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.CONFIRMED);
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(8);
     }
 
     @Test void momoMockCannotPayCancelledOrders() {

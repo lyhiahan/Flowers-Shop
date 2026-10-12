@@ -1,6 +1,8 @@
 package com.finalproject.service.impl;
 
 import com.finalproject.service.EmailService;
+import com.finalproject.service.BrevoOtpSender;
+import com.finalproject.service.OtpEmailInput;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +16,13 @@ import org.springframework.stereotype.Service;
 public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
+    private final BrevoOtpSender brevoSender;
+
+    @Value("${app.mail.provider:brevo}")
+    private String provider = "brevo";
+
+    @Value("${app.mail.from-email:}")
+    private String configuredSender = "";
 
     @Value("${spring.mail.password:}")
     private String mailPassword;
@@ -21,37 +30,46 @@ public class EmailServiceImpl implements EmailService {
     @Value("${spring.mail.username:}")
     private String fromEmail;
 
+    @Value("${app.mail.mock-enabled:false}")
+    private boolean mockEnabled;
+
     @Override
     public void sendOtpEmail(String toEmail, String otpCode) {
-        // Luôn in mã OTP ra Console / Terminal Spring Tool để theo dõi và hỗ trợ kiểm thử
-        System.out.println("\n***************************************************************");
-        System.out.println("********** [SPRING TOOL CONSOLE - GỬI EMAIL OTP XÁC THỰC] **********");
-        System.out.println(">>> GỬI ĐẾN EMAIL : " + toEmail);
-        System.out.println(">>> MÃ OTP (6 SỐ): [ " + otpCode + " ]");
-        System.out.println(">>> HIỆU LỰC      : 5 PHÚT");
-        System.out.println("***************************************************************\n");
-
-        // Nếu mật khẩu mail chưa được cấu hình hoặc là placeholder, không gửi qua SMTP để tránh lỗi xác thực
-        if (mailPassword == null || mailPassword.isBlank() || mailPassword.contains("placeholder")) {
-            log.info("Chế độ thử nghiệm cục bộ (chưa cấu hình mật khẩu ứng dụng Gmail). Đã sinh mã OTP [{}] cho email {}", otpCode, toEmail);
+        String recipient = OtpEmailInput.address(toEmail);
+        if (otpCode == null || !otpCode.matches("[0-9]{6}"))
+            throw new IllegalArgumentException("Mã OTP phải gồm 6 chữ số.");
+        if (mockEnabled) {
+            log.info("Chế độ kiểm thử: bỏ qua gửi email (không ghi mã OTP).");
             return;
+        }
+        String subject = "Mã xác thực - Cửa hàng hoa tươi";
+        String text = "Mã xác thực của bạn: " + otpCode
+                + "\nMã có hiệu lực trong 5 phút. Không chia sẻ mã này với bất kỳ ai."
+                + "\nNếu bạn không yêu cầu, vui lòng bỏ qua email này.";
+        if ("brevo".equalsIgnoreCase(provider)) {
+            brevoSender.send(recipient, subject, text);
+            return;
+        }
+        if (!"smtp".equalsIgnoreCase(provider))
+            throw new IllegalStateException("Cấu hình dịch vụ gửi email không hợp lệ.");
+        // Nếu mật khẩu mail chưa được cấu hình hoặc là placeholder, không gửi qua SMTP để tránh lỗi xác thực
+        if (fromEmail == null || fromEmail.isBlank() || mailPassword == null || mailPassword.isBlank() || mailPassword.contains("placeholder")) {
+            log.warn("Chưa cấu hình SMTP: email OTP chưa được gửi. Vui lòng cấu hình tài khoản mail.");
+            throw new IllegalStateException("Chưa cấu hình dịch vụ email. Vui lòng liên hệ quản trị viên.");
         }
 
         SimpleMailMessage message = new SimpleMailMessage();
-        if (fromEmail != null && !fromEmail.isBlank()) {
-            message.setFrom(fromEmail);
-        }
-        message.setTo(toEmail);
-        message.setSubject("Mã xác thực - Cửa hàng hoa tươi");
-        message.setText("Mã xác thực của bạn: " + otpCode
-                + "\nMã có hiệu lực trong 5 phút. Không chia sẻ mã này với bất kỳ ai."
-                + "\nNếu bạn không yêu cầu, vui lòng bỏ qua email này.");
+        message.setFrom(OtpEmailInput.address(configuredSender == null || configuredSender.isBlank() ? fromEmail : configuredSender));
+        message.setTo(recipient);
+        message.setSubject(subject);
+        message.setText(text);
 
         try {
             mailSender.send(message);
             log.info("Đã gửi email OTP thành công tới: {}", toEmail);
         } catch (Exception ex) {
-            log.warn("Không thể gửi email OTP qua SMTP đến {}: {}. Mã OTP là: {}", toEmail, ex.getMessage(), otpCode);
+            log.warn("Không thể gửi email OTP qua SMTP. Loại lỗi: {}", ex.getClass().getSimpleName());
+            throw new IllegalStateException("Không thể gửi email xác thực. Vui lòng thử lại sau.");
         }
     }
 }

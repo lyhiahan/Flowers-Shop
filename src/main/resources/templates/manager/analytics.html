@@ -30,26 +30,23 @@
                 <div class="d-flex flex-wrap gap-2 align-items-center">
                     <!-- Filter Theo Đơn Hàng / Sản Phẩm -->
                     <div class="btn-group shadow-sm bg-white p-1 rounded-pill" style="border: 1px solid #D1E5DA;">
-                        <a th:href="@{/manager/analytics(type='order', timeframe=${timeframe})}" class="btn btn-sm rounded-pill px-3 fw-semibold"
+                        <a th:href="@{/manager/analytics(type='order', timeframe=${reportRange.period}, startDate=${reportRange.startDate}, endDate=${reportRange.endDate})}" class="btn btn-sm rounded-pill px-3 fw-semibold"
                            th:style="${type == 'order' or type == null} ? 'background-color: #20382E; color: #FFFFFF;' : 'color: #20382E; background: transparent;'">Theo đơn hàng</a>
-                        <a th:href="@{/manager/analytics(type='product')}" class="btn btn-sm rounded-pill px-3 fw-semibold"
+                        <a th:href="@{/manager/analytics(type='product', timeframe=${reportRange.period}, startDate=${reportRange.startDate}, endDate=${reportRange.endDate})}" class="btn btn-sm rounded-pill px-3 fw-semibold"
                            th:style="${type == 'product'} ? 'background-color: #20382E; color: #FFFFFF;' : 'color: #20382E; background: transparent;'">Theo sản phẩm</a>
                     </div>
 
-                    <!-- Timeframe Selector (Khi xem theo đơn hàng) -->
-                    <div th:if="${type == 'order' or type == null}" class="btn-group shadow-sm bg-white p-1 rounded-pill" style="border: 1px solid #D1E5DA;">
-                        <a th:href="@{/manager/analytics(type='order', timeframe='hour')}" class="btn btn-sm rounded-pill px-3 fw-semibold"
-                           th:style="${timeframe == 'hour'} ? 'background-color: #20382E; color: #FFFFFF;' : 'color: #20382E; background: transparent;'">Theo giờ</a>
-                        <a th:href="@{/manager/analytics(type='order', timeframe='day')}" class="btn btn-sm rounded-pill px-3 fw-semibold"
-                           th:style="${timeframe == 'day' or timeframe == null} ? 'background-color: #20382E; color: #FFFFFF;' : 'color: #20382E; background: transparent;'">Theo ngày</a>
-                        <a th:href="@{/manager/analytics(type='order', timeframe='month')}" class="btn btn-sm rounded-pill px-3 fw-semibold"
-                           th:style="${timeframe == 'month'} ? 'background-color: #20382E; color: #FFFFFF;' : 'color: #20382E; background: transparent;'">Theo tháng</a>
-                        <a th:href="@{/manager/analytics(type='order', timeframe='year')}" class="btn btn-sm rounded-pill px-3 fw-semibold"
-                           th:style="${timeframe == 'year'} ? 'background-color: #20382E; color: #FFFFFF;' : 'color: #20382E; background: transparent;'">Theo năm</a>
-                    </div>
                 </div>
             </div>
 
+            <form method="get" action="/manager/analytics" class="card border-0 shadow-sm p-3 mb-4">
+                <input type="hidden" name="type" th:value="${type}">
+                <div th:replace="~{fragments/report-period :: controls('timeframe', 'analyticsTime')}"></div>
+            </form>
+            <p class="fw-bold">Doanh thu trong khoảng chọn:
+                <span th:text="${#numbers.formatDecimal(revenueChart.total, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></span>
+            </p>
+            <p th:if="${revenueChart.total == 0}" class="text-muted">Chưa có doanh thu trong khoảng thời gian này.</p>
             <!-- Charts Grid (Cột & Đường & Tròn) -->
             <div class="row g-4">
                 <div class="col-lg-8">
@@ -84,12 +81,12 @@
 <script th:inline="javascript">
     /*<![CDATA[*/
     var chartData = /*[[${revenueChart}]]*/ {};
-    var labels = (chartData && chartData.labels) ? chartData.labels : ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-    var values = (chartData && chartData.data) ? chartData.data : [1200000, 2400000, 1800000, 3200000, 4500000, 6800000, 5200000];
+    var labels = (chartData && chartData.labels) ? chartData.labels : [];
+    var values = (chartData && chartData.data) ? chartData.data : [];
 
     var ctx = document.getElementById('mainRevenueChart').getContext('2d');
     var currentChartType = 'bar';
-    var mainChart = new Chart(ctx, {
+    var mainChart = typeof Chart === 'undefined' ? null : new Chart(ctx, {
         type: currentChartType,
         data: {
             labels: labels,
@@ -117,7 +114,7 @@
     });
 
     // Doughnut chart
-    new Chart(document.getElementById('doughnutChart').getContext('2d'), {
+    if (typeof Chart !== 'undefined') new Chart(document.getElementById('doughnutChart').getContext('2d'), {
         type: 'doughnut',
         data: {
             labels: labels,
@@ -130,6 +127,7 @@
     });
 
     function switchChart(type) {
+        if (!mainChart) return;
         document.getElementById('btnBar').classList.toggle('active', type === 'bar');
         document.getElementById('btnLine').classList.toggle('active', type === 'line');
         document.getElementById('btnPie').classList.toggle('active', type === 'pie');
@@ -151,6 +149,7 @@
     /*]]>*/
 </script>
 <script th:src="@{/js/global-modal.js}"></script>
+<script th:src="@{/js/report-period.js}"></script>
 <th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
 </body>
 </html>

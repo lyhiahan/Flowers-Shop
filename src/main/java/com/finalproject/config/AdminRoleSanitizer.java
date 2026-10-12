@@ -20,6 +20,7 @@ import java.util.List;
  * 2. Bảo toàn tuyệt đối lịch sử đơn hàng, thông tin tài khoản và nhật ký giao dịch cũ.
  */
 @Component
+@org.springframework.context.annotation.Profile("test")
 @Order(10)
 @RequiredArgsConstructor
 @Slf4j

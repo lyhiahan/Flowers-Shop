@@ -40,6 +40,11 @@ build/
 .vscode/
 
 # Archives and export packages
+.tools/
+.env
+.env.*
+!.env.example
+application-local.properties
 *.zip
 *.rar
 *.7z

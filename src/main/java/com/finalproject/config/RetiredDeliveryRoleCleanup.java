@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /** Disables retired delivery accounts without deleting accounts or order history. */
 @Component
+@org.springframework.context.annotation.Profile("test")
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RequiredArgsConstructor
 public class RetiredDeliveryRoleCleanup implements ApplicationRunner {
