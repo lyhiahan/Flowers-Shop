@@ -41,6 +41,7 @@ class ConcurrencyRegressionTests {
     @Autowired VoucherRepository vouchers;
     @Autowired OrderWorkflowService workflow;
     @Autowired CustomerAccountClosureService accountClosure;
+    @Autowired DemoPaymentService demo;
 
     record Fixture(Long storeId, Long productId, Long categoryId, String manager, List<String> customers, List<Long> userIds, List<Long> itemIds) {}
 
@@ -220,6 +221,132 @@ class ConcurrencyRegressionTests {
             assertThat(state).isIn("CANCELLED", "DELIVERING");
             assertThat(jdbc.queryForObject("select quantity from store_inventories where store_id=?", Integer.class, f.storeId()))
                     .isEqualTo("CANCELLED".equals(state) ? 1 : 0);
+        } finally { cleanup(f); }
+    }
+
+    Long demoOrder(Fixture f, int customer) {
+        return orders.checkout(f.customers().get(customer), List.of(f.itemIds().get(customer)), PaymentMethod.MOMO_DEMO,
+                "Khách", "0900000000", "Quận 1", null, null, LocalDate.now(), "PICKUP", f.storeId()).getFirst().getId();
+    }
+
+    void login(String username, String role) {
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(username, "",
+                List.of(new SimpleGrantedAuthority("ROLE_" + role))));
+    }
+
+    @Test void concurrentDemoConfirmationsAggregateHeldFundsWithoutLostUpdates() throws Exception {
+        Fixture f = fixture();
+        try {
+            jdbc.update("update store_inventories set quantity=2 where store_id=?", f.storeId());
+            Long first = demoOrder(f, 0), second = demoOrder(f, 1);
+            List<String> tokens = List.of(demo.create(List.of(first), f.customers().get(0)), demo.create(List.of(second), f.customers().get(1)));
+            assertThat(race(i -> demo.confirm(tokens.get(i)))).isEqualTo(2);
+            assertThat(jdbc.queryForObject("select pending_balance from stores where id=?", BigDecimal.class, f.storeId())).isEqualByComparingTo("100000");
+            assertThat(jdbc.queryForObject("select e_wallet from stores where id=?", BigDecimal.class, f.storeId())).isEqualByComparingTo("100000");
+            assertThat(jdbc.queryForObject("select count(*) from transactions where store_id=? and type='PAYMENT_HOLD'", Integer.class, f.storeId())).isEqualTo(2);
+        } finally { cleanup(f); }
+    }
+
+    @Test void duplicateDemoPaymentAndCancellationEachApplyOnceUnderConcurrency() throws Exception {
+        Fixture f = fixture();
+        try {
+            Long id = demoOrder(f, 0);
+            String token = demo.create(List.of(id), f.customers().get(0));
+            assertThat(race(i -> demo.confirm(token))).isEqualTo(2);
+            assertThat(jdbc.queryForObject("select pending_balance from stores where id=?", BigDecimal.class, f.storeId())).isEqualByComparingTo("50000");
+            assertThat(race(i -> {
+                login(f.customers().get(0), "USER");
+                workflow.cancelByCustomer(f.customers().get(0), id);
+            })).isEqualTo(2);
+            assertThat(jdbc.queryForObject("select pending_balance from stores where id=?", BigDecimal.class, f.storeId())).isZero();
+            assertThat(jdbc.queryForObject("select e_wallet from stores where id=?", BigDecimal.class, f.storeId())).isEqualByComparingTo("100000");
+            assertThat(jdbc.queryForObject("select quantity from store_inventories where store_id=?", Integer.class, f.storeId())).isEqualTo(1);
+            assertThat(jdbc.queryForObject("select count(*) from transactions where order_id=? and type='REFUND'", Integer.class, id)).isEqualTo(1);
+        } finally { cleanup(f); }
+    }
+
+    @Test void paymentRacingCancellationCannotLeaveHeldMoneyForACancelledOrder() throws Exception {
+        Fixture f = fixture();
+        try {
+            Long id = demoOrder(f, 0);
+            String token = demo.create(List.of(id), f.customers().get(0));
+            race(i -> {
+                if (i == 0) demo.confirm(token);
+                else {
+                    login(f.customers().get(0), "USER");
+                    workflow.cancelByCustomer(f.customers().get(0), id);
+                }
+            });
+            assertThat(jdbc.queryForObject("select status from orders where id=?", String.class, id)).isIn("CANCELLED", "REFUNDED");
+            assertThat(jdbc.queryForObject("select pending_balance from stores where id=?", BigDecimal.class, f.storeId())).isZero();
+            assertThat(jdbc.queryForObject("select e_wallet from stores where id=?", BigDecimal.class, f.storeId())).isEqualByComparingTo("100000");
+            assertThat(jdbc.queryForObject("select quantity from store_inventories where store_id=?", Integer.class, f.storeId())).isEqualTo(1);
+        } finally { cleanup(f); }
+    }
+
+    @Test void simultaneousFulfillmentSettlesHeldMoneyOnlyOnce() throws Exception {
+        Fixture f = fixture();
+        try {
+            Long id = demoOrder(f, 0);
+            demo.confirm(demo.create(List.of(id), f.customers().get(0)));
+            login(f.manager(), "MANAGER");
+            workflow.transition(id, OrderStatus.CONFIRMED);
+            workflow.transition(id, OrderStatus.PREPARING);
+            SecurityContextHolder.clearContext();
+            assertThat(race(i -> {
+                login(f.manager(), "MANAGER");
+                workflow.transition(id, OrderStatus.COMPLETED);
+            })).isEqualTo(2);
+            assertThat(jdbc.queryForObject("select pending_balance from stores where id=?", BigDecimal.class, f.storeId())).isZero();
+            assertThat(jdbc.queryForObject("select e_wallet from stores where id=?", BigDecimal.class, f.storeId())).isEqualByComparingTo("145000");
+            assertThat(jdbc.queryForObject("select count(*) from transactions where order_id=? and type='HOLD_RELEASE'", Integer.class, id)).isEqualTo(1);
+            assertThat(jdbc.queryForObject("select count(*) from transactions where order_id=? and type='ORDER_PAYMENT'", Integer.class, id)).isEqualTo(1);
+        } finally { SecurityContextHolder.clearContext(); cleanup(f); }
+    }
+
+    @Test void multiBranchPaymentHoldsMoneyInTheCorrectBranches() {
+        Fixture first = fixture(), second = fixture();
+        try {
+            Long firstId = demoOrder(first, 0), secondId = demoOrder(second, 0);
+            jdbc.update("update orders set user_id=? where id=?", first.userIds().getFirst(), secondId);
+            String token = demo.create(List.of(secondId, firstId), first.customers().getFirst());
+            assertThat(demo.confirm(token).status()).isEqualTo(DemoPaymentService.Status.SUCCESS);
+            for (Fixture branch : List.of(first, second)) {
+                assertThat(jdbc.queryForObject("select pending_balance from stores where id=?", BigDecimal.class, branch.storeId())).isEqualByComparingTo("50000");
+                assertThat(jdbc.queryForObject("select e_wallet from stores where id=?", BigDecimal.class, branch.storeId())).isEqualByComparingTo("100000");
+            }
+        } finally { cleanup(second); cleanup(first); }
+    }
+
+    @Test void multiBranchHoldFailureRollsBackPreviouslyUpdatedBranchAndAllReceipts() {
+        Fixture first = fixture(), second = fixture();
+        try {
+            Long firstId = demoOrder(first, 0), secondId = demoOrder(second, 0);
+            jdbc.update("update orders set user_id=? where id=?", first.userIds().getFirst(), secondId);
+            String token = demo.create(List.of(firstId, secondId), first.customers().getFirst());
+            jdbc.update("update orders set funds_status='REVIEW_REQUIRED' where id=?", secondId);
+            assertThatThrownBy(() -> demo.confirm(token)).hasMessageContaining("đối soát");
+            for (Long id : List.of(firstId, secondId)) {
+                assertThat(jdbc.queryForObject("select payment_status from orders where id=?", String.class, id)).isEqualTo("UNPAID");
+                assertThat(jdbc.queryForObject("select status from payments where order_id=?", String.class, id)).isEqualTo("PENDING");
+                assertThat(jdbc.queryForObject("select count(*) from transactions where order_id=?", Integer.class, id)).isZero();
+            }
+            for (Fixture branch : List.of(first, second))
+                assertThat(jdbc.queryForObject("select pending_balance from stores where id=?", BigDecimal.class, branch.storeId())).isZero();
+        } finally { cleanup(second); cleanup(first); }
+    }
+
+    @Test void failedHoldRollsBackPaymentReceiptAndAllBalanceChanges() {
+        Fixture f = fixture();
+        try {
+            Long id = demoOrder(f, 0);
+            String token = demo.create(List.of(id), f.customers().get(0));
+            jdbc.update("update orders set funds_status='REVIEW_REQUIRED' where id=?", id);
+            assertThatThrownBy(() -> demo.confirm(token)).hasMessageContaining("đối soát");
+            assertThat(jdbc.queryForObject("select payment_status from orders where id=?", String.class, id)).isEqualTo("UNPAID");
+            assertThat(jdbc.queryForObject("select status from payments where order_id=?", String.class, id)).isEqualTo("PENDING");
+            assertThat(jdbc.queryForObject("select pending_balance from stores where id=?", BigDecimal.class, f.storeId())).isZero();
+            assertThat(jdbc.queryForObject("select count(*) from transactions where order_id=?", Integer.class, id)).isZero();
         } finally { cleanup(f); }
     }
 

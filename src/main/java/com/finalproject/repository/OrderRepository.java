@@ -39,6 +39,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, org.springf
     List<Order> findByPickupStoreIdOrderByCreatedAtDesc(Long storeId);
     List<Order> findByPickupStoreIdAndCreatedAtBetweenOrderByCreatedAtDesc(Long storeId, java.time.LocalDateTime start, java.time.LocalDateTime end);
     List<Order> findByPickupStoreIdAndStatus(Long storeId, OrderStatus status);
+    long countByPickupStoreIdAndFundsStatus(Long storeId, com.finalproject.enums.OrderFundsStatus fundsStatus);
 
     // Tìm các đơn hàng thuê quá hạn (RENTING mà có sản phẩm hết hạn trước ngày hiện tại)
     @Query("SELECT DISTINCT o FROM Order o JOIN o.orderDetails od " +

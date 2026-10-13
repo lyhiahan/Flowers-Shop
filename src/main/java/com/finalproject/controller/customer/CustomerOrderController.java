@@ -94,8 +94,10 @@ public class CustomerOrderController {
                                     @PathVariable("id") Long id,
                                     RedirectAttributes redirectAttributes) {
         try {
-            orderService.cancelOrder(principal.getName(), id);
-            redirectAttributes.addFlashAttribute("successMessage", "Đã hủy đơn hàng #" + id + " thành công!");
+            var order = orderService.cancelOrder(principal.getName(), id);
+            String message = order.getStatus() == com.finalproject.enums.OrderStatus.REFUNDED
+                    ? "Đã hủy đơn và hoàn tiền thành công." : "Đã hủy đơn hàng #" + id + " thành công!";
+            redirectAttributes.addFlashAttribute("successMessage", message);
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }

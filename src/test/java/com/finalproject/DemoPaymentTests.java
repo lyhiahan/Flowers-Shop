@@ -35,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 class DemoPaymentTests {
     @Autowired DemoPaymentService demo;
+    @Autowired com.finalproject.service.OrderFundsService funds;
     @Autowired UserRepository users;
     @Autowired StoreRepository stores;
     @Autowired OrderRepository orders;
@@ -70,7 +71,7 @@ class DemoPaymentTests {
         var phone = mvc.perform(get("/demo-payment/" + token)).andExpect(status().isOk())
                 .andExpect(header().string("Cache-Control", "no-store"))
                 .andExpect(header().string("Referrer-Policy", "no-referrer"))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Xác nhận thanh toán giả lập")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Xác nhận thanh toán")))
                 .andReturn();
         assertThat(order.getPaymentStatus()).isEqualTo("UNPAID");
         preview("phone.html", phone.getResponse().getContentAsByteArray());
@@ -191,12 +192,12 @@ class DemoPaymentTests {
         mvc.perform(get("/customer/demo-payment/" + token + "/success").with(user(customer.getUsername()).roles("USER")))
                 .andExpect(redirectedUrl("/customer/demo-payment/" + token));
         var pending = mvc.perform(get("/demo-payment/" + token)).andExpect(status().isOk()).andReturn();
-        assertThat(pending.getResponse().getContentAsString()).doesNotContain("Thanh toán giả lập thành công");
+        assertThat(pending.getResponse().getContentAsString()).doesNotContain("Thanh toán thành công");
         mvc.perform(post("/demo-payment/" + token + "/confirm").with(csrf()))
                 .andExpect(redirectedUrl("/demo-payment/" + token + "/success"));
         var success = mvc.perform(get("/customer/demo-payment/" + token + "/success").with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk()).andExpect(view().name("customer/demo-payment-success")).andReturn();
-        assertThat(success.getResponse().getContentAsString()).contains("Thanh toán giả lập thành công", "Xem đơn hàng")
+        assertThat(success.getResponse().getContentAsString()).contains("Thanh toán thành công", "Xem đơn hàng", "DEMO")
                 .doesNotContain("payment-qr", "demo-payment.js");
         preview("desktop-success.html", success.getResponse().getContentAsByteArray());
     }
@@ -204,7 +205,7 @@ class DemoPaymentTests {
     @Test void productionCannotEnableLocalPaymentEvenWithFlagSet() {
         var environment = new org.springframework.mock.env.MockEnvironment();
         environment.setActiveProfiles("prod");
-        var service = new DemoPaymentService(orders, payments, users, entityManager, clock, environment);
+        var service = new DemoPaymentService(orders, payments, users, entityManager, clock, environment, funds);
         org.springframework.test.util.ReflectionTestUtils.setField(service, "enabled", true);
         assertThat(service.isEnabled()).isFalse();
         assertThatThrownBy(() -> service.create(List.of(order.getId()), customer.getUsername()))

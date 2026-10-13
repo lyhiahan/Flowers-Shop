@@ -16,7 +16,10 @@
         .withdraw-summary dt { font-weight: 500; color: #66736B; }
         .withdraw-summary dd { margin: 0; overflow-wrap: anywhere; color: #20382E; }
         @media (max-width: 575.98px) { .withdraw-summary { grid-template-columns: 1fr; gap: 4px; } .withdraw-summary dd { margin-bottom: 12px; } }
-        .wallet-card { background: linear-gradient(135deg, #20382E 0%, #162820 100%); color: white; border-radius: 20px; }
+        .wallet-card { background: #20382E; color: white; border-radius: 8px; }
+        .pending-wallet { background: #F0F7FC; color: #174C6B; border: 1px solid #C7E0EF; border-radius: 8px; }
+        .wallet-amount { font-size: 32px; line-height: 1.25; overflow-wrap: anywhere; }
+        .wallet-summary-label { letter-spacing: 0; }
         /* Ẩn nút tăng giảm (spinner) trên ô nhập số tiền rút */
         #inputWithdrawAmount::-webkit-outer-spin-button,
         #inputWithdrawAmount::-webkit-inner-spin-button,
@@ -64,6 +67,11 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
 
+            <div th:if="${fundsReviewCount > 0}" class="alert alert-warning" role="alert">
+                <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>
+                <span th:text="${fundsReviewCount} + ' đơn MoMo cũ cần đối soát. Chưa cộng tiền chờ hoặc thu nhập cho các đơn này.'"></span>
+            </div>
+
             <!-- Wallet Overview Card -->
             <div class="row g-4 mb-4">
                 <div class="col-md-6">
@@ -71,8 +79,8 @@
                         <div>
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <div>
-                                    <small class="text-white-50 text-uppercase fw-semibold" style="letter-spacing: 0.5px;">Số dư GD Coins khả dụng</small>
-                                    <h2 class="display-6 fw-bold mb-0 text-white mt-1"
+                                    <small class="wallet-summary-label text-white-50 text-uppercase fw-semibold">Số dư khả dụng</small>
+                                    <h2 id="walletAvailable" class="wallet-amount fw-bold mb-0 text-white mt-1"
                                         th:text="${store != null and store.eWallet != null ? #numbers.formatDecimal(store.eWallet, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">
                                         0 ₫
                                     </h2>
@@ -102,16 +110,19 @@
                 </div>
 
                 <div class="col-md-6">
-                    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 d-flex flex-column justify-content-center" style="border: 1px solid #E2E7E2 !important; border-radius: 16px;">
-                        <h6 class="fw-bold mb-2" style="color: #20382E;">
-                            <i class="bi bi-info-circle-fill me-1 text-primary"></i> Quy định rút tiền GD Coins
-                        </h6>
-                        <ul class="small ps-3 mb-0" style="color: #66736B; line-height: 1.8;">
-                            <li>Số tiền rút tối thiểu mỗi lần là <strong>50.000 ₫</strong>.</li>
-                            <li>Yêu cầu rút tiền yêu cầu xác thực bằng <strong>Mật khẩu tài khoản</strong>.</li>
-                            <li>Hệ thống chuỗi không thu phí giao dịch rút tiền của cửa hàng.</li>
-                            <li>Lệnh rút được ghi nhận và gửi đến quản trị viên xử lý đối soát.</li>
-                        </ul>
+                    <div class="pending-wallet p-4 h-100 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+                                <div>
+                                    <small class="wallet-summary-label text-uppercase fw-semibold">Tiền chờ giao hàng</small>
+                                    <h2 id="walletPending" class="wallet-amount fw-bold mb-0 mt-1"
+                                        th:text="${#numbers.formatDecimal(store.pendingBalance, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</h2>
+                                </div>
+                                <i class="bi bi-hourglass-split fs-2" aria-hidden="true"></i>
+                            </div>
+                            <p class="small mb-0">MoMo đã thanh toán · Chưa ghi nhận thu nhập</p>
+                        </div>
+                        <div class="small fw-semibold pt-3"><i class="bi bi-lock me-1" aria-hidden="true"></i>Chưa được rút</div>
                     </div>
                 </div>
             </div>
@@ -131,6 +142,8 @@
                             <tr style="background-color: #E5EEE8 !important;">
                                 <th class="ps-4 fw-bold" style="white-space: nowrap !important; min-width: 160px;">Thời gian</th>
                                 <th class="fw-bold" style="white-space: nowrap !important; min-width: 170px;">Loại giao dịch</th>
+                                <th class="fw-bold" style="white-space: nowrap;">Khoản tiền</th>
+                                <th class="fw-bold" style="white-space: nowrap;">Đơn hàng</th>
                                 <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 140px;">Số tiền</th>
                                 <th class="fw-bold" style="white-space: nowrap !important; min-width: 240px;">Nội dung</th>
                                 <th class="text-end pe-4 fw-bold" style="white-space: nowrap !important; min-width: 130px;">Trạng thái</th>
@@ -138,7 +151,7 @@
                             </thead>
                             <tbody>
                             <tr th:if="${#lists.isEmpty(transactions)}">
-                                <td colspan="5" class="text-center py-5 text-muted" style="font-size: 15.5px;">
+                                <td colspan="7" class="text-center py-5 text-muted" style="font-size: 15.5px;">
                                     <div class="fs-2 mb-2">🪙</div>
                                     Chưa có giao dịch rút tiền hoặc cộng tiền nào.
                                 </td>
@@ -149,7 +162,16 @@
                                     <span th:if="${tx.type == 'WITHDRAWAL'}" class="badge" style="background-color: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; padding: 4px 10px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;">RÚT TIỀN VỀ TK</span>
                                     <span th:if="${tx.type == 'ORDER_PAYMENT' or tx.type == 'ORDER_PAYOUT'}" class="badge" style="background-color: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0; padding: 4px 10px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;">CỘNG TIỀN ĐƠN HÀNG</span>
                                     <span th:if="${tx.type == 'REFUND'}" class="badge" style="background-color: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; padding: 4px 10px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;">HOÀN TIỀN</span>
-                                    <span th:if="${tx.type != 'WITHDRAWAL' and tx.type != 'ORDER_PAYMENT' and tx.type != 'ORDER_PAYOUT' and tx.type != 'REFUND'}" class="badge" style="background-color: #E0F2FE; color: #0369A1; border: 1px solid #BAE6FD; padding: 4px 10px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;" th:text="${tx.type}">GIAO DỊCH</span>
+                                    <span th:if="${tx.type == 'PAYMENT_HOLD'}" class="badge bg-info-subtle text-info-emphasis">NHẬN TIỀN CHỜ</span>
+                                    <span th:if="${tx.type == 'HOLD_RELEASE'}" class="badge bg-primary-subtle text-primary-emphasis">CHUYỂN TIỀN CHỜ</span>
+                                    <span th:if="${tx.type == 'COMMISSION_FEE'}" class="badge bg-secondary-subtle text-secondary-emphasis">HOA HỒNG</span>
+                                    <span th:if="${tx.type == 'COMMISSION_REFUND'}" class="badge bg-secondary-subtle text-secondary-emphasis">HOÀN HOA HỒNG</span>
+                                    <span th:if="${tx.type != 'WITHDRAWAL' and tx.type != 'ORDER_PAYMENT' and tx.type != 'ORDER_PAYOUT' and tx.type != 'REFUND' and tx.type != 'PAYMENT_HOLD' and tx.type != 'HOLD_RELEASE' and tx.type != 'COMMISSION_FEE' and tx.type != 'COMMISSION_REFUND'}" class="badge bg-info-subtle text-info-emphasis" th:text="${tx.type}">GIAO DỊCH</span>
+                                </td>
+                                <td class="small text-nowrap" th:text="${tx.walletBucket == 'PENDING' ? 'Số dư chờ' : (tx.walletBucket == 'PLATFORM' ? 'Hoa hồng hệ thống' : 'Ví cửa hàng')}"></td>
+                                <td class="text-nowrap">
+                                    <a th:if="${tx.order != null}" th:href="@{/manager/orders/{id}(id=${tx.order.id})}" th:text="'#' + ${tx.order.id}"></a>
+                                    <span th:unless="${tx.order != null}" class="text-muted">—</span>
                                 </td>
                                 <td class="text-end" style="white-space: nowrap;">
                                     <span style="font-size: 16.5px; font-weight: 800; white-space: nowrap;"

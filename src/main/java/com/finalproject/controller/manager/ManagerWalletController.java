@@ -31,6 +31,7 @@ public class ManagerWalletController {
     private final WalletService walletService;
     private final StoreAccessService storeAccess;
     private final TransactionRepository transactionRepository;
+    private final com.finalproject.repository.OrderRepository orderRepository;
     private final PasswordEncoder passwordEncoder;
 
     /**
@@ -59,6 +60,8 @@ public class ManagerWalletController {
         model.addAttribute("isOwner", isOwner);
         model.addAttribute("requestId", java.util.UUID.randomUUID().toString());
         model.addAttribute("transactions", pagedTransactions);
+        model.addAttribute("fundsReviewCount", orderRepository.countByPickupStoreIdAndFundsStatus(store.getId(),
+                com.finalproject.enums.OrderFundsStatus.REVIEW_REQUIRED));
 
         return "manager/wallet";
     }

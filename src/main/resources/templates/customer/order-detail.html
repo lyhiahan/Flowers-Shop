@@ -131,6 +131,8 @@
                     <span th:if="${order.status.name() == 'CANCELLED'}" class="badge bg-dark px-3 py-2 rounded-pill">
                         ❌ Đã Hủy
                     </span>
+                    <span th:if="${order.status.name() == 'REFUND_REQUESTED'}" class="badge bg-warning text-dark px-3 py-2 rounded-pill">Chờ hoàn tiền</span>
+                    <span th:if="${order.status.name() == 'REFUNDED'}" class="badge bg-secondary px-3 py-2 rounded-pill">Đã hoàn tiền</span>
                 </div>
             </div>
 
@@ -155,7 +157,7 @@
                             <div class="mb-1"><strong>Thời gian đặt:</strong> <span th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></span></div>
                             <div class="mb-1"><strong>Phương thức thanh toán:</strong> 
                                 <span th:if="${order.paymentMethod == 'MOMO_DEMO'}" class="badge text-white px-2 py-1 ms-1" style="background:#a50064;">
-                                    <span th:text="${order.paymentStatus == 'PAID' ? 'MoMo giả lập - Đã thanh toán' : (order.paymentStatus == 'REFUNDED' ? 'MoMo giả lập - Đã hoàn tiền' : 'MoMo giả lập - Chưa thanh toán')}"></span>
+                                    <span th:text="${order.paymentStatus == 'PAID' ? 'MoMo - Đã thanh toán' : (order.paymentStatus == 'REFUNDED' ? 'MoMo - Đã hoàn tiền' : 'MoMo - Chưa thanh toán')}"></span>
                                 </span>
                                 <span th:if="${order.paymentMethod == 'MOMO'}" class="badge rounded-pill text-white px-2 py-1 ms-1" style="background-color: #D82D8B;">
                                     <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo" style="height: 14px; width: 14px; vertical-align: -2px;" class="me-1">
@@ -279,7 +281,8 @@
                     <div class="modal-body py-3 text-secondary">
                         Bạn có chắc chắn muốn hủy đơn hàng <strong class="text-dark" th:text="'#' + ${order.id}"></strong> này không?
                         <p class="small mb-0 mt-2">Bạn chỉ được hủy khi đơn chờ xác nhận hoặc đã xác nhận. Khi cửa hàng bắt đầu cắm hoa/chuẩn bị, bạn không thể tự hủy.</p>
-                        <p th:if="${order.paymentStatus == 'PAID'}" class="small text-warning-emphasis mb-0 mt-2">Đơn đã thanh toán sẽ chuyển sang chờ cửa hàng hoàn tiền.</p>
+                        <p th:if="${order.paymentStatus == 'PAID' and order.paymentMethod == 'MOMO_DEMO'}" class="small text-success mb-0 mt-2">Đơn thanh toán MoMo sẽ được hoàn tiền tự động khi hủy, không cần cửa hàng xác nhận.</p>
+                        <p th:if="${order.paymentStatus == 'PAID' and order.paymentMethod != 'MOMO_DEMO'}" class="small text-warning-emphasis mb-0 mt-2">Đơn đã thanh toán sẽ chuyển sang chờ cửa hàng hoàn tiền.</p>
                     </div>
                     <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
                         <!-- 9b. Bấm nút Cancel -> 9b1. Hủy thao tác -->
@@ -424,7 +427,6 @@
     <!-- ==============================================
          FOOTER CHUẨN ĐỒNG BỘ THEO MẪU (BOTANICAL ATELIER)
          ============================================== -->
-    <div class="container mb-4"><div class="card p-3"><div class="d-flex flex-wrap gap-4"><span>Phí giao hàng: <strong th:text="${#numbers.formatDecimal(order.shippingFee != null ? order.shippingFee : 0,0,'COMMA',0,'POINT')} + ' ₫'"></strong></span><span>Giảm giá: <strong th:text="${#numbers.formatDecimal(order.discountAmount != null ? order.discountAmount : 0,0,'COMMA',0,'POINT')} + ' ₫'"></strong></span></div></div></div>
 <footer class="w-full border-top pt-4 pb-3 mt-5" style="background-color: #FAF4F0 !important; border-top: 1px solid #EBDED4 !important; font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif !important; color: #4A3E3D !important; width: 100%;">
         <div style="max-width: 1240px; margin: 0 auto; padding-left: 20px; padding-right: 20px;">
             <!-- Hàng trên: 2 Cột thông tin -->

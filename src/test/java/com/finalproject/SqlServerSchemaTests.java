@@ -38,15 +38,18 @@ class SqlServerSchemaTests {
                 SchemaManagementToolCoordinator.process(metadata, registry, settings, action -> {});
             } else {
                 String baseline = Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V1__initial_schema.sql"));
+                String pendingFunds = Files.readString(Path.of("src/main/java/com/finalproject/db/migration/V6__demo_pending_funds.java"));
                 for (var table : metadata.collectTableMappings()) {
                     var pattern = java.util.regex.Pattern.compile("create table "
                             + java.util.regex.Pattern.quote(table.getName()) + " \\((.*?)\\);",
                             java.util.regex.Pattern.CASE_INSENSITIVE | java.util.regex.Pattern.DOTALL);
                     var match = pattern.matcher(baseline);
                     assertThat(match.find()).as("table %s", table.getName()).isTrue();
-                    for (var column : table.getColumns())
-                        assertThat(match.group(1)).as("%s.%s", table.getName(), column.getName())
-                                .contains(column.getName() + " ");
+                    for (var column : table.getColumns()) {
+                        if (!match.group(1).contains(column.getName() + " "))
+                            assertThat(pendingFunds).as("additive migration for %s.%s", table.getName(), column.getName())
+                                    .contains("addColumn(jdbc, \"" + table.getName() + "\", \"" + column.getName() + "\"");
+                    }
                 }
                 assertThat(baseline.toLowerCase(Locale.ROOT)).doesNotContain("drop table", "drop database", "truncate table");
             }

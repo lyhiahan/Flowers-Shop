@@ -78,6 +78,10 @@ public class Store {
     @Builder.Default
     private java.math.BigDecimal eWallet = java.math.BigDecimal.ZERO;
 
+    @Column(name = "pending_balance", nullable = false, precision = 18, scale = 2)
+    @Builder.Default
+    private java.math.BigDecimal pendingBalance = java.math.BigDecimal.ZERO;
+
     private Double latitude;
     private Double longitude;
 

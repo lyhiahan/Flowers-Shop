@@ -4,7 +4,7 @@
     if (!root) return;
     let state = root.dataset.state;
     let timer;
-    const labels = { PENDING: 'Chờ xác nhận', SUCCESS: 'Đã thanh toán giả lập', EXPIRED: 'Đã hết hạn', FAILED: 'Không thể thanh toán' };
+    const labels = { PENDING: 'Chờ xác nhận', SUCCESS: 'Đã thanh toán', EXPIRED: 'Đã hết hạn', FAILED: 'Không thể thanh toán' };
     function render(next) {
         state = next;
         if (state === 'SUCCESS') {

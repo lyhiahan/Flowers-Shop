@@ -59,6 +59,7 @@ class BusinessRegressionTests {
     @Autowired UserAddressRepository addresses;
     @Autowired RoleRequestRepository roleRequests;
     @Autowired MomoService momo;
+    @Autowired DemoPaymentService demo;
     @Autowired NotificationRepository notifications;
     @Autowired ProductService productService;
     Store store, otherStore;
@@ -704,7 +705,7 @@ class BusinessRegressionTests {
         mvc.perform(get("/customer/orders").with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("/checkout/momo/" + order.getId())));
         mvc.perform(get("/customer/orders/detail/" + order.getId()).with(user(customer.getUsername()).roles("USER")))
-                .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("Phí giao hàng")));
+                .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Phí giao hàng:"))));
     }
 
     @Test void productVietnameseTextSurvivesDatabaseReloadAndHtmlRendering() throws Exception {
@@ -792,16 +793,15 @@ class BusinessRegressionTests {
         assertThat(orders.findById(order.getId()).orElseThrow().getStatus()).isEqualTo(OrderStatus.REFUND_REQUESTED);
     }
 
-    @Test void bankCheckoutRedirectsToInstructionsWithoutRecordingPaid() throws Exception {
-        var response = mvc.perform(post("/checkout").with(user(customer.getUsername()).roles("USER")).with(csrf())
+    @Test void removedBankCheckoutCannotCreateOrderOrReserveStock() throws Exception {
+        mvc.perform(post("/checkout").with(user(customer.getUsername()).roles("USER")).with(csrf())
                 .param("selectedItemIds", item.getId().toString()).param("paymentMethod", "BANK_TRANSFER")
                 .param("recipientName", "Khách").param("recipientPhone", "0900000000")
                 .param("deliveryDate", LocalDate.now().plusDays(1).toString()).param("deliveryTimeSlot", "09:00-11:00")
                 .param("shippingMethod", "PICKUP").param("pickupStoreId", store.getId().toString()))
-                .andExpect(status().is3xxRedirection()).andReturn().getResponse();
-        assertThat(response.getRedirectedUrl()).startsWith("/checkout/bank/");
-        long id = Long.parseLong(response.getRedirectedUrl().substring("/checkout/bank/".length()));
-        assertThat(orders.findById(id).orElseThrow().getPaymentStatus()).isEqualTo("UNPAID");
+                .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("errorMessage"));
+        assertThat(orders.findByUserIdOrderByCreatedAtDesc(customer.getId())).isEmpty();
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(10);
     }
 
     com.finalproject.dto.request.ProductForm validProductForm() {
@@ -859,6 +859,111 @@ class BusinessRegressionTests {
         assertThatThrownBy(() -> orderService.checkout(customer.getUsername(), List.of(item.getId(), Long.MAX_VALUE), PaymentMethod.COD,
                 "Khách", "0900000000", "Quận 1", null, null, LocalDate.now(), "PICKUP", store.getId())).hasMessageContaining("không thuộc");
         assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(10);
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.EnumSource(value = OrderStatus.class, names = {"PENDING", "CONFIRMED"})
+    void customerCancellationAutomaticallyRefundsDemoMomoExactlyOnce(OrderStatus state) throws Exception {
+        Order order = checkout(PaymentMethod.MOMO_DEMO);
+        String token = demo.create(List.of(order.getId()), customer.getUsername());
+        demo.confirm(token);
+        if (state == OrderStatus.CONFIRMED) {
+            login(manager);
+            workflow.transition(order.getId(), state);
+        }
+        store.setEWallet(new BigDecimal("750000"));
+        stores.saveAndFlush(store);
+        for (String path : List.of("/customer/orders", "/customer/orders/detail/" + order.getId())) {
+            mvc.perform(get(path).with(user(customer.getUsername()).roles("USER")))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(org.hamcrest.Matchers.containsString("hoàn tiền tự động")))
+                    .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("MoMo giả lập"))));
+        }
+        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()))
+                .andExpect(redirectedUrl("/customer/orders"))
+                .andExpect(flash().attribute("successMessage", "Đã hủy đơn và hoàn tiền thành công."));
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.REFUNDED);
+        assertThat(order.getPaymentStatus()).isEqualTo("REFUNDED");
+        Payment receipt = payments.findByOrderId(order.getId()).getFirst();
+        assertThat(receipt.getStatus()).isEqualTo(PaymentStatus.REFUNDED);
+        assertThat(receipt.getRefundMethod()).isEqualTo("DEMO_AUTO");
+        assertThat(receipt.getRefundedAt()).isNotNull();
+        assertThat(order.getCancellationReason()).contains("Đã hủy đơn và hoàn tiền thành công.")
+                .doesNotContain("chưa ghi nhận", "Vui lòng hoàn tiền");
+        LocalDateTime refundedAt = receipt.getRefundedAt();
+        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()))
+                .andExpect(flash().attribute("successMessage", "Đã hủy đơn và hoàn tiền thành công."));
+        assertThat(receipt.getRefundedAt()).isEqualTo(refundedAt);
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(10);
+        assertThat(store.getEWallet()).isEqualByComparingTo("750000");
+        assertThat(transactions.findAllByOrderIdAndType(order.getId(), "ORDER_PAYMENT")).isEmpty();
+        assertThat(store.getPendingBalance()).isZero();
+        assertThat(transactions.findAllByOrderIdAndType(order.getId(), "REFUND")).singleElement()
+                .satisfies(t -> {
+                    assertThat(t.getWalletBucket()).isEqualTo("PENDING");
+                    assertThat(t.getAmount()).isEqualByComparingTo(order.getTotalAmount());
+                });
+        assertThat(notifications.findByUserIdOrderByCreatedAtDesc(customer.getId()).stream()
+                .filter(n -> order.getId().equals(n.getRelatedOrderId()) && "REFUND_COMPLETED".equals(n.getType())).count()).isEqualTo(1);
+        assertThat(demo.confirm(token).status()).isEqualTo(DemoPaymentService.Status.FAILED);
+        String html = mvc.perform(get("/customer/orders/detail/" + order.getId()).with(user(customer.getUsername()).roles("USER")))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        assertThat(html).contains("MoMo - Đã hoàn tiền").doesNotContain("Phí giao hàng:", "Giảm giá:", "MoMo giả lập",
+                "id=\"confirmCancelOrderModal_" + order.getId() + "\"");
+        var preview = java.nio.file.Path.of("target/demo-preview/order-refunded.html");
+        java.nio.file.Files.createDirectories(preview.getParent());
+        java.nio.file.Files.writeString(preview, html);
+    }
+
+    @Test void unpaidDemoMomoCancellationDoesNotCreateARefund() throws Exception {
+        Order order = checkout(PaymentMethod.MOMO_DEMO);
+        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()))
+                .andExpect(flash().attributeExists("successMessage"));
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELLED);
+        assertThat(order.getPaymentStatus()).isEqualTo("UNPAID");
+        Payment receipt = payments.findByOrderId(order.getId()).getFirst();
+        assertThat(receipt.getStatus()).isEqualTo(PaymentStatus.FAILED);
+        assertThat(receipt.getRefundedAt()).isNull();
+    }
+
+    @Test void automaticDemoRefundCannotBypassOwnershipOrPreparation() throws Exception {
+        Order order = checkout(PaymentMethod.MOMO_DEMO);
+        demo.confirm(demo.create(List.of(order.getId()), customer.getUsername()));
+        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(outsider.getUsername()).roles("USER")).with(csrf()))
+                .andExpect(flash().attributeExists("errorMessage"));
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
+        login(manager);
+        workflow.transition(order.getId(), OrderStatus.CONFIRMED);
+        workflow.transition(order.getId(), OrderStatus.PREPARING);
+        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()))
+                .andExpect(flash().attributeExists("errorMessage"));
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PREPARING);
+        assertThat(order.getPaymentStatus()).isEqualTo("PAID");
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(8);
+    }
+
+    @Test void mismatchedDemoReceiptCannotRefundOrRestoreStock() throws Exception {
+        Order order = checkout(PaymentMethod.MOMO_DEMO);
+        demo.confirm(demo.create(List.of(order.getId()), customer.getUsername()));
+        payments.findByOrderId(order.getId()).getFirst().setAmount(BigDecimal.ONE);
+        em.flush();
+        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()))
+                .andExpect(flash().attributeExists("errorMessage"));
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
+        assertThat(order.getPaymentStatus()).isEqualTo("PAID");
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(8);
+    }
+
+    @Test void realMomoCancellationStillRequiresVerifiedRefund() throws Exception {
+        Order order = checkout(PaymentMethod.MOMO);
+        order.setPaymentStatus("PAID");
+        payments.findByOrderId(order.getId()).getFirst().setStatus(PaymentStatus.SUCCESS);
+        em.flush();
+        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()))
+                .andExpect(flash().attributeExists("successMessage"));
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.REFUND_REQUESTED);
+        assertThat(order.getPaymentStatus()).isEqualTo("PAID");
+        assertThat(payments.findByOrderId(order.getId()).getFirst().getRefundedAt()).isNull();
     }
 
     static java.util.stream.Stream<org.junit.jupiter.params.provider.Arguments> cancellableStatesAndPayments() {
@@ -1326,19 +1431,19 @@ class BusinessRegressionTests {
         String address="123 Lê Lợi, Quận 1, TP HCM";
         String name="Nguyễn An, người nhận";
         mvc.perform(post("/checkout").with(user(customer.getUsername()).roles("USER")).with(csrf())
-                .param("selectedItemIds",item.getId().toString()).param("paymentMethod","BANK_TRANSFER")
+                .param("selectedItemIds",item.getId().toString()).param("paymentMethod","MOMO_DEMO")
                 .param("recipientName",name," ").param("recipientPhone","0900000000")
                 .param("recipientAddress",address).param("shippingMethod","DELIVERY")
                 .param("deliveryUnitId",delivery.getId().toString()).param("deliveryDate",LocalDate.now().plusDays(1).toString())
                 .param("deliveryTimeSlot","09:00-11:00"))
-                .andExpect(status().is3xxRedirection()).andExpect(redirectedUrlPattern("/checkout/bank/*"));
+                .andExpect(status().is3xxRedirection()).andExpect(redirectedUrlPattern("/customer/demo-payment/*"));
         Order created=orders.findByUserIdOrderByCreatedAtDesc(customer.getId()).get(0);
         assertThat(created.getRecipientAddress()).isEqualTo(address);assertThat(created.getRecipientName()).isEqualTo(name);
     }
 
     @Test void conflictingRecipientFieldsCannotSilentlyCreateOrder() throws Exception {
         mvc.perform(post("/checkout").with(user(customer.getUsername()).roles("USER")).with(csrf())
-                .param("selectedItemIds",item.getId().toString()).param("paymentMethod","BANK_TRANSFER")
+                .param("selectedItemIds",item.getId().toString()).param("paymentMethod","MOMO_DEMO")
                 .param("recipientName","Nguyễn An","Trần Bình").param("recipientPhone","0900000000")
                 .param("shippingMethod","PICKUP").param("pickupStoreId",store.getId().toString())
                 .param("deliveryDate",LocalDate.now().plusDays(1).toString()).param("deliveryTimeSlot","09:00-11:00"))

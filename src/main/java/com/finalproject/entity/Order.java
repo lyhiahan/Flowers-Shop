@@ -71,6 +71,17 @@ public class Order {
     @Builder.Default
     private String paymentStatus = "UNPAID"; // UNPAID, PAID
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "funds_status", nullable = false, length = 20)
+    @Builder.Default
+    private com.finalproject.enums.OrderFundsStatus fundsStatus = com.finalproject.enums.OrderFundsStatus.NONE;
+
+    @Column(name = "funds_amount", precision = 18, scale = 2)
+    private BigDecimal fundsAmount;
+
+    @Column(name = "commission_rate_snapshot", precision = 9, scale = 4)
+    private BigDecimal commissionRateSnapshot;
+
     @Column(name="payment_expires_at")
     private LocalDateTime paymentExpiresAt;
     @Builder.Default @Column(name="payment_expired")

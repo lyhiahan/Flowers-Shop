@@ -31,6 +31,7 @@ public class DemoPaymentService {
     private final EntityManager entityManager;
     private final Clock clock;
     private final org.springframework.core.env.Environment environment;
+    private final OrderFundsService funds;
     @Value("${app.demo-payment.enabled:false}") private boolean enabled;
 
     private final SecureRandom random = new SecureRandom();
@@ -112,6 +113,7 @@ public class DemoPaymentService {
             payments.save(payment);
             orders.save(order);
         }
+        funds.holdPaidOrders(found);
         return new View(session.token(), session.orderIds(), session.total(), session.expiresAt(), Status.SUCCESS);
     }
 

@@ -23,7 +23,7 @@
                             <i class="bi bi-calendar-check me-1"></i><span th:text="${#temporals.format(o.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
                         </span>
                         <span th:if="${o.paymentMethod == 'MOMO_DEMO'}" class="badge text-white ms-2" style="background:#a50064;">
-                            <span th:text="${o.paymentStatus == 'PAID' ? 'MoMo giả lập: Đã thanh toán' : (o.paymentStatus == 'REFUNDED' ? 'MoMo giả lập: Đã hoàn tiền' : 'MoMo giả lập: Chưa thanh toán')}"></span>
+                            <span th:text="${o.paymentStatus == 'PAID' ? 'MoMo: Đã thanh toán' : (o.paymentStatus == 'REFUNDED' ? 'MoMo: Đã hoàn tiền' : 'MoMo: Chưa thanh toán')}"></span>
                         </span>
                         <!-- MoMo / Payment Method Badge -->
                         <span th:if="${o.paymentMethod == 'MOMO'}" class="badge rounded-pill text-white ms-2" style="background-color: #D82D8B;">
@@ -148,7 +148,7 @@
                         <div class="d-flex align-items-center gap-2">
                             <form th:if="${o.paymentMethod == 'MOMO_DEMO' and o.paymentStatus == 'UNPAID' and (o.status.name() == 'PENDING' or o.status.name() == 'CONFIRMED' or o.status.name() == 'PREPARING')}"
                                   th:action="@{/customer/demo-payment/order/{id}(id=${o.id})}" method="post">
-                                <button type="submit" class="btn btn-outline-secondary btn-sm"><i class="bi bi-qr-code me-1"></i>Thanh toán giả lập</button>
+                                <button type="submit" class="btn btn-outline-secondary btn-sm"><i class="bi bi-qr-code me-1"></i>Thanh toán MoMo</button>
                             </form>
                             <a th:if="${o.paymentMethod == 'BANK_TRANSFER' and o.paymentStatus == 'UNPAID' and o.status.name() != 'CANCELLED' and o.status.name() != 'REFUNDED'}"
                                th:href="@{/checkout/bank/{id}(id=${o.id})}" class="btn btn-outline-success btn-sm rounded-pill px-3">Hướng dẫn chuyển khoản</a>
@@ -202,7 +202,8 @@
                             <div class="modal-body py-3 text-secondary">
                                 Bạn có chắc chắn muốn hủy đơn hàng <strong class="text-dark" th:text="'#' + ${o.id}"></strong> này không?
                                 <p class="small mb-0 mt-2">Bạn chỉ được hủy khi đơn chờ xác nhận hoặc đã xác nhận. Khi cửa hàng bắt đầu cắm hoa/chuẩn bị, bạn không thể tự hủy.</p>
-                                <p th:if="${o.paymentStatus == 'PAID'}" class="small text-warning-emphasis mb-0 mt-2">Đơn đã thanh toán sẽ chuyển sang chờ cửa hàng hoàn tiền.</p>
+                                <p th:if="${o.paymentStatus == 'PAID' and o.paymentMethod == 'MOMO_DEMO'}" class="small text-success mb-0 mt-2">Đơn thanh toán MoMo sẽ được hoàn tiền tự động khi hủy, không cần cửa hàng xác nhận.</p>
+                                <p th:if="${o.paymentStatus == 'PAID' and o.paymentMethod != 'MOMO_DEMO'}" class="small text-warning-emphasis mb-0 mt-2">Đơn đã thanh toán sẽ chuyển sang chờ cửa hàng hoàn tiền.</p>
                             </div>
                             <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
                                 <!-- 9b. Bấm nút Cancel -> 9b1. Hủy thao tác -->

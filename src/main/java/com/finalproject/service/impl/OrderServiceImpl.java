@@ -547,8 +547,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public void cancelOrder(String username, Long orderId) {
-        workflow.cancelByCustomer(username, orderId);
+    public Order cancelOrder(String username, Long orderId) {
+        return workflow.cancelByCustomer(username, orderId);
     }
 
     @Override

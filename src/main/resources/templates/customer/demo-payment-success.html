@@ -4,18 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="referrer" content="no-referrer">
-    <title>Thanh toán giả lập thành công</title>
+    <title>Thanh toán thành công</title>
     <link rel="stylesheet" th:href="@{/css/demo-payment.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
 <header class="payment-header">
-    <div class="header-inner"><strong>MoMo <span>giả lập</span></strong><span class="demo-label">DEMO</span></div>
+    <div class="header-inner"><strong>MoMo</strong><span class="demo-label">DEMO</span></div>
 </header>
 <main class="payment-main phone success-page">
     <div class="success-heading" role="status">
         <i class="bi bi-check-circle result-icon" aria-hidden="true"></i>
-        <h1>Thanh toán giả lập thành công</h1>
+        <h1>Thanh toán thành công</h1>
         <p class="muted">Không phát sinh giao dịch hoặc trừ tiền trong ví thật.</p>
     </div>
     <section class="order-summary" aria-label="Giao dịch đã thanh toán">
@@ -23,7 +23,7 @@
         <p class="amount"><span th:text="${#numbers.formatDecimal(payment.total, 0, 'POINT', 0, 'COMMA')}"></span><span class="currency">đ</span></p>
         <dl>
             <div><dt>Đơn hàng</dt><dd><span th:each="id, iter : ${payment.orderIds}" th:text="${'#' + id + (iter.last ? '' : ', ')}"></span></dd></div>
-            <div><dt>Phương thức</dt><dd>MoMo giả lập</dd></div>
+            <div><dt>Phương thức</dt><dd>MoMo</dd></div>
             <div><dt>Trạng thái</dt><dd class="paid-status">Đã thanh toán</dd></div>
         </dl>
     </section>

@@ -67,9 +67,9 @@ class SqlServerMigrationLiveTests {
     @Test void emptyDatabaseMigratesAllVersionsAndValidatesAllEntities() throws Exception {
         String url = url("SQLSERVER_TEST_FRESH_DATABASE");
         var flyway = flyway(url);
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(4);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(6);
         flyway.validate();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("4");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("6");
         validateEntities(url);
         assertThat(flyway.migrate().migrationsExecuted).isZero();
     }
@@ -80,9 +80,9 @@ class SqlServerMigrationLiveTests {
         var flyway = flyway(url);
         assertThatThrownBy(flyway::migrate).hasMessageContaining("non-empty schema");
         flyway.baseline();
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(3);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(5);
         flyway.validate();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("4");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("6");
         validateEntities(url);
         assertThat(counts(url)).isEqualTo(before);
         assertThat(flyway.migrate().migrationsExecuted).isZero();
