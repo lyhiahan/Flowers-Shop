@@ -276,7 +276,7 @@
                             
                             <form th:id="'reviewForm_' + ${d.product.id}" 
                                   th:action="@{'/products/' + ${d.product.id} + '/review'}" 
-                                  method="post">
+                                  method="post" enctype="multipart/form-data">
                                 <input type="hidden" name="orderId" th:value="${order.id}">
                                 <input type="hidden" name="rating" th:id="'ratingInput_' + ${d.product.id}" value="5">
                                 
@@ -316,7 +316,8 @@
                                         </div>
                                     </div>
 
-                                    <!-- UC_014 Step 7: Viết nội dung phản hồi, đánh giá (review) -->
+                                    <div class="mb-3"><label class="form-label fw-bold small">Ảnh đánh giá thực tế (tùy chọn)</label><input type="file" name="imageFile" class="form-control" accept="image/jpeg,image/png,image/webp,image/gif"><small class="text-muted">Tối đa 10 MB.</small></div>
+<!-- UC_014 Step 7: Viết nội dung phản hồi, đánh giá (review) -->
                                     <div class="mb-3">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <label class="form-label fw-bold small text-muted text-uppercase mb-0">

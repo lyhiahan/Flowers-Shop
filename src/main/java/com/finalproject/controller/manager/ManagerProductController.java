@@ -31,6 +31,8 @@ public class ManagerProductController {
     private final UserRepository userRepository;
     private final com.finalproject.service.StoreAccessService storeAccess;
     private final StoreRepository storeRepository;
+    private final com.finalproject.service.ManagedImageUploadService imageUploads;
+    private final com.finalproject.repository.ProductImageRepository productImages;
 
     @GetMapping
     public String listProducts(Principal principal, Model model) {
@@ -51,7 +53,7 @@ public class ManagerProductController {
     }
 
     @PostMapping("/add")
-    @org.springframework.transaction.annotation.Transactional
+    @org.springframework.transaction.annotation.Transactional(rollbackFor = Exception.class)
     public String addProduct(Principal principal,
                              @RequestParam("name") String name,
                              @RequestParam("categoryId") Long categoryId,
@@ -59,13 +61,15 @@ public class ManagerProductController {
                              @RequestParam(value = "promotionalPrice", required = false) BigDecimal promotionalPrice,
                              @RequestParam(value = "initialStock", defaultValue = "0") int initialStock,
                              @RequestParam(value = "imageUrl", required = false) String imageUrl,
+                             @RequestParam(value = "imageFile", required = false) org.springframework.web.multipart.MultipartFile imageFile,
                              @RequestParam(value = "description", required = false) String description,
-                             RedirectAttributes ra) {
+                             RedirectAttributes ra) throws java.io.IOException {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         Store store = storeAccess.assignedStore();
         Category category = categoryRepository.findById(categoryId).orElseThrow();
 
         validatePrice(priceBuy, promotionalPrice);
+        if (initialStock < 0 || initialStock > 1000000) throw new IllegalArgumentException("Tồn kho không hợp lệ.");
         Product product = Product.builder()
                 .name(name)
                 .category(category)
@@ -84,20 +88,23 @@ public class ManagerProductController {
                 .build();
 
         productRepository.save(product);
+        updateImage(product, imageFile, imageUrl);
         inventoryService.setStock(product.getId(), initialStock);
         ra.addFlashAttribute("successMessage", "Thêm mẫu hoa [" + name + "] thành công!");
         return "redirect:/manager/products";
     }
 
     @PostMapping("/update/{id}")
+    @org.springframework.transaction.annotation.Transactional(rollbackFor = Exception.class)
     public String updateProduct(@PathVariable("id") Long id,
                                 @RequestParam("name") String name,
                                 @RequestParam("categoryId") Long categoryId,
                                 @RequestParam("priceBuy") BigDecimal priceBuy,
                                 @RequestParam(value = "promotionalPrice", required = false) BigDecimal promotionalPrice,
                                 @RequestParam(value = "imageUrl", required = false) String imageUrl,
+                                @RequestParam(value = "imageFile", required = false) org.springframework.web.multipart.MultipartFile imageFile,
                                 @RequestParam(value = "description", required = false) String description,
-                                RedirectAttributes ra) {
+                                RedirectAttributes ra) throws java.io.IOException {
         Product p = productRepository.findById(id).orElseThrow();
         storeAccess.requireManager(p.getStore());
         Category cat = categoryRepository.findById(categoryId).orElseThrow();
@@ -106,9 +113,7 @@ public class ManagerProductController {
         p.setCategory(cat);
         p.setPriceBuy(priceBuy);
         p.setPromotionalPrice(promotionalPrice != null ? promotionalPrice : priceBuy);
-        if (imageUrl != null && !imageUrl.trim().isEmpty()) {
-            p.setImageUrl(imageUrl.trim());
-        }
+        updateImage(p, imageFile, imageUrl);
         p.setDescription(description);
         productRepository.save(p);
         ra.addFlashAttribute("successMessage", "Cập nhật mẫu hoa [" + name + "] thành công!");
@@ -129,6 +134,21 @@ public class ManagerProductController {
         inventoryService.setStock(id, quantity);
         ra.addFlashAttribute("successMessage", "Đã cập nhật tồn kho thực tế.");
         return "redirect:/manager/products";
+    }
+
+    private void updateImage(Product product, org.springframework.web.multipart.MultipartFile file, String url) throws java.io.IOException {
+        var uploaded = imageUploads.upload(file, "rental_shop_products");
+        String newUrl = uploaded != null ? uploaded.secureUrl() : url != null ? url.trim() : "";
+        if (newUrl.isBlank()) return;
+        var main = productImages.findByProductIdAndIsMainTrue(product.getId())
+                .orElseGet(() -> com.finalproject.entity.ProductImage.builder().product(product).isMain(true).build());
+        if (uploaded != null || !newUrl.equals(main.getImageUrl())) {
+            imageUploads.deleteAfterCommit(main.getCloudinaryPublicId());
+            main.setCloudinaryPublicId(uploaded != null ? uploaded.publicId() : null);
+        }
+        main.setImageUrl(newUrl);
+        productImages.save(main);
+        product.setImageUrl(newUrl);
     }
 
     private void validatePrice(BigDecimal price, BigDecimal promotion) {

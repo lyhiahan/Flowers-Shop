@@ -239,7 +239,7 @@
         <!-- ══ Biểu mẫu đăng ký cửa hàng (Bước 4 → 7 của UC_017) ══ -->
         <div class="form-card">
             <form th:action="@{/manager/stores/create}" th:object="${store}"
-                  method="post" id="formTaoCuaHang" novalidate>
+                  method="post" enctype="multipart/form-data" id="formTaoCuaHang" novalidate>
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
                 <!-- ① Bước 5: Thông tin cơ bản -->
@@ -307,7 +307,8 @@
                     <p class="form-hint">Chọn chính sách tỷ lệ chiết khấu doanh thu áp dụng cho cửa hàng này.</p>
                 </div>
 
-                <!-- ④ Trạng thái tiếp nhận đơn ban đầu -->
+                <div class="section-sep">Hình ảnh cửa hàng</div><div class="mb-3"><label class="form-label">Ảnh đại diện</label><input type="file" name="avatarFile" class="form-control" accept="image/jpeg,image/png,image/webp,image/gif"></div><div class="mb-3"><label class="form-label">Ảnh bìa</label><input type="file" name="coverFile" class="form-control" accept="image/jpeg,image/png,image/webp,image/gif"></div><div class="mb-3"><label class="form-label">Ảnh đặc trưng</label><input type="file" name="featuredFiles" class="form-control" multiple accept="image/jpeg,image/png,image/webp,image/gif"><p class="form-hint">Chọn một hoặc nhiều ảnh, tối đa 10 MB/ảnh.</p></div>
+<!-- ④ Trạng thái tiếp nhận đơn ban đầu -->
                 <div class="section-sep">④ Trạng thái ban đầu</div>
 
                 <div class="toggle-row mb-4">

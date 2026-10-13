@@ -54,7 +54,7 @@
             </div>
 
             <div class="card border-0 shadow-sm rounded-4 p-4 bg-white" style="max-width: 700px; border: 1px solid #E2E7E2 !important; border-radius: 14px;">
-                <form th:action="@{'/manager/stores/edit/' + ${store.id}}" th:object="${store}" method="post">
+                <form th:action="@{'/manager/stores/edit/' + ${store.id}}" th:object="${store}" method="post" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label class="form-label small fw-semibold">Tên chi nhánh cửa hàng hoa <span class="text-danger">*</span>:</label>
                         <input type="text" th:field="*{name}" id="editStoreName" class="form-control" required minlength="3" maxlength="120" placeholder="Ví dụ: Tiệm Hoa Tươi Sài Gòn">
@@ -79,15 +79,18 @@
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold">URL Ảnh đại diện cửa hàng (Avatar):</label>
                             <input type="text" th:field="*{avatar}" class="form-control" placeholder="https://...">
+<label class="form-label small mt-2">Hoặc chọn ảnh từ máy</label><input type="file" name="avatarFile" class="form-control" accept="image/jpeg,image/png,image/webp,image/gif"><small class="text-muted">Tối đa 10 MB/ảnh. Avatar/ảnh bìa từ máy được ưu tiên; ảnh đặc trưng được thêm vào danh sách.</small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold">URL Ảnh bìa cửa hàng (Cover):</label>
                             <input type="text" th:field="*{cover}" class="form-control" placeholder="https://...">
+<label class="form-label small mt-2">Hoặc chọn ảnh từ máy</label><input type="file" name="coverFile" class="form-control" accept="image/jpeg,image/png,image/webp,image/gif"><small class="text-muted">Tối đa 10 MB/ảnh. Avatar/ảnh bìa từ máy được ưu tiên; ảnh đặc trưng được thêm vào danh sách.</small>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-semibold">URL Ảnh đặc trưng cửa hàng (Featured Images):</label>
                         <input type="text" th:field="*{featuredImages}" class="form-control" placeholder="https://...">
+<label class="form-label small mt-2">Hoặc chọn ảnh từ máy</label><input type="file" name="featuredFiles" class="form-control" accept="image/jpeg,image/png,image/webp,image/gif" multiple><small class="text-muted">Tối đa 10 MB/ảnh. Avatar/ảnh bìa từ máy được ưu tiên; ảnh đặc trưng được thêm vào danh sách.</small>
                     </div>
                     <div class="mb-3 form-check form-switch">
                         <input class="form-check-input" type="checkbox" role="switch" th:field="*{isOpen}" id="isOpenSwitch">

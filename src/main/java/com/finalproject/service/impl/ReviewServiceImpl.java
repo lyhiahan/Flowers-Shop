@@ -20,10 +20,22 @@ public class ReviewServiceImpl implements ReviewService {
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final StoreRepository storeRepository;
+    private final com.finalproject.service.ManagedImageUploadService imageUploads;
 
     @Override
     @Transactional
     public Review addReview(Long userId, Long productId, Long orderId, int rating, String content, String imageUrl) {
+        try {
+            return addReview(userId, productId, orderId, rating, content, imageUrl, null);
+        } catch (java.io.IOException ex) {
+            throw new IllegalStateException("Không tải được ảnh đánh giá.", ex);
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Review addReview(Long userId, Long productId, Long orderId, int rating, String content, String imageUrl,
+                           org.springframework.web.multipart.MultipartFile imageFile) throws java.io.IOException {
         // 0. BẮT BUỘC: Khách hàng chỉ được đánh giá khi và chỉ khi đã đặt hàng và nhận được hàng rồi
         if (!canReview(userId, productId)) {
             throw new IllegalStateException("Chức năng đánh giá sản phẩm chỉ được thực hiện khi và chỉ khi khách hàng đã đặt hàng và nhận được hàng thành công!");
@@ -65,6 +77,7 @@ public class ReviewServiceImpl implements ReviewService {
         if (reviewRepository.existsByUserIdAndProductIdAndOrderId(userId, productId, order.getId())) {
             throw new IllegalStateException("Bạn đã đánh giá sản phẩm trong đơn này.");
         }
+        var uploaded = imageUploads.upload(imageFile, "rental_shop_reviews");
         Review review = Review.builder()
                 .user(user)
                 .product(product)
@@ -72,7 +85,8 @@ public class ReviewServiceImpl implements ReviewService {
                 .order(order)
                 .rating(rating)
                 .content(content.trim())
-                .imageUrl(imageUrl)
+                .imageUrl(uploaded != null ? uploaded.secureUrl() : imageUrl)
+                .imagePublicId(uploaded != null ? uploaded.publicId() : null)
                 .build();
 
         Review saved = reviewRepository.save(review);

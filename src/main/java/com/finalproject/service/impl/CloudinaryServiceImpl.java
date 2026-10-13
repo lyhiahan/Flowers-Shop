@@ -1,11 +1,11 @@
 package com.finalproject.service.impl;
 
 import com.cloudinary.Cloudinary;
+import com.cloudinary.Transformation;
 import com.cloudinary.utils.ObjectUtils;
 import com.finalproject.service.CloudinaryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,9 +40,6 @@ public class CloudinaryServiceImpl implements CloudinaryService {
 
     private final Cloudinary cloudinary;
 
-    @Value("${cloudinary.api-key:123456789}")
-    private String apiKey;
-
     // ─── Upload ───────────────────────────────────────────────────────────────
 
     @Override
@@ -65,7 +62,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
                                 "folder", folder != null ? folder : "rental_shop_general",
                                 "resource_type", "image",
                                 "allowed_formats", new String[]{"jpg", "jpeg", "png", "webp", "gif"},
-                                "transformation", ObjectUtils.asMap("quality", "auto", "fetch_format", "auto")
+                                "transformation", new Transformation().quality("auto")
                         )
                 );
                 if (uploadResult != null
@@ -77,10 +74,11 @@ public class CloudinaryServiceImpl implements CloudinaryService {
                     return new UploadResult(secureUrl, publicId);
                 }
             } catch (Exception ex) {
-                log.warn("Cloudinary upload failed ({}), falling back to local storage", ex.getMessage());
+                throw new IOException("Không thể tải ảnh lên Cloudinary. Vui lòng kiểm tra kết nối và cấu hình.", ex);
             }
+            throw new IOException("Cloudinary không trả về URL và public_id hợp lệ.");
         } else {
-            log.warn("Cloudinary chưa cấu hình (api-key={}...). Dùng lưu cục bộ.", apiKey.substring(0, Math.min(4, apiKey.length())));
+            log.warn("Cloudinary chưa cấu hình đầy đủ. Dùng lưu cục bộ.");
         }
 
         // 3. Fallback: lưu cục bộ (chỉ cho môi trường phát triển)
@@ -144,17 +142,16 @@ public class CloudinaryServiceImpl implements CloudinaryService {
      * Kiểm tra xem Cloudinary đã cấu hình thật chưa (không phải placeholder)
      */
     private boolean isCloudinaryConfigured() {
-        try {
-            Object key = cloudinary.config.apiKey;
-            if (key == null) return false;
-            String keyStr = key.toString().trim();
-            return !keyStr.isEmpty()
-                    && !"123456789".equals(keyStr)
-                    && !"test".equals(keyStr)
-                    && !"placeholder".equals(keyStr);
-        } catch (Exception e) {
-            return false;
-        }
+        return isRealValue(cloudinary.config.cloudName)
+                && isRealValue(cloudinary.config.apiKey)
+                && isRealValue(cloudinary.config.apiSecret);
+    }
+
+    private boolean isRealValue(String value) {
+        if (value == null || value.isBlank()) return false;
+        String normalized = value.trim().toLowerCase(java.util.Locale.ROOT);
+        return !Set.of("demo", "test", "123456789", "placeholder", "placeholder_secret").contains(normalized)
+                && !normalized.startsWith("your_");
     }
 
     /**

@@ -380,6 +380,7 @@ CREATE TABLE dbo.reviews (
     content NVARCHAR(1000) NOT NULL,
     rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
     image_url NVARCHAR(500) NULL,
+    image_public_id NVARCHAR(255) NULL,
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE(),
     CONSTRAINT FK_reviews_users FOREIGN KEY (user_id) REFERENCES dbo.users(id),

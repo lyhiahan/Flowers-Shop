@@ -202,7 +202,7 @@
                                     <div class="modal fade text-start" th:id="'editProductModal_' + ${p.id}" tabindex="-1">
                                         <div class="modal-dialog modal-lg modal-dialog-centered">
                                             <div class="modal-content">
-                                                <form th:action="@{'/manager/products/update/' + ${p.id}}" method="post">
+                                                <form th:action="@{'/manager/products/update/' + ${p.id}}" method="post" enctype="multipart/form-data">
                                                     <div class="modal-header">
                                                         <h5 class="modal-title font-serif">🌸 Chỉnh Sửa Mẫu Hoa</h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -233,6 +233,7 @@
                                                         <div class="mb-3">
                                                             <label class="form-label small fw-semibold">Đường dẫn ảnh hoa (URL):</label>
                                                             <input type="text" name="imageUrl" class="form-control" th:value="${p.imageUrl}">
+<label class="form-label small fw-semibold mt-2">Hoặc tải ảnh từ máy</label><input type="file" name="imageFile" class="form-control" accept="image/jpeg,image/png,image/webp,image/gif"><small class="text-muted">Tối đa 10 MB. Ảnh chọn từ máy được ưu tiên hơn URL.</small>
                                                         </div>
                                                         <div class="mb-3">
                                                             <label class="form-label small fw-semibold">Mô tả ý nghĩa hoa:</label>
@@ -261,7 +262,7 @@
 <div class="modal fade" id="addProductModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
-            <form th:action="@{/manager/products/add}" method="post">
+            <form th:action="@{/manager/products/add}" method="post" enctype="multipart/form-data">
                 <div class="modal-header">
                     <h5 class="modal-title font-serif">🌸 Thêm Mẫu Hoa Tươi Mới</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -294,6 +295,7 @@
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold">Link ảnh mẫu hoa (URL):</label>
                             <input type="url" name="imageUrl" class="form-control" placeholder="https://images.unsplash.com/...">
+<label class="form-label small fw-semibold mt-2">Hoặc tải ảnh từ máy</label><input type="file" name="imageFile" class="form-control" accept="image/jpeg,image/png,image/webp,image/gif"><small class="text-muted">Tối đa 10 MB. Ảnh chọn từ máy được ưu tiên hơn URL.</small>
                         </div>
                         <div class="col-12">
                             <label class="form-label small fw-semibold">Mô tả chi tiết & Thông điệp hoa:</label>

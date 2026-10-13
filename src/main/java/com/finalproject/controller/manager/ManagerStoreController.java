@@ -23,6 +23,7 @@ public class ManagerStoreController {
     private final com.finalproject.service.StoreAccessService storeAccess;
     private final com.finalproject.repository.CommissionRepository commissionRepository;
     private final com.finalproject.repository.StoreLevelRepository storeLevelRepository;
+    private final com.finalproject.service.ManagedImageUploadService imageUploads;
 
     @GetMapping
     public String listStores(@RequestParam(value = "page", defaultValue = "0") int page,
@@ -80,9 +81,13 @@ public class ManagerStoreController {
     }
 
     @PostMapping("/create")
+    @org.springframework.transaction.annotation.Transactional(rollbackFor = Exception.class)
     public String createStore(Principal principal,
                               @ModelAttribute("store") Store store,
                               @RequestParam(value = "commissionId", required = false) Long commissionId,
+                              @RequestParam(value = "avatarFile", required = false) org.springframework.web.multipart.MultipartFile avatarFile,
+                              @RequestParam(value = "coverFile", required = false) org.springframework.web.multipart.MultipartFile coverFile,
+                              @RequestParam(value = "featuredFiles", required = false) List<org.springframework.web.multipart.MultipartFile> featuredFiles,
                               RedirectAttributes ra) {
         try {
             User user = userRepository.findByUsername(principal.getName()).orElseThrow();
@@ -157,6 +162,9 @@ public class ManagerStoreController {
                 store.setIsOpen(true);
             }
             store.setRating(0.0); // Khởi tạo 0.0 (chưa có đánh giá thực tế)
+            store.setAvatarPublicId(null);
+            store.setCoverPublicId(null);
+            applyImages(store, store, avatarFile, coverFile, featuredFiles);
             Store savedStore = storeRepository.save(store);
 
             // Gán cửa hàng làm việc hiện tại cho user sang cửa hàng vừa tạo
@@ -170,6 +178,7 @@ public class ManagerStoreController {
             // Bước 10 của UC_017: Cửa hàng mới được tạo, chuyển đến trang Dashboard cửa hàng
             return "redirect:/manager/dashboard";
         } catch (Exception ex) {
+            org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             ra.addFlashAttribute("errorMessage", "Tạo cửa hàng thất bại: " + ex.getMessage());
             return "redirect:/manager/stores/create";
         }
@@ -184,9 +193,13 @@ public class ManagerStoreController {
     }
 
     @PostMapping("/edit/{id}")
+    @org.springframework.transaction.annotation.Transactional(rollbackFor = Exception.class)
     public String updateStore(@PathVariable("id") Long id,
                               @ModelAttribute("store") Store formStore,
-                              RedirectAttributes ra) {
+                              @RequestParam(value = "avatarFile", required = false) org.springframework.web.multipart.MultipartFile avatarFile,
+                              @RequestParam(value = "coverFile", required = false) org.springframework.web.multipart.MultipartFile coverFile,
+                              @RequestParam(value = "featuredFiles", required = false) List<org.springframework.web.multipart.MultipartFile> featuredFiles,
+                              RedirectAttributes ra) throws java.io.IOException {
         Store store = storeRepository.findById(id).orElseThrow();
         storeAccess.requireManager(store);
 
@@ -217,13 +230,43 @@ public class ManagerStoreController {
         store.setPhone(cleanPhone);
         store.setAddress(address);
         store.setBio(formStore.getBio() != null ? formStore.getBio().trim() : null);
-        store.setAvatar(formStore.getAvatar());
-        store.setCover(formStore.getCover());
-        store.setFeaturedImages(formStore.getFeaturedImages());
+        applyImages(store, formStore, avatarFile, coverFile, featuredFiles);
         store.setIsOpen(formStore.getIsOpen());
 
         storeRepository.save(store);
         ra.addFlashAttribute("successMessage", "Cập nhật thông tin cửa hàng thành công!");
         return "redirect:/manager/stores";
+    }
+
+    private void applyImages(Store store, Store form,
+                             org.springframework.web.multipart.MultipartFile avatarFile,
+                             org.springframework.web.multipart.MultipartFile coverFile,
+                             List<org.springframework.web.multipart.MultipartFile> featuredFiles) throws java.io.IOException {
+        var avatar = imageUploads.upload(avatarFile, "rental_shop_stores/avatars");
+        var cover = imageUploads.upload(coverFile, "rental_shop_stores/covers");
+        List<String> featured = new java.util.ArrayList<>();
+        if (form.getFeaturedImages() != null && !form.getFeaturedImages().isBlank()) {
+            featured.addAll(java.util.Arrays.stream(form.getFeaturedImages().split("[,\\r\\n]+"))
+                    .map(String::trim).filter(s -> !s.isEmpty()).toList());
+        }
+        if (featuredFiles != null) {
+            for (var file : featuredFiles) {
+                var uploaded = imageUploads.upload(file, "rental_shop_stores/featured");
+                if (uploaded != null) featured.add(uploaded.secureUrl());
+            }
+        }
+        String avatarUrl = avatar != null ? avatar.secureUrl() : form.getAvatar();
+        String coverUrl = cover != null ? cover.secureUrl() : form.getCover();
+        if (avatar != null || !java.util.Objects.equals(avatarUrl, store.getAvatar())) {
+            imageUploads.deleteAfterCommit(store.getAvatarPublicId());
+            store.setAvatarPublicId(avatar != null ? avatar.publicId() : null);
+        }
+        if (cover != null || !java.util.Objects.equals(coverUrl, store.getCover())) {
+            imageUploads.deleteAfterCommit(store.getCoverPublicId());
+            store.setCoverPublicId(cover != null ? cover.publicId() : null);
+        }
+        store.setAvatar(avatarUrl);
+        store.setCover(coverUrl);
+        store.setFeaturedImages(String.join(",", featured));
     }
 }

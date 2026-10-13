@@ -82,6 +82,7 @@ public class ProductDetailController {
                                @RequestParam("content") String content,
                                @RequestParam(value = "orderId", required = false) Long orderId,
                                @RequestParam(value = "imageUrl", required = false) String imageUrl,
+                               @RequestParam(value = "imageFile", required = false) org.springframework.web.multipart.MultipartFile imageFile,
                                Principal principal,
                                RedirectAttributes ra) {
         if (principal == null) {
@@ -106,7 +107,7 @@ public class ProductDetailController {
         }
 
         try {
-            reviewService.addReview(user.getId(), id, orderId, rating, content, imageUrl);
+            reviewService.addReview(user.getId(), id, orderId, rating, content, imageUrl, imageFile);
             ra.addFlashAttribute("successMessage", "Đánh giá, phản hồi thành công! Cảm ơn bạn đã đóng góp ý kiến.");
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());

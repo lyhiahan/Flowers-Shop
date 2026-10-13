@@ -37,6 +37,9 @@ public class Review {
     @Column(name = "image_url", length = 500)
     private String imageUrl;
 
+    @Column(name = "image_public_id", length = 255)
+    private String imagePublicId;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
