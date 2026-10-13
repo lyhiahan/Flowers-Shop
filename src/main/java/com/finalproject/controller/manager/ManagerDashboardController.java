@@ -15,6 +15,17 @@ public class ManagerDashboardController {
     private final StoreRepository stores;
     private final AnalyticsService analytics;
     private final java.time.Clock clock;
+
+    @GetMapping("/dashboard/stock")
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<java.util.Map<String, Long>> stock(
+            @RequestParam(value="storeId", required=false) Long storeId) {
+        var store = storeId == null ? storeAccess.selectedStore() : stores.findById(storeId).orElseThrow();
+        if (store == null) throw new org.springframework.security.access.AccessDeniedException("Chưa chọn chi nhánh.");
+        storeAccess.requireManager(store);
+        return org.springframework.http.ResponseEntity.ok().cacheControl(org.springframework.http.CacheControl.noStore())
+                .body(java.util.Map.of("currentStockQuantity", analytics.currentStockQuantity(store.getId())));
+    }
     @GetMapping({"", "/dashboard"})
     public String showManagerDashboard(@RequestParam(value="storeId", required=false) Long storeId,
             @RequestParam(value="timeRange", required=false) String timeRange,

@@ -33,7 +33,7 @@
         </div>
 
         <div th:unless="${dataLoadError}">
-            <!-- 5 Thẻ KPI Thống kê cốt lõi -->
+            <!-- Chỉ số trong kỳ và tồn kho hiện tại (không phụ thuộc bộ lọc ngày). -->
             <div class="row g-3 mb-4">
                 <div id="kpi-total-users" class="col-12 col-sm-6 col-xl">
                     <div class="kpi-card-admin">
@@ -79,8 +79,20 @@
                         </div>
                         <div>
                             <strong id="totalProductsCount" class="fs-3 fw-bold text-dark d-block" th:text="${totalProductsCount}">0</strong>
-                            <span class="small text-muted">Trong khoảng đã chọn</span>
+                            <span class="small text-muted">Số mẫu mới, không phải số lượng tồn kho</span>
                         </div>
+                    </div>
+                </div>
+
+                <div id="kpi-current-stock" class="col-12 col-sm-6 col-xl">
+                    <div class="kpi-card-admin" data-stock-kpi th:data-stock-endpoint="@{/admin/dashboard/stock}">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small fw-bold text-muted">Tồn kho còn lại toàn chuỗi</span>
+                            <div class="rounded-3 p-2" style="background:#E5EEE8;color:#20382E"><i class="bi bi-box-seam"></i></div>
+                        </div>
+                        <strong id="currentStockQuantity" data-stock-value class="fs-3 fw-bold text-dark d-block" th:text="${currentStockQuantity}">0</strong>
+                        <span class="small text-muted">Đã trừ đơn đặt thành công kể cả COD. Tự cập nhật mỗi 5 giây, không phụ thuộc kỳ báo cáo.</span>
+                        <small data-stock-status class="d-block text-warning mt-1" role="status" hidden></small>
                     </div>
                 </div>
 
@@ -392,6 +404,7 @@ drawStoreChart('adminStoresChart', storesData, /*[[${storeChartType}]]*/ 'bar', 
 </script>
 
 <th:block th:replace="~{fragments/admin-layout :: footer}"></th:block>
+<script th:src="@{/js/stock-kpi.js}"></script>
 <th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
 </body>
 </html>

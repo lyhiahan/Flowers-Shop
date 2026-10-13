@@ -4,9 +4,17 @@ Website bán hoa theo mô hình nhiều chi nhánh. Khách hàng xem sản phẩ
 
 Khách được hủy đơn ở trạng thái chờ xác nhận, đã xác nhận hoặc đang chuẩn bị, không giới hạn một giờ kể từ lúc đặt. Khi đơn bắt đầu giao hoặc đã kết thúc thì không được hủy. Hủy đơn chưa thanh toán trả tồn kho và chuyển sang đã hủy; đơn đã thanh toán chuyển sang chờ cửa hàng hoàn tiền, không tự ghi nhận tiền đã được hoàn.
 
+Đơn đặt thành công trừ tồn kho ngay tại chi nhánh xử lý, kể cả thanh toán khi nhận hàng (COD); không chờ xác nhận, thu tiền hoặc bắt đầu giao mới trừ. Đặt thất bại rollback tồn kho; hủy trước khi giao hoàn kho đúng một lần. Dashboard quản lý/admin có KPI **Tồn kho còn lại** tự cập nhật mỗi 5 giây, độc lập bộ lọc ngày. Đây là tổng số lượng `store_inventories.quantity` của sản phẩm chưa xóa (bao gồm sản phẩm tạm ngừng bán/cửa hàng tạm đóng), không phải số mẫu sản phẩm mới hay số đơn đã thu tiền. Doanh thu COD chỉ được ghi nhận khi đủ điều kiện thanh toán/hoàn tất.
+
 Trang chủ hiển thị số lượng còn lại ở cả hoa bán chạy và danh sách sản phẩm. Số lượng chỉ tính tại chi nhánh hoạt động và mở cửa, hoặc riêng chi nhánh đang lọc. Hết hàng có nhãn rõ ràng và khóa nút thêm vào giỏ; sản phẩm chung toàn chuỗi được chọn chi nhánh có tồn kho thay vì dùng ID cố định.
 
+Sản phẩm riêng của chi nhánh (`product.store` có giá trị) chỉ được đặt và trừ kho ở chi nhánh đó, thống nhất với số lượng trên trang chủ. Giỏ hàng, kiểm tra nhận tại cửa hàng, báo giá và checkout đều kiểm tra quy tắc này; giao tận nơi không chọn kho chi nhánh khác chỉ vì gần địa chỉ hơn. Sản phẩm chung toàn chuỗi (`product.store` rỗng) vẫn được chọn chi nhánh đang mở có đủ hàng. Đơn cũ giữ nguyên chi nhánh đã ghi nhận; khi hủy trước giao, hoàn kho về chính chi nhánh trên đơn.
+
+KPI **Sản phẩm còn hàng** trên trang khách hàng và nhãn tồn kho trên từng thẻ tự cập nhật mỗi 5 giây, khi quay lại tab hoặc trang được khôi phục bằng nút Back. Đơn thành công (kể cả COD) làm giảm số lượng; hủy trước giao hoàn kho và số hiển thị tăng lại. Khi hết hàng nút mua bị khóa; nếu nhập/hoàn kho, nút và chi nhánh còn hàng được cập nhật lại. API công khai chỉ trả số lượng hàng được phép bán, không lấy sản phẩm chưa duyệt/đã xóa/ngừng bán hay kho chi nhánh đóng cửa. Số **mẫu hoa** trong kết quả tìm kiếm/phân trang là chỉ số khác, không giảm khi đặt một vài đơn vị của cùng mẫu.
+
 Stack: Java 21, Spring Boot 4.1.1, Thymeleaf, Bootstrap 5.3.3, JPA/Hibernate, SQL Server, WebSocket/STOMP, JWT và Cloudinary. SQL Server là lựa chọn trong yêu cầu SQLServer/MySQL/PostgreSQL; không cần dùng đồng thời cả ba.
+
+Đăng nhập thất bại giữ đúng email/tên đăng nhập vừa nhập trong phiên trình duyệt, kể cả khi tải lại trang lỗi; không đổi thành tài khoản demo hoặc tài khoản trình duyệt đã lưu. Mật khẩu không được website lưu/điền lại. Khi đăng nhập thành công, đăng xuất hoặc mở trang đăng nhập mới không có lỗi, thông tin lần thử trước được xóa. Trang lỗi phục hồi giá trị đã gửi trước khi người dùng tương tác, không ghi đè khi họ đang sửa hoặc chọn tài khoản demo; giá trị hiển thị được escape để tránh XSS và không đưa vào URL chuyển hướng.
 
 ## Báo cáo theo khoảng ngày
 

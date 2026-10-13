@@ -61,6 +61,29 @@ class SystemHttpSmokeTests {
         return HttpClient.newBuilder().cookieHandler(new CookieManager(null, CookiePolicy.ACCEPT_ALL))
                 .connectTimeout(Duration.ofSeconds(5)).build();
     }
+
+    @Test void failedLoginRetainsSubmittedEmailThroughRealRedirectAndSessionCookie() throws Exception {
+        var browser = client();
+        String login = get(browser, "/login").body();
+        var csrf = Pattern.compile("<input(?=[^>]*name=\"_csrf\")(?=[^>]*value=\"([^\"]+)\")[^>]*>").matcher(login);
+        assertThat(csrf.find()).isTrue();
+        String attempted = "smoke_user@http.test";
+        String wrongPassword = "wrong-smoke-login-password";
+        String body = "username=" + URLEncoder.encode(attempted, StandardCharsets.UTF_8)
+                + "&password=" + URLEncoder.encode(wrongPassword, StandardCharsets.UTF_8)
+                + "&_csrf=" + URLEncoder.encode(csrf.group(1), StandardCharsets.UTF_8);
+        var response = browser.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/perform_login"))
+                .timeout(Duration.ofSeconds(15)).header("Content-Type", "application/x-www-form-urlencoded")
+                .POST(HttpRequest.BodyPublishers.ofString(body)).build(), HttpResponse.BodyHandlers.ofString());
+        assertThat(response.statusCode()).isEqualTo(302);
+        assertThat(response.headers().firstValue("location").orElse("")).endsWith("/login?error=true").doesNotContain(attempted);
+        var retry = get(browser, "/login?error=true");
+        assertThat(retry.statusCode()).isEqualTo(200);
+        assertThat(retry.body()).contains("value=\"" + attempted + "\"", "data-login-failed=\"true\"")
+                .doesNotContain(wrongPassword, "value=\"lygiahan\"");
+        assertThat(get(browser, "/login?error=true").body()).contains("value=\"" + attempted + "\"");
+        assertThat(get(client(), "/login?error=true").body()).doesNotContain("value=\"" + attempted + "\"");
+    }
     private HttpResponse<String> get(HttpClient client, String path) throws Exception {
         return client.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
                 .timeout(Duration.ofSeconds(15)).GET().build(), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));

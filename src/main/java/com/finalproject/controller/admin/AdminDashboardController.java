@@ -27,6 +27,13 @@ public class AdminDashboardController {
     private final AnalyticsService analyticsService;
     private final Clock clock;
 
+    @GetMapping("/dashboard/stock")
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<Map<String, Long>> stock() {
+        return org.springframework.http.ResponseEntity.ok().cacheControl(org.springframework.http.CacheControl.noStore())
+                .body(Map.of("currentStockQuantity", analyticsService.currentStockQuantity(null)));
+    }
+
     @GetMapping({"", "/dashboard"})
     public String showDashboard(
             @RequestParam(value = "timeframe", required = false) String timeframe,

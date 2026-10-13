@@ -18,6 +18,17 @@ public class CatalogStockService {
     public Map<Long, Stock> summarize(Collection<Product> products, Long storeId) {
         List<Long> ids = products.stream().filter(Objects::nonNull).map(Product::getId)
                 .filter(Objects::nonNull).distinct().toList();
+        return summarizeIds(ids, storeId);
+    }
+
+    @Transactional(readOnly = true)
+    public long availableQuantity(Long storeId) {
+        return inventories.sumCatalogQuantity(storeId);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, Stock> summarizeIds(Collection<Long> productIds, Long storeId) {
+        List<Long> ids = productIds.stream().filter(Objects::nonNull).distinct().toList();
         if (ids.isEmpty()) return Map.of();
         Map<Long, Stock> result = new LinkedHashMap<>();
         ids.forEach(id -> result.put(id, new Stock(0, null)));

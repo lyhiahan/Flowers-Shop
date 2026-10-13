@@ -27,6 +27,7 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final CustomAuthenticationSuccessHandler successHandler;
+    private final CustomAuthenticationFailureHandler failureHandler;
     private final com.finalproject.repository.UserRepository userRepository;
 
     @Bean
@@ -122,7 +123,7 @@ public class SecurityConfig {
                 .loginPage("/login")
                 .loginProcessingUrl("/perform_login")
                 .successHandler(successHandler)
-                .failureUrl("/login?error=true")
+                .failureHandler(failureHandler)
                 .permitAll()
             )
             .logout(logout -> logout

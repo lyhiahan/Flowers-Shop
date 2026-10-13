@@ -40,6 +40,9 @@ public class PickupCheckController {
                 throw new AccessDeniedException("Bạn không có quyền truy cập giỏ hàng này.");
             if (item.getQuantity() == null || item.getQuantity() <= 0 || !ProductAvailability.isPublic(item.getProduct()))
                 return invalid("Sản phẩm không còn khả dụng.");
+            if (!ProductAvailability.supportsBranch(item.getProduct(), store))
+                return invalid("Mẫu hoa '" + item.getProduct().getName() + "' chỉ bán tại chi nhánh "
+                        + item.getProduct().getStore().getName() + ". Vui lòng chọn đúng chi nhánh nhận hàng.");
             selected.add(item);
             neededByProduct.merge(item.getProduct().getId(), item.getQuantity().longValue(), Long::sum);
         }

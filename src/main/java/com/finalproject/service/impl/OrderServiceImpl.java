@@ -136,6 +136,7 @@ public class OrderServiceImpl implements OrderService {
         if (!Boolean.TRUE.equals(assignedStore.getStatus()) || !Boolean.TRUE.equals(assignedStore.getIsOpen())) {
             throw new IllegalStateException("Chi nhánh hiện không nhận đơn.");
         }
+        requireFulfillmentBranch(items, assignedStore);
         BigDecimal totalAmount = BigDecimal.ZERO;
         BigDecimal totalImportPrice = BigDecimal.ZERO;
         List<OrderDetail> orderDetails = new ArrayList<>();
@@ -321,6 +322,7 @@ public class OrderServiceImpl implements OrderService {
         if (!Boolean.TRUE.equals(store.getStatus()) || !Boolean.TRUE.equals(store.getIsOpen())) {
             throw new IllegalStateException("Chi nhánh hiện không nhận đơn.");
         }
+        requireFulfillmentBranch(items, store);
         BigDecimal subtotal = BigDecimal.ZERO;
         BigDecimal importTotal = BigDecimal.ZERO;
         Map<Long, Long> required = new HashMap<>();
@@ -407,6 +409,7 @@ public class OrderServiceImpl implements OrderService {
         for (Store candidate : storeRepository.findByStatusTrue()) candidates.putIfAbsent(candidate.getId(), candidate);
         boolean closedStoreHasStock = false;
         for (Store candidate : candidates.values()) {
+            if (!items.stream().allMatch(item -> com.finalproject.service.ProductAvailability.supportsBranch(item.getProduct(), candidate))) continue;
             boolean enough = demand.entrySet().stream().allMatch(entry ->
                     storeInventoryRepository.findByStoreIdAndProductId(candidate.getId(), entry.getKey())
                             .map(stock -> stock.getQuantity() != null && stock.getQuantity() >= entry.getValue()).orElse(false));
@@ -418,6 +421,16 @@ public class OrderServiceImpl implements OrderService {
         }
         if (closedStoreHasStock) throw new IllegalStateException("Chi nhánh có đủ hàng hiện không nhận đơn. Vui lòng thử lại khi chi nhánh mở cửa.");
         throw new IllegalStateException("Các chi nhánh đang mở không có hàng hoặc không đủ tồn kho cho mẫu hoa đã chọn. Vui lòng giảm số lượng hoặc chọn mẫu khác.");
+    }
+
+    private void requireFulfillmentBranch(List<CartItem> items, Store store) {
+        for (CartItem item : items) {
+            Product product = item.getProduct();
+            if (!com.finalproject.service.ProductAvailability.supportsBranch(product, store)) {
+                throw new IllegalStateException("Mẫu hoa '" + product.getName() + "' chỉ bán tại chi nhánh "
+                        + product.getStore().getName() + ". Vui lòng chọn đúng chi nhánh nhận hàng.");
+            }
+        }
     }
 
     private void requireActiveCustomer(User user) {

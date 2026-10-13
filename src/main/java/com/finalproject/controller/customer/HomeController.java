@@ -230,6 +230,7 @@ public class HomeController {
             List<Product> stockProducts = new ArrayList<>(productPage.getContent());
             if (guestFeatured != null) stockProducts.addAll(guestFeatured);
             model.addAttribute("catalogStock", catalogStockService.summarize(stockProducts, storeId));
+            model.addAttribute("customerStockQuantity", catalogStockService.availableQuantity(storeId));
             model.addAttribute("productPage", productPage);
             model.addAttribute("products", productPage.getContent());
             model.addAttribute("currentPage", page);

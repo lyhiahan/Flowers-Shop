@@ -365,7 +365,9 @@ class StoreUseCaseAuditTests {
         inventory.save(StoreInventory.builder().store(store).product(p).quantity(5).build());
         inventory.save(StoreInventory.builder().store(foreignStore).product(p).quantity(5).build());
         var request = new com.finalproject.dto.request.AddToCartRequest(); request.setProductId(p.getId());
-        request.setStoreId(foreignStore.getId());
+        // A branch-owned SKU must first be added through its selling branch.
+        // The foreign inventory remains to verify banning the owner cannot be bypassed.
+        request.setStoreId(store.getId());
         cartService.addToCart(owner.getUsername(), request);
         store.setStatus(false); stores.saveAndFlush(store);
         mvc.perform(get("/products/" + p.getId())).andExpect(status().isNotFound());

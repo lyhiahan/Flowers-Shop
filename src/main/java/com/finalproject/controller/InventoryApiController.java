@@ -18,14 +18,13 @@ public class InventoryApiController {
 
     private final StoreInventoryRepository storeInventoryRepository;
     private final StoreRepository storeRepository;
+    private final com.finalproject.service.CatalogStockService catalogStock;
 
     @GetMapping("/check")
     public InventoryCheckResponse checkStock(@RequestParam("productId") Long productId,
                                              @RequestParam("storeId") Long storeId) {
         Store currentStore = storeRepository.findById(storeId).orElse(null);
-        StoreInventory inventory = storeInventoryRepository.findByStoreIdAndProductId(storeId, productId).orElse(null);
-
-        int stock = (inventory != null) ? inventory.getQuantity() : 0;
+        int stock = Math.toIntExact(catalogStock.summarizeIds(List.of(productId), storeId).get(productId).quantity());
 
         if (stock > 0) {
             return InventoryCheckResponse.builder()
@@ -64,8 +63,10 @@ public class InventoryApiController {
             }
         }
 
+        if (nearestInv == null && !alternatives.isEmpty()) nearestInv = alternatives.getFirst();
         if (nearestInv != null) {
-            String suggestion = "Chi nhánh " + nearestInv.getStore().getName() + " (cách " + minDistance + "km) vẫn còn " +
+            String distanceText = minDistance == Double.MAX_VALUE ? "" : " (cách " + minDistance + "km)";
+            String suggestion = "Chi nhánh " + nearestInv.getStore().getName() + distanceText + " vẫn còn " +
                                 nearestInv.getQuantity() + " sản phẩm. Bạn có muốn đổi sang chi nhánh này?";
             return InventoryCheckResponse.builder()
                     .available(false)

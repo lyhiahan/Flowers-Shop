@@ -952,6 +952,8 @@ class BusinessRegressionTests {
     }
 
     @Test void deliveryFallsBackToAStoreWithStockAndQuoteMatchesCheckout() {
+        // Cross-branch fallback is valid only for a chain-wide product, not a branch-owned SKU.
+        product.setStore(null); products.saveAndFlush(product);
         inventory.deleteAll();
         inventory.saveAndFlush(StoreInventory.builder().store(otherStore).product(product).quantity(5).build());
         CheckoutQuote quote = orderService.quote(customer.getUsername(), List.of(item.getId()), "Quận 1", null, "DELIVERY", null, null);

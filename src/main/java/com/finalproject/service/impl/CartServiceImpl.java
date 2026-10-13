@@ -82,6 +82,8 @@ public class CartServiceImpl implements CartService {
                 .orElseThrow(() -> new ResourceNotFoundException("Chi nhánh không tồn tại"));
 
         if (!Boolean.TRUE.equals(store.getStatus()) || !Boolean.TRUE.equals(store.getIsOpen())) throw new IllegalStateException("Chi nhánh hiện không nhận đơn.");
+        if (!com.finalproject.service.ProductAvailability.supportsBranch(product, store))
+            throw new IllegalStateException("Mẫu hoa này chỉ bán tại chi nhánh " + product.getStore().getName() + ". Vui lòng chọn đúng chi nhánh.");
         // --- Ưu tiên 3: Lấy tồn kho một lần ---
         StoreInventory inventory = storeInventoryRepository.findByStoreIdAndProductId(store.getId(), product.getId())
                 .orElse(null);
@@ -196,6 +198,8 @@ public class CartServiceImpl implements CartService {
         cartItemRepository.flush();
     }
     private void requireAvailableStock(Cart cart, Product product, Store store, Long excludedItemId, int quantity) {
+        if (!com.finalproject.service.ProductAvailability.supportsBranch(product, store))
+            throw new IllegalStateException("Chi nhánh trong giỏ không bán mẫu hoa này. Vui lòng xóa mục cũ và thêm lại từ trang sản phẩm.");
         int available = storeInventoryRepository.findByStoreIdAndProductId(store.getId(), product.getId())
                 .map(stock -> Math.max(0, stock.getQuantity())).orElse(0);
         long requested = quantity;

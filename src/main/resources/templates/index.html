@@ -1758,7 +1758,7 @@
 
             <!-- Lưới sản phẩm: 4 sản phẩm mỗi hàng trên máy tính, 2 trên điện thoại, khoảng cách 24px (g-4) -->
             <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
-                <div class="col" th:each="fp : ${guestFeaturedProducts}"
+                <div class="col" th:each="fp : ${guestFeaturedProducts}" th:data-catalog-product-id="${fp.id}"
                      th:with="stock=${catalogStock[fp.id]}, remaining=${stock != null ? stock.quantity : 0}">
                     <a th:href="@{/product/{id}(id=${fp.id})}" class="text-decoration-none">
                         <div class="card flower-card h-100">
@@ -1790,6 +1790,22 @@
 
         <!-- MỤC 2: TABS TOP 20 & BỘ LỌC TÌM KIẾM, DANH MỤC, PHÂN TRANG CHO KHÁCH HÀNG -->
         <div id="product-catalog" class="card filter-card p-4 mb-4" style="scroll-margin-top: 85px;">
+
+            <div th:if="${loadError == null}" id="customer-stock-kpi" data-stock-kpi data-stock-catalog="true"
+                 th:data-stock-endpoint="@{/api/public/catalog-stock(storeId=${storeId})}"
+                 class="rounded-4 border p-3 mb-3" style="background:var(--flower-sub-bg)">
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <i class="bi bi-box-seam fs-3" style="color:var(--flower-primary)" aria-hidden="true"></i>
+                    <div>
+                        <div class="fw-bold" th:text="${storeId == null ? 'Sản phẩm còn hàng toàn chuỗi' : 'Sản phẩm còn hàng tại chi nhánh đang chọn'}"></div>
+                        <strong id="customerStockQuantity" data-stock-value class="fs-4" style="color:var(--flower-primary)"
+                                th:text="${#numbers.formatInteger(customerStockQuantity, 1, 'POINT')}">0</strong>
+                        <span> sản phẩm còn có thể đặt</span>
+                    </div>
+                </div>
+                <div class="small text-muted mt-1">Đã trừ số lượng trong đơn đặt thành công, kể cả COD. Tự cập nhật mỗi 5 giây; không chỉ tính các mẫu đang hiển thị.</div>
+                <small data-stock-status class="text-warning" role="status" hidden></small>
+            </div>
 
             <!-- Breadcrumb điều hướng quay lại danh mục cha / trang chủ (Rubric 3-5c) -->
             <nav aria-label="breadcrumb" class="mb-3" th:if="${selectedCategory != null or (keyword != null and !keyword.isEmpty())}">
@@ -1867,10 +1883,10 @@
                     <!-- Số lượng hiển thị: Tìm thấy 14 sản phẩm · Hiển thị 1–8 · Trang 1/2 -->
                     <div class="text-secondary small fw-medium" id="catalogProductCount">
                         <th:block th:if="${totalItems != null and totalItems > 0}">
-                            Tìm thấy <strong style="color: var(--flower-accent); font-size: 15px;" th:text="${totalItems}">14</strong> sản phẩm &middot; Hiển thị <span th:text="${startIndex} + '–' + ${endIndex}">1–8</span> &middot; Trang <span th:text="${currentPage} + '/' + ${totalPages}">1/2</span>
+                            Tìm thấy <strong style="color: var(--flower-accent); font-size: 15px;" th:text="${totalItems}">14</strong> mẫu hoa &middot; Hiển thị <span th:text="${startIndex} + '–' + ${endIndex}">1–8</span> &middot; Trang <span th:text="${currentPage} + '/' + ${totalPages}">1/2</span>
                         </th:block>
                         <th:block th:if="${totalItems == null or totalItems == 0}">
-                            Tìm thấy <strong style="color: var(--flower-accent); font-size: 15px;">0</strong> sản phẩm
+                            Tìm thấy <strong style="color: var(--flower-accent); font-size: 15px;">0</strong> mẫu hoa
                         </th:block>
                     </div>
                 </div>
@@ -2079,7 +2095,7 @@
 
         <!-- LƯỚI SẢN PHẨM ĐỒNG NHẤT (Quy chuẩn 1 & 5: 2 hàng × 4 cột máy tính, tối đa 8 sản phẩm/trang) -->
         <div th:if="${not #lists.isEmpty(products)}" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="productGrid">
-            <div class="col" th:each="p : ${products}"
+            <div class="col" th:each="p : ${products}" th:data-catalog-product-id="${p.id}"
                  th:with="stock=${catalogStock[p.id]}, remaining=${stock != null ? stock.quantity : 0}">
                 <div class="flower-card h-100 position-relative">
                     <!-- Nút theo dõi / Yêu thích nhanh 36x36px ở góc trên bên phải -->
@@ -3187,6 +3203,7 @@
                         btn.style.background = '#2ecc71';
                         setTimeout(function () {
                             btn.innerHTML = orig;
+                            if (form.dataset.stockAvailable === 'false') btn.innerHTML = '<i class="bi bi-x-circle"></i><span>Hết hàng</span>';
                             btn.style.background = '';
                         }, 800);
                     }
@@ -3199,7 +3216,7 @@
             })
             .finally(function () {
                 delete form.dataset.pending;
-                if (btn) btn.disabled = false;
+                if (btn) btn.disabled = form.dataset.stockAvailable === 'false';
             });
         });
     })();
@@ -3207,6 +3224,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <script th:src="@{/js/notifications-realtime.js}"></script>
+    <script th:src="@{/js/stock-kpi.js}"></script>
 <th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
 </body>
 

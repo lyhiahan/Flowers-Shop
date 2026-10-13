@@ -97,7 +97,8 @@ public class CheckoutController {
         model.addAttribute("customer", customer);
         model.addAttribute("addresses", customer != null ? userService.getUserAddresses(customer.getId()) : List.of());
         model.addAttribute("vouchers", voucherService.getAvailableVouchers(null));
-        model.addAttribute("stores", storeRepository.findByStatusTrue().stream().filter(store -> Boolean.TRUE.equals(store.getIsOpen())).toList());
+        model.addAttribute("stores", storeRepository.findByStatusTrue().stream().filter(store -> Boolean.TRUE.equals(store.getIsOpen()))
+                .filter(store -> checkoutItems.stream().allMatch(item -> com.finalproject.service.ProductAvailability.supportsBranch(item.getProduct(), store))).toList());
         model.addAttribute("deliveries", deliveryRepository.findAll().stream()
                 .filter(d -> Boolean.TRUE.equals(d.getIsActive()) && !Boolean.TRUE.equals(d.getIsDeleted())).toList());
         model.addAttribute("checkoutItems", checkoutItems);

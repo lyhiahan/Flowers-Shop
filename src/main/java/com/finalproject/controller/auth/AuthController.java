@@ -20,7 +20,19 @@ public class AuthController {
     public String showLoginForm(@RequestParam(value = "error", required = false) String error,
                                 @RequestParam(value = "logout", required = false) String logout,
                                 @RequestParam(value = "activated", required = false) String activated,
-                                Model model) {
+                                Model model, jakarta.servlet.http.HttpServletRequest request) {
+        var session = request.getSession(false);
+        String identifier = "";
+        if (session != null) {
+            if (error != null && session.getAttribute(com.finalproject.config.CustomAuthenticationFailureHandler.ATTEMPTED_USERNAME) instanceof String attempted) {
+                identifier = attempted;
+            } else if (error == null) {
+                session.removeAttribute(com.finalproject.config.CustomAuthenticationFailureHandler.ATTEMPTED_USERNAME);
+                session.removeAttribute(org.springframework.security.web.WebAttributes.AUTHENTICATION_EXCEPTION);
+            }
+        }
+        model.addAttribute("loginUsername", identifier);
+        model.addAttribute("loginFailed", error != null);
         if (error != null) {
             model.addAttribute("errorMessage", "Đăng nhập thất bại: Email, tên đăng nhập hoặc mật khẩu không chính xác!");
         }

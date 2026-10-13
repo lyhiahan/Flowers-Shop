@@ -40,7 +40,7 @@ public class CartController {
                 itemsByStore.computeIfAbsent(store, k -> new java.util.ArrayList<>()).add(item);
 
                 int stock = 0;
-                if (store != null && item.getProduct() != null) {
+                if (com.finalproject.service.ProductAvailability.supportsBranch(item.getProduct(), store)) {
                     stock = storeInventoryRepository.findByStoreIdAndProductId(store.getId(), item.getProduct().getId())
                             .map(com.finalproject.entity.StoreInventory::getQuantity)
                             .orElse(0);
@@ -144,7 +144,7 @@ public class CartController {
             for (com.finalproject.entity.CartItem it : cart.getItems()) {
                 int q = it.getQuantity() != null ? it.getQuantity() : 0;
                 totalQty += q;
-                int stock = (it.getStore() != null && it.getProduct() != null)
+                int stock = com.finalproject.service.ProductAvailability.supportsBranch(it.getProduct(), it.getStore())
                         ? storeInventoryRepository.findByStoreIdAndProductId(it.getStore().getId(), it.getProduct().getId())
                                 .map(com.finalproject.entity.StoreInventory::getQuantity).orElse(0)
                         : 0;

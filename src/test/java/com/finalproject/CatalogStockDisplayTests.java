@@ -114,4 +114,67 @@ class CatalogStockDisplayTests {
         }
         throw new AssertionError("Missing cart form for product " + productId);
     }
+
+    @Test void customerKpiAndPublicSnapshotCountOnlyStockActuallyAvailableToCustomers() throws Exception {
+        mvc.perform(get("/")).andExpect(status().isOk()).andExpect(model().attribute("customerStockQuantity", 24L))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"customer-stock-kpi\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-stock-catalog=\"true\"")));
+        mvc.perform(get("/api/public/catalog-stock").param("productIds", available.getId() + "," + global.getId() + "," + soldOut.getId()))
+                .andExpect(status().isOk()).andExpect(header().string("Cache-Control", "no-store"))
+                .andExpect(jsonPath("$.currentStockQuantity").value(24))
+                .andExpect(jsonPath("$.products['" + available.getId() + "'].quantity").value(17))
+                .andExpect(jsonPath("$.products['" + global.getId() + "'].quantity").value(7))
+                .andExpect(jsonPath("$.products['" + soldOut.getId() + "'].quantity").value(0));
+    }
+
+    @Test void publicStockDoesNotExposePendingDeletedOrStoppedProducts() throws Exception {
+        Product pending = product("Private pending bouquet", first); pending.setIsActive(false); products.save(pending); stock(pending, first, 500);
+        Product deleted = product("Deleted bouquet", first); deleted.setIsDeleted(true); products.save(deleted); stock(deleted, first, 600);
+        Product stopped = product("Stopped bouquet", first); stopped.setIsSelling(false); products.save(stopped); stock(stopped, first, 700);
+        inventories.flush();
+        mvc.perform(get("/api/public/catalog-stock").param("productIds", pending.getId() + "," + deleted.getId() + "," + stopped.getId()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.currentStockQuantity").value(24))
+                .andExpect(jsonPath("$.products['" + pending.getId() + "'].quantity").value(0))
+                .andExpect(jsonPath("$.products['" + deleted.getId() + "'].quantity").value(0))
+                .andExpect(jsonPath("$.products['" + stopped.getId() + "'].quantity").value(0));
+    }
+
+    @Test void publicSnapshotRespectsSelectedBranchAndReturnsZeroForUnknownIds() throws Exception {
+        mvc.perform(get("/api/public/catalog-stock").param("storeId", second.getId().toString())
+                        .param("productIds", global.getId() + "," + available.getId() + "," + Long.MAX_VALUE))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.currentStockQuantity").value(4))
+                .andExpect(jsonPath("$.products['" + global.getId() + "'].quantity").value(4))
+                .andExpect(jsonPath("$.products['" + global.getId() + "'].purchaseStoreId").value(second.getId()))
+                .andExpect(jsonPath("$.products['" + available.getId() + "'].quantity").value(0))
+                .andExpect(jsonPath("$.products['" + Long.MAX_VALUE + "'].quantity").value(0));
+        mvc.perform(get("/products").param("storeId", second.getId().toString()))
+                .andExpect(status().isOk()).andExpect(model().attribute("customerStockQuantity", 4L));
+    }
+
+    @Test void publicStockBoundsUntrustedParameters() throws Exception {
+        mvc.perform(get("/api/public/catalog-stock").param("productIds", "0")).andExpect(status().isBadRequest());
+        mvc.perform(get("/api/public/catalog-stock").param("storeId", "-1")).andExpect(status().isBadRequest());
+        mvc.perform(get("/api/public/catalog-stock").param("productIds", "invalid")).andExpect(status().isBadRequest());
+        String tooMany = java.util.stream.LongStream.rangeClosed(1, 33).mapToObj(Long::toString)
+                .collect(java.util.stream.Collectors.joining(","));
+        mvc.perform(get("/api/public/catalog-stock").param("productIds", tooMany)).andExpect(status().isBadRequest());
+        mvc.perform(get("/api/public/catalog-stock")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.currentStockQuantity").value(24));
+    }
+
+    @Test void customerKpiUsesAllPublicProductsNotJustTheEightCardsOnTheCurrentPage() throws Exception {
+        for (int i = 0; i < 10; i++) stock(product("Additional bouquet " + i, first), first, 1);
+        inventories.flush();
+        mvc.perform(get("/products")).andExpect(status().isOk()).andExpect(model().attribute("customerStockQuantity", 34L));
+        mvc.perform(get("/api/public/catalog-stock")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.currentStockQuantity").value(34));
+    }
+
+    @Test void customerStockTotalDoesNotOverflow32BitQuantities() throws Exception {
+        stock(product("Large available stock 1", first), first, 2_000_000_000);
+        stock(product("Large available stock 2", first), first, 2_000_000_000);
+        inventories.flush();
+        mvc.perform(get("/api/public/catalog-stock")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.currentStockQuantity").value(4_000_000_024L));
+    }
 }

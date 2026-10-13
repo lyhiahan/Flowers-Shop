@@ -29,6 +29,12 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     private final ProductRepository products;
     private final Clock clock;
     private final OrderDetailRepository details;
+    private final StoreInventoryRepository inventories;
+
+    @Override
+    public long currentStockQuantity(Long storeId) {
+        return inventories.sumRemainingQuantity(storeId);
+    }
 
     private boolean recognized(Order order) {
         return "PAID".equals(order.getPaymentStatus()) && (order.getStatus() == OrderStatus.DELIVERED
@@ -69,6 +75,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         var result = new HashMap<String, Object>();
         result.put("reportRange", range);
         result.put("totalProductsCount", newProducts);
+        result.put("currentStockQuantity", currentStockQuantity(storeId));
         result.put("totalOrdersCount", (long) matching.size());
         result.put("chartLabels", revenue.getLabels()); result.put("chartRevenueValues", revenue.getData());
         result.put("chartOrderValues", orderChart.getData()); result.put("chartProductValues", quantityChart.getData());
