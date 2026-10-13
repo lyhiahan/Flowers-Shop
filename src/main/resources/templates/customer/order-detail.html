@@ -154,6 +154,9 @@
                             <div class="mb-1"><strong>Địa chỉ shop:</strong> <span class="small text-muted" th:text="${order.pickupStore.address}"></span></div>
                             <div class="mb-1"><strong>Thời gian đặt:</strong> <span th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></span></div>
                             <div class="mb-1"><strong>Phương thức thanh toán:</strong> 
+                                <span th:if="${order.paymentMethod == 'MOMO_DEMO'}" class="badge text-white px-2 py-1 ms-1" style="background:#a50064;">
+                                    <span th:text="${order.paymentStatus == 'PAID' ? 'MoMo giả lập - Đã thanh toán' : (order.paymentStatus == 'REFUNDED' ? 'MoMo giả lập - Đã hoàn tiền' : 'MoMo giả lập - Chưa thanh toán')}"></span>
+                                </span>
                                 <span th:if="${order.paymentMethod == 'MOMO'}" class="badge rounded-pill text-white px-2 py-1 ms-1" style="background-color: #D82D8B;">
                                     <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo" style="height: 14px; width: 14px; vertical-align: -2px;" class="me-1">
                                     <span th:text="${order.paymentStatus == 'REFUNDED' ? 'Ví MoMo - Đã hoàn tiền' : (order.paymentStatus == 'PAID' ? 'Ví MoMo - Đã thanh toán' : 'Ví MoMo - Chờ thanh toán')}"></span>

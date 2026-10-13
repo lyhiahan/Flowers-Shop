@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="no-referrer">
+    <title>MoMo giả lập | Thanh toán</title>
+    <link rel="stylesheet" th:href="@{/css/demo-payment.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+<header class="payment-header">
+    <div class="header-inner">
+        <a th:if="${desktop}" th:href="@{/customer/orders}" class="back-link" aria-label="Về đơn hàng" title="Về đơn hàng"><i class="bi bi-arrow-left"></i></a>
+        <strong>MoMo <span>giả lập</span></strong>
+        <span class="demo-label">DEMO</span>
+    </div>
+</header>
+<main class="payment-main" th:classappend="${desktop ? 'desktop' : 'phone'}"
+      th:attr="data-state=${payment.status},data-expiry=${payment.expiresAt},data-status-url=${desktop ? '/customer/demo-payment/' + payment.token + '/status' : ''},data-success-url=${(desktop ? '/customer/demo-payment/' : '/demo-payment/') + payment.token + '/success'}">
+    <p class="eyebrow">THANH TOÁN GIẢ LẬP</p>
+    <h1 th:text="${desktop ? 'Thanh toán đơn hàng' : 'Xác nhận thanh toán'}"></h1>
+    <p class="notice"><i class="bi bi-shield-check" aria-hidden="true"></i> Không kết nối hoặc trừ tiền ví MoMo thật.</p>
+    <div class="payment-layout">
+        <section class="order-summary" aria-label="Thông tin giao dịch">
+            <span class="muted">Tổng thanh toán</span>
+            <p class="amount"><span th:text="${#numbers.formatDecimal(payment.total, 0, 'POINT', 0, 'COMMA')}"></span><span class="currency">đ</span></p>
+            <dl>
+                <div><dt>Đơn hàng</dt><dd><span th:each="id, iter : ${payment.orderIds}" th:text="${'#' + id + (iter.last ? '' : ', ')}"></span></dd></div>
+                <div><dt>Phương thức</dt><dd>MoMo giả lập</dd></div>
+                <div><dt>Trạng thái</dt><dd id="payment-status" aria-live="polite">Đang kiểm tra</dd></div>
+                <div id="expiry-row"><dt>Thời gian còn lại</dt><dd id="countdown">--:--</dd></div>
+            </dl>
+            <p id="connection-status" class="connection-status" role="status"></p>
+        </section>
+        <section class="payment-action" aria-label="Xác nhận giao dịch">
+            <div id="pending-panel" th:hidden="${payment.status.name() != 'PENDING'}">
+                <div th:if="${desktop}" class="qr-section">
+                    <h2>Xác nhận trên điện thoại</h2>
+                    <img class="payment-qr" th:src="@{/customer/demo-payment/{token}/qr(token=${payment.token})}" alt="Mã QR thanh toán giả lập" width="280" height="280">
+                    <a class="phone-link" th:href="${phoneUrl}" target="_blank" rel="noreferrer">Mở trang xác nhận <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></a>
+                </div>
+                <form th:unless="${desktop}" id="confirm-form" method="post" th:action="@{/demo-payment/{token}/confirm(token=${payment.token})}">
+                    <h2>Giao dịch thử nghiệm</h2>
+                    <p class="muted">Số tiền thực tế bị trừ: <strong>0 đ</strong></p>
+                    <button id="confirm-button" type="submit" class="confirm-button"><i class="bi bi-check-circle" aria-hidden="true"></i> Xác nhận thanh toán giả lập</button>
+                </form>
+            </div>
+            <div id="result-panel" role="status" th:hidden="${payment.status.name() == 'PENDING'}">
+                <i id="result-icon" class="bi bi-exclamation-circle result-icon" aria-hidden="true"></i>
+                <h2 id="result-title"></h2>
+                <p id="result-message" class="muted"></p>
+            </div>
+        </section>
+    </div>
+    <a th:if="${desktop}" th:href="@{/customer/orders}" class="orders-link"><i class="bi bi-arrow-left" aria-hidden="true"></i> Về đơn hàng</a>
+</main>
+<footer>Giao dịch demo của đồ án · Không phải cổng thanh toán chính thức của MoMo</footer>
+<script th:src="@{/js/demo-payment.js}" defer></script>
+</body>
+</html>

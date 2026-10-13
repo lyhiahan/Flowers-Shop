@@ -52,7 +52,6 @@ public class CartController {
         model.addAttribute("itemStockMap", itemStockMap);
         model.addAttribute("stockByItem", itemStockMap);
         model.addAttribute("totalQuantity", totalQuantity);
-        model.addAttribute("paymentMethods", PaymentMethod.values());
         return "customer/cart";
     }
 

@@ -684,16 +684,15 @@
                                 </div>
                             </div>
 
-                            <!-- Lựa chọn 2: Chuyển khoản ngân hàng -->
-                            <div class="payment-card-option" id="payOptionBank" onclick="selectPayment('pay_bank')">
+                            <div th:if="${demoPaymentEnabled}" class="payment-card-option" id="payOptionMomo" onclick="selectPayment('pay_momo')">
                                 <div class="form-check mb-0">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="pay_bank" value="BANK_TRANSFER" onchange="updatePaymentStyle()">
-                                    <label class="form-check-label fw-bold text-dark ps-2" for="pay_bank" style="cursor: pointer;">
-                                        Chuyển khoản ngân hàng
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="pay_momo" value="MOMO_DEMO" onchange="updatePaymentStyle()">
+                                    <label class="form-check-label fw-bold ps-2" for="pay_momo" style="cursor:pointer;color:#a50064;">
+                                        <i class="bi bi-qr-code me-1"></i> MoMo giả lập
                                     </label>
                                 </div>
-                                <div class="payment-desc d-none" id="desc_pay_bank">
-                                    Quét mã QR hoặc chuyển khoản qua ngân hàng. Hệ thống sẽ tạo đơn và chuyển đến trang thanh toán.
+                                <div class="payment-desc d-none" id="desc_pay_momo">
+                                    Thanh toán thử nghiệm trên điện thoại. Không trừ tiền ví MoMo thật.
                                 </div>
                             </div>
                         </div>
@@ -1206,14 +1205,11 @@
 
         function updatePaymentStyle() {
             const isCod  = document.getElementById('pay_cod')  && document.getElementById('pay_cod').checked;
-            const isBank = document.getElementById('pay_bank') && document.getElementById('pay_bank').checked;
             const isMomo = document.getElementById('pay_momo') && document.getElementById('pay_momo').checked;
 
             const optCod  = document.getElementById('payOptionCod');
-            const optBank = document.getElementById('payOptionBank');
             const optMomo = document.getElementById('payOptionMomo');
             const descCod  = document.getElementById('desc_pay_cod');
-            const descBank = document.getElementById('desc_pay_bank');
             const descMomo = document.getElementById('desc_pay_momo');
             const btnPlaceOrder = document.getElementById('btnPlaceOrder');
 
@@ -1221,15 +1217,11 @@
             if (descMomo) descMomo.classList.toggle('d-none', !isMomo);
             if (isCod) {
                 if (optCod)  optCod.classList.add('active');
-                if (optBank) optBank.classList.remove('active');
                 if (descCod)  descCod.classList.remove('d-none');
-                if (descBank) descBank.classList.add('d-none');
                 if (btnPlaceOrder) btnPlaceOrder.innerHTML = '<i class="bi bi-bag-check me-2"></i>Đặt hàng';
             } else {
                 if (optCod) optCod.classList.remove('active');
-                if (optBank) optBank.classList.toggle('active', !!isBank);
                 if (descCod) descCod.classList.add('d-none');
-                if (descBank) descBank.classList.toggle('d-none', !isBank);
                 if (btnPlaceOrder) {
                     btnPlaceOrder.innerHTML = '<i class="bi bi-credit-card me-2"></i>Tiếp tục thanh toán';
                 }

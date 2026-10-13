@@ -252,7 +252,8 @@ public class OrderWorkflowService {
         entityManager.refresh(order, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
         if (!"UNPAID".equals(order.getPaymentStatus()) || order.getPaymentExpiresAt() == null
                 || order.getPaymentExpiresAt().isAfter(now) || (order.getStatus() != OrderStatus.PENDING && order.getStatus() != OrderStatus.CONFIRMED)) return false;
-        if (!"MOMO".equals(order.getPaymentMethod()) && !"BANK_TRANSFER".equals(order.getPaymentMethod())) return false;
+        if (!"MOMO".equals(order.getPaymentMethod()) && !"MOMO_DEMO".equals(order.getPaymentMethod())
+                && !"BANK_TRANSFER".equals(order.getPaymentMethod())) return false;
         order.setPaymentExpired(true);
         order.setCancellationReason("Đơn đã hết thời hạn thanh toán. Tồn kho đã được trả lại chi nhánh.");
         cancel(order);

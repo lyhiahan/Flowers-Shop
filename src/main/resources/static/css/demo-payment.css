@@ -1,0 +1,54 @@
+:root { color-scheme: light; font-family: Arial, sans-serif; color: #24282c; background: #f6f7f8; letter-spacing: 0; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+a { color: #a50064; text-underline-offset: 4px; }
+.payment-header { background: #a50064; color: white; }
+.header-inner { max-width: 980px; margin: auto; min-height: 76px; padding: 16px 28px; display: flex; align-items: center; gap: 16px; }
+.header-inner strong { font-size: 25px; }
+.header-inner strong span { font-size: 17px; font-weight: 400; }
+.back-link { color: white; display: grid; place-items: center; width: 36px; height: 36px; font-size: 22px; }
+.demo-label { margin-left: auto; font-size: 12px; border: 1px solid #edb8d8; padding: 5px 8px; border-radius: 4px; }
+.payment-main { max-width: 924px; margin: 42px auto; padding: 32px; background: white; border: 1px solid #e1e4e7; border-radius: 8px; }
+.eyebrow { margin: 0 0 10px; color: #a50064; font-size: 12px; font-weight: bold; }
+h1 { font-size: 27px; line-height: 1.3; margin: 0 0 14px; overflow-wrap: anywhere; }
+h2 { font-size: 18px; line-height: 1.4; margin: 0 0 16px; }
+.notice { display: flex; gap: 8px; align-items: baseline; color: #4b6160; font-size: 14px; line-height: 1.6; margin: 0 0 28px; }
+.notice i { color: #248262; }
+.payment-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; border-top: 1px solid #e7e9eb; padding-top: 28px; }
+.muted { color: #647079; font-size: 14px; line-height: 1.6; }
+.amount { font-size: 34px; font-weight: bold; margin: 10px 0 26px; color: #a50064; overflow-wrap: anywhere; }
+.currency { font-size: 21px; margin-left: 8px; }
+dl { margin: 0; }
+dl > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; border-bottom: 1px solid #edf0f1; padding: 14px 0; font-size: 14px; line-height: 1.5; }
+dt { color: #647079; }
+dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
+.payment-action { border-left: 1px solid #e7e9eb; padding-left: 32px; display: grid; align-items: center; min-width: 0; min-height: 330px; text-align: center; }
+.qr-section { display: flex; flex-direction: column; align-items: center; }
+.payment-qr { display: block; width: min(100%, 280px); height: auto; aspect-ratio: 1; }
+.phone-link { margin-top: 16px; font-size: 14px; line-height: 1.5; }
+.orders-link { display: inline-flex; gap: 8px; margin-top: 28px; font-size: 14px; }
+.confirm-button { background: #a50064; color: white; border: 0; border-radius: 6px; padding: 16px; width: 100%; min-height: 54px; font-size: 16px; line-height: 1.5; font-weight: bold; cursor: pointer; overflow-wrap: anywhere; }
+.confirm-button:hover { background: #850050; }
+.confirm-button:disabled { background: #787b80; cursor: wait; }
+a:focus-visible, button:focus-visible { outline: 3px solid #218369; outline-offset: 4px; }
+.result-icon { display: block; color: #218369; font-size: 56px; margin-bottom: 20px; }
+.connection-status { min-height: 42px; color: #7b510e; font-size: 13px; line-height: 1.5; }
+.success-heading { text-align: center; border-bottom: 1px solid #e7e9eb; padding-bottom: 20px; margin-bottom: 24px; }
+.success-heading .result-icon { margin-top: 6px; }
+.paid-status { color: #218369; font-weight: bold; }
+.success-orders-link { display: block; margin-top: 26px; text-align: center; text-decoration: none; }
+.phone { max-width: 480px; }
+.phone .payment-layout { display: block; }
+.phone .payment-action { border-left: 0; padding: 28px 0 0; margin-top: 12px; border-top: 1px solid #e7e9eb; min-height: 190px; }
+footer { padding: 0 20px 30px; text-align: center; color: #647079; font-size: 12px; line-height: 1.6; }
+[hidden] { display: none !important; }
+@media (max-width: 680px) {
+    .header-inner { padding: 14px 16px; min-height: 68px; }
+    .header-inner strong { font-size: 22px; }
+    .payment-main { margin: 20px 12px; padding: 22px 18px; }
+    .phone { margin-left: auto; margin-right: auto; width: calc(100% - 24px); }
+    h1 { font-size: 23px; }
+    .payment-layout { display: block; padding-top: 22px; }
+    .payment-action { border-left: 0; border-top: 1px solid #e7e9eb; padding: 24px 0 0; margin-top: 16px; min-height: 220px; }
+    .amount { font-size: 30px; }
+}

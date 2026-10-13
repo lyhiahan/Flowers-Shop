@@ -80,6 +80,7 @@ public class SecurityConfig {
                 .requestMatchers("/ws", "/ws/**", "/ws-chat", "/api/chat/**").authenticated()
                 // MoMo Callback & IPN Webhook (cho phép chuyển hướng và webhook không bị chặn)
                 .requestMatchers("/checkout/momo/callback", "/checkout/momo/ipn").permitAll()
+                .requestMatchers("/demo-payment/**").permitAll()
                 // Quyền Khách hàng
                 .requestMatchers("/customer/**", "/cart", "/cart/**", "/checkout", "/checkout/**", "/following", "/api/customer/**").hasRole("USER")
                 // Các tài nguyên công khai
