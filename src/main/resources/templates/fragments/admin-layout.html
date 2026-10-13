@@ -228,6 +228,11 @@
             </a>
         </li>
         <li>
+            <a th:href="@{/admin/chat}" id="sidebarChatLink" class="nav-link" th:classappend="${active == 'chat'} ? 'active'">
+                <i class="bi bi-chat-dots me-2"></i> Trung tâm hội thoại
+            </a>
+        </li>
+        <li>
             <a th:href="@{/}" class="nav-link" target="_blank" rel="noopener" style="color: #9DB7AA;" title="Xem website bán hàng để kiểm tra nội dung">
                 <i class="bi bi-box-arrow-up-right"></i>
                 <span>Xem website</span>

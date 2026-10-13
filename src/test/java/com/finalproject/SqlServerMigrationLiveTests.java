@@ -67,9 +67,9 @@ class SqlServerMigrationLiveTests {
     @Test void emptyDatabaseMigratesAllVersionsAndValidatesAllEntities() throws Exception {
         String url = url("SQLSERVER_TEST_FRESH_DATABASE");
         var flyway = flyway(url);
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(4);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(6);
         flyway.validate();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("4");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("6");
         validateEntities(url);
         assertThat(flyway.migrate().migrationsExecuted).isZero();
     }
@@ -80,11 +80,28 @@ class SqlServerMigrationLiveTests {
         var flyway = flyway(url);
         assertThatThrownBy(flyway::migrate).hasMessageContaining("non-empty schema");
         flyway.baseline();
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(3);
+        var previousVersion = Flyway.configure().configuration(flyway.getConfiguration()).target("4").load();
+        assertThat(previousVersion.migrate().migrationsExecuted).isEqualTo(3);
+        assertThat(previousVersion.info().current().getVersion().getVersion()).isEqualTo("4");
+        Map<String, Long> beforeV5 = counts(url);
+        assertThat(beforeV5).isEqualTo(before);
+        long conversationsBefore, messagesBefore;
+        try (var connection = connect(url); var statement = connection.createStatement()) {
+            try (var rows = statement.executeQuery("SELECT COUNT_BIG(*) FROM dbo.chat_conversations")) { rows.next(); conversationsBefore = rows.getLong(1); }
+            try (var rows = statement.executeQuery("SELECT COUNT_BIG(*) FROM dbo.chat_messages")) { rows.next(); messagesBefore = rows.getLong(1); }
+        }
+        var auditedVersion = Flyway.configure().configuration(flyway.getConfiguration()).target("5").load();
+        assertThat(auditedVersion.migrate().migrationsExecuted).isEqualTo(1);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(1);
         flyway.validate();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("4");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("6");
         validateEntities(url);
         assertThat(counts(url)).isEqualTo(before);
+        try (var connection = connect(url); var statement = connection.createStatement()) {
+            try (var rows = statement.executeQuery("SELECT COUNT_BIG(*) FROM dbo.chat_conversations")) { rows.next(); assertThat(rows.getLong(1)).isEqualTo(conversationsBefore); }
+            try (var rows = statement.executeQuery("SELECT COUNT_BIG(*) FROM dbo.chat_messages")) { rows.next(); assertThat(rows.getLong(1)).isEqualTo(messagesBefore); }
+            try (var rows = statement.executeQuery("SELECT COUNT_BIG(*) FROM dbo.chat_access_audits")) { rows.next(); assertThat(rows.getLong(1)).isZero(); }
+        }
         assertThat(flyway.migrate().migrationsExecuted).isZero();
     }
 }

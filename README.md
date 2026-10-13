@@ -71,7 +71,7 @@ Tài khoản demo trên **database rỗng**: `admin`, `manager_q1`, `manager_td`
 
 ## Database hiện có và Flyway
 
-Flyway là nơi quản lý schema ở môi trường chạy. Các bản `V1`–`V4` tạo schema mới hoặc bổ sung bảng/cột/ràng buộc, chuyển role cũ, cài schema chat và ràng buộc đánh giá. File SQL trong `sql/migrations` và `resources/db` là tài liệu lịch sử; không cần chạy chúng lại. Các runner migration cũ chỉ được bật ở profile `test` để giữ kiểm thử H2.
+Flyway là nơi quản lý schema ở môi trường chạy. Các bản `V1`–`V6` tạo schema mới hoặc bổ sung bảng/cột/ràng buộc, chuyển role cũ, cài schema chat, ràng buộc đánh giá, nhật ký giám sát và thẻ sản phẩm trong chat. V5/V6 chỉ thêm bảng/index/ràng buộc mới, không sửa/xóa hội thoại, tin nhắn hoặc đơn cũ. File SQL trong `sql/migrations` và `resources/db` là tài liệu lịch sử; không cần chạy chúng lại. Các runner migration cũ chỉ được bật ở profile `test` để giữ kiểm thử H2.
 
 Với **database rỗng**, chạy ứng dụng để Flyway áp dụng từ `V1`. Với **database đã có dữ liệu nhưng chưa có `flyway_schema_history`**, sao lưu và thử trên bản sao trước. Xác nhận URL database và schema `dbo`, sau đó chủ động ghi nhận baseline:
 
@@ -81,7 +81,7 @@ Với **database rỗng**, chạy ứng dụng để Flyway áp dụng từ `V1`
 .\scripts\maven.ps1 spring-boot:run
 ```
 
-Plugin Flyway đọc ba biến `SPRING_DATASOURCE_*` đã đặt ở trên. Baseline ở version 1 không chạy lại schema tạo mới; lần khởi động sau chạy phần nâng cấp `V2`–`V4` trước khi Hibernate đọc entity. Không bật tự baseline để tránh chấp nhận nhầm database. Nếu migration báo dữ liệu trùng/ràng buộc không hợp lệ, cần rà soát dữ liệu được báo; migration không tự xóa lịch sử để vượt lỗi.
+Plugin Flyway đọc ba biến `SPRING_DATASOURCE_*` đã đặt ở trên. Baseline ở version 1 không chạy lại schema tạo mới; lần khởi động sau chạy phần nâng cấp `V2`–`V6` trước khi Hibernate đọc entity. Không bật tự baseline để tránh chấp nhận nhầm database. Nếu migration báo dữ liệu trùng/ràng buộc không hợp lệ, cần rà soát dữ liệu được báo; migration không tự xóa lịch sử để vượt lỗi.
 
 `database.sql` là script reset cũ có `DROP TABLE`; không dùng script này để nâng cấp database đang có dữ liệu. `spring.jpa.hibernate.ddl-auto=none`; Hibernate không thay đổi schema khi ứng dụng khởi động.
 
@@ -99,6 +99,12 @@ Giao diện Thymeleaf và AJAX trong trình duyệt dùng session cùng CSRF. AP
 Access token là JWT HS256, thời hạn 15 phút; refresh token ngẫu nhiên có thời hạn tối đa 7 ngày tính từ lúc đăng nhập. Database chỉ lưu SHA-256 của refresh token. Dùng lại refresh token đã xoay sẽ thu hồi toàn bộ token family. Đăng xuất, khóa/vô hiệu hóa tài khoản và đổi mật khẩu ngăn sử dụng token đã phát hành. JWT được kiểm tra chữ ký, issuer, audience, thời hạn và token type. Quyền được nạp lại từ database mỗi request.
 
 API Bearer hiện dùng được với chat HTTP, thông báo và API tồn kho. Kết nối WebSocket `/ws`, `/ws-chat` của giao diện tiếp tục xác thực bằng session; không truyền JWT trong URL. STOMP kiểm tra quyền gửi/subscribe theo người dùng và chi nhánh. Quyền tổng quát là `ADMIN`, `MANAGER`, `USER`; nhân sự từng cửa hàng được giới hạn thêm bởi ownership/membership.
+
+Chat khách hàng có ba điểm vào: **Tài khoản → Trò chuyện với hệ thống** mở trực tiếp CSKH/admin; nút nổi **Nhắn tin** mở tất cả lịch sử cửa hàng và hệ thống, không tạo/chọn người nhận tự động; **Nhắn tin với cửa hàng** ở chi tiết sản phẩm mở đúng chi nhánh và hiện thẻ sản phẩm (ảnh, tên, giá, liên kết) sẵn để hỏi. Không còn nút mở CSKH trong hộp lịch sử chung. Chỉ khi khách bấm Gửi, backend xác minh lại sản phẩm/chi nhánh và lưu thẻ sản phẩm cùng tin nhắn; cửa hàng nhận thẻ qua WebSocket và xem lại trong lịch sử. Tên/ảnh/giá được chụp tại lúc gửi, không đổi theo lần sửa sản phẩm về sau. Sản phẩm dùng chung phải có chi nhánh bán hợp lệ; liên hệ từ đơn vẫn dùng chi nhánh đã ghi trên đơn và kiểm tra sở hữu. Không tự gửi tin chỉ vì mở chat. [Chi tiết luồng và cách thử](docs/CHAT_CUSTOMER_ENTRY_20261013.md).
+
+Quản lý có **Hộp thư khách hàng** của chi nhánh đang chọn và tab **Hỗ trợ từ admin** riêng; nút **Liên hệ admin về vận hành** mở một hội thoại nội bộ chung cho đội quản lý chi nhánh (`BRANCH_SUPPORT`). Không chat như người mua với chi nhánh khác hoặc trộn hỗ trợ cá nhân. API inbox/history/images được giới hạn theo chi nhánh có quyền. WebSocket bind chi nhánh tại CONNECT, chỉ cho subscribe `/user/queue/chat.store.{storeId}` và `/user/queue/chat.support.{storeId}` tương ứng, kiểm tra lại quyền khi gửi. Tài khoản phụ trách nhiều chi nhánh phải chuyển chi nhánh/mở lại trang để dùng hộp thư tương ứng. Hội thoại cũ được giữ trong database, không xóa lịch sử.
+
+Admin mở **Trung tâm hội thoại** (`/admin/chat`) với ba hộp thư: CSKH khách hàng, Hỗ trợ chi nhánh và Giám sát chỉ đọc. Hai kênh hỗ trợ cho phép trả lời dưới tài khoản admin; chat khách–chi nhánh chỉ được đọc, không gửi văn bản/ảnh, sửa/xóa tin hay giả danh cửa hàng. Bộ lọc dùng ID chi nhánh, tên/tên đăng nhập người liên hệ và ngày hoạt động gần nhất của hội thoại. Danh sách giám sát không hiện nội dung tin cuối; mở/tải lịch sử phải ghi nhật ký admin–hội thoại–thời điểm–mốc tin cũ trước khi trả nội dung và không cache. Không ghi được nhật ký thì từ chối trả lịch sử. Nhật ký có màn hình riêng `/admin/chat/access-logs`; không có chức năng sửa/xóa. Giám sát dùng tải lịch sử có nhật ký, không subscribe queue riêng của cửa hàng. [Chi tiết và cách thử](docs/CHAT_SUPPORT_MONITOR_20261013.md).
 
 ## Profile và dịch vụ ngoài
 

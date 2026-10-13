@@ -50,4 +50,35 @@ class ChatSocketAccessTests {
         for(StompCommand command:new StompCommand[]{StompCommand.CONNECT,StompCommand.SEND,StompCommand.SUBSCRIBE})
             assertThatThrownBy(()->interceptor.preSend(frame(command,"/app/chat.send",true),null)).isInstanceOf(AccessDeniedException.class);
     }
+    org.springframework.messaging.Message<byte[]> managerFrame(StompCommand command,String destination,Long branch,String requested) {
+        var headers=StompHeaderAccessor.create(command);headers.setUser(()->user.getUsername());headers.setDestination(destination);
+        var attributes=new java.util.HashMap<String,Object>();if(branch!=null) attributes.put("chatStoreId",branch);
+        headers.setSessionAttributes(attributes);if(requested!=null) headers.setNativeHeader("chat-store-id",requested);
+        return MessageBuilder.createMessage(new byte[0],headers.getMessageHeaders());
+    }
+    @Test void managerSocketMustSubscribeToItsBoundBranchNotGenericOrForeignQueue() {
+        user.setRole(Role.MANAGER);
+        when(users.findChatManagers(1L,Role.MANAGER)).thenReturn(java.util.List.of(user));
+        when(users.findChatManagers(2L,Role.MANAGER)).thenReturn(java.util.List.of(user));
+        var connect=managerFrame(StompCommand.CONNECT,null,null,"1");
+        assertThat(interceptor.preSend(connect,null)).isNotNull();
+        assertThat(org.springframework.messaging.simp.SimpMessageHeaderAccessor.getSessionAttributes(connect.getHeaders())).containsEntry("chatStoreId",1L);
+        assertThat(interceptor.preSend(managerFrame(StompCommand.SUBSCRIBE,"/user/queue/chat.store.1",1L,null),null)).isNotNull();
+        assertThat(interceptor.preSend(managerFrame(StompCommand.SUBSCRIBE,"/user/queue/chat.support.1",1L,null),null)).isNotNull();
+        for(String target:java.util.List.of("/user/queue/chat","/user/queue/chat.store.2","/user/queue/chat.support.2"))
+            assertThatThrownBy(()->interceptor.preSend(managerFrame(StompCommand.SUBSCRIBE,target,1L,null),null)).isInstanceOf(AccessDeniedException.class);
+        assertThatThrownBy(()->interceptor.preSend(managerFrame(StompCommand.SEND,"/app/chat.send",null,null),null)).isInstanceOf(AccessDeniedException.class);
+        when(users.findChatManagers(1L,Role.MANAGER)).thenReturn(java.util.List.of());
+        assertThatThrownBy(()->interceptor.preSend(managerFrame(StompCommand.SEND,"/app/chat.send",1L,null),null)).isInstanceOf(AccessDeniedException.class);
+    }
+    @Test void unauthorizedBranchCannotBeBoundAndCustomersCannotSubscribeToManagerQueues() {
+        assertThatThrownBy(()->interceptor.preSend(managerFrame(StompCommand.SUBSCRIBE,"/user/queue/chat.store.1",1L,null),null)).isInstanceOf(AccessDeniedException.class);
+        assertThatThrownBy(()->interceptor.preSend(managerFrame(StompCommand.SUBSCRIBE,"/user/queue/chat.support.1",1L,null),null)).isInstanceOf(AccessDeniedException.class);
+        user.setRole(Role.ADMIN);
+        assertThatThrownBy(()->interceptor.preSend(managerFrame(StompCommand.SUBSCRIBE,"/user/queue/chat.store.1",1L,null),null)).isInstanceOf(AccessDeniedException.class);
+        assertThatThrownBy(()->interceptor.preSend(managerFrame(StompCommand.SUBSCRIBE,"/user/queue/chat.support.1",1L,null),null)).isInstanceOf(AccessDeniedException.class);
+        user.setRole(Role.MANAGER);
+        for(String target:java.util.List.of("1","-1","bad"))
+            assertThatThrownBy(()->interceptor.preSend(managerFrame(StompCommand.CONNECT,null,null,target),null)).isInstanceOf(AccessDeniedException.class);
+    }
 }

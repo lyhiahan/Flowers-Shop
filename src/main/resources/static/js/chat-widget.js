@@ -7,7 +7,21 @@
     let context, current, socket, connected = false, busy = false, buffer = '', retry = 0;
     let reconnectTimer, heartbeat, pending, connectTimer, stopped = false, inboxPage = 0, unseen = 0, historyVersion = 0;
     const conversations = new Map();
-    function status(message, reconnect = false) { el('chatStatus').textContent = message; el('chatReconnect').hidden = !(reconnect || stopped); }
+    let openingContact = false;
+    let questionProduct = null;
+    let mailbox = null, inboxVersion = 0;
+    let filtersOpen = false;
+    const channelButtons = [...document.querySelectorAll('[data-chat-channel]')];
+    function monitorMode() { return context?.role === 'ADMIN' && (mailbox === 'STORE' || current?.kind === 'STORE'); }
+    function scoped(path) {
+        return context?.role === 'MANAGER' ? path + (path.includes('?') ? '&' : '?') + 'storeId=' + context.storeId : path;
+    }
+    function visible(conversation) {
+        if (context?.role === 'ADMIN') return conversation.kind === mailbox;
+        return context?.role !== 'MANAGER' || (conversation.kind === mailbox && Number(conversation.storeId) === Number(context.storeId)
+            && (conversation.kind !== 'STORE' || Number(conversation.customerId) !== Number(context.userId)));
+    }
+    function status(message, reconnect = false) { el('chatStatus').textContent = message; el('chatStatus').title = message; el('chatReconnect').hidden = !(reconnect || stopped); }
     async function api(path, options = {}) {
         const headers = {Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest', ...(options.headers || {})};
         if (options.method && options.method !== 'GET') headers[root.dataset.csrfHeader] = root.dataset.csrfToken;
@@ -29,14 +43,36 @@
         return data;
     }
     function controls() {
-        const disabled = !current || !connected || busy;
+        const disabled = !current || !connected || busy || openingContact || monitorMode();
         text.disabled = image.disabled = el('chatSend').disabled = disabled;
         el('chatRemoveImage').disabled = busy;
+        el('chatRemoveProduct').disabled = busy || openingContact;
+        el('chatSendForm').hidden = monitorMode();
+        el('chatMonitorNotice').hidden = !monitorMode();
     }
     function title(conversation) {
-        let value = conversation.kind === 'ADMIN' ? 'Admin hỗ trợ' : conversation.storeName;
-        if (context.role !== 'USER' && conversation.customerId !== context.userId) value += ' · ' + conversation.customerName;
+        if (context.role === 'ADMIN' && conversation.kind === 'ADMIN') return 'CSKH · ' + (conversation.customerName || 'Khách #' + conversation.customerId);
+        let value = conversation.kind === 'ADMIN' ? 'Trò chuyện với hệ thống · CSKH toàn chuỗi'
+            : conversation.kind === 'BRANCH_SUPPORT' ? 'Hỗ trợ nội bộ · ' + conversation.storeName : conversation.storeName;
+        if (conversation.kind !== 'BRANCH_SUPPORT' && context.role !== 'USER' && conversation.customerId !== context.userId) value += ' · ' + conversation.customerName;
         return value;
+    }
+    function inboxTitle(conversation) {
+        if (context.role !== 'USER') return conversation.kind === 'BRANCH_SUPPORT' ? conversation.storeName
+            : conversation.customerName || 'Khách #' + conversation.customerId;
+        return conversation.kind === 'ADMIN' ? 'Trò chuyện với hệ thống' : conversation.storeName;
+    }
+    function filterValues() {
+        return {storeId: mailbox === 'ADMIN' ? '' : el('chatFilterStore').value.trim(),
+            keyword: el('chatFilterKeyword').value.trim(), from: el('chatFilterFrom').value, to: el('chatFilterTo').value};
+    }
+    function updateFilters() {
+        const admin = context?.role === 'ADMIN';
+        el('chatFilterToggle').hidden = !admin;
+        el('chatFilters').hidden = !admin || !filtersOpen;
+        el('chatFilterStoreField').hidden = mailbox === 'ADMIN';
+        el('chatFilterToggle').setAttribute('aria-expanded', String(admin && filtersOpen));
+        el('chatFilterBadge').hidden = !admin || !Object.values(filterValues()).some(Boolean);
     }
     function timestamp(value) {
         if (!Array.isArray(value)) return typeof value === 'string' ? value : '';
@@ -44,6 +80,7 @@
         return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')}.${String(nano).padStart(9, '0')}`;
     }
     function upsert(conversation) {
+        if (!visible(conversation)) return;
         conversation = {...conversation, updatedAt: timestamp(conversation.updatedAt)};
         const previous = conversations.get(conversation.id);
         if (!previous || previous.updatedAt <= conversation.updatedAt) conversations.set(conversation.id, conversation);
@@ -53,23 +90,61 @@
         [...conversations.values()].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt) || b.id - a.id).forEach(conversation => {
             const button = document.createElement('button'); button.type = 'button';
             button.setAttribute('aria-current', String(current?.id === conversation.id));
-            const strong = document.createElement('strong'); strong.textContent = title(conversation);
+            button.title = title(conversation);
+            const strong = document.createElement('strong'); strong.textContent = inboxTitle(conversation);
             const preview = document.createElement('small'); preview.textContent = conversation.lastMessage || 'Chưa có tin nhắn';
-            button.append(strong, preview); button.addEventListener('click', () => select(conversation));
+            if (context.role === 'ADMIN' && conversation.kind === 'STORE') {
+                const branch = document.createElement('small'); branch.className = 'chat-conversation-scope'; branch.textContent = conversation.storeName;
+                button.append(strong, branch, preview);
+            } else { button.append(strong, preview); }
+            button.addEventListener('click', () => select(conversation));
             el('chatConversations').append(button);
         });
     }
     async function loadInbox(page = 0) {
-        const data = await api('/conversations?page=' + page);
+        const version = inboxVersion;
+        const params = new URLSearchParams({page: String(page)});
+        if (mailbox) params.set('kind', mailbox);
+        if (context?.role === 'ADMIN') {
+            Object.entries(filterValues()).forEach(([key, value]) => { if (value) params.set(key, value); });
+        }
+        const data = await api(scoped('/conversations?' + params));
+        if (version !== inboxVersion) return;
+        if (page === 0) conversations.clear();
         data.conversations.forEach(upsert); inboxPage = page;
         el('chatMoreConversations').hidden = !data.hasMore; renderInbox();
+    }
+    function productCard(product) {
+        if (!product || !Number.isSafeInteger(Number(product.id)) || Number(product.id) <= 0) return null;
+        const card = document.createElement('a'); card.className = 'chat-product-card';
+        card.href = '/products/' + Number(product.id); card.target = '_blank'; card.rel = 'noopener noreferrer';
+        const url = product.imageUrl;
+        if (typeof url === 'string' && (url.startsWith('https://') || /^\/(images|upload)\//.test(url))) {
+            const thumbnail = document.createElement('img'); thumbnail.src = url; thumbnail.alt = product.name || 'Sản phẩm'; card.append(thumbnail);
+        }
+        const description = document.createElement('span');
+        const name = document.createElement('strong'); name.textContent = product.name || 'Sản phẩm #' + product.id;
+        const price = document.createElement('small');
+        price.textContent = Number.isFinite(Number(product.price)) ? Number(product.price).toLocaleString('vi-VN') + ' đ' : '';
+        description.append(name, price); card.append(description); return card;
+    }
+    function setQuestionProduct(product) {
+        questionProduct = product || null;
+        const holder = el('chatQuestionProductCard'); holder.replaceChildren();
+        const card = productCard(questionProduct); if (card) holder.append(card);
+        el('chatQuestionProduct').hidden = !card;
     }
     function bubble(message) {
         const log = el('chatMessages');
         if (log.querySelector('[data-message-id="' + message.id + '"]')) return;
         const item = document.createElement('div'); item.className = 'chat-message'; item.dataset.messageId = message.id;
-        if (message.senderId === context.userId) item.classList.add('mine');
+        if (monitorMode() && current?.kind === 'STORE') {
+            const customerMessage = Number(message.senderId) === Number(current.customerId);
+            item.classList.add(customerMessage ? 'customer-side' : 'branch-side');
+            if (customerMessage) item.classList.add('mine');
+        } else if (message.senderId === context.userId) item.classList.add('mine');
         const caption = document.createElement('small'); caption.textContent = message.senderName + ' · ' + new Date(timestamp(message.createdAt)).toLocaleString('vi-VN'); item.append(caption);
+        const product = productCard(message.product); if (product) item.append(product);
         if (message.content) { const body = document.createElement('p'); body.textContent = message.content; item.append(body); }
         if (message.imageUrl && message.imageUrl.startsWith('https://')) {
             const link = document.createElement('a'); link.href = message.imageUrl; link.target = '_blank'; link.rel = 'noopener noreferrer';
@@ -81,7 +156,7 @@
     async function history(before) {
         if (!current) return;
         const id = current.id, version = historyVersion;
-        const data = await api('/conversations/' + id + '/messages' + (before ? '?before=' + before : ''));
+        const data = await api(scoped('/conversations/' + id + '/messages' + (before ? '?before=' + before : '')));
         if (version !== historyVersion || current?.id !== id) return;
         const log = el('chatMessages'), oldHeight = log.scrollHeight;
         data.messages.forEach(bubble); el('chatOlder').hidden = !data.hasMore;
@@ -89,24 +164,40 @@
         else log.scrollTop = log.scrollHeight;
     }
     async function select(conversation) {
+        if (!visible(conversation)) { status('Hội thoại không thuộc chi nhánh đang chọn.'); return; }
         if (busy) { status('Vui lòng đợi gửi xong tin nhắn hiện tại.'); return; }
         current = conversation; historyVersion++; pending = null;
+        setQuestionProduct(null);
         text.value = ''; image.value = ''; fileName();
         el('chatCurrentTitle').textContent = title(conversation); el('chatMessages').replaceChildren();
         el('chatOlder').hidden = true; controls(); renderInbox();
         try { await history(); } catch (error) { status(error.message); }
     }
-    function fileName() { const file = image.files[0]; el('chatFileName').textContent = file?.name || ''; el('chatRemoveImage').hidden = !file; }
+    function resizeComposer() {
+        text.style.height = 'auto';
+        text.style.height = Math.max(42, Math.min(text.scrollHeight, 112)) + 'px';
+        text.style.overflowY = text.scrollHeight > 112 ? 'auto' : 'hidden';
+    }
+    function fileName() {
+        const file = image.files[0]; el('chatFileName').textContent = file?.name || ''; el('chatRemoveImage').hidden = !file;
+        el('chatAttachmentBar').hidden = !file; resizeComposer();
+    }
     function ack(message) {
         if (pending && String(message.senderId) === String(context.userId) && message.clientMessageId === pending.id) {
             clearTimeout(pending.timer); pending = null; busy = false; text.value = ''; image.value = ''; fileName(); controls();
+            setQuestionProduct(null);
             status('Đã gửi tin nhắn.');
         }
     }
     function received(event) {
-        if (event.type !== 'MESSAGE' || !event.message || !event.conversation) return;
+        if (event.type !== 'MESSAGE' || !event.message || !event.conversation || !visible(event.conversation)) return;
         ack(event.message);
-        upsert(event.conversation); renderInbox();
+        // A live event may belong to the right mailbox but not the active filters.
+        // Ask the backend to reapply branch/name/date filters instead of inserting
+        // an unfiltered event into the visible inbox (username isn't in the event).
+        const filtered = context.role === 'ADMIN' && Object.values(filterValues()).some(Boolean);
+        if (filtered) loadInbox().catch(error => status(error.message));
+        else { upsert(event.conversation); renderInbox(); }
         if (event.message.conversationId === current?.id) { bubble(event.message); el('chatMessages').scrollTop = el('chatMessages').scrollHeight; }
         if (panel.hidden && event.message.senderId !== context.userId) { unseen++; el('chatBadge').textContent = unseen; el('chatBadge').hidden = false; }
     }
@@ -133,7 +224,8 @@
             connection.close();
         }, 10000);
         connection.onopen = () => {
-            if (socket === connection) frame('CONNECT', {'accept-version': '1.2', host: location.host, 'heart-beat': '20000,0'});
+            if (socket === connection) frame('CONNECT', {'accept-version': '1.2', host: location.host, 'heart-beat': '20000,0',
+                ...(context.role === 'MANAGER' ? {'chat-store-id': String(context.storeId)} : {})});
         };
         connection.onmessage = event => {
             if (socket !== connection) return;
@@ -147,9 +239,11 @@
                 lines.forEach(line => { const colon = line.indexOf(':'); if (colon > 0) headers[line.slice(0, colon)] = line.slice(colon + 1); });
                 if (command === 'CONNECTED') {
                     clearTimeout(connectTimer);
-                    connected = true; retry = 0; frame('SUBSCRIBE', {id: 'chat-messages', destination: '/user/queue/chat', ack: 'auto'});
+                    connected = true; retry = 0; frame('SUBSCRIBE', {id: 'chat-messages', destination: context.role === 'MANAGER'
+                        ? '/user/queue/chat.store.' + context.storeId : '/user/queue/chat', ack: 'auto'});
                     frame('SUBSCRIBE', {id: 'chat-errors', destination: '/user/queue/chat.errors', ack: 'auto'});
                     frame('SUBSCRIBE', {id: 'chat-acks', destination: '/user/queue/chat.acks', ack: 'auto'});
+                    if (context.role === 'MANAGER') frame('SUBSCRIBE', {id: 'chat-support', destination: '/user/queue/chat.support.' + context.storeId, ack: 'auto'});
                     clearInterval(heartbeat); heartbeat = setInterval(() => { if (socket.readyState === WebSocket.OPEN) socket.send('\n'); }, 20000);
                     status('Chat đã kết nối.'); controls(); loadInbox().catch(error => status(error.message));
                     if (current) history().catch(error => status(error.message));
@@ -187,51 +281,130 @@
     async function ensureContext() {
             if (!context) {
                 context = await api('/context');
-                if (context.role !== 'ADMIN') {
-                    el('chatStartForm').hidden = false;
-                    const support = document.createElement('option'); support.value = 'ADMIN'; support.textContent = 'Admin hỗ trợ'; el('chatDestination').append(support);
-                    context.stores.forEach(store => { const option = document.createElement('option'); option.value = 'STORE:' + store.id; option.textContent = store.name; el('chatDestination').append(option); });
-                }
+                mailbox = context.role === 'ADMIN' ? 'ADMIN' : context.role === 'MANAGER' ? 'STORE' : null;
+                el('chatBranchSupportButton').hidden = context.role !== 'MANAGER';
+                el('chatChannelTabs').hidden = context.role === 'USER';
+                el('chatToolbar').hidden = context.role === 'USER';
+                updateFilters();
+                el('chatScope').hidden = context.role === 'ADMIN';
+                channelButtons.forEach(button => {
+                    button.hidden = context.role === 'USER' || (context.role === 'MANAGER' && button.dataset.chatChannel === 'ADMIN');
+                    if (context.role === 'ADMIN' && button.dataset.chatChannel === 'STORE') button.textContent = 'Giám sát chỉ đọc';
+                    if (context.role === 'MANAGER' && button.dataset.chatChannel === 'BRANCH_SUPPORT') button.textContent = 'Hỗ trợ từ admin';
+                    button.setAttribute('aria-pressed', String(button.dataset.chatChannel === mailbox));
+                });
+                el('chatHeading').textContent = context.role === 'MANAGER' ? 'Hộp thư khách hàng · ' + context.storeName : 'Tin nhắn';
+                el('chatScope').textContent = context.role === 'MANAGER' ? 'Chỉ nhận tin của ' + context.storeName
+                    : context.role === 'ADMIN' ? 'Hai kênh hỗ trợ được trả lời; giám sát khách–chi nhánh chỉ đọc và có nhật ký.'
+                    : 'Đây là tất cả lịch sử trò chuyện của bạn. Hỗ trợ toàn chuỗi: Tài khoản → Trò chuyện với hệ thống. Hỏi sản phẩm: bấm Nhắn tin với cửa hàng trên chi tiết sản phẩm. Admin có thể giám sát chỉ đọc chat chi nhánh.';
             }
     }
     async function openPanel() {
         panel.hidden = false; el('chatLauncher').setAttribute('aria-expanded', 'true'); unseen = 0; el('chatBadge').hidden = true;
         try {
             await ensureContext(); await loadInbox(); connect();
+            resizeComposer();
         } catch (error) { status(error.message, true); }
     }
-    el('chatLauncher').addEventListener('click', openPanel);
+    el('chatLauncher').addEventListener('click', async () => {
+        if (busy || openingContact) { status('Vui lòng đợi thao tác chat hiện tại hoàn tất.'); return; }
+        const productContact = document.querySelector('[data-chat-detail-contact]');
+        if (productContact && !productContact.disabled) { productContact.click(); return; }
+        if (context?.role === 'USER') {
+            current = null; historyVersion++; pending = null; setQuestionProduct(null);
+            text.value = ''; image.value = ''; fileName(); el('chatMessages').replaceChildren();
+            el('chatCurrentTitle').textContent = 'Chọn hội thoại để xem tin nhắn'; el('chatOlder').hidden = true; controls();
+        }
+        await openPanel();
+    });
     el('chatClose').addEventListener('click', () => { panel.hidden = true; el('chatLauncher').setAttribute('aria-expanded', 'false'); el('chatLauncher').focus(); });
     el('chatReconnect').addEventListener('click', async () => {
         retry = 0; stopped = false;
         try { await api('/context'); await openPanel(); } catch (error) { status(error.message, true); }
     });
-    el('chatRefresh').addEventListener('click', () => loadInbox().catch(error => status(error.message)));
+    el('chatRefresh').addEventListener('click', async () => {
+        try { await loadInbox(); if (current) await history(); } catch (error) { status(error.message); }
+    });
+    async function switchMailbox(kind) {
+        if (busy || openingContact) { status('Vui lòng đợi thao tác hiện tại hoàn tất.'); return; }
+        mailbox = kind; inboxVersion++; historyVersion++; current = null; pending = null;
+        setQuestionProduct(null);
+        text.value = ''; image.value = ''; fileName(); conversations.clear(); renderInbox(); el('chatMessages').replaceChildren();
+        el('chatCurrentTitle').textContent = 'Chọn hội thoại để xem tin nhắn'; el('chatOlder').hidden = true;
+        channelButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.chatChannel === kind)));
+        updateFilters();
+        controls();
+        try { await loadInbox(); } catch (error) { status(error.message); }
+    }
+    channelButtons.forEach(button => button.addEventListener('click', () => switchMailbox(button.dataset.chatChannel)));
+    el('chatFilterToggle').addEventListener('click', () => { if (context?.role === 'ADMIN') { filtersOpen = !filtersOpen; updateFilters(); } });
+    el('chatClearFilters').addEventListener('click', async () => {
+        if (busy || openingContact) { status('Vui lòng đợi thao tác hiện tại hoàn tất.'); return; }
+        ['chatFilterStore','chatFilterKeyword','chatFilterFrom','chatFilterTo'].forEach(id => { el(id).value = ''; });
+        await switchMailbox(mailbox);
+    });
+    el('chatFilters').addEventListener('submit', async event => {
+        event.preventDefault();
+        if (el('chatFilterFrom').value && el('chatFilterTo').value && el('chatFilterFrom').value > el('chatFilterTo').value) {
+            status('Ngày bắt đầu phải trước hoặc bằng ngày kết thúc.'); return;
+        }
+        await switchMailbox(mailbox);
+    });
+    el('chatBranchSupportButton').addEventListener('click', async event => {
+        if (busy || openingContact) { status('Vui lòng đợi thao tác hiện tại hoàn tất.'); return; }
+        const button = event.currentTarget; button.disabled = true;
+        try {
+            await switchMailbox('BRANCH_SUPPORT');
+            const conversation = await api('/conversations', {method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({kind: 'BRANCH_SUPPORT', storeId: context.storeId})});
+            upsert(conversation); await select(conversation);
+        } catch (error) { status(error.message); } finally { button.disabled = false; }
+    });
     el('chatMoreConversations').addEventListener('click', () => loadInbox(inboxPage + 1).catch(error => status(error.message)));
     el('chatOlder').addEventListener('click', () => { const first = el('chatMessages').firstElementChild; if (first) history(first.dataset.messageId).catch(error => status(error.message)); });
-    el('chatStartForm').addEventListener('submit', async event => {
-        event.preventDefault(); const value = el('chatDestination').value; if (!value) return;
-        const button = event.currentTarget.querySelector('button'); button.disabled = true;
-        try { const conversation = await api('/conversations', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({kind: value === 'ADMIN' ? 'ADMIN' : 'STORE', storeId: value === 'ADMIN' ? null : Number(value.split(':')[1])})}); upsert(conversation); await select(conversation); }
-        catch (error) { status(error.message); } finally { button.disabled = false; }
+    document.addEventListener('click', async event => {
+        const button = event.target.closest('[data-chat-system], [data-chat-product-id], [data-chat-order-id]');
+        if (!button || button.disabled) return;
+        if (busy || openingContact) { status('Vui lòng đợi thao tác chat hiện tại hoàn tất.'); return; }
+        openingContact = true; controls();
+        event.preventDefault(); button.disabled = true;
+        try {
+            await openPanel();
+            if (context?.role !== 'USER') throw new Error('Chỉ khách hàng được liên hệ cửa hàng.');
+            if (button.hasAttribute('data-chat-system')) {
+                const conversation = await api('/conversations', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({kind: 'ADMIN'})});
+                upsert(conversation); await select(conversation); text.focus(); return;
+            }
+            const result = await api('/conversations/contact', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
+                productId: button.dataset.chatProductId ? Number(button.dataset.chatProductId) : null,
+                orderId: button.dataset.chatOrderId ? Number(button.dataset.chatOrderId) : null,
+                storeId: button.dataset.chatStoreId ? Number(button.dataset.chatStoreId) : null
+            })});
+            upsert(result.conversation); await select(result.conversation);
+            setQuestionProduct(result.product);
+            text.value = result.suggestedMessage || ''; resizeComposer(); text.focus();
+        } catch (error) { status(error.message); } finally { button.disabled = false; openingContact = false; controls(); }
     });
     image.addEventListener('change', () => { const file = image.files[0]; if (file && (file.size > 10 * 1024 * 1024 || !['image/jpeg','image/png','image/webp','image/gif'].includes(file.type))) { image.value = ''; status('Chọn ảnh JPG, PNG, WEBP hoặc GIF, tối đa 10 MB.'); } fileName(); });
     el('chatRemoveImage').addEventListener('click', () => { image.value = ''; fileName(); });
+    el('chatRemoveProduct').addEventListener('click', () => { if (!busy) setQuestionProduct(null); });
     el('chatSendForm').addEventListener('submit', async event => {
-        event.preventDefault(); if (!current || !connected || busy) return;
+        event.preventDefault(); if (!current || !connected || busy || monitorMode()) return;
         const content = text.value.trim(), file = image.files[0];
-        if (!content && !file) { status('Vui lòng nhập tin nhắn hoặc chọn ảnh.'); text.focus(); return; }
-        if (!pending || pending.text !== content || pending.file !== file) pending = {id: crypto.randomUUID(), text: content, file};
+        if (!content && !file && !questionProduct) { status('Vui lòng nhập tin nhắn hoặc chọn ảnh.'); text.focus(); return; }
+        const productId = questionProduct?.id || null;
+        if (!pending || pending.text !== content || pending.file !== file || pending.productId !== productId) pending = {id: crypto.randomUUID(), text: content, file, productId};
         const attempt = pending, conversationId = current.id;
         busy = true; controls(); status(file ? 'Đang tải ảnh lên Cloudinary…' : 'Đang gửi tin nhắn…');
         try {
             if (file) {
                 const data = new FormData(); data.set('file', file); data.set('content', content); data.set('clientMessageId', attempt.id);
-                const message = await api('/conversations/' + conversationId + '/images', {method: 'POST', body: data}); ack(message);
+                if (attempt.productId) data.set('productId', attempt.productId);
+                const message = await api(scoped('/conversations/' + conversationId + '/images'), {method: 'POST', body: data}); ack(message);
                 if (message.conversationId === current?.id) { bubble(message); el('chatMessages').scrollTop = el('chatMessages').scrollHeight; }
                 loadInbox().catch(() => {});
             } else {
-                frame('SEND', {destination: '/app/chat.send', 'content-type': 'application/json'}, JSON.stringify({conversationId, content, clientMessageId: attempt.id}));
+                frame('SEND', {destination: '/app/chat.send', 'content-type': 'application/json'}, JSON.stringify({conversationId, content, clientMessageId: attempt.id, productId: attempt.productId}));
                 attempt.timer = setTimeout(() => {
                     if (pending?.id !== attempt.id) return;
                     busy = false; controls(); status('Chưa nhận được xác nhận. Bấm Gửi để thử lại, tin nhắn sẽ không bị lưu trùng.');
@@ -242,7 +415,21 @@
         }
     });
     text.addEventListener('keydown', event => { if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) { event.preventDefault(); el('chatSendForm').requestSubmit(); } });
-    document.addEventListener('keydown', event => { if (event.key === 'Escape' && !panel.hidden) el('chatClose').click(); });
+    text.addEventListener('input', resizeComposer);
+    window.addEventListener('resize', resizeComposer);
+    const navigationToggle = el('chatNavigationToggle'), navigation = el('chatAdminNavigation');
+    function closeNavigation() { navigation?.classList.remove('is-open'); navigationToggle?.setAttribute('aria-expanded','false'); navigationToggle?.focus(); }
+    navigationToggle?.addEventListener('click', () => {
+        const open = !navigation.classList.contains('is-open'); navigation.classList.toggle('is-open', open);
+        navigationToggle.setAttribute('aria-expanded', String(open));
+    });
+    el('chatNavigationClose')?.addEventListener('click', closeNavigation);
+    document.addEventListener('keydown', event => {
+        if (event.key !== 'Escape') return;
+        if (navigation?.classList.contains('is-open')) closeNavigation();
+        else if (!panel.hidden && !root.classList?.contains('chat-workbench')) el('chatClose').click();
+    });
     window.addEventListener('beforeunload', () => { stopped = true; clearTimeout(reconnectTimer); clearTimeout(connectTimer); clearInterval(heartbeat); socket?.close(); });
-    ensureContext().then(connect).catch(error => status(error.message, true));
+    resizeComposer();
+    ensureContext().then(() => { connect(); if (root.classList?.contains('chat-workbench')) openPanel(); }).catch(error => status(error.message, true));
 })();

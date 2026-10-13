@@ -33,6 +33,8 @@ class ChatSessionIntegrationTests {
     @Autowired StoreRepository stores;
     @Autowired ChatService chat;
     @Autowired PasswordEncoder passwords;
+    @Autowired ProductRepository products;
+    @Autowired CategoryRepository categories;
 
     User account(String name, Role role) {
         return users.saveAndFlush(User.builder().username(name).fullName(name).email(name + "@socket.test")
@@ -56,10 +58,15 @@ class ChatSessionIntegrationTests {
         return cookies;
     }
     StompSession connect(WebSocketStompClient client, CookieManager cookies) throws Exception {
+        return connect(client,cookies,null);
+    }
+    StompSession connect(WebSocketStompClient client, CookieManager cookies,Long storeId) throws Exception {
         var headers = new WebSocketHttpHeaders();
         headers.add("Cookie", String.join("; ", cookies.getCookieStore().getCookies().stream().map(c -> c.getName() + "=" + c.getValue()).toList()));
         headers.add("Origin", base());
-        return client.connectAsync("ws://localhost:" + port + "/ws-chat", headers, new StompSessionHandlerAdapter() {}).get(10, TimeUnit.SECONDS);
+        var connectHeaders=new StompHeaders();
+        if(storeId!=null) connectHeaders.add("chat-store-id",storeId.toString());
+        return client.connectAsync("ws://localhost:" + port + "/ws-chat", headers, connectHeaders,new StompSessionHandlerAdapter() {}).get(10, TimeUnit.SECONDS);
     }
     StompFrameHandler receiver(BlockingQueue<String> queue) {
         return new StompFrameHandler() {
@@ -79,13 +86,13 @@ class ChatSessionIntegrationTests {
         var opened = new ArrayList<StompSession>();
         try {
             var customerSocket = connect(client, customerCookies); opened.add(customerSocket);
-            var managerSocket = connect(client, managerCookies); opened.add(managerSocket);
+            var managerSocket = connect(client, managerCookies,store.getId()); opened.add(managerSocket);
             var adminSocket = connect(client, adminCookies); opened.add(adminSocket);
             var customerInbox = new LinkedBlockingQueue<String>();
             var managerInbox = new LinkedBlockingQueue<String>();
             var adminInbox = new LinkedBlockingQueue<String>();
             customerSocket.subscribe("/user/queue/chat", receiver(customerInbox));
-            managerSocket.subscribe("/user/queue/chat", receiver(managerInbox));
+            managerSocket.subscribe("/user/queue/chat.store."+store.getId(), receiver(managerInbox));
             adminSocket.subscribe("/user/queue/chat", receiver(adminInbox));
             // Subscription and SEND on the same connection must retain client frame order.
             long branch = chat.open(customer.getUsername(), "STORE", store.getId()).id();
@@ -95,20 +102,66 @@ class ChatSessionIntegrationTests {
             send(managerSocket, branch, "Chi nhánh trả lời");
             assertThat(customerInbox.poll(10, TimeUnit.SECONDS)).contains("Chi nhánh trả lời");
             assertThat(managerInbox.poll(10, TimeUnit.SECONDS)).contains("Chi nhánh trả lời");
+            // Even a manager assigned to both branches gets separate per-connection inboxes.
+            Store secondStore=stores.saveAndFlush(Store.builder().name("Second socket branch").address("Second address").owner(manager).status(true).build());
+            var secondSocket=connect(client,managerCookies,secondStore.getId());opened.add(secondSocket);
+            var secondInbox=new LinkedBlockingQueue<String>();var secondErrors=new LinkedBlockingQueue<String>();
+            secondSocket.subscribe("/user/queue/chat.store."+secondStore.getId(),receiver(secondInbox));
+            secondSocket.subscribe("/user/queue/chat.errors",receiver(secondErrors));
+            // Same-connection SUBSCRIBE then SEND ordering establishes that the
+            // subscription is ready before another connection sends into this branch.
+            send(secondSocket,branch,"Không được trả lời nhầm chi nhánh");
+            assertThat(secondErrors.poll(10,TimeUnit.SECONDS)).contains("không thuộc hộp thư");
+            long secondThread=chat.open(customer.getUsername(),"STORE",secondStore.getId()).id();
+            send(customerSocket,secondThread,"Chỉ gửi chi nhánh thứ hai");
+            assertThat(customerInbox.poll(10,TimeUnit.SECONDS)).contains("Chỉ gửi chi nhánh thứ hai");
+            assertThat(secondInbox.poll(10,TimeUnit.SECONDS)).contains("Chỉ gửi chi nhánh thứ hai");
+            assertThat(managerInbox.poll(500,TimeUnit.MILLISECONDS)).isNull();
+            assertThat(chat.history(customer.getUsername(),branch,null).messages()).hasSize(2);
             long support = chat.open(customer.getUsername(), "ADMIN", null).id();
             send(customerSocket, support, "Admin hỗ trợ");
             assertThat(customerInbox.poll(10, TimeUnit.SECONDS)).contains("Admin hỗ trợ");
             assertThat(adminInbox.poll(10, TimeUnit.SECONDS)).contains("Admin hỗ trợ");
             send(adminSocket, support, "Admin trả lời");
             assertThat(customerInbox.poll(10, TimeUnit.SECONDS)).contains("Admin trả lời");
+            assertThat(adminInbox.poll(10, TimeUnit.SECONDS)).contains("Admin trả lời");
+            var internalInbox=new LinkedBlockingQueue<String>();
+            managerSocket.subscribe("/user/queue/chat.support."+store.getId(),receiver(internalInbox));
+            long internal=chat.open(manager.getUsername(),"BRANCH_SUPPORT",store.getId()).id();
+            send(managerSocket,internal,"Chi nhánh cần hỗ trợ vận hành");
+            assertThat(internalInbox.poll(10,TimeUnit.SECONDS)).contains("hỗ trợ vận hành");
+            assertThat(adminInbox.poll(10,TimeUnit.SECONDS)).contains("hỗ trợ vận hành");
+            send(adminSocket,internal,"Admin hỗ trợ nội bộ");
+            assertThat(internalInbox.poll(10,TimeUnit.SECONDS)).contains("hỗ trợ nội bộ");
+            assertThat(adminInbox.poll(10,TimeUnit.SECONDS)).contains("hỗ trợ nội bộ");
+            assertThat(customerInbox.poll(500,TimeUnit.MILLISECONDS)).isNull();
+            assertThat(secondInbox.poll(500,TimeUnit.MILLISECONDS)).isNull();
+            var adminErrors=new LinkedBlockingQueue<String>();
+            adminSocket.subscribe("/user/queue/chat.errors",receiver(adminErrors));
+            send(adminSocket,branch,"Không được giả danh cửa hàng");
+            assertThat(adminErrors.poll(10,TimeUnit.SECONDS)).contains("chỉ được giám sát");
+            assertThat(managerInbox.poll(500,TimeUnit.MILLISECONDS)).isNull();
+            assertThat(customerInbox.poll(500,TimeUnit.MILLISECONDS)).isNull();
             assertThat(chat.history(customer.getUsername(), branch, null).messages()).hasSize(2);
+            var category=categories.saveAndFlush(Category.builder().name("Socket product context").build());
+            var product=products.saveAndFlush(Product.builder().name("Lan hỏi qua WebSocket").store(store).category(category)
+                .imageUrl("https://example.test/orchid.jpg").priceBuy(java.math.BigDecimal.TEN).importPrice(java.math.BigDecimal.ONE)
+                .priceRentPerDay(java.math.BigDecimal.ZERO).depositFee(java.math.BigDecimal.ZERO).build());
+            send(customerSocket,branch,"Tôi hỏi mẫu lan này",product.getId());
+            assertThat(customerInbox.poll(10,TimeUnit.SECONDS)).contains("\"product\":", "Lan hỏi qua WebSocket", "orchid.jpg");
+            assertThat(managerInbox.poll(10,TimeUnit.SECONDS)).contains("\"product\":", "Lan hỏi qua WebSocket");
+            var saved=chat.history(manager.getUsername(),branch,null,store.getId()).messages().getLast();
+            assertThat(saved.product().id()).isEqualTo(product.getId());
         } finally {
             opened.forEach(StompSession::disconnect); client.stop();
         }
     }
     void send(StompSession session, long conversation, String content) {
+        send(session,conversation,content,null);
+    }
+    void send(StompSession session, long conversation, String content,Long productId) {
         var headers = new StompHeaders(); headers.setDestination("/app/chat.send");
         headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
-        session.send(headers, ("{\"conversationId\":" + conversation + ",\"content\":\"" + content + "\",\"clientMessageId\":\"" + UUID.randomUUID() + "\"}").getBytes(StandardCharsets.UTF_8));
+        session.send(headers, ("{\"conversationId\":" + conversation + ",\"content\":\"" + content + "\",\"clientMessageId\":\"" + UUID.randomUUID() + "\",\"productId\":"+productId+"}").getBytes(StandardCharsets.UTF_8));
     }
 }

@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /** Generate SQL Server DDL from all mapped entities without connecting to a real DB. */
 class SqlServerSchemaTests {
     @Test
-    void baselineCoversEveryMappedTable() throws Exception {
+    void migrationsCoverEveryMappedTable() throws Exception {
         Map<String, Object> settings = new HashMap<>();
         settings.put("hibernate.dialect", "org.hibernate.dialect.SQLServerDialect");
         settings.put("hibernate.boot.allow_jdbc_metadata_access", false);
@@ -37,10 +37,12 @@ class SqlServerSchemaTests {
             if (export) {
                 SchemaManagementToolCoordinator.process(metadata, registry, settings, action -> {});
             } else {
-                String baseline = Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V1__initial_schema.sql"));
+                String baseline = Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V1__initial_schema.sql"))
+                        + Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V5__chat_monitor_access_audit.sql"))
+                        + Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V6__chat_product_context.sql"));
                 for (var table : metadata.collectTableMappings()) {
-                    var pattern = java.util.regex.Pattern.compile("create table "
-                            + java.util.regex.Pattern.quote(table.getName()) + " \\((.*?)\\);",
+                    var pattern = java.util.regex.Pattern.compile("create\\s+table\\s+(?:dbo\\.)?"
+                            + java.util.regex.Pattern.quote(table.getName()) + "\\s*\\((.*?)\\);",
                             java.util.regex.Pattern.CASE_INSENSITIVE | java.util.regex.Pattern.DOTALL);
                     var match = pattern.matcher(baseline);
                     assertThat(match.find()).as("table %s", table.getName()).isTrue();

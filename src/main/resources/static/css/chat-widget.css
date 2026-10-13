@@ -15,7 +15,10 @@
 #flowerChat .chat-thread { display: flex; flex-direction: column; flex: 1; min-height: 0; min-width: 0; overflow: hidden; }
 #flowerChat .chat-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #355447; color: #fff; }
 #flowerChat .chat-header button { border: 0; background: transparent; color: #fff; font-size: 24px; padding: 0 6px; }
-#flowerChat .chat-status { padding: 6px 12px; background: #F4F7F5; color: #66736B; font-size: 12px; display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+#flowerChat .chat-header strong { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#flowerChat .chat-status { min-width: 0; max-width: 60%; color: #E4EDE8; font-size: 11px; display: flex; align-items: center; gap: 6px; margin-left: 12px; }
+#flowerChat #chatStatus { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#flowerChat .chat-header #chatReconnect { border: 1px solid #ffffff80; border-radius: 6px; font-size: 11px; padding: 3px 6px; white-space: nowrap; }
 #flowerChat .chat-start { padding: 8px 12px; border-bottom: 1px solid #E7DED4; }
 #flowerChat .chat-start > div { display: flex; gap: 6px; margin-top: 4px; }
 #flowerChat select { min-width: 0; width: 100%; border: 1px solid #D1E5DA; border-radius: 8px; padding: 6px; background: #fff; }
@@ -30,17 +33,65 @@
 #flowerChat .chat-messages { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: #FCFBF9; }
 #flowerChat .chat-message { max-width: 88%; flex-shrink: 0; align-self: flex-start; background: #fff; border: 1px solid #E7DED4; border-radius: 12px; padding: 10px 12px; overflow-wrap: anywhere; }
 #flowerChat .chat-message.mine { align-self: flex-end; background: #EBF3EE; border-color: #D1E5DA; }
+#flowerChat .chat-message.branch-side { align-self: flex-start; background: #FFF0F3; border-color: #EAD0D8; }
 #flowerChat .chat-message small { display: block; font-size: 11px; color: #66736B; }
 #flowerChat .chat-message p { margin: 4px 0; white-space: pre-wrap; }
 #flowerChat .chat-message img { display: block; max-width: 100%; max-height: 260px; height: auto; object-fit: contain; border-radius: 8px; }
-#flowerChat .chat-send { padding: 10px 12px; border-top: 1px solid #E7DED4; }
+#flowerChat .chat-send { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: end; gap: 8px; padding: 8px 12px; border-top: 1px solid #E7DED4; }
 #flowerChat textarea { width: 100%; resize: none; border: 1px solid #D1E5DA; border-radius: 8px; padding: 8px; }
-#flowerChat .chat-send-actions { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
-#flowerChat .chat-file-label { cursor: pointer; flex-shrink: 0; margin: 0; }
-#flowerChat .chat-file-label input { max-width: 130px; display: block; font-size: 11px; }
+#flowerChat #chatText { grid-column: 2; grid-row: 1; min-height: 42px; max-height: 112px; margin: 0; }
+#flowerChat .chat-file-label { grid-column: 1; grid-row: 1; cursor: pointer; margin: 0; display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; border: 1px solid #D1E5DA; border-radius: 8px; background: #fff; }
+#flowerChat .chat-file-label:focus-within { outline: 2px solid #355447; outline-offset: 2px; }
+#flowerChat .chat-attachment-bar { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; min-width: 0; }
 #flowerChat #chatFileName { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; min-width: 0; }
-#flowerChat #chatSend { margin-left: auto; background: #355447; color: #fff; }
+#flowerChat #chatSend { grid-column: 3; grid-row: 1; min-height: 42px; background: #355447; color: #fff; white-space: nowrap; }
 #flowerChat .chat-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+#flowerChat .chat-question-product { flex-shrink: 0; padding: 8px 12px; background: #EBF3EE; border-bottom: 1px solid #D1E5DA; }
+#flowerChat .chat-product-caption { font-size: 11px; color: #66736B; margin-bottom: 4px; }
+#flowerChat .chat-product-card { display: flex; gap: 10px; align-items: center; padding: 8px; border: 1px solid #D1E5DA; border-radius: 8px; background: #fff; color: #293B32; text-decoration: none; overflow-wrap: anywhere; }
+#flowerChat .chat-product-card img { width: 56px; height: 56px; flex-shrink: 0; object-fit: cover; border-radius: 6px; }
+#flowerChat .chat-product-card span { min-width: 0; }
+#flowerChat .chat-product-card strong, #flowerChat .chat-product-card small { display: block; }
+#flowerChat .chat-product-card small { color: #AE3A58; }
+#flowerChat #chatRemoveProduct { font-size: 11px; margin-top: 4px; }
+#flowerChat .chat-product-card:focus-visible { outline: 2px solid #355447; outline-offset: 2px; }
+#flowerChat .chat-toolbar { display: flex; align-items: center; gap: 8px; padding: 6px 12px; flex-shrink: 0; border-bottom: 1px solid #D1E5DA; }
+#flowerChat .chat-channel-tabs { display: flex; flex: 1; min-width: 0; overflow-x: auto; gap: 6px; }
+#flowerChat .chat-channel-tabs button, #flowerChat #chatFilterToggle { flex-shrink: 0; white-space: nowrap; }
+#flowerChat #chatFilterBadge { font-size: 10px; margin-left: 3px; color: #AE3A58; }
+#flowerChat .chat-filters { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 12px; flex-shrink: 0; border-bottom: 1px solid #D1E5DA; max-height: min(180px, 30dvh); overflow-y: auto; }
+#flowerChat .chat-filter-actions { display: flex; align-items: end; gap: 6px; }
+#flowerChat .chat-channel-tabs button[aria-pressed="true"] { background: #355447; color: #fff; }
+#flowerChat .chat-filters label { font-size: 11px; flex: 1 1 100px; min-width: 0; }
+#flowerChat .chat-filters input { display: block; width: 100%; min-width: 0; padding: 4px; border: 1px solid #D1E5DA; border-radius: 6px; }
+#flowerChat .chat-monitor-notice { padding: 8px 12px; margin: 0; background: #FFF4D7; font-size: 12px; flex-shrink: 0; }
+#flowerChat.chat-workbench { display: flex; flex: 1; min-height: 0; min-width: 0; }
+#flowerChat.chat-workbench .chat-panel { position: relative; right: auto; bottom: auto; width: 100%; height: 100%; min-height: 0; z-index: auto; box-shadow: none; }
+#flowerChat.chat-workbench .chat-launcher, #flowerChat.chat-workbench #chatClose { display: none; }
+/* Override the shared theme's mobile height:auto/overflow:visible only on this page. */
+body.admin-body.admin-chat-page { height: 100vh !important; height: 100dvh !important; min-height: 0; overflow: hidden !important; }
+.admin-chat-page .admin-layout-wrapper { height: 100%; min-height: 0; }
+.admin-chat-page .main-wrapper-admin { display: flex; flex-direction: column; gap: 12px; height: 100%; min-height: 0; overflow: hidden; padding: 20px; }
+.admin-chat-page .chat-admin-navigation { flex-shrink: 0; width: 255px; height: 100%; min-height: 0; }
+.admin-chat-page .sidebar-admin { width: 100% !important; min-width: 0 !important; height: 100% !important; min-height: 0 !important; overflow-y: auto; }
+.admin-chat-page .chat-page-toolbar { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.admin-chat-page .chat-page-toolbar .admin-page-title { margin: 0; font-size: 22px !important; }
+.admin-chat-page .chat-page-toolbar > a { margin-left: auto; white-space: nowrap; font-size: 13px; }
+.admin-chat-page .chat-nav-toggle, .admin-chat-page .chat-nav-close { display: none; }
+#flowerChat.chat-workbench .chat-header { padding: 8px 12px; }
+#flowerChat.chat-workbench .chat-message { max-width: 75%; }
+#flowerChat .chat-conversation-scope { color: #355447; font-size: 11px; }
+@media (max-width: 767.98px) {
+    .admin-chat-page .main-wrapper-admin { padding: 10px; gap: 8px; }
+    .admin-chat-page .chat-page-toolbar { gap: 8px; flex-wrap: wrap; }
+    .admin-chat-page .chat-page-toolbar .admin-page-title { font-size: 18px !important; }
+    .admin-chat-page .chat-nav-toggle { display: inline-flex; }
+    .admin-chat-page .chat-admin-navigation { display: none; position: fixed; inset: 0 auto 0 0; z-index: 1030; box-shadow: 4px 0 18px #0003; }
+    .admin-chat-page .chat-admin-navigation.is-open { display: block; }
+    .admin-chat-page .chat-nav-close { display: block; position: absolute; top: 6px; right: 8px; border: 0; background: transparent; color: #fff; font-size: 26px; padding: 0 8px; }
+    #flowerChat.chat-workbench .chat-sidebar { max-height: 28%; }
+    #flowerChat.chat-workbench .chat-message { max-width: 90%; }
+}
 @media (max-width: 575.98px) { #flowerChat .chat-panel { right: 12px; bottom: 72px; width: calc(100vw - 24px); height: calc(100vh - 92px); height: calc(100dvh - 92px); } #flowerChat .chat-launcher { right: 12px; bottom: 12px; } #flowerChat .chat-messages { padding: 12px; } }
 @media (max-height: 560px) { #flowerChat .chat-inbox { max-height: 72px; } #flowerChat .chat-start, #flowerChat .chat-send { padding-top: 6px; padding-bottom: 6px; } #flowerChat .chat-header { padding-top: 6px; padding-bottom: 6px; } }
 @media (min-width: 768px) {
@@ -51,4 +102,5 @@
     #flowerChat .chat-inbox-heading { flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
     #flowerChat .chat-sidebar .chat-start > div { flex-direction: column; }
     #flowerChat .chat-sidebar .chat-start button { align-self: flex-end; }
+    #flowerChat.chat-workbench .chat-body { grid-template-columns: 280px minmax(0, 1fr); }
 }

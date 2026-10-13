@@ -15,4 +15,5 @@ public class ChatMessage {
  @Column(length=500) private String imageUrl;
  @Column(length=255) private String imagePublicId;
  @Column(nullable=false) private LocalDateTime createdAt;
+ @OneToOne(mappedBy="message",fetch=FetchType.LAZY) private ChatProductContext productContext;
 }

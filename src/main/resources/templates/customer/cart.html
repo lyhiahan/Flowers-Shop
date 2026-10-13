@@ -229,6 +229,7 @@
                             <li sec:authorize="hasRole('USER')">
                                 <a class="dropdown-item py-2" th:href="@{/customer/orders}"><i class="bi bi-box2-heart me-2 text-secondary"></i> Đơn hoa đã đặt</a>
                             </li>
+                            <th:block th:replace="~{fragments/chat-widget :: system-chat-link}"></th:block>
                             <li sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')">
                                 <a class="dropdown-item py-2 fw-semibold text-success" th:href="@{/manager/dashboard}"><i class="bi bi-shop me-2"></i> Kênh Quản lý cửa hàng</a>
                             </li>

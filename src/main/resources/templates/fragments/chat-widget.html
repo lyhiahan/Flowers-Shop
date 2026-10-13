@@ -1,23 +1,54 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
+<li th:fragment="system-chat-link" sec:authorize="hasRole('USER') and !hasRole('MANAGER') and !hasRole('ADMIN')">
+    <button type="button" class="dropdown-item py-2 small d-flex align-items-center gap-2" data-chat-system>
+        <i class="bi bi-chat-heart text-success"></i><span>Trò chuyện với hệ thống</span>
+    </button>
+</li>
 <th:block th:fragment="widget">
-    <div id="flowerChat" sec:authorize="isAuthenticated()" th:data-csrf-token="${_csrf != null ? _csrf.token : ''}" th:data-csrf-header="${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}">
+    <div id="flowerChat" sec:authorize="isAuthenticated()" th:classappend="${chatWorkbench == true} ? 'chat-workbench' : ''" th:data-csrf-token="${_csrf != null ? _csrf.token : ''}" th:data-csrf-header="${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}">
         <link rel="stylesheet" th:href="@{/css/chat-widget.css}">
         <button id="chatLauncher" class="chat-launcher" type="button" aria-controls="chatPanel" aria-expanded="false"><span aria-hidden="true">💬</span> Nhắn tin <span id="chatBadge" hidden>0</span></button>
         <section id="chatPanel" class="chat-panel" aria-labelledby="chatHeading" hidden>
-            <header class="chat-header"><strong id="chatHeading">Chat hỗ trợ</strong><button id="chatClose" type="button" aria-label="Đóng chat">×</button></header>
-            <div class="chat-status" role="status" aria-live="polite"><span id="chatStatus">Đang kết nối…</span><button id="chatReconnect" type="button" hidden>Kết nối lại</button></div>
+            <header class="chat-header"><strong id="chatHeading">Chat hỗ trợ</strong><div class="chat-status" role="status" aria-live="polite"><span id="chatStatus">Đang kết nối…</span><button id="chatReconnect" type="button" hidden>Kết nối lại</button></div><button id="chatClose" type="button" aria-label="Đóng chat">×</button></header>
+            <div id="chatToolbar" class="chat-toolbar">
+            <nav id="chatChannelTabs" class="chat-channel-tabs" aria-label="Hộp thư" hidden>
+                <button type="button" data-chat-channel="ADMIN" hidden>CSKH khách hàng</button>
+                <button type="button" data-chat-channel="BRANCH_SUPPORT" hidden>Hỗ trợ chi nhánh</button>
+                <button type="button" data-chat-channel="STORE" hidden>Tin nhắn khách hàng</button>
+            </nav>
+            <button id="chatFilterToggle" type="button" aria-expanded="false" aria-controls="chatFilters" hidden>Bộ lọc <span id="chatFilterBadge" hidden>Đang lọc</span></button>
+            </div>
+            <form id="chatFilters" class="chat-filters" hidden>
+                <label id="chatFilterStoreField">Chi nhánh <input id="chatFilterStore" type="number" min="1" placeholder="ID chi nhánh"></label>
+                <label>Khách/người liên hệ <input id="chatFilterKeyword" maxlength="100" placeholder="Tên hoặc tên đăng nhập"></label>
+                <label>Từ ngày <input id="chatFilterFrom" type="date"></label><label>Đến ngày <input id="chatFilterTo" type="date"></label>
+                <div class="chat-filter-actions"><button type="submit">Áp dụng</button><button id="chatClearFilters" type="button">Xóa lọc</button></div>
+            </form>
+            <p id="chatMonitorNotice" class="chat-monitor-notice" title="Admin chỉ đọc, không gửi/sửa/xóa tin. Mỗi lần mở hoặc tải lịch sử đều được ghi nhật ký." hidden>Chỉ xem. Mỗi lượt đọc được ghi nhật ký.</p>
             <div class="chat-body">
             <aside class="chat-sidebar" aria-label="Chọn nơi nhắn tin và hội thoại">
-            <form id="chatStartForm" class="chat-start" hidden><label for="chatDestination">Chọn nơi nhắn tin</label><div><select id="chatDestination" required><option value="">Chọn chi nhánh hoặc Admin</option></select><button type="submit">Bắt đầu</button></div></form>
+            <div id="chatScope" class="chat-start small" role="note"></div>
+            <button id="chatBranchSupportButton" type="button" hidden>Liên hệ admin về vận hành</button>
             <div class="chat-inbox"><div class="chat-inbox-heading">Hội thoại của bạn <button id="chatRefresh" type="button">Làm mới</button></div><div id="chatConversations"></div><button id="chatMoreConversations" type="button" hidden>Xem thêm hội thoại</button></div>
             </aside>
             <div class="chat-thread">
             <div id="chatCurrentTitle" class="chat-current-title">Chọn hội thoại để xem tin nhắn</div>
+            <div id="chatQuestionProduct" class="chat-question-product" hidden>
+                <div class="chat-product-caption">Bạn đang hỏi về sản phẩm</div>
+                <div id="chatQuestionProductCard"></div>
+                <button id="chatRemoveProduct" type="button" aria-label="Bỏ sản phẩm đính kèm">Bỏ đính kèm</button>
+            </div>
             <button id="chatOlder" class="chat-older" type="button" hidden>Tải tin nhắn cũ hơn</button>
             <div id="chatMessages" class="chat-messages" role="log" aria-label="Lịch sử tin nhắn" aria-live="polite"></div>
-            <form id="chatSendForm" class="chat-send"><label class="chat-sr-only" for="chatText">Nội dung tin nhắn</label><textarea id="chatText" rows="2" maxlength="2000" placeholder="Nhập tin nhắn…" disabled></textarea><div class="chat-send-actions"><label class="chat-file-label">📎 Gửi ảnh<input id="chatImage" type="file" accept="image/jpeg,image/png,image/webp,image/gif" disabled></label><span id="chatFileName"></span><button id="chatRemoveImage" type="button" hidden aria-label="Bỏ ảnh đã chọn">×</button><button id="chatSend" type="submit" disabled>Gửi</button></div></form>
+            <form id="chatSendForm" class="chat-send">
+                <label class="chat-sr-only" for="chatText">Nội dung tin nhắn</label>
+                <label class="chat-file-label" title="Gửi ảnh"><span aria-hidden="true">📎</span><span class="chat-sr-only">Gửi ảnh</span><input id="chatImage" class="chat-sr-only" type="file" accept="image/jpeg,image/png,image/webp,image/gif" disabled></label>
+                <textarea id="chatText" rows="1" maxlength="2000" placeholder="Nhập tin nhắn…" disabled></textarea>
+                <button id="chatSend" type="submit" disabled>Gửi</button>
+                <div id="chatAttachmentBar" class="chat-attachment-bar" hidden><span id="chatFileName"></span><button id="chatRemoveImage" type="button" hidden aria-label="Bỏ ảnh đã chọn">×</button></div>
+            </form>
             </div>
             </div>
         </section>

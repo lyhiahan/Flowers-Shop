@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin-layout :: assets('Trung tâm hội thoại')}"></head>
+<body class="admin-body admin-chat-page">
+<div class="admin-layout-wrapper">
+    <div id="chatAdminNavigation" class="chat-admin-navigation"><button id="chatNavigationClose" class="chat-nav-close" type="button" aria-label="Đóng menu quản trị">×</button><aside th:replace="~{fragments/admin-layout :: sidebar('chat')}"></aside></div>
+    <main class="main-wrapper-admin">
+        <div class="chat-page-toolbar">
+            <button id="chatNavigationToggle" class="chat-nav-toggle btn btn-outline-success" type="button" aria-controls="chatAdminNavigation" aria-expanded="false" aria-label="Mở menu quản trị"><i class="bi bi-list" aria-hidden="true"></i></button>
+            <h1 class="admin-page-title">Trung tâm hội thoại</h1>
+            <a class="btn btn-outline-success" th:href="@{/admin/chat/access-logs}">Nhật ký truy cập</a>
+        </div>
+        <th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
+    </main>
+</div>
+</body>
+</html>

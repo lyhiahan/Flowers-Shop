@@ -526,6 +526,7 @@
                             <li sec:authorize="hasRole('USER')">
                                 <a class="dropdown-item py-2" th:href="@{/customer/orders}"><i class="bi bi-box2-heart me-2 text-secondary"></i> Đơn hoa đã đặt</a>
                             </li>
+                            <th:block th:replace="~{fragments/chat-widget :: system-chat-link}"></th:block>
                             <li sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')">
                                 <a class="dropdown-item py-2 fw-semibold text-success" th:href="@{/manager/dashboard}"><i class="bi bi-shop me-2"></i> Kênh Quản lý cửa hàng</a>
                             </li>
@@ -729,6 +730,13 @@
                         <span th:if="${product.store != null}" th:text="${product.store.name}"></span>
                     </p>
 
+                    <button sec:authorize="hasRole('USER') and !hasRole('MANAGER') and !hasRole('ADMIN')" type="button"
+                            class="btn btn-outline-success mb-3" data-chat-detail-contact th:data-chat-product-id="${product.id}"
+                            th:data-chat-store-id="${product.store != null ? product.store.id : (purchaseStore != null ? purchaseStore.id : null)}"
+                            th:disabled="${product.store == null and purchaseStore == null}">
+                        <i class="bi bi-chat-dots me-1"></i> Nhắn tin với cửa hàng
+                    </button>
+                    <p th:if="${product.store == null and purchaseStore == null}" class="small text-muted">Chưa xác định chi nhánh bán mẫu hoa này để liên hệ.</p>
                     <!-- 5. MUA HÀNG: Số lượng và nút mua cùng một hàng, cách nhau 12 px -->
                     <!-- Khi đã đăng nhập với vai trò Khách hàng (USER) -->
                     <form sec:authorize="hasRole('USER')" action="/cart/add" method="post"

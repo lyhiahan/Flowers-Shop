@@ -9,11 +9,15 @@ import java.util.Map;
 @Controller @RequiredArgsConstructor
 public class ChatSocketController {
  private final ChatService chat;
- public record SendRequest(Long conversationId,String content,String clientMessageId){}
+ public record SendRequest(Long conversationId,String content,String clientMessageId,Long productId){}
  @MessageMapping("/chat.send")
  @SendToUser(destinations="/queue/chat.acks",broadcast=false)
- public ChatService.MessageView send(SendRequest input,Principal principal){
-  return chat.send(principal==null?null:principal.getName(),input.conversationId(),input.content(),input.clientMessageId());
+ public ChatService.MessageView send(SendRequest input,Principal principal,@Header("simpSessionAttributes") Map<String,Object> attributes){
+  Long storeId=attributes.get("chatStoreId") instanceof Long id?id:null;
+  var actor=chat.activeUser(principal==null?null:principal.getName());
+  if(actor.hasRole(com.finalproject.enums.Role.MANAGER) && !actor.hasRole(com.finalproject.enums.Role.ADMIN) && storeId==null)
+   throw new org.springframework.security.access.AccessDeniedException("Phiên chat quản lý chưa chọn chi nhánh.");
+  return chat.send(principal.getName(),input.conversationId(),input.content(),input.clientMessageId(),storeId,input.productId());
  }
  @MessageExceptionHandler({IllegalArgumentException.class,IllegalStateException.class,org.springframework.security.access.AccessDeniedException.class})
  @SendToUser(destinations="/queue/chat.errors",broadcast=false)
