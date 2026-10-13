@@ -1,12 +1,30 @@
-# COD, tồn kho và hủy đơn trước giao hàng
+# COD, tồn kho và chính sách hủy đơn
 
 ## Quy tắc
 
 - Đặt hàng thành công trừ `store_inventories.quantity` tại chi nhánh thực sự xử lý đơn, ngay trong transaction tạo đơn. COD vẫn có payment `PENDING` / trạng thái thanh toán `UNPAID`, nhưng đã giữ hàng bằng cách giảm số lượng còn lại.
 - Chuyển sang xác nhận, chuẩn bị hoặc giao hàng không trừ kho lần nữa.
-- Khách được hủy ở `PENDING`, `CONFIRMED`, `PREPARING`. Khi đã bắt đầu giao hoặc kết thúc đơn thì bị chặn.
+- Cập nhật theo yêu cầu mới: khách chỉ được hủy ở `PENDING`, `CONFIRMED`. Từ `PREPARING` (bắt đầu cắm hoa/chuẩn bị) thì bị chặn, kể cả chưa bắt đầu giao hoặc nhận tại quầy. Không áp dụng giới hạn một giờ.
 - Hủy hoàn kho về đúng chi nhánh, đúng số lượng, đúng một lần. Gửi lại yêu cầu hủy không cộng thêm hàng. Đặt thất bại rollback, không tạo đơn thành công hoặc làm mất hàng.
 - COD chưa thu tiền không phải doanh thu đã ghi nhận. Đơn đã thanh toán hủy trước giao chuyển sang yêu cầu hoàn tiền, không tự giả định đã hoàn tiền.
+
+## Cập nhật khóa hủy từ lúc cắm hoa
+
+Yêu cầu mới thay thế quy tắc cũ cho phép khách hủy trong `PREPARING`. `Order.isCancellable()` và backend `cancelByCustomer` cùng kiểm tra chỉ `PENDING`/`CONFIRMED`; khóa pessimistic và đọc lại đơn trước quyết định được giữ nguyên. Trang đơn cũ không thể dùng POST để vượt qua trạng thái chuẩn bị mới. Trang danh sách/chi tiết ẩn nút và modal hủy, giải thích khi đã chuẩn bị. Checkout hiển thị chính sách trước đặt; thông báo chuẩn bị cho khách nêu rõ việc khóa hủy.
+
+Admin/manager xác nhận cảnh báo trước khi bắt đầu cắm hoa ở cả danh sách và chi tiết. Trạng thái giao hàng đã tồn tại, giữ luồng `PREPARING → DELIVERING → DELIVERED → COMPLETED`; pickup không dùng bước giao hàng, hoàn tất khi khách đã nhận tại quầy. Không thêm enum/migration hoặc thay dữ liệu đơn thật. Quyền hủy ngoại lệ hiện có của cửa hàng được giữ và gắn nhãn riêng, không đồng nghĩa khách được hủy; cần kiểm tra hàng thực tế khi hoàn kho ngoại lệ.
+
+Kết quả sau thay đổi chính sách: `maven package` thành công; **477 ca Java, 474 đạt, 0 failures/errors, 3 bỏ qua** (Cloudinary live và 2 SQL Server opt-in); **38/38 ca JavaScript đạt**. Kiểm thử bổ sung COD/chuyển khoản đã thanh toán × pickup/delivery, khách đang mở trang xác nhận rồi cửa hàng bắt đầu chuẩn bị, POST hủy bị từ chối và kho/thanh toán không đổi, tiếp tục giao/hoàn tất không trừ kho lần nữa. JavaScript kiểm tra cảnh báo admin/manager bật đúng lúc chuẩn bị, tắt khi chọn trạng thái khác và không mở modal khi chưa chọn. Kiểm thử đặt/hủy dùng H2 riêng; không sửa RentalShop gốc, không tự restart website hoặc push GitHub.
+
+## Lý do hủy và thông báo khách hàng
+
+Modal xác nhận admin/manager thêm textarea Lý do hủy, chỉ hiện và bắt buộc khi chọn `CANCELLED`. Trường được liên kết với form xác nhận dù nằm trong modal body. Đổi sang trạng thái khác sẽ ẩn, disable, bỏ required và xóa lý do để không gửi nhầm. Backend từ chối lý do thiếu/trống/chỉ khoảng trắng hoặc quá 300 ký tự trước khi thay đổi kho, trạng thái và thông báo. Tên người hủy được xác định từ quyền đăng nhập, không nhận từ client.
+
+Lưu câu đầy đủ vào cột `cancellation_reason` 500 ký tự hiện có, không cần migration. Khách thấy lý do ở danh sách/chi tiết đơn và trong hệ thống thông báo: “Đơn hàng của bạn đã bị hủy bởi admin (quản trị viên) với lý do: …”. Quản lý cửa hàng dùng nhãn tương ứng. Thông báo sử dụng cơ chế WebSocket sau commit hiện có. Đơn đã thanh toán chuyển `REFUND_REQUESTED`, thông báo cả lý do và yêu cầu hoàn tiền; không tự đánh dấu đã hoàn tiền. Xác nhận hoàn tiền giữ lời giải thích ban đầu, kể cả khi nội dung lý do có cụm “Vui lòng hoàn tiền”.
+
+Lý do được render bằng `th:text`; toast/list realtime đã escape nội dung. Thao tác hủy lặp không ghi đè lý do, hoàn kho hoặc tạo thông báo hủy lần hai. Hủy tự động khi hết hạn/khóa tài khoản và khách tự hủy vẫn dùng lý do hệ thống, không yêu cầu textarea. Lượt sửa không hủy/chỉnh đơn #23 hoặc dữ liệu RentalShop thật.
+
+Kết quả sau bổ sung lý do: `maven package` thành công; **490 ca Java, 487 đạt, 0 failures/errors, 3 bỏ qua** (Cloudinary live và 2 SQL Server opt-in); **38/38 JavaScript đạt**. Kiểm thử mới bao phủ lý do thiếu/rỗng/chỉ khoảng trắng/quá dài, 3 trạng thái hủy thủ công × COD/chuyển khoản đã trả tiền, thông báo đúng khách có lý do, render chống XSS, hủy lặp không hoàn kho/gửi thông báo lần hai, xác nhận hoàn tiền giữ lý do, và liên kết textarea với đúng form. Không tự push hoặc khởi động lại website trên RentalShop thật.
 
 ## Phần hiển thị được sửa
 
@@ -30,7 +48,7 @@ Kết quả hồi quy sau bổ sung khách hàng: **454 ca Java, 451 đạt, 0 f
 
 ## Kiểm thử bổ sung
 
-- `CodStockKpiTests`: HTTP checkout COD, 10 → 8; dashboard chi nhánh/toàn chuỗi và trang chủ cập nhật; hủy ở cả ba trạng thái trước giao trả 8 → 10, kể cả yêu cầu hủy lặp; giao/hoàn tất không trừ lần nữa và chặn hủy; đặt lặp/đặt thiếu hàng; quyền xem; bộ lọc ngày; tổng vượt số nguyên 32 bit và kho rỗng.
+- `CodStockKpiTests`: HTTP checkout COD, 10 → 8; dashboard chi nhánh/toàn chuỗi và trang chủ cập nhật; hủy ở hai trạng thái chờ/đã xác nhận trả 8 → 10, kể cả yêu cầu hủy lặp; chuẩn bị/giao/hoàn tất không trừ lần nữa và chặn khách hủy; đặt lặp/đặt thiếu hàng; quyền xem; bộ lọc ngày; tổng vượt số nguyên 32 bit và kho rỗng.
 - `CodCheckoutCommitTests`: không có outer transaction của test; tạo dữ liệu, đặt COD, đọc kho, hủy và đọc lại qua các transaction độc lập để xác nhận thay đổi đã commit.
 - `stock-kpi.test.cjs`: polling, số liệu lỗi, lỗi mạng/khôi phục, chống request chồng nhau, tab ẩn, hủy request khi rời trang, khôi phục trang từ back-forward cache.
 
@@ -55,7 +73,7 @@ Kết quả hồi quy sau sửa chọn kho: `maven package` thành công lúc 09
 1. Dừng bản ứng dụng cũ bằng Ctrl+C trong terminal đang chạy nó; chạy lại `scripts/sqlserver.ps1`. Không cần reset database hoặc chạy lại migration chỉ để có KPI mới.
 2. Chọn một sản phẩm còn hàng, ghi lại số lượng ở chi nhánh sẽ xử lý đơn. Mở dashboard chi nhánh đó ở tab/tài khoản quản lý riêng.
 3. Khách đặt 2 sản phẩm bằng COD; số lượng còn lại phải giảm 2 ngay khi đơn thành công. Dashboard đang mở cập nhật trong lần polling kế tiếp; mở lại trang chủ sẽ đọc số mới.
-4. Khách hủy khi đơn chờ xác nhận, đã xác nhận hoặc đang chuẩn bị; tồn kho tăng lại đúng 2. Gửi lại thao tác hủy không tăng thêm.
-5. Với đơn khác, quản lý bắt đầu giao: kho không giảm lần nữa và khách không còn được hủy.
+4. Khách hủy khi đơn chờ xác nhận hoặc đã xác nhận; tồn kho tăng lại đúng 2. Gửi lại thao tác hủy không tăng thêm.
+5. Với đơn khác, quản lý bắt đầu cắm hoa/chuẩn bị: có cảnh báo khóa hủy; kho không giảm lần nữa và khách không còn được hủy, kể cả gọi trực tiếp endpoint từ trang cũ. Đơn giao tận nơi tiếp tục Đang giao → Đã giao → Hoàn tất; đơn pickup chỉ hoàn tất khi khách thực sự nhận hoa.
 
 Đơn giao tận nơi được hệ thống chọn chi nhánh đáp ứng tồn kho/địa chỉ; cần xem chi nhánh trên đơn, không mặc định đó là chi nhánh trước đó đang mở ở tab quản lý. Kiểm thử tự động dùng H2 tách biệt. Việc kiểm tra tổng kho trên SQL Server gốc là chỉ đọc; không tạo/hủy đơn hoặc tự điều chỉnh dữ liệu thật của người dùng.

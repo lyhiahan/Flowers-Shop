@@ -46,13 +46,14 @@ public class OrderWorkflowService {
 
     public String transitionLabel(Order order, OrderStatus next) {
         return switch (next) {
-            case CONFIRMED -> "Tiếp nhận đơn hàng";
+            case CONFIRMED -> "Xác nhận đơn hàng (khách vẫn được hủy)";
             case PREPARING -> "Bắt đầu cắm hoa & Chuẩn bị";
             case PICKED_UP -> "Bàn giao cho người giao hàng";
             case DELIVERING -> "Đang giao hoa đến khách";
             case DELIVERED -> "Đã giao hoa thành công";
             case COMPLETED -> "PICKUP".equals(order.getShippingMethod()) ? "Khách nhận hoa tại quầy - Hoàn tất" : "Hoàn tất đơn hàng";
-            case CANCELLED -> "Hủy đơn hàng";
+            case CANCELLED -> order.getStatus() == OrderStatus.PREPARING
+                    ? "Hủy ngoại lệ từ cửa hàng (khách không được tự hủy)" : "Hủy đơn hàng";
             case REFUNDED -> "Xác nhận đã hoàn tiền cho khách";
             default -> next.name();
         };
@@ -60,7 +61,13 @@ public class OrderWorkflowService {
 
     @Transactional
     public Order transition(Long id, OrderStatus next) {
+        return transition(id, next, null);
+    }
+
+    @Transactional
+    public Order transition(Long id, OrderStatus next, String cancellationReason) {
         Order order = lockedOrder(id);
+        entityManager.refresh(order, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
         access.requireStore(order.getPickupStore());
         if (next == OrderStatus.REFUNDED) access.requireManager(order.getPickupStore());
         OrderStatus previous = order.getStatus();
@@ -74,7 +81,11 @@ public class OrderWorkflowService {
             throw new IllegalStateException("Cần xác nhận đã nhận thanh toán trước khi giao hoa.");
         }
         if (next == OrderStatus.CANCELLED) {
-            order.setCancellationReason("Chi nhánh/quản trị viên đã hủy đơn hàng. "
+            String reason = cancellationReason == null ? "" : cancellationReason.strip();
+            if (reason.isBlank()) throw new IllegalArgumentException("Vui lòng nhập lý do hủy đơn hàng.");
+            if (reason.length() > 300) throw new IllegalArgumentException("Lý do hủy đơn không được vượt quá 300 ký tự.");
+            String actor = access.currentUser().hasRole(Role.ADMIN) ? "admin (quản trị viên)" : "quản lý cửa hàng";
+            order.setCancellationReason("Đơn hàng của bạn đã bị hủy bởi " + actor + " với lý do: " + reason + ". "
                     + ("PAID".equals(order.getPaymentStatus()) ? "Vui lòng hoàn tiền lại cho khách hàng; chưa ghi nhận đã hoàn tiền." : "Đơn chưa thanh toán đã được hủy."));
             Order saved = cancel(order);
             notifyOrderStatusChange(saved, previous, saved.getStatus());
@@ -83,7 +94,9 @@ public class OrderWorkflowService {
         if (next == OrderStatus.REFUNDED) {
             refund(order);
             if (order.getCancellationReason() != null) {
-                order.setCancellationReason(order.getCancellationReason().split("Vui lòng hoàn tiền", 2)[0]
+                String reason = order.getCancellationReason();
+                int refundInstruction = reason.lastIndexOf("Vui lòng hoàn tiền");
+                order.setCancellationReason((refundInstruction >= 0 ? reason.substring(0, refundInstruction) : reason + " ")
                         + "Đã xác nhận hoàn tiền cho khách hàng.");
             }
         }
@@ -194,13 +207,13 @@ public class OrderWorkflowService {
     @Transactional
     public void cancelByCustomer(String username, Long id) {
         Order order = lockedOrder(id);
-        // Re-read after acquiring the lock: delivery may have started since the page loaded.
+        // Re-read after acquiring the lock: preparation may have started since the page loaded.
         entityManager.refresh(order, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
         requireCustomer(order, username);
         if (order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.REFUND_REQUESTED) return;
         if (!order.isCancellable())
-            throw new IllegalStateException("Không thể hủy đơn đã bắt đầu giao hàng hoặc đã kết thúc. Bạn có thể hủy khi đơn đang chờ xác nhận, đã xác nhận hoặc đang chuẩn bị.");
-        order.setCancellationReason("Khách hàng đã hủy đơn trước khi giao hàng. "
+            throw new IllegalStateException("Không thể hủy đơn đã bắt đầu cắm hoa/chuẩn bị, đang giao hoặc đã kết thúc. Bạn chỉ được hủy khi đơn đang chờ xác nhận hoặc đã xác nhận.");
+        order.setCancellationReason("Khách hàng đã hủy đơn trước khi bắt đầu cắm hoa/chuẩn bị. "
                 + ("PAID".equals(order.getPaymentStatus())
                 ? "Vui lòng hoàn tiền lại cho khách hàng; chưa ghi nhận đã hoàn tiền."
                 : "Đơn chưa thanh toán đã được hủy."));
@@ -327,7 +340,7 @@ public class OrderWorkflowService {
                 case PREPARING -> {
                     notificationService.sendNotification(order.getUser(),
                             "🌺 Đang cắm hoa đơn #" + orderId,
-                            "Nghệ nhân tiệm hoa đang tuyển chọn hoa tươi mới và tiến hành cắm hoa cho bạn.",
+                            "Nghệ nhân tiệm hoa đã bắt đầu cắm hoa/chuẩn bị cho bạn. Từ thời điểm này, bạn không thể tự hủy đơn.",
                             "ORDER_PREPARING", orderId);
                 }
                 case DELIVERING -> {
@@ -351,12 +364,14 @@ public class OrderWorkflowService {
                 case CANCELLED -> {
                     notificationService.sendNotification(order.getUser(),
                             "❌ Đơn hoa #" + orderId + " đã bị hủy",
-                            "Đơn hàng #" + orderId + " đã được hủy thành công.",
+                            order.getCancellationReason() != null ? order.getCancellationReason()
+                                    : "Đơn hàng #" + orderId + " đã được hủy thành công.",
                             "ORDER_CANCELLED", orderId);
                     if (order.getPickupStore() != null) {
                         notificationService.sendNotificationToStoreManagers(order.getPickupStore().getId(),
                                 "⚠️ Đơn hoa #" + orderId + " đã bị hủy",
-                                "Đơn hoa #" + orderId + " đã bị hủy bởi người dùng hoặc hệ thống.",
+                                order.getCancellationReason() != null ? order.getCancellationReason()
+                                        : "Đơn hoa #" + orderId + " đã bị hủy bởi người dùng hoặc hệ thống.",
                                 "ORDER_CANCELLED", orderId);
                     }
                 }

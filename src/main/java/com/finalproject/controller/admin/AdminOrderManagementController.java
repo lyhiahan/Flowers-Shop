@@ -184,10 +184,11 @@ public class AdminOrderManagementController {
     @PostMapping("/update-status/{id}")
     public String updateOrderStatus(@PathVariable("id") Long id,
                                     @RequestParam("status") OrderStatus status,
+                                    @RequestParam(value = "cancellationReason", required = false) String cancellationReason,
                                     @RequestParam(value = "redirect", required = false) String redirectUrl,
                                     RedirectAttributes ra) {
         try {
-            orderService.updateOrderStatus(id, status);
+            orderService.updateOrderStatus(id, status, cancellationReason);
             String statusLabel = switch (status) {
                 case CONFIRMED -> "Đã tiếp nhận";
                 case PREPARING -> "Đang cắm hoa";

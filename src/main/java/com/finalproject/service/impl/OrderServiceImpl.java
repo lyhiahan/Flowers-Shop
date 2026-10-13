@@ -530,6 +530,12 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
+    public void updateOrderStatus(Long orderId, OrderStatus status, String cancellationReason) {
+        workflow.transition(orderId, status, cancellationReason);
+    }
+
+    @Override
+    @Transactional
     public void requestRefund(String username, Long orderId) {
         workflow.requestRefund(username, orderId);
     }

@@ -794,6 +794,10 @@
                                           th:text="${#numbers.formatDecimal(grandTotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
                                 </div>
 
+                                <p class="small text-muted mt-3 mb-0" id="cancellationPolicy" role="note">
+                                    Chính sách hủy: Bạn chỉ được hủy khi đơn chờ xác nhận hoặc đã xác nhận.
+                                    Khi cửa hàng bắt đầu cắm hoa/chuẩn bị, bạn không thể tự hủy đơn.
+                                </p>
                                 <div class="mt-4">
                                     <button type="submit" class="btn-order-submit" id="btnPlaceOrder">
                                         Đặt hàng

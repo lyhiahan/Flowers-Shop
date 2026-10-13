@@ -121,7 +121,7 @@ class CodStockKpiTests {
     }
 
     @ParameterizedTest
-    @EnumSource(value = OrderStatus.class, names = {"PENDING", "CONFIRMED", "PREPARING"})
+    @EnumSource(value = OrderStatus.class, names = {"PENDING", "CONFIRMED"})
     void codImmediatelyReservesStockAndCancellationReturnsItExactlyOnce(OrderStatus state) throws Exception {
         assertStock(10, 17);
         submit();
@@ -132,7 +132,6 @@ class CodStockKpiTests {
         mvc.perform(get("/")).andExpect(status().isOk()).andExpect(content().string(containsString("Còn 8 sản phẩm")));
         loginManager();
         if (state != OrderStatus.PENDING) workflow.transition(order.getId(), OrderStatus.CONFIRMED);
-        if (state == OrderStatus.PREPARING) workflow.transition(order.getId(), OrderStatus.PREPARING);
         em.flush();
         for (int retry = 0; retry < 2; retry++) {
             mvc.perform(post("/customer/orders/cancel/" + order.getId())
@@ -145,15 +144,15 @@ class CodStockKpiTests {
     }
 
     @ParameterizedTest
-    @EnumSource(value = OrderStatus.class, names = {"DELIVERING", "DELIVERED", "COMPLETED"})
-    void deliveryAndCompletionDoNotDeductAgainAndBlockCustomerCancellation(OrderStatus state) throws Exception {
+    @EnumSource(value = OrderStatus.class, names = {"PREPARING", "DELIVERING", "DELIVERED", "COMPLETED"})
+    void preparationDeliveryAndCompletionDoNotDeductAgainAndBlockCustomerCancellation(OrderStatus state) throws Exception {
         submit();
         Order order = orders.findAll().getFirst();
         loginManager();
         workflow.transition(order.getId(), OrderStatus.CONFIRMED);
         workflow.transition(order.getId(), OrderStatus.PREPARING);
-        workflow.transition(order.getId(), OrderStatus.DELIVERING);
-        if (state != OrderStatus.DELIVERING) workflow.transition(order.getId(), OrderStatus.DELIVERED);
+        if (state != OrderStatus.PREPARING) workflow.transition(order.getId(), OrderStatus.DELIVERING);
+        if (state == OrderStatus.DELIVERED || state == OrderStatus.COMPLETED) workflow.transition(order.getId(), OrderStatus.DELIVERED);
         if (state == OrderStatus.COMPLETED) workflow.transition(order.getId(), OrderStatus.COMPLETED);
         em.flush(); em.clear();
         assertStock(8, 15);

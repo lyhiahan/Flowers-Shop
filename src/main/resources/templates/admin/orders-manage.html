@@ -433,7 +433,8 @@
                                     </form>
 
                                     <!-- 2. Khi CONFIRMED -> Nút Bắt đầu chuẩn bị -->
-                                    <form th:if="${o.status.name() == 'CONFIRMED'}" th:action="@{'/admin/orders-manage/update-status/' + ${o.id}}" method="post" class="d-inline m-0">
+                                    <form th:if="${o.status.name() == 'CONFIRMED'}" th:action="@{'/admin/orders-manage/update-status/' + ${o.id}}" method="post" class="d-inline m-0"
+                                          onsubmit="return confirm('Bắt đầu cắm hoa/chuẩn bị? Sau thao tác này, khách không thể tự hủy đơn.');">
                                         <input type="hidden" name="status" value="PREPARING">
                                         <button type="submit" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1"
                                                 style="height: 32px; padding: 0 12px; font-size: 13px; font-weight: 700; border-radius: 8px;">

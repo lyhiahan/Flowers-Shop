@@ -165,10 +165,11 @@ public class ManagerOrderController {
     @PostMapping("/update-status/{id}")
     public String updateStatus(@PathVariable("id") Long id,
                                @RequestParam("status") OrderStatus status,
+                               @RequestParam(value = "cancellationReason", required = false) String cancellationReason,
                                @RequestParam(value = "redirect", required = false) String redirectUrl,
                                RedirectAttributes ra) {
         try {
-            orderService.updateOrderStatus(id, status);
+            orderService.updateOrderStatus(id, status, cancellationReason);
             ra.addFlashAttribute("successMessage", "Cập nhật trạng thái đơn #" + id + " thành [" + status + "] thành công!");
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());

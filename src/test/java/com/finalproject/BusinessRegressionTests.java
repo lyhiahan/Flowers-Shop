@@ -180,7 +180,7 @@ class BusinessRegressionTests {
         Order order = checkout(PaymentMethod.BANK_TRANSFER);
         login(admin); workflow.confirmPayment(order.getId());
         mvc.perform(post("/admin/orders/update-status/" + order.getId()).with(user(admin.getUsername()).roles("ADMIN")).with(csrf())
-                .param("status", "CANCELLED")).andExpect(status().is3xxRedirection());
+                .param("status", "CANCELLED").param("cancellationReason", "Không đủ hoa theo mẫu đã chọn")).andExpect(status().is3xxRedirection());
         assertThat(order.getStatus()).isEqualTo(OrderStatus.REFUND_REQUESTED);
         assertThat(order.getCancellationReason()).contains("quản trị viên", "Vui lòng hoàn tiền");
         assertThat(order.getPaymentStatus()).isEqualTo("PAID");
@@ -189,6 +189,109 @@ class BusinessRegressionTests {
         assertThat(store.getEWallet()).isEqualByComparingTo("0");
         assertThat(order.getCancellationReason()).contains("Đã xác nhận hoàn tiền").doesNotContain("Vui lòng hoàn tiền");
         assertThat(customer.getIsActive()).isTrue();
+    }
+
+    static java.util.stream.Stream<org.junit.jupiter.params.provider.Arguments> manualCancellationStatesAndPayments() {
+        return java.util.stream.Stream.of(OrderStatus.PENDING, OrderStatus.CONFIRMED, OrderStatus.PREPARING)
+                .flatMap(state -> java.util.stream.Stream.of(PaymentMethod.COD, PaymentMethod.BANK_TRANSFER)
+                        .map(payment -> org.junit.jupiter.params.provider.Arguments.of(state, payment)));
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.MethodSource("manualCancellationStatesAndPayments")
+    void adminCancellationSavesReasonAndNotifiesCustomerOnlyOnce(OrderStatus state, PaymentMethod method) throws Exception {
+        Order order = checkout(method);
+        User admin = users.findByUsername("admin-test").orElseThrow();
+        login(admin);
+        if (method == PaymentMethod.BANK_TRANSFER) workflow.confirmPayment(order.getId());
+        if (state != OrderStatus.PENDING) workflow.transition(order.getId(), OrderStatus.CONFIRMED);
+        if (state == OrderStatus.PREPARING) workflow.transition(order.getId(), OrderStatus.PREPARING);
+        String reason = "Không đủ hoa tươi theo mẫu khách đã chọn";
+        mvc.perform(post("/admin/orders-manage/update-status/" + order.getId()).with(user(admin.getUsername()).roles("ADMIN")).with(csrf())
+                        .param("status", "CANCELLED").param("cancellationReason", "  " + reason + "  "))
+                .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("successMessage"));
+        assertThat(order.getCancellationReason()).contains("Đơn hàng của bạn đã bị hủy bởi admin", "với lý do: " + reason)
+                .doesNotContain("  " + reason);
+        assertThat(order.getCancellationReason().length()).isLessThanOrEqualTo(500);
+        assertThat(order.getStatus()).isEqualTo(method == PaymentMethod.COD ? OrderStatus.CANCELLED : OrderStatus.REFUND_REQUESTED);
+        assertThat(order.getPaymentStatus()).isEqualTo(method == PaymentMethod.COD ? "UNPAID" : "PAID");
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(10);
+        var cancellationNotices = notifications.findByUserIdOrderByCreatedAtDesc(customer.getId()).stream()
+                .filter(n -> order.getId().equals(n.getRelatedOrderId())
+                        && ("ORDER_CANCELLED".equals(n.getType()) || "REFUND_REQUESTED".equals(n.getType()))).toList();
+        assertThat(cancellationNotices).hasSize(1);
+        assertThat(cancellationNotices.getFirst().getContent()).isEqualTo(order.getCancellationReason());
+        for (String path : List.of("/customer/orders", "/customer/orders/" + order.getId(), "/notifications")) {
+            mvc.perform(get(path).with(user(customer.getUsername()).roles("USER")))
+                    .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString(reason)));
+        }
+        mvc.perform(post("/admin/orders-manage/update-status/" + order.getId()).with(user(admin.getUsername()).roles("ADMIN")).with(csrf())
+                        .param("status", "CANCELLED").param("cancellationReason", "Một lý do khác"))
+                .andExpect(status().is3xxRedirection());
+        assertThat(order.getCancellationReason()).contains(reason).doesNotContain("Một lý do khác");
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(10);
+        assertThat(notifications.findByUserIdOrderByCreatedAtDesc(customer.getId()).stream()
+                .filter(n -> order.getId().equals(n.getRelatedOrderId())
+                        && ("ORDER_CANCELLED".equals(n.getType()) || "REFUND_REQUESTED".equals(n.getType()))).count()).isEqualTo(1);
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.NullAndEmptySource
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"   ", "\t\n"})
+    void adminCancellationRequiresNonBlankReasonBeforeTouchingStock(String reason) throws Exception {
+        Order order = checkout(PaymentMethod.COD);
+        var request = post("/admin/orders-manage/update-status/" + order.getId()).with(user("admin-test").roles("ADMIN")).with(csrf())
+                .param("status", "CANCELLED");
+        if (reason != null) request.param("cancellationReason", reason);
+        long noticeCount = notifications.count();
+        mvc.perform(request).andExpect(status().is3xxRedirection()).andExpect(flash().attribute("errorMessage",
+                org.hamcrest.Matchers.containsString("Vui lòng nhập lý do")));
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
+        assertThat(order.getCancellationReason()).isNull();
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(8);
+        assertThat(notifications.count()).isEqualTo(noticeCount);
+    }
+
+    @Test void manualCancellationRejectsLongReasonAndEscapesCustomerFacingHtml() throws Exception {
+        Order order = checkout(PaymentMethod.COD);
+        login(users.findByUsername("admin-test").orElseThrow());
+        assertThatThrownBy(() -> workflow.transition(order.getId(), OrderStatus.CANCELLED, "a".repeat(301)))
+                .hasMessageContaining("300 ký tự");
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(8);
+        String reason = "<script>alert(1)</script>";
+        workflow.transition(order.getId(), OrderStatus.CANCELLED, reason);
+        for (String path : List.of("/customer/orders", "/customer/orders/" + order.getId(), "/notifications")) {
+            mvc.perform(get(path).with(user(customer.getUsername()).roles("USER")))
+                    .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("&lt;script&gt;alert(1)&lt;/script&gt;")))
+                    .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString(reason))));
+        }
+    }
+
+    @Test void managerExceptionAlsoRequiresReasonAndRefundPreservesTheOriginalExplanation() throws Exception {
+        Order order = checkout(PaymentMethod.BANK_TRANSFER);
+        login(manager); workflow.confirmPayment(order.getId());
+        workflow.transition(order.getId(), OrderStatus.CONFIRMED);
+        workflow.transition(order.getId(), OrderStatus.PREPARING);
+        String reason = "Vui lòng hoàn tiền vì hoa không đạt chất lượng";
+        mvc.perform(post("/manager/orders/update-status/" + order.getId()).with(user(manager.getUsername()).roles("MANAGER")).with(csrf())
+                        .param("status", "CANCELLED").param("cancellationReason", reason))
+                .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("successMessage"));
+        assertThat(order.getCancellationReason()).contains("hủy bởi quản lý cửa hàng", reason);
+        login(manager); workflow.transition(order.getId(), OrderStatus.REFUNDED);
+        assertThat(order.getCancellationReason()).contains(reason, "Đã xác nhận hoàn tiền");
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(10);
+    }
+
+    @Test void cancellationReasonFieldIsBoundToTheConfirmationForm() throws Exception {
+        Order order = checkout(PaymentMethod.COD);
+        for (String role : List.of("admin", "manager")) {
+            String route = "admin".equals(role) ? "/admin/orders-manage/" : "/manager/orders/";
+            mvc.perform(get(route + order.getId()).with(user("admin".equals(role) ? "admin-test" : manager.getUsername()).roles(role.toUpperCase())))
+                    .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"cancellationReasonInput\"")))
+                    .andExpect(content().string(org.hamcrest.Matchers.containsString("form=\"formConfirmStatusUpdate\"")))
+                    .andExpect(content().string(org.hamcrest.Matchers.containsString("maxlength=\"300\"")));
+        }
     }
 
     @Test void refundDeductsRevenueOnceWithoutDeductingOtherOrders() throws Exception {
@@ -759,19 +862,18 @@ class BusinessRegressionTests {
     }
 
     static java.util.stream.Stream<org.junit.jupiter.params.provider.Arguments> cancellableStatesAndPayments() {
-        return java.util.stream.Stream.of(OrderStatus.PENDING, OrderStatus.CONFIRMED, OrderStatus.PREPARING)
+        return java.util.stream.Stream.of(OrderStatus.PENDING, OrderStatus.CONFIRMED)
                 .flatMap(state -> java.util.stream.Stream.of(PaymentMethod.COD, PaymentMethod.BANK_TRANSFER)
                         .map(payment -> org.junit.jupiter.params.provider.Arguments.of(state, payment)));
     }
 
     @org.junit.jupiter.params.ParameterizedTest
     @org.junit.jupiter.params.provider.MethodSource("cancellableStatesAndPayments")
-    void customerCanCancelBeforeDeliveryRegardlessOfAge(OrderStatus state, PaymentMethod method) throws Exception {
+    void customerCanCancelBeforePreparationRegardlessOfAge(OrderStatus state, PaymentMethod method) throws Exception {
         Order order = checkout(method);
         login(manager);
         if (method == PaymentMethod.BANK_TRANSFER) workflow.confirmPayment(order.getId());
         if (state != OrderStatus.PENDING) workflow.transition(order.getId(), OrderStatus.CONFIRMED);
-        if (state == OrderStatus.PREPARING) workflow.transition(order.getId(), OrderStatus.PREPARING);
         order.setCreatedAt(LocalDateTime.now().minusDays(2));
         orders.saveAndFlush(order);
         assertThat(order.isCancellable()).isTrue();
@@ -796,8 +898,8 @@ class BusinessRegressionTests {
 
     @org.junit.jupiter.params.ParameterizedTest
     @org.junit.jupiter.params.provider.EnumSource(value = OrderStatus.class,
-            names = {"DELIVERING", "DELIVERED", "COMPLETED", "PICKED_UP", "RENTING", "RETURNED", "OVERDUE", "REFUNDED"})
-    void cancellationIsBlockedOnceDeliveryStartedOrOrderEnded(OrderStatus state) throws Exception {
+            names = {"PREPARING", "DELIVERING", "DELIVERED", "COMPLETED", "PICKED_UP", "RENTING", "RETURNED", "OVERDUE", "REFUNDED"})
+    void cancellationIsBlockedOncePreparationStartedOrOrderEnded(OrderStatus state) throws Exception {
         Order order = checkout(PaymentMethod.COD);
         order.setStatus(state); orders.saveAndFlush(order);
         assertThat(order.isCancellable()).isFalse();
@@ -809,6 +911,46 @@ class BusinessRegressionTests {
         mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()))
                 .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("errorMessage"));
         assertThat(order.getStatus()).isEqualTo(state);
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(8);
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({"COD,PICKUP", "COD,DELIVERY", "BANK_TRANSFER,PICKUP", "BANK_TRANSFER,DELIVERY"})
+    void startingPreparationLocksCustomerCancellationButKeepsManagerFulfillment(PaymentMethod method, String shipping) throws Exception {
+        Order order = checkout(method);
+        order.setShippingMethod(shipping); orders.saveAndFlush(order);
+        login(manager);
+        if (method == PaymentMethod.BANK_TRANSFER) workflow.confirmPayment(order.getId());
+        workflow.transition(order.getId(), OrderStatus.CONFIRMED);
+        // A customer can still have the cancellable page open while the shop starts work.
+        mvc.perform(get("/customer/orders/" + order.getId()).with(user(customer.getUsername()).roles("USER")))
+                .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "id=\"confirmCancelOrderModal_" + order.getId() + "\"")));
+        mvc.perform(post("/manager/orders/update-status/" + order.getId()).with(user(manager.getUsername()).roles("MANAGER")).with(csrf())
+                        .param("status", "PREPARING"))
+                .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("successMessage"));
+        for (String path : List.of("/customer/orders", "/customer/orders/" + order.getId())) {
+            mvc.perform(get(path).with(user(customer.getUsername()).roles("USER")))
+                    .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("bạn không thể tự hủy đơn")))
+                    .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString(
+                            "id=\"confirmCancelOrderModal_" + order.getId() + "\""))));
+        }
+        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()))
+                .andExpect(status().is3xxRedirection()).andExpect(flash().attribute("errorMessage",
+                        org.hamcrest.Matchers.containsString("đã bắt đầu cắm hoa/chuẩn bị")));
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PREPARING);
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(8);
+        assertThat(order.getPaymentStatus()).isEqualTo(method == PaymentMethod.COD ? "UNPAID" : "PAID");
+        login(manager);
+        assertThat(workflow.availableTransitions(order)).contains(OrderStatus.CANCELLED,
+                "PICKUP".equals(shipping) ? OrderStatus.COMPLETED : OrderStatus.DELIVERING);
+        if ("PICKUP".equals(shipping)) workflow.transition(order.getId(), OrderStatus.COMPLETED);
+        else {
+            workflow.transition(order.getId(), OrderStatus.DELIVERING);
+            workflow.transition(order.getId(), OrderStatus.DELIVERED);
+            workflow.transition(order.getId(), OrderStatus.COMPLETED);
+        }
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.COMPLETED);
         assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(8);
     }
 

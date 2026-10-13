@@ -330,6 +330,16 @@
                 <div class="alert alert-info py-2 px-3 mt-2 mb-0 fw-bold" id="selectedStatusText">
                     Trạng thái mới
                 </div>
+                <p id="preparationCancellationWarning" class="alert alert-warning mt-3 mb-0" hidden>
+                    Sau khi bắt đầu cắm hoa/chuẩn bị, khách không thể tự hủy đơn. Chỉ xác nhận khi cửa hàng thực sự bắt đầu làm hoa.
+                </p>
+                <div id="cancellationReasonGroup" class="mt-3" hidden>
+                    <label for="cancellationReasonInput" class="form-label fw-semibold">Lý do hủy đơn <span class="text-danger">*</span></label>
+                    <textarea id="cancellationReasonInput" name="cancellationReason" form="formConfirmStatusUpdate"
+                              class="form-control" rows="3" maxlength="300" disabled
+                              placeholder="Nhập lý do hủy để thông báo đến khách hàng..." aria-describedby="cancellationReasonHelp"></textarea>
+                    <small id="cancellationReasonHelp" class="text-muted">Bắt buộc, tối đa 300 ký tự. Lý do này sẽ được gửi đến khách hàng.</small>
+                </div>
             </div>
             <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
                 <!-- Alternative 10a: Bấm nút Cancel -> 11a: Hủy thao tác -->
@@ -364,6 +374,13 @@
 
         document.getElementById('hiddenStatusInput').value = selectedValue;
         document.getElementById('selectedStatusText').innerText = selectedText;
+        document.getElementById('preparationCancellationWarning').hidden = selectedValue !== 'PREPARING';
+        const isCancellation = selectedValue === 'CANCELLED';
+        document.getElementById('cancellationReasonGroup').hidden = !isCancellation;
+        const reasonInput = document.getElementById('cancellationReasonInput');
+        reasonInput.disabled = !isCancellation;
+        reasonInput.required = isCancellation;
+        if (!isCancellation) reasonInput.value = '';
 
         const modal = new bootstrap.Modal(document.getElementById('confirmStatusModal'));
         modal.show();

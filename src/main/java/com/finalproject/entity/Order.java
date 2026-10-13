@@ -106,9 +106,8 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderDetail> orderDetails;
-    // Customers may cancel until fulfillment enters delivery; creation time is irrelevant.
+    // Customers may cancel only before the florist starts preparing; creation time is irrelevant.
     public boolean isCancellable() {
-        return status == OrderStatus.PENDING || status == OrderStatus.CONFIRMED
-                || status == OrderStatus.PREPARING;
+        return status == OrderStatus.PENDING || status == OrderStatus.CONFIRMED;
     }
 }

@@ -246,7 +246,8 @@
                                         </form>
 
                                         <!-- Cắm hoa -->
-                                        <form th:if="${o.status.name() == 'CONFIRMED'}" th:action="@{'/manager/orders/update-status/' + ${o.id}}" method="post" class="d-inline">
+                                        <form th:if="${o.status.name() == 'CONFIRMED'}" th:action="@{'/manager/orders/update-status/' + ${o.id}}" method="post" class="d-inline"
+                                              onsubmit="return confirm('Bắt đầu cắm hoa/chuẩn bị? Sau thao tác này, khách không thể tự hủy đơn.');">
                                             <input type="hidden" name="status" value="PREPARING">
                                             <input type="hidden" name="redirect" th:value="@{/manager/orders(tab=${activeTab}, status=${currentStatus}, page=${currentPage})}">
                                             <button type="submit" class="btn btn-outline-danger btn-sm">Cắm Hoa</button>

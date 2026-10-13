@@ -43,7 +43,7 @@
                             ✅ Đã Tiếp Nhận Đơn
                         </span>
                         <span th:if="${o.status.name() == 'PREPARING'}" class="badge px-3 py-2 rounded-pill text-white" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);">
-                            🌸 Đang Cắm Hoa Nghệ Thuật
+                            🌸 Đang cắm hoa
                         </span>
                         <span th:if="${o.status.name() == 'DELIVERING'}" class="badge px-3 py-2 rounded-pill text-white" style="background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);">
                             🚚 Đang Giao Hoa Tới Người Nhận
@@ -64,6 +64,7 @@
                 </div>
 
                 <div class="card-body p-4">
+                    <div th:if="${o.cancellationReason != null}" class="alert alert-warning small" role="alert" th:text="${o.cancellationReason}"></div>
                     <!-- Chi nhánh & Thông tin người nhận -->
                     <div class="row g-3 mb-3 p-3 rounded-3 bg-light border">
                         <div class="col-md-6">
@@ -166,7 +167,7 @@
                             </form>
 
                             <!-- Nút ký hiệu cấm để hủy đơn hàng (UC_011 Alternative 7a) -->
-                            <!-- Khách được hủy đơn chờ xác nhận, đã xác nhận hoặc đang chuẩn bị; không giới hạn một giờ. -->
+                            <!-- Khách chỉ được hủy trước khi bắt đầu cắm hoa/chuẩn bị. -->
                             <button th:if="${o.isCancellable()}" type="button" 
                                     class="btn btn-outline-danger btn-sm rounded-pill px-3" 
                                     title="Hủy đơn hàng"
@@ -174,6 +175,9 @@
                                     th:data-bs-target="'#confirmCancelOrderModal_' + ${o.id}">
                                 <i class="bi bi-slash-circle me-1"></i> Hủy Đơn Hàng
                             </button>
+                            <span th:if="${o.status.name() == 'PREPARING'}" class="small text-muted" role="note">
+                                Đã bắt đầu cắm hoa/chuẩn bị, bạn không thể tự hủy đơn.
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -190,7 +194,7 @@
                             </div>
                             <div class="modal-body py-3 text-secondary">
                                 Bạn có chắc chắn muốn hủy đơn hàng <strong class="text-dark" th:text="'#' + ${o.id}"></strong> này không?
-                                <p class="small mb-0 mt-2">Bạn có thể hủy trước khi đơn bắt đầu giao hàng.</p>
+                                <p class="small mb-0 mt-2">Bạn chỉ được hủy khi đơn chờ xác nhận hoặc đã xác nhận. Khi cửa hàng bắt đầu cắm hoa/chuẩn bị, bạn không thể tự hủy.</p>
                                 <p th:if="${o.paymentStatus == 'PAID'}" class="small text-warning-emphasis mb-0 mt-2">Đơn đã thanh toán sẽ chuyển sang chờ cửa hàng hoàn tiền.</p>
                             </div>
                             <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
