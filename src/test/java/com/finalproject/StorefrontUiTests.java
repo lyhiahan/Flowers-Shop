@@ -3,6 +3,7 @@ package com.finalproject;
 import com.finalproject.entity.*;
 import com.finalproject.enums.Role;
 import com.finalproject.repository.*;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,6 +31,7 @@ class StorefrontUiTests {
     @Autowired ProductRepository products;
     @Autowired StoreInventoryRepository inventories;
     @Autowired CategoryRepository categories;
+    @Autowired EntityManager entityManager;
     User customer;
     Store store;
     Product product;
@@ -77,7 +79,15 @@ class StorefrontUiTests {
         assertThat(html).contains("id=\"headerCartLink\"", "id=\"headerCartBadge\"", "src=\"/js/home-cart.js\"")
                 .containsPattern("id=\"headerCartBadge\"[^>]*>3</span>");
         preview("home-filled.html", html);
-        preview("cart-filled.html", page("/cart"));
+        // HTTP requests normally use fresh persistence contexts, unlike this transactional fixture.
+        entityManager.flush();
+        entityManager.clear();
+        String cartHtml = page("/cart");
+        var summary = Pattern.compile("<div\\b[^>]*id=\"cart-order-summary\"[^>]*>").matcher(cartHtml);
+        assertThat(summary.find()).isTrue();
+        assertThat(summary.group()).doesNotContain("sticky-top", "top:", "position:");
+        assertThat(cartHtml).contains("header-main-bar sticky-top");
+        preview("cart-filled.html", cartHtml);
     }
 
     @Test void everyStorefrontFooterUsesTheSharedFragmentRatherThanAnInlineCopy() throws Exception {
