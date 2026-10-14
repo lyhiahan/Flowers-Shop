@@ -1,6 +1,7 @@
 package com.finalproject.controller.customer;
 
 import com.finalproject.service.DemoPaymentService;
+import com.finalproject.service.DemoPaymentTunnel;
 import com.google.zxing.*;
 import com.google.zxing.qrcode.QRCodeWriter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +25,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class DemoPaymentController {
     private final DemoPaymentService payments;
+    private final DemoPaymentTunnel tunnel;
     @Value("${app.demo-payment.base-url:}") private String configuredBaseUrl;
 
     @ModelAttribute
@@ -39,7 +41,9 @@ public class DemoPaymentController {
         if (payment.status() == DemoPaymentService.Status.SUCCESS)
             return "redirect:/customer/demo-payment/" + token + "/success";
         model.addAttribute("payment", payment);
-        model.addAttribute("phoneUrl", phoneUrl(request, token));
+        var connection = phoneConnection(request, token);
+        model.addAttribute("phoneUrl", connection.url());
+        model.addAttribute("phoneConnection", connection);
         model.addAttribute("desktop", true);
         return "customer/demo-payment";
     }
@@ -94,6 +98,22 @@ public class DemoPaymentController {
         return payments.view(token, principal.getName());
     }
 
+    public record PhoneConnection(String state, String url, String message) {}
+
+    @GetMapping("/customer/demo-payment/{token}/connection")
+    @ResponseBody
+    public PhoneConnection connection(@PathVariable String token, Principal principal, HttpServletRequest request) {
+        payments.view(token, principal.getName());
+        return phoneConnection(request, token);
+    }
+
+    private PhoneConnection phoneConnection(HttpServletRequest request, String token) {
+        if (!tunnel.automatic()) return new PhoneConnection("READY", phoneUrl(request, token), "");
+        var connection = tunnel.connection();
+        return new PhoneConnection(connection.state(), connection.baseUrl() == null ? null
+                : connection.baseUrl() + "/demo-payment/" + token, connection.message());
+    }
+
     @GetMapping(value = "/customer/demo-payment/{token}/qr", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public byte[] qr(@PathVariable String token, Principal principal, HttpServletRequest request) throws Exception {
@@ -109,6 +129,12 @@ public class DemoPaymentController {
     }
 
     private String phoneUrl(HttpServletRequest request, String token) {
+        if (tunnel.automatic()) {
+            var connection = phoneConnection(request, token);
+            if (connection.url() == null)
+                throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, connection.message());
+            return connection.url();
+        }
         String base = configuredBaseUrl.strip();
         if (base.isEmpty()) {
             String host = request.getServerName();

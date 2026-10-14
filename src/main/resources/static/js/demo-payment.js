@@ -4,6 +4,41 @@
     if (!root) return;
     let state = root.dataset.state;
     let timer;
+    const qr = document.getElementById('payment-qr');
+    const phoneLink = document.getElementById('phone-payment-link');
+    const phoneMessage = document.getElementById('phone-connection-message');
+    let phoneUrl = phoneLink?.getAttribute('href') || '';
+
+    function renderConnection(connection) {
+        if (!qr || !phoneLink || !phoneMessage) return;
+        const ready = connection.state === 'READY' && connection.url;
+        qr.hidden = !ready;
+        phoneLink.hidden = !ready;
+        phoneMessage.hidden = !!ready;
+        phoneMessage.textContent = connection.message || 'Đang bật kết nối điện thoại…';
+        if (ready) {
+            phoneLink.href = connection.url;
+            if (phoneUrl !== connection.url || !qr.getAttribute('src')) qr.src = root.dataset.qrUrl;
+            phoneUrl = connection.url;
+        } else {
+            phoneLink.removeAttribute('href');
+            qr.removeAttribute('src');
+            phoneUrl = '';
+        }
+    }
+
+    async function pollConnection() {
+        if (state !== 'PENDING' || !root.dataset.connectionUrl) return;
+        try {
+            const response = await fetch(root.dataset.connectionUrl, {cache:'no-store', headers:{Accept:'application/json'}});
+            if (!response.ok || response.redirected) throw new Error('Connection unavailable');
+            renderConnection(await response.json());
+        } catch (_) {
+            renderConnection({state:'STARTING', message:'Đang kiểm tra lại kết nối điện thoại…'});
+        }
+    }
+
+    qr?.addEventListener('error', () => renderConnection({state:'STARTING', message:'Đang cập nhật mã QR…'}));
     const labels = { PENDING: 'Chờ xác nhận', SUCCESS: 'Đã thanh toán', EXPIRED: 'Đã hết hạn', FAILED: 'Không thể thanh toán' };
     function render(next) {
         state = next;
@@ -41,6 +76,7 @@
         } catch (_) {
             document.getElementById('connection-status').textContent = 'Đang kết nối lại để kiểm tra thanh toán…';
         }
+        await pollConnection();
         if (state === 'PENDING') timer = setTimeout(poll, 2000);
     }
     function countdown() {

@@ -156,7 +156,7 @@ class DemoPaymentTests {
         mvc.perform(post("/demo-payment/" + token + "/confirm")).andExpect(status().isForbidden());
         users.saveAndFlush(User.builder().username("other-demo-customer").email("other-demo@test.local")
                 .password("unused").fullName("Other").isActive(true).role(Role.USER).build());
-        for (String suffix : List.of("", "/status", "/qr", "/success"))
+        for (String suffix : List.of("", "/status", "/qr", "/success", "/connection"))
             mvc.perform(get("/customer/demo-payment/" + token + suffix).with(user("other-demo-customer").roles("USER")))
                     .andExpect(status().isForbidden());
         mvc.perform(post("/customer/demo-payment/order/" + order.getId()).with(user("other-demo-customer").roles("USER")).with(csrf()))

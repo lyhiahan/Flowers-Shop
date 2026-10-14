@@ -17,7 +17,7 @@
     </div>
 </header>
 <main class="payment-main" th:classappend="${desktop ? 'desktop' : 'phone'}"
-      th:attr="data-state=${payment.status},data-expiry=${payment.expiresAt},data-status-url=${desktop ? '/customer/demo-payment/' + payment.token + '/status' : ''},data-success-url=${(desktop ? '/customer/demo-payment/' : '/demo-payment/') + payment.token + '/success'}">
+      th:attr="data-state=${payment.status},data-expiry=${payment.expiresAt},data-status-url=${desktop ? '/customer/demo-payment/' + payment.token + '/status' : ''},data-success-url=${(desktop ? '/customer/demo-payment/' : '/demo-payment/') + payment.token + '/success'},data-connection-url=${desktop ? '/customer/demo-payment/' + payment.token + '/connection' : ''},data-qr-url=${desktop ? '/customer/demo-payment/' + payment.token + '/qr' : ''}">
     <p class="eyebrow">THANH TOÁN DEMO</p>
     <h1 th:text="${desktop ? 'Thanh toán đơn hàng' : 'Xác nhận thanh toán'}"></h1>
     <p class="notice"><i class="bi bi-shield-check" aria-hidden="true"></i> Không kết nối hoặc trừ tiền ví MoMo thật.</p>
@@ -37,8 +37,9 @@
             <div id="pending-panel" th:hidden="${payment.status.name() != 'PENDING'}">
                 <div th:if="${desktop}" class="qr-section">
                     <h2>Xác nhận trên điện thoại</h2>
-                    <img class="payment-qr" th:src="@{/customer/demo-payment/{token}/qr(token=${payment.token})}" alt="Mã QR thanh toán MoMo" width="280" height="280">
-                    <a class="phone-link" th:href="${phoneUrl}" target="_blank" rel="noreferrer">Mở trang xác nhận <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></a>
+                    <p id="phone-connection-message" class="muted" role="status" th:hidden="${phoneUrl != null}" th:text="${phoneConnection.message}"></p>
+                    <img id="payment-qr" class="payment-qr" th:src="${phoneUrl != null} ? @{/customer/demo-payment/{token}/qr(token=${payment.token})} : null" th:hidden="${phoneUrl == null}" alt="Mã QR thanh toán MoMo" width="280" height="280">
+                    <a id="phone-payment-link" class="phone-link" th:href="${phoneUrl}" th:hidden="${phoneUrl == null}" target="_blank" rel="noreferrer">Mở trang xác nhận <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></a>
                 </div>
                 <form th:unless="${desktop}" id="confirm-form" method="post" th:action="@{/demo-payment/{token}/confirm(token=${payment.token})}">
                     <h2>Giao dịch thử nghiệm</h2>

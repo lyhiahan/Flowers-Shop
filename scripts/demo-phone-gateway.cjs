@@ -17,7 +17,7 @@ function headersWithoutHop(headers) {
     return Object.fromEntries(Object.entries(headers).filter(([name]) => !excluded.has(name.toLowerCase())));
 }
 
-function createGateway({ appPort = 8080 } = {}) {
+function createGateway({ appPort = 8080, healthId } = {}) {
     if (!Number.isInteger(appPort) || appPort < 1 || appPort > 65535) throw new Error('Invalid app port');
     const origin = `http://127.0.0.1:${appPort}`;
     const server = http.createServer((req, res) => {
@@ -31,6 +31,7 @@ function createGateway({ appPort = 8080 } = {}) {
                 throw new Error('Non-canonical path');
         } catch (_) { res.writeHead(404); res.end('Not found'); return; }
         if (req.method === 'GET' && path === '/') {
+            if (healthId) res.setHeader('X-Demo-Gateway-Id', healthId);
             res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
             res.end('<!doctype html><html lang="vi"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
                 + '<title>Kết nối thanh toán</title><body style="margin:0;padding:36px 24px;font:18px/1.6 Arial,sans-serif;background:#fff;color:#26332d">'
