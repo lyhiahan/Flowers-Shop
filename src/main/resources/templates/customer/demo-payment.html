@@ -56,7 +56,8 @@
     </div>
     <a th:if="${desktop}" th:href="@{/customer/orders}" class="orders-link"><i class="bi bi-arrow-left" aria-hidden="true"></i> Về đơn hàng</a>
 </main>
-<footer>Giao dịch demo của đồ án · Không phải cổng thanh toán chính thức của MoMo</footer>
+<p class="payment-disclaimer">Giao dịch demo của đồ án · Không phải cổng thanh toán chính thức của MoMo</p>
+<footer th:replace="~{fragments/floral :: footer}"></footer>
 <script th:src="@{/js/demo-payment.js}" defer></script>
 </body>
 </html>

@@ -29,6 +29,7 @@
     </section>
     <a th:if="${desktop}" th:href="${ordersUrl}" class="confirm-button success-orders-link"><i class="bi bi-receipt" aria-hidden="true"></i> Xem đơn hàng</a>
 </main>
-<footer>Giao dịch demo của đồ án · Không phải cổng thanh toán chính thức của MoMo</footer>
+<p class="payment-disclaimer">Giao dịch demo của đồ án · Không phải cổng thanh toán chính thức của MoMo</p>
+<footer th:replace="~{fragments/floral :: footer}"></footer>
 </body>
 </html>

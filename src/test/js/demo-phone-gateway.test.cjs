@@ -40,6 +40,7 @@ test('gateway publishes only phone routes and preserves confirmation cookies and
     assert.deepEqual(requests[1], {path:`/demo-payment/${token}/confirm`,method:'POST',cookie:'JSESSIONID=test',body:'_csrf=test-token'});
     assert.equal((await fetch(`${base}/demo-payment/${token}/success`)).status, 200);
     assert.equal((await fetch(`${base}/css/demo-payment.css`)).status, 200);
+    assert.equal((await fetch(`${base}/css/site-footer.css`)).status, 200);
     assert.equal((await fetch(`${base}/demo-payment/${token}`, {method:'POST'})).status, 404);
     assert.equal((await fetch(`${base}/demo-payment/${token}?redirect=/admin&amount=1`)).status, 200);
     assert.equal(requests.at(-1).path, `/demo-payment/${token}`);

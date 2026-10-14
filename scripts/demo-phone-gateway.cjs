@@ -2,7 +2,7 @@
 const http = require('node:http');
 const { Buffer } = require('node:buffer');
 
-const assets = new Set(['/css/demo-payment.css', '/js/demo-payment.js']);
+const assets = new Set(['/css/demo-payment.css', '/css/site-footer.css', '/js/demo-payment.js']);
 const hopHeaders = new Set(['connection', 'keep-alive', 'proxy-authenticate', 'proxy-authorization', 'te', 'trailer', 'transfer-encoding', 'upgrade']);
 
 function permitted(method, path) {

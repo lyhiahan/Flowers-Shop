@@ -40,7 +40,7 @@ a:focus-visible, button:focus-visible { outline: 3px solid #218369; outline-offs
 .phone { max-width: 480px; }
 .phone .payment-layout { display: block; }
 .phone .payment-action { border-left: 0; padding: 28px 0 0; margin-top: 12px; border-top: 1px solid #e7e9eb; min-height: 190px; }
-footer { padding: 0 20px 30px; text-align: center; color: #647079; font-size: 12px; line-height: 1.6; }
+.payment-disclaimer { padding: 0 20px; text-align: center; color: #647079; font-size: 12px; line-height: 1.6; }
 [hidden] { display: none !important; }
 @media (max-width: 680px) {
     .header-inner { padding: 14px 16px; min-height: 68px; }
