@@ -1,12 +1,10 @@
 package com.finalproject.config;
 
 import com.finalproject.entity.*;
-import com.finalproject.enums.Role;
 import com.finalproject.repository.*;
 import com.finalproject.service.ProductSeederService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;

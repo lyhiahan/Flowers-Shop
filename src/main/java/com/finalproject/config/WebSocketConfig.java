@@ -65,7 +65,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                             || "/user/queue/chat.acks".equals(destination)) return message;
                     if (destination.matches("^/topic/store/[0-9]+/orders$")) {
                         Long storeId = Long.valueOf(destination.split("/")[3]);
-                        var store = stores.findById(storeId).orElseThrow();
+                        stores.findById(storeId).orElseThrow();
                         boolean roleAllowed = user.hasRole(com.finalproject.enums.Role.ADMIN)
                                 || user.hasRole(com.finalproject.enums.Role.MANAGER);
                         boolean allowed = user.hasRole(com.finalproject.enums.Role.ADMIN)

@@ -1,15 +1,12 @@
 package com.finalproject;
 
 import com.finalproject.controller.customer.CheckoutController;
-import com.finalproject.entity.User;
 import com.finalproject.enums.PaymentMethod;
 import com.finalproject.service.CartService;
 import com.finalproject.service.OrderService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.ui.ConcurrentModel;
-import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 
 import java.lang.reflect.Method;
@@ -99,7 +96,6 @@ class CheckoutPhoneValidationTests {
                 mock(com.finalproject.repository.DeliveryRepository.class),
                 mock(com.finalproject.service.UserService.class),
                 mock(com.finalproject.service.VoucherService.class),
-                mock(com.finalproject.repository.StoreInventoryRepository.class),
                 mock(com.finalproject.config.MomoConfig.class),
                 mock(com.finalproject.service.MomoService.class),
                 mock(com.finalproject.service.DemoPaymentService.class)

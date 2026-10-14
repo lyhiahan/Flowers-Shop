@@ -34,7 +34,7 @@ class OtpRecipientRoutingTests {
         return request;
     }
     private ProfileController profile() {
-        return new ProfileController(users, mock(CloudinaryService.class), mock(UserService.class),
+        return new ProfileController(users, mock(UserService.class),
                 mock(ProductService.class), mock(UserFollowStoreRepository.class), mock(StoreRepository.class),
                 mock(CartService.class), otps, mail);
     }

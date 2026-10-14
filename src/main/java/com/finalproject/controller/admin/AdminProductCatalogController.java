@@ -1,21 +1,14 @@
 package com.finalproject.controller.admin;
 
-import com.finalproject.dto.request.ProductForm;
 import com.finalproject.entity.Product;
 import com.finalproject.entity.Store;
-import com.finalproject.repository.CategoryRepository;
 import com.finalproject.repository.ProductRepository;
 import com.finalproject.repository.StoreRepository;
-import com.finalproject.service.ProductService;
-import com.finalproject.service.ProductSeederService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.util.List;

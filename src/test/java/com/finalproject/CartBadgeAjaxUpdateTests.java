@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -55,13 +54,12 @@ public class CartBadgeAjaxUpdateTests {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    private User customer;
     private Store store;
     private Product product;
 
     @BeforeEach
     void setup() {
-        customer = userRepository.save(User.builder()
+        userRepository.save(User.builder()
                 .username("test_cart_badge_user")
                 .password(passwordEncoder.encode("123456"))
                 .email("cartbadge@flower.vn")

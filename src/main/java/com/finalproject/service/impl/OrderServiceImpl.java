@@ -31,7 +31,6 @@ public class OrderServiceImpl implements OrderService {
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
     private final DeliveryRepository deliveryRepository;
-    private final com.finalproject.repository.ShippingTariffRepository shippingTariffRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final com.finalproject.service.VoucherService voucherService;
     private final com.finalproject.service.NotificationService notificationService;

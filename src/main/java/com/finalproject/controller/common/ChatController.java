@@ -19,7 +19,7 @@ public class ChatController {
         @RequestParam(defaultValue="") String content,@RequestParam org.springframework.web.multipart.MultipartFile file) throws java.io.IOException {
   return chat.sendImage(principal.getName(),id,content,clientMessageId,file);
  }
- @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class) public ResponseEntity<Map<String,String>> oversized(Exception ex){return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(Map.of("error","Ảnh tối đa 10 MB."));}
+ @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class) public ResponseEntity<Map<String,String>> oversized(Exception ex){return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE).body(Map.of("error","Ảnh tối đa 10 MB."));}
  @ExceptionHandler(AccessDeniedException.class) public ResponseEntity<Map<String,String>> denied(AccessDeniedException ex){return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error",ex.getMessage()));}
  @ExceptionHandler(IllegalArgumentException.class) public ResponseEntity<Map<String,String>> invalid(IllegalArgumentException ex){return ResponseEntity.badRequest().body(Map.of("error",ex.getMessage()));}
  @ExceptionHandler({IllegalStateException.class,org.springframework.dao.PessimisticLockingFailureException.class}) public ResponseEntity<Map<String,String>> conflict(Exception ex){return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error",ex instanceof IllegalStateException?ex.getMessage():"Hội thoại đang được xử lý. Vui lòng thử lại."));}

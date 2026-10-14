@@ -1,8 +1,6 @@
 package com.finalproject.service;
 
 import com.finalproject.entity.*;
-import com.finalproject.enums.OrderStatus;
-import com.finalproject.enums.OrderType;
 import com.finalproject.enums.Role;
 import com.finalproject.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
