@@ -66,51 +66,7 @@
             </div>
             <div><label for="productPrice" class="form-label">Giá bán (VND) <span class="text-danger">*</span></label><input id="productPrice" name="priceBuy" type="number" min="1" max="9999999999999999" step="1" required th:value="${product.priceBuy}" class="form-control" placeholder="Ví dụ: 250000"></div>
             <div><label for="productPromotion" class="form-label">Giá khuyến mãi (VND)</label><input id="productPromotion" name="promotionalPrice" type="number" min="1" max="9999999999999999" step="1" th:value="${product.promotionalPrice}" class="form-control" placeholder="Để trống nếu không áp dụng" aria-describedby="promotionHelp"><div id="promotionHelp" class="form-text">Là số tiền khách trả, không phải phần trăm giảm. Ví dụ: 100000đ; chỉ nhập số đồng nguyên.</div></div>
-            <div class="full-width" th:if="${productAttributeGroups != null and !productAttributeGroups.isEmpty()}">
-                <div class="p-3 bg-light rounded-3 border" style="border-color: #E2E7E2 !important;">
-                    <label class="form-label fw-bold mb-1 d-flex align-items-center gap-2">
-                        <i class="bi bi-tags-fill text-success"></i> Thuộc tính hoa tươi (Tùy chọn)
-                    </label>
-                    <p class="form-text mt-0 mb-3 text-muted">Bấm vào từng nhóm để chọn loại hoa, màu sắc, kiểu dáng và phong cách phù hợp.</p>
-                    <input type="hidden" name="attributesSubmitted" value="true">
-                    <div class="row g-3">
-                        <div class="col-md-6 col-lg-3" th:each="group : ${productAttributeGroups}">
-                            <div class="dropdown">
-                                <label class="form-label small fw-bold text-muted mb-1" th:text="${group.key}">Thuộc tính</label>
-                                <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center bg-white manager-attr-btn" 
-                                        type="button" 
-                                        th:id="${'mgrAttrBtn_' + #strings.replace(group.key, ' ', '_')}" 
-                                        data-bs-toggle="dropdown" 
-                                        data-bs-auto-close="outside" 
-                                        aria-expanded="false"
-                                        style="border-color: #D1E5DA; border-radius: 8px; padding: 8px 12px; font-size: 14px; min-height: 40px; color: #20382E;">
-                                    <span class="text-truncate manager-attr-summary" th:text="'-- Chọn ' + ${group.key} + ' --'">-- Chọn --</span>
-                                    <span class="badge rounded-pill bg-success ms-1 d-none manager-attr-badge">0</span>
-                                </button>
-                                <div class="dropdown-menu p-3 shadow-lg border-0 rounded-3 w-100" 
-                                     style="max-height: 240px; overflow-y: auto; z-index: 1050; border: 1px solid #D1E5DA !important;" 
-                                     th:aria-labelledby="${'mgrAttrBtn_' + #strings.replace(group.key, ' ', '_')}">
-                                    <div class="d-flex flex-column gap-2">
-                                        <div class="form-check py-1" th:each="v : ${group.value}">
-                                            <input class="form-check-input manager-attr-cb" 
-                                                   type="checkbox" 
-                                                   name="styleValueIds" 
-                                                   th:id="${'flower-attribute-' + v.id}" 
-                                                   th:value="${v.id}" 
-                                                   th:checked="${product.styleValues != null and product.styleValues.contains(v)}"
-                                                   th:data-name="${v.name}">
-                                            <label class="form-check-label w-100 cursor-pointer user-select-none" 
-                                                   th:for="${'flower-attribute-' + v.id}" 
-                                                   th:text="${v.name}">
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div class="full-width"><th:block th:replace="~{fragments/flower-attributes :: editor(${product.attributeLabel('Loại hoa')}, ${product.attributeLabel('Màu sắc')}, ${product.attributeLabel('Phong cách')}, ${product.selectedStyleValueIds})}"></th:block></div>
             <div><label for="productImageFile" class="form-label">Ảnh sản phẩm</label><input id="productImageFile" name="imageFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="form-control" aria-describedby="productImageHelp"><div id="productImageHelp" class="form-text">JPEG, PNG, GIF hoặc WEBP; tối đa 10 MB.</div></div>
             <div><label for="productImageUrl" class="form-label">Hoặc đường dẫn ảnh</label><input id="productImageUrl" name="imageUrl" th:value="${product.imageUrl}" maxlength="500" class="form-control" placeholder="https://..."></div>
             <div class="full-width"><label for="productDescription" class="form-label">Mô tả</label><textarea id="productDescription" name="description" th:text="${product.description}" class="form-control" rows="4" placeholder="Giới thiệu mẫu hoa, chất liệu và dịp sử dụng"></textarea></div>

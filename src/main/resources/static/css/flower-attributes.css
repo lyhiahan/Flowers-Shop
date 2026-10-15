@@ -1,0 +1,41 @@
+.flower-attributes { min-width: 0; color: #293b32; }
+.flower-attributes .flower-attributes-title { margin: 0 0 18px; font-size: 18px; font-weight: 700; }
+.flower-attribute-grid { display: grid; gap: 18px; }
+.flower-attribute-field { display: grid; grid-template-columns: 120px minmax(0, 1fr); align-items: start; gap: 16px; min-width: 0; }
+.flower-attributes .form-label { margin: 12px 0 0; font-size: 14px; font-weight: 600; }
+.flower-attribute-field > datalist { display: none; }
+.flower-tag-editor { min-width: 0; }
+.flower-tag-row { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; padding: 7px 10px; border: 1px solid #d3ded7; border-radius: 10px; background: #fff; min-height: 52px; }
+.flower-tag-row:focus-within { border-color: #355447; box-shadow: 0 0 0 2px #35544718; }
+.flower-tag-surface { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; flex: 1 1 240px; min-width: 0; }
+.flower-attributes .flower-tags { display: contents; margin: 0; padding: 0; list-style: none; }
+.flower-attributes .flower-tag { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 2px 4px 2px 10px; border: 0; border-radius: 6px; background: #edf3ef; color: #294538; font-size: 14px; line-height: 24px; }
+.flower-tag span { overflow-wrap: anywhere; min-width: 0; }
+.flower-attributes .flower-tag-remove { border: 0; background: transparent; color: #52675a; padding: 0; width: 28px; height: 28px; min-height: 28px; border-radius: 4px; font-size: 18px; line-height: 1; cursor: pointer; }
+.flower-attributes .flower-tag-input { flex: 1 1 160px; width: 160px; max-width: 100%; min-width: 100px; min-height: 34px; margin: 0; padding: 4px 6px; border: 0; border-radius: 0; box-shadow: none; outline: none; background: transparent; color: #293b32; font-size: 14px; line-height: 24px; }
+.flower-attributes .flower-tag-input:focus { outline: none; box-shadow: none; }
+.flower-attributes .flower-tag-input::placeholder { color: #6a756f; opacity: 1; }
+.flower-tag-controls { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+.flower-attributes .flower-tag-add, .flower-attributes .flower-tag-picker { min-height: 34px; border: 0; border-radius: 6px; padding: 5px 10px; font-size: 13px; font-weight: 700; line-height: 24px; white-space: nowrap; cursor: pointer; }
+.flower-attributes .flower-tag-add { background: #355447; color: #fff; }
+.flower-attributes .flower-tag-add:disabled { background: #eef1ef; color: #6a756f; cursor: default; }
+.flower-attributes .flower-tag-picker { color: #355447; background: #fff; }
+.flower-attributes .flower-tag-picker:hover, .flower-attributes .flower-tag-picker[aria-expanded="true"] { background: #edf3ef; }
+.flower-tag-choices { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; padding: 12px; border: 1px solid #d3ded7; border-radius: 8px; max-height: 200px; overflow-y: auto; background: #fafcfb; }
+.flower-tag-choices[hidden] { display: none; }
+.flower-attributes .flower-tag-choice { border: 1px solid #d3ded7; padding: 6px 12px; border-radius: 6px; background: #fff; color: #40564a; font-size: 14px; line-height: 22px; cursor: pointer; text-align: left; }
+.flower-attributes .flower-tag-choice[aria-pressed="true"] { background: #355447; border-color: #355447; color: #fff; }
+.flower-choice-empty { font-size: 13px; color: #66736b; }
+.flower-existing-options { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-height: 44px; }
+.flower-attributes .flower-existing-option { display: inline-flex; align-items: center; gap: 8px; border: 1px solid #d3ded7; border-radius: 6px; padding: 7px 10px; margin: 0; background: #fff; color: #40564a; font-size: 14px; line-height: 22px; cursor: pointer; }
+.flower-existing-option:has(input:checked) { background: #edf3ef; border-color: #9cb5a6; }
+.flower-attributes .flower-existing-option input { width: 16px; height: 16px; min-height: 0; margin: 0; padding: 0; accent-color: #355447; flex-shrink: 0; }
+.flower-tag-error:empty { display: none; }
+.flower-tag-error { color: #a02333; margin-top: 6px; font-size: 13px; }
+.flower-attributes button:focus-visible, .flower-existing-option input:focus-visible { outline: 2px solid #355447; outline-offset: 2px; }
+.flower-attributes .flower-attribute-source[hidden] { display: none; }
+@media (max-width: 767.98px) {
+    .flower-attribute-field { grid-template-columns: 1fr; gap: 8px; }
+    .flower-attributes .form-label { margin: 0; }
+    .flower-tag-surface { flex-basis: 100%; }
+}

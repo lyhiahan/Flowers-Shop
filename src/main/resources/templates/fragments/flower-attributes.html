@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section th:fragment="editor(types, colors, designs, selectedIds)" class="flower-attributes" aria-label="Thuộc tính hoa">
+    <link rel="stylesheet" th:href="@{/css/flower-attributes.css}">
+    <h3 class="flower-attributes-title">Thuộc tính hoa <span class="text-muted fw-normal fs-6">(không bắt buộc)</span></h3>
+    <input type="hidden" name="flowerAttributesSubmitted" value="true">
+    <div class="flower-attribute-grid">
+        <!-- Fields are fixed; suggestions are optional, never the source of the form structure. -->
+        <div class="flower-attribute-field" th:each="group : ${ {'Loại hoa', 'Màu sắc', 'Phong cách'} }"
+             th:with="field=${group == 'Loại hoa' ? 'flowerTypes' : (group == 'Màu sắc' ? 'flowerColors' : 'flowerStyles')}">
+            <label class="form-label" th:for="${field}" th:text="${group}"></label>
+            <textarea class="form-control flower-attribute-source" rows="2" maxlength="1500"
+                      th:id="${field}" th:name="${field}"
+                      th:data-suggestions="${field + '-suggestions'}"
+                      th:data-label="${group}"
+                      placeholder="Nhập giá trị mới..."
+                      th:text="${group == 'Loại hoa' ? types : (group == 'Màu sắc' ? colors : designs)}"></textarea>
+            <datalist th:id="${field + '-suggestions'}">
+                <option th:each="suggestion : ${flowerInputSuggestions == null ? null : flowerInputSuggestions.get(group)}"
+                        th:value="${suggestion}"></option>
+            </datalist>
+        </div>
+        <th:block th:if="${otherProductAttributeGroups != null and !#maps.isEmpty(otherProductAttributeGroups)}">
+            <input type="hidden" name="attributesSubmitted" value="true">
+            <div class="flower-attribute-field" th:each="group : ${otherProductAttributeGroups}">
+                <span class="form-label" th:id="${'other-attribute-label-' + group.value[0].style.id}" th:text="${group.key}"></span>
+                <div class="flower-existing-options" role="group" th:aria-labelledby="${'other-attribute-label-' + group.value[0].style.id}">
+                    <label class="flower-existing-option" th:each="option : ${group.value}">
+                        <input type="checkbox" name="styleValueIds" th:value="${option.id}"
+                               th:checked="${selectedIds != null and (#lists.contains(selectedIds, option.id) or selectedIds.contains(option.id))}">
+                        <span th:text="${option.name}"></span>
+                    </label>
+                </div>
+            </div>
+        </th:block>
+    </div>
+    <script defer th:src="@{/js/flower-attributes.js}"></script>
+</section>
+</body>
+</html>

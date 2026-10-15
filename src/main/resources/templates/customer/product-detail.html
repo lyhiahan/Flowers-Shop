@@ -709,7 +709,12 @@
                         <div class="flower-info-row"
                              th:with="flowerColor=${product.name.contains('Hướng Dương') or product.name.contains('Vàng') or product.name.contains('Ánh Dương') or product.name.contains('Hoàng Kim') ? 'Vàng tươi sáng' : (product.name.contains('Đỏ') ? 'Đỏ nồng nàn' : (product.name.contains('Pastel') or product.name.contains('Hồng') ? 'Hồng pastel dịu dàng' : (product.name.contains('Trắng') ? 'Trắng ngọc tinh khôi' : (product.name.contains('Tím') ? 'Tím thủy chung' : (product.name.contains('Cam') ? 'Cam ấm áp' : (product.name.contains('Xanh') ? 'Xanh tươi mát' : 'Tone màu tươi sáng hài hòa'))))))}">
                             <span class="flower-info-label">Màu sắc</span>
-                            <span class="flower-info-value" th:text="${flowerColor}">Tone màu tươi sáng hài hòa</span>
+                            <span class="flower-info-value" th:text="${#strings.isEmpty(product.attributeLabel('Màu sắc')) ? flowerColor : product.attributeLabel('Màu sắc')}">Tone màu tươi sáng hài hòa</span>
+                        </div>
+
+                        <div class="flower-info-row" th:if="${!#strings.isEmpty(product.attributeLabel('Phong cách'))}">
+                            <span class="flower-info-label">Phong cách</span>
+                            <span class="flower-info-value" th:text="${product.attributeLabel('Phong cách')}"></span>
                         </div>
 
                         <!-- Dòng 4: Thành phần tóm tắt ngắn (Gọn gàng trong khu vực mua hàng) -->

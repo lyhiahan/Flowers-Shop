@@ -9,7 +9,7 @@ function form(regular = '120000', promotionValue = '') {
     const price = { value: regular, listeners: {}, addEventListener(name, fn) { this.listeners[name] = fn; } };
     const promotion = { value: promotionValue, listeners: {}, validity: '',
         addEventListener(name, fn) { this.listeners[name] = fn; }, setCustomValidity(message) { this.validity = message; } };
-    vm.runInNewContext(source, { document: { getElementById(id) { return id === 'productPrice' ? price : promotion; } } });
+    vm.runInNewContext(source, { document: { getElementById(id) { return id === 'productPrice' ? price : id === 'productPromotion' ? promotion : null; }, querySelectorAll() { return []; } } });
     return { price, promotion };
 }
 
@@ -26,5 +26,5 @@ test('changing regular price updates promotion validation', () => {
     promotion.value = ''; promotion.listeners.input(); assert.equal(promotion.validity, '');
 });
 test('pages without product form remain unaffected', () => {
-    assert.doesNotThrow(() => vm.runInNewContext(source, { document: { getElementById() { return null; } } }));
+    assert.doesNotThrow(() => vm.runInNewContext(source, { document: { getElementById() { return null; }, querySelectorAll() { return []; } } }));
 });

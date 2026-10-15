@@ -1339,7 +1339,7 @@ class BusinessRegressionTests {
         Style group=Style.builder().name("Kiểu dáng cắm").isDeleted(null).build();
         StyleValue value=StyleValue.builder().name("Bó hoa").style(group).isDeleted(null).build();
         org.mockito.Mockito.when(repo.findAll()).thenReturn(List.of(value));
-        ProductAttributeService service=new ProductAttributeService(repo);
+        ProductAttributeService service=new ProductAttributeService(repo, org.mockito.Mockito.mock(StyleRepository.class));
         assertThat(service.catalogGroups().get("Kiểu dáng")).contains(value);
         group.setIsDeleted(true);assertThat(service.activeValues()).isEmpty();
     }

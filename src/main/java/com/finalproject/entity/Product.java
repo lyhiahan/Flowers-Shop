@@ -38,9 +38,19 @@ public class Product {
     }
 
     public String attributeLabel(String group) {
+        if (styleValues == null) return "";
         return styleValues.stream().filter(v -> !Boolean.TRUE.equals(v.getIsDeleted()) && v.getStyle() != null
-                && !Boolean.TRUE.equals(v.getStyle().getIsDeleted()) && group.equalsIgnoreCase(v.getStyle().getName()))
+                && !Boolean.TRUE.equals(v.getStyle().getIsDeleted())
+                && com.finalproject.utils.FlowerAttributes.group(group).equalsIgnoreCase(
+                    com.finalproject.utils.FlowerAttributes.group(v.getStyle().getName())))
                 .map(StyleValue::getName).sorted().collect(java.util.stream.Collectors.joining(", "));
+    }
+
+    public java.util.List<Long> getSelectedStyleValueIds() {
+        if (styleValues == null) return java.util.List.of();
+        return styleValues.stream()
+                .filter(v -> !Boolean.TRUE.equals(v.getIsDeleted()))
+                .map(StyleValue::getId).toList();
     }
 
     @org.hibernate.annotations.Nationalized

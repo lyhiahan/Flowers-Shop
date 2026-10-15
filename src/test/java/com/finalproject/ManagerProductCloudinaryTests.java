@@ -40,7 +40,7 @@ class ManagerProductCloudinaryTests {
         var file = new MockMultipartFile("imageFile", "flower.png", "image/png", new byte[]{1, 2});
         when(cloud.upload(file, "rental_shop_products")).thenReturn(new CloudinaryService.UploadResult("https://res.cloudinary.com/project/flower.png", "rental_shop_products/flower"));
         controller.addProduct(() -> "manager", "Hoa", 2L, new BigDecimal("100000"), null, 3,
-                "https://old.example/flower.png", file, "Mô tả", null, false, null, false, new RedirectAttributesModelMap());
+                "https://old.example/flower.png", file, "Mô tả", null, false, false, null, null, null, null, false, new RedirectAttributesModelMap());
         verify(products).save(argThat(p -> p.getImageUrl().startsWith("https://res.cloudinary.com/")));
         verify(images).save(argThat(p -> p.getCloudinaryPublicId().equals("rental_shop_products/flower") && p.getIsMain()));
         verify(inventory).setStock(3L, 3);
@@ -52,13 +52,13 @@ class ManagerProductCloudinaryTests {
         when(products.findById(3L)).thenReturn(Optional.of(product)); when(categories.findById(2L)).thenReturn(Optional.of(category));
         var file = new MockMultipartFile("imageFile", "flower.png", "image/png", new byte[]{1, 2});
         when(cloud.upload(file, "rental_shop_products")).thenThrow(new java.io.IOException("Upload unavailable"));
-        assertThatThrownBy(() -> controller.updateProduct(3L, "Tên mới", 2L, new BigDecimal("100000"), null, null, file, "", null, false, null, false, new RedirectAttributesModelMap()))
+        assertThatThrownBy(() -> controller.updateProduct(3L, "Tên mới", 2L, new BigDecimal("100000"), null, null, file, "", null, false, false, null, null, null, null, false, new RedirectAttributesModelMap()))
                 .isInstanceOf(IllegalStateException.class);
         assertThat(product.getName()).isEqualTo("Tên cũ"); verify(products, never()).save(any());
         ProductImage old = ProductImage.builder().isMain(true).build(); when(images.findByProductId(3L)).thenReturn(List.of(old));
         doReturn(new CloudinaryService.UploadResult("https://res.cloudinary.com/project/new.png", "products/new"))
                 .when(cloud).upload(file, "rental_shop_products");
-        controller.updateProduct(3L, "Tên mới", 2L, new BigDecimal("100000"), null, null, file, "", null, false, null, false, new RedirectAttributesModelMap());
+        controller.updateProduct(3L, "Tên mới", 2L, new BigDecimal("100000"), null, null, file, "", null, false, false, null, null, null, null, false, new RedirectAttributesModelMap());
         assertThat(old.getIsMain()).isFalse(); assertThat(product.getImageUrl()).endsWith("new.png");
         verify(images).save(argThat(p -> p.getCloudinaryPublicId().equals("products/new") && p.getIsMain()));
     }

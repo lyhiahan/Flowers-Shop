@@ -21,6 +21,10 @@ public class ProductForm {
     private Long id;
     private List<Long> styleValueIds;
     private boolean attributesSubmitted;
+    private boolean flowerAttributesSubmitted;
+    private String flowerTypes;
+    private String flowerColors;
+    private String flowerStyles;
 
     @NotNull(message = "Vui lòng chọn danh mục sản phẩm")
     private Long categoryId;

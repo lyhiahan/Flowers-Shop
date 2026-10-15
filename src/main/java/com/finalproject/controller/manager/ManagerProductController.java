@@ -104,6 +104,10 @@ public class ManagerProductController {
                              @RequestParam(value = "description", required = false) String description,
                              @RequestParam(value = "styleValueIds", required = false) java.util.List<Long> styleValueIds,
                              @RequestParam(value = "attributesSubmitted", defaultValue = "false") boolean attributesSubmitted,
+                             @RequestParam(value = "flowerAttributesSubmitted", defaultValue = "false") boolean flowerAttributesSubmitted,
+                             @RequestParam(value = "flowerTypes", required = false) String flowerTypes,
+                             @RequestParam(value = "flowerColors", required = false) String flowerColors,
+                             @RequestParam(value = "flowerStyles", required = false) String flowerStyles,
                              @RequestParam(value = "additionalCategoryIds", required = false) List<Long> additionalCategoryIds,
                              @RequestParam(value = "categoriesSubmitted", defaultValue = "false") boolean categoriesSubmitted,
                              RedirectAttributes ra) {
@@ -137,7 +141,11 @@ public class ManagerProductController {
                 .build();
 
         categoryService.assignAdditional(product, additionalCategoryIds, categoriesSubmitted);
-        if (attributesSubmitted) attributes.assign(product, styleValueIds, true);
+        if (flowerAttributesSubmitted) {
+            attributes.assignOther(product, styleValueIds, attributesSubmitted);
+            attributes.assignText(product, flowerTypes, flowerColors, flowerStyles, true);
+        }
+        else if (attributesSubmitted) attributes.assign(product, styleValueIds, true);
         productRepository.save(product);
         saveUploadedImage(product, uploaded);
         inventoryService.setStock(product.getId(), initialStock);
@@ -157,6 +165,10 @@ public class ManagerProductController {
                                 @RequestParam(value = "description", required = false) String description,
                                 @RequestParam(value = "styleValueIds", required = false) java.util.List<Long> styleValueIds,
                                 @RequestParam(value = "attributesSubmitted", defaultValue = "false") boolean attributesSubmitted,
+                                @RequestParam(value = "flowerAttributesSubmitted", defaultValue = "false") boolean flowerAttributesSubmitted,
+                                @RequestParam(value = "flowerTypes", required = false) String flowerTypes,
+                                @RequestParam(value = "flowerColors", required = false) String flowerColors,
+                                @RequestParam(value = "flowerStyles", required = false) String flowerStyles,
                                 @RequestParam(value = "additionalCategoryIds", required = false) List<Long> additionalCategoryIds,
                                 @RequestParam(value = "categoriesSubmitted", defaultValue = "false") boolean categoriesSubmitted,
                                 RedirectAttributes ra) {
@@ -173,7 +185,11 @@ public class ManagerProductController {
         p.setName(name);
         p.setCategory(cat);
         categoryService.assignAdditional(p, additionalCategoryIds, categoriesSubmitted);
-        if (attributesSubmitted) attributes.assign(p, styleValueIds, true);
+        if (flowerAttributesSubmitted) {
+            attributes.assignOther(p, styleValueIds, attributesSubmitted);
+            attributes.assignText(p, flowerTypes, flowerColors, flowerStyles, true);
+        }
+        else if (attributesSubmitted) attributes.assign(p, styleValueIds, true);
         p.setPriceBuy(priceBuy);
         p.setPromotionalPrice(promotionalPrice != null ? promotionalPrice : priceBuy);
         if (uploaded != null) {

@@ -212,7 +212,10 @@ public class AdminProductController {
         ProductForm form = new ProductForm();
         form.setId(product.getId());
         form.setName(product.getName());
-        form.setStyleValueIds(product.getStyleValues().stream().map(com.finalproject.entity.StyleValue::getId).toList());
+        form.setStyleValueIds(product.getSelectedStyleValueIds());
+        form.setFlowerTypes(product.attributeLabel("Loại hoa"));
+        form.setFlowerColors(product.attributeLabel("Màu sắc"));
+        form.setFlowerStyles(product.attributeLabel("Phong cách"));
         form.setCategoryId(product.getCategory() != null ? product.getCategory().getId() : null);
         form.setAdditionalCategoryIds(product.getAdditionalCategories().stream().map(com.finalproject.entity.Category::getId).toList());
         form.setDescription(product.getDescription());

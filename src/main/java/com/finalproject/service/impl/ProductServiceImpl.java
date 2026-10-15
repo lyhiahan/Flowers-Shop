@@ -237,7 +237,11 @@ public class ProductServiceImpl implements ProductService {
                 .rating(5.0)
                 .build();
         categoryService.assignAdditional(product, form.getAdditionalCategoryIds(), form.isCategoriesSubmitted());
-        attributes.assign(product, form.getStyleValueIds(), form.isAttributesSubmitted());
+        if (form.isFlowerAttributesSubmitted()) {
+            attributes.assignOther(product, form.getStyleValueIds(), form.isAttributesSubmitted());
+            attributes.assignText(product, form.getFlowerTypes(), form.getFlowerColors(), form.getFlowerStyles(), true);
+        }
+        else attributes.assign(product, form.getStyleValueIds(), form.isAttributesSubmitted());
         Product savedProduct = productRepository.save(product);
 
         // 2. Upload danh sách ảnh lên Cloudinary
@@ -299,7 +303,11 @@ public class ProductServiceImpl implements ProductService {
         product.setName(form.getName());
         product.setCategory(category);
         categoryService.assignAdditional(product, form.getAdditionalCategoryIds(), form.isCategoriesSubmitted());
-        attributes.assign(product, form.getStyleValueIds(), form.isAttributesSubmitted());
+        if (form.isFlowerAttributesSubmitted()) {
+            attributes.assignOther(product, form.getStyleValueIds(), form.isAttributesSubmitted());
+            attributes.assignText(product, form.getFlowerTypes(), form.getFlowerColors(), form.getFlowerStyles(), true);
+        }
+        else attributes.assign(product, form.getStyleValueIds(), form.isAttributesSubmitted());
         product.setDescription(form.getDescription());
         product.setImportPrice(form.getImportPrice());
         product.setPriceBuy(form.getPriceBuy());
