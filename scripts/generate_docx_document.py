@@ -536,49 +536,61 @@ p_prompt_intro = doc.add_paragraph()
 p_prompt_intro.add_run("Duoi day la bang tong hop toan bo cac prompt chinh ma nhom da su dung trong qua trinh phat trien du an voi su ho tro cua Tro ly Tri tue nhan tao (AI - Antigravity / Gemini), phuc vu tieu chi cham diem danh gia ky nang Prompt Engineering cua Giang vien:")
 
 prompts_data = [
-    ("Giai doan 1: Khoi tao du an", 
+    ("1. Khoi tao kien truc", 
      "Thiet ke kien truc Spring Boot 4.x, Java 21, Thymeleaf, Bootstrap 5, JPA, SQL Server, WebSocket, JWT, Cloudinary. Phan chia package chuan MVC.",
      "AI sinh file pom.xml, khoi tao cau truc thu muc 3 lop, tao cac entity quan he Store, Product, StoreInventory va migration Flyway V1-V8."),
     
-    ("Giai doan 2: Bao mat phan quyen kep",
+    ("2. CSDL & Mo hinh chuoi",
+     "Thiet ke cac Entity JPA cho mo hinh chuoi hoa tuoi: Store, Product, StoreInventory voi so luong ton kho theo chi nhanh va khoa phuc hop.",
+     "AI thiet ke cac entity quan he, tao bang store_inventories lien ket @ManyToOne voi Store va Product luu so luong quantity."),
+    
+    ("3. Migration CSDL Flyway",
+     "Cau hinh Flyway migration tren SQL Server tu V1 den V8, tat ddl-auto cua Hibernate de kiem soat chat che schema dbo.",
+     "AI sinh 8 ban migration SQL trong resources/db/migration/sqlserver, tat hoan toan ddl-auto cua Hibernate."),
+    
+    ("4. Bao mat phan quyen kep",
      "Tao Dual Security: Web dung Session + CSRF, con API dung Bearer JWT Stateless voi Token Rotation. Gui ma OTP qua email, khong in ra console.",
      "AI viet JwtSecurityConfig, JwtTokenService, JwtAuthController va OtpService gui mail an toan."),
     
-    ("Giai doan 3: Dat hang & Tru ton kho",
-     "Dat hang COD phai tru ton kho ngay lap tuc tai chi nhanh. Tranh race condition khi 2 nguoi mua dong thoi bong hoa cuoi cung.",
-     "AI cai dat Pessimistic Write Lock tren StoreInventory trong transaction REPEATABLE_READ va co che reconcileInventoryOnCancel()."),
+    ("5. Cap phat & Xoay JWT",
+     "Hien thuc day du luong xac thuc JWT tai /api/auth/**: cap Access Token (15 phut) va Refresh Token (7 ngay), ho tro token rotation va revoke khi logout.",
+     "AI viet JwtTokenService, entity JwtSession, JwtRefreshToken luu hash va 4 endpoints API chuan REST."),
     
-    ("Giai doan 4: Vong doi don hang hoa",
+    ("6. Xac thuc OTP Email",
+     "Xay dung chuc nang quen mat khau: Khach hang nhap email, he thong gui ma OTP 6 chu so qua Email. Tuyet doi khong in ma OTP ra console log hoac truyen qua URL.",
+     "AI xay dung OtpService, tich hop JavaMailSender gui email HTML va ma hoa mat khau moi bang BCrypt."),
+    
+    ("7. Tim kiem & Bo loc hoa",
+     "Xay dung trang chu va trang danh muc hoa tuoi: hien thi banner, danh muc theo dip va bo loc da tieu chi theo chi nhanh con hang, khoang gia, loai hoa, mau sac.",
+     "AI viet ProductController va ProductSpecification ho tro truy van dong Spring Data JPA, hien thi ton kho realtime tren the hoa."),
+    
+    ("8. Dat hang & Tru ton kho",
+     "Dat hang COD phai tru ton kho ngay lap tuc tai chi nhanh. Tranh race condition khi 2 nguoi mua dong thoi bong hoa cuoi cung.",
+     "AI cai dat Pessimistic Write Lock tren StoreInventory trong transaction REPEATABLE_READ va co che hoan kho chinh xac 1 lan."),
+    
+    ("9. Vong doi don hang hoa",
      "Khi cua hang chuyen sang Dang cam hoa (PREPARING), khoa nut huy cua khach. Quan ly huy bat buoc nhap ly do <= 300 ky tu.",
      "AI cap nhat OrderStatus, kiem tra dieu kien tai Backend va tao modal popup xac nhan kem ghi log ly do huy vao CSDL."),
     
-    ("Giai doan 5: Realtime Chat & Cloudinary",
-     "Cau hinh WebSocket STOMP /ws-chat de chat thoi gian thuc theo chi nhanh. Upload anh Cloudinary lay API key tu file .env, khong hardcode.",
-     "AI tao WebSocketConfig, ChatController va CloudinaryService doc tu file bien moi truong an toan."),
+    ("10. Quan ly chi nhanh UC_017-026",
+     "Hoan thien day du cac Use Case quan ly chi nhanh tu UC_017 den UC_026: Tao cua hang, ho so cua hang, phan cong nhan vien, quan ly mau hoa, cap nhat ton kho, vi tien va rut tien.",
+     "AI xay dung tron bo controller quan ly chi nhanh, quan ly nhan su, ton kho kho hoa va vi doanh thu kha dung."),
     
-    ("Giai doan 6: Tinh chinh giao dien KPI",
-     "Cho cac KPIs nay nam cung 1 hang tren Dashboard quan ly.",
-     "AI viet lai CSS Grid va Flexbox responsive tren manager/dashboard.html va admin/dashboard.html."),
+    ("11. Realtime Chat STOMP",
+     "Cau hinh WebSocket STOMP /ws-chat de chat thoi gian thuc theo chi nhanh. Tin nhan gui tuc thi khong can tai lai trang.",
+     "AI tao WebSocketConfig, ChatController, phan luong tin nhan qua /topic/messages.{chatSessionId} va thong bao cho shop."),
     
-    ("Giai doan 7: Dat lai ten san pham",
-     "Dat lai ten toan bo san pham cua cua hang cho dung va de hieu, khong dat ten tru tuong nhu 'Bo Hoa Huong Duong Anh Duong Rang Ro'.",
-     "AI viet script cap nhat CSDL doi toan bo ten sang ten thuc te: 'Bo hoa huong duong', 'Bo hoa hong do tuoi'..."),
+    ("12. Luu tru Media Cloudinary",
+     "Tich hop Cloudinary de tai len anh san pham hoa tuoi, avatar, chat. Khong luu cung API Key va Secret trong code; tu dong doc tu .env.",
+     "AI tao CloudinaryService nap bien moi truong an toan, ham uploadImage() tra ve secure_url va public_id."),
     
-    ("Giai doan 8: Dropdown chon thuoc tinh",
-     "Loi khi them san pham, toi muon no co nut bam so xuong de co the lua chon thuoc tinh hoa.",
-     "AI viet component flower-attributes.html va JS ho tro dropdown so xuong chon nhanh tag Loai hoa, Mau sac, Phong cach, Dip tang."),
+    ("13. Quan tri Admin toan chuoi",
+     "Xay dung trang Dashboard Admin quan ly toan chuoi: duyet/khoa chi nhanh, quan ly danh muc hoa, don vi giao hang va bieu phi van chuyen vung.",
+     "AI tach cac controller quan tri chuyen biet, bao ve tai khoan ROLE_ADMIN va cai dat bieu phi van chuyen linh hoat."),
     
-    ("Giai doan 9: Sua loi upload anh 413",
-     "Khi them san pham bi loi 413 FileCountLimitExceededException.",
-     "AI toi uu hoa multipart resolver, loai bo cac input file trung lap, cho phep upload anh on dinh."),
-    
-    ("Giai doan 10: Bao toan thuoc tinh cu",
-     "Ban giup toi, sau khi toi sua cac thuoc tinh thi cac thuoc tinh cu cua toi bi mat di.",
-     "AI phan tich lech alias 'Phong cach' vs 'Phong cach thiet ke', sua ProductAttributeService giu nguyen gia tri cu va them getSelectedStyleValueIds()."),
-    
-    ("Giai doan 11: Don dep du an & Sinh hinh",
-     "Xoa toan bo cac file khong can den trong du an va tu dong tao trong qua trinh bien dich. Sinh hinh so do kien truc cho bao cao.",
-     "AI chay mvn clean xoa target/, xoa .tmp/, viet script Python sinh 5 so do kien truc chat luong cao va tao file bao cao .docx nay.")
+    ("14. Kiem thu tu dong (540+ Tests)",
+     "Viet bo kiem thu tu dong (JUnit 5 + Mockito + SpringBootTest) kiem tra toan bo luong nghiep vu: bao mat JWT, gio hang, hoan kho va 20 luong dong thoi.",
+     "AI xay dung hon 540 ca kiem thu tu dong trong src/test/java/com/finalproject/, ket qua 547 ca test dat (BUILD SUCCESS).")
 ]
 
 tbl_pr = doc.add_table(rows=len(prompts_data)+1, cols=3)
