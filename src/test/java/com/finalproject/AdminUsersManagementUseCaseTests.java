@@ -148,6 +148,52 @@ class AdminUsersManagementUseCaseTests {
                 .andExpect(content().string(containsString("user2_uc27")));
     }
 
+    @Test
+    @WithMockUser(username = "admin_uc27", roles = {"ADMIN"})
+    void defaultPageRendersAllFifteenUsersAndPageSizeChoices() throws Exception {
+        for (int i = 0; i < 10; i++) {
+            userRepository.save(User.builder().username("extra_uc27_" + i)
+                    .email("extra_uc27_" + i + "@example.test").password(admin.getPassword())
+                    .fullName("Khách kiểm thử " + i).role(Role.USER).isActive(true).build());
+        }
+        var allUsers = mockMvc.perform(get("/admin/users").param("role", "ALL").param("keyword", ""))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("totalElements", 15L))
+                .andExpect(model().attribute("pageSize", 20))
+                .andExpect(model().attribute("users", org.hamcrest.Matchers.hasSize(15)))
+                .andExpect(content().string(containsString("id=\"usersPageSize\"")))
+                .andExpect(content().string(containsString("id=\"usersPagination\"")))
+                .andReturn().getResponse().getContentAsString();
+        for (int n : new int[] {5, 10, 20, 50}) {
+            org.assertj.core.api.Assertions.assertThat(allUsers).contains(n + " / trang</option>");
+        }
+        for (User user : userRepository.findAll()) {
+            org.assertj.core.api.Assertions.assertThat(allUsers).contains("@" + user.getUsername());
+        }
+        mockMvc.perform(get("/admin/users").param("role", "ALL").param("size", "5"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("totalPages", 3))
+                .andExpect(model().attribute("users", org.hamcrest.Matchers.hasSize(5)))
+                .andExpect(content().string(containsString("role=ALL&amp;page=1&amp;size=5")))
+                .andExpect(content().string(containsString("Trang sau")));
+        mockMvc.perform(get("/admin/users").param("size", "50").param("role", "USER"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("users", org.hamcrest.Matchers.hasSize(14)));
+    }
+
+    @Test
+    @WithMockUser(username = "admin_uc27", roles = {"ADMIN"})
+    void pageSizeIsBoundedAndEmptySearchStillRendersPagination() throws Exception {
+        mockMvc.perform(get("/admin/users").param("size", "1000000"))
+                .andExpect(status().isOk()).andExpect(model().attribute("pageSize", 50));
+        mockMvc.perform(get("/admin/users").param("size", "0"))
+                .andExpect(status().isOk()).andExpect(model().attribute("pageSize", 1));
+        mockMvc.perform(get("/admin/users").param("keyword", "no_matching_user_uc27"))
+                .andExpect(status().isOk()).andExpect(model().attribute("totalElements", 0L))
+                .andExpect(content().string(containsString("Không tìm thấy người dùng")))
+                .andExpect(content().string(containsString("id=\"usersPagination\"")));
+    }
+
     /**
      * Main Flow Bước 4:
      * 4. Chọn Next (hoặc Previous, hoặc trang bất kỳ) để xem trang tiếp theo (hoặc trước đó, hoặc trang tương ứng)

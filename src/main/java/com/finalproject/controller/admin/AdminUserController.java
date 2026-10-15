@@ -37,8 +37,9 @@ public class AdminUserController {
                             @RequestParam(value = "keyword", required = false) String keyword,
                             @RequestParam(value = "role", required = false) String roleStr,
                             @RequestParam(value = "page", defaultValue = "0") int page,
-                            @RequestParam(value = "size", defaultValue = "5") int size,
+                            @RequestParam(value = "size", defaultValue = "20") int size,
                             Model model) {
+        size = Math.max(1, Math.min(size, 50));
         try {
             // Tab 1: Danh sách người dùng có phân trang (UC_027)
             Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, size), Sort.by(Sort.Direction.DESC, "id"));
