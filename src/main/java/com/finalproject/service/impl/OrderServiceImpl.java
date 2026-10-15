@@ -37,6 +37,7 @@ public class OrderServiceImpl implements OrderService {
     private final com.finalproject.service.NotificationService notificationService;
     private final jakarta.persistence.EntityManager entityManager;
     private final java.time.Clock clock;
+    private final com.finalproject.service.DemoPaymentService demoPayments;
 
     @Override
     @Transactional
@@ -81,9 +82,12 @@ public class OrderServiceImpl implements OrderService {
     public List<Order> checkout(String username, List<Long> selectedCartItemIds, PaymentMethod paymentMethod,
                                String recipientName, String recipientPhone, String recipientAddress, String greetingMessage, String voucherCode,
                                LocalDate deliveryDate, String shippingMethod, Long pickupStoreId, Long deliveryUnitId) {
-        if (paymentMethod != PaymentMethod.COD && paymentMethod != PaymentMethod.BANK_TRANSFER && paymentMethod != PaymentMethod.MOMO) {
+        if (paymentMethod != PaymentMethod.COD && paymentMethod != PaymentMethod.BANK_TRANSFER
+                && paymentMethod != PaymentMethod.MOMO && paymentMethod != PaymentMethod.MOMO_DEMO) {
             throw new IllegalArgumentException("Phương thức thanh toán chưa được hỗ trợ.");
         }
+        if (paymentMethod == PaymentMethod.MOMO_DEMO && !demoPayments.isEnabled())
+            throw new IllegalStateException("Thanh toán giả lập đang tắt.");
         if (!"PICKUP".equals(shippingMethod) && !"DELIVERY".equals(shippingMethod)) {
             throw new IllegalArgumentException("Hình thức nhận hàng không hợp lệ.");
         }
@@ -243,6 +247,7 @@ public class OrderServiceImpl implements OrderService {
         order.setPaymentMethod(paymentMethod != null ? paymentMethod.name() : "COD");
         order.setPaymentStatus("UNPAID");
         if (paymentMethod == PaymentMethod.MOMO) order.setPaymentExpiresAt(LocalDateTime.now(clock).plusMinutes(30));
+        if (paymentMethod == PaymentMethod.MOMO_DEMO) order.setPaymentExpiresAt(LocalDateTime.now(clock).plusMinutes(10));
         if (paymentMethod == PaymentMethod.BANK_TRANSFER) order.setPaymentExpiresAt(LocalDateTime.now(clock).plusHours(24));
         order.setOrderDetails(orderDetails);
         Order savedOrder = orderRepository.save(order);
@@ -706,8 +711,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public void cancelOrder(String username, Long orderId) {
-        workflow.cancelByCustomer(username, orderId);
+    public Order cancelOrder(String username, Long orderId) {
+        return workflow.cancelByCustomer(username, orderId);
     }
 
     @Override

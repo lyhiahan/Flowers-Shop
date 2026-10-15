@@ -383,7 +383,7 @@
             overflow: hidden;
             background: linear-gradient(135deg, #E9DFD8 0%, #D8CFC8 100%);
             border: 1px solid var(--flower-border);
-            margin-bottom: 50px;
+            margin-bottom: 0;
         }
         .profile-cover-img {
             width: 100%;
@@ -391,12 +391,13 @@
             object-fit: cover;
         }
         .profile-avatar-wrapper {
-            position: absolute;
-            bottom: -36px;
-            left: 28px;
+            position: relative;
+            margin: -36px 28px 24px;
             display: flex;
             align-items: flex-end;
             gap: 16px;
+            min-width: 0;
+            flex-wrap: wrap;
         }
         .profile-avatar-img {
             width: 96px;
@@ -406,6 +407,13 @@
             object-fit: cover;
             box-shadow: 0 4px 14px rgba(41, 59, 50, 0.15);
             background-color: #FFFFFF;
+            flex-shrink: 0;
+        }
+        .profile-image-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
+        #avatarFileName { max-width: 100%; }
+        @media (max-width: 575px) {
+            .profile-avatar-wrapper { margin-left: 12px; margin-right: 12px; align-items: flex-start; }
+            .profile-image-controls { flex: 1 1 160px; }
         }
         .cover-upload-trigger {
             position: absolute;
@@ -841,26 +849,26 @@
                             <img id="coverPreview" class="profile-cover-img"
                                  th:src="${user.cover != null and !user.cover.isEmpty() ? user.cover : 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=1200&h=350&fit=crop&q=80'}"
                                  alt="Ảnh bìa">
-                            <label for="coverFileInput" class="cover-upload-trigger">
-                                <i class="bi bi-camera me-1"></i>
-                                <span>Chọn ảnh bìa</span>
-                            </label>
-
-                            <div class="profile-avatar-wrapper">
+                            <button type="button" data-profile-image-trigger="coverFileInput" class="cover-upload-trigger" aria-label="Đổi ảnh nền">
+                                <i class="bi bi-camera me-1" aria-hidden="true"></i>
+                                <span>Đổi ảnh nền</span>
+                            </button>
+                        </div>
+                        <div class="profile-avatar-wrapper">
                                 <img th:src="${user.avatarUrl != null and !user.avatarUrl.isEmpty() ? user.avatarUrl : '/images/flower-logo.png'}"
                                      id="avatarPreview" class="profile-avatar-img" alt="Ảnh đại diện">
-                                <div class="bg-white px-3 py-1.5 rounded-3 border shadow-sm d-flex align-items-center gap-2">
-                                    <label for="avatarFileInput" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-bold mb-0" style="cursor: pointer;">
-                                        <i class="bi bi-image me-1"></i> Đổi ảnh đại diện
-                                    </label>
-                                    <span id="avatarFileName" class="file-chosen-name text-muted small">Chưa chọn tệp</span>
+                                <div class="profile-image-controls">
+                                    <button type="button" data-profile-image-trigger="avatarFileInput" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-bold" aria-label="Đổi ảnh đại diện">
+                                        <i class="bi bi-image me-1" aria-hidden="true"></i> Đổi ảnh đại diện
+                                    </button>
+                                    <span id="avatarFileName" class="file-chosen-name text-muted small" role="status"></span>
                                 </div>
-                            </div>
                         </div>
 
                         <!-- Ẩn input file mặc định, dùng trigger tiếng Việt -->
-                        <input id="coverFileInput" name="coverFile" type="file" accept="image/*" class="d-none" onchange="previewCoverImage(this)">
-                        <input id="avatarFileInput" name="avatarFile" type="file" accept="image/*" class="d-none" onchange="previewAvatarImage(this)">
+                        <input id="coverFileInput" name="coverFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="d-none" data-profile-image="coverPreview">
+                        <input id="avatarFileInput" name="avatarFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="d-none" data-profile-image="avatarPreview">
+                        <div id="profileImageError" class="text-danger mb-3" role="alert" hidden></div>
 
                         <div class="d-flex align-items-center justify-content-between mb-3 pt-2">
                             <h5 class="fw-bold mb-0 text-dark">Hồ sơ người dùng</h5>
@@ -1122,36 +1130,9 @@
          ============================================== -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script th:src="@{/js/global-modal.js}"></script>
+    <script th:src="@{/js/profile-images.js}"></script>
 
     <script>
-        // Xử lý xem trước ảnh Avatar & Cover
-        function previewAvatarImage(input) {
-            if (input.files && input.files[0]) {
-                const file = input.files[0];
-                const fileNameElem = document.getElementById('avatarFileName');
-                if (fileNameElem) fileNameElem.textContent = file.name;
-
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const preview = document.getElementById('avatarPreview');
-                    if (preview) preview.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function previewCoverImage(input) {
-            if (input.files && input.files[0]) {
-                const file = input.files[0];
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const preview = document.getElementById('coverPreview');
-                    if (preview) preview.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
         // Đổi vai trò trong modal đăng ký
         function openEditAddressModal(id, recipientName, phone, addressDetail, isDefault) {
             const form = document.getElementById('formEditAddress');

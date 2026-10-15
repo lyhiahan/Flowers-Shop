@@ -42,6 +42,7 @@ class SqlServerSchemaTests {
                         + Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V6__chat_product_context.sql"))
                         + Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V7__product_categories.sql"))
                         + Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V8__branch_catalog_visibility.sql"));
+                String pendingFunds = Files.readString(Path.of("src/main/java/com/finalproject/db/migration/V10__demo_pending_funds.java"));
                 for (var table : metadata.collectTableMappings()) {
                     var pattern = java.util.regex.Pattern.compile("create\\s+table\\s+(?:dbo\\.)?"
                             + java.util.regex.Pattern.quote(table.getName()) + "\\s*\\((.*?)\\);",
@@ -53,9 +54,12 @@ class SqlServerSchemaTests {
                             + java.util.regex.Pattern.quote(table.getName()) + "\\s+add\\s+(.*?);",
                             java.util.regex.Pattern.CASE_INSENSITIVE | java.util.regex.Pattern.DOTALL).matcher(baseline);
                     while (additions.find()) definitions += additions.group(1);
-                    for (var column : table.getColumns())
-                        assertThat(definitions).as("%s.%s", table.getName(), column.getName())
-                                .contains(column.getName() + " ");
+                    for (var column : table.getColumns()) {
+                        if (!definitions.contains(column.getName() + " ")) {
+                            assertThat(pendingFunds).as("additive migration for %s.%s", table.getName(), column.getName())
+                                    .contains("addColumn(jdbc, \"" + table.getName() + "\", \"" + column.getName() + "\"");
+                        }
+                    }
                 }
                 assertThat(baseline.toLowerCase(Locale.ROOT)).doesNotContain("drop table", "drop database", "truncate table");
             }

@@ -112,7 +112,7 @@ class ReportDateFilteringTests {
         amount(250, analytics.getProductRevenueChart(own.getId(), range).getTotal());
         var dashboard = analytics.dashboard(own.getId(), range, "products");
         assertEquals(2L, dashboard.get("totalOrdersCount"));
-        amount(4, ((List<BigDecimal>) dashboard.get("chartValues")).getFirst());
+        amount(4, (BigDecimal) ((List<?>) dashboard.get("chartValues")).getFirst());
         amount(1, analytics.getNewUsersChart(range).getTotal());
     }
 

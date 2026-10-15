@@ -148,4 +148,30 @@ class CheckoutEdgeSafetyTests {
                 "Khách", "0901234567",null,null,null,LocalDate.now().minusDays(1),"PICKUP",store.getId(),null,java.time.LocalTime.NOON))
                 .isInstanceOf(IllegalArgumentException.class);
     }
+
+    @Test void demoCheckoutRedirectsToQrAndKeepsPaymentPending() throws Exception {
+        var result = mvc.perform(post("/checkout").with(user(customer.getUsername()).roles("USER")).with(csrf())
+                .param("selectedItemIds", first.getId().toString()).param("paymentMethod", "MOMO_DEMO")
+                .param("recipientName", "Test customer").param("recipientPhone", "0901234567")
+                .param("shippingMethod", "PICKUP").param("pickupStoreId", store.getId().toString())
+                .param("deliveryDate", LocalDate.now().plusDays(2).toString()).param("deliveryTimeSlot", "09:00-11:00"))
+                .andExpect(status().is3xxRedirection()).andReturn();
+        assertThat(result.getResponse().getRedirectedUrl()).matches("/customer/demo-payment/[0-9a-f]{64}");
+        var demoOrder = orderService.getOrdersByUsernameAndStatus(customer.getUsername(), null).get(0);
+        assertThat(demoOrder.getPaymentMethod()).isEqualTo("MOMO_DEMO");
+        assertThat(demoOrder.getPaymentStatus()).isEqualTo("UNPAID");
+        assertThat(demoOrder.getPaymentExpiresAt()).isNotNull();
+    }
+
+    @Test void bankOptionIsRemovedAndForgedBankCheckoutCannotCreateOrder() throws Exception {
+        var page = mvc.perform(get("/checkout").param("selectedItemIds", first.getId().toString())
+                .with(user(customer.getUsername()).roles("USER"))).andExpect(status().isOk()).andReturn();
+        assertThat(page.getResponse().getContentAsString()).contains("value=\"MOMO_DEMO\"", "value=\"COD\"")
+                .doesNotContain("payOptionBank", "value=\"BANK_TRANSFER\"");
+        mvc.perform(post("/checkout").with(user(customer.getUsername()).roles("USER")).with(csrf())
+                .param("selectedItemIds", first.getId().toString()).param("paymentMethod", "BANK_TRANSFER"))
+                .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("errorMessage"));
+        assertThat(orderService.getOrdersByUsernameAndStatus(customer.getUsername(), null)).isEmpty();
+        assertThat(stocks.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(10);
+    }
 }

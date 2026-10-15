@@ -35,6 +35,7 @@ public class CheckoutController {
     private final com.finalproject.service.VoucherService voucherService;
     private final com.finalproject.config.MomoConfig momoConfig;
     private final com.finalproject.service.MomoService momoService;
+    private final com.finalproject.service.DemoPaymentService demoPayments;
 
     @GetMapping
     public String showCheckoutPage(
@@ -104,8 +105,10 @@ public class CheckoutController {
         model.addAttribute("subtotalRentAndBuy", subtotalRentAndBuy);
         model.addAttribute("totalDeposit", totalDeposit);
         model.addAttribute("grandTotal", grandTotal);
-        model.addAttribute("paymentMethods", PaymentMethod.values());
+        model.addAttribute("paymentMethods", demoPayments.isEnabled()
+                ? List.of(PaymentMethod.COD, PaymentMethod.MOMO_DEMO) : List.of(PaymentMethod.COD));
         model.addAttribute("momoMock", momoConfig.isMock());
+        model.addAttribute("demoPaymentEnabled", demoPayments.isEnabled());
 
         return "customer/checkout";
     }
@@ -134,6 +137,8 @@ public class CheckoutController {
         String finalRecipientAddress = extractFirstNonBlank(recipientAddress);
 
         try {
+            if (paymentMethod == PaymentMethod.BANK_TRANSFER)
+                throw new IllegalArgumentException("Thanh toán ngân hàng đã được gỡ. Vui lòng chọn COD hoặc MoMo.");
             finalRecipientName = resolveRecipientField(request, "recipientName", recipientName);
             finalRecipientPhone = resolveRecipientField(request, "recipientPhone", recipientPhone);
             finalRecipientAddress = resolveRecipientField(request, "recipientAddress", recipientAddress);
@@ -151,7 +156,18 @@ public class CheckoutController {
             if ("DELIVERY".equals(shippingMethod) && (finalRecipientAddress == null || finalRecipientAddress.isBlank()))
                 throw new IllegalArgumentException("Vui lòng nhập địa chỉ giao hàng.");
             validateDeliverySelection(shippingMethod, deliveryUnitId);
+            if (paymentMethod == PaymentMethod.MOMO_DEMO && !demoPayments.isEnabled())
+                throw new IllegalArgumentException("Thanh toán MoMo demo đang tắt.");
             List<com.finalproject.entity.Order> createdOrders = orderService.checkout(principal.getName(), selectedItemIds, paymentMethod, finalRecipientName, finalRecipientPhone, finalRecipientAddress, greetingMessage, voucherCode, deliveryDate, shippingMethod, pickupStoreId, deliveryUnitId, deliveryTime);
+            if (paymentMethod == PaymentMethod.MOMO_DEMO) {
+                try {
+                    String token = demoPayments.create(createdOrders.stream().map(com.finalproject.entity.Order::getId).toList(), principal.getName());
+                    return "redirect:/customer/demo-payment/" + token;
+                } catch (IllegalArgumentException | IllegalStateException ex) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Đơn đã được lưu. Vui lòng mở lại thanh toán MoMo trong danh sách đơn hàng.");
+                    return "redirect:/customer/orders";
+                }
+            }
             if (paymentMethod == PaymentMethod.MOMO && createdOrders != null && !createdOrders.isEmpty()) {
                 com.finalproject.entity.Order firstOrder = createdOrders.get(0);
                 try {
@@ -160,9 +176,6 @@ public class CheckoutController {
                     redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage() + " Đơn đã được lưu để thanh toán lại.");
                     return "redirect:/customer/orders";
                 }
-            }
-            if (paymentMethod == PaymentMethod.BANK_TRANSFER && createdOrders != null && !createdOrders.isEmpty()) {
-                return "redirect:/checkout/bank/" + createdOrders.get(0).getId();
             }
             redirectAttributes.addFlashAttribute("successMessage", "🌸 Đặt hoa thành công! Đơn hàng của bạn đã được chuyển đến chi nhánh cắm hoa để chuẩn bị.");
             return "redirect:/customer/orders";

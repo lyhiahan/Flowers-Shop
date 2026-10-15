@@ -32,6 +32,10 @@ public class Transaction {
     @Column(nullable = false)
     private BigDecimal amount;
 
+    @Column(name = "wallet_bucket", nullable = false, length = 20)
+    @Builder.Default
+    private String walletBucket = "AVAILABLE";
+
     @Column(length = 30)
     @Builder.Default
     private String type = "ORDER_PAYMENT"; // ORDER_PAYMENT, WITHDRAWAL, COMMISSION_FEE, REFUND

@@ -246,7 +246,7 @@
                             <div class="small mb-2 d-flex align-items-center justify-content-between">
                                 <span class="text-muted">Phương thức: </span>
                                 <div>
-                                    <span th:if="${order.paymentMethod == 'MOMO'}"
+                                    <span th:if="${order.paymentMethod == 'MOMO' or order.paymentMethod == 'MOMO_DEMO'}"
                                           class="badge rounded-pill text-white px-2 py-1" style="background-color: #D82D8B;">
                                         <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo" style="height: 14px; width: 14px; vertical-align: -2px;" class="me-1">
                                         Ví MoMo
@@ -270,6 +270,10 @@
                                 <span th:if="${order.paymentStatus == 'UNPAID'}" class="badge bg-warning text-dark rounded-pill px-2 py-1">
                                     <i class="bi bi-clock-history me-1"></i>Chưa thanh toán
                                 </span>
+                            </div>
+                            <div th:if="${order.paymentMethod == 'MOMO_DEMO'}" class="small d-flex flex-wrap gap-2 justify-content-between mt-2">
+                                <span class="text-muted">Khoản tiền:</span>
+                                <strong th:text="${order.fundsStatus.name() == 'HELD' ? 'Đang chờ giao hàng' : (order.fundsStatus.name() == 'SETTLED' ? 'Đã chuyển vào ví cửa hàng' : (order.fundsStatus.name() == 'REFUNDED' ? 'Đã hoàn tiền' : (order.fundsStatus.name() == 'REVIEW_REQUIRED' ? 'Cần đối soát' : 'Chưa nhận tiền')))}"></strong>
                             </div>
                         </div>
 

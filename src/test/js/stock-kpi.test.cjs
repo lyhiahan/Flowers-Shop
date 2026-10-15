@@ -10,7 +10,10 @@ function setup(fetcher, withCard = true, options = {}) {
     const value = {textContent: '10'}, status = {hidden: true, textContent: ''};
     const card = {dataset: {stockEndpoint: options.endpoint || '/manager/dashboard/stock?storeId=1',
         stockCatalog: options.catalog ? 'true' : undefined},
-        querySelector(selector) {return selector === '[data-stock-value]' ? (options.noTotal ? null : value) : status;}};
+        querySelector(selector) {
+            if (options.withoutSummary) return null;
+            return selector === '[data-stock-value]' ? (options.noTotal ? null : value) : status;
+        }};
     const document = {hidden: false, listeners: {}, querySelector() {return withCard ? card : null;},
         querySelectorAll() {return options.cards || [];},
         addEventListener(event, listener) {this.listeners[event] = listener;}};
@@ -94,6 +97,17 @@ test('pages without stock card make no requests or timers', () => {
     const ui = setup(() => ok(8), false);
     assert.equal(ui.requests.length, 0);
     assert.equal(ui.timers.length, 0);
+});
+
+test('catalog cards keep refreshing after removing the chain-wide summary', async () => {
+    const card = productCard('1');
+    const ui = setup(async () => ({ok:true,json:async () => ({currentStockQuantity:4,products:{'1':{quantity:4,purchaseStoreId:2}}})}),
+        true, {catalog:true,withoutSummary:true,cards:[card]});
+    await settle();
+    assert.equal(ui.requests.length,1);
+    assert.equal(card.stockText.textContent,'Còn 4 sản phẩm');
+    assert.equal(card.store.value,'2');
+    assert.equal(card.button.disabled,false);
 });
 
 test('back-forward cache restoration resumes refresh and polling', async () => {
