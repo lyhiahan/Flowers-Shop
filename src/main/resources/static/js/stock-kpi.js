@@ -1,12 +1,12 @@
 (function () {
     'use strict';
-    const card = document.querySelector('[data-stock-kpi]');
+    const card = document.querySelector('[data-stock-kpi], [data-stock-catalog]');
     if (!card) return;
     const value = card.querySelector('[data-stock-value]');
     const status = card.querySelector('[data-stock-status]');
     let endpoint = card.dataset.stockEndpoint;
-    if (!value || !status || !endpoint) return;
     const catalogMode = card.dataset.stockCatalog === 'true';
+    if ((!value && !catalogMode) || !status || !endpoint) return;
     const productCards = catalogMode ? Array.from(document.querySelectorAll('[data-catalog-product-id]')) : [];
     const productIds = Array.from(new Set(productCards.map(item => item.dataset.catalogProductId)));
     if (productIds.length) endpoint += (endpoint.includes('?') ? '&' : '?') + 'productIds=' + encodeURIComponent(productIds.join(','));
@@ -35,7 +35,7 @@
             }
             if (stopped) return;
             for (const item of productCards) updateProduct(item, data.products[item.dataset.catalogProductId]);
-            value.textContent = data.currentStockQuantity.toLocaleString('vi-VN');
+            if (value) value.textContent = data.currentStockQuantity.toLocaleString('vi-VN');
             status.hidden = true;
             status.textContent = '';
         } catch (_) {

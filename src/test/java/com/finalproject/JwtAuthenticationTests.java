@@ -3,7 +3,6 @@ package com.finalproject;
 import com.finalproject.entity.User;
 import com.finalproject.enums.Role;
 import com.finalproject.repository.*;
-import com.finalproject.service.JwtTokenService;
 import com.finalproject.config.JwtProperties;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;

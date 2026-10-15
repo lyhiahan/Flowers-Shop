@@ -345,7 +345,7 @@
               <div class="flex items-baseline gap-2 mb-3.5">
                 <span class="text-lg font-extrabold text-botanic-rose"
                       th:text="${#numbers.formatDecimal(p.priceBuy != null ? p.priceBuy : (p.sellingPrice != null ? p.sellingPrice : 0), 0, 'COMMA', 0, 'POINT')} + ' đ'">850.000 đ</span>
-                <span th:if="${p.promotionalPrice != null and p.priceBuy != null and p.promotionalPrice < p.priceBuy}"
+                <span th:if="${p.priceBuy != null and p.sellingPrice < p.priceBuy}"
                       class="text-xs text-[#999] line-through font-semibold"
                       th:text="${#numbers.formatDecimal(p.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'">950.000 đ</span>
               </div>

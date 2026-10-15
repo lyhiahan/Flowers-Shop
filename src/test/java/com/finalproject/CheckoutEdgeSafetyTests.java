@@ -33,6 +33,7 @@ class CheckoutEdgeSafetyTests {
     @Autowired CartService cartService;
     @Autowired OrderService orderService;
     @Autowired ShippingTariffRepository tariffs;
+    @Autowired DeliveryRepository deliveries;
     @Autowired CustomUserDetailsService details;
     @Autowired MockMvc mvc;
     User customer; Store store; Product product; Cart cart; CartItem first;
@@ -54,6 +55,47 @@ class CheckoutEdgeSafetyTests {
     CartItem second(int quantity) {
         return items.saveAndFlush(CartItem.builder().cart(cart).store(store).product(product).orderType(OrderType.BUY)
                 .quantity(quantity).deliveryDate(LocalDate.now().plusDays(1)).build());
+    }
+    @Test void openingDeliveryAdminMustNotCreateOrRecreateTariffs() throws Exception {
+        long before = tariffs.count();
+        mvc.perform(get("/admin/deliveries").with(user("edge_admin").roles("ADMIN")))
+                .andExpect(status().isOk());
+        assertThat(tariffs.count()).isEqualTo(before);
+    }
+
+    Delivery carrier(String name) {
+        return deliveries.save(Delivery.builder().name(name).price(BigDecimal.ZERO).isActive(true).isDeleted(false).build());
+    }
+    ShippingTariff tariff(Delivery carrier, String area, boolean active) {
+        return tariffs.save(ShippingTariff.builder().store(store).delivery(carrier).destinationArea(area)
+                .serviceName("Tiêu chuẩn").baseFee(new BigDecimal("25000")).bulkySurcharge(BigDecimal.ZERO)
+                .isActive(active).isDeleted(false).build());
+    }
+    CheckoutQuote deliveryQuote(Delivery carrier) {
+        return orderService.quote(customer.getUsername(), java.util.List.of(first.getId()),
+                "123 Lê Lợi, Quận 1", null, "DELIVERY", null, carrier.getId());
+    }
+    @Test void shippingCannotUseAnotherCarriersTariff() {
+        var chosen = carrier("Chosen carrier");
+        tariff(carrier("Other carrier"), "Khu vực gần chi nhánh (< 5km)", true);
+        assertThatThrownBy(() -> deliveryQuote(chosen)).isInstanceOf(IllegalArgumentException.class);
+    }
+    @Test void shippingCannotUseWrongZoneOrDisabledTariff() {
+        var chosen = carrier("Chosen carrier");
+        var rate = tariff(chosen, "Khu vực xa hơn (5 - 15km)", true);
+        assertThatThrownBy(() -> deliveryQuote(chosen)).isInstanceOf(IllegalArgumentException.class);
+        rate.setDestinationArea("Khu vực gần chi nhánh (< 5km)"); rate.setIsActive(false);
+        assertThatThrownBy(() -> deliveryQuote(chosen)).isInstanceOf(IllegalArgumentException.class);
+        rate.setIsActive(true);
+        assertThat(deliveryQuote(chosen).shippingFee()).isEqualByComparingTo("25000");
+    }
+    @Test void branchTariffOverridesGlobalTariffForSameCarrierAndZone() {
+        var chosen = carrier("Chosen carrier");
+        var global = tariff(chosen, "Khu vực gần chi nhánh (< 5km)", true);
+        global.setStore(null); global.setBaseFee(new BigDecimal("40000")); tariffs.saveAndFlush(global);
+        assertThat(deliveryQuote(chosen).shippingFee()).isEqualByComparingTo("40000");
+        tariff(chosen, "Khu vực gần chi nhánh (< 5km)", true);
+        assertThat(deliveryQuote(chosen).shippingFee()).isEqualByComparingTo("25000");
     }
     @Test void duplicateDateLineMustRespectCombinedStock() {
         second(7);

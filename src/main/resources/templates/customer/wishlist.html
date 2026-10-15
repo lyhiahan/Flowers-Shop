@@ -332,8 +332,8 @@
             <!-- Price tiering -->
             <div class="flex flex-wrap items-baseline gap-1.5 mb-2">
               <span class="font-extrabold text-[16px] sm:text-[17px] text-secondary"
-                    th:text="${#numbers.formatDecimal(p.promotionalPrice != null and p.priceBuy != null and p.promotionalPrice < p.priceBuy ? p.promotionalPrice : (p.priceBuy != null ? p.priceBuy : 0), 0, 'COMMA', 0, 'POINT')} + ' đ'">850.000 đ</span>
-              <span th:if="${p.promotionalPrice != null and p.priceBuy != null and p.promotionalPrice < p.priceBuy}"
+                    th:text="${#numbers.formatDecimal(p.sellingPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">850.000 đ</span>
+              <span th:if="${p.priceBuy != null and p.sellingPrice < p.priceBuy}"
                     class="text-[12px] line-through text-[#9A8D87]"
                     th:text="${#numbers.formatDecimal(p.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'">950.000 đ</span>
             </div>

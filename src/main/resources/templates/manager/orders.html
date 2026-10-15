@@ -6,11 +6,18 @@
 <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-page); color: var(--text-main); }
         .font-serif { font-family: 'Playfair Display', Georgia, serif; }
-
-
-
-
-        .badge-status { font-size: 0.8rem; padding: 6px 12px; border-radius: 20px; }
+        .table-manager-orders td {
+            padding: 16px 14px !important;
+            vertical-align: middle;
+        }
+        .table-manager-orders th {
+            padding: 16px 14px !important;
+            color: #20382E !important;
+            font-weight: 800 !important;
+            font-size: 15.5px !important;
+            letter-spacing: 0.2px;
+        }
+        .badge-status { font-size: 0.85rem; padding: 6px 12px; border-radius: 20px; }
     </style>
 <link rel="stylesheet" th:href="@{/css/manager-layout.css}">
 </head>
@@ -32,10 +39,10 @@
                     <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Theo dõi tiến độ cắm hoa, điều phối giao hàng và cập nhật trạng thái đơn hàng của chi nhánh.</p>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    <a th:href="@{/manager/notifications}" class="btn btn-sm btn-outline-success rounded-pill px-3 shadow-sm d-flex align-items-center gap-1.5 position-relative" style="border-color: #20382E; color: #20382E;">
-                        <i class="bi bi-bell-fill"></i>
+                    <a th:href="@{/manager/notifications}" class="btn rounded-pill px-3 shadow-sm d-inline-flex align-items-center gap-2 position-relative" style="border: 1.5px solid #20382E; color: #20382E; height: 44px; font-size: 15px; font-weight: 700;">
+                        <i class="bi bi-bell-fill me-1" style="font-size: 17px;"></i>
                         <span>Thông Báo</span>
-                        <span id="ordersNotifBadge" class="badge rounded-pill bg-danger ms-1" style="display:none; font-size:10px;">0</span>
+                        <span id="ordersNotifBadge" class="badge rounded-pill bg-danger ms-1" style="display:none; font-size:11px;">0</span>
                     </a>
                 </div>
             </div>
@@ -50,58 +57,88 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
 
-            <!-- Bước 8 theo UC_022: Chọn Processing orders (hoặc Processed orders) để xem bảng danh sách các đơn hàng đang xử lý (đã xử lý) -->
-            <div class="d-flex flex-wrap gap-2 mb-4 bg-white p-3 rounded-4 shadow-sm" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
-                <!-- Tab: Processing orders (Đang xử lý) -->
-                <a th:href="@{/manager/orders(tab='processing')}"
-                   class="btn btn-sm rounded-pill px-3 fw-semibold d-inline-flex align-items-center gap-1.5"
-                   id="tabProcessingOrders"
-                   data-testid="tabProcessingOrders"
-                   th:style="${activeTab == 'processing' or currentStatus == 'PROCESSING'} ? 'background-color: #20382E; color: #FFFFFF; border-color: #20382E;' : 'background-color: #F8F9F8; color: #20382E; border: 1px solid #D1E5DA;'">
-                    <i class="bi bi-arrow-repeat"></i>
-                    <span>Processing orders</span>
-                    <span class="badge rounded-pill ms-1"
-                          th:classappend="${activeTab == 'processing' or currentStatus == 'PROCESSING'} ? 'bg-light text-dark' : 'bg-secondary text-white'"
-                          th:text="${processingCount}">0</span>
-                </a>
+            <!-- Bước 8 theo UC_022: Chọn Đơn đang xử lý (hoặc Đơn đã xử lý) để xem bảng danh sách các đơn hàng -->
+            <div class="mb-4 bg-white p-3 rounded-4 shadow-sm" style="border: 1.5px solid #E2E7E2 !important; border-radius: 14px;">
+                <!-- Hàng 1: Tabs phân loại luồng đơn hàng -->
+                <div class="d-flex align-items-center gap-2 flex-wrap pb-2.5 mb-2.5 border-bottom" style="border-color: #EDF2EE !important;">
+                    <!-- Tab: Đơn đang xử lý -->
+                    <a th:href="@{/manager/orders(tab='processing')}"
+                       class="btn rounded-pill px-3 d-inline-flex align-items-center shadow-sm"
+                       id="tabProcessingOrders"
+                       data-testid="tabProcessingOrders"
+                       th:style="${activeTab == 'processing' or currentStatus == 'PROCESSING'} ? 'background-color: #20382E; color: #FFFFFF; border: 1.5px solid #20382E; height: 42px; font-size: 14.5px; font-weight: 700;' : 'background-color: #FFFFFF; color: #20382E; border: 1.5px solid #D1E5DA; height: 42px; font-size: 14.5px; font-weight: 700;'">
+                        <i class="bi bi-arrow-repeat me-2" th:style="${activeTab == 'processing' or currentStatus == 'PROCESSING'} ? 'color: #7AD19D; font-size: 17px;' : 'color: #2E684D; font-size: 17px;'"></i>
+                        <span>Đơn đang xử lý</span>
+                        <span class="badge rounded-pill ms-2"
+                              th:style="${activeTab == 'processing' or currentStatus == 'PROCESSING'} ? 'background-color: rgba(255,255,255,0.25); color: #fff; font-size: 13px; font-weight: 700; padding: 3px 8px;' : 'background-color: #E5EEE8; color: #20382E; font-size: 13px; font-weight: 700; padding: 3px 8px;'"
+                              th:text="${processingCount}">0</span>
+                    </a>
 
-                <!-- Tab: Processed orders (Đã xử lý) -->
-                <a th:href="@{/manager/orders(tab='processed')}"
-                   class="btn btn-sm rounded-pill px-3 fw-semibold d-inline-flex align-items-center gap-1.5"
-                   id="tabProcessedOrders"
-                   data-testid="tabProcessedOrders"
-                   th:style="${activeTab == 'processed' or currentStatus == 'PROCESSED'} ? 'background-color: #20382E; color: #FFFFFF; border-color: #20382E;' : 'background-color: #F8F9F8; color: #20382E; border: 1px solid #D1E5DA;'">
-                    <i class="bi bi-check2-all"></i>
-                    <span>Processed orders</span>
-                    <span class="badge rounded-pill ms-1"
-                          th:classappend="${activeTab == 'processed' or currentStatus == 'PROCESSED'} ? 'bg-light text-dark' : 'bg-secondary text-white'"
-                          th:text="${processedCount}">0</span>
-                </a>
+                    <!-- Tab: Đơn đã xử lý -->
+                    <a th:href="@{/manager/orders(tab='processed')}"
+                       class="btn rounded-pill px-3 d-inline-flex align-items-center shadow-sm"
+                       id="tabProcessedOrders"
+                       data-testid="tabProcessedOrders"
+                       th:style="${activeTab == 'processed' or currentStatus == 'PROCESSED'} ? 'background-color: #20382E; color: #FFFFFF; border: 1.5px solid #20382E; height: 42px; font-size: 14.5px; font-weight: 700;' : 'background-color: #FFFFFF; color: #20382E; border: 1.5px solid #D1E5DA; height: 42px; font-size: 14.5px; font-weight: 700;'">
+                        <i class="bi bi-check2-all me-2" th:style="${activeTab == 'processed' or currentStatus == 'PROCESSED'} ? 'color: #7AD19D; font-size: 17px;' : 'color: #2E684D; font-size: 17px;'"></i>
+                        <span>Đơn đã xử lý</span>
+                        <span class="badge rounded-pill ms-2"
+                              th:style="${activeTab == 'processed' or currentStatus == 'PROCESSED'} ? 'background-color: rgba(255,255,255,0.25); color: #fff; font-size: 13px; font-weight: 700; padding: 3px 8px;' : 'background-color: #E5EEE8; color: #20382E; font-size: 13px; font-weight: 700; padding: 3px 8px;'"
+                              th:text="${processedCount}">0</span>
+                    </a>
 
-                <!-- Tab: Tất cả đơn hàng -->
-                <a th:href="@{/manager/orders(tab='all')}"
-                   class="btn btn-sm rounded-pill px-3 fw-semibold d-inline-flex align-items-center gap-1.5"
-                   id="tabAllOrders"
-                   th:style="${activeTab == 'all' and currentStatus == 'ALL'} ? 'background-color: #20382E; color: #FFFFFF; border-color: #20382E;' : 'background-color: #F8F9F8; color: #20382E; border: 1px solid #D1E5DA;'">
-                    <span>Tất cả đơn</span>
-                    <span class="badge rounded-pill ms-1"
-                          th:classappend="${activeTab == 'all' and currentStatus == 'ALL'} ? 'bg-light text-dark' : 'bg-secondary text-white'"
-                          th:text="${totalCount}">0</span>
-                </a>
+                    <!-- Tab: Tất cả đơn hàng -->
+                    <a th:href="@{/manager/orders(tab='all')}"
+                       class="btn rounded-pill px-3 d-inline-flex align-items-center shadow-sm"
+                       id="tabAllOrders"
+                       th:style="${activeTab == 'all' and currentStatus == 'ALL'} ? 'background-color: #20382E; color: #FFFFFF; border: 1.5px solid #20382E; height: 42px; font-size: 14.5px; font-weight: 700;' : 'background-color: #FFFFFF; color: #20382E; border: 1.5px solid #D1E5DA; height: 42px; font-size: 14.5px; font-weight: 700;'">
+                        <i class="bi bi-collection me-2" style="font-size: 16px;"></i>
+                        <span>Tất cả đơn</span>
+                        <span class="badge rounded-pill ms-2"
+                              th:style="${activeTab == 'all' and currentStatus == 'ALL'} ? 'background-color: rgba(255,255,255,0.25); color: #fff; font-size: 13px; font-weight: 700; padding: 3px 8px;' : 'background-color: #E5EEE8; color: #20382E; font-size: 13px; font-weight: 700; padding: 3px 8px;'"
+                              th:text="${totalCount}">0</span>
+                    </a>
+                </div>
 
-                <div class="vr my-1 mx-1 d-none d-md-block"></div>
-
-                <!-- Sub-filters chi tiết -->
-                <a th:href="@{/manager/orders(status='PENDING')}" class="btn btn-sm rounded-pill px-2.5 fw-semibold"
-                   th:style="${currentStatus == 'PENDING'} ? 'background-color: #20382E; color: #FFFFFF;' : 'background-color: #F8F9F8; color: #66736B; border: 1px solid #E2E7E2;'">⏳ Chờ xác nhận</a>
-                <a th:href="@{/manager/orders(status='CONFIRMED')}" class="btn btn-sm rounded-pill px-2.5 fw-semibold"
-                   th:style="${currentStatus == 'CONFIRMED'} ? 'background-color: #20382E; color: #FFFFFF;' : 'background-color: #F8F9F8; color: #66736B; border: 1px solid #E2E7E2;'">✅ Đã tiếp nhận</a>
-                <a th:href="@{/manager/orders(status='PREPARING')}" class="btn btn-sm rounded-pill px-2.5 fw-semibold"
-                   th:style="${currentStatus == 'PREPARING'} ? 'background-color: #20382E; color: #FFFFFF;' : 'background-color: #F8F9F8; color: #66736B; border: 1px solid #E2E7E2;'">🌸 Đang cắm hoa</a>
-                <a th:href="@{/manager/orders(status='DELIVERING')}" class="btn btn-sm rounded-pill px-2.5 fw-semibold"
-                   th:style="${currentStatus == 'DELIVERING'} ? 'background-color: #20382E; color: #FFFFFF;' : 'background-color: #F8F9F8; color: #66736B; border: 1px solid #E2E7E2;'">🚚 Đang giao</a>
-                <a th:href="@{/manager/orders(status='COMPLETED')}" class="btn btn-sm rounded-pill px-2.5 fw-semibold"
-                   th:style="${currentStatus == 'COMPLETED'} ? 'background-color: #20382E; color: #FFFFFF;' : 'background-color: #F8F9F8; color: #66736B; border: 1px solid #E2E7E2;'">🎉 Hoàn thành</a>
+                <!-- Hàng 2: Các KPIs trạng thái nằm cùng 1 hàng -->
+                <div class="d-flex align-items-center gap-2 flex-nowrap overflow-x-auto py-1" style="scrollbar-width: thin;">
+                    <span class="fw-semibold text-muted small me-1 d-none d-md-inline" style="white-space: nowrap; font-size: 13.5px; color: #66736B !important;">Trạng thái:</span>
+                    <a th:href="@{/manager/orders(status='PENDING')}"
+                       class="btn rounded-pill px-3 d-inline-flex align-items-center shadow-sm"
+                       style="white-space: nowrap;"
+                       th:styleappend="${currentStatus == 'PENDING'} ? 'background-color: #20382E; color: #FFFFFF; border: 1.5px solid #20382E; height: 40px; font-size: 14px; font-weight: 700;' : 'background-color: #FFFFFF; color: #66736B; border: 1.5px solid #E2E7E2; height: 40px; font-size: 14px; font-weight: 600;'">
+                        <i class="bi bi-clock me-2" th:style="${currentStatus == 'PENDING'} ? 'color: #FCD34D; font-size: 16px;' : 'color: #92400E; font-size: 16px;'"></i>
+                        <span>Chờ xác nhận</span>
+                    </a>
+                    <a th:href="@{/manager/orders(status='CONFIRMED')}"
+                       class="btn rounded-pill px-3 d-inline-flex align-items-center shadow-sm"
+                       style="white-space: nowrap;"
+                       th:styleappend="${currentStatus == 'CONFIRMED'} ? 'background-color: #20382E; color: #FFFFFF; border: 1.5px solid #20382E; height: 40px; font-size: 14px; font-weight: 700;' : 'background-color: #FFFFFF; color: #66736B; border: 1.5px solid #E2E7E2; height: 40px; font-size: 14px; font-weight: 600;'">
+                        <i class="bi bi-check2-circle me-2" th:style="${currentStatus == 'CONFIRMED'} ? 'color: #7DD3FC; font-size: 17px;' : 'color: #0284C7; font-size: 17px;'"></i>
+                        <span>Đã tiếp nhận</span>
+                    </a>
+                    <a th:href="@{/manager/orders(status='PREPARING')}"
+                       class="btn rounded-pill px-3 d-inline-flex align-items-center shadow-sm"
+                       style="white-space: nowrap;"
+                       th:styleappend="${currentStatus == 'PREPARING'} ? 'background-color: #20382E; color: #FFFFFF; border: 1.5px solid #20382E; height: 40px; font-size: 14px; font-weight: 700;' : 'background-color: #FFFFFF; color: #66736B; border: 1.5px solid #E2E7E2; height: 40px; font-size: 14px; font-weight: 600;'">
+                        <i class="bi bi-flower1 me-2" th:style="${currentStatus == 'PREPARING'} ? 'color: #FDA4AF; font-size: 17px;' : 'color: #E11D48; font-size: 17px;'"></i>
+                        <span>Đang cắm hoa</span>
+                    </a>
+                    <a th:href="@{/manager/orders(status='DELIVERING')}"
+                       class="btn rounded-pill px-3 d-inline-flex align-items-center shadow-sm"
+                       style="white-space: nowrap;"
+                       th:styleappend="${currentStatus == 'DELIVERING'} ? 'background-color: #20382E; color: #FFFFFF; border: 1.5px solid #20382E; height: 40px; font-size: 14px; font-weight: 700;' : 'background-color: #FFFFFF; color: #66736B; border: 1.5px solid #E2E7E2; height: 40px; font-size: 14px; font-weight: 600;'">
+                        <i class="bi bi-truck me-2" th:style="${currentStatus == 'DELIVERING'} ? 'color: #FCD34D; font-size: 17px;' : 'color: #D97706; font-size: 17px;'"></i>
+                        <span>Đang giao</span>
+                    </a>
+                    <a th:href="@{/manager/orders(status='COMPLETED')}"
+                       class="btn rounded-pill px-3 d-inline-flex align-items-center shadow-sm"
+                       style="white-space: nowrap;"
+                       th:styleappend="${currentStatus == 'COMPLETED'} ? 'background-color: #20382E; color: #FFFFFF; border: 1.5px solid #20382E; height: 40px; font-size: 14px; font-weight: 700;' : 'background-color: #FFFFFF; color: #66736B; border: 1.5px solid #E2E7E2; height: 40px; font-size: 14px; font-weight: 600;'">
+                        <i class="bi bi-check-circle-fill me-2" th:style="${currentStatus == 'COMPLETED'} ? 'color: #86EFAC; font-size: 16px;' : 'color: #16A34A; font-size: 16px;'"></i>
+                        <span>Hoàn thành</span>
+                    </a>
+                </div>
             </div>
 
             <!-- Orders Table -->
@@ -133,10 +170,12 @@
                                     <div class="fw-bold" style="font-size: 16px; color: #20382E;" th:text="'#' + ${o.id}">#101</div>
                                     <div style="font-size: 13px; color: #66736B; margin-top: 2px;" th:text="${#temporals.format(o.createdAt, 'dd/MM/yyyy HH:mm')}">01/10/2026 09:30</div>
                                 </td>
-
                                 <!-- 2. Người nhận -->
                                 <td>
-                                    <div th:if="${o.cancellationReason != null}" class="small text-danger mb-1" th:text="${o.cancellationReason}"></div>
+                                    <div th:if="${o.cancellationReason != null and !#strings.isEmpty(o.cancellationReason)}" class="small text-danger mb-1.5" style="line-height: 1.35;">
+                                        <div class="fw-semibold" th:text="${o.cancellationActorDisplay}">Đã hủy bởi Admin</div>
+                                        <div style="font-size: 12.5px; margin-top: 1px;">Lý do: <span th:text="${o.cancellationReasonDetail}">không còn hàng.</span></div>
+                                    </div>
                                     <div class="fw-semibold" style="font-size: 16px; color: #20382E;" th:text="${o.recipientName != null ? o.recipientName : (o.user != null ? o.user.fullName : 'Khách lẻ')}">Nguyễn Văn A</div>
                                     <div style="font-size: 14px; color: #66736B; margin-top: 2px;">
                                         <i class="bi bi-telephone me-1"></i><span th:text="${o.recipientPhone != null ? o.recipientPhone : (o.user != null ? o.user.phone : '---')}">0901234567</span>
@@ -221,13 +260,13 @@
 
                                 <!-- 7. Thao tác -->
                                 <td class="text-end pe-3">
-                                    <div class="d-flex align-items-center justify-content-end gap-1.5 flex-wrap">
+                                    <div class="d-flex align-items-center justify-content-end gap-2 flex-wrap">
                                         <!-- Bước 10 theo UC_022: Chọn nút xem chi tiết -->
                                         <a th:href="@{'/manager/orders/' + ${o.id}}"
-                                           class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1 fw-bold"
+                                           class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1.5 d-inline-flex align-items-center gap-1.5 fw-bold"
                                            th:id="'btnViewDetail_' + ${o.id}"
                                            data-testid="btnViewDetail">
-                                            <i class="bi bi-eye"></i> Xem chi tiết
+                                            <i class="bi bi-eye me-1"></i> <span>Xem chi tiết</span>
                                         </a>
 
                                         <!-- Quick actions -->
@@ -235,14 +274,14 @@
                                               th:action="@{/manager/orders/confirm-payment/{id}(id=${o.id})}"
                                               method="post" class="d-inline" onsubmit="return confirm('Bạn đã kiểm tra và nhận đủ tiền chuyển khoản?');">
                                             <input type="hidden" name="redirect" th:value="@{/manager/orders(tab=${activeTab}, status=${currentStatus}, page=${currentPage})}">
-                                            <button class="btn btn-outline-success btn-sm">Nhận tiền</button>
+                                            <button class="btn btn-outline-success btn-sm rounded-pill px-3 py-1.5 fw-semibold">Nhận tiền</button>
                                         </form>
 
                                         <!-- Tiếp nhận đơn -->
                                         <form th:if="${o.status.name() == 'PENDING'}" th:action="@{'/manager/orders/update-status/' + ${o.id}}" method="post" class="d-inline">
                                             <input type="hidden" name="status" value="CONFIRMED">
                                             <input type="hidden" name="redirect" th:value="@{/manager/orders(tab=${activeTab}, status=${currentStatus}, page=${currentPage})}">
-                                            <button type="submit" class="btn btn-outline-info btn-sm">Nhận Đơn</button>
+                                            <button type="submit" class="btn btn-outline-info btn-sm rounded-pill px-3 py-1.5 fw-semibold">Nhận Đơn</button>
                                         </form>
 
                                         <!-- Cắm hoa -->
@@ -250,29 +289,28 @@
                                               onsubmit="return confirm('Bắt đầu cắm hoa/chuẩn bị? Sau thao tác này, khách không thể tự hủy đơn.');">
                                             <input type="hidden" name="status" value="PREPARING">
                                             <input type="hidden" name="redirect" th:value="@{/manager/orders(tab=${activeTab}, status=${currentStatus}, page=${currentPage})}">
-                                            <button type="submit" class="btn btn-outline-danger btn-sm">Cắm Hoa</button>
+                                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1.5 fw-semibold">Cắm Hoa</button>
                                         </form>
 
                                         <!-- Quản lý cập nhật tiến độ giao hàng -->
                                         <form th:if="${o.shippingMethod != 'PICKUP' and (o.status.name() == 'PREPARING' or o.status.name() == 'PICKED_UP' or o.status.name() == 'DELIVERING')}" th:action="@{'/manager/orders/update-status/' + ${o.id}}" method="post" class="d-inline">
                                             <input type="hidden" name="status" th:value="${o.status.name() == 'DELIVERING' ? 'DELIVERED' : 'DELIVERING'}">
                                             <input type="hidden" name="redirect" th:value="@{/manager/orders(tab=${activeTab}, status=${currentStatus}, page=${currentPage})}">
-                                            <button type="submit" class="btn btn-warning btn-sm" th:text="${o.status.name() == 'DELIVERING' ? 'Đã giao đến khách' : 'Bắt đầu giao hoa'}">Bắt đầu giao hoa</button>
+                                            <button type="submit" class="btn btn-warning btn-sm rounded-pill px-3 py-1.5 fw-semibold" th:text="${o.status.name() == 'DELIVERING' ? 'Đã giao đến khách' : 'Bắt đầu giao hoa'}">Bắt đầu giao hoa</button>
                                         </form>
-
 
                                         <!-- Hoàn tất đơn nhận tại quầy -->
                                         <form th:if="${o.status.name() == 'PREPARING' and o.shippingMethod == 'PICKUP'}" th:action="@{'/manager/orders/update-status/' + ${o.id}}" method="post" class="d-inline">
                                             <input type="hidden" name="status" value="COMPLETED">
                                             <input type="hidden" name="redirect" th:value="@{/manager/orders(tab=${activeTab}, status=${currentStatus}, page=${currentPage})}">
-                                            <button type="submit" class="btn btn-success btn-sm">Đã giao quầy</button>
+                                            <button type="submit" class="btn btn-success btn-sm rounded-pill px-3 py-1.5 fw-semibold">Đã giao quầy</button>
                                         </form>
 
                                         <!-- Hoàn tất đơn giao hàng -->
                                         <form th:if="${o.status.name() == 'DELIVERED'}" th:action="@{'/manager/orders/update-status/' + ${o.id}}" method="post" class="d-inline">
                                             <input type="hidden" name="status" value="COMPLETED">
                                             <input type="hidden" name="redirect" th:value="@{/manager/orders(tab=${activeTab}, status=${currentStatus}, page=${currentPage})}">
-                                            <button type="submit" class="btn btn-success btn-sm">Hoàn Tất</button>
+                                            <button type="submit" class="btn btn-success btn-sm rounded-pill px-3 py-1.5 fw-semibold">Hoàn Tất</button>
                                         </form>
                                     </div>
 

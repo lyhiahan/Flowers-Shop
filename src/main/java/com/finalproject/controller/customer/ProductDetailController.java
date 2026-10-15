@@ -58,6 +58,7 @@ public class ProductDetailController {
 
         model.addAttribute("product", product);
         var branchStock = inventories.findByProductId(product.getId()).stream()
+                .filter(com.finalproject.entity.StoreInventory::isAvailableForSale)
                 .filter(s -> Boolean.TRUE.equals(s.getStore().getStatus()) && Boolean.TRUE.equals(s.getStore().getIsOpen()))
                 .filter(s -> product.getStore() == null || product.getStore().getId().equals(s.getStore().getId()))
                 .sorted(java.util.Comparator.comparing(s -> s.getStore().getId())).toList();

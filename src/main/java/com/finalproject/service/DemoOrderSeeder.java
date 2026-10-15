@@ -32,10 +32,10 @@ public class DemoOrderSeeder {
     @Transactional
     public void seed(Store storeB, User vendorFlower) {
         // Lấy hoặc tạo tài khoản khách hàng để đặt đơn
-        User customer1 = userRepository.findByUsername("khachhang").orElseGet(() -> userRepository.save(User.builder()
-                .username("khachhang")
+        User customer1 = userRepository.findByUsername("leminhhoa").or(() -> userRepository.findByEmail("khachhang@gmail.com")).orElseGet(() -> userRepository.save(User.builder()
+                .username("leminhhoa")
                 .password(passwordEncoder.encode("123456"))
-                .fullName("Lê Khách Hàng")
+                .fullName("Lê Minh Hoa")
                 .email("khachhang@gmail.com")
                 .phone("0909999888")
                 .role(Role.USER)
@@ -44,8 +44,8 @@ public class DemoOrderSeeder {
                 .createdDate(LocalDate.now().minusMonths(6))
                 .build()));
 
-        User customer2 = userRepository.findByUsername("khachhang_q7").orElseGet(() -> userRepository.save(User.builder()
-                .username("khachhang_q7")
+        User customer2 = userRepository.findByUsername("nguyenbichtram").or(() -> userRepository.findByEmail("bichtram.flower@gmail.com")).orElseGet(() -> userRepository.save(User.builder()
+                .username("nguyenbichtram")
                 .password(passwordEncoder.encode("123456"))
                 .fullName("Nguyễn Ngọc Bích Trâm")
                 .email("bichtram.flower@gmail.com")
@@ -57,8 +57,8 @@ public class DemoOrderSeeder {
                 .createdDate(LocalDate.now().minusMonths(3))
                 .build()));
 
-        User customer3 = userRepository.findByUsername("khachhang_dn").orElseGet(() -> userRepository.save(User.builder()
-                .username("khachhang_dn")
+        User customer3 = userRepository.findByUsername("namsaigon").or(() -> userRepository.findByEmail("contact@namsaigontech.vn")).orElseGet(() -> userRepository.save(User.builder()
+                .username("namsaigon")
                 .password(passwordEncoder.encode("123456"))
                 .fullName("Công Ty Cổ Phần Công Nghệ Nam Sài Gòn")
                 .email("contact@namsaigontech.vn")

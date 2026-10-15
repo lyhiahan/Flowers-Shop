@@ -101,7 +101,9 @@ class ReportDateFilteringTests {
         assertEquals(period.equals("30days") ? 2L : 1L, dashboard.get("totalProductsCount"));
     }
 
-    @Test void customSingleDayIncludesLateEveningButExcludesNextMidnightAndPreviousDays() {
+    @Test
+    @SuppressWarnings("unchecked")
+    void customSingleDayIncludesLateEveningButExcludesNextMidnightAndPreviousDays() {
         var day = today.minusDays(6);
         var range = ReportRange.resolve("custom", day, day, clock);
         order(own, product, day.atStartOfDay(), 50, true);

@@ -81,7 +81,7 @@
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label">Danh mục hoa (*)</label>
+                        <label class="form-label">Danh mục chính (*)</label>
                         <select th:field="*{categoryId}" class="form-select" th:classappend="${#fields.hasErrors('categoryId')} ? 'is-invalid' : ''">
                             <option value="">-- Chọn danh mục --</option>
                             <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
@@ -90,11 +90,25 @@
                     </div>
 
                     <div class="col-12">
-                        <label class="form-label" for="productAttributes">Thuộc tính hoa (giữ Ctrl để chọn nhiều)</label>
+                        <fieldset class="mb-3"><legend class="fs-6 fw-semibold">Danh mục bổ sung</legend>
+                          <input type="hidden" name="categoriesSubmitted" value="true">
+                          <div class="d-flex flex-wrap gap-3"><div class="form-check" th:each="cat : ${categories}">
+                            <input class="form-check-input" type="checkbox" th:field="*{additionalCategoryIds}" th:value="${cat.id}" th:id="${'extra-category-' + cat.id}">
+                            <label class="form-check-label" th:for="${'extra-category-' + cat.id}" th:text="${cat.name}"></label>
+                          </div></div><div class="form-text">Chọn thêm các dịp phù hợp; không cần chọn lại danh mục chính.</div>
+                        </fieldset>
+                        <fieldset class="mb-3"><legend class="fs-6 fw-semibold">Thuộc tính hoa</legend>
                           <input type="hidden" name="attributesSubmitted" value="true">
-                          <select id="productAttributes" th:field="*{styleValueIds}" multiple class="form-select mb-3" size="6">
-                              <option th:each="v : ${attributeValues}" th:value="${v.id}" th:text="${v.style.name + ': ' + v.name}"></option>
-                          </select>
+                          <p class="form-text mt-0">Loại hoa, màu sắc, kiểu dáng và phong cách chọn riêng; có thể chọn nhiều giá trị.</p>
+                          <div class="row g-3"><div class="col-md-6" th:each="group : ${productAttributeGroups}">
+                            <details class="border rounded p-3" open><summary class="fw-semibold mb-2" th:text="${group.key}"></summary>
+                              <div class="d-flex flex-wrap gap-3"><div class="form-check" th:each="v : ${group.value}">
+                                <input class="form-check-input" type="checkbox" th:field="*{styleValueIds}" th:value="${v.id}" th:id="${'flower-attribute-' + v.id}">
+                                <label class="form-check-label" th:for="${'flower-attribute-' + v.id}" th:text="${v.name}"></label>
+                              </div></div>
+                            </details>
+                          </div></div>
+                        </fieldset>
 <label class="form-label">Mô tả chi tiết & Công thức phối hoa</label>
                         <textarea th:field="*{description}" class="form-control" rows="4" 
                                   placeholder="Mô tả ý nghĩa bó hoa, loại hoa chính, phụ kiện đính kèm và lưu ý bảo quản..."></textarea>
@@ -110,7 +124,7 @@
                     <div class="col-md-6">
                         <label class="form-label">Giá nhập gốc (VNĐ) (*)</label>
                         <div class="input-group">
-                            <input type="number" th:field="*{importPrice}" class="form-control" placeholder="350000"
+                            <input type="number" th:field="*{importPrice}" min="1" step="1" class="form-control" placeholder="350000"
                                    th:classappend="${#fields.hasErrors('importPrice')} ? 'is-invalid' : ''">
                             <span class="input-group-text bg-light text-muted fw-bold">₫</span>
                         </div>
@@ -121,7 +135,7 @@
                     <div class="col-md-6">
                         <label class="form-label">Giá bán niêm yết (VNĐ) (*)</label>
                         <div class="input-group">
-                            <input type="number" th:field="*{priceBuy}" id="priceBuyInput" class="form-control fw-bold" 
+                            <input type="number" th:field="*{priceBuy}" min="1" step="1" id="priceBuyInput" class="form-control fw-bold"
                                    style="color: #A64060;" placeholder="650000"
                                    th:classappend="${#fields.hasErrors('priceBuy')} ? 'is-invalid' : ''">
                             <span class="input-group-text bg-light text-muted fw-bold">₫</span>

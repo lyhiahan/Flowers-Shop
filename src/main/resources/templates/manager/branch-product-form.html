@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head><title>Sửa sản phẩm chung tại chi nhánh</title>
+<th:block th:replace="~{fragments/manager-layout :: assets}"></th:block>
+<link rel="stylesheet" th:href="@{/css/manager-layout.css}"></head>
+<body class="manager-page">
+<header th:replace="~{fragments/manager-layout :: mobileHeader}"></header>
+<div class="manager-layout"><aside th:replace="~{fragments/manager-layout :: sidebar('products')}"></aside>
+<main class="manager-main"><div class="manager-form-page">
+    <h1>Sửa sản phẩm chung tại chi nhánh</h1>
+    <p class="text-muted">Thông tin và giá của mẫu chung do quản trị viên quản lý. Các thay đổi dưới đây chỉ áp dụng cho kho và trạng thái bán tại chi nhánh đang chọn.</p>
+    <div class="card mb-3"><h2 class="h5" th:text="${product.name}"></h2>
+        <p class="mb-0" th:text="${#numbers.formatDecimal(product.sellingPrice,0,'COMMA',0,'POINT') + ' đ'}"></p></div>
+    <form th:action="@{/manager/products/branch/{id}(id=${product.id})}" method="post" class="card" data-confirm="Lưu thay đổi tại chi nhánh này?">
+        <label class="form-label" for="branchStock">Số lượng tồn kho</label>
+        <input class="form-control mb-3" type="number" id="branchStock" name="quantity" min="0" max="1000000" step="1" required th:value="${inventory.quantity}">
+        <label class="form-label" for="branchSelling">Trạng thái tại chi nhánh</label>
+        <select class="form-select mb-4" id="branchSelling" name="selling"><option value="true" th:selected="${inventory.isSelling != false}">Đang bán</option><option value="false" th:selected="${inventory.isSelling == false}">Ngừng bán</option></select>
+        <div class="d-flex justify-content-end gap-2"><a class="btn btn-light" th:href="@{/manager/products}">Hủy</a><button class="btn btn-success" type="submit">Lưu thay đổi</button></div>
+    </form>
+</div></main></div>
+<th:block th:replace="~{fragments/manager-layout :: footer}"></th:block>
+<script th:src="@{/js/store-confirm.js}"></script><script th:src="@{/js/global-modal.js}"></script>
+<th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
+</body></html>

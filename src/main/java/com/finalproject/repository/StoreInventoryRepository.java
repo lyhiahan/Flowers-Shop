@@ -23,6 +23,7 @@ public interface StoreInventoryRepository extends JpaRepository<StoreInventory, 
             FROM StoreInventory si JOIN si.product p JOIN si.store s LEFT JOIN p.store ownerStore
             WHERE p.id IN :productIds AND s.status = true AND s.isOpen = true
                 AND p.isActive = true AND p.isSelling = true
+                AND si.isSelling = true AND si.isDeleted = false
                 AND (p.isDeleted = false OR p.isDeleted IS NULL)
                 AND (ownerStore.id IS NULL OR ownerStore.id = s.id)
                 AND (:storeId IS NULL OR s.id = :storeId) AND si.quantity > 0
@@ -36,6 +37,7 @@ public interface StoreInventoryRepository extends JpaRepository<StoreInventory, 
             SELECT COALESCE(SUM(CAST(si.quantity AS long)), 0)
             FROM StoreInventory si JOIN si.product p JOIN si.store s LEFT JOIN p.store ownerStore
             WHERE s.status = true AND s.isOpen = true AND p.isActive = true AND p.isSelling = true
+                AND si.isSelling = true AND si.isDeleted = false
                 AND (p.isDeleted = false OR p.isDeleted IS NULL)
                 AND (ownerStore.id IS NULL OR ownerStore.id = s.id)
                 AND (:storeId IS NULL OR s.id = :storeId) AND si.quantity > 0
@@ -58,9 +60,10 @@ public interface StoreInventoryRepository extends JpaRepository<StoreInventory, 
     // A stock snapshot must not be filtered by product creation date or report period.
     @Query("""
             SELECT COALESCE(SUM(CAST(si.quantity AS long)), 0)
-            FROM StoreInventory si JOIN si.product p
+            FROM StoreInventory si JOIN si.product p LEFT JOIN p.store ownerStore
             WHERE (:storeId IS NULL OR si.store.id = :storeId)
                 AND (p.isDeleted = false OR p.isDeleted IS NULL)
+                AND si.isDeleted = false AND (ownerStore.id IS NULL OR ownerStore.id = si.store.id)
             """)
     long sumRemainingQuantity(@Param("storeId") Long storeId);
 
@@ -70,6 +73,7 @@ public interface StoreInventoryRepository extends JpaRepository<StoreInventory, 
     @Query("""
             SELECT si FROM StoreInventory si JOIN si.product p JOIN si.store s LEFT JOIN p.store ownerStore
             WHERE p.id = :productId AND s.id != :currentStoreId AND si.quantity > 0
+                AND si.isSelling = true AND si.isDeleted = false
                 AND s.status = true AND s.isOpen = true AND p.isActive = true AND p.isSelling = true
                 AND (p.isDeleted = false OR p.isDeleted IS NULL)
                 AND (ownerStore.id IS NULL OR ownerStore.id = s.id)

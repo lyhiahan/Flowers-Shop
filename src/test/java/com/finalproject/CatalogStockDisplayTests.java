@@ -117,7 +117,7 @@ class CatalogStockDisplayTests {
 
     @Test void customerKpiAndPublicSnapshotCountOnlyStockActuallyAvailableToCustomers() throws Exception {
         mvc.perform(get("/")).andExpect(status().isOk()).andExpect(model().attribute("customerStockQuantity", 24L))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"customer-stock-kpi\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("id=\"customer-stock-kpi\""))))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("data-stock-catalog=\"true\"")));
         mvc.perform(get("/api/public/catalog-stock").param("productIds", available.getId() + "," + global.getId() + "," + soldOut.getId()))
                 .andExpect(status().isOk()).andExpect(header().string("Cache-Control", "no-store"))

@@ -306,7 +306,87 @@
             resizeComposer();
         } catch (error) { status(error.message, true); }
     }
-    el('chatLauncher').addEventListener('click', async () => {
+    const launcherEl = el('chatLauncher');
+    let hasDragged = false;
+    if (launcherEl && typeof window !== 'undefined' && typeof launcherEl.getBoundingClientRect === 'function') {
+        let isDown = false, startX = 0, startY = 0, origX = 0, origY = 0;
+        try {
+            const saved = window.sessionStorage?.getItem('flowerChat_pos');
+            if (saved) {
+                const pos = JSON.parse(saved);
+                if (pos && typeof pos.top === 'number' && typeof pos.left === 'number') {
+                    const maxLeft = Math.max(10, (window.innerWidth || 800) - 120);
+                    const maxTop = Math.max(10, (window.innerHeight || 600) - 50);
+                    launcherEl.style.left = Math.min(Math.max(10, pos.left), maxLeft) + 'px';
+                    launcherEl.style.top = Math.min(Math.max(10, pos.top), maxTop) + 'px';
+                    launcherEl.style.right = 'auto';
+                    launcherEl.style.bottom = 'auto';
+                }
+            }
+        } catch (_) {}
+
+        const onPointerDown = e => {
+            if (e.button && e.button !== 0) return;
+            isDown = true;
+            hasDragged = false;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            startX = clientX;
+            startY = clientY;
+            const rect = launcherEl.getBoundingClientRect();
+            origX = rect.left;
+            origY = rect.top;
+        };
+
+        const onPointerMove = e => {
+            if (!isDown) return;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const dx = clientX - startX;
+            const dy = clientY - startY;
+            if (!hasDragged && Math.hypot(dx, dy) > 6) {
+                hasDragged = true;
+                launcherEl.classList?.add?.('is-dragging');
+            }
+            if (hasDragged) {
+                e.preventDefault?.();
+                const width = launcherEl.offsetWidth || 120;
+                const height = launcherEl.offsetHeight || 44;
+                const newLeft = Math.max(10, Math.min((window.innerWidth || 800) - width - 10, origX + dx));
+                const newTop = Math.max(10, Math.min((window.innerHeight || 600) - height - 10, origY + dy));
+                launcherEl.style.left = newLeft + 'px';
+                launcherEl.style.top = newTop + 'px';
+                launcherEl.style.right = 'auto';
+                launcherEl.style.bottom = 'auto';
+            }
+        };
+
+        const onPointerUp = () => {
+            if (!isDown) return;
+            isDown = false;
+            launcherEl.classList?.remove?.('is-dragging');
+            if (hasDragged) {
+                try {
+                    const rect = launcherEl.getBoundingClientRect();
+                    window.sessionStorage?.setItem('flowerChat_pos', JSON.stringify({left: rect.left, top: rect.top}));
+                } catch (_) {}
+            }
+        };
+
+        launcherEl.addEventListener('mousedown', onPointerDown);
+        window.addEventListener('mousemove', onPointerMove, {passive: false});
+        window.addEventListener('mouseup', onPointerUp);
+
+        launcherEl.addEventListener('touchstart', onPointerDown, {passive: true});
+        window.addEventListener('touchmove', onPointerMove, {passive: false});
+        window.addEventListener('touchend', onPointerUp);
+    }
+
+    launcherEl?.addEventListener('click', async () => {
+        if (hasDragged) {
+            hasDragged = false;
+            return;
+        }
         if (busy || openingContact) { status('Vui lòng đợi thao tác chat hiện tại hoàn tất.'); return; }
         const productContact = document.querySelector('[data-chat-detail-contact]');
         if (productContact && !productContact.disabled) { productContact.click(); return; }

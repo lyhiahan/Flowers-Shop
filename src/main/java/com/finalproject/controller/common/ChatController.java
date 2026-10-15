@@ -25,7 +25,7 @@ public class ChatController {
         @RequestParam(defaultValue="") String content,@RequestParam org.springframework.web.multipart.MultipartFile file,@RequestParam(required=false) Long storeId,@RequestParam(required=false) Long productId) throws java.io.IOException {
   return chat.sendImage(principal.getName(),id,content,clientMessageId,file,storeId,productId);
  }
- @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class) public ResponseEntity<Map<String,String>> oversized(Exception ex){return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(Map.of("error","Ảnh tối đa 10 MB."));}
+ @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class) public ResponseEntity<Map<String,String>> oversized(Exception ex){return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE).body(Map.of("error","Ảnh tối đa 10 MB."));}
  @ExceptionHandler(AccessDeniedException.class) public ResponseEntity<Map<String,String>> denied(AccessDeniedException ex){return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error",ex.getMessage()));}
  @ExceptionHandler(IllegalArgumentException.class) public ResponseEntity<Map<String,String>> invalid(IllegalArgumentException ex){return ResponseEntity.badRequest().body(Map.of("error",ex.getMessage()));}
  @ExceptionHandler({org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class,org.springframework.http.converter.HttpMessageNotReadableException.class})

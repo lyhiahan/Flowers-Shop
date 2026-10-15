@@ -62,9 +62,11 @@
                         </span>
                     </div>
                 </div>
-
                 <div class="card-body p-4">
-                    <div th:if="${o.cancellationReason != null}" class="alert alert-warning small" role="alert" th:text="${o.cancellationReason}"></div>
+                    <div th:if="${o.cancellationReason != null and !#strings.isEmpty(o.cancellationReason)}" class="alert alert-warning small py-2 px-3 mb-3" role="alert" style="line-height: 1.4;">
+                        <div class="fw-bold" th:text="${o.cancellationActorDisplay}">Đã hủy bởi Admin</div>
+                        <div>Lý do: <span th:text="${o.cancellationReasonDetail}">không còn hàng.</span></div>
+                    </div>
                     <!-- Chi nhánh & Thông tin người nhận -->
                     <div class="row g-3 mb-3 p-3 rounded-3 bg-light border">
                         <div class="col-md-6">

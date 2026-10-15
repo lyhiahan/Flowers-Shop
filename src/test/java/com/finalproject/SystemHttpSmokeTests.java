@@ -131,11 +131,15 @@ class SystemHttpSmokeTests {
     @Test void managerAndAdminScreensRenderAndValidateDateFiltersThroughRealHttp() throws Exception {
         var manager = login("smoke_manager");
         pages(manager, List.of("/manager/dashboard", "/manager/analytics?type=product&timeframe=30days",
-                "/manager/products", "/manager/orders", "/manager/stores", "/manager/vouchers", "/manager/staff"));
+                "/manager/products", "/manager/products/create", "/manager/products/edit/" + product.getId(),
+                "/manager/products?tab=stored", "/manager/products?tab=all", "/manager/products?tab=deleted",
+                "/manager/orders", "/manager/stores", "/manager/vouchers", "/manager/staff", "/manager/profile", "/manager/wallet"));
         var admin = login("smoke_admin");
         var today = LocalDate.now(clock);
         var query = "?timeframe=custom&startDate=" + today.minusDays(6) + "&endDate=" + today;
-        pages(admin, List.of("/admin/dashboard" + query, "/admin/users", "/admin/stores", "/admin/orders", "/admin/products"));
+        pages(admin, List.of("/admin/dashboard" + query, "/admin/users", "/admin/stores", "/admin/orders", "/admin/products",
+                "/admin/deliveries", "/admin/deliveries?tab=tariffs", "/admin/deliveries/create",
+                "/admin/categories", "/admin/styles", "/admin/store-levels", "/admin/user-levels", "/admin/vouchers", "/admin/chat"));
         var dashboard = get(admin, "/admin/dashboard" + query);
         assertThat(dashboard.body()).contains("Hôm nay", "30 ngày gần nhất", "value=\"" + today + "\"");
         assertThat(get(admin, "/admin/dashboard?timeframe=custom").statusCode()).isEqualTo(400);

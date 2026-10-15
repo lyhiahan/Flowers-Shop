@@ -39,15 +39,22 @@ class SqlServerSchemaTests {
             } else {
                 String baseline = Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V1__initial_schema.sql"))
                         + Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V5__chat_monitor_access_audit.sql"))
-                        + Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V6__chat_product_context.sql"));
+                        + Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V6__chat_product_context.sql"))
+                        + Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V7__product_categories.sql"))
+                        + Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V8__branch_catalog_visibility.sql"));
                 for (var table : metadata.collectTableMappings()) {
                     var pattern = java.util.regex.Pattern.compile("create\\s+table\\s+(?:dbo\\.)?"
                             + java.util.regex.Pattern.quote(table.getName()) + "\\s*\\((.*?)\\);",
                             java.util.regex.Pattern.CASE_INSENSITIVE | java.util.regex.Pattern.DOTALL);
                     var match = pattern.matcher(baseline);
                     assertThat(match.find()).as("table %s", table.getName()).isTrue();
+                    String definitions = match.group(1);
+                    var additions = java.util.regex.Pattern.compile("alter\\s+table\\s+(?:dbo\\.)?"
+                            + java.util.regex.Pattern.quote(table.getName()) + "\\s+add\\s+(.*?);",
+                            java.util.regex.Pattern.CASE_INSENSITIVE | java.util.regex.Pattern.DOTALL).matcher(baseline);
+                    while (additions.find()) definitions += additions.group(1);
                     for (var column : table.getColumns())
-                        assertThat(match.group(1)).as("%s.%s", table.getName(), column.getName())
+                        assertThat(definitions).as("%s.%s", table.getName(), column.getName())
                                 .contains(column.getName() + " ");
                 }
                 assertThat(baseline.toLowerCase(Locale.ROOT)).doesNotContain("drop table", "drop database", "truncate table");

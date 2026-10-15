@@ -75,6 +75,7 @@ public class CartServiceImpl implements CartService {
         Long storeId = request.getStoreId() != null ? request.getStoreId() : (product.getStore() != null ? product.getStore().getId()
                 : storeInventoryRepository.findByProductId(product.getId()).stream()
                     .filter(s -> Boolean.TRUE.equals(s.getStore().getStatus()) && Boolean.TRUE.equals(s.getStore().getIsOpen())
+                            && s.isAvailableForSale()
                             && s.getQuantity() != null && s.getQuantity() >= addQty)
                     .sorted(java.util.Comparator.comparing(s -> s.getStore().getId())).map(s -> s.getStore().getId()).findFirst()
                     .orElseThrow(() -> new IllegalStateException("Không có chi nhánh đang mở đủ tồn kho cho sản phẩm này.")));
@@ -87,7 +88,7 @@ public class CartServiceImpl implements CartService {
         // --- Ưu tiên 3: Lấy tồn kho một lần ---
         StoreInventory inventory = storeInventoryRepository.findByStoreIdAndProductId(store.getId(), product.getId())
                 .orElse(null);
-        int availableStock = (inventory != null && inventory.getQuantity() != null) ? inventory.getQuantity() : 0;
+        int availableStock = (inventory != null && inventory.isAvailableForSale() && inventory.getQuantity() != null) ? inventory.getQuantity() : 0;
         if (availableStock <= 0) {
             throw new IllegalStateException("Mẫu hoa '" + product.getName()
                     + "' hiện đang tạm hết hàng tại " + store.getName()
@@ -201,7 +202,7 @@ public class CartServiceImpl implements CartService {
         if (!com.finalproject.service.ProductAvailability.supportsBranch(product, store))
             throw new IllegalStateException("Chi nhánh trong giỏ không bán mẫu hoa này. Vui lòng xóa mục cũ và thêm lại từ trang sản phẩm.");
         int available = storeInventoryRepository.findByStoreIdAndProductId(store.getId(), product.getId())
-                .map(stock -> Math.max(0, stock.getQuantity())).orElse(0);
+                .filter(StoreInventory::isAvailableForSale).map(stock -> Math.max(0, stock.getQuantity())).orElse(0);
         long requested = quantity;
         for (CartItem line : cart.getItems()) {
             if (!java.util.Objects.equals(line.getId(), excludedItemId)

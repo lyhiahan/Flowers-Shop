@@ -528,15 +528,18 @@
 
                                 <!-- A3: Dịch vụ giao hàng -->
                                 <div class="mb-3" id="deliveryUnitSection" th:if="${deliveries != null and !#lists.isEmpty(deliveries)}">
-                                    <label class="form-label-custom"><i class="bi bi-box-seam me-1"></i>Dịch vụ giao hàng (*)</label>
+                                    <label class="form-label-custom"><i class="bi bi-box-seam me-1"></i>Đơn vị vận chuyển (*)</label>
                                     <select name="deliveryUnitId" id="deliveryUnitSelect" class="form-select-custom w-100"
                                             onchange="updateCheckoutTotal()">
                                         <option th:each="d : ${deliveries}"
                                                 th:value="${d.id}"
-                                                th:data-price="${d.price}"
-                                                th:text="${d.name + ' (' + #numbers.formatDecimal(d.price, 0, 'COMMA', 0, 'POINT') + ' ₫)'}">
+                                                th:text="${d.name + (d.phone != null and !d.phone.isBlank() ? ' (Hotline: ' + d.phone + ')' : '')}">
                                         </option>
                                     </select>
+                                    <div class="mt-2 text-muted" style="font-size: 13px; line-height: 1.4;">
+                                        <i class="bi bi-info-circle text-success me-1"></i>
+                                        <span>Cước phí được tính tự động từ <strong>Biểu phí giao hàng</strong> của chi nhánh theo khoảng cách (&lt; 5km hoặc 5&ndash;15km) và phụ phí hàng lớn (nếu có kệ hoa 2 tầng, chậu lan lớn).</span>
+                                    </div>
                                 </div>
 
                                 <!-- A4: Ngày và khung giờ giao -->

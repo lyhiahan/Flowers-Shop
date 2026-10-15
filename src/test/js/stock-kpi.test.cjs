@@ -10,7 +10,7 @@ function setup(fetcher, withCard = true, options = {}) {
     const value = {textContent: '10'}, status = {hidden: true, textContent: ''};
     const card = {dataset: {stockEndpoint: options.endpoint || '/manager/dashboard/stock?storeId=1',
         stockCatalog: options.catalog ? 'true' : undefined},
-        querySelector(selector) {return selector === '[data-stock-value]' ? value : status;}};
+        querySelector(selector) {return selector === '[data-stock-value]' ? (options.noTotal ? null : value) : status;}};
     const document = {hidden: false, listeners: {}, querySelector() {return withCard ? card : null;},
         querySelectorAll() {return options.cards || [];},
         addEventListener(event, listener) {this.listeners[event] = listener;}};
@@ -156,6 +156,22 @@ test('customer sold-out card disables buying; restock restores branch target and
     assert.equal(product.button.disabled, false);
     assert.equal(product.buttonText.textContent, 'Thêm vào giỏ');
     assert.equal(product.store.value, '2');
+});
+
+test('customer catalog without a total-stock banner still updates sold-out and replenished products', async () => {
+    const product = productCard('12');
+    let quantity = 0;
+    const ui = setup(() => snapshot(quantity, {12: {quantity, purchaseStoreId: quantity ? 2 : null}}), true,
+        {catalog: true, noTotal: true, endpoint: '/api/public/catalog-stock', cards: [product]});
+    await settle();
+    assert.equal(product.stockText.textContent, 'Hết hàng');
+    assert.equal(product.button.disabled, true);
+    quantity = 7;
+    await ui.timers[0].fn();
+    assert.equal(product.stockText.textContent, 'Còn 7 sản phẩm');
+    assert.equal(product.button.disabled, false);
+    assert.equal(product.store.value, '2');
+    assert.equal(ui.value.textContent, '10');
 });
 
 test('stock refresh never re-enables a pending cart submission', async () => {

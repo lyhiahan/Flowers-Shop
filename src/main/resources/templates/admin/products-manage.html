@@ -497,7 +497,7 @@
                         <strong th:text="${(currentPage + 1) * pageSize < totalElements ? (currentPage + 1) * pageSize : totalElements}">10</strong>
                         trên tổng số <strong th:text="${totalElements}">10</strong> sản phẩm
                     </div>
-                    <nav aria-label="Products pagination">
+                    <nav aria-label="Products pagination" class="admin-pagination-nav">
                         <ul class="pagination pagination-sm mb-0">
                             <!-- Nút Previous -->
                             <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">

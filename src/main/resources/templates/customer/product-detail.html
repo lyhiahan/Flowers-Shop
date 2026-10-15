@@ -643,7 +643,7 @@
                     <div class="product-price-block">
                         <span class="product-price" th:text="${product.sellingPrice != null ? #numbers.formatDecimal(product.sellingPrice, 0, 'COMMA', 0, 'POINT') + ' ₫' : (product.priceBuy != null ? #numbers.formatDecimal(product.priceBuy, 0, 'COMMA', 0, 'POINT') + ' ₫' : 'Liên hệ')}">850.000 ₫</span>
 
-                        <span th:if="${product.promotionalPrice != null and product.priceBuy != null and product.promotionalPrice.compareTo(product.priceBuy) < 0}"
+                        <span th:if="${product.priceBuy != null and product.sellingPrice.compareTo(product.priceBuy) < 0}"
                               class="product-original-price"
                               th:text="${#numbers.formatDecimal(product.priceBuy, 0, 'COMMA', 0, 'POINT') + ' ₫'}">
                             950.000 ₫
@@ -687,18 +687,22 @@
 
                     <!-- 3. THÔNG TIN CHÍNH: Nội dung 17–18 px; câu dài xuống dòng trong cột phải -->
                     <div class="flower-info-table mb-4">
+                        <div class="flower-info-row">
+                            <span class="flower-info-label">Danh mục</span>
+                            <span class="flower-info-value d-flex flex-wrap gap-2"><a th:each="c : ${product.catalogCategories}" th:href="@{/(categoryId=${c.id})}" th:text="${c.name}" class="text-success"></a></span>
+                        </div>
                         <!-- Dòng 1: Loại hoa -->
                         <div class="flower-info-row"
                              th:with="flowerType=${product.name.contains('Hướng Dương') ? 'Hoa hướng dương' : (product.name.contains('Mẫu Đơn') ? 'Hoa mẫu đơn' : (product.name.contains('Hồng') ? 'Hoa hồng cao cấp' : (product.name.contains('Cẩm Tú Cầu') ? 'Hoa cẩm tú cầu' : (product.name.contains('Tulip') ? 'Hoa tulip Hà Lan' : (product.name.contains('Lan') or product.name.contains('Hồ Điệp') ? 'Lan hồ điệp' : (product.name.contains('Baby') ? 'Hoa baby' : (product.name.contains('Sen') ? 'Hoa sen' : (product.name.contains('Đồng Tiền') or product.name.contains('Hồng Môn') ? 'Hồng môn, đồng tiền' : (product.category != null and product.category.isDeleted != true ? product.category.name : 'Hoa tươi tự nhiên')))))))))}">
                             <span class="flower-info-label">Loại hoa</span>
-                            <span class="flower-info-value" th:text="${flowerType}">Hoa tươi tự nhiên</span>
+                            <span class="flower-info-value" th:text="${#strings.isEmpty(product.attributeLabel('Loại hoa')) ? flowerType : product.attributeLabel('Loại hoa')}">Hoa tươi tự nhiên</span>
                         </div>
 
                         <!-- Dòng 2: Kiểu dáng -->
                         <div class="flower-info-row"
                              th:with="flowerStyle=${product.name.contains('Giỏ') ? 'Giỏ hoa để bàn' : (product.name.contains('Hộp') ? 'Hộp hoa sang trọng' : (product.name.contains('Kệ') or product.name.contains('2 Tầng') ? 'Kệ hoa khai trương 2 tầng' : (product.name.contains('Lọ') or product.name.contains('Bình') ? 'Bình hoa / Lọ hoa để bàn' : (product.name.contains('Chậu') ? 'Chậu hoa trang trí' : 'Bó hoa tươi nghệ thuật'))))}">
                             <span class="flower-info-label">Kiểu dáng</span>
-                            <span class="flower-info-value" th:text="${flowerStyle}">Bó hoa tươi nghệ thuật</span>
+                            <span class="flower-info-value" th:text="${#strings.isEmpty(product.attributeLabel('Kiểu dáng')) ? flowerStyle : product.attributeLabel('Kiểu dáng')}">Bó hoa tươi nghệ thuật</span>
                         </div>
 
                         <!-- Dòng 3: Màu sắc -->

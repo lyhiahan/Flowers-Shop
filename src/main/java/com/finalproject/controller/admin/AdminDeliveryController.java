@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @Controller
 @RequestMapping("/admin")
@@ -30,7 +29,6 @@ public class AdminDeliveryController {
             @RequestParam(value = "size", defaultValue = "10") int size,
             Model model) {
         try {
-            ensureDefaultTariffs();
             java.util.List<Delivery> allDeliveries = deliveryRepository.findAllByOrderByIdAsc();
             java.util.List<Delivery> filtered = allDeliveries;
             if (keyword != null && !keyword.trim().isEmpty()) {
@@ -81,59 +79,13 @@ public class AdminDeliveryController {
         return "admin/deliveries";
     }
 
-    private void ensureDefaultTariffs() {
-        if (shippingTariffRepository.count() == 0) {
-            Store benThanh = storeRepository.findFirstByNameOrderByIdAsc("Chi Nhánh Bến Thành (Quận 1)")
-                    .or(() -> storeRepository.findAll().stream().findFirst()).orElse(null);
-            Delivery standardDeliv = deliveryRepository.findAll().stream().findFirst().orElse(null);
-
-            shippingTariffRepository.save(ShippingTariff.builder()
-                    .store(benThanh)
-                    .destinationArea("Khu vực gần chi nhánh (< 5km)")
-                    .serviceName("Tiêu chuẩn")
-                    .delivery(standardDeliv)
-                    .baseFee(new BigDecimal("25000"))
-                    .bulkySurcharge(new BigDecimal("20000"))
-                    .estimatedTime("4 - 6 giờ")
-                    .note("Giao hoa tươi giữ ẩm tận nơi trong bán kính gần")
-                    .isActive(true)
-                    .isDeleted(false)
-                    .build());
-
-            shippingTariffRepository.save(ShippingTariff.builder()
-                    .store(benThanh)
-                    .destinationArea("Khu vực xa hơn (5 - 15km)")
-                    .serviceName("Tiêu chuẩn")
-                    .delivery(standardDeliv)
-                    .baseFee(new BigDecimal("40000"))
-                    .bulkySurcharge(new BigDecimal("25000"))
-                    .estimatedTime("4 - 6 giờ")
-                    .note("Giao các quận nội thành xa chi nhánh")
-                    .isActive(true)
-                    .isDeleted(false)
-                    .build());
-
-            shippingTariffRepository.save(ShippingTariff.builder()
-                    .store(benThanh)
-                    .destinationArea("Khu vực gần chi nhánh (< 5km)")
-                    .serviceName("Hỏa tốc")
-                    .delivery(standardDeliv)
-                    .baseFee(new BigDecimal("50000"))
-                    .bulkySurcharge(new BigDecimal("30000"))
-                    .estimatedTime("Trong vòng 2 giờ")
-                    .note("Ưu tiên cắm và giao ngay trong lồng kính xe máy")
-                    .isActive(true)
-                    .isDeleted(false)
-                    .build());
-        }
-    }
 
     /**
      * Bước 5 & 6: Chọn nút New delivery unit để thêm mới -> Hiển thị form thêm mới
      */
     @GetMapping("/deliveries/create")
     public String createDeliveryForm(Model model) {
-        model.addAttribute("delivery", Delivery.builder().price(BigDecimal.ZERO).isActive(true).isDeleted(false).build());
+        model.addAttribute("delivery", Delivery.builder().phone("").price(BigDecimal.ZERO).isActive(true).isDeleted(false).build());
         model.addAttribute("isEdit", false);
         return "admin/delivery-form";
     }
@@ -157,6 +109,7 @@ public class AdminDeliveryController {
      */
     @PostMapping("/deliveries/add")
     public String addDelivery(@RequestParam("name") String name,
+                              @RequestParam(value = "phone", required = false) String phone,
                               @RequestParam(value = "price", defaultValue = "0") BigDecimal price,
                               @RequestParam(value = "description", required = false) String description,
                               RedirectAttributes ra) {
@@ -168,6 +121,7 @@ public class AdminDeliveryController {
             }
             Delivery d = Delivery.builder()
                     .name(cleanName)
+                    .phone(phone != null && !phone.isBlank() ? phone.trim() : null)
                     .price(price != null ? price : BigDecimal.ZERO)
                     .description(description)
                     .isActive(true)
@@ -187,6 +141,7 @@ public class AdminDeliveryController {
     @PostMapping("/deliveries/update/{id}")
     public String updateDelivery(@PathVariable("id") Long id,
                                  @RequestParam("name") String name,
+                                 @RequestParam(value = "phone", required = false) String phone,
                                  @RequestParam(value = "price", defaultValue = "0") BigDecimal price,
                                  @RequestParam(value = "description", required = false) String description,
                                  @RequestParam(value = "isActive", required = false) Boolean isActive,
@@ -199,6 +154,9 @@ public class AdminDeliveryController {
             }
             String cleanName = name != null ? name.trim() : d.getName();
             d.setName(cleanName);
+            if (phone != null) {
+                d.setPhone(phone.trim());
+            }
             if (price != null) {
                 d.setPrice(price);
             }
@@ -258,28 +216,40 @@ public class AdminDeliveryController {
 
     @PostMapping("/deliveries/reset-defaults")
     public String resetDefaultDeliveries(RedirectAttributes ra) {
-        record DefDeliv(String name, BigDecimal price, String desc) {}
+        record DefDeliv(String name, String phone, BigDecimal price, String desc) {}
         java.util.List<DefDeliv> defaults = java.util.List.of(
-            new DefDeliv("Giao Hàng Tiêu Chuẩn Trong Ngày", new BigDecimal("25000"), "Giao tận nơi trong vòng 4-6 giờ, đóng gói hoa cẩn thận có giữ ẩm."),
-            new DefDeliv("GrabExpress Hỏa Tốc (2H)", new BigDecimal("45000"), "Giao nhanh trong 2 giờ bảo quản hoa tươi trong lồng kính xe máy."),
-            new DefDeliv("Ahamove Siêu Tốc Hoa Tươi", new BigDecimal("50000"), "Tài xế chuyên giao hoa tươi và bánh kem, cam kết không dập nát.")
+            new DefDeliv("Giao hàng nội bộ", "028 7108 8810", BigDecimal.ZERO, "Đội ngũ giao hoa nội bộ tiệm, trang bị thùng giữ ẩm chuyên dụng và che chắn hoa cẩn thận."),
+            new DefDeliv("GrabExpress", "1900 633 677", BigDecimal.ZERO, "Đối tác GrabExpress chuyên giao hàng hỏa tốc xe máy có lồng bảo hộ cánh hoa."),
+            new DefDeliv("Ahamove", "1900 545 411", BigDecimal.ZERO, "Đối tác Ahamove giao siêu tốc, chuyên đơn hàng hoa tươi và bánh kem nội thành.")
         );
         for (DefDeliv d : defaults) {
             java.util.Optional<Delivery> existing = deliveryRepository.findAll().stream()
-                .filter(x -> x.getName().equalsIgnoreCase(d.name()))
+                .filter(x -> x.getName().equalsIgnoreCase(d.name()) 
+                          || (d.name().contains("nội bộ") && x.getName().toLowerCase().contains("nội bộ"))
+                          || (d.name().contains("Grab") && x.getName().toLowerCase().contains("grab"))
+                          || (d.name().contains("Ahamove") && x.getName().toLowerCase().contains("ahamove")))
                 .findFirst();
             if (existing.isPresent()) {
                 Delivery del = existing.get();
+                del.setName(d.name());
+                del.setPhone(d.phone());
                 del.setPrice(d.price());
                 del.setDescription(d.desc());
                 del.setIsActive(true);
                 del.setIsDeleted(false);
                 deliveryRepository.save(del);
             } else {
-                deliveryRepository.save(Delivery.builder().name(d.name()).price(d.price()).description(d.desc()).isActive(true).isDeleted(false).build());
+                deliveryRepository.save(Delivery.builder()
+                        .name(d.name())
+                        .phone(d.phone())
+                        .price(d.price())
+                        .description(d.desc())
+                        .isActive(true)
+                        .isDeleted(false)
+                        .build());
             }
         }
-        ra.addFlashAttribute("successMessage", "Khôi phục toàn bộ danh sách đơn vị vận chuyển mẫu thành công!");
+        ra.addFlashAttribute("successMessage", "Khôi phục danh sách 3 đơn vị vận chuyển chuẩn thành công!");
         return "redirect:/admin/deliveries";
     }
 

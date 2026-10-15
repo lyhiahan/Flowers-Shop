@@ -1,12 +1,10 @@
 package com.finalproject.config;
 
 import com.finalproject.entity.*;
-import com.finalproject.enums.Role;
 import com.finalproject.repository.*;
 import com.finalproject.service.ProductSeederService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -164,97 +162,16 @@ public class DataInitializer implements CommandLineRunner {
             }
         }
 
-        // 6. Danh mục hoa tươi
-        Category catSinhNhat = categoryRepository.findByName("Hoa Sinh Nhật")
-                .orElseGet(() -> categoryRepository.save(Category.builder()
-                        .name("Hoa Sinh Nhật")
-                        .description("Các mẫu bó hoa, lẵng hoa chúc mừng sinh nhật ngọt ngào, ý nghĩa")
-                        .build()));
-
-        Category catKhaiTruong = categoryRepository.findByName("Hoa Khai Trương")
-                .orElseGet(() -> categoryRepository.save(Category.builder()
-                        .name("Hoa Khai Trương")
-                        .description("Kệ hoa, lẵng hoa khai trương sang trọng phát tài phát lộc")
-                        .build()));
-
-        Category catTinhYeu = categoryRepository.findByName("Hoa Tình Yêu & Valentine")
-                .orElseGet(() -> categoryRepository.save(Category.builder()
-                        .name("Hoa Tình Yêu & Valentine")
-                        .description("Hoa hồng đỏ Ecuador, hoa baby trắng lãng mạn tỏ tình")
-                        .build()));
-
-        Category catLanHoDiep = categoryRepository.findByName("Lan Hồ Điệp Sang Trọng")
-                .orElseGet(() -> categoryRepository.save(Category.builder()
-                        .name("Lan Hồ Điệp Sang Trọng")
-                        .description("Chậu hoa lan hồ điệp cao cấp trưng Tết, biếu sếp, mừng tân gia")
-                        .build()));
-
-        // Khởi tạo các danh mục con (Subcategories) có parent_id liên kết với danh mục cha
-        Category subBoSinhNhat = categoryRepository.findByName("Bó Hoa Sinh Nhật")
-                .orElseGet(() -> categoryRepository.save(Category.builder()
-                        .name("Bó Hoa Sinh Nhật")
-                        .description("Các mẫu bó hoa tươi rực rỡ chúc mừng sinh nhật")
-                        .parent(catSinhNhat)
-                        .build()));
-        if (subBoSinhNhat.getParent() == null) {
-            subBoSinhNhat.setParent(catSinhNhat);
-            categoryRepository.save(subBoSinhNhat);
+        // Categories classify occasions; species/containers belong to attributes.
+        for (var definition : com.finalproject.utils.FlowerCategoryDefaults.definitions()) {
+            if (!categoryRepository.existsByName(definition.name())) {
+                categoryRepository.save(Category.builder().name(definition.name()).description(definition.description()).isDeleted(false).build());
+            }
         }
-
-        Category subLangSinhNhat = categoryRepository.findByName("Lẵng Hoa Sinh Nhật")
-                .orElseGet(() -> categoryRepository.save(Category.builder()
-                        .name("Lẵng Hoa Sinh Nhật")
-                        .description("Lẵng hoa để bàn chúc mừng sinh nhật sang trọng")
-                        .parent(catSinhNhat)
-                        .build()));
-        if (subLangSinhNhat.getParent() == null) {
-            subLangSinhNhat.setParent(catSinhNhat);
-            categoryRepository.save(subLangSinhNhat);
-        }
-
-        Category subBoHongDo = categoryRepository.findByName("Bó Hoa Hồng Đỏ")
-                .orElseGet(() -> categoryRepository.save(Category.builder()
-                        .name("Bó Hoa Hồng Đỏ")
-                        .description("Bó hoa hồng đỏ nhập khẩu quyến rũ trao gửi tình yêu")
-                        .parent(catTinhYeu)
-                        .build()));
-        if (subBoHongDo.getParent() == null) {
-            subBoHongDo.setParent(catTinhYeu);
-            categoryRepository.save(subBoHongDo);
-        }
-
-        Category subBoBabyTrang = categoryRepository.findByName("Bó Hoa Baby Trắng")
-                .orElseGet(() -> categoryRepository.save(Category.builder()
-                        .name("Bó Hoa Baby Trắng")
-                        .description("Bó hoa baby trắng tinh khôi, nhẹ nhàng lãng mạn")
-                        .parent(catTinhYeu)
-                        .build()));
-        if (subBoBabyTrang.getParent() == null) {
-            subBoBabyTrang.setParent(catTinhYeu);
-            categoryRepository.save(subBoBabyTrang);
-        }
-
-        Category subKeKhaiTruong = categoryRepository.findByName("Kệ Hoa Khai Trương")
-                .orElseGet(() -> categoryRepository.save(Category.builder()
-                        .name("Kệ Hoa Khai Trương")
-                        .description("Kệ hoa chúc mừng khai trương hồng phát sang trọng")
-                        .parent(catKhaiTruong)
-                        .build()));
-        if (subKeKhaiTruong.getParent() == null) {
-            subKeKhaiTruong.setParent(catKhaiTruong);
-            categoryRepository.save(subKeKhaiTruong);
-        }
-
-        Category subLanTrang = categoryRepository.findByName("Chậu Lan Hồ Điệp Trắng")
-                .orElseGet(() -> categoryRepository.save(Category.builder()
-                        .name("Chậu Lan Hồ Điệp Trắng")
-                        .description("Chậu lan hồ điệp trắng đại diện cho sự thanh cao, sang trọng")
-                        .parent(catLanHoDiep)
-                        .build()));
-        if (subLanTrang.getParent() == null) {
-            subLanTrang.setParent(catLanHoDiep);
-            categoryRepository.save(subLanTrang);
-        }
+        Category catSinhNhat = categoryRepository.findByName("Hoa Sinh Nhật").orElseThrow();
+        Category catKhaiTruong = categoryRepository.findByName("Hoa Khai Trương").orElseThrow();
+        Category catTinhYeu = categoryRepository.findByName("Hoa Tình Yêu").orElseThrow();
+        Category catLanHoDiep = categoryRepository.findByName("Hoa Quà Tặng").orElseThrow();
 
         // Demo initialization supplements fixtures; it does not merge or delete user categories.
 

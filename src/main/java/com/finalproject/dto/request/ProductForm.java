@@ -25,6 +25,9 @@ public class ProductForm {
     @NotNull(message = "Vui lòng chọn danh mục sản phẩm")
     private Long categoryId;
 
+    private List<Long> additionalCategoryIds;
+    private boolean categoriesSubmitted;
+
     @NotBlank(message = "Vui lòng điền tên sản phẩm")
     @jakarta.validation.constraints.Size(max = 200, message = "Tên sản phẩm tối đa 200 ký tự")
     private String name;
@@ -32,14 +35,21 @@ public class ProductForm {
     private String description;
 
     @NotNull(message = "Vui lòng điền giá nhập hàng")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Giá nhập hàng phải lớn hơn 0")
-    @jakarta.validation.constraints.Digits(integer = 16, fraction = 2, message = "Giá nhập tối đa 16 chữ số và 2 số thập phân")
+    @DecimalMin(value = "1", message = "Giá nhập hàng phải từ 1đ")
+    @jakarta.validation.constraints.Digits(integer = 16, fraction = 0, message = "Giá nhập phải là số đồng nguyên, tối đa 16 chữ số")
     private BigDecimal importPrice;
 
     @NotNull(message = "Vui lòng điền giá bán")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Giá bán đứt phải là số dương lớn hơn 0. Vui lòng nhập lại.")
-    @jakarta.validation.constraints.Digits(integer = 16, fraction = 2, message = "Giá bán tối đa 16 chữ số và 2 số thập phân")
+    @DecimalMin(value = "1", message = "Giá bán phải từ 1đ")
+    @jakarta.validation.constraints.Digits(integer = 16, fraction = 0, message = "Giá bán phải là số đồng nguyên, tối đa 16 chữ số")
     private BigDecimal priceBuy;
+
+    // JDBC commonly returns 120000.00; normalize insignificant zeros before validation.
+    public void setPriceBuy(BigDecimal value) { priceBuy = normalizeDong(value); }
+    public void setImportPrice(BigDecimal value) { importPrice = normalizeDong(value); }
+    private BigDecimal normalizeDong(BigDecimal value) {
+        return value == null ? null : value.stripTrailingZeros().scale() <= 0 ? value.setScale(0) : value;
+    }
 
     private BigDecimal priceRentPerDay = BigDecimal.ZERO;
 

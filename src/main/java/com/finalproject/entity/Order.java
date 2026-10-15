@@ -110,4 +110,29 @@ public class Order {
     public boolean isCancellable() {
         return status == OrderStatus.PENDING || status == OrderStatus.CONFIRMED;
     }
+
+    @Transient
+    public String getCancellationActorDisplay() {
+        if (cancellationReason == null || cancellationReason.isBlank()) return null;
+        String lower = cancellationReason.toLowerCase();
+        if (lower.contains("admin")) return "Đã hủy bởi Admin";
+        if (lower.contains("quản lý") || lower.contains("cửa hàng")) return "Đã hủy bởi Cửa hàng";
+        return "Đã hủy đơn";
+    }
+
+    @Transient
+    public String getCancellationReasonDetail() {
+        if (cancellationReason == null || cancellationReason.isBlank()) return null;
+        String text = cancellationReason.trim();
+        text = text.replace(" Đơn chưa thanh toán đã được hủy.", "").replace("Đơn chưa thanh toán đã được hủy.", "").trim();
+        int idx = text.indexOf("với lý do:");
+        if (idx >= 0) {
+            text = text.substring(idx + "với lý do:".length()).trim();
+        }
+        if (text.toLowerCase().startsWith("lý do:")) {
+            text = text.substring("lý do:".length()).trim();
+        }
+        return text;
+    }
 }
+

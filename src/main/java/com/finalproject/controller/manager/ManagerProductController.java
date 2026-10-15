@@ -31,6 +31,7 @@ public class ManagerProductController {
     private final com.finalproject.service.StoreAccessService storeAccess;
     private final com.finalproject.service.CloudinaryService cloudinaryService;
     private final com.finalproject.repository.ProductImageRepository productImages;
+    private final com.finalproject.service.StoreProductService storeProducts;
 
     @GetMapping("/create")
     public String createForm(Model model) {
@@ -53,23 +54,37 @@ public class ManagerProductController {
     @GetMapping
     public String listProducts(Principal principal, Model model,
             @RequestParam(value="tab", defaultValue="selling") String tab,
+            @RequestParam(value="keyword", required=false) String keyword,
+            @RequestParam(value="categoryId", required=false) Long categoryId,
             @RequestParam(value="page", defaultValue="0") int page,
             @RequestParam(value="size", defaultValue="8") int size) {
         userRepository.findByUsername(principal.getName()).orElseThrow();
         Long storeId = storeAccess.assignedStore().getId();
 
-        if (!java.util.Set.of("selling", "stored").contains(tab)) throw new IllegalArgumentException("Tab sản phẩm không hợp lệ.");
-        var result = com.finalproject.utils.StorePages.load(page, size, pageable -> productRepository.findAll((root, query, cb) -> cb.and(
-                cb.equal(root.get("store").get("id"), storeId), cb.isFalse(root.get("isDeleted")),
-                cb.equal(root.get("isSelling"), "selling".equals(tab))), pageable));
+        if (!java.util.Set.of("selling", "stored", "all", "deleted").contains(tab)) throw new IllegalArgumentException("Tab sản phẩm không hợp lệ.");
+        var result = com.finalproject.utils.StorePages.load(page, size, pageable -> productRepository.findAll(
+                com.finalproject.service.StoreProductService.catalog(storeId, tab, keyword, categoryId), pageable));
         List<Product> products = result.getContent();
         com.finalproject.utils.StorePages.model(model, result);
         model.addAttribute("activeTab", tab);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("categoryId", categoryId);
 
+        // Counts for tab badges
+        model.addAttribute("countSelling", productRepository.count(com.finalproject.service.StoreProductService.catalog(storeId, "selling")));
+        model.addAttribute("countStored", productRepository.count(com.finalproject.service.StoreProductService.catalog(storeId, "stored")));
+        model.addAttribute("countAll", productRepository.count(com.finalproject.service.StoreProductService.catalog(storeId, "all")));
+        model.addAttribute("countDeleted", productRepository.count(com.finalproject.service.StoreProductService.catalog(storeId, "deleted")));
 
         model.addAttribute("products", products);
         java.util.Map<Long, Integer> stock = new java.util.HashMap<>();
-        inventories.findByStoreIdAndProductIdIn(storeId, products.stream().map(Product::getId).toList()).forEach(item -> stock.put(item.getProduct().getId(), item.getQuantity()));
+        java.util.Map<Long, Boolean> selling = new java.util.HashMap<>();
+        inventories.findByStoreIdAndProductIdIn(storeId, products.stream().map(Product::getId).toList()).forEach(item -> {
+            stock.put(item.getProduct().getId(), item.getQuantity()); selling.put(item.getProduct().getId(), item.isAvailableForSale());
+        });
+        products.forEach(p -> selling.putIfAbsent(p.getId(), com.finalproject.service.ProductAvailability.isPublic(p)));
+        model.addAttribute("branchSelling", selling);
+        model.addAttribute("currentStockQuantity", inventories.sumRemainingQuantity(storeId));
         model.addAttribute("stock", stock);
         model.addAttribute("categories", categoryRepository.findActiveCategories());
         model.addAttribute("store", storeAccess.assignedStore());
@@ -89,6 +104,8 @@ public class ManagerProductController {
                              @RequestParam(value = "description", required = false) String description,
                              @RequestParam(value = "styleValueIds", required = false) java.util.List<Long> styleValueIds,
                              @RequestParam(value = "attributesSubmitted", defaultValue = "false") boolean attributesSubmitted,
+                             @RequestParam(value = "additionalCategoryIds", required = false) List<Long> additionalCategoryIds,
+                             @RequestParam(value = "categoriesSubmitted", defaultValue = "false") boolean categoriesSubmitted,
                              RedirectAttributes ra) {
         userRepository.findByUsername(principal.getName()).orElseThrow();
         Store store = storeAccess.assignedStore();
@@ -119,6 +136,7 @@ public class ManagerProductController {
                 .isSelling(true)
                 .build();
 
+        categoryService.assignAdditional(product, additionalCategoryIds, categoriesSubmitted);
         if (attributesSubmitted) attributes.assign(product, styleValueIds, true);
         productRepository.save(product);
         saveUploadedImage(product, uploaded);
@@ -139,6 +157,8 @@ public class ManagerProductController {
                                 @RequestParam(value = "description", required = false) String description,
                                 @RequestParam(value = "styleValueIds", required = false) java.util.List<Long> styleValueIds,
                                 @RequestParam(value = "attributesSubmitted", defaultValue = "false") boolean attributesSubmitted,
+                                @RequestParam(value = "additionalCategoryIds", required = false) List<Long> additionalCategoryIds,
+                                @RequestParam(value = "categoriesSubmitted", defaultValue = "false") boolean categoriesSubmitted,
                                 RedirectAttributes ra) {
         Product p = productRepository.findById(id).orElseThrow();
         if (Boolean.TRUE.equals(p.getIsDeleted())) throw new IllegalArgumentException("Sản phẩm đã bị xóa.");
@@ -152,6 +172,7 @@ public class ManagerProductController {
         var uploaded = uploadProductImage(imageFile);
         p.setName(name);
         p.setCategory(cat);
+        categoryService.assignAdditional(p, additionalCategoryIds, categoriesSubmitted);
         if (attributesSubmitted) attributes.assign(p, styleValueIds, true);
         p.setPriceBuy(priceBuy);
         p.setPromotionalPrice(promotionalPrice != null ? promotionalPrice : priceBuy);
@@ -169,13 +190,50 @@ public class ManagerProductController {
 
     @PostMapping("/toggle-selling/{id}")
     public String toggleSelling(@PathVariable("id") Long id, @RequestParam(value="selling", required=false) Boolean selling, RedirectAttributes ra) {
-        Product p = productRepository.findById(id).orElseThrow();
-        storeAccess.requireManager(p.getStore());
-        if (Boolean.TRUE.equals(p.getIsDeleted())) throw new IllegalArgumentException("Sản phẩm đã bị xóa.");
-        p.setIsSelling(selling != null ? selling : !Boolean.TRUE.equals(p.getIsSelling()));
-        productRepository.save(p);
+        Product p = storeProducts.requireSelectedProduct(id);
+        var local = inventories.findByStoreIdAndProductId(storeAccess.assignedStore().getId(), id);
+        boolean currentlySelling = local.map(com.finalproject.entity.StoreInventory::isAvailableForSale)
+                .orElse(com.finalproject.service.ProductAvailability.isPublic(p));
+        storeProducts.setSelling(id, selling != null ? selling : !currentlySelling);
         ra.addFlashAttribute("successMessage", "Đã cập nhật trạng thái mở bán sản phẩm!");
         return "redirect:/manager/products";
+    }
+
+    @GetMapping("/branch/{id}")
+    public String editShared(@PathVariable Long id, Model model) {
+        var product = storeProducts.requireSelectedProduct(id);
+        if (product.getStore() != null) return "redirect:/manager/products/edit/" + id;
+        var inventory = inventories.findByStoreIdAndProductId(storeAccess.assignedStore().getId(), id).orElseThrow();
+        if (Boolean.TRUE.equals(inventory.getIsDeleted()) || Boolean.TRUE.equals(product.getIsDeleted()))
+            throw new IllegalArgumentException("Khôi phục sản phẩm trước khi chỉnh sửa.");
+        model.addAttribute("product", product); model.addAttribute("inventory", inventory);
+        return "manager/branch-product-form";
+    }
+
+    @PostMapping("/branch/{id}")
+    public String updateShared(@PathVariable Long id, @RequestParam int quantity,
+            @RequestParam(defaultValue="false") boolean selling, RedirectAttributes ra) {
+        storeProducts.updateShared(id, quantity, selling);
+        ra.addFlashAttribute("successMessage", "Đã cập nhật sản phẩm chung tại chi nhánh này.");
+        return "redirect:/manager/products";
+    }
+
+    @PostMapping("/delete/{id}")
+    public String delete(@PathVariable Long id, RedirectAttributes ra) {
+        try {
+            storeProducts.delete(id);
+            ra.addFlashAttribute("successMessage", "Đã xóa sản phẩm khỏi danh mục chi nhánh. Tồn kho và lịch sử đơn được giữ lại; có thể khôi phục tại mục Đã xóa.");
+        } catch (IllegalArgumentException ex) {
+            ra.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/manager/products";
+    }
+
+    @PostMapping("/restore/{id}")
+    public String restore(@PathVariable Long id, RedirectAttributes ra) {
+        storeProducts.restore(id);
+        ra.addFlashAttribute("successMessage", "Đã khôi phục sản phẩm về mục Ngừng bán. Kiểm tra thông tin và tồn kho trước khi mở bán lại.");
+        return "redirect:/manager/products?tab=stored";
     }
     @PostMapping("/stock/{id}")
     public String updateStock(@PathVariable("id") Long id, @RequestParam("quantity") int quantity, RedirectAttributes ra) {
@@ -202,10 +260,7 @@ public class ManagerProductController {
     }
 
     private void validatePrice(BigDecimal price, BigDecimal promotion) {
-        if (price == null || price.signum() <= 0 || price.precision() - price.scale() > 16 || price.stripTrailingZeros().scale() > 2
-                || (promotion != null && (promotion.signum() <= 0 || promotion.compareTo(price) > 0 || promotion.stripTrailingZeros().scale() > 2))) {
-            throw new IllegalArgumentException("Giá bán phải lớn hơn 0, tối đa 16 chữ số và 2 số thập phân; giá khuyến mãi không vượt quá giá bán.");
-        }
+        com.finalproject.utils.ProductPrices.validate(price, promotion);
     }
     private void validateName(String name) {
         if (name == null || name.isBlank() || name.length() > 200) throw new IllegalArgumentException("Tên sản phẩm phải có từ 1 đến 200 ký tự.");

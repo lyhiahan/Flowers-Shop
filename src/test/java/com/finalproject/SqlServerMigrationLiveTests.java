@@ -43,7 +43,7 @@ class SqlServerMigrationLiveTests {
         }
         return result;
     }
-    private void validateEntities(String url) {
+    void validateEntities(String url) {
         Map<String, Object> settings = new HashMap<>();
         settings.put("hibernate.connection.url", url);
         settings.put("hibernate.connection.username", System.getenv("SPRING_DATASOURCE_USERNAME"));
@@ -67,9 +67,9 @@ class SqlServerMigrationLiveTests {
     @Test void emptyDatabaseMigratesAllVersionsAndValidatesAllEntities() throws Exception {
         String url = url("SQLSERVER_TEST_FRESH_DATABASE");
         var flyway = flyway(url);
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(6);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(8);
         flyway.validate();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("6");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("8");
         validateEntities(url);
         assertThat(flyway.migrate().migrationsExecuted).isZero();
     }
@@ -92,9 +92,9 @@ class SqlServerMigrationLiveTests {
         }
         var auditedVersion = Flyway.configure().configuration(flyway.getConfiguration()).target("5").load();
         assertThat(auditedVersion.migrate().migrationsExecuted).isEqualTo(1);
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(1);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(3);
         flyway.validate();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("6");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("8");
         validateEntities(url);
         assertThat(counts(url)).isEqualTo(before);
         try (var connection = connect(url); var statement = connection.createStatement()) {

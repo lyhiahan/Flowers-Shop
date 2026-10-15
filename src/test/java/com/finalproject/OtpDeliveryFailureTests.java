@@ -59,7 +59,7 @@ class OtpDeliveryFailureTests {
         var user = User.builder().id(1L).username("otp_user").email("otp-user@example.test").role(Role.USER).build();
         when(users.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
         doThrow(new IllegalStateException("SMTP unavailable")).when(email).sendOtpEmail(anyString(), anyString());
-        var controller = new ProfileController(users, mock(CloudinaryService.class), mock(UserService.class),
+        var controller = new ProfileController(users, mock(UserService.class),
                 mock(ProductService.class), mock(UserFollowStoreRepository.class), mock(StoreRepository.class),
                 mock(CartService.class), otps, email);
         var response = controller.sendPasswordOtp(user::getUsername, user.getEmail());

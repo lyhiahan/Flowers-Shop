@@ -22,6 +22,27 @@ public class Product {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
+    @ManyToMany
+    @JoinTable(name = "product_additional_categories", joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id"))
+    @Builder.Default
+    private java.util.Set<Category> additionalCategories = new java.util.LinkedHashSet<>();
+
+    public java.util.List<Category> getCatalogCategories() {
+        var result = new java.util.LinkedHashMap<Long, Category>();
+        if (category != null && !Boolean.TRUE.equals(category.getIsDeleted())) result.put(category.getId(), category);
+        if (additionalCategories != null) for (Category extra : additionalCategories) {
+            if (!Boolean.TRUE.equals(extra.getIsDeleted())) result.putIfAbsent(extra.getId(), extra);
+        }
+        return new java.util.ArrayList<>(result.values());
+    }
+
+    public String attributeLabel(String group) {
+        return styleValues.stream().filter(v -> !Boolean.TRUE.equals(v.getIsDeleted()) && v.getStyle() != null
+                && !Boolean.TRUE.equals(v.getStyle().getIsDeleted()) && group.equalsIgnoreCase(v.getStyle().getName()))
+                .map(StyleValue::getName).sorted().collect(java.util.stream.Collectors.joining(", "));
+    }
+
     @org.hibernate.annotations.Nationalized
     @Column(nullable = false, length = 200)
     private String name;
@@ -81,11 +102,10 @@ public class Product {
     }
 
     public BigDecimal getSellingPrice() {
-        if (priceBuy == null) {
-            return promotionalPrice != null && promotionalPrice.compareTo(BigDecimal.ZERO) >= 0 ? promotionalPrice : BigDecimal.ZERO;
-        }
-        return promotionalPrice != null && promotionalPrice.compareTo(BigDecimal.ZERO) >= 0 && promotionalPrice.compareTo(priceBuy) <= 0
-                ? promotionalPrice : priceBuy;
+        boolean validPromotion = com.finalproject.utils.ProductPrices.valid(promotionalPrice);
+        if (priceBuy == null) return validPromotion ? promotionalPrice : BigDecimal.ZERO;
+        // Ignore invalid legacy promotions, rather than rendering/charging 0đ after rounding.
+        return validPromotion && promotionalPrice.compareTo(priceBuy) <= 0 ? promotionalPrice : priceBuy;
     }
 
     @PrePersist

@@ -1131,3 +1131,26 @@ h2.section-title, h3.section-title, .h2-title {
     box-shadow: none !important;
     transform: none !important;
 }
+
+/* Khoảng trống chống đè giữa floating chat widget và phân trang/nút thao tác */
+.admin-body .main-wrapper,
+.admin-body .main-wrapper-admin,
+.manager-page .manager-main,
+.manager-page .main-wrapper {
+    padding-bottom: 96px !important;
+}
+
+.admin-body .pagination,
+.manager-page .pagination,
+.admin-pagination-nav {
+    margin-right: 120px;
+}
+
+@media (max-width: 767.98px) {
+    .admin-body .pagination,
+    .manager-page .pagination,
+    .admin-pagination-nav {
+        margin-right: 0;
+    }
+}
+

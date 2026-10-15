@@ -236,6 +236,7 @@ public class ProductServiceImpl implements ProductService {
                 .sold(0)
                 .rating(5.0)
                 .build();
+        categoryService.assignAdditional(product, form.getAdditionalCategoryIds(), form.isCategoriesSubmitted());
         attributes.assign(product, form.getStyleValueIds(), form.isAttributesSubmitted());
         Product savedProduct = productRepository.save(product);
 
@@ -297,6 +298,7 @@ public class ProductServiceImpl implements ProductService {
 
         product.setName(form.getName());
         product.setCategory(category);
+        categoryService.assignAdditional(product, form.getAdditionalCategoryIds(), form.isCategoriesSubmitted());
         attributes.assign(product, form.getStyleValueIds(), form.isAttributesSubmitted());
         product.setDescription(form.getDescription());
         product.setImportPrice(form.getImportPrice());

@@ -11,6 +11,19 @@ import java.util.*;
 public class CategoryService {
     private final CategoryRepository categories;
     private final jakarta.persistence.EntityManager entityManager;
+
+    @Transactional(readOnly=true)
+    public void assignAdditional(com.finalproject.entity.Product product, List<Long> ids, boolean submitted) {
+        if (!submitted) return; // Old forms must not silently clear additional classifications.
+        Set<Long> requested = ids == null ? new LinkedHashSet<>() : new LinkedHashSet<>(ids);
+        if (requested.size() > 10 || requested.stream().anyMatch(id -> id == null || id <= 0))
+            throw new IllegalArgumentException("Chọn tối đa 10 danh mục bổ sung hợp lệ.");
+        if (product.getCategory() != null) requested.remove(product.getCategory().getId());
+        var selected = requested.isEmpty() ? List.<Category>of() : categories.findAllById(requested);
+        if (selected.size() != requested.size() || selected.stream().anyMatch(c -> !visible(c)))
+            throw new IllegalArgumentException("Danh mục bổ sung không tồn tại hoặc đã bị ẩn.");
+        product.setAdditionalCategories(new LinkedHashSet<>(selected));
+    }
     public boolean visible(Category category) {
         Set<Long> seen = new HashSet<>();
         for (Category current = category; current != null; current = current.getParent()) {

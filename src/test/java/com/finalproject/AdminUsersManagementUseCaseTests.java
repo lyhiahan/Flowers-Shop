@@ -39,6 +39,9 @@ class AdminUsersManagementUseCaseTests {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private com.finalproject.service.CustomerAccountClosureService accountClosure;
+
     private User admin;
     private User customer1;
     private User customer2;
@@ -146,6 +149,44 @@ class AdminUsersManagementUseCaseTests {
                 .andExpect(content().string(containsString("Quản Lý Người Dùng & Vai Trò")))
                 .andExpect(content().string(containsString("user1_uc27")))
                 .andExpect(content().string(containsString("user2_uc27")));
+    }
+
+    @Test
+    @WithMockUser(username = "admin_uc27", roles = {"ADMIN"})
+    void combinedRoleAndKeywordAndPhoneSearchMustAllApply() throws Exception {
+        customer1.setPhone("0901234567"); userRepository.saveAndFlush(customer1);
+        mockMvc.perform(get("/admin/users").param("role", "ADMIN").param("keyword", "user1_uc27"))
+                .andExpect(status().isOk()).andExpect(model().attribute("totalElements", 0L));
+        mockMvc.perform(get("/admin/users").param("role", "USER").param("keyword", "0901234567"))
+                .andExpect(status().isOk()).andExpect(model().attribute("totalElements", 1L))
+                .andExpect(content().string(containsString("@user1_uc27")));
+    }
+
+    @Test
+    @WithMockUser(username = "admin_uc27", roles = {"ADMIN"})
+    void renamedAdminCannotBeDisabledThroughDirectRequest() throws Exception {
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                        .post("/admin/users/toggle-active/{id}", admin.getId())
+                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("errorMessage", containsString("Không thể khóa")));
+        org.assertj.core.api.Assertions.assertThat(userRepository.findById(admin.getId()).orElseThrow().getIsActive()).isTrue();
+    }
+
+    @Test
+    @WithMockUser(username = "admin_uc27", roles = {"ADMIN"})
+    void accountClosureServiceAlsoProtectsRenamedAdmin() {
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> accountClosure.disable(admin.getId(), false))
+                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Quản trị viên");
+        org.assertj.core.api.Assertions.assertThat(admin.getIsActive()).isTrue();
+    }
+
+    @Test
+    @WithMockUser(username = "admin_uc27", roles = {"ADMIN"})
+    void outOfRangePageFallsBackToLastAvailablePage() throws Exception {
+        mockMvc.perform(get("/admin/users").param("page", "999").param("size", "2"))
+                .andExpect(status().isOk()).andExpect(model().attribute("currentPage", 2))
+                .andExpect(model().attribute("users", org.hamcrest.Matchers.hasSize(1)));
     }
 
     @Test

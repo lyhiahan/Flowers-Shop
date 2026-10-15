@@ -1790,23 +1790,9 @@
         </div>
 
         <!-- MỤC 2: TABS TOP 20 & BỘ LỌC TÌM KIẾM, DANH MỤC, PHÂN TRANG CHO KHÁCH HÀNG -->
-        <div id="product-catalog" class="card filter-card p-4 mb-4" style="scroll-margin-top: 85px;">
-
-            <div th:if="${loadError == null}" id="customer-stock-kpi" data-stock-kpi data-stock-catalog="true"
-                 th:data-stock-endpoint="@{/api/public/catalog-stock(storeId=${storeId})}"
-                 class="rounded-4 border p-3 mb-3" style="background:var(--flower-sub-bg)">
-                <div class="d-flex align-items-center gap-3 flex-wrap">
-                    <i class="bi bi-box-seam fs-3" style="color:var(--flower-primary)" aria-hidden="true"></i>
-                    <div>
-                        <div class="fw-bold" th:text="${storeId == null ? 'Sản phẩm còn hàng toàn chuỗi' : 'Sản phẩm còn hàng tại chi nhánh đang chọn'}"></div>
-                        <strong id="customerStockQuantity" data-stock-value class="fs-4" style="color:var(--flower-primary)"
-                                th:text="${#numbers.formatInteger(customerStockQuantity, 1, 'POINT')}">0</strong>
-                        <span> sản phẩm còn có thể đặt</span>
-                    </div>
-                </div>
-                <div class="small text-muted mt-1">Đã trừ số lượng trong đơn đặt thành công, kể cả COD. Tự cập nhật mỗi 5 giây; không chỉ tính các mẫu đang hiển thị.</div>
-                <small data-stock-status class="text-warning" role="status" hidden></small>
-            </div>
+        <div id="product-catalog" class="card filter-card p-4 mb-4" style="scroll-margin-top: 85px;"
+             data-stock-catalog="true" th:data-stock-endpoint="${loadError == null} ? @{/api/public/catalog-stock(storeId=${storeId})} : null">
+            <small data-stock-status class="text-warning mb-2" role="status" hidden></small>
 
             <!-- Breadcrumb điều hướng quay lại danh mục cha / trang chủ (Rubric 3-5c) -->
             <nav aria-label="breadcrumb" class="mb-3" th:if="${selectedCategory != null or (keyword != null and !keyword.isEmpty())}">

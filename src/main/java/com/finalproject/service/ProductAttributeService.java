@@ -40,7 +40,8 @@ public class ProductAttributeService {
         var selected=values.findAllById(requested);
         if (selected.size()!=requested.size() || selected.stream().anyMatch(v->Boolean.TRUE.equals(v.getIsDeleted())
                 || v.getStyle()==null || Boolean.TRUE.equals(v.getStyle().getIsDeleted())
-                || (v.getStyle().getCategory()!=null && !v.getStyle().getCategory().getId().equals(product.getCategory().getId()))))
+                || (v.getStyle().getCategory()!=null && product.getCatalogCategories().stream()
+                    .noneMatch(c -> c.getId().equals(v.getStyle().getCategory().getId())))))
             throw new IllegalArgumentException("Thuộc tính đã bị xóa hoặc không thuộc danh mục sản phẩm.");
         product.setStyleValues(new LinkedHashSet<>(selected));
     }

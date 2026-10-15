@@ -72,10 +72,10 @@ public class DemoBranchSeeder {
                                 .build())));
 
         // 2. Tạo các tài khoản mẫu cho từng Role (mật khẩu mặc định: 123456)
-        userRepository.findByUsername("admin").orElseGet(() -> userRepository.save(User.builder()
-                .username("admin")
+        userRepository.findByUsername("nguyenthanhminh").or(() -> userRepository.findByEmail("admin@rentalshop.vn")).orElseGet(() -> userRepository.save(User.builder()
+                .username("nguyenthanhminh")
                 .password(passwordEncoder.encode("123456"))
-                .fullName("Quản Trị Viên Toàn Hệ Thống")
+                .fullName("Nguyễn Thanh Minh")
                 .email("admin@rentalshop.vn")
                 .role(Role.ADMIN)
                 .isActive(true)
@@ -83,10 +83,10 @@ public class DemoBranchSeeder {
                 .createdDate(LocalDate.now())
                 .build()));
 
-        User managerA = userRepository.findByUsername("manager_q1").orElseGet(() -> userRepository.save(User.builder()
-                .username("manager_q1")
+        User managerA = userRepository.findByUsername("nguyenquanghuy").or(() -> userRepository.findByEmail("manager.q1@rentalshop.vn")).orElseGet(() -> userRepository.save(User.builder()
+                .username("nguyenquanghuy")
                 .password(passwordEncoder.encode("123456"))
-                .fullName("Nguyễn Quản Lý Q1")
+                .fullName("Nguyễn Quang Huy")
                 .email("manager.q1@rentalshop.vn")
                 .phone("0912345678")
                 .role(Role.MANAGER)
@@ -96,10 +96,10 @@ public class DemoBranchSeeder {
                 .createdDate(LocalDate.now())
                 .build()));
 
-        User vendor = userRepository.findByUsername("vendor_flower").orElseGet(() -> userRepository.save(User.builder()
-                .username("vendor_flower")
+        User vendor = userRepository.findByUsername("tranduclong").or(() -> userRepository.findByEmail("vendor@rentalshop.vn")).orElseGet(() -> userRepository.save(User.builder()
+                .username("tranduclong")
                 .password(passwordEncoder.encode("123456"))
-                .fullName("Trần Đối Tác Vườn Hoa Đà Lạt")
+                .fullName("Trần Đức Long")
                 .email("vendor@rentalshop.vn")
                 .phone("0988776655")
                 .role(Role.MANAGER)
@@ -113,10 +113,10 @@ public class DemoBranchSeeder {
         if (storeA.getOwner() == null) { storeA.setOwner(managerA); storeRepository.save(storeA); }
         if (storeB.getOwner() == null) { storeB.setOwner(vendor); storeRepository.save(storeB); }
 
-        User customer = userRepository.findByUsername("khachhang").orElseGet(() -> userRepository.save(User.builder()
-                .username("khachhang")
+        User customer = userRepository.findByUsername("leminhhoa").or(() -> userRepository.findByEmail("khachhang@gmail.com")).orElseGet(() -> userRepository.save(User.builder()
+                .username("leminhhoa")
                 .password(passwordEncoder.encode("123456"))
-                .fullName("Lê Khách Hàng")
+                .fullName("Lê Minh Hoa")
                 .email("khachhang@gmail.com")
                 .phone("0909999888")
                 .address("789 Hai Bà Trưng, Phường 8, Quận 3, TP.HCM")
@@ -131,14 +131,14 @@ public class DemoBranchSeeder {
         if (userAddressRepository.findByUserIdOrderByIsDefaultDescCreatedAtDesc(customer.getId()).isEmpty()) {
             userAddressRepository.save(UserAddress.builder()
                     .user(customer)
-                    .recipientName("Lê Khách Hàng")
+                    .recipientName("Lê Minh Hoa")
                     .phone("0909999888")
                     .addressDetail("789 Hai Bà Trưng, Phường 8, Quận 3, TP.HCM")
                     .isDefault(true)
                     .build());
             userAddressRepository.save(UserAddress.builder()
                     .user(customer)
-                    .recipientName("Lê Khách Hàng (Văn phòng)")
+                    .recipientName("Lê Minh Hoa")
                     .phone("0909999888")
                     .addressDetail("Toà nhà Bitexco, số 2 Hải Triều, Phường Bến Nghé, Quận 1, TP.HCM")
                     .isDefault(false)

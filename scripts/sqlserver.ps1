@@ -7,10 +7,13 @@ param(
 $ErrorActionPreference = 'Stop'
 $savedSettings = @{}
 foreach ($name in @('SPRING_PROFILES_ACTIVE','SPRING_DATASOURCE_URL','SPRING_DATASOURCE_USERNAME','SPRING_DATASOURCE_PASSWORD',
-        'MAIL_PROVIDER','MAIL_FROM_EMAIL','MAIL_FROM_NAME','BREVO_API_KEY')) {
+        'MAIL_PROVIDER','MAIL_FROM_EMAIL','MAIL_FROM_NAME','BREVO_API_KEY',
+        'CLOUDINARY_CLOUD_NAME','CLOUDINARY_API_KEY','CLOUDINARY_API_SECRET')) {
     $savedSettings[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
 }
 try {
+    . (Join-Path $PSScriptRoot 'cloudinary-env.ps1')
+    Import-LocalCloudinarySettings -Path (Join-Path (Split-Path -Parent $PSScriptRoot) '.env')
     $mailCredentialFile = Join-Path (Split-Path -Parent $PSScriptRoot) '.tools/mail-local.json'
     if ([string]::IsNullOrWhiteSpace($env:BREVO_API_KEY) -and
             ([string]::IsNullOrWhiteSpace($env:MAIL_PROVIDER) -or $env:MAIL_PROVIDER -ieq 'brevo') -and
@@ -63,6 +66,12 @@ try {
     else { & $mavenScript 'compile' ('flyway:' + $Action) }
     $scriptExitCode = $LASTEXITCODE
 } finally {
-    foreach ($name in $savedSettings.Keys) { [Environment]::SetEnvironmentVariable($name, $savedSettings[$name], 'Process') }
+    foreach ($name in $savedSettings.Keys) {
+        if ($null -eq $savedSettings[$name]) {
+            Remove-Item -LiteralPath ('Env:\' + $name) -ErrorAction SilentlyContinue
+        } else {
+            [Environment]::SetEnvironmentVariable($name, $savedSettings[$name], 'Process')
+        }
+    }
 }
 exit $scriptExitCode

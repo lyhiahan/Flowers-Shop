@@ -38,10 +38,12 @@
                         &bull; Chi nhánh phục vụ: <strong style="color: #20382E;" th:text="${order.pickupStore != null ? order.pickupStore.name : 'Chi nhánh'}"></strong>
                     </p>
                 </div>
-
                 <!-- Current Status Badge -->
                 <div>
-                    <div th:if="${order.cancellationReason != null}" class="alert alert-warning" role="alert" th:text="${order.cancellationReason}"></div>
+                    <div th:if="${order.cancellationReason != null and !#strings.isEmpty(order.cancellationReason)}" class="alert alert-warning py-2 px-3 mb-2" role="alert" style="line-height: 1.4;">
+                        <div class="fw-bold" th:text="${order.cancellationActorDisplay}">Đã hủy bởi Admin</div>
+                        <div>Lý do: <span th:text="${order.cancellationReasonDetail}">không còn hàng.</span></div>
+                    </div>
                     <span th:if="${order.status.name() == 'PENDING'}" class="badge px-3 py-2 rounded-pill" style="background-color: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; font-size: 14px; font-weight: 700;">
                         <i class="bi bi-clock me-1"></i> CHỜ TIẾP NHẬN
                     </span>

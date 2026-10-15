@@ -2,7 +2,6 @@ package com.finalproject.controller.customer;
 
 import com.finalproject.entity.User;
 import com.finalproject.repository.UserRepository;
-import com.finalproject.service.CloudinaryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
@@ -21,7 +20,6 @@ import java.security.Principal;
 public class ProfileController {
 
     private final UserRepository userRepository;
-    private final CloudinaryService cloudinaryService;
     private final com.finalproject.service.UserService userService;
     private final com.finalproject.service.ProductService productService;
     private final com.finalproject.repository.UserFollowStoreRepository followStoreRepository;
@@ -53,8 +51,6 @@ public class ProfileController {
                                 @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile,
                                 @RequestParam(value = "coverFile", required = false) MultipartFile coverFile,
                                 RedirectAttributes ra) {
-        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
-
         try {
             userService.updateProfileImages(principal.getName(), fullName, phone, address, avatarFile, coverFile);
 

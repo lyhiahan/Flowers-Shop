@@ -1,8 +1,6 @@
 package com.finalproject.service;
 
 import com.finalproject.entity.*;
-import com.finalproject.enums.OrderStatus;
-import com.finalproject.enums.OrderType;
 import com.finalproject.enums.Role;
 import com.finalproject.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -46,7 +43,9 @@ public class VendorDataSeederService {
 
     @Transactional
     public void seedVendorDemoData() {
-        if (userRepository.findByUsername("vendor_flower").isPresent()) return;
+        if (userRepository.findByUsername("vendor_flower").isPresent()
+                || userRepository.findByUsername("tranduclong").isPresent()
+                || userRepository.findByEmail("vendor@rentalshop.vn").isPresent()) return;
         log.info("--- Bắt đầu khởi tạo dữ liệu mẫu cho vai trò MANAGER ---");
 
         final Store storeB = resolveVendorStore();
@@ -82,11 +81,11 @@ public class VendorDataSeederService {
                 .findFirst()
                 .ifPresent(storeB::setStoreLevel);
 
-        // 2. Tài khoản MANAGER chính: vendor_flower & tài khoản phụ vendor
-        User vendorFlower = userRepository.findByUsername("vendor_flower").orElseGet(() -> userRepository.save(User.builder()
-                .username("vendor_flower")
+        // 2. Tài khoản quản lý chính và quản lý hỗ trợ; chức vụ tách khỏi họ tên.
+        User vendorFlower = userRepository.findByUsername("tranduclong").or(() -> userRepository.findByEmail("vendor@rentalshop.vn")).orElseGet(() -> userRepository.save(User.builder()
+                .username("tranduclong")
                 .password(passwordEncoder.encode("123456"))
-                .fullName("Trần Đối Tác Vườn Hoa Đà Lạt")
+                .fullName("Trần Đức Long")
                 .email("vendor@rentalshop.vn")
                 .phone("0988776655")
                 .role(Role.MANAGER)
@@ -102,7 +101,7 @@ public class VendorDataSeederService {
         vendorFlower.setIsActive(true);
         vendorFlower.setIsEmailActive(true);
         if (vendorFlower.getFullName() == null || vendorFlower.getFullName().isBlank()) {
-            vendorFlower.setFullName("Trần Đối Tác Vườn Hoa Đà Lạt");
+            vendorFlower.setFullName("Trần Đức Long");
         }
         userRepository.save(vendorFlower);
 
@@ -110,11 +109,11 @@ public class VendorDataSeederService {
         storeB.setOwner(vendorFlower);
         storeRepository.save(storeB);
 
-        // Tài khoản vendor alias (cho trường hợp người dùng gõ username: vendor)
-        User vendorAlias = userRepository.findByUsername("vendor").orElseGet(() -> userRepository.save(User.builder()
-                .username("vendor")
+        // Một người quản lý khác, không dùng cùng họ tên hoặc bí danh theo chức vụ.
+        User vendorAlias = userRepository.findByUsername("tranminhtuan").or(() -> userRepository.findByEmail("vendor.demo@rentalshop.vn")).orElseGet(() -> userRepository.save(User.builder()
+                .username("tranminhtuan")
                 .password(passwordEncoder.encode("123456"))
-                .fullName("Trần Đối Tác (Vendor)")
+                .fullName("Trần Minh Tuấn")
                 .email("vendor.demo@rentalshop.vn")
                 .phone("0988776699")
                 .role(Role.MANAGER)

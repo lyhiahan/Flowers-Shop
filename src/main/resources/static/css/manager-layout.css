@@ -52,7 +52,18 @@ body.manager-page {
 .manager-form-page { max-width: 960px; margin: 0 auto; }
 .manager-form-page .card { padding: 28px; }
 .manager-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.manager-form-grid > * { min-width: 0; }
 .manager-form-grid .full-width { grid-column: 1 / -1; }
+.manager-form-grid fieldset { width: 100%; min-width: 0; margin: 0; padding: 0; border: 0; }
+/* Bootstrap floats legends; keep grouped choices below their heading inside the grid. */
+.manager-form-grid legend { float: none; display: block; width: 100%; margin-bottom: 12px; }
+.manager-choice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: 10px 16px; min-width: 0; }
+.manager-choice-grid .form-check { display: flex; align-items: flex-start; gap: 10px; min-width: 0; margin: 0; padding: 10px 12px; border: 1px solid var(--border-soft); border-radius: 8px; }
+.manager-choice-grid .form-check-input { float: none; flex: 0 0 auto; margin: 3px 0 0; }
+.manager-choice-grid .form-check-label { min-width: 0; margin: 0; line-height: 1.5; overflow-wrap: anywhere; cursor: pointer; }
+.manager-attribute-groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.manager-attribute-groups > * { min-width: 0; }
+@media (max-width: 767.98px) { .manager-attribute-groups { grid-template-columns: 1fr; } }
 @media (max-width: 1199.98px) { .manager-page .manager-main { padding: 24px !important; } }
 @media (max-width: 991.98px) {
     .manager-layout { display: block; }

@@ -85,8 +85,8 @@ public class OrderWorkflowService {
             if (reason.isBlank()) throw new IllegalArgumentException("Vui lòng nhập lý do hủy đơn hàng.");
             if (reason.length() > 300) throw new IllegalArgumentException("Lý do hủy đơn không được vượt quá 300 ký tự.");
             String actor = access.currentUser().hasRole(Role.ADMIN) ? "admin (quản trị viên)" : "quản lý cửa hàng";
-            order.setCancellationReason("Đơn hàng của bạn đã bị hủy bởi " + actor + " với lý do: " + reason + ". "
-                    + ("PAID".equals(order.getPaymentStatus()) ? "Vui lòng hoàn tiền lại cho khách hàng; chưa ghi nhận đã hoàn tiền." : "Đơn chưa thanh toán đã được hủy."));
+            order.setCancellationReason("Đơn hàng của bạn đã bị hủy bởi " + actor + " với lý do: " + reason + "."
+                    + ("PAID".equals(order.getPaymentStatus()) ? " Vui lòng hoàn tiền lại cho khách hàng; chưa ghi nhận đã hoàn tiền." : ""));
             Order saved = cancel(order);
             notifyOrderStatusChange(saved, previous, saved.getStatus());
             return saved;
@@ -213,10 +213,10 @@ public class OrderWorkflowService {
         if (order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.REFUND_REQUESTED) return;
         if (!order.isCancellable())
             throw new IllegalStateException("Không thể hủy đơn đã bắt đầu cắm hoa/chuẩn bị, đang giao hoặc đã kết thúc. Bạn chỉ được hủy khi đơn đang chờ xác nhận hoặc đã xác nhận.");
-        order.setCancellationReason("Khách hàng đã hủy đơn trước khi bắt đầu cắm hoa/chuẩn bị. "
+        order.setCancellationReason("Khách hàng đã hủy đơn trước khi bắt đầu cắm hoa/chuẩn bị."
                 + ("PAID".equals(order.getPaymentStatus())
-                ? "Vui lòng hoàn tiền lại cho khách hàng; chưa ghi nhận đã hoàn tiền."
-                : "Đơn chưa thanh toán đã được hủy."));
+                ? " Vui lòng hoàn tiền lại cho khách hàng; chưa ghi nhận đã hoàn tiền."
+                : ""));
         cancel(order);
     }
 

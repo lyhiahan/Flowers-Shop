@@ -451,7 +451,7 @@ class BusinessRegressionTests {
         product.setIsDeleted(true);
         assertThatThrownBy(() -> orderService.quote(customer.getUsername(), List.of(item.getId()),
                 "Quận 1", null, "PICKUP", store.getId(), null)).hasMessageContaining("ngừng bán");
-        product.setIsDeleted(false); product.setPromotionalPrice(BigDecimal.ZERO);
+        product.setIsDeleted(false); product.setPromotionalPrice(null); product.setPriceBuy(BigDecimal.ZERO);
         assertThatThrownBy(() -> orderService.quote(customer.getUsername(), List.of(item.getId()),
                 "Quận 1", null, "PICKUP", store.getId(), null)).hasMessageContaining("Giá sản phẩm");
         assertThat(orders.count()).isZero();
@@ -1299,6 +1299,29 @@ class BusinessRegressionTests {
         assertThat(second.getAddressDetail()).isEqualTo("456 Other street");
         userService.deleteAddress(first.getId(),customer.getId());
         assertThat(second.getIsDefault()).isTrue();
+    }
+
+    @Test void guestCanBrowseAndSeeNamedDemoChoicesButCannotAccessPrivateChat() throws Exception {
+        long accountsBefore=users.count();
+        mvc.perform(get("/").with(anonymous())).andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Sản phẩm còn hàng toàn chuỗi"))));
+        mvc.perform(get("/login").with(anonymous())).andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Nguyễn Thanh Minh · Admin")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("fillCreds('leminhhoa'")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("fillCreds('khachhang"))));
+        mvc.perform(get("/api/chat/conversations").with(anonymous()))
+                .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/login"));
+        mvc.perform(get("/cart").with(anonymous()))
+                .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/login"));
+        assertThat(users.count()).isEqualTo(accountsBefore);
+    }
+
+    @Test void demoSeederCannotReactivateRenamedVendorByStableEmail() {
+        User vendor=createUser("tranduclong",Role.MANAGER,store);
+        vendor.setEmail("vendor@rentalshop.vn"); vendor.setIsActive(false); users.saveAndFlush(vendor);
+        vendorSeeder.seedVendorDemoData();
+        assertThat(vendor.getIsActive()).isFalse();
+        assertThat(users.findByUsername("vendor_flower")).isEmpty();
     }
 
     @Test void demoSeederCannotReactivateExistingVendorOrReplenishStock() {

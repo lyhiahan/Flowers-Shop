@@ -12,6 +12,14 @@ import java.util.List;
 
 @Repository
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> {
+    @Query("""
+        select count(d) > 0 from OrderDetail d where d.product.id=:productId and d.order.pickupStore.id=:storeId
+        and d.order.status in (com.finalproject.enums.OrderStatus.PENDING, com.finalproject.enums.OrderStatus.CONFIRMED,
+            com.finalproject.enums.OrderStatus.PREPARING, com.finalproject.enums.OrderStatus.PICKED_UP,
+            com.finalproject.enums.OrderStatus.DELIVERING, com.finalproject.enums.OrderStatus.DELIVERED,
+            com.finalproject.enums.OrderStatus.RENTING, com.finalproject.enums.OrderStatus.OVERDUE)
+        """)
+    boolean hasOpenOrdersAtStore(Long productId, Long storeId);
     interface SalesRank {
         Long getId();
         String getName();

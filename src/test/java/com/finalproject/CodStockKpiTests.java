@@ -112,7 +112,8 @@ class CodStockKpiTests {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.currentStockQuantity").value(all));
         mvc.perform(get("/").with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk()).andExpect(model().attribute("customerStockQuantity", all))
-                .andExpect(content().string(containsString("id=\"customerStockQuantity\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(containsString("id=\"customerStockQuantity\""))))
+                .andExpect(content().string(org.hamcrest.Matchers.not(containsString("Sản phẩm còn hàng toàn chuỗi"))))
                 .andExpect(content().string(containsString("/js/stock-kpi.js")));
         mvc.perform(get("/api/public/catalog-stock").param("productIds", bouquet.getId().toString()))
                 .andExpect(status().isOk()).andExpect(header().string("Cache-Control", "no-store"))

@@ -11,6 +11,12 @@ import jakarta.servlet.http.HttpServletRequest;
 public class ProductAttributeAdvice {
     private final ProductAttributeService attributes;
     @ModelAttribute public void attributes(HttpServletRequest request, Model model) {
-        if (request.getRequestURI().contains("products")) model.addAttribute("attributeValues", attributes.activeValues());
+        if (request.getRequestURI().contains("products")) {
+            var values = attributes.activeValues();
+            model.addAttribute("attributeValues", values);
+            var groups = new java.util.LinkedHashMap<String, java.util.List<com.finalproject.entity.StyleValue>>();
+            values.forEach(value -> groups.computeIfAbsent(value.getStyle().getName(), key -> new java.util.ArrayList<>()).add(value));
+            model.addAttribute("productAttributeGroups", groups);
+        }
     }
 }

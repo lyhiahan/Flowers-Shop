@@ -2,7 +2,6 @@ package com.finalproject.controller.admin;
 
 import com.finalproject.dto.request.ProductForm;
 import com.finalproject.entity.Product;
-import com.finalproject.entity.Store;
 import com.finalproject.repository.CategoryRepository;
 import com.finalproject.repository.ProductRepository;
 import com.finalproject.repository.StoreRepository;
@@ -17,7 +16,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Controller
@@ -216,6 +214,7 @@ public class AdminProductController {
         form.setName(product.getName());
         form.setStyleValueIds(product.getStyleValues().stream().map(com.finalproject.entity.StyleValue::getId).toList());
         form.setCategoryId(product.getCategory() != null ? product.getCategory().getId() : null);
+        form.setAdditionalCategoryIds(product.getAdditionalCategories().stream().map(com.finalproject.entity.Category::getId).toList());
         form.setDescription(product.getDescription());
         form.setImportPrice(product.getImportPrice());
         form.setPriceBuy(product.getPriceBuy());

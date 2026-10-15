@@ -32,6 +32,9 @@ public class CustomerAccountClosureService {
     public Result disable(Long id, boolean deletionRequested) {
         var customer = users.findLockedById(id).orElseThrow();
         entityManager.refresh(customer, LockModeType.PESSIMISTIC_WRITE);
+        if (customer.hasRole(Role.ADMIN)) {
+            throw new IllegalArgumentException("Không thể khóa tài khoản Quản trị viên.");
+        }
         customer.setIsActive(false);
         customer.setAccountDisabledByAdmin(true);
         users.saveAndFlush(customer);

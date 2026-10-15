@@ -5,7 +5,9 @@
 #flowerChat button { cursor: pointer; border: 1px solid #D1E5DA; border-radius: 8px; padding: 5px 10px; color: #355447; background: #fff; }
 #flowerChat button:disabled { opacity: .55; cursor: default; }
 #flowerChat button:focus-visible, #flowerChat select:focus-visible, #flowerChat textarea:focus-visible { outline: 2px solid #355447; outline-offset: 2px; }
-#flowerChat .chat-launcher { position: fixed; z-index: 1040; right: 20px; bottom: 20px; padding: 12px 18px; border-radius: 28px; background: #355447; color: #fff; box-shadow: 0 4px 20px #0003; }
+#flowerChat .chat-launcher { position: fixed; z-index: 1040; right: 20px; bottom: 20px; padding: 12px 18px; border-radius: 28px; background: #355447; color: #fff; box-shadow: 0 4px 20px #0003; cursor: pointer; user-select: none; touch-action: none; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+#flowerChat .chat-launcher:hover { transform: translateY(-2px); box-shadow: 0 6px 24px #00000038; }
+#flowerChat .chat-launcher.is-dragging { opacity: 0.9; cursor: grabbing; transition: none; }
 #flowerChat #chatBadge { background: #AE3A58; padding: 1px 6px; border-radius: 12px; }
 #flowerChat .chat-panel { position: fixed; z-index: 1045; right: 20px; bottom: 76px; width: min(560px, calc(100vw - 40px)); height: min(780px, calc(100vh - 100px)); height: min(780px, calc(100dvh - 100px)); display: flex; flex-direction: column; background: #fff; border: 1px solid #D1E5DA; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 36px #0003; }
 #flowerChat .chat-header, #flowerChat .chat-status, #flowerChat .chat-start, #flowerChat .chat-current-title, #flowerChat .chat-older, #flowerChat .chat-send { flex-shrink: 0; }

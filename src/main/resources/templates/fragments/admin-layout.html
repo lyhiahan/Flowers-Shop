@@ -75,12 +75,23 @@
                 border-left: 3px solid #6EE7B7;
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             }
-            .main-wrapper-admin {
+            .main-wrapper-admin,
+            .admin-body .main-wrapper {
                 flex: 1;
                 min-width: 0;
                 overflow-x: hidden;
                 background-color: var(--admin-bg);
-                padding: 28px;
+                padding: 28px 28px 96px 28px !important;
+            }
+            .admin-body .pagination,
+            .admin-pagination-nav {
+                margin-right: 120px;
+            }
+            @media (max-width: 767.98px) {
+                .admin-body .pagination,
+                .admin-pagination-nav {
+                    margin-right: 0;
+                }
             }
             .admin-page-title {
                 font-size: 26px !important;

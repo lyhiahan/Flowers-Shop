@@ -144,17 +144,20 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-bold" style="color: #20382E; font-size: 15px;">Phí vận chuyển chuẩn (VNĐ) (*):</label>
-                    <input type="number" name="price" id="deliveryPriceInput" class="form-control" th:value="${delivery.price}" 
-                           placeholder="VD: 25000, 45000..." min="0" step="1000"
+                    <label class="form-label fw-bold" style="color: #20382E; font-size: 15px;">Số điện thoại / Hotline hỗ trợ (*):</label>
+                    <input type="text" name="phone" id="deliveryPhoneInput" class="form-control" th:value="${delivery.phone}" 
+                           placeholder="VD: 028 7108 8810 hoặc 1900 633 677" 
                            style="height: 44px; border-radius: 10px; border-color: #E2E7E2; font-size: 15px;" required>
-                    <small class="text-muted">Cước phí giao hàng tiêu chuẩn tính cho mỗi đơn hàng sử dụng đơn vị này.</small>
+                    <small class="text-muted">Hotline điều phối và hỗ trợ khách hàng của đơn vị vận chuyển.</small>
                 </div>
 
+                <!-- Cước phí được quản lý riêng tại tab Khu vực & Biểu phí -->
+                <input type="hidden" name="price" id="deliveryPriceInput" th:value="${delivery.price != null ? delivery.price : 0}">
+
                 <div class="mb-4">
-                    <label class="form-label fw-bold" style="color: #20382E; font-size: 15px;">Mô tả / Thông tin liên hệ & khu vực:</label>
+                    <label class="form-label fw-bold" style="color: #20382E; font-size: 15px;">Mô tả / Phương tiện & Quy cách bảo quản hoa:</label>
                     <textarea name="description" id="deliveryDescInput" class="form-control" rows="3"
-                              placeholder="VD: Giao nhanh 2H, bảo quản hoa tươi trong lồng kính. Khu vực: Toàn TP.HCM"
+                              placeholder="VD: Đội shipper chuyên nghiệp, trang bị thùng giữ ẩm và che chắn cánh hoa cẩn thận."
                               style="border-radius: 10px; border-color: #E2E7E2; font-size: 15px;" th:text="${delivery.description}"></textarea>
                 </div>
 
@@ -212,18 +215,19 @@
 <script>
     function triggerConfirmDeliveryModal() {
         const nameInput = document.getElementById('deliveryNameInput');
-        const priceInput = document.getElementById('deliveryPriceInput');
+        const phoneInput = document.getElementById('deliveryPhoneInput');
 
         if (!nameInput.value || nameInput.value.trim() === '') {
             nameInput.reportValidity();
             return;
         }
-        if (priceInput.value === '' || priceInput.value < 0) {
-            priceInput.reportValidity();
+        if (phoneInput && (!phoneInput.value || phoneInput.value.trim() === '')) {
+            phoneInput.reportValidity();
             return;
         }
 
-        document.getElementById('confirmDeliveryNameDisplay').innerText = nameInput.value.trim() + " (" + Number(priceInput.value).toLocaleString() + " ₫)";
+        const phoneVal = phoneInput ? phoneInput.value.trim() : '';
+        document.getElementById('confirmDeliveryNameDisplay').innerText = nameInput.value.trim() + (phoneVal ? " (Hotline: " + phoneVal + ")" : "");
         const confirmModal = new bootstrap.Modal(document.getElementById('confirmDeliveryModal'));
         confirmModal.show();
     }

@@ -8,15 +8,27 @@ Luồng giao tận nơi: Chờ xác nhận → Đã xác nhận → Đang cắm 
 
 Admin/quản lý chọn **Hủy đơn hàng** trong hộp xác nhận phải nhập lý do (không được trống, tối đa 300 ký tự). Backend cũng kiểm tra, kể cả gửi request trực tiếp. Lý do và người hủy được lưu trên đơn; khách nhận thông báo “Đơn hàng của bạn đã bị hủy bởi admin (quản trị viên)/quản lý cửa hàng với lý do: …” và xem lại trên danh sách/chi tiết đơn. Đơn đã thanh toán vẫn chờ hoàn tiền; xác nhận hoàn tiền không làm mất lý do hủy ban đầu. Thao tác cập nhật trạng thái khác không yêu cầu lý do.
 
-Đơn đặt thành công trừ tồn kho ngay tại chi nhánh xử lý, kể cả thanh toán khi nhận hàng (COD); không chờ xác nhận, thu tiền hoặc bắt đầu giao mới trừ. Đặt thất bại rollback tồn kho; hủy trước khi giao hoàn kho đúng một lần. Dashboard quản lý/admin có KPI **Tồn kho còn lại** tự cập nhật mỗi 5 giây, độc lập bộ lọc ngày. Đây là tổng số lượng `store_inventories.quantity` của sản phẩm chưa xóa (bao gồm sản phẩm tạm ngừng bán/cửa hàng tạm đóng), không phải số mẫu sản phẩm mới hay số đơn đã thu tiền. Doanh thu COD chỉ được ghi nhận khi đủ điều kiện thanh toán/hoàn tất.
+Đơn đặt thành công trừ tồn kho ngay tại chi nhánh xử lý, kể cả thanh toán khi nhận hàng (COD); không chờ xác nhận, thu tiền hoặc bắt đầu giao mới trừ. Đặt thất bại rollback tồn kho; hủy trước khi giao hoàn kho đúng một lần. Dashboard quản lý/admin có KPI **Tồn kho còn lại** tự cập nhật mỗi 5 giây, độc lập bộ lọc ngày. Đây là tổng số lượng `store_inventories.quantity` hợp lệ của mẫu riêng đúng chi nhánh hoặc mẫu chung, chưa xóa tại hệ thống/chi nhánh (bao gồm sản phẩm tạm ngừng bán/cửa hàng tạm đóng), không phải số mẫu sản phẩm mới hay số đơn đã thu tiền. Trang quản lý chỉ hiển thị tồn kho chi nhánh đang chọn. Kho cũ của mẫu riêng thuộc chi nhánh khác không cộng vào KPI, không xuất hiện trong danh sách/cảnh báo; URL `tab=legacy` không còn được hỗ trợ. Dữ liệu kho và đơn cũ giữ nguyên. Doanh thu COD chỉ được ghi nhận khi đủ điều kiện thanh toán/hoàn tất.
+
+Trang **Sản phẩm** của quản lý hiển thị cả mẫu riêng và mẫu chung đã có trong kho chi nhánh, kể cả bản ghi cũ có `products.is_deleted=NULL`. Số mẫu là tổng của mục đang chọn, không phải số dòng trên một trang; danh sách có phân trang. Các mục: Đang bán, Ngừng bán, Tất cả và Đã xóa. Các thao tác dùng tiếng Việt: Thêm sản phẩm, Sửa, Ngừng bán/Mở bán, Xóa và Khôi phục. Mẫu chung chỉ cho quản lý sửa tồn kho/trạng thái tại chi nhánh đang chọn; tên, giá và thông tin chung do admin quản lý. Không được sửa/xóa mẫu riêng của cửa hàng khác chỉ vì có một dòng kho cũ tại cửa hàng mình.
+
+Xóa tại chi nhánh là **xóa mềm**: giữ số lượng kho, ảnh Cloudinary và lịch sử đơn; không gọi xóa ảnh hoặc xóa đơn. Mẫu chung chỉ bị ẩn ở chi nhánh thực hiện, chi nhánh khác vẫn bán được. Mẫu riêng bị ẩn công khai và được giữ lại trong mục Đã xóa. Không cho xóa khi còn đơn đang xử lý; có thể ngừng bán để chặn đơn mới. Khôi phục về mục Ngừng bán, kiểm tra thông tin/tồn kho rồi chủ động mở bán. Giỏ hàng cũ, báo giá và checkout cũng kiểm tra trạng thái chi nhánh, không cho đặt hàng đã ngừng bán/xóa. V8 chỉ thêm hai cột trạng thái mặc định trên `store_inventories`, không đổi kho, sản phẩm hoặc đơn cũ.
 
 Trang chủ hiển thị số lượng còn lại ở cả hoa bán chạy và danh sách sản phẩm. Số lượng chỉ tính tại chi nhánh hoạt động và mở cửa, hoặc riêng chi nhánh đang lọc. Hết hàng có nhãn rõ ràng và khóa nút thêm vào giỏ; sản phẩm chung toàn chuỗi được chọn chi nhánh có tồn kho thay vì dùng ID cố định.
 
 Sản phẩm riêng của chi nhánh (`product.store` có giá trị) chỉ được đặt và trừ kho ở chi nhánh đó, thống nhất với số lượng trên trang chủ. Giỏ hàng, kiểm tra nhận tại cửa hàng, báo giá và checkout đều kiểm tra quy tắc này; giao tận nơi không chọn kho chi nhánh khác chỉ vì gần địa chỉ hơn. Sản phẩm chung toàn chuỗi (`product.store` rỗng) vẫn được chọn chi nhánh đang mở có đủ hàng. Đơn cũ giữ nguyên chi nhánh đã ghi nhận; khi hủy trước giao, hoàn kho về chính chi nhánh trên đơn.
 
-KPI **Sản phẩm còn hàng** trên trang khách hàng và nhãn tồn kho trên từng thẻ tự cập nhật mỗi 5 giây, khi quay lại tab hoặc trang được khôi phục bằng nút Back. Đơn thành công (kể cả COD) làm giảm số lượng; hủy trước giao hoàn kho và số hiển thị tăng lại. Khi hết hàng nút mua bị khóa; nếu nhập/hoàn kho, nút và chi nhánh còn hàng được cập nhật lại. API công khai chỉ trả số lượng hàng được phép bán, không lấy sản phẩm chưa duyệt/đã xóa/ngừng bán hay kho chi nhánh đóng cửa. Số **mẫu hoa** trong kết quả tìm kiếm/phân trang là chỉ số khác, không giảm khi đặt một vài đơn vị của cùng mẫu.
+Nhãn tồn kho trên từng thẻ sản phẩm tự cập nhật mỗi 5 giây, khi quay lại tab hoặc trang được khôi phục bằng nút Back; không hiển thị khối KPI tổng tồn kho trên trang khách hàng. Đơn thành công (kể cả COD) làm giảm số lượng; hủy trước giao hoàn kho và số hiển thị tăng lại. Khi hết hàng nút mua bị khóa; nếu nhập/hoàn kho, nút và chi nhánh còn hàng được cập nhật lại. API công khai chỉ trả số lượng hàng được phép bán, không lấy sản phẩm chưa duyệt/đã xóa/ngừng bán hay kho chi nhánh đóng cửa. Số **mẫu hoa** trong kết quả tìm kiếm/phân trang là chỉ số khác, không giảm khi đặt một vài đơn vị của cùng mẫu.
 
 Stack: Java 21, Spring Boot 4.1.1, Thymeleaf, Bootstrap 5.3.3, JPA/Hibernate, SQL Server, WebSocket/STOMP, JWT và Cloudinary. SQL Server là lựa chọn trong yêu cầu SQLServer/MySQL/PostgreSQL; không cần dùng đồng thời cả ba.
+
+## Phân loại hoa và giá sản phẩm
+
+Mỗi sản phẩm có **một danh mục chính** và tối đa **10 danh mục bổ sung**, chọn bằng checkbox. Danh mục mặc định phân theo dịp/mục đích: Tình yêu, Sinh nhật, Cưới, Khai trương, Tốt nghiệp, Chúc mừng, Chia buồn, Tân gia, Trang trí và Quà tặng. Một mẫu có thể xuất hiện ở nhiều danh mục; bộ lọc danh mục và dịp tặng trên trang khách hàng tìm cả danh mục chính/bổ sung, không lặp sản phẩm hoặc làm sai phân trang. Loại hoa, màu sắc, kiểu dáng, kích cỡ và phong cách chọn riêng trong các nhóm thuộc tính; không cần giữ Ctrl. Thuộc tính không bắt buộc chọn ở mọi nhóm.
+
+Giá bán/giá khuyến mãi là **số tiền bằng đồng nguyên, từ 1đ**, không phải phần trăm giảm; giá khuyến mãi không lớn hơn giá bán. Ví dụ: giá niêm yết 120000, giá khuyến mãi 100000 thì khách trả 100000đ. Để trống giá khuyến mãi nếu không áp dụng. Cả trình duyệt và backend từ chối `0.01`, số âm hoặc giá khuyến mãi quá cao. Giá khuyến mãi không hợp lệ đã lưu trước đó bị bỏ qua khi hiển thị/tính tiền: dùng giá niêm yết, không làm tròn thành 0đ. Đơn cũ vẫn giữ nguyên đơn giá đã ghi nhận.
+
+Flyway V7 thêm bảng danh mục bổ sung và chuyển những danh mục mặc định cũ đang trộn kiểu dáng/loại hoa sang nhóm dịp phù hợp. Nhóm quà tặng/trang trí có dịp rõ trong tên sản phẩm được chuyển theo dịp đó; nếu chưa rõ thì giữ ở Quà tặng/Trang trí để quản lý chọn thêm sau. Danh mục cũ chỉ bị ẩn, không xóa; bảng `product_category_legacy` lưu phân loại trước khi chuyển. Danh mục tự tạo ngoài danh sách mặc định không bị đổi. Không thay sản phẩm, ảnh, giá, tồn kho, đơn hàng hoặc chat ngoài trường phân loại. Sao lưu và thử trên bản sao SQL Server trước khi áp dụng lên database có dữ liệu.
 
 Đăng nhập thất bại giữ đúng email/tên đăng nhập vừa nhập trong phiên trình duyệt, kể cả khi tải lại trang lỗi; không đổi thành tài khoản demo hoặc tài khoản trình duyệt đã lưu. Mật khẩu không được website lưu/điền lại. Khi đăng nhập thành công, đăng xuất hoặc mở trang đăng nhập mới không có lỗi, thông tin lần thử trước được xóa. Trang lỗi phục hồi giá trị đã gửi trước khi người dùng tương tác, không ghi đè khi họ đang sửa hoặc chọn tài khoản demo; giá trị hiển thị được escape để tránh XSS và không đưa vào URL chuyển hướng.
 
@@ -32,7 +44,7 @@ Khoảng tùy chỉnh trên 90 ngày gom biểu đồ theo tháng, trên 730 ng�
 
 1. Cài JDK 21, SQL Server 2019+ và bật TCP/IP. Dự án có Maven Wrapper nên không cần cài Maven riêng. Bản JDK 21 portable đã được đặt trong `.tools` trên máy hiện tại; thư mục này không được đưa vào Git.
 2. Tạo một database rỗng, ví dụ `RentalShop`, và tài khoản database có quyền tạo bảng/index trong schema `dbo` để chạy migration. Dùng tài khoản riêng cho môi trường production.
-3. Xem `.env.example`, đặt biến môi trường trong PowerShell hoặc IDE. Spring Boot **không tự đọc** `.env`.
+3. Xem `.env.example`, đặt biến môi trường trong PowerShell hoặc IDE. Spring Boot **không tự đọc** `.env`; riêng `scripts/sqlserver.ps1` tự nạp ba biến Cloudinary như hướng dẫn bên dưới.
 
 ```powershell
 $env:SPRING_PROFILES_ACTIVE = 'dev'
@@ -67,11 +79,29 @@ Script dùng mật khẩu từ biến môi trường, hoặc credential mã hóa
 
 Nếu chạy từ IDE thay vì script, chọn profile `dev` và cung cấp `SPRING_DATASOURCE_USERNAME`/`SPRING_DATASOURCE_PASSWORD` trong cấu hình chạy; Spring không đọc được file credential DPAPI của script. `SPRING_DATASOURCE_URL` vẫn có thể ghi đè URL mặc định khi dùng máy/instance khác. Production dùng URL và chứng chỉ của môi trường triển khai, không dùng `trustServerCertificate=true` của local.
 
-Tài khoản demo trên **database rỗng**: `admin`, `manager_q1`, `manager_td`, `khachhang`; mật khẩu `123456`. Không bật dữ liệu demo trên production. Nếu database đã có user/store/product, bộ khởi tạo bỏ qua; không tự bổ sung lại sản phẩm đã được người vận hành đổi tên.
+### Cloudinary local, không lưu secret trong code
+
+Trong `.env` tại thư mục gốc, điền ba biến dưới đây bằng giá trị thật của tài khoản Cloudinary (không điền vào các file `application*.properties`):
+
+```dotenv
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_new_api_secret
+```
+
+Chạy `./scripts/sqlserver.ps1`: script tự nạp đúng ba biến này, không in giá trị ra màn hình, không thực thi nội dung `.env` và không thay cấu hình database/mail từ file này. Biến đã đặt trong terminal được ưu tiên; kết thúc script sẽ khôi phục môi trường ban đầu. Hỗ trợ giá trị trần hoặc bọc trong dấu nháy; đặt chú thích trên dòng riêng, không thêm chú thích sau secret. `CLOUDINARY_URL` không được dùng bởi cấu hình hiện tại; chỉ cần ba biến trên.
+
+`.env` bị Git ignore nhưng **không được mã hóa**; không chia sẻ, chụp ảnh hoặc đưa vào bản nộp công khai. Khi chạy từ IDE hoặc `scripts/maven.ps1` trực tiếp, vẫn phải đặt ba biến trong môi trường của cấu hình chạy. Nếu key/secret đã xuất hiện trong chat, ảnh chụp hoặc Git, hãy thu hồi/thay key trên Cloudinary rồi cập nhật `.env` (và các bản sao như `CLOUDINARY_URL` nếu có). Git ignore không bảo vệ giá trị từng được lưu trong file đã theo dõi. Kiểm tra script nạp `.env` bằng `./scripts/test-cloudinary-env.ps1`; kiểm thử chỉ dùng giá trị giả, không gửi ảnh lên Cloudinary.
+
+Tài khoản demo trên **database rỗng**: `nguyenthanhminh` (Nguyễn Thanh Minh, admin), `nguyenquanghuy` (Nguyễn Quang Huy, quản lý Q1), `tranduclong` (Trần Đức Long, quản lý Q7), `leminhhoa` (Lê Minh Hoa, khách hàng); mật khẩu mẫu `123456`. Họ tên dùng để hiển thị, tên đăng nhập duy nhất dùng để xác thực, chức vụ/vai trò hiển thị riêng. Không bật dữ liệu demo trên production. Nếu database đã có user/store/product, bộ khởi tạo bỏ qua; không tự bổ sung lại sản phẩm đã được người vận hành đổi tên.
+
+Với database demo cũ trên SQLEXPRESS, `scripts/rename-demo-accounts.ps1` mặc định chỉ **Preview** danh sách đổi tên. `-Action Test` thử trong transaction rồi rollback; `-Action Apply` sao lưu/kiểm tra backup trước khi cập nhật RentalShop. Chỉ tài khoản khớp chính xác tên đăng nhập cũ, họ tên mẫu và role mới được đổi; trùng tên đăng nhập mới thì dừng toàn bộ. Không thay email, mật khẩu, quyền, ID, tồn kho, đơn hoặc chat. Sau đổi tên cần đăng xuất/đăng nhập lại bằng tên mới; thông tin người nhận trên đơn/tin nhắn đã gửi không bị viết lại.
+
+Khách vãng lai là phiên **chưa đăng nhập** (anonymous), không cần lưu user hoặc role `GUEST` trong database. Được xem trang chủ, tìm sản phẩm, chi tiết và cửa hàng; giỏ hàng/đặt hàng cần quyền `USER`, chat cần đăng nhập. Quyền `USER` cấp cho tài khoản đăng ký, không cấp cho phiên anonymous. Trang khách hàng không hiển thị tổng tồn kho toàn chuỗi; số lượng từng sản phẩm và nhãn **Hết hàng** vẫn cập nhật mỗi 5 giây.
 
 ## Database hiện có và Flyway
 
-Flyway là nơi quản lý schema ở môi trường chạy. Các bản `V1`–`V6` tạo schema mới hoặc bổ sung bảng/cột/ràng buộc, chuyển role cũ, cài schema chat, ràng buộc đánh giá, nhật ký giám sát và thẻ sản phẩm trong chat. V5/V6 chỉ thêm bảng/index/ràng buộc mới, không sửa/xóa hội thoại, tin nhắn hoặc đơn cũ. File SQL trong `sql/migrations` và `resources/db` là tài liệu lịch sử; không cần chạy chúng lại. Các runner migration cũ chỉ được bật ở profile `test` để giữ kiểm thử H2.
+Flyway là nơi quản lý schema ở môi trường chạy. Các bản `V1`–`V8` tạo schema mới hoặc bổ sung bảng/cột/ràng buộc, chuyển role cũ, cài schema chat, ràng buộc đánh giá, nhật ký giám sát, thẻ sản phẩm trong chat và phân loại sản phẩm theo nhiều dịp. V5/V6 chỉ thêm bảng/index/ràng buộc mới, không sửa/xóa hội thoại, tin nhắn hoặc đơn cũ; V7 chuyển danh mục như mô tả bên trên; V8 bổ sung trạng thái bán/xóa theo chi nhánh. File SQL trong `sql/migrations` và `resources/db` là tài liệu lịch sử; không cần chạy chúng lại. Các runner migration cũ chỉ được bật ở profile `test` để giữ kiểm thử H2.
 
 Với **database rỗng**, chạy ứng dụng để Flyway áp dụng từ `V1`. Với **database đã có dữ liệu nhưng chưa có `flyway_schema_history`**, sao lưu và thử trên bản sao trước. Xác nhận URL database và schema `dbo`, sau đó chủ động ghi nhận baseline:
 

@@ -6,9 +6,6 @@ import com.finalproject.repository.StoreRepository;
 import com.finalproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -40,23 +37,22 @@ public class AdminUserController {
                             @RequestParam(value = "size", defaultValue = "20") int size,
                             Model model) {
         size = Math.max(1, Math.min(size, 50));
+        final String search = keyword == null ? "" : keyword.trim().toLowerCase(java.util.Locale.ROOT);
+        final String normalizedRole = roleStr == null || roleStr.isBlank() ? "ALL" : roleStr.trim().toUpperCase(java.util.Locale.ROOT);
+        final Role selectedRole = "ALL".equals(normalizedRole) ? null : Role.valueOf(normalizedRole);
         try {
-            // Tab 1: Danh sách người dùng có phân trang (UC_027)
-            Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, size), Sort.by(Sort.Direction.DESC, "id"));
-            Page<User> userPage;
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                userPage = userRepository.findByUsernameContainingIgnoreCaseOrFullNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
-                        keyword.trim(), keyword.trim(), keyword.trim(), pageable);
-            } else if (roleStr != null && !roleStr.trim().isEmpty() && !"ALL".equalsIgnoreCase(roleStr)) {
-                try {
-                    Role role = Role.valueOf(roleStr.toUpperCase());
-                    userPage = userRepository.findByRole(role, pageable);
-                } catch (Exception ex) {
-                    userPage = userRepository.findAll(pageable);
-                }
-            } else {
-                userPage = userRepository.findAll(pageable);
-            }
+            org.springframework.data.jpa.domain.Specification<User> filters = (root, query, cb) -> {
+                var roleFilter = selectedRole == null ? cb.conjunction() : cb.equal(root.get("role"), selectedRole);
+                if (search.isEmpty()) return roleFilter;
+                String pattern = "%" + search.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%";
+                return cb.and(roleFilter, cb.or(
+                        cb.like(cb.lower(root.get("username")), pattern, '\\'),
+                        cb.like(cb.lower(root.get("fullName")), pattern, '\\'),
+                        cb.like(cb.lower(root.get("email")), pattern, '\\'),
+                        cb.like(root.get("phone"), pattern, '\\')));
+            };
+            Page<User> userPage = com.finalproject.utils.StorePages.load(Math.max(0, page), size,
+                    pageable -> userRepository.findAll(filters, pageable));
 
             model.addAttribute("activeTab", "users");
             model.addAttribute("users", userPage.getContent());
@@ -66,7 +62,7 @@ public class AdminUserController {
             model.addAttribute("totalElements", userPage.getTotalElements());
             model.addAttribute("pageSize", size);
             model.addAttribute("keyword", keyword);
-            model.addAttribute("currentRole", roleStr != null ? roleStr : "ALL");
+            model.addAttribute("currentRole", normalizedRole);
             model.addAttribute("roles", Role.values());
             model.addAttribute("dataLoadError", false);
         } catch (Exception ex) {
@@ -90,7 +86,7 @@ public class AdminUserController {
             ra.addFlashAttribute("errorMessage", "Tài khoản giao hàng đã ngừng sử dụng và được giữ ở trạng thái vô hiệu hóa.");
             return "redirect:/admin/users?tab=users";
         }
-        if ("admin".equalsIgnoreCase(user.getUsername())) {
+        if (user.hasRole(Role.ADMIN) || "admin".equalsIgnoreCase(user.getUsername())) {
             ra.addFlashAttribute("errorMessage", "Không thể khóa tài khoản Quản trị viên tối cao!");
             return "redirect:/admin/users?tab=users";
         }

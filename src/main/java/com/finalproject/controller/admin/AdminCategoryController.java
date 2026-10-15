@@ -8,9 +8,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-
 @Controller
 @RequestMapping("/admin")
 @RequiredArgsConstructor
@@ -180,29 +177,18 @@ public class AdminCategoryController {
 
     @PostMapping("/categories/reset-defaults")
     public String resetDefaultCategories(RedirectAttributes ra) {
-        record DefCat(String name, String desc) {}
-        java.util.List<DefCat> defaults = java.util.List.of(
-            new DefCat("Hoa Sinh Nhật", "Các mẫu bó hoa, lẵng hoa chúc mừng sinh nhật ngọt ngào, ý nghĩa"),
-            new DefCat("Hoa Khai Trương", "Kệ hoa, lẵng hoa khai trương sang trọng phát tài phát lộc"),
-            new DefCat("Hoa Tình Yêu & Valentine", "Bó hoa hồng đỏ Ecuador, hoa baby trắng lãng mạn tỏ tình"),
-            new DefCat("Lan Hồ Điệp Sang Trọng", "Chậu hoa lan hồ điệp cao cấp trưng Tết, biếu sếp, mừng tân gia"),
-            new DefCat("Hoa Cưới Cầm Tay Cô Dâu", "Bó hoa cưới tinh tế tôn vinh vẻ đẹp cô dâu trong ngày trọng đại"),
-            new DefCat("Hoa Chúc Mừng & Tốt Nghiệp", "Thiết kế tươi sáng, gửi gắm lời chúc may mắn thành công"),
-            new DefCat("Hoa Chia Buồn & Kính Viếng", "Kệ hoa trang trọng, thành kính phân ưu cùng gia quyến"),
-            new DefCat("Bình Hoa Nghệ Thuật Để Bàn", "Bình gốm, bình thủy tinh cắm hoa tươi trang trí phòng khách và văn phòng"),
-            new DefCat("Hộp Hoa & Giỏ Hoa Quà Tặng", "Hộp hoa mica, hộp tròn cao cấp và giỏ hoa tươi thiết kế độc đáo")
-        );
-        for (DefCat d : defaults) {
+        var defaults = com.finalproject.utils.FlowerCategoryDefaults.definitions();
+        for (var d : defaults) {
             java.util.Optional<Category> existing = categoryRepository.findByName(d.name());
             if (existing.isEmpty()) {
-                categoryRepository.save(Category.builder().name(d.name()).description(d.desc()).isDeleted(false).build());
+                categoryRepository.save(Category.builder().name(d.name()).description(d.description()).isDeleted(false).build());
             } else if (Boolean.TRUE.equals(existing.get().getIsDeleted())) {
                 Category c = existing.get();
                 c.setIsDeleted(false);
                 categoryRepository.save(c);
             }
         }
-        ra.addFlashAttribute("successMessage", "Khôi phục toàn bộ danh sách 9 loại sản phẩm hoa tươi mẫu thành công!");
+        ra.addFlashAttribute("successMessage", "Khôi phục toàn bộ 10 danh mục hoa theo dịp / mục đích thành công!");
         return "redirect:/admin/categories";
     }
 

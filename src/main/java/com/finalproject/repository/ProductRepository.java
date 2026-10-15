@@ -20,19 +20,21 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @org.springframework.transaction.annotation.Transactional
     @Query("update Product p set p.viewCount = coalesce(p.viewCount, 0) + 1 where p.id = :id and (p.isDeleted = false or p.isDeleted is null)")
     int incrementViewCount(@Param("id") Long id);
-    List<Product> findByCategoryId(Long categoryId);
+    @Query("select p from Product p where p.category.id = :categoryId or exists (select c.id from Product q join q.additionalCategories c where q.id=p.id and c.id=:categoryId and (c.isDeleted=false or c.isDeleted is null))")
+    List<Product> findByCategoryId(@Param("categoryId") Long categoryId);
 
     @Query("SELECT p FROM Product p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Product> searchByName(@Param("keyword") String keyword);
 
     // Phân trang theo danh mục
-    Page<Product> findByCategoryId(Long categoryId, Pageable pageable);
+    @Query("select p from Product p where p.category.id = :categoryId or exists (select c.id from Product q join q.additionalCategories c where q.id=p.id and c.id=:categoryId and (c.isDeleted=false or c.isDeleted is null))")
+    Page<Product> findByCategoryId(@Param("categoryId") Long categoryId, Pageable pageable);
 
     // Phân trang tìm kiếm theo từ khóa (tên hoặc mô tả)
     Page<Product> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String name, String desc, Pageable pageable);
 
     // Phân trang kết hợp cả danh mục và từ khóa
-    @Query("SELECT p FROM Product p WHERE p.category.id = :categoryId AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    @Query("SELECT p FROM Product p WHERE (p.category.id = :categoryId or exists (select c.id from Product q join q.additionalCategories c where q.id=p.id and c.id=:categoryId and (c.isDeleted=false or c.isDeleted is null))) AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Product> searchByCategoryAndKeyword(@Param("categoryId") Long categoryId, @Param("keyword") String keyword, Pageable pageable);
 
     // Guest: Tối đa 8 sản phẩm bán chạy nhất
@@ -64,7 +66,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     Page<Product> findByIsActiveTrueAndIsSellingTrue(Pageable pageable);
 
     @Query("SELECT p FROM Product p WHERE p.isActive = true AND p.isSelling = true " +
-           "AND (:categoryIds IS NULL OR p.category.id IN :categoryIds) " +
+           "AND (:categoryIds IS NULL OR p.category.id IN :categoryIds OR EXISTS (select c.id from Product q join q.additionalCategories c where q.id=p.id and c.id IN :categoryIds and (c.isDeleted=false or c.isDeleted is null))) " +
            "AND (:keyword IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
            "AND (:minPrice IS NULL OR p.priceBuy >= :minPrice) " +
            "AND (:maxPrice IS NULL OR p.priceBuy <= :maxPrice) " +

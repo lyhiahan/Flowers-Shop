@@ -51,7 +51,12 @@ public class ProductSpecification {
             predicates.add(cb.or(cb.isNull(ownerStore.get("id")), cb.and(cb.isTrue(ownerStore.get("status")), cb.isTrue(ownerStore.get("isOpen")))));
 
             if (categoryIds != null && !categoryIds.isEmpty()) {
-                predicates.add(root.get("category").get("id").in(categoryIds));
+                var extraQuery = query.subquery(Long.class);
+                var extraProduct = extraQuery.from(Product.class);
+                var extra = extraProduct.join("additionalCategories");
+                extraQuery.select(extraProduct.get("id")).where(cb.equal(extraProduct.get("id"), root.get("id")),
+                        extra.get("id").in(categoryIds), cb.or(cb.isFalse(extra.get("isDeleted")), cb.isNull(extra.get("isDeleted"))));
+                predicates.add(cb.or(root.get("category").get("id").in(categoryIds), cb.exists(extraQuery)));
             }
 
             if (keyword != null && !keyword.trim().isEmpty()) {
@@ -69,7 +74,8 @@ public class ProductSpecification {
             }
 
             var sellingPrice = cb.<BigDecimal>selectCase().when(cb.and(cb.isNotNull(root.get("promotionalPrice")),
-                    cb.greaterThanOrEqualTo(root.get("promotionalPrice"), BigDecimal.ZERO),
+                    cb.greaterThanOrEqualTo(root.get("promotionalPrice"), BigDecimal.ONE),
+                    cb.equal(cb.function("floor", BigDecimal.class, root.get("promotionalPrice")), root.get("promotionalPrice")),
                     cb.lessThanOrEqualTo(root.get("promotionalPrice"), root.get("priceBuy"))), root.<BigDecimal>get("promotionalPrice"))
                     .otherwise(root.<BigDecimal>get("priceBuy"));
             if (minPrice != null) predicates.add(cb.greaterThanOrEqualTo(sellingPrice, minPrice));
@@ -80,7 +86,8 @@ public class ProductSpecification {
             if (storeId != null) {
                 var inventory = query.subquery(Long.class);
                 var stock = inventory.from(com.finalproject.entity.StoreInventory.class);
-                inventory.select(stock.get("id")).where(cb.equal(stock.get("product").get("id"), root.get("id")), cb.equal(stock.get("store").get("id"), storeId));
+                inventory.select(stock.get("id")).where(cb.equal(stock.get("product").get("id"), root.get("id")), cb.equal(stock.get("store").get("id"), storeId),
+                        cb.isTrue(stock.get("isSelling")), cb.isFalse(stock.get("isDeleted")));
                 predicates.add(cb.or(cb.equal(ownerStore.get("id"), storeId), cb.and(cb.isNull(ownerStore.get("id")), cb.exists(inventory))));
             }
 
@@ -119,7 +126,23 @@ public class ProductSpecification {
                     }
                 }
                 if (!occasionPredicates.isEmpty()) {
-                    predicates.add(attributeFilter(root, query, cb, List.of("dịp tặng"), flowerOccasions, cb.or(occasionPredicates.toArray(new Predicate[0]))));
+                    var extraQuery = query.subquery(Long.class);
+                    var extraProduct = extraQuery.from(Product.class);
+                    var extraCategory = extraProduct.join("additionalCategories");
+                    var names = new ArrayList<Predicate>();
+                    var mainNames = new ArrayList<Predicate>();
+                    for (String occasion : flowerOccasions) {
+                        if (occasion == null || occasion.isBlank()) continue;
+                        String term = occasion.trim().toLowerCase(java.util.Locale.ROOT);
+                        if (term.contains("valentine") || term.contains("kỷ niệm")) term = "tình yêu";
+                        if (term.contains("cưới")) term = "cưới";
+                        names.add(cb.like(cb.lower(extraCategory.get("name")), "%" + term + "%"));
+                        mainNames.add(cb.like(cb.lower(root.get("category").get("name")), "%" + term + "%"));
+                    }
+                    extraQuery.select(extraProduct.get("id")).where(cb.equal(extraProduct.get("id"), root.get("id")),
+                            cb.or(names.toArray(new Predicate[0])), cb.or(cb.isFalse(extraCategory.get("isDeleted")), cb.isNull(extraCategory.get("isDeleted"))));
+                    predicates.add(cb.or(cb.or(mainNames.toArray(new Predicate[0])), cb.exists(extraQuery),
+                            attributeFilter(root, query, cb, List.of("dịp tặng"), flowerOccasions, cb.or(occasionPredicates.toArray(new Predicate[0])))));
                 }
             }
 

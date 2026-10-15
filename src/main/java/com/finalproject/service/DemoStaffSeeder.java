@@ -1,8 +1,6 @@
 package com.finalproject.service;
 
 import com.finalproject.entity.*;
-import com.finalproject.enums.OrderStatus;
-import com.finalproject.enums.OrderType;
 import com.finalproject.enums.Role;
 import com.finalproject.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -11,11 +9,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -39,10 +34,10 @@ public class DemoStaffSeeder {
         }
 
         // Nhân viên 1: Nghệ nhân cắm hoa chính
-        User staff1 = userRepository.findByUsername("staff_q7_flt").orElseGet(() -> userRepository.save(User.builder()
-                .username("staff_q7_flt")
+        User staff1 = userRepository.findByUsername("nguyenmailan").or(() -> userRepository.findByEmail("mailan.florist@rentalshop.vn")).orElseGet(() -> userRepository.save(User.builder()
+                .username("nguyenmailan")
                 .password(passwordEncoder.encode("123456"))
-                .fullName("Nguyễn Thị Mai Lan - Nghệ Nhân Cắm Hoa Chính")
+                .fullName("Nguyễn Thị Mai Lan")
                 .email("mailan.florist@rentalshop.vn")
                 .phone("0938112233")
                 .role(Role.MANAGER)
@@ -66,10 +61,10 @@ public class DemoStaffSeeder {
         }
 
         // Nhân viên 2: Tiếp nhận & Điều phối đơn hàng
-        User staff2 = userRepository.findByUsername("staff_q7_order").orElseGet(() -> userRepository.save(User.builder()
-                .username("staff_q7_order")
+        User staff2 = userRepository.findByUsername("tranbaophuc").or(() -> userRepository.findByEmail("baophuc.orders@rentalshop.vn")).orElseGet(() -> userRepository.save(User.builder()
+                .username("tranbaophuc")
                 .password(passwordEncoder.encode("123456"))
-                .fullName("Trần Bảo Phúc - Tiếp Nhận & Điều Phối Đơn Hàng")
+                .fullName("Trần Bảo Phúc")
                 .email("baophuc.orders@rentalshop.vn")
                 .phone("0938223344")
                 .role(Role.MANAGER)
@@ -93,10 +88,10 @@ public class DemoStaffSeeder {
         }
 
         // Nhân viên 3: Thủ kho hoa tươi & nguyên phụ liệu
-        User staff3 = userRepository.findByUsername("staff_q7_inv").orElseGet(() -> userRepository.save(User.builder()
-                .username("staff_q7_inv")
+        User staff3 = userRepository.findByUsername("lehoangkhoi").or(() -> userRepository.findByEmail("hoangkhoi.stock@rentalshop.vn")).orElseGet(() -> userRepository.save(User.builder()
+                .username("lehoangkhoi")
                 .password(passwordEncoder.encode("123456"))
-                .fullName("Lê Hoàng Khôi - Thủ Kho & Kiểm Soát Hoa Tươi")
+                .fullName("Lê Hoàng Khôi")
                 .email("hoangkhoi.stock@rentalshop.vn")
                 .phone("0938334455")
                 .role(Role.MANAGER)

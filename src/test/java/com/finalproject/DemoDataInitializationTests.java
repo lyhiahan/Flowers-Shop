@@ -23,7 +23,8 @@ class DemoDataInitializationTests {
     @Test void demoBuildsChainAndRepeatedStartupPreservesEditedFixtures() throws Exception {
         assertThat(stores.count()).isGreaterThanOrEqualTo(3);
         assertThat(products.count()).isGreaterThan(5);
-        assertThat(users.findByUsername("admin")).isPresent();
+        assertThat(users.findByUsername("nguyenthanhminh")).hasValueSatisfying(user ->
+                assertThat(user.getRole()).isEqualTo(com.finalproject.enums.Role.ADMIN));
         var product = products.findAll().getFirst();
         String title = "Sản phẩm đã chỉnh sửa thủ công";
         product.setName(title);
