@@ -119,9 +119,10 @@
                                     <div class="form-check py-1" th:each="cat : ${categories}">
                                         <input class="form-check-input extra-category-checkbox" 
                                                type="checkbox" 
-                                               th:field="*{additionalCategoryIds}" 
+                                               name="additionalCategoryIds" 
                                                th:value="${cat.id}" 
-                                               th:id="${'extra-category-' + cat.id}">
+                                               th:id="${'extra-category-' + cat.id}"
+                                               th:checked="${productForm.additionalCategoryIds != null and productForm.additionalCategoryIds.contains(cat.id)}">
                                         <label class="form-check-label w-100 cursor-pointer user-select-none" 
                                                th:for="${'extra-category-' + cat.id}" 
                                                th:text="${cat.name}">
@@ -164,9 +165,10 @@
                                                 <div class="form-check py-1" th:each="v : ${group.value}">
                                                     <input class="form-check-input attr-checkbox" 
                                                            type="checkbox" 
-                                                           th:field="*{styleValueIds}" 
+                                                           name="styleValueIds" 
                                                            th:value="${v.id}" 
                                                            th:id="${'flower-attribute-' + v.id}"
+                                                           th:checked="${productForm.styleValueIds != null and productForm.styleValueIds.contains(v.id)}"
                                                            th:data-group="${group.key}"
                                                            th:data-name="${v.name}">
                                                     <label class="form-check-label w-100 cursor-pointer user-select-none" 
