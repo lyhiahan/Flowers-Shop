@@ -54,7 +54,9 @@ public class ProfileController {
         userRepository.findByUsername(principal.getName()).orElseThrow();
 
         try {
-            userService.updateProfileImages(principal.getName(), fullName, phone, address, avatarFile, coverFile);
+            userService.updateProfileImages(principal.getName(), fullName,
+                    phone == null || phone.isBlank() ? null : phone,
+                    address == null || address.isBlank() ? null : address, avatarFile, coverFile);
 
             ra.addFlashAttribute("successMessage", "Cập nhật hồ sơ thành công!");
         } catch (IllegalArgumentException ex) {
@@ -259,6 +261,7 @@ public class ProfileController {
             return org.springframework.http.ResponseEntity.ok(java.util.Map.of(
                     "success", true,
                     "liked", liked,
+                    "followerCount", productService.getFollowerCount(productId),
                     "remainingCount", remainingCount,
                     "message", message
             ));

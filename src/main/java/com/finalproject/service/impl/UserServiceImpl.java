@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService {
         entityManager.refresh(user, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
         if (!Boolean.TRUE.equals(user.getIsActive()) || Boolean.TRUE.equals(user.getAccountDisabledByAdmin()) || user.isRetiredDeliveryAccount())
             throw new org.springframework.security.access.AccessDeniedException("Tài khoản đã bị vô hiệu hóa.");
-        // Only submitted fields change. Uploads and removal of previous images share this transaction.
+        // Only submitted fields change; old images remain available until the database commit.
         if (name == null || name.isBlank() || name.trim().length() > 100
                 || phone != null && !phone.trim().matches("0[35789][0-9]{8}")
                 || address != null && (address.isBlank() || address.trim().length() > 255))
@@ -41,14 +41,31 @@ public class UserServiceImpl implements UserService {
         if (phone != null) user.setPhone(phone.trim());
         if (address != null) user.setAddress(address.trim());
         if (avatar != null && !avatar.isEmpty()) {
-            var uploaded = cloud.upload(avatar,"rental_shop_avatars");
-            if (uploaded != null) { cloud.delete(user.getAvatarPublicId()); user.setAvatarUrl(uploaded.secureUrl()); user.setAvatarPublicId(uploaded.publicId()); }
+            var uploaded = uploadProfileImage(avatar, "rental_shop_avatars", user.getAvatarPublicId());
+            user.setAvatarUrl(uploaded.secureUrl()); user.setAvatarPublicId(uploaded.publicId());
         }
         if (cover != null && !cover.isEmpty()) {
-            var uploaded = cloud.upload(cover,"rental_shop_covers");
-            if (uploaded != null) { cloud.delete(user.getCoverPublicId()); user.setCover(uploaded.secureUrl()); user.setCoverPublicId(uploaded.publicId()); }
+            var uploaded = uploadProfileImage(cover, "rental_shop_covers", user.getCoverPublicId());
+            user.setCover(uploaded.secureUrl()); user.setCoverPublicId(uploaded.publicId());
         }
         return userRepository.save(user);
+    }
+
+    private com.finalproject.service.CloudinaryService.UploadResult uploadProfileImage(
+            org.springframework.web.multipart.MultipartFile file, String folder, String previousId) throws java.io.IOException {
+        var uploaded = cloud.upload(file, folder);
+        if (uploaded == null || uploaded.secureUrl() == null || uploaded.secureUrl().isBlank()
+                || uploaded.publicId() == null || uploaded.publicId().isBlank())
+            throw new java.io.IOException("Không tải được ảnh mới. Vui lòng thử lại.");
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+                new org.springframework.transaction.support.TransactionSynchronization() {
+                    @Override public void afterCompletion(int status) {
+                        if (java.util.Objects.equals(previousId, uploaded.publicId())) return;
+                        if (status == STATUS_COMMITTED && previousId != null && !previousId.isBlank()) cloud.delete(previousId);
+                        else if (status == STATUS_ROLLED_BACK) cloud.delete(uploaded.publicId());
+                    }
+                });
+        return uploaded;
     }
 
     @Override

@@ -234,6 +234,18 @@
             text-decoration: line-through !important;
             white-space: nowrap !important;
         }
+        .product-follow-group {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 128px;
+            align-items: center;
+            gap: 8px;
+            width: 248px;
+            max-width: 100%;
+            flex: 0 0 auto;
+        }
+        .product-follow-group form { margin: 0; min-width: 0; }
+        .product-follow-button { width: 128px; height: 34px; padding-inline: 8px !important; white-space: nowrap; justify-content: center; font-size: 13px !important; gap: 6px; }
+        .product-follow-group .product-follow-count { min-width: 0; padding-inline: 6px !important; font-size: 12px !important; overflow: hidden; text-overflow: ellipsis; }
 
         /* Thông tin phụ & đánh giá thực tế: 15–16 px */
         .rating-inline {
@@ -658,7 +670,8 @@
                             Chưa có đánh giá
                         </span>
                         <span class="text-muted" style="font-size: 14px;">·</span>
-                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2 py-1" style="font-size: 13.5px;">
+                        <div class="product-follow-group">
+                        <span class="product-follow-count badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2 py-1" style="font-size: 13.5px;">
                             <i class="bi bi-people-fill me-1"></i><span id="followerCount" class="fw-bold" th:text="${followerCount != null ? followerCount : 0}">0</span> theo dõi
                         </span>
 
@@ -666,21 +679,23 @@
                         <form sec:authorize="hasRole('USER')"
                               th:action="@{/customer/following/toggle/{id}(id=${product.id})}"
                               method="post"
-                              class="m-0 d-inline-block ms-1"
+                              class="m-0"
                               onsubmit="toggleDetailFollowAjax(event, this)">
                             <button type="submit" id="btnDetailFollow"
-                                    class="btn rounded-pill px-3 py-1 fw-medium d-inline-flex align-items-center gap-1.5 transition-all shadow-xs"
+                                    class="product-follow-button btn rounded-pill px-3 py-1 fw-medium d-inline-flex align-items-center transition-all shadow-xs"
+                                    th:aria-pressed="${isFollowed}"
                                     th:style="${isFollowed} ? 'background-color: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5; font-size: 13px;' : 'background-color: #FFF1F2; color: #E11D48; border: 1px solid #FECDD3; font-size: 13px;'">
                                 <i class="bi" th:classappend="${isFollowed} ? 'bi-check-circle-fill' : 'bi-plus-circle'" style="font-size: 14px;"></i>
                                 <span th:text="${isFollowed} ? 'Đang theo dõi' : 'Theo dõi'">Theo dõi</span>
                             </button>
                         </form>
                         <a sec:authorize="!hasRole('USER')" th:href="@{/login}"
-                           class="btn rounded-pill px-3 py-1 fw-medium d-inline-flex align-items-center gap-1.5 shadow-xs ms-1"
+                           class="product-follow-button btn rounded-pill px-3 py-1 fw-medium d-inline-flex align-items-center shadow-xs"
                            style="background-color: #FFF1F2; color: #E11D48; border: 1px solid #FECDD3; font-size: 13px;">
                             <i class="bi bi-plus-circle" style="font-size: 14px;"></i>
                             <span>Theo dõi</span>
                         </a>
+                        </div>
                     </div>
 
 
@@ -797,43 +812,6 @@
                         </div>
                     </div>
 
-                    <!-- 7. THAO TÁC PHỤ: Nút Theo dõi & Yêu thích -->
-                    <div class="action-sub-row d-flex align-items-center gap-2 flex-wrap pt-2">
-                        <!-- Follow / Following button -->
-                        <form sec:authorize="hasRole('USER')" th:action="@{/customer/following/toggle/{productId}(productId=${product.id})}" method="post" class="d-inline m-0">
-                            <button type="submit" id="btnFollowProductTop"
-                                    class="btn btn-sm rounded-pill px-3 py-1 border d-inline-flex align-items-center gap-2 shadow-sm"
-                                    style="font-size: 14.5px;"
-                                    th:classappend="${isFollowed or isLiked} ? 'btn-danger text-white border-danger' : 'btn-outline-danger'">
-                                <i class="bi" th:classappend="${isFollowed or isLiked} ? 'bi-check-circle-fill' : 'bi-plus-circle'"></i>
-                                <span th:text="${isFollowed or isLiked} ? 'Đang theo dõi' : 'Theo dõi'">Theo dõi</span>
-                            </button>
-                        </form>
-                        <a sec:authorize="isAnonymous()" th:href="@{/login}"
-                           class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 border d-inline-flex align-items-center gap-2"
-                           style="font-size: 14.5px;">
-                            <i class="bi bi-plus-circle"></i> <span>Theo dõi</span>
-                        </a>
-
-                        <!-- Nút Yêu thích -->
-                        <form th:if="${#authorization.expression('isAuthenticated()')}"
-                              action="/customer/profile/wishlist/toggle"
-                              th:action="@{/customer/profile/wishlist/toggle/{id}(id=${product.id})}"
-                              method="post" class="d-inline m-0">
-                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                            <button type="submit" class="btn btn-sm rounded-pill px-3 py-1 border d-inline-flex align-items-center gap-2"
-                                    style="font-size: 14.5px; border-color: var(--flower-border) !important; color: var(--flower-text-main); background: #ffffff;">
-                                <i class="bi" th:classappend="${isLiked} ? 'bi-heart-fill text-danger' : 'bi-heart'"></i>
-                                <span th:text="${isLiked} ? 'Đã lưu yêu thích' : 'Lưu vào yêu thích'">Lưu vào yêu thích</span>
-                            </button>
-                        </form>
-                        <a th:unless="${#authorization.expression('isAuthenticated()')}" th:href="@{/login}"
-                           class="btn btn-sm rounded-pill px-3 py-1 border d-inline-flex align-items-center gap-2"
-                           style="font-size: 14.5px; border-color: var(--flower-border) !important; color: var(--flower-text-main); background: #ffffff;">
-                            <i class="bi bi-heart"></i>
-                            <span>Lưu vào yêu thích</span>
-                        </a>
-                    </div>
 
                 </div>
             </div>
@@ -1222,6 +1200,7 @@
                 if (btn) {
                     const icon = btn.querySelector('i');
                     const textSpan = btn.querySelector('span');
+                    btn.setAttribute('aria-pressed', String(Boolean(data.liked)));
                     if (data.liked) {
                         btn.style.backgroundColor = '#FEE2E2';
                         btn.style.color = '#DC2626';
@@ -1236,14 +1215,9 @@
                         if (textSpan) textSpan.textContent = 'Theo dõi';
                     }
                 }
-                const countBadge = document.getElementById('detailFollowerCount');
+                const countBadge = document.getElementById('followerCount');
                 if (countBadge) {
-                    let currentCount = parseInt(countBadge.textContent, 10) || 0;
-                    if (data.liked) {
-                        countBadge.textContent = currentCount + 1;
-                    } else {
-                        countBadge.textContent = Math.max(0, currentCount - 1);
-                    }
+                    countBadge.textContent = data.followerCount;
                 }
             })
             .catch(err => {

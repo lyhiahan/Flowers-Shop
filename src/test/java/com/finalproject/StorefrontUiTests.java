@@ -100,6 +100,24 @@ class StorefrontUiTests {
         }
     }
 
+    @Test void productDetailHasOneStableFollowControlAndReloadsTheRealFollowerCount() throws Exception {
+        String url="/products/"+product.getId();
+        String before=page(url);
+        assertThat(before).contains("product-follow-group", "id=\"btnDetailFollow\"")
+                .doesNotContain("btnFollowProductTop", "action-sub-row", "Đã lưu yêu thích");
+        preview("product-before.html",before);
+        mvc.perform(post("/customer/following/toggle/"+product.getId()).with(user(customer.getUsername()).roles("USER"))
+                        .with(csrf()).header("X-Requested-With","XMLHttpRequest"))
+                .andExpect(jsonPath("$.liked").value(true)).andExpect(jsonPath("$.followerCount").value(1));
+        String after=page(url);
+        assertThat(after).contains("aria-pressed=\"true\"").containsPattern("id=\"followerCount\"[^>]*>1</span>");
+        preview("product-after.html",after);
+        mvc.perform(post("/customer/following/toggle/"+product.getId()).with(user(customer.getUsername()).roles("USER"))
+                        .with(csrf()).header("X-Requested-With","XMLHttpRequest"))
+                .andExpect(jsonPath("$.liked").value(false)).andExpect(jsonPath("$.followerCount").value(0));
+        assertThat(page("/")).doesNotContain("customer-stock-kpi", "Sản phẩm còn hàng toàn chuỗi");
+    }
+
     private String page(String route) throws Exception {
         return mvc.perform(get(route).with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
