@@ -19,7 +19,7 @@ public class DemoProductFixtureSeeder {
         // 7. Tạo danh sách hoa mẫu phong phú có sold >= 10 phục vụ tiêu chí Khách vãng lai (Guest)
         if (productRepository.count() < 5) {
             Product p1 = Product.builder()
-                    .name("Bó Hoa Hồng Đỏ Ecuador 99 Bông Nhập Khẩu")
+                    .name("Bó Hoa Hồng Đỏ 99 Bông")
                     .category(catTinhYeu)
                     .store(storeA)
                     .description("Bó hoa hồng đỏ nhập khẩu Ecuador size bông cực lớn, cánh dày nhung mịn, kết hợp lá bạc Dollar sang trọng biểu tượng tình yêu vĩnh cửu bất diệt.")
@@ -35,7 +35,7 @@ public class DemoProductFixtureSeeder {
                     .build();
 
             Product p2 = Product.builder()
-                    .name("Kệ Hoa Khai Trương 2 Tầng Đồng Tiền & Lan Vàng")
+                    .name("Kệ Hoa Khai Trương Đồng Tiền")
                     .category(catKhaiTruong)
                     .store(storeA)
                     .description("Kệ hoa thiết kế 2 tầng kết hợp hoa đồng tiền, hoa hướng dương rực rỡ và lan hồ điệp vàng mang lại nhiều may mắn cho ngày khởi đầu kinh doanh.")
@@ -51,7 +51,7 @@ public class DemoProductFixtureSeeder {
                     .build();
 
             Product p3 = Product.builder()
-                    .name("Hộp Hoa Tròn Hoa Hồng Trà Phối Cẩm Chướng")
+                    .name("Hộp Hoa Hồng Trà")
                     .category(catSinhNhat)
                     .store(storeB)
                     .description("Hộp hoa cắm tròn xinh xắn phối giữa hoa hồng trà, hoa cẩm chướng hồng và hoa baby trắng bồng bềnh, thích hợp tặng bạn gái hoặc đồng nghiệp.")
@@ -67,7 +67,7 @@ public class DemoProductFixtureSeeder {
                     .build();
 
             Product p4 = Product.builder()
-                    .name("Chậu Sứ Lan Hồ Điệp Tím 5 Cành")
+                    .name("Chậu Lan Hồ Điệp Tím 5 Cành")
                     .category(catLanHoDiep)
                     .store(storeC)
                     .description("Chậu men sứ cao cấp trồng 5 cành hoa lan hồ điệp tím rực rỡ, hoa nở đều đẹp, độ bền kéo dài từ 4 đến 8 tuần thích hợp trang trí sảnh phòng khách.")
@@ -83,7 +83,7 @@ public class DemoProductFixtureSeeder {
                     .build();
 
             Product p5 = Product.builder()
-                    .name("Bó Hoa Hướng Dương 5 Bông Gói Báo Vintage")
+                    .name("Bó Hoa Hướng Dương Vintage")
                     .category(catSinhNhat)
                     .store(storeA)
                     .description("Bó hoa hướng dương 5 bông size lớn gói giấy báo vintage phối kèm hoa cúc tana, hoa phi yến trắng tượng trưng cho niềm tin và hoài bão vươn xa.")
@@ -99,7 +99,7 @@ public class DemoProductFixtureSeeder {
                     .build();
 
             Product p6 = Product.builder()
-                    .name("Bó Hoa Cưới Tulip Trắng & Hoa Hồng Ohara")
+                    .name("Bó Hoa Cưới Tulip & Hồng")
                     .category(catTinhYeu)
                     .store(storeB)
                     .description("Bó hoa cưới thiết kế tay cầm quấn ruy băng lụa cao cấp, phối hoa tulip Hà Lan trắng, mao lương trắng và hoa hồng Ohara thơm ngát quyến rũ.")

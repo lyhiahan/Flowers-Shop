@@ -68,7 +68,7 @@ public class ProductSeederService {
         List<ProductTemplate> templates = List.of(
             // --- CHI NHÁNH BẾN THÀNH (QUẬN 1) --- (9 loại sản phẩm)
             new ProductTemplate(
-                "Bó Hoa Hồng Đỏ Ecuador 99 Bông Nhập Khẩu",
+                "Bó Hoa Hồng Đỏ 99 Bông",
                 "Hoa Tình Yêu", "Quận 1",
                 "Bó hoa hồng đỏ nhập khẩu Ecuador size bông cực lớn, cánh dày nhung mịn, kết hợp lá bạc Dollar sang trọng biểu tượng tình yêu vĩnh cửu bất diệt.",
                 new BigDecimal("1200000"), new BigDecimal("700000"), new BigDecimal("150000"), new BigDecimal("500000"),
@@ -76,7 +76,7 @@ public class ProductSeederService {
                 85, 4.9
             ),
             new ProductTemplate(
-                "Bó Hoa Hướng Dương 5 Bông Gói Báo Vintage",
+                "Bó Hoa Hướng Dương Vintage",
                 "Hoa Sinh Nhật", "Quận 1",
                 "Bó hoa hướng dương 5 bông size lớn gói giấy báo vintage phối kèm hoa cúc tana, hoa phi yến trắng tượng trưng cho niềm tin và hoài bão vươn xa.",
                 new BigDecimal("480000"), new BigDecimal("250000"), new BigDecimal("60000"), new BigDecimal("200000"),
@@ -84,7 +84,7 @@ public class ProductSeederService {
                 95, 4.9
             ),
             new ProductTemplate(
-                "Kệ Hoa Khai Trương 2 Tầng Đồng Tiền & Lan Vàng",
+                "Kệ Hoa Khai Trương Đồng Tiền",
                 "Hoa Khai Trương", "Quận 1",
                 "Kệ hoa thiết kế 2 tầng kết hợp hoa đồng tiền, hoa hướng dương rực rỡ và lan hồ điệp vàng mang lại nhiều may mắn cho ngày khởi đầu kinh doanh.",
                 new BigDecimal("1850000"), new BigDecimal("1000000"), new BigDecimal("200000"), new BigDecimal("800000"),
@@ -92,7 +92,7 @@ public class ProductSeederService {
                 64, 4.8
             ),
             new ProductTemplate(
-                "Giỏ Hoa Đồng Tiền & Hoa Hồng Cam Vàng",
+                "Giỏ Hoa Đồng Tiền Cam",
                 "Hoa Quà Tặng", "Quận 1",
                 "Giỏ hoa thiết kế phối hoa đồng tiền, hướng dương và hoa hồng cam lãng mạn mang đến tài lộc khởi sắc cho chi nhánh mới.",
                 new BigDecimal("950000"), new BigDecimal("550000"), new BigDecimal("120000"), new BigDecimal("400000"),
@@ -100,7 +100,7 @@ public class ProductSeederService {
                 58, 4.9
             ),
             new ProductTemplate(
-                "Hộp Hoa Nhung Tròn Hoa Hồng Đỏ & Baby Trắng",
+                "Hộp Hoa Hồng Đỏ & Baby",
                 "Hoa Quà Tặng", "Quận 1",
                 "Hộp hoa nhung tròn cao cấp cắm kín hoa hồng đỏ nhung cùng hoa baby trắng biểu tượng tình yêu sâu đậm và nồng cháy.",
                 new BigDecimal("850000"), new BigDecimal("480000"), new BigDecimal("100000"), new BigDecimal("350000"),
@@ -108,7 +108,7 @@ public class ProductSeederService {
                 72, 5.0
             ),
             new ProductTemplate(
-                "Chậu Lan Hồ Điệp Trắng Lưỡi Đỏ 6 Cành",
+                "Chậu Lan Hồ Điệp Trắng",
                 "Hoa Quà Tặng", "Quận 1",
                 "Chậu lan hồ điệp trắng nhập khẩu cành dài hoa to kết hợp chậu sứ vân đá cẩm thạch sang trọng thích hợp biếu đối tác doanh nghiệp.",
                 new BigDecimal("2500000"), new BigDecimal("1400000"), new BigDecimal("280000"), new BigDecimal("1200000"),
@@ -116,7 +116,7 @@ public class ProductSeederService {
                 34, 4.9
             ),
             new ProductTemplate(
-                "Bình Hoa Gốm Sứ Hoa Hồng Ohara & Cúc Mẫu Đơn",
+                "Bình Hoa Hồng Ohara",
                 "Hoa Trang Trí", "Quận 1",
                 "Bình gốm sứ mạ viền vàng cắm hoa hồng ngoại Ohara thơm ngát phối cúc mẫu đơn Hà Lan trưng phòng khách đẳng cấp.",
                 new BigDecimal("780000"), new BigDecimal("420000"), new BigDecimal("90000"), new BigDecimal("300000"),
@@ -124,7 +124,7 @@ public class ProductSeederService {
                 46, 4.8
             ),
             new ProductTemplate(
-                "Bó Hoa Cưới Tulip Trắng Phối Mao Lương",
+                "Bó Hoa Cưới Tulip Trắng",
                 "Hoa Cưới", "Quận 1",
                 "Bó hoa cưới tulip trắng phối mao lương và hoa hồng trắng quấn dải ruy băng lụa satin tôn vinh nét đẹp tinh khôi ngày cưới.",
                 new BigDecimal("890000"), new BigDecimal("500000"), new BigDecimal("120000"), new BigDecimal("400000"),
@@ -132,7 +132,7 @@ public class ProductSeederService {
                 51, 4.9
             ),
             new ProductTemplate(
-                "Kệ Hoa Tang Lễ Tone Trắng Tím Trang Nghiêm",
+                "Kệ Hoa Tang Lễ Trắng Tím",
                 "Hoa Chia Buồn", "Quận 1",
                 "Kệ hoa tang lễ thiết kế trang nghiêm phối hoa cúc trắng, hoa lan tím và hoa ly trắng gửi gắm niềm tiếc thương sâu sắc.",
                 new BigDecimal("1150000"), new BigDecimal("650000"), new BigDecimal("150000"), new BigDecimal("500000"),
@@ -142,7 +142,7 @@ public class ProductSeederService {
 
             // --- CHI NHÁNH PHÚ MỸ HƯNG (QUẬN 7) --- (9 loại sản phẩm)
             new ProductTemplate(
-                "Hộp Hoa Tròn Hoa Hồng Trà Phối Cẩm Chướng",
+                "Hộp Hoa Hồng Trà",
                 "Hoa Quà Tặng", "Quận 7",
                 "Hộp hoa cắm tròn xinh xắn phối giữa hoa hồng trà, hoa cẩm chướng hồng và hoa baby trắng bồng bềnh, thích hợp tặng bạn gái hoặc đồng nghiệp.",
                 new BigDecimal("650000"), new BigDecimal("350000"), new BigDecimal("80000"), new BigDecimal("300000"),
@@ -150,7 +150,7 @@ public class ProductSeederService {
                 120, 5.0
             ),
             new ProductTemplate(
-                "Bó Hoa Cưới Tulip Trắng & Hoa Hồng Ohara",
+                "Bó Hoa Cưới Tulip & Hồng",
                 "Hoa Cưới", "Quận 7",
                 "Bó hoa cưới thiết kế tay cầm quấn ruy băng lụa cao cấp, phối hoa tulip Hà Lan trắng, mao lương trắng và hoa hồng Ohara thơm ngát quyến rũ.",
                 new BigDecimal("890000"), new BigDecimal("500000"), new BigDecimal("120000"), new BigDecimal("400000"),
@@ -158,7 +158,7 @@ public class ProductSeederService {
                 42, 4.8
             ),
             new ProductTemplate(
-                "Bó Hoa Tulip Hà Lan Hồng Pastel Gói Giấy Mờ",
+                "Bó Hoa Tulip Pastel",
                 "Hoa Tình Yêu", "Quận 7",
                 "Bó hoa tulip nhập khẩu Hà Lan tone hồng pastel ngọt ngào, gói giấy mờ cao cấp phong cách tiểu thư thanh lịch.",
                 new BigDecimal("950000"), new BigDecimal("550000"), new BigDecimal("110000"), new BigDecimal("400000"),
@@ -166,7 +166,7 @@ public class ProductSeederService {
                 68, 4.9
             ),
             new ProductTemplate(
-                "Giỏ Mây Hoa Hồng Kem Dâu Phối Cẩm Chướng",
+                "Giỏ Hoa Hồng Kem Dâu",
                 "Hoa Sinh Nhật", "Quận 7",
                 "Giỏ mây cắm hoa hồng kem dâu, cẩm chướng và hoa baby bồng bềnh thích hợp tặng mẹ, chị gái hoặc người thương.",
                 new BigDecimal("720000"), new BigDecimal("400000"), new BigDecimal("90000"), new BigDecimal("300000"),
@@ -174,7 +174,7 @@ public class ProductSeederService {
                 88, 4.9
             ),
             new ProductTemplate(
-                "Kệ Hoa Khai Trương Khung Tranh Tone Đỏ Hồng",
+                "Kệ Hoa Khai Trương Tone Đỏ",
                 "Hoa Khai Trương", "Quận 7",
                 "Kệ hoa khung tranh hiện đại phối hoa hồng đỏ, cẩm tú cầu và lan vũ nữ đón đầu xu hướng thẩm mỹ sang trọng.",
                 new BigDecimal("1950000"), new BigDecimal("1100000"), new BigDecimal("220000"), new BigDecimal("850000"),
@@ -182,7 +182,7 @@ public class ProductSeederService {
                 53, 4.8
             ),
             new ProductTemplate(
-                "Chậu Lan Hồ Điệp Vàng Hoàng Yến 5 Cành",
+                "Chậu Lan Hồ Điệp Vàng",
                 "Hoa Quà Tặng", "Quận 7",
                 "Chậu lan hồ điệp vàng hoàng yến cánh dày bóng mượt, tượng trưng cho tiền tài sung túc và phát triển bền vững.",
                 new BigDecimal("2300000"), new BigDecimal("1300000"), new BigDecimal("260000"), new BigDecimal("1100000"),
@@ -190,7 +190,7 @@ public class ProductSeederService {
                 39, 4.8
             ),
             new ProductTemplate(
-                "Bình Hoa Cẩm Tú Cầu Xanh Phối Baby Để Bàn",
+                "Bình Hoa Cẩm Tú Cầu",
                 "Hoa Trang Trí", "Quận 7",
                 "Bình hoa cẩm tú cầu xanh bồng bềnh kết hợp hoa baby trắng tinh khiết tạo điểm nhấn trang nhã cho không gian sống.",
                 new BigDecimal("690000"), new BigDecimal("380000"), new BigDecimal("80000"), new BigDecimal("280000"),
@@ -198,7 +198,7 @@ public class ProductSeederService {
                 44, 4.7
             ),
             new ProductTemplate(
-                "Bó Hoa Baby Trắng Khổng Lồ Gói Kraft",
+                "Bó Hoa Baby Trắng",
                 "Hoa Tình Yêu", "Quận 7",
                 "Bó hoa baby trắng khổng lồ bồng bềnh như mây, gói giấy Kraft tối giản tạo vẻ đẹp tinh tế thuần khiết.",
                 new BigDecimal("520000"), new BigDecimal("280000"), new BigDecimal("70000"), new BigDecimal("220000"),
@@ -206,7 +206,7 @@ public class ProductSeederService {
                 91, 4.9
             ),
             new ProductTemplate(
-                "Bó Hoa Hướng Dương Phối Hoa Chuông Xanh",
+                "Bó Hoa Hướng Dương Chuông Xanh",
                 "Hoa Chúc Mừng", "Quận 7",
                 "Bó hoa hướng dương rực rỡ phối hoa chuông xanh và cúc tana chúc mừng tân gia, mừng thăng chức thành công rực rỡ.",
                 new BigDecimal("620000"), new BigDecimal("340000"), new BigDecimal("80000"), new BigDecimal("250000"),
@@ -216,7 +216,7 @@ public class ProductSeederService {
 
             // --- CHI NHÁNH LÀNG ĐẠI HỌC (TP. THỦ ĐỨC) --- (9 loại sản phẩm)
             new ProductTemplate(
-                "Chậu Sứ Lan Hồ Điệp Tím 5 Cành",
+                "Chậu Lan Hồ Điệp Tím 5 Cành",
                 "Hoa Quà Tặng", "Thủ Đức",
                 "Chậu men sứ cao cấp trồng 5 cành hoa lan hồ điệp tím rực rỡ, hoa nở đều đẹp, độ bền kéo dài từ 4 đến 8 tuần thích hợp trang trí sảnh phòng khách.",
                 new BigDecimal("2200000"), new BigDecimal("1200000"), new BigDecimal("250000"), new BigDecimal("1000000"),
@@ -224,7 +224,7 @@ public class ProductSeederService {
                 38, 4.7
             ),
             new ProductTemplate(
-                "Bó Hoa Hướng Dương Tốt Nghiệp Kèm Gấu Cử Nhân",
+                "Bó Hoa Hướng Dương Tốt Nghiệp",
                 "Hoa Chúc Mừng", "Thủ Đức",
                 "Bó hoa hướng dương rực rỡ tặng lễ tốt nghiệp cử nhân, đính kèm gấu bông cử nhân mini và ruy băng chúc mừng.",
                 new BigDecimal("390000"), new BigDecimal("200000"), new BigDecimal("50000"), new BigDecimal("180000"),
@@ -232,7 +232,7 @@ public class ProductSeederService {
                 135, 5.0
             ),
             new ProductTemplate(
-                "Bó Hoa Cúc Tana Trắng Gói Giấy Mộc",
+                "Bó Hoa Cúc Tana",
                 "Hoa Sinh Nhật", "Thủ Đức",
                 "Bó hoa cúc tana trắng cánh mỏng nhỏ xinh phối lá cỏ đồng nội nhẹ nhàng, món quà sinh nhật mộc mạc đáng yêu.",
                 new BigDecimal("350000"), new BigDecimal("180000"), new BigDecimal("50000"), new BigDecimal("150000"),
@@ -240,7 +240,7 @@ public class ProductSeederService {
                 110, 4.9
             ),
             new ProductTemplate(
-                "Giỏ Gỗ Hoa Cẩm Chướng & Đồng Tiền Pastel",
+                "Giỏ Hoa Cẩm Chướng Pastel",
                 "Hoa Quà Tặng", "Thủ Đức",
                 "Giỏ gỗ cắm hoa đồng tiền hồng pastel, cẩm chướng và hoa sao tím tri ân thầy cô giáo và chúc mừng bạn bè.",
                 new BigDecimal("550000"), new BigDecimal("290000"), new BigDecimal("70000"), new BigDecimal("220000"),
@@ -248,7 +248,7 @@ public class ProductSeederService {
                 82, 4.8
             ),
             new ProductTemplate(
-                "Hộp Hoa Mica Trong Suốt Tone Hồng Thắt Nơ",
+                "Hộp Hoa Tone Hồng",
                 "Hoa Quà Tặng", "Thủ Đức",
                 "Hộp mica nắp trong suốt sang xịn, hoa tươi cắm bên trong thắt nơ lụa tinh xảo, thích hợp để bàn học, bàn làm việc.",
                 new BigDecimal("490000"), new BigDecimal("260000"), new BigDecimal("60000"), new BigDecimal("200000"),
@@ -256,7 +256,7 @@ public class ProductSeederService {
                 67, 4.9
             ),
             new ProductTemplate(
-                "Kệ Hoa Sắt 1 Tầng Hoa Hướng Dương & Đồng Tiền",
+                "Kệ Hoa Hướng Dương 1 Tầng",
                 "Hoa Chúc Mừng", "Thủ Đức",
                 "Kệ hoa chân sắt gọn nhẹ cắm hoa hướng dương, đồng tiền đỏ và lan mokara tươi sáng cho sự kiện câu lạc bộ, khoa viện.",
                 new BigDecimal("850000"), new BigDecimal("450000"), new BigDecimal("110000"), new BigDecimal("380000"),
@@ -264,7 +264,7 @@ public class ProductSeederService {
                 49, 4.8
             ),
             new ProductTemplate(
-                "Bình Thủy Tinh Hoa Cúc Họa Mi Để Bàn",
+                "Bình Hoa Cúc Họa Mi",
                 "Hoa Trang Trí", "Thủ Đức",
                 "Bình thủy tinh nhỏ xinh cắm hoa cúc họa mi trắng thanh khiết, mang lại năng lượng tích cực cho góc học tập.",
                 new BigDecimal("280000"), new BigDecimal("140000"), new BigDecimal("40000"), new BigDecimal("120000"),
@@ -272,7 +272,7 @@ public class ProductSeederService {
                 98, 4.9
             ),
             new ProductTemplate(
-                "Bó Hoa Hồng Đỏ 20 Bông Gói Giấy Đen Viền Vàng",
+                "Bó Hoa Hồng Đỏ 20 Bông",
                 "Hoa Tình Yêu", "Thủ Đức",
                 "Bó hoa hồng đỏ gói giấy đen nhám viền vàng phong cách lãng mạn giúp các bạn sinh viên tỏ tình thành công.",
                 new BigDecimal("580000"), new BigDecimal("300000"), new BigDecimal("75000"), new BigDecimal("250000"),
@@ -280,7 +280,7 @@ public class ProductSeederService {
                 76, 4.9
             ),
             new ProductTemplate(
-                "Kệ Hoa Gỗ Khai Trương Hoa Đồng Tiền Ngũ Sắc",
+                "Kệ Hoa Khai Trương Ngũ Sắc",
                 "Hoa Khai Trương", "Thủ Đức",
                 "Kệ hoa chân gỗ cắm hoa đồng tiền ngũ sắc và hoa hướng dương chúc mừng lễ thành lập câu lạc bộ, đội nhóm trường đại học.",
                 new BigDecimal("790000"), new BigDecimal("420000"), new BigDecimal("100000"), new BigDecimal("350000"),
