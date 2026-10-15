@@ -41,8 +41,8 @@
                 <!-- Current Status Badge -->
                 <div>
                     <div th:if="${order.cancellationReason != null and !#strings.isEmpty(order.cancellationReason)}" class="alert alert-warning py-2 px-3 mb-2" role="alert" style="line-height: 1.4;">
-                        <div class="fw-bold" th:text="${order.cancellationActorDisplay}">Đã hủy bởi Admin</div>
-                        <div>Lý do: <span th:text="${order.cancellationReasonDetail}">không còn hàng.</span></div>
+                        <div class="fw-bold" th:text="${#strings.containsIgnoreCase(order.cancellationReason, 'admin') ? 'Đã hủy bởi Admin' : (#strings.containsIgnoreCase(order.cancellationReason, 'quản lý') or #strings.containsIgnoreCase(order.cancellationReason, 'cửa hàng') ? 'Đã hủy bởi Cửa hàng' : 'Đã hủy đơn')}">Đã hủy đơn</div>
+                        <div>Lý do: <span th:text="${#strings.contains(order.cancellationReason, 'với lý do:') ? #strings.substringAfter(order.cancellationReason, 'với lý do:') : (#strings.startsWith(#strings.toLowerCase(order.cancellationReason), 'lý do:') ? #strings.substring(order.cancellationReason, 6) : order.cancellationReason)}">không còn hàng.</span></div>
                     </div>
                     <span th:if="${order.status.name() == 'PENDING'}" class="badge px-3 py-2 rounded-pill" style="background-color: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; font-size: 14px; font-weight: 700;">
                         <i class="bi bi-clock me-1"></i> CHỜ TIẾP NHẬN

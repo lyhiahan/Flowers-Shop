@@ -320,8 +320,8 @@
                             <!-- 3. Người nhận: Họ tên và số điện thoại -->
                             <td>
                                 <div th:if="${o.cancellationReason != null and !#strings.isEmpty(o.cancellationReason)}" class="small text-danger mb-1.5" style="line-height: 1.35;">
-                                    <div class="fw-semibold" th:text="${o.cancellationActorDisplay}">Đã hủy bởi Admin</div>
-                                    <div style="font-size: 12.5px; margin-top: 1px;">Lý do: <span th:text="${o.cancellationReasonDetail}">không còn hàng.</span></div>
+                                    <div class="fw-semibold" th:text="${#strings.containsIgnoreCase(o.cancellationReason, 'admin') ? 'Đã hủy bởi Admin' : (#strings.containsIgnoreCase(o.cancellationReason, 'quản lý') or #strings.containsIgnoreCase(o.cancellationReason, 'cửa hàng') ? 'Đã hủy bởi Cửa hàng' : 'Đã hủy đơn')}">Đã hủy đơn</div>
+                                    <div style="font-size: 12.5px; margin-top: 1px;">Lý do: <span th:text="${#strings.contains(o.cancellationReason, 'với lý do:') ? #strings.substringAfter(o.cancellationReason, 'với lý do:') : (#strings.startsWith(#strings.toLowerCase(o.cancellationReason), 'lý do:') ? #strings.substring(o.cancellationReason, 6) : o.cancellationReason)}">không còn hàng.</span></div>
                                 </div>
                                 <div class="fw-semibold" style="font-size: 15.5px; color: #24332C;"
                                      th:text="${o.recipientName != null and !o.recipientName.isEmpty() ? o.recipientName : (o.user != null ? o.user.fullName : 'Khách vãng lai')}">Gia Hân</div>
