@@ -92,6 +92,20 @@ class StorefrontUiTests {
         preview("cart-filled.html", cartHtml);
     }
 
+    @Test void checkoutSummaryScrollsNormallyWhileTheHeaderKeepsItsStickyPosition() throws Exception {
+        mvc.perform(post("/cart/add").with(user(customer.getUsername()).roles("USER")).with(csrf())
+                        .param("productId", product.getId().toString()).param("storeId", store.getId().toString())
+                        .param("quantity", "1").param("orderType", "BUY"))
+                .andExpect(status().is3xxRedirection());
+        entityManager.flush(); entityManager.clear();
+        String html = page("/checkout");
+        var summary = Pattern.compile("<div\\b[^>]*id=\"checkout-order-summary\"[^>]*>").matcher(html);
+        assertThat(summary.find()).isTrue();
+        assertThat(summary.group()).doesNotContain("sticky", "fixed", "top:", "position:");
+        assertThat(html).contains("Sản phẩm đã chọn", "id=\"voucherCollapse\"", "id=\"btnPlaceOrder\"")
+                .containsPattern("<header\\b[^>]*class=\"sticky-top ");
+    }
+
     @Test void everyStorefrontFooterUsesTheSharedFragmentRatherThanAnInlineCopy() throws Exception {
         try (var files = Files.list(Path.of("src/main/resources/templates/customer"))) {
             for (Path file : files.filter(p -> p.toString().endsWith(".html")).toList()) {
@@ -245,7 +259,7 @@ class StorefrontUiTests {
                     "data-fallback-src=\"/images/flower-logo.png\"", "alt=\"Storefront bouquet\"");
             count++;
         }
-        assertThat(count).isEqualTo(2);
+        assertThat(count).isEqualTo(1);
         assertThat(html).contains("src=\"/js/cart-product-images.js\"").doesNotContain("alt=\"Product Image\"");
         Product saved = products.findById(product.getId()).orElseThrow();
         saved.setImageUrl("   "); products.saveAndFlush(saved); entityManager.clear();
