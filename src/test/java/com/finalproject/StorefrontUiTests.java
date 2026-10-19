@@ -32,6 +32,7 @@ class StorefrontUiTests {
     @Autowired StoreInventoryRepository inventories;
     @Autowired CategoryRepository categories;
     @Autowired RecentlyViewedRepository recentHistory;
+    @Autowired ProductWishlistRepository wishlists;
     @Autowired EntityManager entityManager;
     User customer;
     Store store;
@@ -169,6 +170,21 @@ class StorefrontUiTests {
         mvc.perform(get("/customer/recently-viewed/clear").with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isMethodNotAllowed());
         assertThat(recentHistory.findTop10ByUserIdOrderByViewedAtDesc(customer.getId())).hasSize(1);
+    }
+
+    @Test void wishlistPromisesKeepResponsiveSpaceFromProductsAndBetweenCards() throws Exception {
+        wishlists.saveAndFlush(ProductWishlist.builder().user(customer).product(product).build());
+        for (String route : List.of("/customer/profile/wishlist", "/customer/wishlist")) {
+            String html = page(route);
+            assertThat(html).contains("id=\"wishlistGrid\"");
+            var section = Pattern.compile("(?s)<section\\b[^>]*id=\"wishlistPromises\"[^>]*>.*?</section>").matcher(html);
+            assertThat(section.find()).isTrue();
+            String promises = section.group();
+            assertThat(promises).contains("mt-8 md:mt-10", "gap-4 md:gap-6", "Cam Kết Tươi Mới 3 Ngày",
+                            "Chụp Ảnh Trước Khi Giao", "Đổi Trả &amp; Hoàn Tiền 100%")
+                    .doesNotContain("mt-space-xl", "gap-space-md", "p-space-md", "id=\"wishlistToast\"");
+            assertThat(promises.split("class=\"p-5 ", -1)).hasSize(4);
+        }
     }
 
     private String page(String route) throws Exception {
