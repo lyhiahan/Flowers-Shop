@@ -80,7 +80,7 @@ param([Parameter(ValueFromRemainingArguments = $true)][string[]]$MavenArguments)
 if ($env:CLOUDINARY_CLOUD_NAME -cne 'runner-cloud' -or
         $env:CLOUDINARY_API_KEY -cne '987654' -or
         $env:CLOUDINARY_API_SECRET -cne 'explicit-dummy-secret' -or
-        $env:SPRING_DATASOURCE_URL -notlike '*instanceName=SQLEXPRESS;databaseName=RentalShop;*') {
+        $env:SPRING_DATASOURCE_URL -notlike '*instanceName=SQLEXPRESS;databaseName=CloudinaryEnvTest;*') {
     throw 'Dummy runner did not receive the intended environment.'
 }
 exit 0
@@ -97,7 +97,7 @@ SPRING_DATASOURCE_URL=must-not-override-the-selected-instance
     $env:BREVO_API_KEY = 'dummy-mail-key'
     $beforeRunner = @{}
     foreach ($name in $names) { $beforeRunner[$name] = [Environment]::GetEnvironmentVariable($name, 'Process') }
-    & (Join-Path $fakeScripts 'sqlserver.ps1')
+    & (Join-Path $fakeScripts 'sqlserver.ps1') -DatabaseName CloudinaryEnvTest
     Assert-Check ($LASTEXITCODE -eq 0) 'SQL runner forwards the configured environment'
     foreach ($name in $names) {
         Assert-Check ([Environment]::GetEnvironmentVariable($name, 'Process') -ceq $beforeRunner[$name]) "SQL runner restores $name after exit"
@@ -106,7 +106,7 @@ SPRING_DATASOURCE_URL=must-not-override-the-selected-instance
 
     [IO.File]::WriteAllText((Join-Path $fakeScripts 'maven.ps1'), "throw 'Expected dummy runner failure.'")
     $failed = $false
-    try { & (Join-Path $fakeScripts 'sqlserver.ps1') }
+    try { & (Join-Path $fakeScripts 'sqlserver.ps1') -DatabaseName CloudinaryEnvTest }
     catch { $failed = $_.Exception.Message -eq 'Expected dummy runner failure.' }
     Assert-Check $failed 'Dummy runner failure was propagated'
     foreach ($name in $names) {

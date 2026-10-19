@@ -73,7 +73,23 @@ Không cần triển khai đồng thời SQL Server, MySQL và PostgreSQL. SQL S
 
 Các file chính: [pom.xml](D:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/pom.xml), [JWT](D:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/src/main/java/com/finalproject/config/JwtSecurityConfig.java), [WebSocket](D:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/src/main/java/com/finalproject/config/WebSocketConfig.java).
 
-## 3. Kết quả đã chạy
+## 3. Kết quả kiểm thử
+
+### Kết quả cập nhật ngày 19/10/2026
+
+| Kiểm tra | Kết quả | Ghi chú |
+| --- | --- | --- |
+| Java toàn bộ, lần gần nhất có quyền localhost | 622 ca: 616 đạt, 0 thất bại, 0 lỗi, 6 bỏ qua; BUILD SUCCESS | Các test mở máy chủ cần được phép kết nối localhost. |
+| Java toàn bộ, chạy lại trong sandbox hạn chế | 619 ca được ghi nhận: 611 đạt, 0 thất bại, 2 lỗi, 6 bỏ qua; BUILD FAILURE | Hai suite `ChatSessionIntegrationTests` và `SystemHttpSmokeTests` không khởi động được Tomcat vì `Permission denied: connect`; không phải assertion nghiệp vụ thất bại. Tổng ca khác vì hai suite dừng ngay ở bước tạo context. |
+| Java `StoreProductCatalogTests` chạy riêng | 8/8 đạt; BUILD SUCCESS | Xác nhận assertion nút “Sửa” theo cấu trúc HTML hiện tại đã được sửa. |
+| JavaScript toàn bộ, lần gần nhất có quyền localhost | 102/102 đạt | Gồm gateway demo. |
+| JavaScript không cần gateway, chạy lại trong sandbox | 96/96 đạt | Sáu ca gateway không thể xác nhận lại vì kết nối localhost bị `EACCES`. |
+| JavaScript thuộc tính hoa chạy riêng | 16/16 đạt | Xác nhận fixture và gợi ý/tự nhập đã theo giao diện mới. |
+| Cấu hình Cloudinary cục bộ | 10/10 đạt | Chỉ dùng credential và Maven giả; test hiện dùng tên database giả, không kết nối `RentalShop`. |
+
+Lần chạy sandbox không được tính là bộ test xanh toàn bộ. Cần chạy lại hai suite Java và sáu ca JavaScript gateway trong môi trường cho phép localhost; không bỏ hoặc sửa test chỉ để che lỗi quyền.
+
+### Kết quả gốc ngày 16/10/2026 — đã được khắc phục, lưu để đối chiếu
 
 | Kiểm tra | Kết quả |
 | --- | --- |
@@ -97,19 +113,19 @@ node --test --test-concurrency=1 --test-reporter=spec @auditJsFiles
 
 Môi trường Java dùng JDK 21 qua script, JavaScript dùng Node 24.19.0. Báo cáo Java chi tiết nằm ở [surefire-reports](D:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/target/surefire-reports).
 
-### Test Java thất bại
+### Nguyên nhân test Java thất bại ngày 16/10 — đã sửa
 
 `StoreProductCatalogTests.includesOwnAndSharedProductsWithoutExposingForeignStock` đòi HTML chứa chính xác `>Sửa</a>`. Template hiện có icon và xuống dòng bên trong thẻ liên kết. HTML trả về vẫn có nút Sửa và sản phẩm của fixture.
 
-Đây là assertion giao diện quá phụ thuộc định dạng HTML, chưa phải bằng chứng trang sản phẩm không hoạt động hoặc lộ kho chi nhánh khác. Nên kiểm tra liên kết/nhãn theo cấu trúc DOM thay vì chuỗi HTML cứng, sau đó chạy lại toàn suite.
+Đây là assertion giao diện quá phụ thuộc định dạng HTML, không phải bằng chứng trang sản phẩm không hoạt động hoặc lộ kho chi nhánh khác. Test đã chuyển sang kiểm tra liên kết/nhãn theo cấu trúc DOM; lần chạy riêng mới nhất đạt 8/8.
 
 Nguồn: [test dòng 75](D:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/src/test/java/com/finalproject/StoreProductCatalogTests.java:75), [template dòng 251](D:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/src/main/resources/templates/manager/products.html:251).
 
-### Test JavaScript thất bại
+### Nguyên nhân test JavaScript thất bại ngày 16/10 — đã sửa
 
 8 test trong flower-attributes.test.cjs đọc DOM theo bố cục cũ. Setup lấy trực tiếp `[tags, controls, error]`, trong khi editor mới chứa `[row, choices, error]`; row mới chứa surface và controls. Vì vậy nhiều test truy cập input không tồn tại hoặc sai phần tử. Test gợi ý cũng còn kỳ vọng thuộc tính list của datalist trong khi giao diện đã có nút chọn gợi ý riêng.
 
-Cần cập nhật fixture và bổ sung test cho chọn có sẵn, lọc gợi ý, nhập giá trị mới, bỏ tag, giữ thuộc tính cũ và lưu form. Hiện chưa thể dùng các test thất bại này để kết luận 8 chức năng thực tế đều lỗi hoặc giao diện đã hoàn toàn đúng.
+Fixture đã được cập nhật và bổ sung kiểm tra chọn có sẵn, lọc gợi ý, nhập giá trị mới, bỏ tag, giữ thuộc tính cũ và lưu form. Lần chạy riêng mới nhất đạt 16/16; các lỗi ở bảng lịch sử không còn là lỗi hiện tại.
 
 Nguồn: [fixture](D:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/src/test/js/flower-attributes.test.cjs:25), [DOM mới](D:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/src/main/resources/static/js/flower-attributes.js:48).
 
