@@ -69,7 +69,7 @@ try {
             $schemaVersion = [string]$versionCommand.ExecuteScalar()
             $parsedVersion = 0
             if (![int]::TryParse($schemaVersion, [ref]$parsedVersion) -or $parsedVersion -lt 10) {
-                throw "RentalShop đang ở Flyway V$schemaVersion. Khởi động website sẽ tự áp dụng V9–V10; hãy xác nhận với thành viên phụ trách thanh toán và chạy migration có chủ đích sau khi sao lưu."
+                throw "RentalShop dang o Flyway V$schemaVersion. Khoi dong website se tu ap dung V9-V10; hay xac nhan voi thanh vien phu trach thanh toan va chay migration co chu dich sau khi sao luu."
             }
         } finally { $auditConnection.Dispose() }
     }
