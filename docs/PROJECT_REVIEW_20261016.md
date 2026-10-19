@@ -211,3 +211,9 @@ Sau các bước này mới nên chốt bộ source dùng để nộp và quay v
 - 81 dòng kho lệch vẫn được giữ nguyên, không tự gán là hàng có thể bán hoặc xóa; cần kiểm kê vật lý/chứng từ để quyết định xử lý số lượng. Mã nguồn hiện loại các dòng lệch khỏi tồn kho bán được.
 - Đã sửa kết nối mặc định `dev` khỏi cổng SQL Server cũ và bổ sung bài kiểm tra sổ số dư chỉ đọc với kết nối `RentalShop` được chỉ định rõ. Kiểm tra này đạt trên V10; chạy lại bằng `scripts/audit-demo-funds-sqlserver.ps1`. Truy vấn lại sau migration xác nhận 81 dòng / 2.003 đơn vị lệch, tổng 154 dòng / 3.339 đơn vị và không có tồn kho âm.
 - Người dùng xác nhận 81 dòng là dữ liệu nhân bản. Diễn tập trên bản sao V10 đã lưu giá trị gốc vào bảng đối soát, đưa 81 dòng về 0/ngừng bán/xóa mềm; bản sao còn 1.336 đơn vị, đơn hàng không đổi. Việc áp dụng tương tự lên `RentalShop` thật bị chặn chờ phê duyệt riêng vì thay đổi 2.003 đơn vị; database thật chưa bị sửa ở bước này.
+
+### Cập nhật tiếp theo: xóa dòng kho nhân bản theo yêu cầu rõ ràng của người dùng
+
+- Sau khi người dùng yêu cầu xóa, đã tạo backup `RentalShop_before_duplicate_delete_20261019_0856_prepare.bak`, phục hồi sang `CodexDupDeleteCopy_20261019_0856` và chạy đúng giao dịch xóa thử: 81 dòng/2.003 đơn vị bị xóa, còn 73 dòng/1.336 đơn vị; database gốc không đổi ở bước diễn tập.
+- Trước khi áp dụng thật đã xác minh ứng dụng không lắng nghe cổng 8080, tạo và kiểm tra backup thứ hai `RentalShop_before_duplicate_delete_20261019_0856_apply.bak`. Lệnh xóa trên `RentalShop` lưu toàn bộ giá trị gốc ở `dbo.inventory_duplicate_deletion_20261019`. Kiểm tra độc lập sau xóa: 73 dòng/1.336 đơn vị, 0 dòng lệch và 0 tồn âm; 26 đơn/28 chi tiết đơn giữ nguyên, đơn `#23` vẫn `CANCELLED`.
+- Bộ code mới bỏ qua hoàn kho vào chi nhánh không sở hữu sản phẩm khi hủy các đơn lịch sử có dòng kho nhân bản. Test hồi quy cho trường hợp này đã đạt trong bộ Java 622 ca. Cần chạy ứng dụng bằng bản code mới khi tiếp tục thao tác các đơn lịch sử.

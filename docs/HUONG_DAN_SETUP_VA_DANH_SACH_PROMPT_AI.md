@@ -344,7 +344,7 @@ Các mục sau **tóm lược theo thứ tự chủ đề xuất hiện trong cu
 | 48 | Kiểm tra toàn bộ cấu trúc dự án, chạy test Java/JavaScript và rà soát các luồng web; nêu rõ phần đã chứng minh và phần chưa thể kiểm thử trực tiếp. |
 | 49 | Vùng giao hàng chỉ là **demo**, không cần bản đồ thật; bỏ cách đoán khoảng cách từ chuỗi địa chỉ vì “Quận 1” có thể khớp nhầm “Quận 10/12”. Chọn vùng giao rõ ràng và dùng cùng quy tắc ở báo giá/checkout. |
 | 50 | Phần thanh toán do thành viên khác phụ trách; giải thích ranh giới công việc, cấu hình mock/sandbox và các điểm cần phối hợp, không tự nhận hệ thống thanh toán thật đã hoàn tất. |
-| 51 | Đối soát 81 dòng kho lệch chi nhánh (2.003 đơn vị) trước khi sửa/xóa; không đổi đơn `#23`. Sau đó người dùng xác nhận đây là **dữ liệu kho cũ bị nhân bản**. |
+| 51 | Đối soát 81 dòng kho lệch chi nhánh (2.003 đơn vị) trước khi sửa/xóa; không đổi đơn `#23`. Sau đó người dùng xác nhận đây là **dữ liệu kho cũ bị nhân bản** và yêu cầu xóa các dòng đó. |
 | 52 | Hoàn thiện các điểm audit: schema SQL Server V8→V10, test cũ lệch HTML, vùng giao demo, tài liệu/liên kết, rồi “sửa tất cả, tự sửa”. |
 | 53 | Hỏi vì sao tin nhắn trong hàng chờ của Antigravity không tự gửi sau khi agent hoàn thành và muốn hướng dẫn cấu hình; đây là yêu cầu về công cụ AI, **không phải** chức năng website. |
 | 54 | Yêu cầu cập nhật chính báo cáo setup/danh sách prompt này để phản ánh cuộc trò chuyện, thay vì chỉ giữ 20 prompt mẫu ban đầu. |
@@ -380,7 +380,7 @@ Các mục sau **tóm lược theo thứ tự chủ đề xuất hiện trong cu
 ### Kết quả kiểm chứng và phần chưa hoàn tất tại thời điểm cập nhật
 
 - Trên máy cục bộ, `RentalShop` đã được sao lưu và nâng Flyway V9–V10; kiểm tra HTTP cơ bản và đối soát số dư demo chỉ đọc đạt. Java **622 ca: 616 đạt, 6 bỏ qua**, JavaScript **102/102 đạt**. Đây là kết quả test tự động, không thay thế việc demo mọi thao tác bằng trình duyệt trên máy chấm.
-- Người dùng đã xác nhận 81 dòng kho lệch là dữ liệu nhân bản. Đã diễn tập cô lập 81 dòng/2.003 đơn vị trên **bản sao** và lưu giá trị gốc để hoàn tác; **chưa áp dụng việc đưa số lượng về 0 trên `RentalShop` thật** vì thao tác này thay đổi dữ liệu quan trọng và đang chờ phê duyệt riêng. Các đơn, gồm `#23`, không bị sửa ở bước diễn tập.
+- Người dùng đã xác nhận 81 dòng kho lệch là dữ liệu nhân bản và yêu cầu xóa. Sau khi sao lưu và diễn tập trên **bản sao**, đã xóa 81 dòng/2.003 đơn vị khỏi `RentalShop` thật; bảng audit và backup giữ bản gốc. Còn 73 dòng kho/1.336 đơn vị, không còn kho lệch; các đơn, gồm `#23`, không bị sửa.
 - Một số yêu cầu trong lịch sử là **hướng dẫn, đánh giá hoặc câu hỏi**; không nên ghi tất cả thành “AI đã sinh code”. Với mỗi tính năng đem trình bày, hãy gắn commit, test hoặc ảnh demo tương ứng. Không công bố khóa Brevo/Cloudinary/JWT từng dùng trong quá trình thử nghiệm.
 
 ---

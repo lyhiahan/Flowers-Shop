@@ -103,7 +103,7 @@ Khách vãng lai là phiên **chưa đăng nhập** (anonymous), không cần l�
 
 Flyway là nơi quản lý schema ở môi trường chạy. Các bản `V1`–`V8` tạo schema và phân loại sản phẩm; `V9` mở rộng phương thức thanh toán demo, `V10` thêm các cột đối soát tiền demo. Database `RentalShop` cục bộ đã lên **V10 ngày 19/10/2026** sau khi sao lưu và thử trên bản sao; môi trường khác vẫn phải kiểm tra `flyway_schema_history` riêng. **Spring Boot tự chạy migration đang chờ khi khởi động**, vì vậy `scripts/sqlserver.ps1 -Action run` chặn riêng `RentalShop` chưa lên V10. File SQL trong `sql/migrations` và `resources/db` là tài liệu lịch sử; không cần chạy chúng lại. Các runner migration cũ chỉ được bật ở profile `test` để giữ kiểm thử H2.
 
-81 dòng kho lệch đã được người dùng xác nhận là dữ liệu nhân bản. Phương án cô lập và lưu giá trị gốc đã đạt trên bản sao SQL Server; `RentalShop` thật **chưa** đưa 2.003 đơn vị nhân bản về 0 vì thao tác này cần phê duyệt riêng. Chi tiết tại [báo cáo đối soát kho](docs/DOI_SOAT_KHO_LECH_CHI_NHANH_20261019.md).
+81 dòng kho lệch (2.003 đơn vị) đã được người dùng xác nhận là dữ liệu nhân bản và yêu cầu xóa. Ngày 19/10/2026, sau khi sao lưu và thử trên bản sao, các dòng này đã được xóa khỏi `RentalShop`; còn 73 dòng kho / 1.336 đơn vị, không còn dòng lệch. Giá trị gốc lưu trong bảng audit và backup; đơn hàng không đổi. Chi tiết tại [báo cáo đối soát kho](docs/DOI_SOAT_KHO_LECH_CHI_NHANH_20261019.md).
 
 Với **database rỗng**, chạy ứng dụng để Flyway áp dụng từ `V1`. Với **database đã có dữ liệu nhưng chưa có `flyway_schema_history`**, sao lưu và thử trên bản sao trước. Xác nhận URL database và schema `dbo`, sau đó chủ động ghi nhận baseline:
 
