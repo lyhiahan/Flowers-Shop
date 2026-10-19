@@ -54,3 +54,87 @@ test('failed read preserves unread UI and releases its button', async () => {
     await assert.rejects(app.api.readAllNotifications());
     assert.equal(app.node('headerNotifBadge').textContent, 2);
 });
+
+function bellDropdown({ id = 'notifBellDropdown', list = [], ok = true, redirected = false } = {}) {
+    let init;
+    const requests = [], events = new Map();
+    const container = {
+        html: '', rows: [],
+        set innerHTML(value) { this.html = value; this.rows = []; },
+        get innerHTML() { return this.html; },
+        appendChild(row) { this.rows.push(row); }
+    };
+    const trigger = {
+        id,
+        addEventListener(name, callback) { events.set(name, callback); },
+        closest() { return { querySelector() { return container; } }; }
+    };
+    const context = {
+        document: {
+            readyState: 'loading',
+            addEventListener(name, callback) { if (name === 'DOMContentLoaded') init = callback; },
+            getElementById() { return null; },
+            querySelector() { return null; },
+            querySelectorAll(selector) { return selector === '[data-bs-toggle="dropdown"]' ? [trigger] : []; },
+            createElement() {
+                return {
+                    textContent: '', style: {}, addEventListener() {},
+                    set innerHTML(value) { this.html = value; },
+                    get innerHTML() {
+                        return this.html ?? this.textContent.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    }
+                };
+            }
+        },
+        fetch: async url => {
+            requests.push(url);
+            return url.endsWith('/latest')
+                ? { ok, redirected, json: async () => list }
+                : { ok: true, json: async () => ({ unreadCount: 2 }) };
+        },
+        location: { pathname: '/' }, console: { debug() {} }, setTimeout() {}, Date
+    };
+    context.window = context;
+    vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../../main/resources/static/js/notifications-realtime.js'), 'utf8'), context);
+    init();
+    return {
+        requests, container,
+        async open() {
+            assert.ok(events.has('show.bs.dropdown'));
+            events.get('show.bs.dropdown')();
+            await new Promise(resolve => setImmediate(resolve));
+        }
+    };
+}
+
+for (const id of ['notifBellDropdown', 'floralNotifDropdown']) {
+    test(`${id} loads customer notifications and links to their content`, async () => {
+        const app = bellDropdown({ id, list: [
+            { id: 7, title: '<script>private</script>', content: 'Delivery updated', isRead: false },
+            { id: 8, title: 'Order ready', relatedOrderId: 42, isRead: true }
+        ] });
+        await app.open();
+        assert.ok(app.requests.includes('/api/notifications/latest'));
+        assert.equal(app.container.rows.length, 2);
+        assert.equal(app.container.rows[0].href, '/notifications#notif_7');
+        assert.ok(app.container.rows[0].innerHTML.includes('&lt;script&gt;'));
+        assert.ok(app.container.rows[0].innerHTML.includes('Delivery updated'));
+        assert.equal(app.container.rows[1].href, '/customer/orders/detail/42');
+    });
+}
+
+test('empty bell list displays an explicit empty state', async () => {
+    const app = bellDropdown();
+    await app.open();
+    assert.ok(app.container.innerHTML.includes('Không có thông báo mới nào'));
+});
+
+for (const response of [{ ok: false }, { redirected: true }, { list: { error: 'invalid response' } }]) {
+    test(`failed bell list keeps a usable notification-page link: ${JSON.stringify(response)}`, async () => {
+        const app = bellDropdown(response);
+        await app.open();
+        assert.ok(app.container.innerHTML.includes('href="/notifications"'));
+        assert.ok(app.container.innerHTML.includes('Không thể tải thông báo'));
+        assert.equal(app.container.rows.length, 0);
+    });
+}

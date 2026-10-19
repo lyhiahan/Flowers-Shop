@@ -31,6 +31,7 @@ class StorefrontUiTests {
     @Autowired ProductRepository products;
     @Autowired StoreInventoryRepository inventories;
     @Autowired CategoryRepository categories;
+    @Autowired RecentlyViewedRepository recentHistory;
     @Autowired EntityManager entityManager;
     User customer;
     Store store;
@@ -116,6 +117,58 @@ class StorefrontUiTests {
                         .with(csrf()).header("X-Requested-With","XMLHttpRequest"))
                 .andExpect(jsonPath("$.liked").value(false)).andExpect(jsonPath("$.followerCount").value(0));
         assertThat(page("/")).doesNotContain("customer-stock-kpi", "Sản phẩm còn hàng toàn chuỗi");
+    }
+
+    @Test void profileTabsHideListMarkersAndKeepTheirPanelTargets() throws Exception {
+        for (String tab : List.of("info", "address", "password")) {
+            String html = page("/customer/profile?tab=" + tab);
+            assertThat(html).containsPattern("\\.profile-nav-pills\\s*\\{[^}]*list-style:\\s*none;")
+                    .containsPattern("\\.profile-nav-pills \\.nav-item\\s*\\{[^}]*list-style:\\s*none;")
+                    .contains("id=\"profileTab\" role=\"tablist\"", "data-bs-target=\"#tab-info\"",
+                            "data-bs-target=\"#tab-address\"", "data-bs-target=\"#tab-password\"");
+        }
+    }
+
+    @Test void recentlyViewedRemovesTheBannerButKeepsAProtectedClearButton() throws Exception {
+        recentHistory.saveAndFlush(RecentlyViewed.builder().user(customer).product(product).build());
+        String html = page("/customer/recently-viewed");
+        assertThat(html).doesNotContain("Mẫu Hoa Bạn Vừa Xem Gần Đây", "recentCountBadge", "Tiếp tục khám phá",
+                        "Lịch sử các sản phẩm bạn đã bấm xem chi tiết.")
+                .contains("id=\"recentHistoryActions\"", "id=\"clearHistoryForm\"", "id=\"clearHistoryBtn\"",
+                        "action=\"/customer/recently-viewed/clear\"", "method=\"post\"", "name=\"_csrf\"",
+                        "Xóa lịch sử đã xem", "id=\"productGrid\"");
+    }
+
+    @Test void clearingRecentlyViewedPersistsAndNeverDeletesAnotherCustomersHistory() throws Exception {
+        User other = users.saveAndFlush(User.builder().username("other-history").email("other-history@example.test")
+                .fullName("Other customer").password("unused").role(Role.USER).isActive(true).build());
+        recentHistory.saveAndFlush(RecentlyViewed.builder().user(customer).product(product).build());
+        recentHistory.saveAndFlush(RecentlyViewed.builder().user(other).product(product).build());
+        for (String route : List.of("/customer/recently-viewed/clear", "/customer/profile/recently-viewed/clear")) {
+            mvc.perform(post(route).with(user(customer.getUsername()).roles("USER")).with(csrf())
+                            .param("userId", other.getId().toString()))
+                    .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/customer/recently-viewed"))
+                    .andExpect(flash().attributeExists("successMessage"));
+            entityManager.flush();
+            entityManager.clear();
+            assertThat(recentHistory.findTop10ByUserIdOrderByViewedAtDesc(customer.getId())).isEmpty();
+            assertThat(recentHistory.findTop10ByUserIdOrderByViewedAtDesc(other.getId())).hasSize(1);
+            String html = page("/customer/recently-viewed");
+            assertThat(html).doesNotContain("id=\"productGrid\"")
+                    .containsPattern("<button\\b(?=[^>]*id=\"clearHistoryBtn\")(?=[^>]*disabled)[^>]*>");
+        }
+        assertThat(products.findById(product.getId())).isPresent();
+    }
+
+    @Test void clearingHistoryRequiresAuthenticationCsrfAndPost() throws Exception {
+        recentHistory.saveAndFlush(RecentlyViewed.builder().user(customer).product(product).build());
+        mvc.perform(post("/customer/recently-viewed/clear").with(user(customer.getUsername()).roles("USER")))
+                .andExpect(status().isForbidden());
+        mvc.perform(post("/customer/recently-viewed/clear").with(anonymous()).with(csrf()))
+                .andExpect(status().is3xxRedirection());
+        mvc.perform(get("/customer/recently-viewed/clear").with(user(customer.getUsername()).roles("USER")))
+                .andExpect(status().isMethodNotAllowed());
+        assertThat(recentHistory.findTop10ByUserIdOrderByViewedAtDesc(customer.getId())).hasSize(1);
     }
 
     private String page(String route) throws Exception {

@@ -287,8 +287,9 @@
 
         try {
             const res = await fetch('/api/notifications/latest');
-            if (!res.ok) throw new Error('Không thể tải thông báo');
+            if (!res.ok || res.redirected) throw new Error('Không thể tải thông báo');
             const list = await res.json();
+            if (!Array.isArray(list)) throw new Error('Danh sách thông báo không hợp lệ');
 
             if (!list || list.length === 0) {
                 container.innerHTML = `
@@ -305,7 +306,7 @@
                 const visuals = getNotifVisuals(item.type);
                 const timeStr = formatTimeAgo(item.createdAt);
                 const isManagerPath = window.location.pathname.startsWith('/manager');
-                let targetUrl = isManagerPath || isManagerUser ? '/manager/notifications' : '/notifications';
+                let targetUrl = (isManagerPath || isManagerUser ? '/manager/notifications' : '/notifications') + '#notif_' + encodeURIComponent(item.id);
                 if (item.relatedOrderId) {
                     targetUrl = isManagerPath || isManagerUser ? '/manager/orders/' + item.relatedOrderId : '/customer/orders/detail/' + item.relatedOrderId;
                 }
@@ -338,7 +339,8 @@
                 container.appendChild(row);
             });
         } catch (e) {
-            container.innerHTML = '<div class="p-3 text-center text-danger small">Không thể tải thông báo lúc này.</div>';
+            const pageUrl = window.location.pathname.startsWith('/manager') || isManagerUser ? '/manager/notifications' : '/notifications';
+            container.innerHTML = '<div class="p-3 text-center text-danger small">Không thể tải thông báo lúc này. <a href="' + pageUrl + '" class="d-block mt-2">Mở trang thông báo</a></div>';
         }
     }
 

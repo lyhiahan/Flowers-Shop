@@ -205,6 +205,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
+    public void clearRecentlyViewed(Long userId) {
+        if (userId != null) recentlyViewedRepository.deleteByUserId(userId);
+    }
+
+    @Override
     @Transactional(rollbackFor = IOException.class)
     public Product createProduct(ProductForm form) throws IOException {
         validateForm(form);

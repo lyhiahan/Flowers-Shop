@@ -202,36 +202,17 @@
         <span class="text-botanic-rose font-bold">Mẫu hoa đã xem gần đây</span>
       </nav>
 
-      <!-- 3. BANNER TIÊU ĐỀ TRANG "MẪU HOA BẠN VỪA XEM GẦN ĐÂY" -->
-      <div class="relative overflow-hidden rounded-2xl bg-[#FFF7F2] border border-[#EEDFD5] p-6 sm:p-8 lg:p-9 mb-8 shadow-xs">
-        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div class="max-w-2xl">
-            <div class="flex flex-wrap items-center gap-2.5 mb-2.5">
-              <h1 class="font-extrabold text-2xl sm:text-3xl text-botanic-dark flex items-center gap-2">
-                <span>🕒</span> Mẫu Hoa Bạn Vừa Xem Gần Đây
-              </h1>
-              <span id="recentCountBadge" class="px-3.5 py-1 rounded-full bg-white border border-[#E8D6CB] text-botanic-rose font-bold text-xs shadow-xs"
-                    th:text="${recentProducts != null ? #lists.size(recentProducts) + ' mẫu hoa đã xem gần nhất' : '0 mẫu hoa'}">
-                0 mẫu hoa đã xem
-              </span>
-            </div>
-            <p class="text-[14px] text-botanic-muted leading-relaxed font-medium">
-              Lịch sử các sản phẩm bạn đã bấm xem chi tiết. Dễ dàng so sánh giá, kiểu dáng và chọn ngay mẫu hoa ưng ý nhất cho người bạn thương.
-            </p>
-          </div>
-
-          <!-- Action buttons -->
-          <div class="flex flex-wrap items-center gap-3 shrink-0">
-            <a th:href="@{/}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#264E43] hover:bg-[#1E433A] text-white text-xs sm:text-sm font-bold transition-all shadow-sm">
-              <span>Tiếp tục khám phá 🌸</span>
-            </a>
-            <button id="clearHistoryBtn" type="button"
-                    class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white hover:bg-[#FAF0E8] border border-[#E5D7CD] text-[#555] hover:text-botanic-rose text-xs sm:text-sm font-bold transition-all shadow-xs">
-              <span class="material-symbols-outlined text-[17px]">delete_sweep</span>
-              <span>Xóa lịch sử đã xem</span>
-            </button>
-          </div>
-        </div>
+      <h1 class="sr-only">Mẫu hoa đã xem gần đây</h1>
+      <div th:if="${successMessage}" role="status" class="mb-4 text-sm font-semibold text-botanic-green" th:text="${successMessage}"></div>
+      <div id="recentHistoryActions" class="flex flex-wrap items-center justify-end gap-3 mb-5">
+        <form id="clearHistoryForm" th:action="@{/customer/recently-viewed/clear}" method="post" class="m-0"
+              onsubmit="return confirm('Bạn có chắc chắn muốn xóa toàn bộ lịch sử đã xem không?')">
+          <button id="clearHistoryBtn" type="submit" th:disabled="${#lists.isEmpty(recentProducts)}"
+                  class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white hover:bg-[#FAF0E8] border border-[#E5D7CD] text-[#555] hover:text-botanic-rose text-xs sm:text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+            <span class="material-symbols-outlined text-[17px]" aria-hidden="true">delete_sweep</span>
+            <span>Xóa lịch sử đã xem</span>
+          </button>
+        </form>
       </div>
 
       <!-- 4. BỘ LỌC VÀ TÌM KIẾM NHANH (Filter & Toolbar) -->
@@ -478,33 +459,6 @@
 
       products.forEach(p => grid.appendChild(p));
     }
-
-    // Clear history action
-    document.getElementById('clearHistoryBtn')?.addEventListener('click', function() {
-      window.showGlobalConfirmModal({
-        title: 'Xác Nhận Xóa Lịch Sử',
-        message: 'Bạn có chắc chắn muốn xóa toàn bộ danh sách hoa đã xem gần đây không?',
-        isDanger: true,
-        confirmText: 'Xác nhận xóa',
-        onConfirm: function() {
-          const grid = document.getElementById('productGrid');
-          const emptyState = document.getElementById('emptyRecentState');
-          const countBadge = document.getElementById('recentCountBadge');
-
-          if (grid) {
-            grid.style.opacity = '0';
-            grid.style.transform = 'scale(0.95)';
-            grid.style.transition = 'all 0.3s ease';
-            setTimeout(() => {
-              grid.remove();
-              if (emptyState) emptyState.classList.remove('hidden');
-              if (countBadge) countBadge.textContent = '0 mẫu hoa';
-              showToast('Đã xóa lịch sử xem gần đây thành công!');
-            }, 300);
-          }
-        }
-      });
-    });
 
     // Quick follow toggle
     function toggleRecentlyViewedFollowAjax(event, formEl) {
