@@ -84,37 +84,12 @@
 
 <body class="bg-[#FAF6F0] font-sans text-botanic-dark antialiased selection:bg-botanic-rose-soft selection:text-botanic-rose">
 
-  <!-- 1. THANH TIỆN ÍCH TRÊN CÙNG (Top Utility Bar) -->
-  <header class="fixed top-0 left-0 right-0 z-50 bg-white border-b border-[#EAE1DC] shadow-xs">
-    <div class="bg-[#F7EFE9] border-b border-[#EBDED4] text-[13px] text-[#555555] py-2 px-4 sm:px-8">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-2 font-bold text-[#444]">
-        <span class="text-botanic-rose">🌸</span>
-        <span>Chuỗi Cửa Hàng Hoa Tươi &amp; Điện Hoa Sài Gòn</span>
-      </div>
-        <div class="flex items-center gap-4 sm:gap-6">
-          <a class="hover:text-primary flex items-center gap-1" href="tel:0281111222">
-            <span class="material-symbols-outlined text-[15px]">call</span>028 1111 222
-          </a>
-          <span class="hidden md:flex items-center gap-1">
-            <span class="material-symbols-outlined text-[15px]">schedule</span>Giao nhanh 60–90 phút
-          </span>
-          <a class="hidden sm:flex items-center gap-1 hover:text-primary" th:href="@{/following}">
-            <span class="material-symbols-outlined text-[15px]">bookmark</span>Following
-          </a>
-          <a class="hidden lg:flex items-center gap-1 hover:text-primary" th:href="@{/stores}">
-            <span class="material-symbols-outlined text-[15px]">store</span>Hệ thống cửa hàng
-          </a>
-          <a class="flex items-center gap-1 hover:text-primary" th:href="@{/users}">
-            <span class="material-symbols-outlined text-[15px]">group</span>Người dùng
-          </a>
-        </div>
-      </div>
-    </div>
+  <!-- Main header -->
+  <header class="sticky top-0 z-50 bg-white border-b border-[#EAE1DC] shadow-xs">
 
     <!-- Main navigation bar -->
     <div class="bg-white">
-      <div class="h-20 max-w-7xl mx-auto px-4 md:px-margin-desktop flex items-center justify-between gap-space-md">
+      <div class="min-h-[80px] max-w-7xl mx-auto px-4 md:px-margin-desktop py-3 flex flex-wrap items-center justify-between gap-3">
         <!-- Brand Logo -->
         <div class="flex items-center shrink-0">
           <a class="flex items-center gap-2.5 group" th:href="@{/}">
@@ -164,11 +139,12 @@
             <span class="material-symbols-outlined text-[22px]">person</span>
           </a>
           
-          <!-- Nút Đăng Xuất mở Modal -->
-          <button type="button" onclick="openModal('signOutModal')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#E2D7D1] text-[13px] text-[#5C4A42] hover:bg-[#F5ECE7] hover:text-secondary transition-colors cursor-pointer" title="Đăng xuất">
-            <span class="material-symbols-outlined text-[18px]">logout</span>
-            <span class="hidden sm:inline">Đăng xuất</span>
-          </button>
+          <form id="wishlistLogoutForm" th:action="@{/logout}" method="post" class="m-0" onsubmit="confirmWishlistLogout(event, this)">
+            <button type="submit" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#E2D7D1] text-[13px] text-[#5C4A42] hover:bg-[#F5ECE7] transition-colors cursor-pointer" title="Đăng xuất">
+              <span class="material-symbols-outlined text-[18px]" aria-hidden="true">logout</span>
+              <span class="hidden sm:inline">Đăng xuất</span>
+            </button>
+          </form>
         </div>
       </div>
     </div>
@@ -177,7 +153,7 @@
   <!-- ==============================================
        MAIN LAYOUT CONTAINER
        ============================================== -->
-  <main class="pt-[124px] pb-space-xl max-w-7xl mx-auto px-4 md:px-margin-desktop">
+  <main class="pt-6 pb-8 max-w-7xl mx-auto px-4 md:px-margin-desktop">
 
     <!-- Flash message alerts -->
     <div th:if="${successMessage}" class="mb-4 p-4 rounded-xl bg-[#E9F3EE] border border-[#264E43]/20 flex items-center gap-3 shadow-xs">
@@ -432,30 +408,6 @@
   </main>
 
   <!-- ==============================================
-       MODALS: ĐĂNG XUẤT (#signOutModal)
-       ============================================== -->
-  <div class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" id="signOutModal">
-    <div class="bg-surface-container-lowest rounded-2xl max-w-sm w-full p-space-lg shadow-2xl text-center border border-[#EAE1DC]">
-      <div class="w-12 h-12 rounded-full bg-[#FCECEE] text-secondary flex items-center justify-center mx-auto mb-space-sm">
-        <span class="material-symbols-outlined text-[26px]">logout</span>
-      </div>
-      <h4 class="font-extrabold text-[20px] text-[#2D2424]">Đăng Xuất Tài Khoản?</h4>
-      <p class="font-body-sm text-body-sm text-on-surface-variant mt-2">
-        Bạn có chắc chắn muốn rời khỏi phiên đăng nhập? Giỏ hoa và các đơn hàng đã lưu sẽ luôn được giữ an toàn.
-      </p>
-      
-      <form th:action="@{/logout}" method="post" class="mt-space-lg grid grid-cols-2 gap-space-sm">
-        <button type="button" class="py-2.5 rounded-full bg-[#F5ECE7] text-on-surface font-bold text-[13px] hover:bg-[#EFE7E2] transition-colors border border-[#E2D7D1] cursor-pointer" onclick="closeModal('signOutModal')">
-          Ở lại
-        </button>
-        <button type="submit" class="py-2.5 rounded-full bg-secondary text-white font-bold text-[13px] shadow-xs hover:bg-[#b02f43] transition-all cursor-pointer">
-          Xác nhận
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- ==============================================
        FOOTER CHUẨN ĐỒNG BỘ THEO MẪU (BOTANICAL ATELIER)
        ============================================== -->
 <footer th:replace="~{fragments/floral :: footer}"></footer>
@@ -464,28 +416,17 @@
        SCRIPTS: MODALS, FILTERS, AJAX & LIVE SEARCH
        ============================================== -->
   <script>
-    // Modal controls
-    function openModal(id) {
-      const modal = document.getElementById(id);
-      if (modal) {
-        modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-      }
+    function confirmWishlistLogout(event, form) {
+      event.preventDefault();
+      window.showGlobalConfirmModal({
+        title: 'Đăng xuất tài khoản?',
+        message: 'Bạn có chắc chắn muốn rời khỏi phiên đăng nhập? Giỏ hoa và các đơn hàng đã lưu sẽ luôn được giữ an toàn.',
+        confirmText: 'Xác nhận',
+        cancelText: 'Ở lại',
+        isDanger: false,
+        onConfirm: function () { form.submit(); }
+      });
     }
-
-    function closeModal(id) {
-      const modal = document.getElementById(id);
-      if (modal) {
-        modal.classList.add('hidden');
-        document.body.style.overflow = '';
-      }
-    }
-
-    window.onclick = function(e) {
-      if (e.target.classList.contains('fixed') && !e.target.classList.contains('hidden')) {
-        closeModal(e.target.id);
-      }
-    };
 
     // Client-side Category Filter
     function filterCategory(categoryKey, btn) {

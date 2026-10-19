@@ -12,11 +12,12 @@
         style.id = styleId;
         style.textContent = `
             .g-modal-backdrop {
+                box-sizing: border-box;
                 position: fixed;
                 top: 0;
                 left: 0;
-                width: 100vw;
-                height: 100vh;
+                width: 100%;
+                height: 100%;
                 background: rgba(15, 23, 42, 0.6);
                 backdrop-filter: blur(5px);
                 -webkit-backdrop-filter: blur(5px);
@@ -34,12 +35,15 @@
                 visibility: visible;
             }
             .g-modal-box {
+                box-sizing: border-box;
                 background: #FFFFFF;
                 border-radius: 20px;
                 width: 100%;
                 max-width: 460px;
                 box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.06);
-                overflow: hidden;
+                max-height: calc(100vh - 32px);
+                max-height: calc(100dvh - 32px);
+                overflow-y: auto;
                 transform: scale(0.92) translateY(12px);
                 transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
                 font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -67,6 +71,7 @@
                 background: linear-gradient(135deg, #F0FDF4 0%, #E8F5E9 100%);
             }
             .g-modal-title-group {
+                min-width: 0;
                 display: flex;
                 align-items: center;
                 gap: 12px;
@@ -98,6 +103,7 @@
                 color: #355447;
             }
             .g-modal-title {
+                overflow-wrap: anywhere;
                 font-size: 17.5px;
                 font-weight: 700;
                 color: #1E293B;
@@ -110,6 +116,7 @@
                 margin-top: 2px;
             }
             .g-modal-close-btn {
+                flex-shrink: 0;
                 background: transparent;
                 border: none;
                 font-size: 22px;
@@ -125,6 +132,7 @@
                 color: #334155;
             }
             .g-modal-body {
+                overflow-wrap: anywhere;
                 padding: 22px 24px;
                 font-size: 15px;
                 color: #334155;
@@ -147,10 +155,16 @@
                 background: #F8FAFC;
                 border-top: 1px solid #F1F5F9;
                 display: flex;
+                flex-wrap: wrap;
                 justify-content: flex-end;
                 gap: 10px;
             }
             .g-modal-btn {
+                box-sizing: border-box;
+                min-height: 44px;
+                max-width: 100%;
+                white-space: normal;
+                overflow-wrap: anywhere;
                 padding: 9.5px 22px;
                 border-radius: 9999px;
                 font-size: 14.5px;
@@ -160,6 +174,7 @@
                 transition: all 0.15s ease;
                 display: inline-flex;
                 align-items: center;
+                justify-content: center;
                 gap: 6px;
             }
             .g-modal-btn-cancel {
@@ -191,6 +206,22 @@
                 background: #253D33;
                 border-color: #253D33;
             }
+            .g-modal-btn:focus-visible, .g-modal-close-btn:focus-visible {
+                outline: 2px solid #355447;
+                outline-offset: 3px;
+            }
+            @media (max-width: 480px) {
+                .g-modal-header, .g-modal-body, .g-modal-footer {
+                    padding-left: 16px;
+                    padding-right: 16px;
+                }
+                .g-modal-btn {
+                    flex: 1 1 0;
+                    min-width: 0;
+                    padding-left: 12px;
+                    padding-right: 12px;
+                }
+            }
         `;
         document.head.appendChild(style);
     }
@@ -200,7 +231,7 @@
     modalBackdrop.className = 'g-modal-backdrop';
     modalBackdrop.id = 'gModalBackdrop';
     modalBackdrop.innerHTML = `
-        <div class="g-modal-box" id="gModalBox">
+        <div class="g-modal-box" id="gModalBox" role="dialog" aria-modal="true" aria-labelledby="gModalTitle" aria-describedby="gModalMessageBox">
             <div class="g-modal-header" id="gModalHeader">
                 <div class="g-modal-title-group">
                     <div class="g-modal-icon-badge" id="gModalIconBadge">⚠️</div>

@@ -187,6 +187,46 @@ class StorefrontUiTests {
         }
     }
 
+    @Test void customerHeadersNoLongerRenderTheAuxiliaryUtilityStrip() throws Exception {
+        for (String route : List.of("/", "/customer/profile", "/products/" + product.getId(), "/customer/following",
+                "/customer/followed-stores", "/customer/recently-viewed", "/customer/profile/wishlist")) {
+            assertThat(page(route)).as(route).doesNotContain("class=\"top-subbar\"",
+                    "Chuỗi Cửa Hàng Hoa Tươi &amp; Điện Hoa Sài Gòn", "Chuỗi Cửa Hàng Hoa Tươi & Điện Hoa Sài Gòn")
+                    .contains("HOA TƯƠI SÀI GÒN");
+        }
+    }
+
+    @Test void wishlistLogoutUsesTheSharedDialogAndKeepsItsCsrfProtectedForm() throws Exception {
+        String html = page("/customer/profile/wishlist");
+        var form = Pattern.compile("(?s)<form\\b[^>]*id=\"wishlistLogoutForm\"[^>]*>.*?</form>").matcher(html);
+        assertThat(form.find()).isTrue();
+        assertThat(form.group()).contains("action=\"/logout\"", "method=\"post\"", "name=\"_csrf\"",
+                "onsubmit=\"confirmWishlistLogout(event, this)\"");
+        assertThat(html).contains("src=\"/js/global-modal.js\"")
+                .doesNotContain("id=\"signOutModal\"", "function openModal(", "pt-[124px]");
+        assertThat(html).containsPattern("<header\\b[^>]*class=\"sticky top-0 ");
+    }
+
+    @Test void bootstrapDialogsAcrossTemplatesRetainTheirOpaqueContentContainers() throws Exception {
+        int checked = 0;
+        try (var files = Files.walk(Path.of("src/main/resources/templates"))) {
+            for (Path file : files.filter(p -> p.toString().endsWith(".html")).toList()) {
+                String source = Files.readString(file);
+                var modals = Pattern.compile("<div\\b[^>]*\\bclass=\"modal\\s[^\"]*\"[^>]*>").matcher(source);
+                java.util.ArrayList<Integer> starts = new java.util.ArrayList<>();
+                while (modals.find()) starts.add(modals.start());
+                for (int i = 0; i < starts.size(); i++) {
+                    String modal = source.substring(starts.get(i), i + 1 < starts.size() ? starts.get(i + 1) : source.length());
+                    assertThat(modal).as(file + " modal " + i)
+                            .containsPattern("class=\"[^\"]*\\bmodal-dialog\\b[^\"]*\"")
+                            .containsPattern("class=\"[^\"]*\\bmodal-content\\b[^\"]*\"");
+                    checked++;
+                }
+            }
+        }
+        assertThat(checked).isGreaterThan(10);
+    }
+
     private String page(String route) throws Exception {
         return mvc.perform(get(route).with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
