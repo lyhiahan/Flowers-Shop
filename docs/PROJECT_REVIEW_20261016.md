@@ -1,12 +1,30 @@
-# Đánh giá dự án ngày 16/10/2026
+# Đánh giá dự án: ảnh chụp 16/10 và cập nhật 19/10/2026
 
 ## Kết luận
 
 Dự án đã triển khai đủ các công nghệ trong yêu cầu: Spring Boot, Thymeleaf, Bootstrap, JPA, SQL Server, WebSocket, JWT và Cloudinary. Cấu trúc phân lớp và các phân hệ khách hàng, quản lý chi nhánh, quản trị viên phù hợp bài toán chuỗi cửa hàng. Phần nghiệp vụ và phân quyền có bộ kiểm thử tương đối rộng.
 
-Tuy nhiên, chưa thể kết luận hoàn thiện 100% hoặc chắc chắn đạt 10 điểm: bộ test hiện còn thất bại, database thật chưa cập nhật theo mã nguồn mới nhất, tồn kho cũ chưa đối soát xong, logic xác định vùng giao demo có lỗi và tài liệu còn thông tin cũ.
+**Trạng thái mới nhất ngày 19/10:** các lỗi code/dữ liệu trong đánh giá gốc đã được xử lý: bộ test đạt ở lần chạy đầy đủ có quyền localhost gần nhất; `RentalShop` đã lên Flyway V10; 81 dòng kho nhân bản đã được xác nhận, sao lưu và xóa có lưu audit; vùng giao demo dùng lựa chọn `NEAR`/`FAR`/`OUTSIDE` thay vì đoán từ địa chỉ; README và tài liệu tổng hợp đã được cập nhật. Lần chạy lại trong môi trường hiện tại bị chặn ở test cần cổng localhost (chi tiết dưới đây), nên **không gọi lần chạy này là xanh toàn bộ**. Các số liệu và nhận định cũ ở phần 1–9 bên dưới chỉ là **ảnh chụp lịch sử ngày 16/10**, không mô tả trạng thái hiện tại.
 
-Phạm vi đánh giá gốc ngày 16/10: mã nguồn tại commit `0b6bcac` (`merge code`), test tự động, đọc dữ liệu SQL Server và rubric đã cung cấp. Các số liệu test bên dưới là **ảnh chụp tại thời điểm 16/10**, không phải kết quả mới nhất. Đợt sửa tiếp ngày 19/10 đã cập nhật test, vùng giao demo, tài liệu và thử Flyway V9–V10 trên bản sao; `RentalShop` gốc vẫn V8. Xem kết quả mới trong phần cập nhật cuối tài liệu.
+Điều này **không bảo đảm 100% hay 10 điểm**: vẫn cần kiểm thử nghiệp vụ cuối bằng các vai trò trên database hiện tại, đối chiếu phần thanh toán do thành viên khác làm, rà soát bí mật từng có trong Git và chuẩn bị bằng chứng thuyết trình theo rubric.
+
+Phạm vi đánh giá gốc ngày 16/10: mã nguồn tại commit `0b6bcac` (`merge code`), test tự động, đọc dữ liệu SQL Server và rubric đã cung cấp. Các số liệu test bên dưới là **ảnh chụp tại thời điểm 16/10**, không phải kết quả mới nhất. Xem diễn tiến và kết quả sau sửa ở phần cuối tài liệu.
+
+### Đối chiếu năm vấn đề với trạng thái hiện tại
+
+| Vấn đề trong kết luận gốc | Trạng thái 19/10/2026 |
+| --- | --- |
+| Test thất bại | Lần chạy đầy đủ **có quyền localhost** gần nhất: Java 622 ca, 616 đạt và 6 bỏ qua có chủ đích; JavaScript 102/102 đạt. Lần chạy lại trong sandbox hiện tại: Java 619 ca được ghi nhận, 611 đạt, 6 bỏ qua, 2 lỗi khởi động Tomcat do `Permission denied: connect` ở `ChatSessionIntegrationTests` và `SystemHttpSmokeTests`; JavaScript 96/96 ca không cần gateway đạt, 6 ca gateway không xác nhận lại vì `EACCES` localhost. Đây là giới hạn môi trường kiểm tra, chưa phải bằng chứng lỗi nghiệp vụ; cần chạy lại trọn bộ ngoài sandbox. |
+| Database thật còn V8 | `RentalShop` đã được sao lưu, thử V9–V10 trên bản sao rồi nâng lên Flyway V10; ứng dụng đã khởi động trên SQL Server thật. |
+| Kho cũ lệch chi nhánh | Người dùng xác nhận 81 dòng là dữ liệu nhân bản. Đã sao lưu, diễn tập trên bản sao và xóa đúng 81 dòng/2.003 đơn vị trên `RentalShop`, lưu audit; còn 73 dòng/1.336 đơn vị, 0 dòng lệch, đơn hàng không đổi. |
+| Sai vùng giao demo | Checkout và báo phí dùng mã vùng được người mua chọn: `NEAR`, `FAR`, `OUTSIDE`; không còn dò chuỗi “Quận 1” trong địa chỉ để suy khoảng cách. Test hồi quy đã được thêm. |
+| Tài liệu cũ | README đã sửa sáu liên kết gãy; tài liệu tổng hợp và phần kết luận này đã cập nhật. Những mục kiểm tra bên dưới được giữ làm lịch sử, không phải danh sách lỗi đang mở. |
+
+**Giới hạn còn lại:** cần chạy lại trọn bộ test với quyền localhost; chưa kiểm thử thủ công toàn bộ luồng với nhiều vai trò sau lần xóa kho; 6 test live/integration chủ động bỏ qua; thanh toán thật không nằm trong bản demo hiện tại; chưa xác nhận đã thay các khóa từng xuất hiện trong lịch sử Git. Không dùng kết quả trên để tự cam kết điểm tối đa.
+
+---
+
+**Phần 1–9: đánh giá gốc ngày 16/10, giữ để đối chiếu lịch sử.**
 
 ## 1. Cấu trúc
 
@@ -217,3 +235,4 @@ Sau các bước này mới nên chốt bộ source dùng để nộp và quay v
 - Sau khi người dùng yêu cầu xóa, đã tạo backup `RentalShop_before_duplicate_delete_20261019_0856_prepare.bak`, phục hồi sang `CodexDupDeleteCopy_20261019_0856` và chạy đúng giao dịch xóa thử: 81 dòng/2.003 đơn vị bị xóa, còn 73 dòng/1.336 đơn vị; database gốc không đổi ở bước diễn tập.
 - Trước khi áp dụng thật đã xác minh ứng dụng không lắng nghe cổng 8080, tạo và kiểm tra backup thứ hai `RentalShop_before_duplicate_delete_20261019_0856_apply.bak`. Lệnh xóa trên `RentalShop` lưu toàn bộ giá trị gốc ở `dbo.inventory_duplicate_deletion_20261019`. Kiểm tra độc lập sau xóa: 73 dòng/1.336 đơn vị, 0 dòng lệch và 0 tồn âm; 26 đơn/28 chi tiết đơn giữ nguyên, đơn `#23` vẫn `CANCELLED`.
 - Bộ code mới bỏ qua hoàn kho vào chi nhánh không sở hữu sản phẩm khi hủy các đơn lịch sử có dòng kho nhân bản. Test hồi quy cho trường hợp này đã đạt trong bộ Java 622 ca. Cần chạy ứng dụng bằng bản code mới khi tiếp tục thao tác các đơn lịch sử.
+- Sau khi tạo lại bản biên dịch cục bộ, ứng dụng đã khởi động trên `RentalShop` V10 sau xóa kho. HTTP smoke: `/`, `/products`, `/login` trả 200; `/manager/products` chuyển 302 sang đăng nhập khi chưa xác thực. Đã dừng máy chủ thử nghiệm.
