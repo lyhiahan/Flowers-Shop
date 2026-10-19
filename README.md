@@ -66,7 +66,7 @@ Mở `http://localhost:8080`. Các biến môi trường trên chỉ tồn tại
 
 ### SQL Express trên máy hiện tại
 
-Database đã chọn là `RentalShop` trong `SQLEXPRESS` (4 cửa hàng, 14 người dùng, 21 đơn khi kiểm tra). Instance này đang dùng cổng động `53735`, không phải `1433`. Profile dev kết nối bằng `instanceName=SQLEXPRESS`; SQL Server Browser xác định cổng hiện hành, tránh phụ thuộc cổng động sau restart. Instance `SQLEXPRESS01` chứa database khác, không được sửa.
+Database đã chọn là `RentalShop` trong `SQLEXPRESS`. Cổng TCP hiện tại là `53735`, không phải `1433`; URL mặc định của profile `dev` dùng cổng này. Nếu SQL Server đổi cổng sau khi khởi động lại, đặt `SPRING_DATASOURCE_URL` theo cổng mới trước khi chạy ứng dụng. Instance `SQLEXPRESS01` chứa database khác, không được sửa.
 
 ```powershell
 # Đọc trạng thái Flyway, không sửa database:
@@ -101,7 +101,9 @@ Khách vãng lai là phiên **chưa đăng nhập** (anonymous), không cần l�
 
 ## Database hiện có và Flyway
 
-Flyway là nơi quản lý schema ở môi trường chạy. Các bản `V1`–`V8` tạo schema mới hoặc bổ sung bảng/cột/ràng buộc, chuyển role cũ, cài schema chat, ràng buộc đánh giá, nhật ký giám sát, thẻ sản phẩm trong chat và phân loại sản phẩm theo nhiều dịp. V5/V6 chỉ thêm bảng/index/ràng buộc mới, không sửa/xóa hội thoại, tin nhắn hoặc đơn cũ; V7 chuyển danh mục như mô tả bên trên; V8 bổ sung trạng thái bán/xóa theo chi nhánh. File SQL trong `sql/migrations` và `resources/db` là tài liệu lịch sử; không cần chạy chúng lại. Các runner migration cũ chỉ được bật ở profile `test` để giữ kiểm thử H2.
+Flyway là nơi quản lý schema ở môi trường chạy. Các bản `V1`–`V8` tạo schema và phân loại sản phẩm; `V9` mở rộng phương thức thanh toán demo, `V10` thêm các cột đối soát tiền demo. Database `RentalShop` cục bộ đã lên **V10 ngày 19/10/2026** sau khi sao lưu và thử trên bản sao; môi trường khác vẫn phải kiểm tra `flyway_schema_history` riêng. **Spring Boot tự chạy migration đang chờ khi khởi động**, vì vậy `scripts/sqlserver.ps1 -Action run` chặn riêng `RentalShop` chưa lên V10. File SQL trong `sql/migrations` và `resources/db` là tài liệu lịch sử; không cần chạy chúng lại. Các runner migration cũ chỉ được bật ở profile `test` để giữ kiểm thử H2.
+
+81 dòng kho lệch đã được người dùng xác nhận là dữ liệu nhân bản. Phương án cô lập và lưu giá trị gốc đã đạt trên bản sao SQL Server; `RentalShop` thật **chưa** đưa 2.003 đơn vị nhân bản về 0 vì thao tác này cần phê duyệt riêng. Chi tiết tại [báo cáo đối soát kho](docs/DOI_SOAT_KHO_LECH_CHI_NHANH_20261019.md).
 
 Với **database rỗng**, chạy ứng dụng để Flyway áp dụng từ `V1`. Với **database đã có dữ liệu nhưng chưa có `flyway_schema_history`**, sao lưu và thử trên bản sao trước. Xác nhận URL database và schema `dbo`, sau đó chủ động ghi nhận baseline:
 
@@ -130,11 +132,11 @@ Access token là JWT HS256, thời hạn 15 phút; refresh token ngẫu nhiên c
 
 API Bearer hiện dùng được với chat HTTP, thông báo và API tồn kho. Kết nối WebSocket `/ws`, `/ws-chat` của giao diện tiếp tục xác thực bằng session; không truyền JWT trong URL. STOMP kiểm tra quyền gửi/subscribe theo người dùng và chi nhánh. Quyền tổng quát là `ADMIN`, `MANAGER`, `USER`; nhân sự từng cửa hàng được giới hạn thêm bởi ownership/membership.
 
-Chat khách hàng có ba điểm vào: **Tài khoản → Trò chuyện với hệ thống** mở trực tiếp CSKH/admin; nút nổi **Nhắn tin** mở tất cả lịch sử cửa hàng và hệ thống, không tạo/chọn người nhận tự động; **Nhắn tin với cửa hàng** ở chi tiết sản phẩm mở đúng chi nhánh và hiện thẻ sản phẩm (ảnh, tên, giá, liên kết) sẵn để hỏi. Không còn nút mở CSKH trong hộp lịch sử chung. Chỉ khi khách bấm Gửi, backend xác minh lại sản phẩm/chi nhánh và lưu thẻ sản phẩm cùng tin nhắn; cửa hàng nhận thẻ qua WebSocket và xem lại trong lịch sử. Tên/ảnh/giá được chụp tại lúc gửi, không đổi theo lần sửa sản phẩm về sau. Sản phẩm dùng chung phải có chi nhánh bán hợp lệ; liên hệ từ đơn vẫn dùng chi nhánh đã ghi trên đơn và kiểm tra sở hữu. Không tự gửi tin chỉ vì mở chat. [Chi tiết luồng và cách thử](docs/CHAT_CUSTOMER_ENTRY_20261013.md).
+Chat khách hàng có ba điểm vào: **Tài khoản → Trò chuyện với hệ thống** mở trực tiếp CSKH/admin; nút nổi **Nhắn tin** mở tất cả lịch sử cửa hàng và hệ thống, không tạo/chọn người nhận tự động; **Nhắn tin với cửa hàng** ở chi tiết sản phẩm mở đúng chi nhánh và hiện thẻ sản phẩm (ảnh, tên, giá, liên kết) sẵn để hỏi. Không còn nút mở CSKH trong hộp lịch sử chung. Chỉ khi khách bấm Gửi, backend xác minh lại sản phẩm/chi nhánh và lưu thẻ sản phẩm cùng tin nhắn; cửa hàng nhận thẻ qua WebSocket và xem lại trong lịch sử. Tên/ảnh/giá được chụp tại lúc gửi, không đổi theo lần sửa sản phẩm về sau. Sản phẩm dùng chung phải có chi nhánh bán hợp lệ; liên hệ từ đơn vẫn dùng chi nhánh đã ghi trên đơn và kiểm tra sở hữu. Không tự gửi tin chỉ vì mở chat. Xem [tài liệu tổng hợp](docs/TAI_LIEU_TONG_HOP_DU_AN.md).
 
 Quản lý có **Hộp thư khách hàng** của chi nhánh đang chọn và tab **Hỗ trợ từ admin** riêng; nút **Liên hệ admin về vận hành** mở một hội thoại nội bộ chung cho đội quản lý chi nhánh (`BRANCH_SUPPORT`). Không chat như người mua với chi nhánh khác hoặc trộn hỗ trợ cá nhân. API inbox/history/images được giới hạn theo chi nhánh có quyền. WebSocket bind chi nhánh tại CONNECT, chỉ cho subscribe `/user/queue/chat.store.{storeId}` và `/user/queue/chat.support.{storeId}` tương ứng, kiểm tra lại quyền khi gửi. Tài khoản phụ trách nhiều chi nhánh phải chuyển chi nhánh/mở lại trang để dùng hộp thư tương ứng. Hội thoại cũ được giữ trong database, không xóa lịch sử.
 
-Admin mở **Trung tâm hội thoại** (`/admin/chat`) với ba hộp thư: CSKH khách hàng, Hỗ trợ chi nhánh và Giám sát chỉ đọc. Hai kênh hỗ trợ cho phép trả lời dưới tài khoản admin; chat khách–chi nhánh chỉ được đọc, không gửi văn bản/ảnh, sửa/xóa tin hay giả danh cửa hàng. Bộ lọc dùng ID chi nhánh, tên/tên đăng nhập người liên hệ và ngày hoạt động gần nhất của hội thoại. Danh sách giám sát không hiện nội dung tin cuối; mở/tải lịch sử phải ghi nhật ký admin–hội thoại–thời điểm–mốc tin cũ trước khi trả nội dung và không cache. Không ghi được nhật ký thì từ chối trả lịch sử. Nhật ký có màn hình riêng `/admin/chat/access-logs`; không có chức năng sửa/xóa. Giám sát dùng tải lịch sử có nhật ký, không subscribe queue riêng của cửa hàng. [Chi tiết và cách thử](docs/CHAT_SUPPORT_MONITOR_20261013.md).
+Admin mở **Trung tâm hội thoại** (`/admin/chat`) với ba hộp thư: CSKH khách hàng, Hỗ trợ chi nhánh và Giám sát chỉ đọc. Hai kênh hỗ trợ cho phép trả lời dưới tài khoản admin; chat khách–chi nhánh chỉ được đọc, không gửi văn bản/ảnh, sửa/xóa tin hay giả danh cửa hàng. Bộ lọc dùng ID chi nhánh, tên/tên đăng nhập người liên hệ và ngày hoạt động gần nhất của hội thoại. Danh sách giám sát không hiện nội dung tin cuối; mở/tải lịch sử phải ghi nhật ký admin–hội thoại–thời điểm–mốc tin cũ trước khi trả nội dung và không cache. Không ghi được nhật ký thì từ chối trả lịch sử. Nhật ký có màn hình riêng `/admin/chat/access-logs`; không có chức năng sửa/xóa. Giám sát dùng tải lịch sử có nhật ký, không subscribe queue riêng của cửa hàng. Xem [tài liệu tổng hợp](docs/TAI_LIEU_TONG_HOP_DU_AN.md).
 
 ## Profile và dịch vụ ngoài
 
@@ -167,14 +169,18 @@ Hiện chưa có API key/người gửi được cấu hình tại máy kiểm t
 
 Java test dùng H2 ở chế độ SQL Server, không ghi database SQL Server đang có. Test WebSocket thực tế cần được phép mở kết nối localhost. Mockito được nạp bằng Java agent để tránh tự attach bị treo. JavaScript test cần Node.js 22; trên máy hiện tại đã có runtime portable trong `.tools`.
 
+Kết quả ngày 19/10/2026: Java 622 ca (616 đạt, 6 bỏ qua có chủ đích, không thất bại/lỗi); JavaScript 102/102 ca đạt. Kiểm tra sổ số dư SQL Server V10 chỉ đọc đạt khi chạy riêng; test Cloudinary live không nằm trong lượt chạy mặc định.
+
+Phí giao hàng demo dùng **vùng do người mua chọn** (gần/xa/ngoài phạm vi) để đối chiếu biểu phí của chi nhánh; hệ thống không đo khoảng cách bản đồ và không suy từ chuỗi địa chỉ như “Quận 1”. Không thể đặt hàng khi chọn ngoài phạm vi hoặc khi không có biểu phí phù hợp. Đối soát tồn kho cũ: [báo cáo 19/10/2026](docs/DOI_SOAT_KHO_LECH_CHI_NHANH_20261019.md).
+
 Script Maven tương thích Windows PowerShell 5.1 và PowerShell 7: kiểm tra `java -version` bằng process stream riêng để không coi stderr chứa thông tin phiên bản là `NativeCommandError`. Nếu Java mặc định là 26, script bỏ qua và chọn JDK 21 portable của dự án; không cần gỡ Java 26. Xem toolchain bằng `./scripts/maven.ps1 -MavenArguments @('--version')` (không dùng `-v`, có thể bị PowerShell hiểu là Verbose).
 
-Test Cloudinary live chỉ chạy khi chủ động đặt `-Dcloudinary.live=true` và cung cấp credential thật; test tạo và xóa riêng ảnh kiểm thử. SQL Server đã được kiểm tra offline và live trên database rỗng/bản sao; RentalShop trên SQLEXPRESS đã nâng cấp Flyway V4 và chạy website thật thành công sau khi người dùng chấp thuận. Môi trường triển khai khác vẫn phải backup/thử migration trên bản sao riêng.
+Test Cloudinary live chỉ chạy khi chủ động đặt `-Dcloudinary.live=true` và cung cấp credential thật; test tạo và xóa riêng ảnh kiểm thử. Trước khi nâng cấp SQL Server trên máy khác vẫn cần sao lưu, thử bản sao và kiểm tra dữ liệu sau migration; không suy từ phiên bản trong mã nguồn rằng database của máy đó đã được nâng cấp.
 
-Đối chiếu yêu cầu, các thay đổi và kết quả kiểm thử: [báo cáo kỹ thuật](docs/REQUIREMENTS_AUDIT_20261012.md).
+Đối chiếu yêu cầu, các thay đổi và kết quả kiểm thử: [báo cáo kỹ thuật](docs/PROJECT_REVIEW_20261016.md).
 
-Đánh giá chạy thử mới nhất, bộ lọc báo cáo, sửa OTP và checklist dịch vụ còn cần cấu hình: [báo cáo hệ thống](docs/SYSTEM_REVIEW_20261012.md).
+Đánh giá chạy thử và các việc còn lại: [báo cáo hệ thống](docs/PROJECT_REVIEW_20261016.md).
 
-Nguyên nhân cổng 1433, backup, migration thật và lệnh chạy SQL Express: [báo cáo sửa SQL Server](docs/SQLSERVER_REPAIR_20261012.md).
+Thiết lập SQL Server và chạy ứng dụng: [hướng dẫn cài đặt](docs/HUONG_DAN_SETUP_VA_DANH_SACH_PROMPT_AI.md).
 
-OTP gửi đúng người nhận, không điền Gmail App Password vào code: [hướng dẫn cấu hình mail API](docs/OTP_EMAIL_SETUP_20261012.md).
+OTP gửi đúng người nhận, không điền Gmail App Password vào code: xem `scripts/configure-mail.ps1` và [tài liệu tổng hợp](docs/TAI_LIEU_TONG_HOP_DU_AN.md).

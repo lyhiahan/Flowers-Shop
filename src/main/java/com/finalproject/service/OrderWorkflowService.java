@@ -251,13 +251,18 @@ public class OrderWorkflowService {
 
     private Order cancel(Order order) {
         java.util.Map<Long, StoreInventory> stock = new java.util.HashMap<>();
-        for (Long productId : order.getOrderDetails().stream().map(d -> d.getProduct().getId()).distinct().sorted().toList()) {
+        // Legacy orders can reference a duplicated inventory row at a branch that does not own
+        // the product. Those rows are quarantined, so cancellation must not recreate fake stock.
+        for (Long productId : order.getOrderDetails().stream()
+                .filter(d -> ProductAvailability.supportsBranch(d.getProduct(), order.getPickupStore()))
+                .map(d -> d.getProduct().getId()).distinct().sorted().toList()) {
             StoreInventory row = inventories.findLockedStock(order.getPickupStore().getId(), productId)
                     .orElseThrow(() -> new IllegalStateException("Không tìm thấy tồn kho của đơn hàng."));
             entityManager.refresh(row, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
             stock.put(productId, row);
         }
         for (OrderDetail detail : order.getOrderDetails()) {
+            if (!ProductAvailability.supportsBranch(detail.getProduct(), order.getPickupStore())) continue;
             StoreInventory inventory = stock.get(detail.getProduct().getId());
             inventory.setQuantity(Math.addExact(inventory.getQuantity(), detail.getQuantity()));
             inventories.save(inventory);

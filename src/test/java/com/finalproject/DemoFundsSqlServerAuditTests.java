@@ -2,35 +2,28 @@ package com.finalproject;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
-import org.springframework.core.env.PropertiesPropertySource;
-import org.springframework.core.env.StandardEnvironment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.DriverManager;
-import java.util.Properties;
 
 import static org.assertj.core.api.Assertions.*;
 
-/** Opt-in read-only audit of the configured development database; no business rows are changed. */
+/** Opt-in read-only audit of RentalShop; explicit connection settings prevent fallback to a stale database. */
 @EnabledIfSystemProperty(named = "demo.funds.live", matches = "true")
 class DemoFundsSqlServerAuditTests {
     @Test void migratedBalancesMatchHeldOrderSnapshots() throws Exception {
-        var properties = new Properties();
-        try (var reader = Files.newBufferedReader(Path.of("src/main/resources/application-dev.properties"), StandardCharsets.UTF_8)) {
-            properties.load(reader);
-        }
-        var environment = new StandardEnvironment();
-        environment.getPropertySources().addLast(new PropertiesPropertySource("development", properties));
-        String url = environment.getRequiredProperty("spring.datasource.url");
-        try (var connection = DriverManager.getConnection(url, environment.getRequiredProperty("spring.datasource.username"),
-                environment.getRequiredProperty("spring.datasource.password"))) {
+        String url = System.getenv("SPRING_DATASOURCE_URL");
+        String username = System.getenv("SPRING_DATASOURCE_USERNAME");
+        String password = System.getenv("SPRING_DATASOURCE_PASSWORD");
+        assertThat(url).as("Explicit RentalShop JDBC URL is required")
+                .containsIgnoringCase(";databaseName=RentalShop;");
+        assertThat(username).as("Explicit SQL login is required").isNotBlank();
+        assertThat(password).as("Explicit SQL password is required").isNotBlank();
+        try (var connection = DriverManager.getConnection(url, username, password)) {
             connection.setReadOnly(true);
             var jdbc = new JdbcTemplate(new SingleConnectionDataSource(connection, true));
-            assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '6' AND success = 1", Integer.class)).isEqualTo(1);
+            assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '10' AND success = 1", Integer.class)).isEqualTo(1);
             assertThat(jdbc.queryForObject("""
                     SELECT COUNT(*) FROM stores s
                     WHERE s.pending_balance < 0 OR s.pending_balance <> COALESCE(

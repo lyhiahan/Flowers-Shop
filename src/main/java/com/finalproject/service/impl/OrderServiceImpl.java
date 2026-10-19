@@ -82,6 +82,14 @@ public class OrderServiceImpl implements OrderService {
     public List<Order> checkout(String username, List<Long> selectedCartItemIds, PaymentMethod paymentMethod,
                                String recipientName, String recipientPhone, String recipientAddress, String greetingMessage, String voucherCode,
                                LocalDate deliveryDate, String shippingMethod, Long pickupStoreId, Long deliveryUnitId) {
+        return checkoutWithZone(username, selectedCartItemIds, paymentMethod, recipientName, recipientPhone, recipientAddress,
+                greetingMessage, voucherCode, deliveryDate, shippingMethod, pickupStoreId, deliveryUnitId, "NEAR");
+    }
+
+    private List<Order> checkoutWithZone(String username, List<Long> selectedCartItemIds, PaymentMethod paymentMethod,
+                               String recipientName, String recipientPhone, String recipientAddress, String greetingMessage, String voucherCode,
+                               LocalDate deliveryDate, String shippingMethod, Long pickupStoreId, Long deliveryUnitId,
+                               String deliveryZone) {
         if (paymentMethod != PaymentMethod.COD && paymentMethod != PaymentMethod.BANK_TRANSFER
                 && paymentMethod != PaymentMethod.MOMO && paymentMethod != PaymentMethod.MOMO_DEMO) {
             throw new IllegalArgumentException("Phương thức thanh toán chưa được hỗ trợ.");
@@ -226,7 +234,7 @@ public class OrderServiceImpl implements OrderService {
 
         // Áp dụng voucher nếu có (Đảm bảo giá sau giảm không bao giờ thấp hơn tổng giá nhập)
         com.finalproject.service.CheckoutQuote amounts = calculateAmounts(totalAmount, totalImportPrice,
-                assignedStore, voucherCode, shippingMethod, deliveryUnitId, finalRecipientAddress, items);
+                assignedStore, voucherCode, shippingMethod, deliveryUnitId, deliveryZone, items);
         BigDecimal discount = amounts.discount();
         if (voucherCode != null && !voucherCode.trim().isEmpty()) {
             Voucher v = voucherService.findByCode(voucherCode.trim());
@@ -303,6 +311,16 @@ public class OrderServiceImpl implements OrderService {
     public com.finalproject.service.CheckoutQuote quote(String username, List<Long> selectedCartItemIds,
                                                        String recipientAddress, String voucherCode,
                                                        String shippingMethod, Long pickupStoreId, Long deliveryUnitId) {
+        return quote(username, selectedCartItemIds, recipientAddress, voucherCode, shippingMethod,
+                pickupStoreId, deliveryUnitId, "NEAR");
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public com.finalproject.service.CheckoutQuote quote(String username, List<Long> selectedCartItemIds,
+                                                       String recipientAddress, String voucherCode,
+                                                       String shippingMethod, Long pickupStoreId, Long deliveryUnitId,
+                                                       String deliveryZone) {
         if (!"PICKUP".equals(shippingMethod) && !"DELIVERY".equals(shippingMethod)) {
             throw new IllegalArgumentException("Hình thức nhận hàng không hợp lệ.");
         }
@@ -356,18 +374,27 @@ public class OrderServiceImpl implements OrderService {
                     : p.getPriceBuy() != null ? p.getPriceBuy().multiply(BigDecimal.valueOf(0.6)) : BigDecimal.ZERO;
             importTotal = importTotal.add(cost.multiply(BigDecimal.valueOf(item.getQuantity())));
         }
-        String effectiveAddress = (recipientAddress != null && !recipientAddress.isBlank()) ? recipientAddress : user.getAddress();
-        return calculateAmounts(subtotal, importTotal, store, voucherCode, shippingMethod, deliveryUnitId, effectiveAddress, items);
+        return calculateAmounts(subtotal, importTotal, store, voucherCode, shippingMethod, deliveryUnitId,
+                deliveryZone, items);
     }
 
     @Override @Transactional
     public List<Order> checkout(String username, List<Long> ids, PaymentMethod method, String name, String phone,
             String address, String greeting, String voucher, LocalDate date, String shipping, Long storeId, Long deliveryId,
             java.time.LocalTime time) {
+        return checkout(username, ids, method, name, phone, address, greeting, voucher, date,
+                shipping, storeId, deliveryId, time, "NEAR");
+    }
+
+    @Override @Transactional
+    public List<Order> checkout(String username, List<Long> ids, PaymentMethod method, String name, String phone,
+            String address, String greeting, String voucher, LocalDate date, String shipping, Long storeId, Long deliveryId,
+            java.time.LocalTime time, String deliveryZone) {
         if (date == null || time == null) throw new IllegalArgumentException("Vui lòng chọn ngày và giờ nhận hoa.");
         if (java.time.LocalDateTime.of(date, time).isBefore(java.time.LocalDateTime.now(clock)))
             throw new IllegalArgumentException("Ngày giờ nhận hoa không được ở quá khứ.");
-        var created = checkout(username, ids, method, name, phone, address, greeting, voucher, date, shipping, storeId, deliveryId);
+        var created = checkoutWithZone(username, ids, method, name, phone, address, greeting, voucher, date,
+                shipping, storeId, deliveryId, deliveryZone);
         created.forEach(order -> order.setDeliveryTime(time));
         orderRepository.saveAll(created);
         return created;
@@ -384,95 +411,10 @@ public class OrderServiceImpl implements OrderService {
                 || catName.contains("kệ") || catName.contains("chậu") || catName.contains("khung") || catName.contains("phụ kiện");
     }
 
-    private double estimateDistanceKm(Store store, String address) {
-        if (address == null || address.isBlank()) return 3.0; // Bán kính gần chi nhánh
-        String norm = address.toLowerCase();
-
-        // 1. Kiểm tra các khu vực ngoại vi/ngoài tỉnh cách xa > 15km
-        if (norm.contains("củ chi") || norm.contains("cu chi")
-                || norm.contains("cần giờ") || norm.contains("can gio")
-                || norm.contains("hóc môn") || norm.contains("hoc mon")
-                || norm.contains("hà nội") || norm.contains("ha noi")
-                || norm.contains("đà nẵng") || norm.contains("da nang")
-                || norm.contains("long an") || norm.contains("tiền giang") || norm.contains("bến tre")
-                || norm.contains("vũng tàu") || norm.contains("đồng nai") || norm.contains("ngoài 15km")
-                || norm.contains("> 15km") || norm.contains(">15km")) {
-            return 25.0; // Ngoài 15km
-        }
-
-        String storeName = (store != null && store.getName() != null) ? store.getName().toLowerCase() : "";
-
-        // 2. Chi nhánh Cao Lãnh (Đồng Tháp)
-        if (storeName.contains("cao lãnh") || storeName.contains("cao lanh")) {
-            if (norm.contains("cao lãnh") || norm.contains("cao lanh") || norm.contains("phường 1")
-                    || norm.contains("phường 2") || norm.contains("phường 3") || norm.contains("phường 4")
-                    || norm.contains("an bình") || norm.contains("mỹ trà")) {
-                return 3.0; // < 5km
-            }
-            if (norm.contains("lấp vò") || norm.contains("sa đéc") || norm.contains("tháp mười")
-                    || norm.contains("đồng tháp") || norm.contains("huyện cao lãnh")) {
-                return 9.0; // 5 - 15km
-            }
-            return 25.0; // Ngoài 15km
-        }
-
-        // 3. Chi nhánh TP. Thủ Đức (Làng Đại Học)
-        if (storeName.contains("thủ đức") || storeName.contains("thu duc")) {
-            if (norm.contains("thủ đức") || norm.contains("thu duc") || norm.contains("linh chiểu")
-                    || norm.contains("linh trung") || norm.contains("linh tây") || norm.contains("bình thọ")
-                    || norm.contains("tam phú") || norm.contains("dĩ an") || norm.contains("quận 9") || norm.contains("q9")) {
-                return 3.5; // < 5km
-            }
-            if (norm.contains("quận 2") || norm.contains("q2") || norm.contains("bình thạnh")
-                    || norm.contains("gò vấp") || norm.contains("quận 1") || norm.contains("q1")) {
-                return 8.5; // 5 - 15km
-            }
-            if (norm.contains("quận 7") || norm.contains("quận 8") || norm.contains("bình chánh")
-                    || norm.contains("nhà bè")) {
-                return 18.0; // > 15km
-            }
-            return 8.0;
-        }
-
-        // 4. Chi nhánh Quận 7 (Phú Mỹ Hưng)
-        if (storeName.contains("quận 7") || storeName.contains("q7") || storeName.contains("phú mỹ hưng")) {
-            if (norm.contains("quận 7") || norm.contains("q7") || norm.contains("phú mỹ hưng")
-                    || norm.contains("tân phong") || norm.contains("tân phú") || norm.contains("tân hưng")
-                    || norm.contains("nhà bè")) {
-                return 3.0; // < 5km
-            }
-            if (norm.contains("quận 4") || norm.contains("q4") || norm.contains("quận 1") || norm.contains("q1")
-                    || norm.contains("quận 8") || norm.contains("q8") || norm.contains("quận 5")
-                    || norm.contains("bình chánh")) {
-                return 7.5; // 5 - 15km
-            }
-            if (norm.contains("thủ đức") || norm.contains("quận 12") || norm.contains("gò vấp")) {
-                return 18.0; // > 15km
-            }
-            return 8.0;
-        }
-
-        // 5. Chi nhánh Bến Thành (Quận 1) - Trung tâm
-        if (norm.contains("quận 1") || norm.contains("q1") || norm.contains("q.1") || norm.contains("bến thành")
-                || norm.contains("quận 3") || norm.contains("q3") || norm.contains("quận 4") || norm.contains("q4")) {
-            return 2.5; // < 5km
-        }
-        if (norm.contains("quận 5") || norm.contains("q5") || norm.contains("quận 10") || norm.contains("q10")
-                || norm.contains("bình thạnh") || norm.contains("phú nhuận") || norm.contains("tân bình")
-                || norm.contains("quận 8") || norm.contains("gò vấp") || norm.contains("quận 7")) {
-            return 7.0; // 5 - 15km
-        }
-        if (norm.contains("quận 12") || norm.contains("thủ đức") || norm.contains("bình tân")) {
-            return 12.0; // 5 - 15km
-        }
-
-        return 4.0;
-    }
-
     private com.finalproject.service.CheckoutQuote calculateAmounts(BigDecimal subtotal, BigDecimal importTotal,
                                                                    Store store, String voucherCode,
                                                                    String shippingMethod, Long deliveryUnitId,
-                                                                   String recipientAddress, List<CartItem> items) {
+                                                                   String deliveryZone, List<CartItem> items) {
         BigDecimal shippingFee = BigDecimal.ZERO;
         if ("DELIVERY".equals(shippingMethod) && deliveryUnitId != null) {
             Delivery delivery = deliveryRepository.findById(deliveryUnitId)
@@ -493,14 +435,13 @@ public class OrderServiceImpl implements OrderService {
                 throw new IllegalArgumentException("Chi nhánh [" + branchName + "] hiện chưa có cấu hình biểu phí giao hàng. Quý khách vui lòng chọn hình thức 'Đến lấy tại cửa hàng' hoặc liên hệ hotline để được hỗ trợ.");
             }
 
-            // 2. Tính khoảng cách và kiểm tra phạm vi giao hoa tươi (giới hạn 15km)
-            double distanceKm = estimateDistanceKm(store, recipientAddress);
-            if (distanceKm > 15.0) {
-                String branchName = (store != null && store.getName() != null) ? store.getName() : "chi nhánh";
-                throw new IllegalArgumentException("Địa chỉ nhận hàng cách " + branchName + " trên 15km (ngoài phạm vi giao hoa tươi trực tiếp bằng xe máy). Để hoa không héo và giữ dáng cắm, quý khách vui lòng chọn 'Đến lấy tại cửa hàng' hoặc liên hệ hotline chi nhánh.");
-            }
-
-            boolean isNearZone = distanceKm <= 5.0;
+            // Demo: the customer explicitly chooses a delivery zone. No map distance is inferred from free text.
+            if (!"NEAR".equals(deliveryZone) && !"FAR".equals(deliveryZone)
+                    && !"OUTSIDE".equals(deliveryZone))
+                throw new IllegalArgumentException("Vui lòng chọn vùng giao hàng demo hợp lệ.");
+            if ("OUTSIDE".equals(deliveryZone))
+                throw new IllegalArgumentException("Vùng ngoài phạm vi giao hoa demo. Vui lòng nhận tại cửa hàng hoặc liên hệ chi nhánh.");
+            boolean isNearZone = "NEAR".equals(deliveryZone);
 
             // 3. Tra cứu biểu phí phù hợp từ ShippingTariff (không lấy trực tiếp từ delivery.price)
             ShippingTariff matchedTariff = null;

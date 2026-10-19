@@ -72,7 +72,7 @@ class StoreProductCatalogTests {
                 .andExpect(content().string(containsString("Shared legacy flower")))
                 .andExpect(content().string(containsString("Owned legacy flower")))
                 .andExpect(content().string(containsString("Xóa")))
-                .andExpect(content().string(containsString(">Sửa</a>")));
+                .andExpect(result -> assertEditLink(result.getResponse().getContentAsString(), own.getId()));
         for (String tab : List.of("selling", "stored", "all", "deleted")) {
             mvc.perform(get("/manager/products").param("tab",tab)).andExpect(status().isOk())
                     .andExpect(content().string(org.hamcrest.Matchers.not(containsString("Foreign legacy flower"))))
@@ -84,6 +84,31 @@ class StoreProductCatalogTests {
                 .andExpect(model().attribute("currentStockQuantity",25L))
                 .andExpect(model().attributeDoesNotExist("legacyStockQuantity"))
                 .andExpect(content().string(org.hamcrest.Matchers.not(containsString("kho cũ lệch chi nhánh"))));
+    }
+
+    private void assertEditLink(String html, Long productId) throws Exception {
+        Map<String, String> links = new HashMap<>();
+        new javax.swing.text.html.parser.ParserDelegator().parse(new java.io.StringReader(html),
+                new javax.swing.text.html.HTMLEditorKit.ParserCallback() {
+                    String href;
+                    final StringBuilder label = new StringBuilder();
+                    @Override public void handleStartTag(javax.swing.text.html.HTML.Tag tag,
+                            javax.swing.text.MutableAttributeSet attributes, int position) {
+                        if (tag == javax.swing.text.html.HTML.Tag.A) {
+                            href = (String) attributes.getAttribute(javax.swing.text.html.HTML.Attribute.HREF);
+                            label.setLength(0);
+                        }
+                    }
+                    @Override public void handleText(char[] text, int position) {
+                        if (href != null) label.append(text);
+                    }
+                    @Override public void handleEndTag(javax.swing.text.html.HTML.Tag tag, int position) {
+                        if (tag == javax.swing.text.html.HTML.Tag.A && href != null) {
+                            links.put(href, label.toString().strip()); href = null;
+                        }
+                    }
+                }, true);
+        assertThat(links).containsEntry("/manager/products/edit/" + productId, "Sửa");
     }
 
     @Test void badgeUsesTotalCountNotJustFirstPage() throws Exception {

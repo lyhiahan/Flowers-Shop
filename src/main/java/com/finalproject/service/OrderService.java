@@ -26,9 +26,16 @@ public interface OrderService {
                          java.time.LocalDate deliveryDate, String shippingMethod, Long pickupStoreId, Long deliveryUnitId);
     CheckoutQuote quote(String username, List<Long> selectedCartItemIds, String recipientAddress,
                         String voucherCode, String shippingMethod, Long pickupStoreId, Long deliveryUnitId);
+    CheckoutQuote quote(String username, List<Long> selectedCartItemIds, String recipientAddress,
+                        String voucherCode, String shippingMethod, Long pickupStoreId, Long deliveryUnitId,
+                        String deliveryZone);
     List<Order> checkout(String username, List<Long> selectedCartItemIds, PaymentMethod paymentMethod,
                         String recipientName, String recipientPhone, String recipientAddress, String greetingMessage, String voucherCode,
                         java.time.LocalDate deliveryDate, String shippingMethod, Long pickupStoreId, Long deliveryUnitId, java.time.LocalTime deliveryTime);
+    List<Order> checkout(String username, List<Long> selectedCartItemIds, PaymentMethod paymentMethod,
+                        String recipientName, String recipientPhone, String recipientAddress, String greetingMessage, String voucherCode,
+                        java.time.LocalDate deliveryDate, String shippingMethod, Long pickupStoreId, Long deliveryUnitId,
+                        java.time.LocalTime deliveryTime, String deliveryZone);
     List<Order> getOrdersByUsernameAndStatus(String username, com.finalproject.enums.OrderStatus status);
     List<Order> getOrdersByStore(Long storeId);
     List<Order> getAllOrders();

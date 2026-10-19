@@ -40,7 +40,7 @@
         if (['voucherCode', 'recipientAddress'].includes(event.target.name)) updateCheckoutTotal();
     });
     form.addEventListener('change', event => {
-        if (['shippingMethod', 'pickupStoreId', 'deliveryUnitId', 'voucherCode'].includes(event.target.name)) updateCheckoutTotal();
+        if (['shippingMethod', 'pickupStoreId', 'deliveryUnitId', 'deliveryZone', 'voucherCode'].includes(event.target.name)) updateCheckoutTotal();
     });
     form.addEventListener('submit', event => {
         if (!ready) { event.preventDefault(); updateCheckoutTotal(); return; }

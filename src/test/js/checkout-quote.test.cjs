@@ -63,3 +63,13 @@ test('late quote response cannot overwrite the latest selection', async () => {
     assert.match(app.node('displayGrandTotal').textContent, /200[.,]000/);
     assert.equal(app.node('btnPlaceOrder').disabled, false);
 });
+
+test('changing the explicit demo delivery zone requests a fresh server quote', async () => {
+    let calls = 0;
+    const app = checkout(async () => { calls++; return ok(175000); });
+    app.node('checkoutForm').events.change({ target: { name: 'deliveryZone' } });
+    assert.equal(app.node('btnPlaceOrder').disabled, true);
+    await app.run();
+    assert.equal(calls, 1);
+    assert.equal(app.node('btnPlaceOrder').disabled, false);
+});

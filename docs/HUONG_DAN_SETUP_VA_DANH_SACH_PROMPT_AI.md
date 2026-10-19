@@ -6,7 +6,9 @@
 
 > **MỤC ĐÍCH TÀI LIỆU**:
 > 1. Cung cấp hướng dẫn từng bước chi tiết (Step-by-Step Setup Guide) để Giảng viên và Hội đồng chấm thi có thể dễ dàng cài đặt, cấu hình CSDL và khởi chạy website trơn tru trên máy tính cá nhân.
-> 2. Ghi nhận và minh chứng toàn bộ **lịch sử các câu lệnh Prompt** mà nhóm đã sử dụng để AI (Google DeepMind Antigravity / Gemini) hỗ trợ sinh mã nguồn, sinh sơ đồ kiến trúc, tối ưu logic nghiệp vụ và gỡ lỗi (chiếm **2.0 điểm** trong rubric đánh giá).
+> 2. Tổng hợp các prompt/yêu cầu AI liên quan đến dự án từ tài liệu cũ và cuộc trò chuyện hiện có. Đây là **bản tóm lược để đối chiếu**, không thay thế bản xuất lịch sử chat, commit hoặc minh chứng demo khi nộp bài.
+
+**Công cụ AI đã dùng/được nhắc đến:** Google Antigravity (Gemini) và OpenAI Codex. Hai công cụ có thể hỗ trợ ở các giai đoạn khác nhau; báo cáo không tự gán mọi thay đổi mã nguồn cho một công cụ khi chưa đối chiếu lịch sử làm việc. Ảnh chụp do người dùng gửi là **minh chứng lỗi/yêu cầu**, không phải prompt do AI tự tạo.
 
 ---
 
@@ -19,8 +21,10 @@
   - [1.4. Lệnh khởi chạy ứng dụng (2 phương thức)](#14-lenh-khoi-chay)
   - [1.5. Danh sách tài khoản thử nghiệm theo các vai trò](#15-tai-khoan-thu-nghiem)
   - [1.6. Xử lý sự cố thường gặp (Troubleshooting)](#16-troubleshooting)
-- [PHẦN 2: DANH SÁCH TOÀN BỘ PROMPT NHÓM ĐÃ SỬ DỤNG VỚI AI](#phan-2-prompts)
-  - [Danh sách chi tiết từ Prompt 1 đến Prompt 20](#phan-2-prompts)
+- [PHẦN 2: DANH SÁCH PROMPT VÀ YÊU CẦU AI ĐÃ GHI NHẬN](#phan-2-prompts)
+  - [Prompt 1–20 đang có trong bản báo cáo](#phan-2-prompts)
+  - [Nhật ký yêu cầu bổ sung từ cuộc trò chuyện](#nhat-ky-bo-sung)
+  - [Prompt tóm lược từ các ảnh chụp màn hình](#prompts-tu-anh)
 
 ---
 
@@ -50,33 +54,25 @@
      GO
      ```
 3. **Cơ chế Migration tự động (Flyway)**:
-   - Bạn **không cần phải chạy script tạo bảng thủ công**. Khi ứng dụng Spring Boot khởi động, thư viện **Flyway** sẽ tự động thực thi các bản migration từ `V1` đến `V8` trong thư mục [src/main/resources/db/migration/sqlserver](file:///d:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/src/main/resources/db/migration/sqlserver) để tạo toàn bộ bảng, khóa ngoại, chỉ mục và nạp dữ liệu mẫu ban đầu.
+   - Bạn **không cần chạy script tạo bảng thủ công**. Với database rỗng, Flyway áp dụng các migration `V1`–`V10` khi ứng dụng khởi động. Với database đã có dữ liệu, phải sao lưu, thử trên bản sao và kiểm tra `flyway_schema_history` trước. Database `RentalShop` cục bộ đã được nâng lên V10 ngày 19/10/2026; điều này **không** có nghĩa database trên máy khác cũng đã lên V10. Migration nằm trong `src/main/resources/db/migration/sqlserver` và `src/main/java/com/finalproject/db/migration`.
 
 ---
 
 <a name="13-cau-hinh-env"></a>
 ### 1.3. Cấu hình biến môi trường (`.env`)
-Để bảo vệ an toàn cho các mã khóa bí mật (API Secret, JWT Secret), dự án sử dụng file `.env` tại thư mục gốc. 
+Để tránh đưa mã khóa bí mật vào Git, có thể dùng biến môi trường hoặc file `.env` cục bộ đã bị Git ignore. `.env` **không được mã hóa**; Spring Boot không tự đọc file này. Script `scripts/sqlserver.ps1` nạp các biến Cloudinary từ `.env`, còn các biến khác cần cấu hình theo hướng dẫn của từng dịch vụ hoặc trong môi trường chạy.
 
 Hãy tạo (hoặc kiểm tra) file **`.env`** tại thư mục gốc `finalproject/`:
 ```dotenv
 # Cấu hình lưu trữ ảnh Cloudinary
-CLOUDINARY_CLOUD_NAME=rbw3u9td
+CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 
-# Khóa bí mật ký JWT Token (chuỗi Base64 tối thiểu 32 byte)
-JWT_SECRET=c2VjdXJlX2Jsb29tX2Zsb3dlcl9jaGFpbl9qd3Rfc2VjcmV0X2tleV8yMDI2
-
-# Profile kích hoạt: dev (dùng cho môi trường lập trình local)
-SPRING_PROFILES_ACTIVE=dev
-
-# Bật nạp dữ liệu mẫu demo (Store, Product, Tài khoản) trên database mới
-APP_DEMO_DATA_ENABLED=true
 ```
 
 > [!TIP]
-> Script khởi chạy `.\scripts\sqlserver.ps1` sẽ tự động đọc 3 biến Cloudinary và JWT Secret từ file `.env` này, bạn không cần phải xuất biến thủ công trong Windows.
+> Script hiện chỉ nạp ba biến Cloudinary từ `.env`. `JWT_SECRET`, `SPRING_PROFILES_ACTIVE` và `APP_DEMO_DATA_ENABLED` cần đặt trong môi trường PowerShell/IDE nếu dùng; riêng script chạy SQL Server đặt profile `dev`. Chỉ bật `APP_DEMO_DATA_ENABLED=true` khi chủ động tạo dữ liệu mẫu trên **database demo**. Thay/thu hồi mọi API key từng xuất hiện trong chat, ảnh chụp hoặc Git; tệp `.env` bị Git ignore không bảo vệ những khóa đã lộ trước đó.
 
 ---
 
@@ -87,11 +83,12 @@ Mở cửa sổ **PowerShell** tại thư mục gốc dự án (`d:\LAPTRINH\LAP
 
 #### Cách 1: Sử dụng Script tự động kết nối SQL Server (Khuyên dùng)
 ```powershell
-.\scripts\sqlserver.ps1
+.\scripts\sqlserver.ps1 -Action run
 ```
-*Script này sẽ tự động: phát hiện instance SQLEXPRESS, giải mã credential bảo mật cục bộ, nạp biến `.env`, chọn JDK 21 portable và khởi chạy Spring Boot.*
+*Script dùng instance `SQLEXPRESS` mặc định, nạp credential SQL Server cục bộ đã bảo vệ và cấu hình Cloudinary từ `.env`, rồi chọn JDK 21 để khởi chạy. Máy khác cần tự thiết lập credential/URL phù hợp; không sao chép tệp credential cục bộ.*
 
 #### Cách 2: Khởi chạy trực tiếp qua Maven Wrapper
+Trước khi chạy, đặt `SPRING_PROFILES_ACTIVE`, `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`, `JWT_SECRET` và các biến Cloudinary trong môi trường của terminal/IDE. Cách này **không tự nạp `.env`**.
 ```powershell
 .\scripts\maven.ps1 spring-boot:run
 ```
@@ -108,7 +105,7 @@ Tomcat started on port 8080 (http) with context path '/'
 <a name="15-tai-khoan-thu-nghiem"></a>
 ### 1.5. Danh sách tài khoản thử nghiệm theo các vai trò
 
-Mật khẩu chung cho toàn bộ tài khoản thử nghiệm: **`123456`**
+Các tài khoản bên dưới chỉ là **ví dụ minh họa**; tên đăng nhập/mật khẩu thực tế phụ thuộc dữ liệu mẫu trên database của người chạy. Không công bố hoặc sử dụng mật khẩu demo trên hệ thống thật.
 
 | STT | Vai trò (Role) | Tên đăng nhập | Mật khẩu | URL đích tự động sau đăng nhập | Quyền hạn chính |
 |:---:|:---|:---:|:---:|:---|:---|
@@ -138,9 +135,9 @@ Mật khẩu chung cho toàn bộ tài khoản thử nghiệm: **`123456`**
 ---
 
 <a name="phan-2-prompts"></a>
-# PHẦN 2: DANH SÁCH TOÀN BỘ PROMPT NHÓM ĐÃ SỬ DỤNG VỚI AI
+# PHẦN 2: DANH SÁCH PROMPT VÀ YÊU CẦU AI ĐÃ GHI NHẬN
 
-Dưới đây là tập hợp đầy đủ các câu lệnh Prompt (kèm ngữ cảnh và kết quả hỗ trợ của AI) trong suốt quá trình phát triển dự án:
+Dưới đây là 20 mục có sẵn trong bản báo cáo trước và phần bổ sung từ cuộc trò chuyện. Những câu đặt trong dấu ngoặc kép ở phần cũ cần được đối chiếu với log nếu muốn trình bày như trích dẫn nguyên văn; mô tả “Kết quả AI sinh” cũng cần được kiểm chứng bằng mã nguồn/commit tương ứng.
 
 ---
 
@@ -149,7 +146,7 @@ Dưới đây là tập hợp đầy đủ các câu lệnh Prompt (kèm ngữ c
 * **Ngữ cảnh & Ràng buộc**: Yêu cầu Java 21 LTS, Spring Boot 4.1.1, phân tách rõ ràng giữa Web Thymeleaf và REST API.
 * **Kết quả AI sinh**:
   - Sinh toàn bộ file [pom.xml](file:///d:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/pom.xml) với đầy đủ starters: `data-jpa`, `thymeleaf`, `security`, `oauth2-resource-server`, `websocket`, `flyway-sqlserver`, `mssql-jdbc` và `cloudinary-http44`.
-  - Thiết lập cấu trúc thư mục phân lớp: `config`, `controller/{customer, manager, admin, api}`, `service`, `repository`, `entity`, `dto`, `security`.
+  - Thiết lập cấu trúc thư mục phân lớp: `config`, `controller/{customer, manager, admin, auth}`, `service`, `repository`, `entity`, `dto`, `security`.
 
 ---
 
@@ -177,10 +174,10 @@ Dưới đây là tập hợp đầy đủ các câu lệnh Prompt (kèm ngữ c
     - Chain 2 (`@Order(2)`): Áp dụng cho Web MVC, bật CSRF, quản lý Session, phân quyền URL theo role.
 
 ### Prompt 5:
-> *"Hãy hiện thực đầy đủ luồng xác thực JWT tại package `com.finalproject.controller.api`: cấp Access Token (15 phút) và Refresh Token (7 ngày), hỗ trợ xoay token (rotation) và thu hồi (revoke) khi đăng xuất."*
+> *"Hãy hiện thực luồng xác thực JWT: cấp Access Token và Refresh Token, hỗ trợ xoay token (rotation) và thu hồi (revoke) khi đăng xuất."*
 * **Kết quả AI sinh**:
   - Viết `JwtTokenService` ký token HMAC-SHA256 với secret từ biến môi trường.
-  - Viết [JwtAuthController.java](file:///d:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/src/main/java/com/finalproject/controller/api/JwtAuthController.java) với 4 endpoints: `/api/auth/login`, `/api/auth/refresh`, `/api/auth/me`, `/api/auth/logout`.
+  - Xem [JwtAuthController.java](../src/main/java/com/finalproject/controller/auth/JwtAuthController.java) với các endpoint xác thực JWT trong `/api/auth/**`.
 
 ---
 
@@ -293,7 +290,102 @@ Dưới đây là tập hợp đầy đủ các câu lệnh Prompt (kèm ngữ c
 
 ---
 
+<a name="nhat-ky-bo-sung"></a>
+## NHẬT KÝ BỔ SUNG: CÁC YÊU CẦU TRONG CUỘC TRÒ CHUYỆN
+
+Các mục sau **tóm lược theo thứ tự chủ đề xuất hiện trong cuộc trò chuyện được cung cấp**, không phải bản chép nguyên văn từng tin nhắn và không tự chứng minh chức năng đã hoàn thành. Một số yêu cầu được hỏi lại hoặc bổ sung bằng ảnh; chúng được gộp khi cùng một vấn đề. Không ghi API key, mật khẩu, OTP hay dữ liệu riêng tư vào báo cáo. Các Prompt 1–20 ở phần trên là nội dung đã có sẵn trong tài liệu trước lần cập nhật này; cần đối chiếu lịch sử/commit nếu dùng chúng như bằng chứng nguyên văn.
+
+### A. Tài khoản, đơn hàng và tồn kho
+
+| Số | Yêu cầu/prompt người dùng đã nêu (tóm lược) |
+| ---: | --- |
+| 21 | OTP của khách B khi đổi/quên mật khẩu phải gửi đến đúng email đã đăng ký của B, không gửi về email cấu hình của cửa hàng. Hướng dẫn cấu hình Brevo và kiểm tra thư thật bằng hai email sở hữu. |
+| 22 | Kiểm tra cấu hình gửi mail đã lưu, lỗi chạy `scripts/sqlserver.ps1` liên quan PowerShell/Java, và hướng dẫn các bước để hoàn thành demo. |
+| 23 | Đăng nhập sai email, tên đăng nhập hoặc mật khẩu phải giữ lại đúng email/tên đăng nhập người dùng vừa nhập; không tự điền tên demo mặc định. |
+| 24 | Khi đặt hàng thành công, kể cả COD, phải trừ tồn kho ngay tại **đúng chi nhánh** và cập nhật số lượng/nhãn “Hết hàng” trên trang khách; không chờ giao hàng. |
+| 25 | Người dùng được hủy trước khi bắt đầu chuẩn bị/giao, hoàn kho đúng một lần; khi đang giao thì không được hủy. Giữ nguyên đơn lịch sử `#23`, chỉ sửa luồng đặt hàng mới. |
+| 26 | Thảo luận các trạng thái quản lý đơn: xác nhận, bắt đầu cắm hoa, giao hàng, hoàn tất, hủy và quyền hủy theo từng giai đoạn. |
+| 27 | Khi admin/quản lý hủy đơn phải có ô nhập lý do; gửi thông báo cho khách theo dạng “Đơn hàng của bạn đã bị hủy bởi admin với lý do…”. |
+| 28 | Giải thích vì sao tổng tồn kho ở thống kê khác số mẫu hoa quản lý Q1 đang thấy; trang sản phẩm phải hiện đầy đủ mẫu thuộc quyền quản lý, có thao tác Thêm/Sửa/Xóa bằng tiếng Việt và xóa mềm an toàn. |
+| 29 | Không hiển thị thẻ tổng tồn kho toàn chuỗi trên giao diện khách; vẫn phải cập nhật số lượng/“Hết hàng” của từng sản phẩm. |
+| 30 | Sửa tên hiển thị và tên đăng nhập demo của khách/admin cho tự nhiên, phân biệt tài khoản; giải thích khách vãng lai là phiên chưa đăng nhập, không cần bản ghi role `GUEST` trong database. |
+| 31 | Sửa lỗi trang sản phẩm và form thêm sản phẩm của quản lý Q1; không hiển thị tồn kho chi nhánh khác như hàng bán được tại Q1. |
+
+### B. Chat, WebSocket và phân quyền chi nhánh
+
+| Số | Yêu cầu/prompt người dùng đã nêu (tóm lược) |
+| ---: | --- |
+| 32 | Hướng dẫn test WebSocket: khách và quản lý chat/nhận thông báo giữa hai phiên mà không tải lại trang. |
+| 33 | Kiểm tra quyền chat: chi nhánh chỉ nhận và đọc hội thoại gửi đến mình; quản lý Q1 không được xem tin của Q7. Admin có thể giám sát toàn chuỗi ở màn hình riêng, **chỉ đọc** và có nhật ký truy cập. |
+| 34 | Khách nhắn với cửa hàng bằng nút “Nhắn tin với Cửa hàng” trên chi tiết sản phẩm; hệ thống tự chọn đúng chi nhánh bán và đính kèm sản phẩm đang hỏi, không bắt khách chọn người nhận thủ công. |
+| 35 | Thêm “Tài khoản → Trò chuyện với hệ thống” để khách nhắn admin. Nút “Nhắn tin” ở trang chủ mở toàn bộ lịch sử hội thoại; hỗ trợ toàn chuỗi và hỏi sản phẩm là hai luồng khác nhau. |
+| 36 | Giao diện chat không nên giải thích dài như AI; dùng nhãn ngắn, tự nhiên. Trong giám sát admin, tin khách ở bên phải, tin chi nhánh ở bên trái và khác màu. |
+| 37 | Nới chiều cao vùng hội thoại và chỉnh bố cục màn hình chat/admin cho dễ đọc; xác nhận sau đó đẩy code lên GitHub với commit tiếng Việt ngắn gọn (chỉ áp dụng cho lần được yêu cầu). |
+
+### C. Cloudinary, sản phẩm, danh mục và thuộc tính
+
+| Số | Yêu cầu/prompt người dùng đã nêu (tóm lược) |
+| ---: | --- |
+| 38 | Đánh giá mức hoàn thành stack Spring Boot, Thymeleaf, Bootstrap, JPA, SQL Server, WebSocket, JWT và Cloudinary theo rubric môn học; hướng dẫn demo chức năng thật. |
+| 39 | Hướng dẫn và kiểm tra tải ảnh sản phẩm, gửi ảnh chat, xác nhận ảnh thực sự có trên Cloudinary; cấu hình qua biến môi trường, không công khai API secret. |
+| 40 | Đổi danh mục từ tên loại hoa/kiểu bó sang dịp hoặc mục đích: Hoa Tình Yêu, Sinh Nhật, Cưới, Khai Trương… Mỗi sản phẩm có **một danh mục chính và nhiều danh mục bổ sung**. |
+| 41 | Chuyển sản phẩm cũ về đúng danh mục dịp; nhóm chưa rõ dịp vào Hoa Quà Tặng/Hoa Trang Trí. Giữ lịch sử và không làm mất ảnh, tồn kho, đơn hàng. |
+| 42 | Phân biệt giá bán với giá khuyến mãi là **số tiền khách trả**, không phải phần trăm; không nhận giá lẻ như `0.01` đồng rồi hiển thị thành `0đ`. |
+| 43 | Form thêm/sửa sản phẩm quá nhiều thuộc tính: loại hoa, màu sắc, phong cách phải cho **tự nhập hoặc chọn gợi ý**; một bó có thể gồm nhiều loại/màu/phong cách. |
+| 44 | Hiển thị lại thuộc tính cũ khi sửa sản phẩm; nhấn Enter hoặc “Thêm” để tạo từng giá trị; trình bày tag, gợi ý và các trường cho gọn, dễ nhìn, không để khu vực thuộc tính trống. |
+
+### D. Quản trị, giao hàng demo và chất lượng dự án
+
+| Số | Yêu cầu/prompt người dùng đã nêu (tóm lược) |
+| ---: | --- |
+| 45 | Tab “Đơn vị vận chuyển” chỉ quản lý thông tin đơn vị; giá cước đặt ở tab “Khu vực & Biểu phí”. Nhãn thao tác dùng tiếng Việt. |
+| 46 | Trang admin “Người dùng” phải hiển thị danh sách người dùng hiện có; điều tra trường hợp tiêu đề báo 15 người nhưng bảng trống. Sửa xong mới push GitHub với commit tiếng Việt ngắn gọn (yêu cầu của lần đó). |
+| 47 | Điều tra trang sản phẩm của role quản lý chuyển sang trang lỗi hệ thống; cần tìm nguyên nhân từ code/log, không chỉ dựa vào ảnh lỗi chung. |
+| 48 | Kiểm tra toàn bộ cấu trúc dự án, chạy test Java/JavaScript và rà soát các luồng web; nêu rõ phần đã chứng minh và phần chưa thể kiểm thử trực tiếp. |
+| 49 | Vùng giao hàng chỉ là **demo**, không cần bản đồ thật; bỏ cách đoán khoảng cách từ chuỗi địa chỉ vì “Quận 1” có thể khớp nhầm “Quận 10/12”. Chọn vùng giao rõ ràng và dùng cùng quy tắc ở báo giá/checkout. |
+| 50 | Phần thanh toán do thành viên khác phụ trách; giải thích ranh giới công việc, cấu hình mock/sandbox và các điểm cần phối hợp, không tự nhận hệ thống thanh toán thật đã hoàn tất. |
+| 51 | Đối soát 81 dòng kho lệch chi nhánh (2.003 đơn vị) trước khi sửa/xóa; không đổi đơn `#23`. Sau đó người dùng xác nhận đây là **dữ liệu kho cũ bị nhân bản**. |
+| 52 | Hoàn thiện các điểm audit: schema SQL Server V8→V10, test cũ lệch HTML, vùng giao demo, tài liệu/liên kết, rồi “sửa tất cả, tự sửa”. |
+| 53 | Hỏi vì sao tin nhắn trong hàng chờ của Antigravity không tự gửi sau khi agent hoàn thành và muốn hướng dẫn cấu hình; đây là yêu cầu về công cụ AI, **không phải** chức năng website. |
+| 54 | Yêu cầu cập nhật chính báo cáo setup/danh sách prompt này để phản ánh cuộc trò chuyện, thay vì chỉ giữ 20 prompt mẫu ban đầu. |
+
+<a name="prompts-tu-anh"></a>
+### Prompt tóm lược từ các ảnh chụp màn hình người dùng đã gửi
+
+Đây là **cách diễn đạt lại yêu cầu bằng lời** dựa trên ảnh và tin nhắn kèm ảnh, giúp tái hiện cách nhóm giao việc cho Antigravity/Gemini hoặc Codex. Không khẳng định từng câu dưới đây đã được gửi nguyên văn. Ảnh có khóa API/thông tin cá nhân phải được che trước khi đưa vào bản nộp; các đường dẫn ảnh tạm trong chat không phải liên kết minh chứng lâu dài.
+
+| Mã | Ảnh/hiện tượng được phản ánh | Prompt có thể dùng để tái hiện yêu cầu |
+| --- | --- | --- |
+| A01 | Màn hình tạo API key Brevo. | “Hãy hướng dẫn cấu hình gửi OTP bằng Brevo cho Spring Boot. Phân biệt email **người gửi** của cửa hàng và email **người nhận** của từng khách; không in hoặc lưu API key trong mã nguồn, log hay báo cáo. Kiểm tra OTP đến đúng hai tài khoản thử nghiệm.” |
+| A02 | PowerShell lưu cấu hình mail thành công nhưng chạy `sqlserver.ps1` báo lỗi tại bước đọc `java -version`. | “Hãy đọc script khởi động và sửa cách PowerShell xử lý đầu ra stderr của Java. Xác nhận ứng dụng chạy được bằng JDK 21, không sửa nhầm cấu hình Brevo đã lưu.” |
+| A03 | Trang `/login?error=true` báo đăng nhập sai nhưng ô tên/email lại hiện tên demo mặc định. | “Khi xác thực thất bại, hãy giữ lại đúng tên đăng nhập hoặc email người dùng vừa nhập, không tự thay bằng tài khoản demo; không giữ lại mật khẩu đã nhập và không làm lộ thông tin tài khoản tồn tại.” |
+| A04 | Đơn COD `#23` mua 15 sản phẩm, thẻ sản phẩm vẫn ghi còn 15. | “Hãy truy vết từ checkout tới `StoreInventory` và trang khách. Đặt hết hàng tại đúng chi nhánh phải trừ kho và hiển thị ‘Hết hàng’; hủy hợp lệ phải hoàn đúng một lần. **Giữ nguyên đơn #23**, chỉ sửa luồng đặt hàng mới.” |
+| A05 | Menu trạng thái admin chỉ có ‘Bắt đầu cắm hoa & Chuẩn bị’/‘Hủy đơn hàng’; modal hủy chưa có lý do. | “Hãy thiết kế vòng đời đơn rõ các bước xác nhận, chuẩn bị, đang giao, hoàn tất/hủy. Khi admin hủy, bắt buộc nhập lý do và gửi thông báo cho khách; khách không được tự hủy khi đã bắt đầu chuẩn bị hoặc đang giao.” |
+| A06 | Tài khoản quản lý Q1 thấy danh sách nơi nhận tin gồm các chi nhánh khác. | “Hãy kiểm tra phân quyền chat ở cả API, truy vấn lịch sử và WebSocket: quản lý chỉ đọc/trả lời hội thoại thuộc chi nhánh mình. Admin giám sát ở màn hình chỉ đọc có nhật ký; không dùng dropdown ở giao diện để thay thế kiểm tra quyền backend.” |
+| A07 | Menu ‘Tài khoản’ và nút nhắn tin trên trang chủ. | “Thêm ‘Tài khoản → Trò chuyện với hệ thống’ để khách liên hệ admin; nút nhắn tin nổi ở trang chủ mở danh sách lịch sử. Nút liên hệ trên chi tiết sản phẩm tự mở hội thoại với chi nhánh bán và kèm sản phẩm cần hỏi.” |
+| A08 | Ô chat hiển thị đoạn hướng dẫn dài, trông như câu trả lời của AI. | “Hãy rút gọn lời hướng dẫn trong giao diện chat thành nhãn và trạng thái ngắn, tự nhiên; không đưa quy trình sử dụng dài vào khung hội thoại như một tin nhắn.” |
+| A09 | Trang giám sát chat admin có tin khách và chi nhánh cùng lệch về một phía. | “Trong chế độ giám sát chỉ đọc, căn tin khách sang phải, tin chi nhánh sang trái và dùng nền khác nhau; giữ tên người gửi/thời gian rõ ràng, không cho admin gửi thay chi nhánh.” |
+| A10 | Vùng đọc tin nhắn admin thấp, còn nhiều khoảng trống dưới trang. | “Hãy tăng chiều cao vùng hội thoại theo viewport, để danh sách và nội dung cuộn độc lập; giữ bộ lọc, ô nhập và nút gửi dễ thao tác trên màn hình desktop lẫn nhỏ hơn.” |
+| A11 | Form sản phẩm có URL Cloudinary, ảnh sản phẩm/chat hiển thị và Media Library có ảnh tương ứng. | “Hãy hướng dẫn kiểm tra ảnh sản phẩm và ảnh chat thật sự được upload lên đúng Cloudinary account: xem URL `res.cloudinary.com`, đối chiếu asset trong Media Library, thử tải lại trang; không kết luận chỉ từ việc ảnh hiển thị.” |
+| A12 | Form thêm sản phẩm có danh mục, thuộc tính hoa và giá khuyến mãi `0.01`. | “Đổi danh mục thành dịp/mục đích, cho một danh mục chính và nhiều danh mục bổ sung. Loại hoa, màu, phong cách cho chọn gợi ý **hoặc tự nhập nhiều giá trị**. Giá khuyến mãi phải là số đồng hợp lệ; chặn `0.01` để không hiện `0đ`.” |
+| A13 | Quản lý Q1 thấy 1 mẫu hoa ở tab Sản phẩm nhưng thống kê báo 749 đơn vị tồn. | “Hãy phân biệt số **mẫu sản phẩm** và tổng **đơn vị tồn**; hiển thị đầy đủ sản phẩm quản lý được phép bán ở Q1, không lấy hàng riêng của chi nhánh khác. Bổ sung Thêm/Sửa/Xóa mềm với nhãn tiếng Việt và giải thích cách tính KPI.” |
+| A14 | Thẻ tổng tồn kho toàn chuỗi trên trang khách hiển thị 1.296 đơn vị. | “Ẩn thẻ tổng tồn kho nội bộ khỏi giao diện khách; vẫn cập nhật tồn và nhãn Hết hàng của từng sản phẩm theo đúng chi nhánh, kể cả sau khi đặt hoặc hủy đơn.” |
+| A15 | Form quản lý Q1 bị vỡ bố cục checkbox danh mục; cảnh báo 428 đơn vị kho cũ lệch chi nhánh. | “Sửa grid/checkbox danh mục bổ sung để không tràn ra ngoài form. Điều tra dòng kho có `store_id` khác chi nhánh sở hữu sản phẩm, tách khỏi kho bán được và lập báo cáo đối soát; không chuyển/xóa số lượng hoặc đơn cũ khi chưa có căn cứ.” |
+| A16 | Hai tab quản lý giao hàng trộn cột đơn vị, cước phí, khu vực và biểu phí. | “Tab ‘Đơn vị vận chuyển’ chỉ quản lý thông tin đơn vị; chuyển giá, khu vực, phụ phí và thời gian sang ‘Khu vực & Biểu phí’. Dùng nhãn tiếng Việt nhất quán và không giả định có đo khoảng cách bản đồ.” |
+| A17 | `/manager/products` chuyển sang trang lỗi hệ thống chung. | “Hãy tìm exception thực tế từ log, controller, service, query và template của trang sản phẩm quản lý; viết test tái hiện và sửa nguyên nhân gốc, không che lỗi bằng thông báo chung.” |
+| A18 | Trang admin Người dùng báo 15 người nhưng bảng danh sách trống. | “Hãy kiểm tra điều kiện lọc `role=ALL`, phân trang và truy vấn backend. Khi chọn ‘Tất cả’, phải liệt kê đúng tài khoản hiện có; test cả bộ lọc vai trò và trang rỗng hợp lệ.” |
+| A19 | Antigravity hiển thị ‘Queued Messages’ nhưng tin chỉ gửi khi bấm mũi tên. | “Hãy giải thích cơ chế hàng chờ trong Antigravity và chỉ cách kiểm tra/cấu hình tự gửi sau khi agent kết thúc, nếu phiên bản công cụ hỗ trợ; phân biệt lỗi công cụ AI với lỗi chat của website.” |
+| A20 | Form sửa sản phẩm ban đầu trống vùng thuộc tính; bản sau hiện tag cũ nhưng bố cục xấu. | “Hãy giữ nguyên các thuộc tính cũ khi mở form sửa, cho thêm/xóa từng tag bằng Enter hoặc nút Thêm, hỗ trợ gợi ý lẫn giá trị mới, và bố trí ba nhóm Loại hoa/Màu sắc/Phong cách gọn, cân đối, dễ đọc.” |
+
+### Kết quả kiểm chứng và phần chưa hoàn tất tại thời điểm cập nhật
+
+- Trên máy cục bộ, `RentalShop` đã được sao lưu và nâng Flyway V9–V10; kiểm tra HTTP cơ bản và đối soát số dư demo chỉ đọc đạt. Java **622 ca: 616 đạt, 6 bỏ qua**, JavaScript **102/102 đạt**. Đây là kết quả test tự động, không thay thế việc demo mọi thao tác bằng trình duyệt trên máy chấm.
+- Người dùng đã xác nhận 81 dòng kho lệch là dữ liệu nhân bản. Đã diễn tập cô lập 81 dòng/2.003 đơn vị trên **bản sao** và lưu giá trị gốc để hoàn tác; **chưa áp dụng việc đưa số lượng về 0 trên `RentalShop` thật** vì thao tác này thay đổi dữ liệu quan trọng và đang chờ phê duyệt riêng. Các đơn, gồm `#23`, không bị sửa ở bước diễn tập.
+- Một số yêu cầu trong lịch sử là **hướng dẫn, đánh giá hoặc câu hỏi**; không nên ghi tất cả thành “AI đã sinh code”. Với mỗi tính năng đem trình bày, hãy gắn commit, test hoặc ảnh demo tương ứng. Không công bố khóa Brevo/Cloudinary/JWT từng dùng trong quá trình thử nghiệm.
+
+---
+
 ### KẾT LUẬN VỀ KỸ NĂNG PROMPT ENGINEERING CỦA NHÓM
 1. **Tính định hướng kỹ thuật cao**: Các câu lệnh prompt đều chỉ rõ mục tiêu công nghệ (Spring Boot, JWT Stateless, Pessimistic Lock, Flyway), không để AI tự phán đoán mơ hồ.
-2. **Kiểm soát chất lượng bằng Unit Test**: Mọi tính năng do AI hỗ trợ code đều được kiểm chứng qua 547 ca kiểm thử tự động trước khi hợp nhất.
-3. **Bảo mật tuyệt đối**: Không lưu trữ mật khẩu hay secret trong mã nguồn, luôn tuân thủ nguyên tắc nạp qua biến môi trường.
+2. **Kiểm soát chất lượng bằng kiểm thử**: Lượt kiểm tra gần nhất có 622 ca Java (616 đạt, 6 bỏ qua) và 102/102 ca JavaScript đạt; một số tích hợp bên ngoài vẫn cần demo trực tiếp.
+3. **Bảo mật cần được duy trì**: Đưa secret ra khỏi tài liệu/mã nguồn, thu hồi khóa đã lộ và kiểm tra cấu hình môi trường trước khi nộp hoặc triển khai.

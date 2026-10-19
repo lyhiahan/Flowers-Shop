@@ -526,7 +526,23 @@
                                     </div>
                                 </div>
 
-                                <!-- A3: Dịch vụ giao hàng -->
+                                <!-- A3: Vùng giao hàng demo do khách lựa chọn, không suy đoán khoảng cách từ địa chỉ -->
+                                <div class="mb-3">
+                                    <label class="form-label-custom" for="deliveryZoneSelect">Vùng giao hàng demo (*)</label>
+                                    <select name="deliveryZone" id="deliveryZoneSelect" class="form-select-custom w-100" required
+                                            onchange="updateCheckoutTotal()">
+                                        <option value="">-- Chọn vùng theo bảng phí của cửa hàng --</option>
+                                        <option value="NEAR" th:selected="${prevDeliveryZone == 'NEAR'}">Vùng gần (bảng phí dưới 5 km)</option>
+                                        <option value="FAR" th:selected="${prevDeliveryZone == 'FAR'}">Vùng xa (bảng phí 5–15 km)</option>
+                                        <option value="OUTSIDE" th:selected="${prevDeliveryZone == 'OUTSIDE'}">Ngoài phạm vi giao hàng demo</option>
+                                    </select>
+                                    <div class="mt-2 text-muted" style="font-size: 13px; line-height: 1.4;">
+                                        Đây là vùng giao hàng mô phỏng; hệ thống không tính khoảng cách bằng bản đồ.
+                                        Nếu chưa rõ vùng phù hợp, vui lòng hỏi chi nhánh trước khi đặt.
+                                    </div>
+                                </div>
+
+                                <!-- A4: Đơn vị giao hàng -->
                                 <div class="mb-3" id="deliveryUnitSection" th:if="${deliveries != null and !#lists.isEmpty(deliveries)}">
                                     <label class="form-label-custom"><i class="bi bi-box-seam me-1"></i>Đơn vị vận chuyển (*)</label>
                                     <select name="deliveryUnitId" id="deliveryUnitSelect" class="form-select-custom w-100"
@@ -538,7 +554,7 @@
                                     </select>
                                     <div class="mt-2 text-muted" style="font-size: 13px; line-height: 1.4;">
                                         <i class="bi bi-info-circle text-success me-1"></i>
-                                        <span>Cước phí được tính tự động từ <strong>Biểu phí giao hàng</strong> của chi nhánh theo khoảng cách (&lt; 5km hoặc 5&ndash;15km) và phụ phí hàng lớn (nếu có kệ hoa 2 tầng, chậu lan lớn).</span>
+                                        <span>Cước phí lấy từ <strong>biểu phí giao hàng</strong> theo chi nhánh, đơn vị và vùng demo đã chọn; có thể cộng phụ phí hàng lớn.</span>
                                     </div>
                                 </div>
 
@@ -1081,6 +1097,8 @@
 
             /* Đơn vị giao hàng (chỉ khi giao tận nơi) */
             if (!isPickup) {
+                const zoneSelect = document.getElementById('deliveryZoneSelect');
+                if (zoneSelect && zoneSelect.value) params.append('deliveryZone', zoneSelect.value);
                 const unitSelect = document.getElementById('deliveryUnitSelect');
                 if (unitSelect && unitSelect.value) {
                     params.append('deliveryUnitId', unitSelect.value);

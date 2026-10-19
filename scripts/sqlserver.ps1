@@ -57,6 +57,22 @@ try {
         finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($passwordPointer); $securePassword.Dispose() }
     }
     Write-Host "SQL Server: $ServerInstance | Database: $DatabaseName | Action: $Action"
+    if ($Action -eq 'run' -and $DatabaseName -eq 'RentalShop') {
+        # Spring Boot runs pending Flyway migrations at startup. Do not let a routine
+        # website start silently apply the payment-owned V9/V10 schema changes.
+        $auditConnection = [System.Data.SqlClient.SqlConnection]::new(
+            "Data Source=$ServerInstance;Initial Catalog=$DatabaseName;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;Connect Timeout=15")
+        try {
+            $auditConnection.Open()
+            $versionCommand = $auditConnection.CreateCommand()
+            $versionCommand.CommandText = 'SELECT TOP (1) version FROM dbo.flyway_schema_history WHERE success=1 ORDER BY installed_rank DESC'
+            $schemaVersion = [string]$versionCommand.ExecuteScalar()
+            $parsedVersion = 0
+            if (![int]::TryParse($schemaVersion, [ref]$parsedVersion) -or $parsedVersion -lt 10) {
+                throw "RentalShop đang ở Flyway V$schemaVersion. Khởi động website sẽ tự áp dụng V9–V10; hãy xác nhận với thành viên phụ trách thanh toán và chạy migration có chủ đích sau khi sao lưu."
+            }
+        } finally { $auditConnection.Dispose() }
+    }
     if ($Action -in @('baseline','migrate')) {
         $confirmation = Read-Host "This updates $DatabaseName. Verify a backup first, then type the exact database name to continue"
         if ($confirmation -cne $DatabaseName) { throw 'Database operation cancelled; no migration performed.' }

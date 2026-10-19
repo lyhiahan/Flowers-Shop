@@ -35,20 +35,20 @@ Website bán hàng theo mô hình chuỗi cửa hàng hoa tươi (100% mô hình
 #### Bảng kiểm chứng các công nghệ cốt lõi:
 | Yêu cầu công nghệ | Mức độ đáp ứng | Bằng chứng mã nguồn & Hiện trạng |
 |:---|:---:|:---|
-| **Chuỗi cửa hàng** | **ĐẠT 100%** | `Store`, `StoreInventory`, `StoreMembership`, `StoreAccessService`; chọn chi nhánh, phân quyền theo cửa hàng, đơn hàng và doanh thu độc lập |
-| **Spring Boot** | **ĐẠT 100%** | `pom.xml`, `FinalprojectApplication`, phiên bản Spring Boot 4.1.1 trên Java 21 LTS |
-| **Thymeleaf** | **ĐẠT 100%** | Starter Thymeleaf và hơn 74 template giao diện trong `resources/templates/` (`customer/`, `manager/`, `admin/`, `fragments/`) |
-| **Bootstrap** | **ĐẠT 100%** | Bootstrap 5.3.3 CSS/JS kết hợp Bootstrap Icons trên toàn bộ layout và components |
-| **JPA (Hibernate)** | **ĐẠT 100%** | Entity ánh xạ quan hệ, Spring Data JPA repositories, transaction và khóa bi quan (`Pessimistic Lock`) chống âm kho |
-| **SQL Server** | **ĐẠT 100%** | Driver Microsoft SQL Server `mssql-jdbc`; CSDL `RentalShop` trên SQLEXPRESS; Flyway quản lý schema V1-V8 |
-| **WebSocket** | **ĐẠT 100%** | Endpoint `/ws` và `/ws-chat`, STOMP `/app/chat.send`, tin nhắn realtime theo chi nhánh |
-| **JWT** | **ĐẠT 100%** | Xác thực Stateless độc lập cho `/api/**`, cấp Access Token (15p) + Refresh Token Rotation (7 ngày), logout revocation |
-| **Cloudinary** | **ĐẠT 100%** | Upload ảnh hoa, avatar, ảnh bìa, ảnh chat; lưu `secure_url` và `public_id`; nạp credential an toàn qua `.env` |
+| **Chuỗi cửa hàng** | **Đã triển khai; còn đối soát kho cũ** | `Store`, `StoreInventory`, `StoreMembership`, `StoreAccessService`; chọn chi nhánh, phân quyền theo cửa hàng |
+| **Spring Boot** | **Đã triển khai** | `pom.xml`, `FinalprojectApplication`, Spring Boot 4.1.1 trên Java 21 |
+| **Thymeleaf** | **Đã triển khai** | Giao diện `customer/`, `manager/`, `admin/`, `fragments/` |
+| **Bootstrap** | **Đã triển khai** | Bootstrap 5.3.3 CSS/JS và Bootstrap Icons |
+| **JPA (Hibernate)** | **Đã triển khai** | Entity, Spring Data JPA, transaction và khóa bi quan |
+| **SQL Server** | **Đã triển khai; RentalShop cục bộ V10** | `mssql-jdbc`; mã nguồn Flyway V1–V10, các môi trường khác cần kiểm tra riêng |
+| **WebSocket** | **Đã triển khai** | Endpoint `/ws` và `/ws-chat`, tin nhắn realtime theo quyền chi nhánh |
+| **JWT** | **Đã triển khai** | Xác thực stateless cho `/api/**`; web Thymeleaf dùng session riêng |
+| **Cloudinary** | **Đã triển khai** | Upload và lưu `secure_url`, `public_id`; test thật cần bật riêng |
 
 
 ### 1.3. Kết luận kiểm toán hệ thống (System Audit)
 - 238 file Java và 74 template HTML tại thời điểm hoàn thiện.
-- Các luồng nghiệp vụ chính có kiểm thử tự động bao quát với 547 ca test đạt (`BUILD SUCCESS`).
+- Các luồng nghiệp vụ chính có kiểm thử tự động; xem [báo cáo kiểm thử mới nhất](PROJECT_REVIEW_20261016.md) trước khi kết luận đạt.
 - CSDL SQL Server gốc `RentalShop` được bảo toàn toàn vẹn dữ liệu, các bảng được chuẩn hóa schema và kiểm soát qua migration.
 
 
@@ -67,7 +67,7 @@ Hệ thống được tổ chức thành 5 tầng rõ rệt:
 
 *(Xem sơ đồ kiến trúc chi tiết tại `docs/diagrams/diagram_architecture.png` hoặc tài liệu Word `.docx`).*
 
-### 2.2. Lịch sử Migration CSDL bằng Flyway (V1 - V8)
+### 2.2. Lịch sử Migration CSDL bằng Flyway (V1 - V10)
 Hệ thống quản lý schema `dbo` trên SQL Server bằng Flyway với các phiên bản:
 - **V1**: Khởi tạo schema gốc từ toàn bộ Entity (bảng `stores`, `products`, `categories`, `orders`, `order_items`, `users`...).
 - **V2**: Bổ sung index tối ưu truy vấn và ràng buộc toàn vẹn dữ liệu.
@@ -76,10 +76,12 @@ Hệ thống quản lý schema `dbo` trên SQL Server bằng Flyway với các p
 - **V5 - V6**: Bổ sung bảng nhật ký giám sát, thẻ sản phẩm trong khung chat.
 - **V7**: Chuyển đổi danh mục theo nhiều dịp tặng (Tình yêu, Sinh nhật, Khai trương, Cưới...) và bảo toàn danh mục cũ vào `product_category_legacy`.
 - **V8**: Bổ sung cờ trạng thái kinh doanh/xóa theo chi nhánh trên `store_inventories` phục vụ tính năng xóa mềm.
+- **V9**: Mở rộng ràng buộc phương thức thanh toán cho môi trường demo.
+- **V10**: Bổ sung cột và đối soát tiền MoMo demo; đã thử trên bản sao và áp dụng cho `RentalShop` cục bộ ngày 19/10/2026 sau bản sao lưu. Bản dữ liệu này không có đơn `MOMO_DEMO` cũ để backfill.
 
 ### 2.3. Khắc phục kết nối SQL Server Local
-- Database `RentalShop` nằm trên instance `SQLEXPRESS` (sử dụng cổng động được SQL Server Browser điều hướng).
-- Kết nối thông qua URL: `jdbc:sqlserver://127.0.0.1;instanceName=SQLEXPRESS;databaseName=RentalShop;encrypt=true;trustServerCertificate=true;sendStringParametersAsUnicode=true;`
+- Database `RentalShop` nằm trên instance `SQLEXPRESS`; cổng TCP hiện tại là `53735`.
+- URL mặc định profile `dev` dùng cổng đó. Nếu cổng thay đổi, truyền `SPRING_DATASOURCE_URL` với cổng mới.
 - Credential được bảo vệ bằng mã hóa Windows DPAPI trong `.tools/sqlserver-local.json` hoặc nạp qua biến môi trường.
 
 
@@ -257,7 +259,7 @@ Bảng tổng hợp chi tiết toàn bộ các câu lệnh (prompts) mà nhóm p
 
 | Giai đoạn phát triển | Câu lệnh Prompt yêu cầu AI | Kết quả và Đóng góp của AI |
 |:---|:---|:---|
-| **1. Khởi tạo kiến trúc** | *"Thiết kế kiến trúc Spring Boot 4.x, Java 21, Thymeleaf, Bootstrap 5, JPA, SQL Server, WebSocket, JWT, Cloudinary. Phân chia package chuẩn MVC."* | AI sinh file `pom.xml`, cấu trúc thư mục 3 lớp, tạo entity `Store`, `Product`, `StoreInventory` và cấu hình Flyway migration V1-V8. |
+| **1. Khởi tạo kiến trúc** | *"Thiết kế kiến trúc Spring Boot 4.x, Java 21, Thymeleaf, Bootstrap 5, JPA, SQL Server, WebSocket, JWT, Cloudinary. Phân chia package chuẩn MVC."* | AI sinh file `pom.xml`, cấu trúc thư mục 3 lớp, tạo entity `Store`, `Product`, `StoreInventory` và cấu hình Flyway migration có phiên bản. |
 | **2. Bảo mật phân quyền kép** | *"Tạo Dual Security: Web dùng Session + CSRF, còn API dùng Bearer JWT Stateless với Token Rotation. Gửi mã OTP qua email, không in ra console."* | AI viết `JwtSecurityConfig`, `JwtTokenService`, `JwtAuthController` và `OtpService` gửi mail an toàn. |
 | **3. Đặt hàng & Trừ tồn kho** | *"Đặt hàng COD phải trừ tồn kho ngay lập tức tại chi nhánh. Tránh race condition khi 2 người mua đồng thời bông hoa cuối cùng."* | AI cài đặt Pessimistic Write Lock trên `StoreInventory` trong transaction `REPEATABLE_READ` và cơ chế hoàn kho chính xác 1 lần. |
 | **4. Vòng đời đơn hàng hoa** | *"Khi cửa hàng chuyển sang Đang cắm hoa (PREPARING), khóa nút hủy của khách. Quản lý hủy bắt buộc nhập lý do <= 300 ký tự."* | AI cập nhật `OrderStatus`, kiểm tra điều kiện tại Backend và tạo modal popup xác nhận kèm ghi log lý do hủy vào CSDL. |
@@ -298,10 +300,9 @@ Mở terminal PowerShell tại thư mục gốc của dự án và chạy lệnh
 Sau khi khởi động thành công, mở trình duyệt truy cập: **`http://localhost:8080`**
 
 ### 10.4. Kết quả Kiểm thử Tự động (Automated Test Suite)
-- Tổng số ca kiểm thử Java: **552 ca kiểm thử**, trong đó **547 ca đạt**, **0 thất bại**, **0 lỗi** (`BUILD SUCCESS`).
-- 5 ca kiểm thử bỏ qua có điều kiện (upload Cloudinary thật và migration từ đầu trên CSDL rỗng).
-- Bộ kiểm thử JavaScript frontend: **65/65 ca đạt**.
-- Bộ nạp biến môi trường Cloudinary: **10/10 ca đạt**.
+- Ngày 19/10/2026: Java **622 ca** (616 đạt, 0 thất bại, 0 lỗi, 6 bỏ qua có chủ đích); JavaScript **102/102 ca đạt** khi cho phép kết nối localhost của test.
+- Test SQL Server live và Cloudinary live chỉ chạy khi chủ động bật cờ riêng; test thông thường không chứng minh dịch vụ thật hoạt động.
+- Các phát hiện và giới hạn kiểm thử được ghi trong [báo cáo rà soát](PROJECT_REVIEW_20261016.md).
 
 ---
 *Tài liệu được biên soạn và chuẩn hóa toàn diện phục vụ nghiệm thu đồ án môn học Lập trình Web.*

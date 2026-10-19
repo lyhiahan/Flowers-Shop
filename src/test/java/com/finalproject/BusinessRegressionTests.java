@@ -54,6 +54,7 @@ class BusinessRegressionTests {
     @Autowired EntityManager em;
     @Autowired MockMvc mvc;
     @Autowired DeliveryRepository deliveries;
+    @Autowired ShippingTariffRepository tariffs;
     @Autowired ProductWishlistRepository wishlists;
     @Autowired UserFollowStoreRepository follows;
     @Autowired UserAddressRepository addresses;
@@ -510,6 +511,22 @@ class BusinessRegressionTests {
         assertThat(payments.findByOrderId(order.getId()).get(0).getStatus()).isEqualTo(PaymentStatus.FAILED);
     }
 
+    @Test void cancellingLegacyMismatchedOrderDoesNotRestoreDuplicatedBranchStock() {
+        Order order = checkout(PaymentMethod.COD);
+        var duplicate = inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow();
+        assertThat(duplicate.getQuantity()).isEqualTo(8);
+        product.setStore(otherStore);
+        products.saveAndFlush(product);
+        inventory.save(StoreInventory.builder().store(otherStore).product(product).quantity(10).build());
+
+        orderService.cancelOrder(customer.getUsername(), order.getId());
+
+        assertThat(orders.findById(order.getId()).orElseThrow().getStatus()).isEqualTo(OrderStatus.CANCELLED);
+        assertThat(duplicate.getQuantity()).isEqualTo(8);
+        assertThat(inventory.findByStoreIdAndProductId(otherStore.getId(), product.getId()).orElseThrow().getQuantity())
+                .isEqualTo(10);
+    }
+
     @Test void refundRequestDoesNotPretendThatMoneyHasBeenReturned() {
         Order order = deliveryOrder(); workflow.transition(order.getId(), OrderStatus.DELIVERED);
         login(customer); orderService.requestRefund(customer.getUsername(), order.getId());
@@ -682,7 +699,37 @@ class BusinessRegressionTests {
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").exists());
         mvc.perform(post("/checkout/quote").with(user(customer.getUsername()).roles("USER")).with(csrf())
                         .param("selectedItemIds", item.getId().toString()).param("deliveryUnitId", delivery.getId().toString()).param("recipientAddress", "Quận 1"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value("Vui lòng chọn vùng giao hàng demo."));
+        mvc.perform(post("/checkout/quote").with(user(customer.getUsername()).roles("USER")).with(csrf())
+                        .param("selectedItemIds", item.getId().toString()).param("deliveryUnitId", delivery.getId().toString())
+                        .param("deliveryZone", "NEAR").param("recipientAddress", "Quận 1"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.total").value(190000));
+    }
+
+    @Test void demoDeliveryZoneDeterminesTariffWithoutGuessingDistrictName() {
+        Delivery delivery = deliveries.save(Delivery.builder().name("Demo zone delivery").price(BigDecimal.ZERO).build());
+        tariffs.save(ShippingTariff.builder().store(store).delivery(delivery)
+                .destinationArea("Khu vực gần chi nhánh (< 5km)").serviceName("Tiêu chuẩn")
+                .baseFee(new BigDecimal("25000")).build());
+        tariffs.save(ShippingTariff.builder().store(store).delivery(delivery)
+                .destinationArea("Khu vực xa hơn (5 - 15km)").serviceName("Tiêu chuẩn")
+                .baseFee(new BigDecimal("40000")).build());
+        String address = "Đường hoa, Quận 10";
+        CheckoutQuote near = orderService.quote(customer.getUsername(), List.of(item.getId()), address,
+                null, "DELIVERY", null, delivery.getId(), "NEAR");
+        CheckoutQuote far = orderService.quote(customer.getUsername(), List.of(item.getId()), address,
+                null, "DELIVERY", null, delivery.getId(), "FAR");
+        assertThat(near.shippingFee()).isEqualByComparingTo("25000");
+        assertThat(far.shippingFee()).isEqualByComparingTo("40000");
+        assertThatThrownBy(() -> orderService.quote(customer.getUsername(), List.of(item.getId()), address,
+                null, "DELIVERY", null, delivery.getId(), "OUTSIDE")).hasMessageContaining("ngoài phạm vi");
+        assertThatThrownBy(() -> orderService.quote(customer.getUsername(), List.of(item.getId()), address,
+                null, "DELIVERY", null, delivery.getId(), "INVALID")).hasMessageContaining("hợp lệ");
+        Order order = orderService.checkout(customer.getUsername(), List.of(item.getId()), PaymentMethod.COD,
+                "Khách", "0900000000", address, null, null, LocalDate.now().plusDays(1), "DELIVERY", null,
+                delivery.getId(), java.time.LocalTime.NOON, "FAR").get(0);
+        assertThat(order.getShippingFee()).isEqualByComparingTo(far.shippingFee());
+        assertThat(order.getTotalAmount()).isEqualByComparingTo(far.total());
     }
 
     @Test void repairedPagesRenderWithRealModelsAndRetainPaymentActions() throws Exception {
@@ -1457,7 +1504,8 @@ class BusinessRegressionTests {
                 .param("selectedItemIds",item.getId().toString()).param("paymentMethod","MOMO_DEMO")
                 .param("recipientName",name," ").param("recipientPhone","0900000000")
                 .param("recipientAddress",address).param("shippingMethod","DELIVERY")
-                .param("deliveryUnitId",delivery.getId().toString()).param("deliveryDate",LocalDate.now().plusDays(1).toString())
+                .param("deliveryUnitId",delivery.getId().toString()).param("deliveryZone","NEAR")
+                .param("deliveryDate",LocalDate.now().plusDays(1).toString())
                 .param("deliveryTimeSlot","09:00-11:00"))
                 .andExpect(status().is3xxRedirection()).andExpect(redirectedUrlPattern("/customer/demo-payment/*"));
         Order created=orders.findByUserIdOrderByCreatedAtDesc(customer.getId()).get(0);

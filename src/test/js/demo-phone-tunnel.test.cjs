@@ -6,7 +6,8 @@ const {createAutoTunnel, tunnelUrl} = require('../../../scripts/demo-phone-tunne
 
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function until(condition) {
-    for (let i = 0; i < 100; i++) { if (condition()) return; await pause(10); }
+    const deadline = Date.now() + 5000;
+    while (Date.now() < deadline) { if (condition()) return; await pause(10); }
     assert.fail('Timed out waiting for tunnel state');
 }
 function fixture(options = {}) {
@@ -35,8 +36,9 @@ test('only a strict Cloudflare origin is parsed from logs', () => {
 });
 
 test('owned random-port gateway is verified before announcing READY and is private', async t => {
-    let healthy = false, probeId;
-    const f = fixture({probe:async (url, id) => { probeId = id; return healthy; }});
+    let probeId, releaseProbe;
+    const healthGate = new Promise(resolve => { releaseProbe = resolve; });
+    const f = fixture({startupTimeoutMs:10000, probe:async (url, id) => { probeId = id; return healthGate; }});
     t.after(() => f.tunnel.stop());
     await f.tunnel.start();
     assert.match(f.targets[0], /^http:\/\/127\.0\.0\.1:\d+$/);
@@ -49,7 +51,7 @@ test('owned random-port gateway is verified before announcing READY and is priva
     assert.equal(f.events.some(e => e.state === 'READY'), false);
     assert.equal((await fetch(f.targets[0] + '/admin')).status, 404);
     assert.equal((await fetch(f.targets[0] + '/customer/orders')).status, 404);
-    healthy = true;
+    releaseProbe(true);
     await until(() => f.events.at(-1).state === 'READY');
     assert.equal(f.events.at(-1).url, 'https://first-phone.trycloudflare.com');
     await f.tunnel.stop();
