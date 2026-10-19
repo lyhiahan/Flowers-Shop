@@ -108,12 +108,20 @@
         }
 
         .item-thumb {
+            display: block;
             width: 72px;
             height: 72px;
+            min-width: 72px;
+            max-width: 72px;
             border-radius: 12px;
             object-fit: cover;
             border: 1px solid #f1f5f9;
             flex-shrink: 0;
+        }
+        .item-thumb.is-image-fallback {
+            object-fit: contain;
+            padding: 12px;
+            background-color: #f8faf9;
         }
 
         .greeting-badge {
@@ -334,8 +342,9 @@
                                         <!-- Mẫu Hoa, Ảnh & Lời chúc -->
                                         <td>
                                             <div class="d-flex align-items-start gap-3 py-1">
-                                                <img th:src="${item.product.imageUrl != null and !item.product.imageUrl.isEmpty() ? item.product.imageUrl : 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=140'}"
-                                                     class="item-thumb" alt="Product Image">
+                                                <img th:src="@{${item.product.imageUrl != null and !#strings.isEmpty(#strings.trim(item.product.imageUrl)) ? #strings.trim(item.product.imageUrl) : '/images/flower-logo.png'}}"
+                                                     class="item-thumb" width="72" height="72" decoding="async" data-cart-product-image
+                                                     th:data-fallback-src="@{/images/flower-logo.png}" th:alt="${item.product.name}">
                                                 <div>
                                                     <a th:href="@{/products/{id}(id=${item.product.id})}" class="fw-semibold text-dark text-decoration-none d-block mb-1" th:text="${item.product.name}">Tên hoa tươi</a>
                                                     <div class="small text-muted mb-1">
@@ -436,8 +445,9 @@
                                 <!-- Mẫu Hoa, Ảnh & Lời chúc -->
                                 <td>
                                     <div class="d-flex align-items-start gap-3 py-1">
-                                        <img th:src="${item.product.imageUrl != null and !item.product.imageUrl.isEmpty() ? item.product.imageUrl : 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=140'}"
-                                             class="item-thumb" alt="Product Image">
+                                        <img th:src="@{${item.product.imageUrl != null and !#strings.isEmpty(#strings.trim(item.product.imageUrl)) ? #strings.trim(item.product.imageUrl) : '/images/flower-logo.png'}}"
+                                             class="item-thumb" width="72" height="72" decoding="async" data-cart-product-image
+                                             th:data-fallback-src="@{/images/flower-logo.png}" th:alt="${item.product.name}">
                                         <div>
                                             <a th:href="@{/products/{id}(id=${item.product.id})}" class="fw-semibold text-dark text-decoration-none d-block mb-1" th:text="${item.product.name}">Tên hoa tươi</a>
                                             <div class="small text-muted mb-1">
@@ -674,6 +684,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script th:src="@{/js/global-modal.js}"></script>
+    <script th:src="@{/js/cart-product-images.js}"></script>
     <script>
         function confirmDeleteCartItem(itemId, productName, storeName) {
             document.getElementById('modalDeleteProductName').innerText = productName || 'Mẫu hoa';

@@ -227,6 +227,42 @@ class StorefrontUiTests {
         assertThat(checked).isGreaterThan(10);
     }
 
+    @Test void cartThumbnailsUseLocalRosePhotosAndAnInternalFallback() throws Exception {
+        product.setImageUrl("/images/demo-rose-bouquet.jpg"); products.saveAndFlush(product);
+        for (int day : List.of(1, 2)) {
+            mvc.perform(post("/cart/add").with(user(customer.getUsername()).roles("USER")).with(csrf())
+                            .header("X-Requested-With", "XMLHttpRequest").param("productId", product.getId().toString())
+                            .param("storeId", store.getId().toString()).param("quantity", "1").param("orderType", "BUY")
+                            .param("deliveryDate", java.time.LocalDate.now().plusDays(day).toString()))
+                    .andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true));
+        }
+        entityManager.flush(); entityManager.clear();
+        String html = page("/cart");
+        var images = Pattern.compile("<img\\b[^>]*data-cart-product-image[^>]*>").matcher(html);
+        int count = 0;
+        while (images.find()) {
+            assertThat(images.group()).contains("src=\"/images/demo-rose-bouquet.jpg\"", "width=\"72\"", "height=\"72\"",
+                    "data-fallback-src=\"/images/flower-logo.png\"", "alt=\"Storefront bouquet\"");
+            count++;
+        }
+        assertThat(count).isEqualTo(2);
+        assertThat(html).contains("src=\"/js/cart-product-images.js\"").doesNotContain("alt=\"Product Image\"");
+        Product saved = products.findById(product.getId()).orElseThrow();
+        saved.setImageUrl("   "); products.saveAndFlush(saved); entityManager.clear();
+        assertThat(page("/cart")).containsPattern("<img\\b(?=[^>]*data-cart-product-image)(?=[^>]*src=\"/images/flower-logo.png\")[^>]*>");
+    }
+
+    @Test void localCartImageAssetsAreAvailableWithoutSigningIn() throws Exception {
+        byte[] bytes = mvc.perform(get("/images/demo-rose-bouquet.jpg").with(anonymous()))
+                .andExpect(status().isOk()).andExpect(content().contentTypeCompatibleWith("image/jpeg"))
+                .andReturn().getResponse().getContentAsByteArray();
+        var image = javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(bytes));
+        assertThat(image).isNotNull();
+        assertThat(image.getWidth()).isEqualTo(800);
+        assertThat(image.getHeight()).isGreaterThan(0);
+        mvc.perform(get("/images/flower-logo.png").with(anonymous())).andExpect(status().isOk());
+    }
+
     private String page(String route) throws Exception {
         return mvc.perform(get(route).with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);

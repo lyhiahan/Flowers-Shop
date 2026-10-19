@@ -276,7 +276,7 @@ public class ProductSeederService {
                 "Hoa Tình Yêu", "Thủ Đức",
                 "Bó hoa hồng đỏ gói giấy đen nhám viền vàng phong cách lãng mạn giúp các bạn sinh viên tỏ tình thành công.",
                 new BigDecimal("580000"), new BigDecimal("300000"), new BigDecimal("75000"), new BigDecimal("250000"),
-                "https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=800",
+                "/images/demo-rose-bouquet.jpg",
                 76, 4.9
             ),
             new ProductTemplate(
