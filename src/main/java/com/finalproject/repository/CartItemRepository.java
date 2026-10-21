@@ -27,17 +27,16 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
         @org.springframework.data.repository.query.Param("productId") Long productId,
         @org.springframework.data.repository.query.Param("storeId") Long storeId);
 
-    /** Tìm dòng trùng có cùng sản phẩm, chi nhánh, kiểu, ngày giao (không load quan hệ toàn giỏ) */
+    /** Cart lines are identified by product and branch, not a tentative delivery date. */
     @org.springframework.data.jpa.repository.Query(
         "select i from CartItem i " +
         "where i.cart.id = :cartId and i.product.id = :productId and i.store.id = :storeId " +
-        "and i.orderType = :orderType and i.deliveryDate = :deliveryDate")
-    java.util.Optional<CartItem> findDuplicateLine(
+        "and i.orderType = :orderType order by i.id")
+    List<CartItem> findMatchingLines(
         @org.springframework.data.repository.query.Param("cartId") Long cartId,
         @org.springframework.data.repository.query.Param("productId") Long productId,
         @org.springframework.data.repository.query.Param("storeId") Long storeId,
-        @org.springframework.data.repository.query.Param("orderType") com.finalproject.enums.OrderType orderType,
-        @org.springframework.data.repository.query.Param("deliveryDate") java.time.LocalDate deliveryDate);
+        @org.springframework.data.repository.query.Param("orderType") com.finalproject.enums.OrderType orderType);
 
     List<CartItem> findByCartId(Long cartId);
     Optional<CartItem> findByCartIdAndProductIdAndStoreId(Long cartId, Long productId, Long storeId);

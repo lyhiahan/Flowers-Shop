@@ -9,8 +9,12 @@ INSERT INTO @Names VALUES
 ('admin', N'Quản Trị Viên Toàn Hệ Thống', 'ADMIN', 'nguyenthanhminh', N'Nguyễn Thanh Minh'),
 ('manager_q1', N'Nguyễn Quản Lý Cửa Hàng Q1', 'MANAGER', 'nguyenquanghuy', N'Nguyễn Quang Huy'),
 ('manager_q1', N'Nguyễn Quản Lý Q1', 'MANAGER', 'nguyenquanghuy', N'Nguyễn Quang Huy'),
+-- Rename this legacy demo identity without changing its existing admin permission.
+('manager_q1', N'Nguyễn Quản Lý Cửa Hàng Q1', 'ADMIN', 'nguyenquanghuy', N'Nguyễn Quang Huy'),
 ('khachhang', N'Lê Minh Hoa', 'USER', 'leminhhoa', N'Lê Minh Hoa'),
 ('khachhang', N'Lê Khách Hàng', 'USER', 'leminhhoa', N'Lê Minh Hoa'),
+('khachhang', N'Lê Khách Hàng Yêu Hoa', 'USER', 'leminhhoa', N'Lê Minh Hoa'),
+('khachhang', N'Lê Khách Hàng Yêu  Hoa', 'USER', 'leminhhoa', N'Lê Minh Hoa'),
 ('khachhang2', N'Trần Thị Hoa', 'USER', 'tranthihoa', N'Trần Thị Hoa'),
 ('khachhang_q7', N'Nguyễn Ngọc Bích Trâm', 'USER', 'nguyenbichtram', N'Nguyễn Ngọc Bích Trâm'),
 ('khachhang_dn', N'Công Ty Cổ Phần Công Nghệ Nam Sài Gòn', 'USER', 'namsaigon', N'Công Ty Cổ Phần Công Nghệ Nam Sài Gòn'),

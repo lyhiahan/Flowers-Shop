@@ -101,27 +101,40 @@ public class CartServiceImpl implements CartService {
         // --- Ưu tiên 5: Lấy khóa giỏ ngay trước khi ghi, giảm thời gian giữ khóa ---
         Cart cart = getCartForUpdate(username);
 
-        // --- Ưu tiên 4: Tìm dòng trùng bằng query lean, không load toàn bộ CartItem ---
-        CartItem existingItem = cartItemRepository.findDuplicateLine(
+        java.util.List<CartItem> matchingLines = cartItemRepository.findMatchingLines(
                 cart.getId(), product.getId(), storeId,
-                com.finalproject.enums.OrderType.BUY, delivDate).orElse(null);
+                com.finalproject.enums.OrderType.BUY);
 
         long alreadyInCart = cartItemRepository.sumQtyByCartProductStore(cart.getId(), product.getId(), storeId);
         if (alreadyInCart + addQty > availableStock) {
             throw new IllegalArgumentException("Số lượng vượt quá tồn kho; chỉ còn " + availableStock + " sản phẩm tại chi nhánh này.");
         }
-        if (existingItem != null) {
-            int newTotal = existingItem.getQuantity() + addQty;
-            if (newTotal > availableStock) {
-                throw new IllegalStateException("Tổng số lượng trong giỏ (" + newTotal
-                        + " bó) vượt quá tồn kho còn lại (" + availableStock + " bó) tại " + store.getName() + ".");
-            }
-            existingItem.setQuantity(newTotal);
+        if (!matchingLines.isEmpty()) {
+            CartItem existingItem = matchingLines.getFirst();
+            long newTotal = addQty;
+            for (CartItem line : matchingLines) newTotal += line.getQuantity();
+            existingItem.setQuantity(Math.toIntExact(newTotal));
+            existingItem.setDeliveryDate(delivDate);
             String greetingMsg = request.getGreetingMessage();
+            if (greetingMsg == null || greetingMsg.isBlank()) {
+                for (CartItem line : matchingLines) {
+                    if (line.getGreetingMessage() != null && !line.getGreetingMessage().isBlank()) {
+                        greetingMsg = line.getGreetingMessage();
+                    }
+                }
+            }
             if (greetingMsg != null && !greetingMsg.isBlank()) {
                 existingItem.setGreetingMessage(greetingMsg);
             }
             cartItemRepository.save(existingItem);
+            // Consolidate legacy date-based rows under the same cart lock.
+            if (matchingLines.size() > 1) {
+                var duplicates = matchingLines.subList(1, matchingLines.size());
+                if (cart.getItems() != null) {
+                    cart.getItems().removeIf(line -> duplicates.stream().anyMatch(duplicate -> duplicate.getId().equals(line.getId())));
+                }
+                cartItemRepository.deleteAll(duplicates);
+            }
         } else {
             // --- Ưu tiên 3: Kiểm tra tồn kho tổng hợp: SL đã có + SL mới thêm ---
             CartItem cartItem = CartItem.builder()

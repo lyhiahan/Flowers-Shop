@@ -281,6 +281,14 @@ public class ProfileController {
         return "customer/recently-viewed";
     }
 
+    @PostMapping({"/recently-viewed/clear", "/profile/recently-viewed/clear"})
+    public String clearRecentlyViewed(Principal principal, RedirectAttributes redirectAttributes) {
+        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
+        productService.clearRecentlyViewed(user.getId());
+        redirectAttributes.addFlashAttribute("successMessage", "Đã xóa lịch sử xem gần đây thành công.");
+        return "redirect:/customer/recently-viewed";
+    }
+
     @GetMapping({"/followed-stores", "/profile/followed-stores"})
     public String viewFollowedStores(Principal principal, Model model) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();

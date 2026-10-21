@@ -1,10 +1,18 @@
 param(
     [ValidateSet('Preview','Test','Apply')][string]$Action='Preview',
-    [ValidatePattern('^(RentalShop|CodexCatalogCopy_[0-9_]+)$')][string]$DatabaseName='RentalShop'
+    [ValidatePattern('^(RentalShop|CodexCatalogCopy_[0-9_]+)$')][string]$DatabaseName='RentalShop',
+    [ValidateNotNullOrEmpty()][string]$Server='127.0.0.1\SQLEXPRESS'
 )
 $ErrorActionPreference='Stop'
 Add-Type -AssemblyName System.Data
-$connection=[System.Data.SqlClient.SqlConnection]::new('Data Source=127.0.0.1,53735;Initial Catalog=' + $DatabaseName + ';Integrated Security=True;Encrypt=True;TrustServerCertificate=True;Connect Timeout=10')
+$connectionString=[System.Data.SqlClient.SqlConnectionStringBuilder]::new()
+$connectionString['Data Source']=$Server
+$connectionString['Initial Catalog']=$DatabaseName
+$connectionString['Integrated Security']=$true
+$connectionString['Encrypt']=$true
+$connectionString['TrustServerCertificate']=$true
+$connectionString['Connect Timeout']=10
+$connection=[System.Data.SqlClient.SqlConnection]::new($connectionString.ConnectionString)
 $connection.Open()
 $transaction=$null
 function Get-BusinessSnapshot {

@@ -41,4 +41,5 @@ public interface ProductService {
     // Sản phẩm đã xem gần đây
     void recordRecentlyViewed(Long userId, Long productId);
     List<Product> getRecentlyViewed(Long userId);
+    void clearRecentlyViewed(Long userId);
 }
