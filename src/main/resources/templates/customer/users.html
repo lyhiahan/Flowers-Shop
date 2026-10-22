@@ -1,68 +1,115 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:replace="~{fragments/floral :: head('Thành viên hệ thống')}">
+<head th:replace="~{fragments/floral :: head('Cộng Đồng Thành Viên')}">
 </head>
 <body class="floral-body">
 <header th:replace="~{fragments/floral :: header}"></header>
 
-<main class="floral-main-content py-5">
-    <div class="container">
-        <!-- Page Header & Title -->
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-            <div>
-                <nav aria-label="breadcrumb" class="mb-2">
-                    <ol class="breadcrumb mb-0 small">
-                        <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none text-muted">Trang chủ</a></li>
-                        <li class="breadcrumb-item active text-success fw-semibold" aria-current="page">Thành viên</li>
-                    </ol>
-                </nav>
-                <h1 class="h2 fw-bold text-dark mb-1" style="font-family: 'Playfair Display', serif; color: #20382E;">
-                    Cộng Đồng Thành Viên
-                </h1>
-                <p class="text-muted mb-0" style="font-size: 15px;">
-                    Gặp gỡ những người yêu hoa, đối tác và nghệ nhân cắm hoa trong hệ thống Hoa Tươi Sài Gòn
-                </p>
+<main class="floral-main-content py-4">
+    <div class="flower-container" style="max-width: 1240px; margin: 0 auto; padding: 0 20px;">
+        
+        <!-- Grounded Hero & KPI Metrics Container -->
+        <section class="card border-0 shadow-sm rounded-4 p-4 p-md-5 mb-4" style="background: #FFFFFF; border: 1px solid #E7DED4 !important; border-radius: 20px !important;">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                <div>
+                    <nav aria-label="breadcrumb" class="mb-2">
+                        <ol class="breadcrumb mb-0 small">
+                            <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none text-muted">Trang chủ</a></li>
+                            <li class="breadcrumb-item active fw-bold" style="color: #A64060;" aria-current="page">Thành viên</li>
+                        </ol>
+                    </nav>
+                    <h1 class="fw-bold mb-1" style="font-family: 'Nunito', Arial, sans-serif !important; font-size: 28px; color: #293B32;">
+                        Cộng Đồng Thành Viên
+                    </h1>
+                    <p class="text-muted mb-0 small">
+                        Gặp gỡ những người yêu hoa, đối tác và nghệ nhân cắm hoa trong hệ thống Hoa Tươi Sài Gòn
+                    </p>
+                </div>
+                <div>
+                    <span class="badge rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2" style="background-color: #EBF3EE; color: #355447; border: 1px solid #C8DDD0; font-size: 14px; font-weight: 700;">
+                        <i class="bi bi-people-fill"></i> <span th:text="${totalUsers}">0</span> thành viên
+                    </span>
+                </div>
             </div>
-            <div>
-                <span class="badge rounded-pill px-3 py-2" style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; font-size: 14px; font-weight: 700;">
-                    <i class="bi bi-people-fill me-1"></i> <span th:text="${totalUsers}">0</span> thành viên
-                </span>
-            </div>
-        </div>
 
-        <div th:replace="~{fragments/floral :: flashes}"></div>
-
-        <!-- Search Bar -->
-        <div class="card border-0 shadow-sm rounded-4 mb-4" style="background-color: #F8FAF9; border: 1px solid #E2E7E2 !important;">
-            <div class="card-body p-3 p-md-4">
-                <form th:action="@{/users}" method="get" class="row g-2 align-items-center">
-                    <input type="hidden" name="size" th:value="${pageSize != null ? pageSize : 6}" />
-                    <div class="col-md-9 col-lg-10">
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0 ps-3" style="border-color: #D1E5DA; border-radius: 12px 0 0 12px;">
-                                <i class="bi bi-search text-muted"></i>
-                            </span>
-                            <input type="text" name="keyword" class="form-control border-start-0 ps-2"
-                                   th:value="${keyword}"
-                                   placeholder="Tìm kiếm thành viên theo họ tên, tên đăng nhập hoặc email..."
-                                   aria-label="Tìm thành viên"
-                                   style="height: 46px; border-color: #D1E5DA; border-radius: 0 12px 12px 0; font-size: 15px;">
+            <!-- KPI Metric Summary Strip -->
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-lg-3">
+                    <div class="p-3 rounded-4 h-100 border d-flex align-items-center gap-3" style="background: #FFFCF8; border-color: #E7DED4 !important;">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-3" style="width: 44px; height: 44px; background: #EBF3EE; color: #355447; flex-shrink: 0;">
+                            <i class="bi bi-people-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small" style="font-size: 12.5px;">Tổng thành viên</div>
+                            <strong class="fs-6 fw-bold" style="color: #293B32;" th:text="${totalUsers} + ' Thành viên'">0 Thành viên</strong>
                         </div>
                     </div>
-                    <div class="col-md-3 col-lg-2 d-flex gap-2">
-                        <button type="submit" class="btn btn-success flex-grow-1 fw-bold shadow-sm"
-                                style="height: 46px; border-radius: 12px; background-color: #20382E; border-color: #20382E;">
-                            Tìm kiếm
-                        </button>
-                        <a th:if="${keyword != null and !keyword.isEmpty()}" th:href="@{/users(size=${pageSize})}"
-                           class="btn btn-outline-secondary d-flex align-items-center justify-content-center px-3"
-                           title="Xóa tìm kiếm" style="height: 46px; border-radius: 12px; border-color: #D1E5DA;">
-                            <i class="bi bi-x-lg"></i>
-                        </a>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="p-3 rounded-4 h-100 border d-flex align-items-center gap-3" style="background: #FFFCF8; border-color: #E7DED4 !important;">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-3" style="width: 44px; height: 44px; background: #ECFDF5; color: #059669; flex-shrink: 0;">
+                            <i class="bi bi-patch-check-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small" style="font-size: 12.5px;">Xác thực tài khoản</div>
+                            <strong class="fs-6 fw-bold" style="color: #059669;">100% Tin cậy</strong>
+                        </div>
                     </div>
-                </form>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="p-3 rounded-4 h-100 border d-flex align-items-center gap-3" style="background: #FFFCF8; border-color: #E7DED4 !important;">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-3" style="width: 44px; height: 44px; background: #FFFBEB; color: #B45309; flex-shrink: 0;">
+                            <i class="bi bi-shop fs-5"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small" style="font-size: 12.5px;">Chuỗi chi nhánh</div>
+                            <strong class="fs-6 fw-bold" style="color: #B45309;">Toàn TP.HCM</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="p-3 rounded-4 h-100 border d-flex align-items-center gap-3" style="background: #FFFCF8; border-color: #E7DED4 !important;">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-3" style="width: 44px; height: 44px; background: #F3E6E1; color: #A64060; flex-shrink: 0;">
+                            <i class="bi bi-flower1 fs-5"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small" style="font-size: 12.5px;">Nghệ nhân hoa</div>
+                            <strong class="fs-6 fw-bold" style="color: #A64060;">Atelier Floral</strong>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+
+            <!-- Search Form -->
+            <form th:action="@{/users}" method="get" class="row g-2 align-items-center pt-2">
+                <input type="hidden" name="size" th:value="${pageSize != null ? pageSize : 6}" />
+                <div class="col-md-9 col-lg-10">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 ps-3" style="border-color: #E7DED4; border-radius: 9999px 0 0 9999px;">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text" name="keyword" class="form-control border-start-0 ps-2"
+                               th:value="${keyword}"
+                               placeholder="Tìm kiếm thành viên theo họ tên, tên đăng nhập hoặc email..."
+                               aria-label="Tìm thành viên"
+                               style="height: 46px; border-color: #E7DED4; border-radius: 0 9999px 9999px 0; font-size: 14.5px;">
+                    </div>
+                </div>
+                <div class="col-md-3 col-lg-2 d-flex gap-2">
+                    <button type="submit" class="btn text-white flex-grow-1 fw-bold shadow-sm"
+                            style="height: 46px; border-radius: 9999px; background-color: #355447; border-color: #355447;">
+                        <i class="bi bi-search me-1"></i> Tìm kiếm
+                    </button>
+                    <a th:if="${keyword != null and !keyword.isEmpty()}" th:href="@{/users(size=${pageSize})}"
+                       class="btn btn-outline-secondary d-flex align-items-center justify-content-center px-3"
+                       title="Xóa tìm kiếm" style="height: 46px; border-radius: 9999px; border-color: #E7DED4;">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                </div>
+            </form>
+        </section>
+
+        <div th:replace="~{fragments/floral :: flashes}"></div>
 
         <!-- Search Results Count / Active Filter Notice -->
         <div th:if="${keyword != null and !keyword.isEmpty()}" class="d-flex align-items-center justify-content-between mb-3 px-1">
@@ -70,13 +117,13 @@
                 Kết quả tìm kiếm cho: <strong class="text-dark" th:text="'“' + ${keyword} + '”'"></strong>
                 (<span th:text="${totalUsers}">0</span> thành viên)
             </span>
-            <a th:href="@{/users(size=${pageSize})}" class="small text-success text-decoration-none fw-semibold">
+            <a th:href="@{/users(size=${pageSize})}" class="small text-success text-decoration-none fw-bold">
                 <i class="bi bi-arrow-left me-1"></i> Xem tất cả thành viên
             </a>
         </div>
 
         <!-- Empty State -->
-        <div th:if="${#lists.isEmpty(users)}" class="card border-0 shadow-sm rounded-4 text-center py-5 my-4" style="background-color: #FFFFFF; border: 1px dashed #D1E5DA !important;">
+        <div th:if="${#lists.isEmpty(users)}" class="card border-0 shadow-sm rounded-4 text-center py-5 my-4" style="background-color: #FFFFFF; border: 1px dashed #E7DED4 !important; border-radius: 18px !important;">
             <div class="card-body py-4">
                 <div class="mb-3">
                     <img th:src="@{/images/flower-logo.png}" alt="Hoa Tươi" style="width: 64px; height: 64px; opacity: 0.7;">
@@ -85,7 +132,7 @@
                 <p class="text-muted small mb-3" style="max-width: 420px; margin: 0 auto;">
                     Không có thành viên nào khớp với từ khóa tìm kiếm của bạn. Hãy thử tìm bằng từ khóa khác hoặc quay lại danh sách đầy đủ.
                 </p>
-                <a th:href="@{/users}" class="btn btn-outline-success rounded-pill px-4 fw-semibold" style="border-color: #20382E; color: #20382E;">
+                <a th:href="@{/users}" class="btn rounded-pill px-4 fw-bold text-white" style="background-color: #355447;">
                     Xem danh sách đầy đủ
                 </a>
             </div>
@@ -95,19 +142,19 @@
         <div th:if="${!#lists.isEmpty(users)}" class="row g-4 mb-4">
             <div class="col-12 col-sm-6 col-lg-4" th:each="u : ${users}">
                 <article class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative member-card"
-                         style="background-color: #FFFFFF; border: 1px solid #EAEFEA !important; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                         style="background-color: #FFFFFF; border: 1px solid #E7DED4 !important; border-radius: 18px !important; transition: transform 0.2s ease, box-shadow 0.2s ease;">
                     <div class="card-body p-4 d-flex flex-column text-center">
                         <!-- Avatar with fallback -->
                         <div class="mx-auto mb-3 position-relative" style="width: 88px; height: 88px;">
                             <img th:src="${u.avatarUrl != null and !u.avatarUrl.trim().isEmpty() ? u.avatarUrl : '/images/flower-logo.png'}"
                                  onerror="this.onerror=null; this.src='/images/flower-logo.png';"
                                  class="rounded-circle shadow-sm border"
-                                 style="width: 88px; height: 88px; object-fit: cover; border-color: #D1E5DA !important; background-color: #F8FAF9;"
+                                 style="width: 88px; height: 88px; object-fit: cover; border-color: #E7DED4 !important; background-color: #FFFCF8;"
                                  th:alt="${u.fullName != null ? u.fullName : u.username}">
                         </div>
 
                         <!-- Name & Username -->
-                        <h2 class="h5 fw-bold text-dark mb-1" style="font-size: 18px;" th:text="${u.fullName != null and !u.fullName.isEmpty() ? u.fullName : u.username}">
+                        <h2 class="h5 fw-bold text-dark mb-1" style="font-size: 18px; font-family: 'Nunito', Arial, sans-serif !important;" th:text="${u.fullName != null and !u.fullName.isEmpty() ? u.fullName : u.username}">
                             Nguyễn Văn A
                         </h2>
                         <p class="text-muted small mb-2" style="font-size: 13.5px;" th:text="'@' + ${u.username}">
@@ -116,24 +163,24 @@
 
                         <!-- Store / Role Badges -->
                         <div class="mb-3 d-flex flex-wrap justify-content-center gap-1">
-                            <span th:if="${u.store != null}" class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2.5 py-1" style="font-size: 12px;">
+                            <span th:if="${u.store != null}" class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2.5 py-1" style="font-size: 12px; font-weight: 700;">
                                 <i class="bi bi-shop me-1"></i> <span th:text="${u.store.name}">Chi nhánh</span>
                             </span>
-                            <span th:if="${u.store == null}" class="badge rounded-pill bg-light text-secondary border px-2.5 py-1" style="font-size: 12px;">
+                            <span th:if="${u.store == null}" class="badge rounded-pill px-2.5 py-1" style="font-size: 12px; font-weight: 600; background-color: #F3E6E1; color: #A64060;">
                                 <i class="bi bi-person me-1"></i> Thành viên
                             </span>
                         </div>
 
                         <!-- Extra Details -->
-                        <div class="small text-muted mb-4 mt-auto pt-2 border-top" style="font-size: 13px; border-color: #F0F4F1 !important;">
+                        <div class="small text-muted mb-4 mt-auto pt-2 border-top" style="font-size: 13px; border-color: #F1EAE2 !important;">
                             <div th:if="${u.createdDate != null}" class="text-truncate">
                                 <i class="bi bi-calendar3 me-1 text-success"></i> Tham gia: <span th:text="${#temporals.format(u.createdDate, 'dd/MM/yyyy')}">01/01/2026</span>
                             </div>
                         </div>
 
                         <!-- Profile Action -->
-                        <a th:href="@{/users/{id}(id=${u.id})}" class="btn btn-outline-success w-100 rounded-pill fw-semibold py-2"
-                           style="border-color: #20382E; color: #20382E; font-size: 14px;">
+                        <a th:href="@{/users/{id}(id=${u.id})}" class="btn w-100 rounded-pill fw-bold py-2"
+                           style="border: 1.5px solid #355447; color: #355447; font-size: 14px; background: transparent; transition: all 0.2s ease;">
                             Xem hồ sơ cá nhân <i class="bi bi-arrow-right ms-1"></i>
                         </a>
                     </div>
@@ -148,7 +195,7 @@
                 <li class="page-item" th:classappend="${!hasPrevious} ? 'disabled' : ''">
                     <a class="page-link rounded-3 px-3 py-2 fw-semibold"
                        th:href="@{/users(keyword=${keyword}, page=${currentPage - 1}, size=${pageSize})}"
-                       aria-label="Trang trước" style="color: #20382E; border-color: #D1E5DA;">
+                       aria-label="Trang trước" style="color: #293B32; border-color: #E7DED4; background: #FFFFFF;">
                         <i class="bi bi-chevron-left me-1"></i> Trước
                     </a>
                 </li>
@@ -157,28 +204,28 @@
                 <th:block th:with="startPage=${T(java.lang.Math).max(0, currentPage - 2)}, endPage=${T(java.lang.Math).min(totalPages - 1, currentPage + 2)}">
                     <!-- First page jump if far -->
                     <li th:if="${startPage > 0}" class="page-item">
-                        <a class="page-link rounded-3 px-3 py-2" th:href="@{/users(keyword=${keyword}, page=0, size=${pageSize})}">1</a>
+                        <a class="page-link rounded-3 px-3 py-2" th:href="@{/users(keyword=${keyword}, page=0, size=${pageSize})}" style="color: #293B32; border-color: #E7DED4; background: #FFFFFF;">1</a>
                     </li>
                     <li th:if="${startPage > 1}" class="page-item disabled">
-                        <span class="page-link rounded-3 px-3 py-2">...</span>
+                        <span class="page-link rounded-3 px-3 py-2" style="border-color: #E7DED4;">...</span>
                     </li>
 
                     <!-- Window sequence -->
                     <li th:each="i : ${#numbers.sequence(startPage, endPage)}" class="page-item" th:classappend="${i == currentPage} ? 'active' : ''">
-                        <a class="page-link rounded-3 px-3 py-2 fw-semibold"
+                        <a class="page-link rounded-3 px-3 py-2 fw-bold"
                            th:href="@{/users(keyword=${keyword}, page=${i}, size=${pageSize})}"
                            th:text="${i + 1}"
-                           th:style="${i == currentPage} ? 'background-color: #20382E; border-color: #20382E; color: #FFFFFF;' : 'color: #20382E; border-color: #D1E5DA;'">
+                           th:style="${i == currentPage} ? 'background-color: #355447 !important; border-color: #355447 !important; color: #FFFFFF !important;' : 'color: #293B32; border-color: #E7DED4; background: #FFFFFF;'">
                             1
                         </a>
                     </li>
 
                     <!-- Last page jump if far -->
                     <li th:if="${endPage < totalPages - 2}" class="page-item disabled">
-                        <span class="page-link rounded-3 px-3 py-2">...</span>
+                        <span class="page-link rounded-3 px-3 py-2" style="border-color: #E7DED4;">...</span>
                     </li>
                     <li th:if="${endPage < totalPages - 1}" class="page-item">
-                        <a class="page-link rounded-3 px-3 py-2" th:href="@{/users(keyword=${keyword}, page=${totalPages - 1}, size=${pageSize})}" th:text="${totalPages}">10</a>
+                        <a class="page-link rounded-3 px-3 py-2" th:href="@{/users(keyword=${keyword}, page=${totalPages - 1}, size=${pageSize})}" th:text="${totalPages}" style="color: #293B32; border-color: #E7DED4; background: #FFFFFF;">10</a>
                     </li>
                 </th:block>
 
@@ -186,7 +233,7 @@
                 <li class="page-item" th:classappend="${!hasNext} ? 'disabled' : ''">
                     <a class="page-link rounded-3 px-3 py-2 fw-semibold"
                        th:href="@{/users(keyword=${keyword}, page=${currentPage + 1}, size=${pageSize})}"
-                       aria-label="Trang sau" style="color: #20382E; border-color: #D1E5DA;">
+                       aria-label="Trang sau" style="color: #293B32; border-color: #E7DED4; background: #FFFFFF;">
                         Sau <i class="bi bi-chevron-right ms-1"></i>
                     </a>
                 </li>
