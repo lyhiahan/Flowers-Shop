@@ -35,10 +35,6 @@ public class Review {
     @Column(nullable = false)
     private Integer rating; // 1 đến 5 sao
 
-    // Tương thích với dữ liệu SQL Server cũ còn cột stars bắt buộc.
-    @Column(name = "stars")
-    private Integer stars;
-
     @Column(name = "image_url", length = 500)
     private String imageUrl;
 
@@ -47,14 +43,17 @@ public class Review {
 
     @PrePersist
     public void prePersist() {
-        stars = rating;
         if (createdAt == null) createdAt = LocalDateTime.now();
         if (updatedAt == null) updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
     public void preUpdate() {
-        stars = rating;
         updatedAt = LocalDateTime.now();
+    }
+
+    @Transient
+    public Integer getStars() {
+        return rating != null ? rating : 5;
     }
 }
