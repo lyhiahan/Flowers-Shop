@@ -1221,3 +1221,375 @@ h2.section-title, h3.section-title, .h2-title {
     }
 }
 
+/* ==========================================================================
+   UNIFIED STOREFRONT HEADER & NAVIGATION (ĐỒNG BỘ 100% VỚI TRANG CHỦ)
+   ========================================================================== */
+.flower-container {
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.header-main-bar {
+    background-color: var(--flower-surface, #FFFCF8) !important;
+    border-bottom: 1px solid var(--flower-border, #E7DED4) !important;
+    padding: 12px 0 !important;
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+}
+
+.brand-logo-text {
+    font-family: 'Playfair Display', Georgia, 'Times New Roman', serif !important;
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    color: var(--flower-primary, #355447) !important;
+    letter-spacing: 0.5px !important;
+    line-height: 1 !important;
+    text-decoration: none !important;
+}
+
+.header-search-box {
+    background: #FFFFFF !important;
+    border: 1.5px solid var(--flower-border, #E7DED4) !important;
+    border-radius: 9999px !important;
+    padding: 3px 6px 3px 12px !important;
+    box-shadow: 0 1px 3px rgba(41, 59, 50, 0.03) !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+    width: 100% !important;
+}
+
+.header-search-box:focus-within {
+    border-color: var(--flower-primary, #355447) !important;
+    box-shadow: 0 0 0 3px rgba(53, 84, 71, 0.12) !important;
+}
+
+.header-search-type-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border-right: 1px solid var(--flower-border, #E7DED4);
+    padding-right: 6px;
+    flex-shrink: 0;
+}
+
+.header-search-type {
+    background: transparent !important;
+    font-size: 13.5px !important;
+    color: #4A3E3D !important;
+    font-weight: 600 !important;
+    padding: 2px 4px !important;
+    outline: none !important;
+    border: none !important;
+    cursor: pointer !important;
+}
+
+.header-search-input {
+    border: none !important;
+    outline: none !important;
+    font-size: 13.5px !important;
+    font-weight: 400 !important;
+    color: var(--flower-text-main, #293B32) !important;
+    background: transparent !important;
+    padding: 0 10px !important;
+}
+
+.header-search-input:focus {
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+.header-search-btn {
+    background-color: var(--flower-primary, #355447) !important;
+    border: none !important;
+    color: #ffffff !important;
+    border-radius: 9999px !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    padding: 6px 18px !important;
+    transition: background-color 0.2s ease, transform 0.1s ease !important;
+}
+
+.header-search-btn:hover {
+    background-color: var(--flower-primary-hover, #243D32) !important;
+    color: #ffffff !important;
+}
+
+.header-cart-link {
+    color: var(--flower-text-main, #293B32) !important;
+    text-decoration: none !important;
+    font-size: 21px !important;
+    padding: 6px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    position: relative !important;
+    transition: color 0.15s ease !important;
+}
+
+.header-cart-link:hover {
+    color: var(--flower-accent, #A64060) !important;
+}
+
+.cart-badge-pill {
+    position: absolute;
+    top: 0;
+    right: -2px;
+    background-color: var(--flower-accent, #A64060);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+}
+
+.account-pill-btn {
+    border: 1px solid var(--flower-border, #E7DED4) !important;
+    background-color: #FFFFFF !important;
+    color: var(--flower-text-main, #293B32) !important;
+    border-radius: 9999px !important;
+    padding: 7px 16px !important;
+    font-size: 14.5px !important;
+    font-weight: 600 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    transition: all 0.15s ease !important;
+    text-decoration: none !important;
+}
+
+.account-pill-btn:hover,
+.account-pill-btn:focus {
+    background-color: var(--flower-sub-bg, #F3E6E1) !important;
+    color: var(--flower-primary, #355447) !important;
+    border-color: #DDD3C8 !important;
+}
+
+.nav-categories-bar {
+    background-color: var(--flower-surface, #FFFCF8) !important;
+    border-bottom: 1px solid var(--flower-border, #E7DED4) !important;
+    padding: 7px 0 !important;
+}
+
+.cat-nav-link {
+    color: var(--flower-text-main, #293B32) !important;
+    text-decoration: none !important;
+    font-size: 15.5px !important;
+    font-weight: 600 !important;
+    padding: 5px 12px !important;
+    border-radius: 9999px !important;
+    transition: all 0.15s ease !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.cat-nav-link:hover {
+    background-color: #FFF0F3 !important;
+    color: var(--flower-accent, #A64060) !important;
+}
+
+.cat-nav-link.active {
+    background-color: #EBF3EE !important;
+    color: #355447 !important;
+    font-weight: 700 !important;
+}
+
+/* Nút chuẩn phong cách tiệm hoa */
+.btn-flower-primary,
+.btn-primary-pill {
+    background-color: #355447 !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 9999px !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    padding: 8px 20px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 2px 8px rgba(53, 84, 71, 0.15) !important;
+}
+
+.btn-flower-primary:hover,
+.btn-primary-pill:hover {
+    background-color: #243D32 !important;
+    color: #FFFFFF !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(53, 84, 71, 0.25) !important;
+}
+
+.btn-flower-outline,
+.btn-outline-pill {
+    background-color: #FFFFFF !important;
+    color: #355447 !important;
+    border: 1.5px solid #355447 !important;
+    border-radius: 9999px !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    padding: 7px 18px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-flower-outline:hover,
+.btn-outline-pill:hover {
+    background-color: #EBF3EE !important;
+    color: #243D32 !important;
+    border-color: #243D32 !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ==========================================================================
+   UNIFIED STOREFRONT KPI CARDS & STATUS PILLS
+   ========================================================================== */
+.unified-kpi-card {
+    background: #FFFCF8 !important;
+    border: 1px solid #E7DED4 !important;
+    border-radius: 14px !important;
+    padding: 14px 16px !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease !important;
+}
+
+.unified-kpi-card:hover {
+    border-color: #DDD3C8 !important;
+    box-shadow: 0 4px 12px rgba(53, 84, 71, 0.05) !important;
+}
+
+.unified-kpi-icon {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 10px !important;
+    background: #EBF3EE !important;
+    color: #355447 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 18px !important;
+    flex-shrink: 0 !important;
+}
+
+.unified-kpi-label {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #64748B !important;
+    line-height: 1.3 !important;
+    margin-bottom: 2px !important;
+}
+
+.unified-kpi-value {
+    font-size: 15.5px !important;
+    font-weight: 700 !important;
+    color: #293B32 !important;
+    line-height: 1.2 !important;
+}
+
+/* Unified Status Filter Pills */
+.status-filter-pill {
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    padding: 6px 14px !important;
+    border-radius: 9999px !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    transition: all 0.15s ease !important;
+    border: 1px solid #E7DED4 !important;
+    background-color: #FFFFFF !important;
+    color: #475569 !important;
+}
+
+.status-filter-pill:hover {
+    background-color: #F8FAF9 !important;
+    color: #355447 !important;
+    border-color: #C8DDD0 !important;
+}
+
+.status-filter-pill.active {
+    background-color: #355447 !important;
+    border-color: #355447 !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 2px 6px rgba(53, 84, 71, 0.2) !important;
+}
+
+/* Unified Order Status Badges */
+.order-status-badge {
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    padding: 5px 12px !important;
+    border-radius: 9999px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    white-space: nowrap !important;
+    line-height: 1.3 !important;
+}
+
+.order-status-pending {
+    background-color: #FEF3C7 !important;
+    color: #B45309 !important;
+    border: 1px solid #FDE68A !important;
+}
+
+.order-status-confirmed {
+    background-color: #E0F2FE !important;
+    color: #0369A1 !important;
+    border: 1px solid #BAE6FD !important;
+}
+
+.order-status-preparing {
+    background-color: #FCE7F3 !important;
+    color: #BE185D !important;
+    border: 1px solid #FBCFE8 !important;
+}
+
+.order-status-delivering {
+    background-color: #EFF6FF !important;
+    color: #1D4ED8 !important;
+    border: 1px solid #BFDBFE !important;
+}
+
+.order-status-completed {
+    background-color: #ECFDF5 !important;
+    color: #047857 !important;
+    border: 1px solid #A7F3D0 !important;
+}
+
+.order-status-cancelled {
+    background-color: #FEE2E2 !important;
+    color: #B91C1C !important;
+    border: 1px solid #FECACA !important;
+}
+
+.order-status-refund-requested {
+    background-color: #FFFBEB !important;
+    color: #D97706 !important;
+    border: 1px solid #FDE68A !important;
+}
+
+.order-status-refunded {
+    background-color: #F1F5F9 !important;
+    color: #475569 !important;
+    border: 1px solid #CBD5E1 !important;
+}
+
+

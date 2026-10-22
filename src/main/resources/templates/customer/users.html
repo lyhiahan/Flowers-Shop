@@ -9,72 +9,72 @@
     <div class="flower-container" style="max-width: 1240px; margin: 0 auto; padding: 0 20px;">
         
         <!-- Grounded Hero & KPI Metrics Container -->
-        <section class="card border-0 shadow-sm rounded-4 p-4 p-md-5 mb-4" style="background: #FFFFFF; border: 1px solid #E7DED4 !important; border-radius: 20px !important;">
+        <section class="card border-0 shadow-sm rounded-4 p-4 p-md-4 mb-4" style="background: #FFFFFF; border: 1px solid #E7DED4 !important; border-radius: 18px !important;">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
                 <div>
-                    <nav aria-label="breadcrumb" class="mb-2">
-                        <ol class="breadcrumb mb-0 small">
+                    <nav aria-label="breadcrumb" class="mb-1">
+                        <ol class="breadcrumb mb-0" style="font-size: 13px;">
                             <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none text-muted">Trang chủ</a></li>
                             <li class="breadcrumb-item active fw-bold" style="color: #A64060;" aria-current="page">Thành viên</li>
                         </ol>
                     </nav>
-                    <h1 class="fw-bold mb-1" style="font-family: 'Nunito', Arial, sans-serif !important; font-size: 28px; color: #293B32;">
+                    <h1 class="fw-bold mb-1" style="font-family: 'Nunito', Arial, sans-serif !important; font-size: 24px; color: #293B32;">
                         Cộng Đồng Thành Viên
                     </h1>
-                    <p class="text-muted mb-0 small">
+                    <p class="text-muted mb-0" style="font-size: 14.5px;">
                         Gặp gỡ những người yêu hoa, đối tác và nghệ nhân cắm hoa trong hệ thống Hoa Tươi Sài Gòn
                     </p>
                 </div>
                 <div>
-                    <span class="badge rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2" style="background-color: #EBF3EE; color: #355447; border: 1px solid #C8DDD0; font-size: 14px; font-weight: 700;">
+                    <span class="badge rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2" style="background-color: #EBF3EE; color: #355447; border: 1px solid #C8DDD0; font-size: 13.5px; font-weight: 700;">
                         <i class="bi bi-people-fill"></i> <span th:text="${totalUsers}">0</span> thành viên
                     </span>
                 </div>
             </div>
 
-            <!-- KPI Metric Summary Strip -->
+            <!-- KPI Metric Summary Strip (Đồng bộ font chữ & bộ icon) -->
             <div class="row g-3 mb-4">
                 <div class="col-6 col-lg-3">
-                    <div class="p-3 rounded-4 h-100 border d-flex align-items-center gap-3" style="background: #FFFCF8; border-color: #E7DED4 !important;">
-                        <div class="d-inline-flex align-items-center justify-content-center rounded-3" style="width: 44px; height: 44px; background: #EBF3EE; color: #355447; flex-shrink: 0;">
-                            <i class="bi bi-people-fill fs-5"></i>
+                    <div class="unified-kpi-card">
+                        <div class="unified-kpi-icon">
+                            <i class="bi bi-people-fill"></i>
                         </div>
                         <div>
-                            <div class="text-muted small" style="font-size: 12.5px;">Tổng thành viên</div>
-                            <strong class="fs-6 fw-bold" style="color: #293B32;" th:text="${totalUsers} + ' Thành viên'">0 Thành viên</strong>
+                            <div class="unified-kpi-label">Tổng thành viên</div>
+                            <div class="unified-kpi-value" th:text="${totalUsers} + ' Thành viên'">0 Thành viên</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-6 col-lg-3">
-                    <div class="p-3 rounded-4 h-100 border d-flex align-items-center gap-3" style="background: #FFFCF8; border-color: #E7DED4 !important;">
-                        <div class="d-inline-flex align-items-center justify-content-center rounded-3" style="width: 44px; height: 44px; background: #ECFDF5; color: #059669; flex-shrink: 0;">
-                            <i class="bi bi-patch-check-fill fs-5"></i>
+                    <div class="unified-kpi-card">
+                        <div class="unified-kpi-icon">
+                            <i class="bi bi-patch-check-fill"></i>
                         </div>
                         <div>
-                            <div class="text-muted small" style="font-size: 12.5px;">Xác thực tài khoản</div>
-                            <strong class="fs-6 fw-bold" style="color: #059669;">100% Tin cậy</strong>
+                            <div class="unified-kpi-label">Xác thực tài khoản</div>
+                            <div class="unified-kpi-value">100% Tin cậy</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-6 col-lg-3">
-                    <div class="p-3 rounded-4 h-100 border d-flex align-items-center gap-3" style="background: #FFFCF8; border-color: #E7DED4 !important;">
-                        <div class="d-inline-flex align-items-center justify-content-center rounded-3" style="width: 44px; height: 44px; background: #FFFBEB; color: #B45309; flex-shrink: 0;">
-                            <i class="bi bi-shop fs-5"></i>
+                    <div class="unified-kpi-card">
+                        <div class="unified-kpi-icon">
+                            <i class="bi bi-shop"></i>
                         </div>
                         <div>
-                            <div class="text-muted small" style="font-size: 12.5px;">Chuỗi chi nhánh</div>
-                            <strong class="fs-6 fw-bold" style="color: #B45309;">Toàn TP.HCM</strong>
+                            <div class="unified-kpi-label">Chuỗi chi nhánh</div>
+                            <div class="unified-kpi-value">Toàn TP.HCM</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-6 col-lg-3">
-                    <div class="p-3 rounded-4 h-100 border d-flex align-items-center gap-3" style="background: #FFFCF8; border-color: #E7DED4 !important;">
-                        <div class="d-inline-flex align-items-center justify-content-center rounded-3" style="width: 44px; height: 44px; background: #F3E6E1; color: #A64060; flex-shrink: 0;">
-                            <i class="bi bi-flower1 fs-5"></i>
+                    <div class="unified-kpi-card">
+                        <div class="unified-kpi-icon">
+                            <i class="bi bi-flower1"></i>
                         </div>
                         <div>
-                            <div class="text-muted small" style="font-size: 12.5px;">Nghệ nhân hoa</div>
-                            <strong class="fs-6 fw-bold" style="color: #A64060;">Atelier Floral</strong>
+                            <div class="unified-kpi-label">Nghệ nhân hoa</div>
+                            <div class="unified-kpi-value">Atelier Floral</div>
                         </div>
                     </div>
                 </div>

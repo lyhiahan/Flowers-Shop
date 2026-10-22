@@ -303,14 +303,14 @@
         <section class="store-hero-card">
             <div class="row align-items-center g-3 mb-4">
                 <div class="col-lg-6">
-                    <nav aria-label="breadcrumb" class="mb-2">
-                        <ol class="breadcrumb mb-0" style="font-size: 13.5px;">
+                    <nav aria-label="breadcrumb" class="mb-1">
+                        <ol class="breadcrumb mb-0" style="font-size: 13px;">
                             <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none text-muted">Trang chủ</a></li>
                             <li class="breadcrumb-item active fw-bold" style="color: var(--flower-accent);" aria-current="page">Hệ thống cửa hàng</li>
                         </ol>
                     </nav>
-                    <h1 class="fw-bold mb-1" style="font-size: 28px; color: var(--flower-primary);">Hệ Thống Chi Nhánh Cửa Hàng</h1>
-                    <p class="text-muted small mb-0">Tìm kiếm và tham quan các chi nhánh cửa hàng hoa tươi gần bạn trong hệ thống Hoa Tươi Sài Gòn</p>
+                    <h1 class="fw-bold mb-1" style="font-size: 24px; color: var(--flower-primary);">Hệ Thống Chi Nhánh Cửa Hàng</h1>
+                    <p class="text-muted mb-0" style="font-size: 14.5px;">Tìm kiếm và tham quan các chi nhánh cửa hàng hoa tươi gần bạn trong hệ thống Hoa Tươi Sài Gòn</p>
                 </div>
                 <div class="col-lg-6">
                     <form th:action="@{/stores}" method="get" class="store-search-box d-flex align-items-center">
@@ -323,49 +323,49 @@
                 </div>
             </div>
 
-            <!-- KPI Summary Strip -->
+            <!-- KPI Summary Strip (Đồng bộ font chữ & bộ icon) -->
             <div class="row g-3">
                 <div class="col-6 col-lg-3">
-                    <div class="kpi-mini-card d-flex align-items-center gap-3">
-                        <div class="d-inline-flex align-items-center justify-content-center rounded-3" style="width: 44px; height: 44px; background: #EBF3EE; color: #355447; flex-shrink: 0;">
-                            <i class="bi bi-shop fs-5"></i>
+                    <div class="unified-kpi-card">
+                        <div class="unified-kpi-icon">
+                            <i class="bi bi-shop"></i>
                         </div>
                         <div>
-                            <div class="text-muted small" style="font-size: 12.5px;">Tổng chi nhánh</div>
-                            <strong class="fs-6 fw-bold" style="color: #293B32;" th:text="(${totalItems != null ? totalItems : #lists.size(stores)}) + ' Chi nhánh'">3 Chi nhánh</strong>
+                            <div class="unified-kpi-label">Tổng chi nhánh</div>
+                            <div class="unified-kpi-value" th:text="(${totalItems != null ? totalItems : #lists.size(stores)}) + ' Chi nhánh'">3 Chi nhánh</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-6 col-lg-3">
-                    <div class="kpi-mini-card d-flex align-items-center gap-3">
-                        <div class="d-inline-flex align-items-center justify-content-center rounded-3" style="width: 44px; height: 44px; background: #ECFDF5; color: #059669; flex-shrink: 0;">
-                            <i class="bi bi-clock-history fs-5"></i>
+                    <div class="unified-kpi-card">
+                        <div class="unified-kpi-icon">
+                            <i class="bi bi-clock-history"></i>
                         </div>
                         <div>
-                            <div class="text-muted small" style="font-size: 12.5px;">Phục vụ chu đáo</div>
-                            <strong class="fs-6 fw-bold" style="color: #059669;">100% Đang mở cửa</strong>
+                            <div class="unified-kpi-label">Phục vụ chu đáo</div>
+                            <div class="unified-kpi-value">100% Đang mở cửa</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-6 col-lg-3">
-                    <div class="kpi-mini-card d-flex align-items-center gap-3">
-                        <div class="d-inline-flex align-items-center justify-content-center rounded-3" style="width: 44px; height: 44px; background: #FFFBEB; color: #B45309; flex-shrink: 0;">
-                            <i class="bi bi-star-fill fs-5"></i>
+                    <div class="unified-kpi-card">
+                        <div class="unified-kpi-icon">
+                            <i class="bi bi-star-fill"></i>
                         </div>
                         <div>
-                            <div class="text-muted small" style="font-size: 12.5px;">Đánh giá hài lòng</div>
-                            <strong class="fs-6 fw-bold" style="color: #B45309;">5.0 ⭐ Xuất sắc</strong>
+                            <div class="unified-kpi-label">Đánh giá hài lòng</div>
+                            <div class="unified-kpi-value">5.0 <i class="bi bi-star-fill text-warning" style="font-size: 13px;"></i> Xuất sắc</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-6 col-lg-3">
-                    <div class="kpi-mini-card d-flex align-items-center gap-3">
-                        <div class="d-inline-flex align-items-center justify-content-center rounded-3" style="width: 44px; height: 44px; background: #F3E6E1; color: #A64060; flex-shrink: 0;">
-                            <i class="bi bi-lightning-charge-fill fs-5"></i>
+                    <div class="unified-kpi-card">
+                        <div class="unified-kpi-icon">
+                            <i class="bi bi-lightning-charge-fill"></i>
                         </div>
                         <div>
-                            <div class="text-muted small" style="font-size: 12.5px;">Giao hoa hỏa tốc</div>
-                            <strong class="fs-6 fw-bold" style="color: #A64060;">60 – 90 Phút</strong>
+                            <div class="unified-kpi-label">Giao hoa hỏa tốc</div>
+                            <div class="unified-kpi-value">60 – 90 Phút</div>
                         </div>
                     </div>
                 </div>
