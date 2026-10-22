@@ -138,3 +138,33 @@ for (const response of [{ ok: false }, { redirected: true }, { list: { error: 'i
         assert.equal(app.container.rows.length, 0);
     });
 }
+
+test('bell dropdown uses server targetUrl when provided', async () => {
+    const app = bellDropdown({ list: [
+        { id: 12, title: 'Khách hàng bị khóa', targetUrl: '/admin/orders/6', isRead: false },
+        { id: 13, title: 'Cảnh báo hệ thống', targetUrl: '/admin/notifications#notif_13', isRead: true }
+    ] });
+    await app.open();
+    assert.equal(app.container.rows.length, 2);
+    assert.equal(app.container.rows[0].href, '/admin/orders/6');
+    assert.equal(app.container.rows[1].href, '/admin/notifications#notif_13');
+});
+
+test('bell dropdown rejects malicious or external targetUrl and falls back safely', async () => {
+    const app = bellDropdown({ list: [
+        { id: 14, title: 'Lừa đảo', targetUrl: 'https://evil.com/phish', relatedOrderId: 10, isRead: false },
+        { id: 15, title: 'Protocol bypass', targetUrl: '//evil.com/orders', isRead: true }
+    ] });
+    await app.open();
+    assert.equal(app.container.rows[0].href, '/customer/orders/detail/10');
+    assert.equal(app.container.rows[1].href, '/notifications#notif_15');
+});
+
+test('bell dropdown rejects route traversal and notification lookalike paths', async () => {
+    for (const targetUrl of ['/admin/orders/4/../../users', '/notifications-evil',
+        '/admin/orders/%2e%2e/users', '/notifications" onclick="alert(1)', '/admin/orders/0']) {
+        const app = bellDropdown({ list: [{ id: 16, title: 'Invalid route', targetUrl, isRead: true }] });
+        await app.open();
+        assert.equal(app.container.rows[0].href, '/notifications#notif_16');
+    }
+});

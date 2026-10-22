@@ -9,6 +9,25 @@ import static org.assertj.core.api.Assertions.*;
 
 @EnabledIfSystemProperty(named = "cart.sqlserver.live", matches = "true")
 class CartLineSqlServerTests {
+    @Test void incompleteLegacyRowsArePreservedOnRepeatedRuns() throws Exception {
+        try (var connection = DriverManager.getConnection(System.getenv("SPRING_DATASOURCE_URL"),
+                System.getenv("SPRING_DATASOURCE_USERNAME"), System.getenv("SPRING_DATASOURCE_PASSWORD"));
+             var statement = connection.createStatement()) {
+            statement.execute("CREATE TABLE #legacy_cart (id bigint PRIMARY KEY, cart_id bigint, product_id bigint, store_id bigint, order_type varchar(10), quantity int, delivery_date date, greeting_message nvarchar(500))");
+            statement.execute("INSERT INTO #legacy_cart VALUES (1,1,1,NULL,'BUY',2,'2026-10-22',N'First'),(2,1,1,NULL,'BUY',3,'2026-10-23',N'Latest')");
+            String sql = Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V15__merge_cart_lines_by_product_and_branch.sql")).replace("dbo.cart_items", "#legacy_cart");
+            for (int run = 0; run < 2; run++) {
+                statement.execute(sql);
+                try (var rows = statement.executeQuery("SELECT COUNT(*), SUM(quantity) FROM #legacy_cart")) {
+                    assertThat(rows.next()).isTrue(); assertThat(rows.getInt(1)).isEqualTo(2); assertThat(rows.getInt(2)).isEqualTo(5);
+                }
+                try (var rows = statement.executeQuery("SELECT greeting_message FROM #legacy_cart ORDER BY id")) {
+                    assertThat(rows.next()).isTrue(); assertThat(rows.getNString(1)).isEqualTo("First");
+                    assertThat(rows.next()).isTrue(); assertThat(rows.getNString(1)).isEqualTo("Latest");
+                }
+            }
+        }
+    }
     @Test void migrationMergesOnlyMatchingBuyRowsPreservesUnitsAndCanRunTwice() throws Exception {
         try (var connection = DriverManager.getConnection(System.getenv("SPRING_DATASOURCE_URL"),
                 System.getenv("SPRING_DATASOURCE_USERNAME"), System.getenv("SPRING_DATASOURCE_PASSWORD"));
@@ -23,7 +42,7 @@ class CartLineSqlServerTests {
                     + "(5,2,1,1,'BUY',5,'2026-10-22',N'Other cart'),"
                     + "(6,1,1,1,'RENT',6,'2026-10-23',N'Legacy rental'),"
                     + "(7,1,2,1,'BUY',7,NULL,NULL)");
-            String migration = Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V14__merge_cart_lines_by_product_and_branch.sql"))
+            String migration = Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V15__merge_cart_lines_by_product_and_branch.sql"))
                     .replace("dbo.cart_items", "#cart_line_fixture");
             for (int run = 0; run < 2; run++) {
                 statement.execute(migration);

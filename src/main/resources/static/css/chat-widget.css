@@ -83,14 +83,16 @@ body.admin-body.admin-chat-page { height: 100vh !important; height: 100dvh !impo
 #flowerChat.chat-workbench .chat-header { padding: 8px 12px; }
 #flowerChat.chat-workbench .chat-message { max-width: 75%; }
 #flowerChat .chat-conversation-scope { color: #355447; font-size: 11px; }
+@media (max-width: 991.98px) {
+    .admin-chat-page .chat-nav-toggle { display: inline-flex; }
+    .admin-chat-page .chat-admin-navigation { display: none; position: fixed; inset: 0 auto 0 0; z-index: 1050; box-shadow: 4px 0 18px #0003; height: 100vh; height: 100dvh; }
+    .admin-chat-page .chat-admin-navigation.is-open { display: block; }
+    .admin-chat-page .chat-nav-close { display: block; position: absolute; top: 6px; right: 8px; z-index: 1060; border: 0; background: transparent; color: #fff; font-size: 26px; padding: 0 8px; cursor: pointer; }
+}
 @media (max-width: 767.98px) {
     .admin-chat-page .main-wrapper-admin { padding: 10px; gap: 8px; }
     .admin-chat-page .chat-page-toolbar { gap: 8px; flex-wrap: wrap; }
     .admin-chat-page .chat-page-toolbar .admin-page-title { font-size: 18px !important; }
-    .admin-chat-page .chat-nav-toggle { display: inline-flex; }
-    .admin-chat-page .chat-admin-navigation { display: none; position: fixed; inset: 0 auto 0 0; z-index: 1030; box-shadow: 4px 0 18px #0003; }
-    .admin-chat-page .chat-admin-navigation.is-open { display: block; }
-    .admin-chat-page .chat-nav-close { display: block; position: absolute; top: 6px; right: 8px; border: 0; background: transparent; color: #fff; font-size: 26px; padding: 0 8px; }
     #flowerChat.chat-workbench .chat-sidebar { max-height: 28%; }
     #flowerChat.chat-workbench .chat-message { max-width: 90%; }
 }

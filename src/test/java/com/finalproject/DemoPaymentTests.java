@@ -58,7 +58,9 @@ class DemoPaymentTests {
     Order fixture(String amount) {
         Order created = orders.save(Order.builder().user(customer).pickupStore(store).orderType(OrderType.BUY)
                 .status(OrderStatus.PENDING).paymentMethod("MOMO_DEMO").paymentStatus("UNPAID")
-                .paymentExpiresAt(LocalDateTime.now(clock).plusMinutes(10)).totalAmount(new BigDecimal(amount)).build());
+                // H2 persists six fractional digits; make the fixture deadline exactly representable.
+                .paymentExpiresAt(LocalDateTime.now(clock).plusMinutes(10).truncatedTo(java.time.temporal.ChronoUnit.MICROS))
+                .totalAmount(new BigDecimal(amount)).build());
         payments.save(Payment.builder().order(created).method(PaymentMethod.MOMO_DEMO)
                 .amount(created.getTotalAmount()).status(PaymentStatus.PENDING).build());
         return created;

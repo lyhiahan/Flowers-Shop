@@ -4,7 +4,9 @@ SELECT cart_id, product_id, store_id, MIN(id) AS keep_id,
        SUM(CAST(quantity AS bigint)) AS total_quantity
 INTO #cart_line_groups
 FROM dbo.cart_items
-WHERE order_type = 'BUY'
+-- Incomplete rows from V2 upgrades need branch reconciliation; preserve them.
+WHERE order_type = 'BUY' AND cart_id IS NOT NULL
+  AND product_id IS NOT NULL AND store_id IS NOT NULL
 GROUP BY cart_id, product_id, store_id
 HAVING COUNT(*) > 1;
 

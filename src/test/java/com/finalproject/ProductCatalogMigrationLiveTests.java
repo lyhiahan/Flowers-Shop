@@ -22,7 +22,7 @@ class ProductCatalogMigrationLiveTests {
                 rows.next(); assertThat(rows.getLong(1)).isGreaterThanOrEqualTo(10);
             }
             try (var rows = statement.executeQuery("SELECT TOP 1 version FROM dbo.flyway_schema_history WHERE success=1 ORDER BY installed_rank DESC")) {
-                rows.next(); assertThat(rows.getString(1)).isEqualTo("10");
+                rows.next(); assertThat(rows.getString(1)).isEqualTo("15");
             }
         }
     }

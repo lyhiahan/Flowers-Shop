@@ -17,6 +17,7 @@ public class User {
     private String username;
 
     @Column(nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private String password;
 
     @org.hibernate.annotations.Nationalized
@@ -58,6 +59,7 @@ public class User {
     private Boolean isEmailActive = true;
 
     @Column(name = "otp_code", length = 10)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private String otpCode;
 
     @Column(name = "otp_expiry")

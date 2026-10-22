@@ -38,6 +38,7 @@ public class OrderServiceImpl implements OrderService {
     private final jakarta.persistence.EntityManager entityManager;
     private final java.time.Clock clock;
     private final com.finalproject.service.DemoPaymentService demoPayments;
+    private final com.finalproject.config.MomoConfig momoConfig;
 
     @Override
     @Transactional
@@ -94,6 +95,7 @@ public class OrderServiceImpl implements OrderService {
                 && paymentMethod != PaymentMethod.MOMO && paymentMethod != PaymentMethod.MOMO_DEMO) {
             throw new IllegalArgumentException("Phương thức thanh toán chưa được hỗ trợ.");
         }
+        if (paymentMethod == PaymentMethod.MOMO) momoConfig.requireEnabled();
         if (paymentMethod == PaymentMethod.MOMO_DEMO && !demoPayments.isEnabled())
             throw new IllegalStateException("Thanh toán giả lập đang tắt.");
         if (!"PICKUP".equals(shippingMethod) && !"DELIVERY".equals(shippingMethod)) {

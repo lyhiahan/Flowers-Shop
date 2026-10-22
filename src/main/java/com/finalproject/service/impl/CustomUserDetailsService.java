@@ -48,14 +48,11 @@ public class CustomUserDetailsService implements UserDetailsService {
             }
         }
 
-        return new org.springframework.security.core.userdetails.User(
+        return new com.finalproject.security.SessionUserDetails(
                 user.getUsername(),
                 user.getPassword(),
                 Boolean.TRUE.equals(user.getIsActive()) && !Boolean.TRUE.equals(user.getAccountDisabledByAdmin())
                         && !user.isRetiredDeliveryAccount(),
-                true, // accountNonExpired
-                true, // credentialsNonExpired
-                true, // accountNonLocked
                 authorities
         );
     }

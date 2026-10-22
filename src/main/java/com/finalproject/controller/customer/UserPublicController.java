@@ -26,29 +26,27 @@ public class UserPublicController {
                             @RequestParam(value = "size", defaultValue = "6") int size,
                             java.security.Principal principal,
                             Model model) {
-        List<User> allUsers;
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            String kw = keyword.trim();
-            allUsers = userRepository.findByUsernameContainingIgnoreCaseOrFullNameContainingIgnoreCaseOrEmailContainingIgnoreCase(kw, kw, kw);
-        } else {
-            allUsers = userRepository.findAll();
-        }
-
-        int totalUsers = allUsers.size();
-        int pageSize = Math.max(1, size);
-        int totalPages = (int) Math.ceil((double) totalUsers / pageSize);
-        if (totalPages == 0) totalPages = 1;
-
+        String kw = keyword == null ? "" : keyword.trim();
+        int pageSize = Math.min(50, Math.max(1, size));
+        var sort = org.springframework.data.domain.Sort.by("id");
+        java.util.function.IntFunction<org.springframework.data.domain.Page<User>> fetch = requested -> {
+            var pageable = org.springframework.data.domain.PageRequest.of(requested, pageSize, sort);
+            return kw.isEmpty() ? userRepository.findAll(pageable)
+                    : userRepository.findByUsernameContainingIgnoreCaseOrFullNameContainingIgnoreCaseOrEmailContainingIgnoreCase(kw, kw, kw, pageable);
+        };
+        long totalUsers = kw.isEmpty() ? userRepository.count()
+                : userRepository.countByUsernameContainingIgnoreCaseOrFullNameContainingIgnoreCaseOrEmailContainingIgnoreCase(kw, kw, kw);
+        int totalPages = (int)Math.max(1, Math.min(Integer.MAX_VALUE, (totalUsers + pageSize - 1) / pageSize));
         int currentPage = Math.max(0, Math.min(page, totalPages - 1));
-        int fromIndex = Math.min(currentPage * pageSize, totalUsers);
-        int toIndex = Math.min(fromIndex + pageSize, totalUsers);
-        List<User> pagedUsers = allUsers.subList(fromIndex, toIndex);
+        var result = fetch.apply(currentPage);
+        List<User> pagedUsers = result.getContent();
 
         model.addAttribute("users", pagedUsers);
         model.addAttribute("keyword", keyword != null ? keyword.trim() : "");
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("totalUsers", totalUsers);
+        model.addAttribute("pageSize", pageSize);
         model.addAttribute("hasPrevious", currentPage > 0);
         model.addAttribute("hasNext", currentPage < totalPages - 1);
         if (principal != null) {
@@ -62,6 +60,7 @@ public class UserPublicController {
     @GetMapping("/{id}")
     public String viewUser(@PathVariable("id") Long id,
                            @RequestParam(value = "tab", defaultValue = "home") String tab,
+                           java.security.Principal principal,
                            Model model) {
         User user = userRepository.findById(id).orElse(null);
         if (user == null) {
@@ -70,6 +69,11 @@ public class UserPublicController {
 
         model.addAttribute("user", user);
         model.addAttribute("activeTab", tab);
+        if (principal != null) {
+            try {
+                model.addAttribute("cartItemCount", cartService.getCartItemCount(principal.getName()));
+            } catch (Exception ignored) {}
+        }
         return "customer/user-detail";
     }
 }

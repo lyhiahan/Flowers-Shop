@@ -24,7 +24,7 @@ class OtpRecipientRoutingTests {
         var validator = mock(Validator.class);
         when(validator.validate(any(RegisterRequest.class))).thenReturn(Set.of());
         return new AuthServiceImpl(users, otps, mock(CartRepository.class), mail,
-                mock(PasswordEncoder.class), validator, mock(EntityManager.class));
+                mock(PasswordEncoder.class), validator, mock(EntityManager.class), java.time.Clock.system(java.time.ZoneId.of("Asia/Bangkok")));
     }
     private RegisterRequest request(String email) {
         var request = new RegisterRequest();

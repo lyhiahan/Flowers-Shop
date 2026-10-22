@@ -36,6 +36,7 @@ public class MomoServiceImpl implements MomoService {
 
     @Override
     public String createPaymentUrl(Order input, HttpServletRequest request) {
+        config.requireEnabled();
         // Commit the correlation record BEFORE contacting MoMo, so early IPN can find it.
         MomoPaymentAttempt attempt = new TransactionTemplate(transactionManager).execute(tx -> {
             Order order = orders.findLockedById(input.getId()).orElseThrow();
@@ -140,6 +141,7 @@ public class MomoServiceImpl implements MomoService {
 
     @Override @Transactional
     public void simulatePayment(Long id, String username) {
+        config.requireEnabled();
         if (!config.isMock()) throw new IllegalStateException("Mô phỏng chỉ dùng trong chế độ mock.");
         Order order = orders.findLockedById(id).orElseThrow();
         if (!order.getUser().getUsername().equals(username)) throw new org.springframework.security.access.AccessDeniedException("Không phải đơn của bạn.");

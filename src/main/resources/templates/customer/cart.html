@@ -682,7 +682,10 @@
     <script>
         function confirmDeleteCartItem(itemId, productName, storeName) {
             document.getElementById('modalDeleteProductName').innerText = productName || 'Mẫu hoa';
-            document.getElementById('modalDeleteProductStore').innerHTML = '<i class="bi bi-shop me-1 text-secondary"></i>' + (storeName || 'Chi nhánh');
+            var storeLabel = document.getElementById('modalDeleteProductStore');
+            var storeIcon = document.createElement('i');
+            storeIcon.className = 'bi bi-shop me-1 text-secondary';
+            storeLabel.replaceChildren(storeIcon, document.createTextNode(storeName || 'Chi nhánh'));
             document.getElementById('modalDeleteCartForm').action = '/cart/remove/' + itemId;
             var modalEl = document.getElementById('deleteCartItemModal');
             var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);

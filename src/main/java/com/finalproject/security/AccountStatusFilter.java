@@ -23,16 +23,24 @@ public class AccountStatusFilter extends OncePerRequestFilter {
         if (authentication != null && authentication.isAuthenticated()
                 && !(authentication instanceof AnonymousAuthenticationToken)) {
             var user = users.findByUsername(authentication.getName()).orElse(null);
+            boolean staleCredential = authentication.getPrincipal() instanceof SessionUserDetails principal
+                    ? user == null || !principal.matchesCredential(user.getPassword())
+                    // Old form-login sessions have no stamp: require a fresh login after rollout.
+                    : authentication.getDetails() instanceof org.springframework.security.web.authentication.WebAuthenticationDetails;
             if (user == null || !Boolean.TRUE.equals(user.getIsActive()) || user.isRetiredDeliveryAccount()
-                    || Boolean.TRUE.equals(user.getAccountDisabledByAdmin())) {
+                    || Boolean.TRUE.equals(user.getAccountDisabledByAdmin()) || staleCredential) {
                 SecurityContextHolder.clearContext();
                 var session = request.getSession(false);
                 if (session != null) session.invalidate();
                 if ("XMLHttpRequest".equalsIgnoreCase(request.getHeader("X-Requested-With"))
                         || (request.getHeader("Accept") != null && request.getHeader("Accept").contains("application/json"))) {
-                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.setStatus(staleCredential ? HttpServletResponse.SC_UNAUTHORIZED : HttpServletResponse.SC_FORBIDDEN);
                     response.setContentType("application/json;charset=UTF-8");
-                    response.getWriter().write("{\"success\":false,\"message\":\"Tài khoản đã bị khóa hoặc vô hiệu hóa.\"}");
+                    response.getWriter().write(staleCredential
+                            ? "{\"success\":false,\"message\":\"Phiên đăng nhập đã hết hiệu lực. Vui lòng đăng nhập lại.\"}"
+                            : "{\"success\":false,\"message\":\"Tài khoản đã bị khóa hoặc vô hiệu hóa.\"}");
+                } else if (staleCredential) {
+                    response.sendRedirect(request.getContextPath() + "/login");
                 } else {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "Tài khoản đã bị khóa hoặc vô hiệu hóa.");
                 }

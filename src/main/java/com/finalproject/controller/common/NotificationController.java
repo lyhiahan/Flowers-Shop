@@ -24,12 +24,60 @@ public class NotificationController {
     private final NotificationService notificationService;
     private final UserRepository userRepository;
     private final StoreAccessService storeAccess;
+    private final com.finalproject.service.NotificationNavigationResolver navigationResolver;
 
     /**
-     * Trang xem toàn bộ thông báo của người dùng (tự động hiển thị layout Quản lý nếu có quyền Manager/Vendor)
+     * Trang xem toàn bộ thông báo của người dùng (tự động hiển thị layout theo vai trò: Admin -> /admin/notifications, Manager -> /manager/notifications, Customer -> customer/notifications)
      */
     @GetMapping({"/notifications", "/manager/notifications"})
+    public String viewAllNotifications(jakarta.servlet.http.HttpServletRequest request, Principal principal, Model model) {
+        if (principal == null) return "redirect:/login";
+
+        User user = userRepository.findByUsername(principal.getName()).orElse(null);
+        if (user == null) return "redirect:/login";
+
+        Role effectiveRole = navigationResolver.resolveRole(user);
+        if (effectiveRole == Role.ADMIN) {
+            return "redirect:/admin/notifications";
+        }
+
+        if (effectiveRole == Role.MANAGER) {
+            if (request != null && "/notifications".equals(request.getRequestURI())) {
+                return "redirect:/manager/notifications";
+            }
+            List<Notification> notifications = notificationService.getUserNotifications(user.getId());
+            long unreadCount = notificationService.getUnreadCount(user.getId());
+
+            model.addAttribute("notifications", notifications);
+            model.addAttribute("unreadCount", unreadCount);
+            model.addAttribute("user", user);
+            try {
+                if (storeAccess != null) {
+                    model.addAttribute("managerStore", storeAccess.selectedStore());
+                }
+            } catch (Exception ignored) {}
+            return "manager/notifications";
+        }
+
+        List<Notification> notifications = notificationService.getUserNotifications(user.getId());
+        long unreadCount = notificationService.getUnreadCount(user.getId());
+
+        model.addAttribute("notifications", notifications);
+        model.addAttribute("unreadCount", unreadCount);
+        model.addAttribute("user", user);
+
+        return "customer/notifications";
+    }
+
     public String viewAllNotifications(Principal principal, Model model) {
+        return viewAllNotifications(null, principal, model);
+    }
+
+    /**
+     * Trang xem toàn bộ thông báo dành riêng cho Quản trị viên hệ thống
+     */
+    @GetMapping("/admin/notifications")
+    public String viewAdminNotifications(Principal principal, Model model) {
         if (principal == null) return "redirect:/login";
 
         User user = userRepository.findByUsername(principal.getName()).orElse(null);
@@ -41,17 +89,9 @@ public class NotificationController {
         model.addAttribute("notifications", notifications);
         model.addAttribute("unreadCount", unreadCount);
         model.addAttribute("user", user);
+        model.addAttribute("active", "notifications");
 
-        if (user.getRole() == Role.MANAGER) {
-            try {
-                if (storeAccess != null) {
-                    model.addAttribute("managerStore", storeAccess.selectedStore());
-                }
-            } catch (Exception ignored) {}
-            return "manager/notifications";
-        }
-
-        return "customer/notifications";
+        return "admin/notifications";
     }
 
     /**
@@ -67,7 +107,9 @@ public class NotificationController {
                     map.put("unreadCount", notificationService.getUnreadCount(u.getId()));
                     map.put("userId", u.getId());
                     map.put("username", u.getUsername());
-                    map.put("isManager", u.getRole() == Role.MANAGER);
+                    Role effectiveRole = navigationResolver.resolveRole(u);
+                    map.put("isManager", effectiveRole == Role.MANAGER);
+                    map.put("isAdmin", effectiveRole == Role.ADMIN);
                     return ResponseEntity.ok(map);
                 })
                 .orElse(ResponseEntity.ok(Map.of("unreadCount", 0L)));
@@ -94,6 +136,9 @@ public class NotificationController {
             map.put("isRead", n.getIsRead());
             map.put("relatedOrderId", n.getRelatedOrderId());
             map.put("createdAt", n.getCreatedAt() != null ? n.getCreatedAt().toString() : "");
+            String targetUrl = n.getTargetUrl() != null ? n.getTargetUrl()
+                    : (navigationResolver != null ? navigationResolver.resolveTargetUrl(user, n.getId(), n.getRelatedOrderId()) : "");
+            map.put("targetUrl", targetUrl);
             return map;
         }).toList();
 

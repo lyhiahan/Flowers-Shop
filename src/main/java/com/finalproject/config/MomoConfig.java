@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 @Configuration
 @Getter
 public class MomoConfig {
+    @org.springframework.beans.factory.annotation.Autowired
+    private org.springframework.core.env.Environment environment;
     @Value("${momo.mode:mock}") private String mode;
     @Value("${momo.partner-code:}") private String partnerCode;
     @Value("${momo.access-key:}") private String accessKey;
@@ -24,9 +26,18 @@ public class MomoConfig {
     @Value("${momo.ipn-url:http://localhost:8080/checkout/momo/ipn}") private String ipnUrl;
 
     public boolean isMock() { return "mock".equals(mode); }
+    public boolean isEnabled() {
+        return !"disabled".equals(mode) && (environment == null || !environment.matchesProfiles("prod"));
+    }
+    public void requireEnabled() {
+        if (!isEnabled()) throw new IllegalStateException("MoMo thử nghiệm không được sử dụng trong môi trường này.");
+    }
 
     @PostConstruct
     public void validate() {
+        if (environment != null && environment.matchesProfiles("prod") && !"disabled".equals(mode))
+            throw new IllegalStateException("Production phải tắt MoMo thử nghiệm bằng momo.mode=disabled.");
+        if ("disabled".equals(mode)) return;
         if (!isMock() && !"sandbox".equals(mode)) throw new IllegalStateException("MoMo chỉ hỗ trợ mock hoặc sandbox cho project dev.");
         if (!isMock()) {
             if (partnerCode.isBlank() || accessKey.isBlank() || secretKey.isBlank())
@@ -45,7 +56,7 @@ public class MomoConfig {
     }
 
     public boolean verifyNotification(Map<String, Object> payload) {
-        if (isMock()) return false;
+        if (!isEnabled() || isMock()) return false;
         try {
             String fields = "amount,extraData,message,orderId,orderInfo,orderType,partnerCode,payType,requestId,responseTime,resultCode,transId";
             String raw = "accessKey=" + accessKey + "&" + java.util.Arrays.stream(fields.split(","))

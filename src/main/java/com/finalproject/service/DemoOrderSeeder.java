@@ -26,6 +26,7 @@ public class DemoOrderSeeder {
     private final StoreInventoryRepository storeInventoryRepository;
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
+    private final PaymentRepository paymentRepository;
     private final DeliveryRepository deliveryRepository;
     private final PasswordEncoder passwordEncoder;
     private final DemoWalletSeeder walletSeeder;
@@ -264,6 +265,16 @@ public class DemoOrderSeeder {
                 .build();
 
         Order saved = orderRepository.save(order);
+        // New fixtures have receipts too; never fabricate receipts for existing orders.
+        boolean paid = "PAID".equals(paymentStatus);
+        paymentRepository.save(Payment.builder().order(saved)
+                .method(com.finalproject.enums.PaymentMethod.valueOf(paymentMethod)).amount(totalAmount)
+                .status(paid ? com.finalproject.enums.PaymentStatus.SUCCESS
+                        : status == OrderStatus.CANCELLED ? com.finalproject.enums.PaymentStatus.FAILED
+                        : com.finalproject.enums.PaymentStatus.PENDING)
+                .transactionCode(paid ? "DEMO-SEED-" + saved.getId() : null)
+                .momoEnvironment("MOMO".equals(paymentMethod) ? "mock" : null)
+                .paidAt(paid ? createdAt : null).build());
 
         List<OrderDetail> details = new ArrayList<>();
         for (ItemSpec item : items) {

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin-layout :: assets('Trung Tâm Thông Báo Quản Trị - Hoa Tươi Sài Gòn')}">
+</head>
+<body class="admin-body">
+<div class="admin-layout-wrapper">
+    <!-- Sidebar thống nhất chuẩn Quản trị viên -->
+    <aside th:replace="~{fragments/admin-layout :: sidebar('notifications')}"></aside>
+
+    <!-- Main Content -->
+    <main class="main-wrapper-admin">
+        <div th:replace="~{fragments/admin-layout :: mobile-topbar('Thông báo')}"></div>
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2 pb-2 border-bottom">
+            <div>
+                <h1 class="admin-page-title mb-1">Trung tâm thông báo quản trị</h1>
+                <p class="text-muted small mb-0">
+                    Theo dõi các cập nhật hệ thống, đơn hàng liên quan và cảnh báo tài khoản
+                    <span class="mx-1">•</span> Chưa đọc:
+                    <strong id="unreadCountDisplay" class="text-danger fw-bold" th:text="${unreadCount}">0</strong>
+                </p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button th:if="${unreadCount > 0}" id="pageMarkAllReadBtn" onclick="markAllAdminRead(this)" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold shadow-sm">
+                    <i class="bi bi-check2-all me-1"></i> Đánh dấu đã đọc tất cả
+                </button>
+            </div>
+        </div>
+
+        <!-- Thông báo rỗng -->
+        <div id="emptyNotifAlert" th:classappend="${#lists.isEmpty(notifications)} ? '' : 'd-none'" class="card-admin p-5 text-center bg-white rounded-3 shadow-sm">
+            <div class="fs-1 mb-2 text-secondary opacity-50"><i class="bi bi-bell-slash"></i></div>
+            <h5 class="fw-bold text-dark">Chưa có thông báo nào</h5>
+            <p class="text-muted small mb-3">Mọi thông báo về đơn hàng cần xử lý, cảnh báo khách hàng bị khóa và giao dịch hệ thống sẽ hiển thị tại đây.</p>
+            <div>
+                <a th:href="@{/admin/dashboard}" class="btn btn-sm btn-success rounded-pill px-4">Về bảng điều khiển</a>
+            </div>
+        </div>
+
+        <!-- Danh sách thông báo -->
+        <div id="notificationsList" th:classappend="${#lists.isEmpty(notifications)} ? 'd-none' : ''" class="d-flex flex-column gap-3">
+            <div th:each="n : ${notifications}"
+                 class="card-admin p-3 rounded-3 shadow-sm transition-all"
+                 th:classappend="${!n.isRead} ? 'border-start border-4 border-success bg-white' : 'bg-light bg-opacity-75'"
+                 th:id="'notif_' + ${n.id}">
+                <div class="d-flex align-items-start gap-3">
+                    <!-- Icon theo loại -->
+                    <div class="rounded-3 p-2 d-flex align-items-center justify-content-center flex-shrink-0"
+                         style="width: 42px; height: 42px;"
+                         th:style="${n.type == 'ORDER_UPDATE' or n.type == 'ORDER_CREATED'} ? 'background-color: #ECFDF5; color: #059669;' :
+                                    (${n.type == 'PAYMENT_SUCCESS'} ? 'background-color: #FDF2F8; color: #DB2777;' :
+                                    (${n.type == 'ORDER_CANCELLED'} ? 'background-color: #FEE2E2; color: #DC2626;' : 'background-color: #EFF6FF; color: #2563EB;'))">
+                        <i class="fs-5 bi"
+                           th:classappend="${n.type == 'ORDER_UPDATE' or n.type == 'ORDER_CREATED'} ? 'bi-flower1' :
+                                            (${n.type == 'PAYMENT_SUCCESS'} ? 'bi-credit-card-fill' :
+                                            (${n.type == 'ORDER_CANCELLED'} ? 'bi-x-circle-fill' : 'bi-bell-fill'))"></i>
+                    </div>
+
+                    <!-- Nội dung -->
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="d-flex justify-content-between align-items-baseline mb-1 flex-wrap gap-1">
+                            <h6 class="fw-bold text-dark mb-0 text-truncate" th:text="${n.title}">Tiêu đề</h6>
+                            <small class="text-muted" th:text="${#temporals.format(n.createdAt, 'dd/MM/yyyy HH:mm')}">Thời gian</small>
+                        </div>
+                        <p class="text-secondary small mb-2 text-break" th:text="${n.content}">Nội dung chi tiết thông báo.</p>
+
+                        <div class="d-flex align-items-center gap-3 flex-wrap">
+                            <a th:if="${n.targetUrl != null}"
+                               th:href="${n.targetUrl}"
+                               onclick="markAdminReadDirect(this)"
+                               th:data-id="${n.id}"
+                               class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold" style="font-size: 12.5px;">
+                                <span th:text="${n.relatedOrderId != null ? 'Xem chi tiết đơn #' + n.relatedOrderId : 'Xem chi tiết'}">Xem chi tiết</span>
+                                <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                            <button th:if="${!n.isRead}"
+                                    onclick="markSingleAdminRead(this)"
+                                    th:data-id="${n.id}"
+                                    class="btn btn-link btn-sm text-muted p-0 text-decoration-none" style="font-size: 12.5px;">
+                                <i class="bi bi-check2"></i> Đánh dấu đã đọc
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<th:block th:replace="~{fragments/admin-layout :: footer}"></th:block>
+
+<script>
+    function getAdminCsrfHeaders() {
+        const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+        const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+        const h = { 'Content-Type': 'application/json' };
+        if (token && header) h[header] = token;
+        return h;
+    }
+
+    async function markSingleAdminRead(btn) {
+        const id = btn.getAttribute('data-id');
+        if (!id) return;
+        btn.disabled = true;
+        try {
+            const res = await fetch('/api/notifications/read/' + id, {
+                method: 'POST',
+                headers: getAdminCsrfHeaders()
+            });
+            if (res.ok) {
+                const card = document.getElementById('notif_' + id);
+                if (card) {
+                    card.classList.remove('border-start', 'border-4', 'border-success', 'bg-white');
+                    card.classList.add('bg-light', 'bg-opacity-75');
+                }
+                btn.remove();
+                if (window.FlowerShopNotif?.readNotification) {
+                    window.FlowerShopNotif.readNotification(id).catch(() => {});
+                }
+            } else {
+                btn.disabled = false;
+            }
+        } catch (e) {
+            btn.disabled = false;
+        }
+    }
+
+    function markAdminReadDirect(link) {
+        const id = link.getAttribute('data-id');
+        if (id) {
+            fetch('/api/notifications/read/' + id, {
+                method: 'POST',
+                headers: getAdminCsrfHeaders()
+            }).catch(() => {});
+        }
+    }
+
+    async function markAllAdminRead(btn) {
+        if (!confirm('Bạn có chắc muốn đánh dấu tất cả thông báo là đã đọc?')) return;
+        btn.disabled = true;
+        try {
+            const res = await fetch('/api/notifications/read-all', {
+                method: 'POST',
+                headers: getAdminCsrfHeaders()
+            });
+            if (res.ok) {
+                document.querySelectorAll('#notificationsList .card-admin').forEach(c => {
+                    c.classList.remove('border-start', 'border-4', 'border-success', 'bg-white');
+                    c.classList.add('bg-light', 'bg-opacity-75');
+                });
+                document.querySelectorAll('#notificationsList button[onclick*="markSingleAdminRead"]').forEach(b => b.remove());
+                const countEl = document.getElementById('unreadCountDisplay');
+                if (countEl) countEl.textContent = '0';
+                btn.style.display = 'none';
+                if (window.FlowerShopNotif?.readAllNotifications) {
+                    window.FlowerShopNotif.readAllNotifications().catch(() => {});
+                }
+            } else {
+                btn.disabled = false;
+            }
+        } catch (e) {
+            btn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>

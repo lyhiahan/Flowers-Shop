@@ -89,7 +89,7 @@ class NotificationSqlServerTests {
             expected.put(20, "Ghi chú riêng của khách?");
             expected.put(21, "🎉 Giao hoa thành công đơn #30");
             for (int id = 22; id <= 24; id++) expected.put(id, "?? Giao hoa thành công don #30");
-            String migration = Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V12__restore_legacy_notification_titles.sql"))
+            String migration = Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V13__restore_legacy_notification_titles.sql"))
                     .replace("dbo.notifications", "#notification_title_fixture");
             for (int run = 0; run < 2; run++) {
                 statement.execute(migration);

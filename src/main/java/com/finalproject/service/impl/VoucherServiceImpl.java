@@ -18,6 +18,7 @@ public class VoucherServiceImpl implements VoucherService {
 
     private final VoucherRepository voucherRepository;
     private final jakarta.persistence.EntityManager entityManager;
+    private final java.time.Clock clock;
 
     @Override
     @Transactional
@@ -30,7 +31,7 @@ public class VoucherServiceImpl implements VoucherService {
 
     @Override
     public List<Voucher> getAvailableVouchers(Long storeId) {
-        return voucherRepository.findAvailableVouchers(storeId, LocalDate.now());
+        return voucherRepository.findAvailableVouchers(storeId, LocalDate.now(clock));
     }
 
     @Override
@@ -41,7 +42,7 @@ public class VoucherServiceImpl implements VoucherService {
     @Override
     public BigDecimal calculateDiscount(Voucher voucher, BigDecimal orderAmount, BigDecimal shippingFee, BigDecimal minAllowedAmount) {
         if (voucher == null) return BigDecimal.ZERO;
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
         if (!Boolean.TRUE.equals(voucher.getIsActive()) || voucher.getStartDate() == null || voucher.getEndDate() == null
                 || today.isBefore(voucher.getStartDate()) || today.isAfter(voucher.getEndDate())
                 || voucher.getUsedCount() >= voucher.getQuantity()) {

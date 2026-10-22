@@ -74,7 +74,25 @@ class SqlServerMigrationLiveTests {
         assertThat(flyway.migrate().migrationsExecuted).isZero();
     }
 
-    @Test void existingDatabaseCopyRequiresExplicitBaselineAndPreservesBusinessRows() throws Exception {
+    @Test void existingV11CopyMigratesWithoutRepairAndPreservesBusinessRows() throws Exception {
+        String url = url("SQLSERVER_TEST_COPY_DATABASE");
+        var flyway = flyway(url);
+        Map<String, Long> before = counts(url);
+        flyway.validateWithResult(); // Pending V12-V15 are expected before migrate.
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("11");
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(4);
+        flyway.validate();
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("15");
+        assertThat(java.util.Arrays.stream(flyway.info().applied()).filter(m -> "11".equals(m.getVersion().getVersion())).findFirst().orElseThrow().getChecksum())
+                .isEqualTo(306107251);
+        validateEntities(url);
+        assertThat(counts(url)).isEqualTo(before);
+        assertThat(flyway.migrate().migrationsExecuted).isZero();
+    }
+
+    /** Requires an actual pre-Flyway/V2 copy, not a V11 database with its history removed. */
+    @Test @EnabledIfSystemProperty(named="sqlserver.legacy-baseline.live", matches="true")
+    void existingDatabaseCopyRequiresExplicitBaselineAndPreservesBusinessRows() throws Exception {
         String url = url("SQLSERVER_TEST_COPY_DATABASE");
         Map<String, Long> before = counts(url);
         var flyway = flyway(url);

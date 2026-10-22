@@ -24,7 +24,7 @@ class CartImageMigrationTests {
                     insert.executeUpdate();
                 }
             }
-            String migration = Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V13__replace_missing_demo_rose_image.sql"));
+            String migration = Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V14__replace_missing_demo_rose_image.sql"));
             for (int run = 0; run < 2; run++) {
                 assertThat(statement.executeUpdate(migration)).isEqualTo(run == 0 ? 2 : 0);
                 try (var rows = statement.executeQuery("SELECT id,name,image_url,price FROM dbo.products ORDER BY id")) {
