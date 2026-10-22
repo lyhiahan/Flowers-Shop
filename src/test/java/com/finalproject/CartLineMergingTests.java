@@ -156,6 +156,54 @@ class CartLineMergingTests {
                 .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Giao ngày:"))));
     }
 
+    @Test void buyNowSelectsOnlyRequestedProductWithoutIncludingOtherCartLines() throws Exception {
+        var other = products.save(Product.builder().name("Other bouquet").category(product.getCategory()).store(store)
+                .priceBuy(new BigDecimal("200000")).importPrice(BigDecimal.TEN)
+                .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).build());
+        inventories.saveAndFlush(StoreInventory.builder().store(store).product(other).quantity(10).build());
+        var otherRequest = request(2, null); otherRequest.setProductId(other.getId());
+        cartService.addToCart(customer.getUsername(), otherRequest);
+
+        var result = mvc.perform(post("/cart/buy-now").with(user(customer.getUsername()).roles("USER")).with(csrf())
+                        .param("productId", product.getId().toString()).param("storeId", store.getId().toString())
+                        .param("orderType", "BUY").param("quantity", "3"))
+                .andExpect(status().is3xxRedirection()).andReturn();
+        var lines = savedLines();
+        assertThat(lines).hasSize(2);
+        var chosen = lines.stream().filter(line -> line.getProduct().getId().equals(product.getId())).findFirst().orElseThrow();
+        assertThat(result.getResponse().getRedirectedUrl()).isEqualTo("/checkout?selectedItemIds=" + chosen.getId());
+        assertThat(chosen.getQuantity()).isEqualTo(3);
+        assertThat(lines.stream().filter(line -> line.getProduct().getId().equals(other.getId())).findFirst().orElseThrow().getQuantity()).isEqualTo(2);
+        assertThat(inventories.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(10);
+    }
+
+    @Test void productDetailRendersBuyNowAsSeparatePostForm() throws Exception {
+        mvc.perform(get("/product/" + product.getId()).with(user(customer.getUsername()).roles("USER")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("form=\"detailBuyNowForm\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"detailBuyNowForm\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("action=\"/cart/buy-now\" method=\"post\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"buyNowQuantity\" name=\"quantity\" value=\"1\"")));
+    }
+
+    @Test void buyNowUsesChosenQuantityInsteadOfAccumulatingExistingCartQuantity() {
+        cartService.addToCart(customer.getUsername(), request(8, null));
+        Long existingId = savedLines().getFirst().getId();
+        Long selectedId = cartService.prepareBuyNow(customer.getUsername(), request(2, null));
+        assertThat(selectedId).isEqualTo(existingId);
+        assertThat(savedLines()).singleElement().satisfies(line -> assertThat(line.getQuantity()).isEqualTo(2));
+    }
+
+    @Test void buyNowRejectsInsufficientStockWithoutChangingTheCart() throws Exception {
+        cartService.addToCart(customer.getUsername(), request(2, null));
+        mvc.perform(post("/cart/buy-now").with(user(customer.getUsername()).roles("USER")).with(csrf())
+                        .param("productId", product.getId().toString()).param("storeId", store.getId().toString())
+                        .param("orderType", "BUY").param("quantity", "11"))
+                .andExpect(redirectedUrl("/product/" + product.getId()))
+                .andExpect(flash().attributeExists("errorMessage"));
+        assertThat(savedLines()).singleElement().satisfies(line -> assertThat(line.getQuantity()).isEqualTo(2));
+    }
+
     @Test void checkoutUsesTheChosenDateAndAllMergedUnits() {
         cartService.addToCart(customer.getUsername(), request(1, LocalDate.now()));
         cartService.addToCart(customer.getUsername(), request(2, LocalDate.now().plusDays(1)));

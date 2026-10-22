@@ -71,14 +71,14 @@
 #flowerChat.chat-workbench .chat-panel { position: relative; right: auto; bottom: auto; width: 100%; height: 100%; min-height: 0; z-index: auto; box-shadow: none; }
 #flowerChat.chat-workbench .chat-launcher, #flowerChat.chat-workbench #chatClose { display: none; }
 /* Override the shared theme's mobile height:auto/overflow:visible only on this page. */
-body.admin-body.admin-chat-page { height: 100vh !important; height: 100dvh !important; min-height: 0; overflow: hidden !important; }
-.admin-chat-page .admin-layout-wrapper { height: 100%; min-height: 0; }
-.admin-chat-page .main-wrapper-admin { display: flex; flex-direction: column; gap: 12px; height: 100%; min-height: 0; overflow: hidden; padding: 20px; }
+body.admin-body.admin-chat-page { height: 100vh !important; height: 100dvh !important; min-height: 0; overflow: hidden !important; background-color: var(--admin-bg, #F6F7F4) !important; font-family: 'Nunito', sans-serif !important; }
+.admin-chat-page .admin-layout-wrapper { height: 100%; min-height: 0; background-color: var(--admin-bg, #F6F7F4) !important; }
+.admin-chat-page .main-wrapper-admin { display: flex; flex-direction: column; gap: 12px; height: 100%; min-height: 0; overflow: hidden; padding: 20px; background-color: var(--admin-bg, #F6F7F4) !important; }
 .admin-chat-page .chat-admin-navigation { flex-shrink: 0; width: 255px; height: 100%; min-height: 0; }
 .admin-chat-page .sidebar-admin { width: 100% !important; min-width: 0 !important; height: 100% !important; min-height: 0 !important; overflow-y: auto; }
 .admin-chat-page .chat-page-toolbar { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-.admin-chat-page .chat-page-toolbar .admin-page-title { margin: 0; font-size: 22px !important; }
-.admin-chat-page .chat-page-toolbar > a { margin-left: auto; white-space: nowrap; font-size: 13px; }
+.admin-chat-page .chat-page-toolbar .admin-page-title { margin: 0; font-size: 28px !important; font-weight: 800 !important; color: #20382E !important; }
+.admin-chat-page .chat-page-toolbar > a { margin-left: auto; white-space: nowrap; font-size: 14.5px; }
 .admin-chat-page .chat-nav-toggle, .admin-chat-page .chat-nav-close { display: none; }
 #flowerChat.chat-workbench .chat-header { padding: 8px 12px; }
 #flowerChat.chat-workbench .chat-message { max-width: 75%; }

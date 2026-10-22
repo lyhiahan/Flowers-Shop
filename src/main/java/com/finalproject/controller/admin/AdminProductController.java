@@ -29,6 +29,24 @@ public class AdminProductController {
     private final CategoryRepository categoryRepository;
     private final ProductService productService;
     private final ProductSeederService productSeederService;
+    private final com.finalproject.repository.StoreInventoryRepository inventories;
+    private final com.finalproject.service.InventoryService inventoryService;
+
+    public record BranchStock(Long storeId, String storeName, int quantity, boolean archived) {}
+
+    private void addBranchStocks(Product product, Model model) {
+        var stockByStore = new java.util.HashMap<Long, com.finalproject.entity.StoreInventory>();
+        inventories.findByProductId(product.getId()).forEach(row ->
+                stockByStore.put(row.getStore().getId(), row));
+        model.addAttribute("stockRows", storeRepository.findAll().stream()
+                .filter(store -> com.finalproject.service.ProductAvailability.supportsBranch(product, store))
+                .map(store -> {
+                    var row = stockByStore.get(store.getId());
+                    return new BranchStock(store.getId(), store.getName(),
+                            row == null || row.getQuantity() == null ? 0 : row.getQuantity(),
+                            row != null && Boolean.TRUE.equals(row.getIsDeleted()));
+                }).toList());
+    }
 
 
 
@@ -232,6 +250,7 @@ public class AdminProductController {
         model.addAttribute("isEdit", true);
         model.addAttribute("categories", categoryRepository.findActiveCategories());
         model.addAttribute("stores", storeRepository.findAll());
+        addBranchStocks(product, model);
         return "admin/product-form";
     }
 
@@ -244,6 +263,7 @@ public class AdminProductController {
         model.addAttribute("isEdit", true);
         model.addAttribute("categories", categoryRepository.findActiveCategories());
         model.addAttribute("stores", storeRepository.findAll());
+        productRepository.findById(id).ifPresent(product -> addBranchStocks(product, model));
 
         if (bindingResult.hasErrors()) {
             return "admin/product-form";
@@ -268,6 +288,26 @@ public class AdminProductController {
             model.addAttribute("errorMessage", "Lỗi khi cập nhật sản phẩm: " + ex.getMessage());
             return "admin/product-form";
         }
+    }
+
+    @PostMapping("/restock/{id}")
+    public String restock(@PathVariable Long id,
+                          @RequestParam("storeId") Long storeId,
+                          @RequestParam("addedQuantity") String addedQuantity,
+                          @RequestParam(value = "returnUrl", required = false) String returnUrl,
+                          RedirectAttributes ra) {
+        try {
+            int amount = Integer.parseInt(addedQuantity.trim());
+            int remaining = inventoryService.restock(id, storeId, amount);
+            ra.addFlashAttribute("successMessage", "Đã nhập thêm " + amount
+                    + " sản phẩm. Tồn kho chi nhánh hiện là " + remaining + ".");
+        } catch (NumberFormatException ex) {
+            ra.addFlashAttribute("errorMessage", "Số lượng nhập thêm phải là số nguyên dương.");
+        } catch (IllegalArgumentException ex) {
+            ra.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        ra.addAttribute("returnUrl", safeReturnUrl(returnUrl));
+        return "redirect:/admin/products-manage/edit/" + id;
     }
 
     @PostMapping("/delete/{id}")

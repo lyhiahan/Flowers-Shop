@@ -9,6 +9,8 @@
 <main class="manager-main"><div class="manager-form-page">
     <h1>Sửa sản phẩm chung tại chi nhánh</h1>
     <p class="text-muted">Thông tin và giá của mẫu chung do quản trị viên quản lý. Các thay đổi dưới đây chỉ áp dụng cho kho và trạng thái bán tại chi nhánh đang chọn.</p>
+    <div th:if="${successMessage}" class="alert alert-success" role="status" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
     <div class="card mb-3"><h2 class="h5" th:text="${product.name}"></h2>
         <p class="mb-0" th:text="${#numbers.formatDecimal(product.sellingPrice,0,'COMMA',0,'POINT') + ' đ'}"></p></div>
     <form th:action="@{/manager/products/branch/{id}(id=${product.id})}" method="post" class="card" data-confirm="Lưu thay đổi tại chi nhánh này?">
@@ -17,6 +19,16 @@
         <label class="form-label" for="branchSelling">Trạng thái tại chi nhánh</label>
         <select class="form-select mb-4" id="branchSelling" name="selling"><option value="true" th:selected="${inventory.isSelling != false}">Đang bán</option><option value="false" th:selected="${inventory.isSelling == false}">Ngừng bán</option></select>
         <div class="d-flex justify-content-end gap-2"><a class="btn btn-light" th:href="@{/manager/products}">Hủy</a><button class="btn btn-success" type="submit">Lưu thay đổi</button></div>
+    </form>
+    <form th:action="@{/manager/products/restock/{id}(id=${product.id})}" method="post" class="card mt-3">
+        <h2 class="h5">Nhập thêm hàng</h2>
+        <p class="text-muted">Tồn hiện tại: <strong th:text="${inventory.quantity + ' sản phẩm'}">0 sản phẩm</strong>. Số đã bán và đơn hàng cũ không thay đổi.</p>
+        <div class="d-flex align-items-end gap-2 flex-wrap">
+            <div><label for="branchAddedStock" class="form-label">Số lượng nhập thêm</label>
+                <input id="branchAddedStock" name="addedQuantity" type="number" min="1" max="1000000"
+                       step="1" required class="form-control" style="max-width: 190px"></div>
+            <button type="submit" class="btn btn-success">Nhập thêm hàng</button>
+        </div>
     </form>
 </div></main></div>
 <th:block th:replace="~{fragments/manager-layout :: footer}"></th:block>

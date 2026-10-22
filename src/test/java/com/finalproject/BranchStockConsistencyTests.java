@@ -95,7 +95,7 @@ class BranchStockConsistencyTests {
         mvc.perform(get("/api/inventory/check").param("productId", product.getId().toString()).param("storeId", nearest.getId().toString()))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.available").value(false)).andExpect(jsonPath("$.currentStock").value(0));
         for (int retry = 0; retry < 2; retry++) {
-            mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()))
+            mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()).param("reasonCode", "NO_LONGER_NEEDED"))
                     .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("successMessage"));
             inventories.flush();
             assertThat(stock(owner)).isEqualTo(15); assertThat(stock(nearest)).isEqualTo(25);

@@ -96,12 +96,12 @@ class LoginRetryTests {
         page(first, "first@example.test"); page(second, "second@example.test");
     }
 
-    @Test void freshLoginPageClearsPreviousAttemptAndAllowsNormalAutofill() throws Exception {
+    @Test void freshLoginPageClearsPreviousAttemptAndDisablesAutofill() throws Exception {
         var session = new MockHttpSession();
         fail(session, "first@example.test");
         mvc.perform(get("/login").session(session)).andExpect(status().isOk())
                 .andExpect(model().attribute("loginUsername", "")).andExpect(model().attribute("loginFailed", false))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("autocomplete=\"username\"")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("autocomplete=\"off\"")));
         assertThat(session.getAttribute(CustomAuthenticationFailureHandler.ATTEMPTED_USERNAME)).isNull();
     }
 

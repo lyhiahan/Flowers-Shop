@@ -49,7 +49,7 @@ public class AdminStoreLevelController {
 
             model.addAttribute("levels", pagedLevels);
             model.addAttribute("allLevels", allLevels);
-            model.addAttribute("stores", storeRepository.findAll());
+            model.addAttribute("stores", storeRepository.findAllWithDetails());
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", totalPages);
             model.addAttribute("totalElements", (long) totalElements);

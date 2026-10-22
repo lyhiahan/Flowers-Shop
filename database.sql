@@ -381,6 +381,7 @@ CREATE TABLE dbo.reviews (
     order_id BIGINT NULL,
     content NVARCHAR(1000) NOT NULL,
     rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    stars INT NOT NULL CHECK (stars >= 1 AND stars <= 5),
     image_url NVARCHAR(500) NULL,
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE(),
@@ -580,7 +581,7 @@ DECLARE @sampleOrderId BIGINT = SCOPE_IDENTITY();
 INSERT INTO dbo.order_details (order_id, product_id, quantity, unit_price, order_type)
 VALUES (@sampleOrderId, 1, 1, 650000.00, 'BUY');
 
-INSERT INTO dbo.reviews (user_id, product_id, store_id, order_id, content, rating, created_at)
-VALUES (3, 1, 1, @sampleOrderId, N'Hoa hồng đỏ Ecuador nhận được rất tươi, cánh hoa nở to đều và thơm dịu. Đóng gói cẩn thận có thiệp viết tay rất chỉn chu. Shipper giao hoa đúng giờ hẹn, phục vụ rất nhiệt tình!', 5, GETDATE());
+INSERT INTO dbo.reviews (user_id, product_id, store_id, order_id, content, rating, stars, created_at)
+VALUES (3, 1, 1, @sampleOrderId, N'Hoa hồng đỏ Ecuador nhận được rất tươi, cánh hoa nở to đều và thơm dịu. Đóng gói cẩn thận có thiệp viết tay rất chỉn chu. Shipper giao hoa đúng giờ hẹn, phục vụ rất nhiệt tình!', 5, 5, GETDATE());
 GO
 

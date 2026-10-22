@@ -136,7 +136,7 @@ class CodStockKpiTests {
         em.flush();
         for (int retry = 0; retry < 2; retry++) {
             mvc.perform(post("/customer/orders/cancel/" + order.getId())
-                            .with(user(customer.getUsername()).roles("USER")).with(csrf()))
+                            .with(user(customer.getUsername()).roles("USER")).with(csrf()).param("reasonCode", "NO_LONGER_NEEDED"))
                     .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("successMessage"));
             em.flush(); em.clear();
             assertStock(10, 17);
@@ -158,7 +158,7 @@ class CodStockKpiTests {
         em.flush(); em.clear();
         assertStock(8, 15);
         mvc.perform(post("/customer/orders/cancel/" + order.getId())
-                        .with(user(customer.getUsername()).roles("USER")).with(csrf()))
+                        .with(user(customer.getUsername()).roles("USER")).with(csrf()).param("reasonCode", "NO_LONGER_NEEDED"))
                 .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("errorMessage"));
         assertStock(8, 15);
     }

@@ -1,172 +1,74 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Đơn Vị Vận Chuyển - Quản Trị Hệ Thống Hoa Tươi</title>
-    <!-- Google Fonts Nunito & Bootstrap 5 & Icons -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
-    <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
+    <th:block th:replace="~{fragments/admin-layout :: assets('Quản Lý Đơn Vị Vận Chuyển - Quản Trị Hệ Thống Hoa Tươi')}"></th:block>
     <style>
-        body { 
-            font-family: 'Nunito', var(--font-sans), sans-serif !important; 
-            background-color: #F6F7F4 !important; 
-            color: #24332C; 
-            min-height: 100vh; 
-        }
-        .main-wrapper { flex: 1; overflow-x: hidden; background-color: #F6F7F4 !important; }
-        
-        /* Font và màu theo quy chuẩn người dùng */
-        .page-header-title {
+        .admin-page-title {
             font-size: 28px !important;
             font-weight: 800 !important;
-            color: #20382E !important;
+            color: #20382E;
+            line-height: 1.25;
             letter-spacing: -0.3px;
         }
-        .btn-main-green {
-            background-color: #355447 !important;
-            border-color: #355447 !important;
-            color: #FFFFFF !important;
-            font-weight: 700 !important;
-            height: 44px !important;
-            border-radius: 8px !important;
-            padding: 0 20px !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 8px !important;
-            box-shadow: 0 2px 6px rgba(53, 84, 71, 0.2) !important;
-            transition: all 0.2s ease !important;
-        }
-        .btn-main-green:hover {
-            background-color: #253D33 !important;
-            border-color: #253D33 !important;
-            color: #FFFFFF !important;
-        }
-        .input-standard {
-            height: 44px !important;
-            border-radius: 8px !important;
-            border: 1px solid #D1E5DA !important;
-            font-size: 15px !important;
-            padding: 0 16px !important;
-            background-color: #FFFFFF !important;
-        }
-        .input-standard:focus {
-            border-color: #355447 !important;
-            box-shadow: 0 0 0 3px rgba(53, 84, 71, 0.15) !important;
-        }
-        
-        /* Bảng theo chuẩn bo góc 12px, nền trắng */
-        .table-card {
-            background: #FFFFFF !important;
-            border-radius: 12px !important;
-            border: 1px solid #E2E7E2 !important;
-            overflow: hidden !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important;
-        }
+        /* Table Styles */
         .table thead th {
             background-color: #E5EEE8 !important;
             color: #20382E !important;
-            font-size: 16px !important;
-            font-weight: 700 !important;
-            padding: 16px 18px !important;
+            font-weight: 800 !important;
+            font-size: 14.5px !important;
+            letter-spacing: 0.2px;
             border-bottom: 2px solid #D1E5DA !important;
-            white-space: nowrap !important;
+            padding: 14px 16px;
         }
         .table tbody td {
-            font-size: 16px !important;
-            font-weight: 400 !important;
-            color: #24332C !important;
-            padding: 16px 18px !important;
-            vertical-align: middle !important;
-            border-bottom: 1px solid #EAEFEA !important;
-        }
-        .unit-name {
-            font-size: 17px !important;
-            font-weight: 700 !important;
-            color: #20382E !important;
-            line-height: 1.3 !important;
-        }
-        .unit-code {
-            font-size: 13.5px !important;
-            color: #718096 !important;
-            font-weight: 600 !important;
-        }
-        .badge-type-internal {
-            background-color: #EDE9FE !important;
-            color: #5B21B6 !important;
-            border: 1px solid #DDD6FE !important;
-            font-size: 13.5px !important;
-            font-weight: 700 !important;
-            padding: 5px 12px !important;
-            border-radius: 6px !important;
-        }
-        .badge-type-partner {
-            background-color: #E0F2FE !important;
-            color: #0369A1 !important;
-            border: 1px solid #BAE6FD !important;
-            font-size: 13.5px !important;
-            font-weight: 700 !important;
-            padding: 5px 12px !important;
-            border-radius: 6px !important;
-        }
-        .badge-status-active {
-            background-color: #E8F5E9 !important;
-            color: #2E7D32 !important;
-            border: 1px solid #A5D6A7 !important;
-            font-size: 13px !important;
-            font-weight: 700 !important;
-            padding: 6px 12px !important;
-            border-radius: 9999px !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            gap: 6px !important;
-        }
-        .badge-status-paused {
-            background-color: #F1F5F9 !important;
-            color: #475569 !important;
-            border: 1px solid #CBD5E1 !important;
-            font-size: 13px !important;
-            font-weight: 700 !important;
-            padding: 6px 12px !important;
-            border-radius: 9999px !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            gap: 6px !important;
-        }
-
-        /* Tabs điều hướng Đơn vị vận chuyển · Khu vực & biểu phí */
-        .nav-tabs {
-            border-bottom: 2px solid #E2E7E2 !important;
-            margin-bottom: 24px !important;
-        }
-        .nav-tabs .nav-link {
-            font-weight: 600 !important;
-            color: #64748B;
-            border: none;
-            border-bottom: 2px solid transparent;
-            padding: 10px 22px;
+            padding: 14px 16px;
+            vertical-align: middle;
+            border-bottom: 1px solid #EAEFEA;
             font-size: 15px;
-            background: transparent;
-            transition: color 0.15s ease, border-color 0.15s ease;
         }
-        .nav-tabs .nav-link.active {
-            font-weight: 700 !important;
-            color: #20382E !important;
-            border-color: #20382E !important;
-            background: transparent;
+        .table tbody tr:hover td {
+            background-color: #FAFCFA;
         }
-        .nav-tabs .nav-link:hover {
-            color: #20382E;
-            border-color: #CBD5E1;
+        /* Status Badges */
+        .status-pill-active {
+            background-color: #E8F5E9;
+            color: #2E7D32;
+            border: 1px solid #A5D6A7;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
         }
-
+        .status-pill-paused {
+            background-color: #F1F5F2;
+            color: #708076;
+            border: 1px solid #D5DDD7;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+        .status-pill-deleted {
+            background-color: #FFEBEE;
+            color: #C62828;
+            border: 1px solid #FFCDD2;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
         .service-badge-standard {
             background-color: #E8F5E9;
             color: #2E7D32;
@@ -206,437 +108,303 @@
     </style>
 </head>
 <body class="admin-body">
-<div class="d-flex">
-    <!-- Sidebar Quản Trị Hệ Thống Chuẩn Thương Hiệu Tiệm Hoa -->
-    <aside class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white">
-        <a th:href="@{/admin/dashboard}" class="d-flex align-items-center gap-3 mb-4 text-white text-decoration-none px-2 pt-2">
-            <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img flex-shrink-0" style="width: 40px; height: 40px; border-radius: 8px;">
-            <div>
-                <div class="fw-bold text-white" style="font-size: 16px; line-height: 1.2; letter-spacing: 0.5px;">HOA TƯƠI SÀI GÒN</div>
-                <div class="small" style="font-size: 11px; color: #9DB7AA !important; letter-spacing: 0.05em;">QUẢN TRỊ VIÊN HỆ THỐNG</div>
-            </div>
-        </a>
-
-        <ul class="nav nav-pills flex-column mb-auto gap-1">
-            <li>
-                <a th:href="@{/admin/dashboard}" class="nav-link">
-                    <i class="bi bi-grid"></i>
-                    <span>Thống kê</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/users}" class="nav-link">
-                    <i class="bi bi-people"></i>
-                    <span>Người dùng</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/stores}" class="nav-link">
-                    <i class="bi bi-shop"></i>
-                    <span>Cửa hàng</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/store-levels}" class="nav-link">
-                    <i class="bi bi-award"></i>
-                    <span>Hạng chi nhánh</span>
-                </a>
-            </li>
-
-            <li>
-                <a th:href="@{/admin/products-manage}" class="nav-link">
-                    <i class="bi bi-box-seam"></i>
-                    <span>Sản phẩm</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/orders-manage}" class="nav-link">
-                    <i class="bi bi-bag"></i>
-                    <span>Đơn hàng</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/categories}" class="nav-link">
-                    <i class="bi bi-tags"></i>
-                    <span>Danh mục hoa</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/styles}" class="nav-link">
-                    <i class="bi bi-sliders"></i>
-                    <span>Thuộc tính sản phẩm</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/deliveries}" class="nav-link active" id="sidebarDeliveriesLink" data-testid="sidebarDeliveriesLink">
-                    <i class="bi bi-truck"></i>
-                    <span>Quản lý giao hàng</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/vouchers}" class="nav-link">
-                    <i class="bi bi-ticket-perforated"></i>
-                    <span>Khuyến mãi</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/user-levels}" class="nav-link">
-                    <i class="bi bi-award"></i>
-                    <span>Cấp bậc khách</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/transactions}" class="nav-link">
-                    <i class="bi bi-journal-text"></i>
-                    <span>Lịch sử giao dịch</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/}" class="nav-link" target="_blank" style="color: #9DB7AA;" title="Xem trang bán hàng bên ngoài để kiểm tra nội dung">
-                    <i class="bi bi-box-arrow-up-right"></i>
-                    <span>Xem website</span>
-                </a>
-            </li>
-        </ul>
-
-        <hr class="border-secondary my-2">
-        <form th:action="@{/logout}" method="post" class="d-inline">
-            <button type="submit" class="btn btn-outline-danger btn-sm w-100 d-flex align-items-center justify-content-center gap-2">
-                <i class="bi bi-box-arrow-right"></i> Đăng xuất
-            </button>
-        </form>
-    </aside>
+<div class="admin-layout-wrapper">
+    <!-- Sidebar -->
+    <aside th:replace="~{fragments/admin-layout :: sidebar('deliveries')}"></aside>
 
     <!-- Main Content -->
-    <div class="main-wrapper p-4">
-        <!-- Bố cục đề xuất: Bên trái Tiêu đề & Mô tả, Bên phải Nút Thêm -->
+    <main class="main-wrapper-admin">
+
+        <!-- 1. Header: Tiêu đề + Huy hiệu số lượng + Nút Thêm mới (Đồng bộ với trang Cửa hàng) -->
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
             <div>
-                <div class="d-flex align-items-center gap-3 mb-1">
-                    <h1 class="page-header-title mb-0">Quản lý giao hàng</h1>
+                <div class="d-flex align-items-center gap-3">
+                    <h1 class="admin-page-title mb-0" style="font-size: 28px !important; font-weight: 800; color: #20382E;">Quản lý đơn vị vận chuyển trong hệ thống</h1>
+                    <span class="badge rounded-pill" style="background-color: #E5EEE8; color: #20382E; border: 1px solid #D1E5DA; font-size: 14.5px; font-weight: 700; padding: 6px 14px;">
+                        <span th:text="${totalElements != null ? totalElements : (deliveries != null ? #lists.size(deliveries) : 0)}">3</span> đơn vị vận chuyển
+                    </span>
                 </div>
-                <p class="text-muted mb-0" style="font-size: 15px;">
-                    Quản lý đối tác vận chuyển, biểu phí và thời gian giao hàng theo từng chi nhánh.
-                </p>
+                <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Quản lý đối tác vận chuyển, biểu phí và thời gian giao hàng theo từng chi nhánh</p>
             </div>
             <div>
-                <a th:if="${activeTab == 'units' or activeTab == null}" th:href="@{/admin/deliveries/create}" id="btnNewDelivery" data-testid="btnNewDelivery" class="btn-main-green text-decoration-none">
-                    <i class="bi bi-plus-lg fs-5"></i>
+                <!-- Nút Thêm mới: UC_034 btnNewDelivery -->
+                <a th:if="${activeTab == 'units' or activeTab == null}" th:href="@{/admin/deliveries/create}" id="btnNewDelivery" data-testid="btnNewDelivery"
+                   class="btn btn-sm d-inline-flex align-items-center gap-2 text-white shadow-sm text-decoration-none"
+                   style="background-color: #20382E; border-color: #20382E; border-radius: 10px; padding: 9px 18px; font-weight: 700; font-size: 14.5px;">
+                    <i class="bi bi-plus-lg"></i>
                     <span>New delivery unit</span>
                 </a>
-                <button th:if="${activeTab == 'tariffs'}" type="button" class="btn-main-green border-0" data-bs-toggle="modal" data-bs-target="#modalNewTariff" id="btnNewTariff">
-                    <i class="bi bi-plus-lg fs-5"></i>
+                <button th:if="${activeTab == 'tariffs'}" type="button" id="btnNewTariff" data-bs-toggle="modal" data-bs-target="#modalNewTariff"
+                        class="btn btn-sm d-inline-flex align-items-center gap-2 text-white shadow-sm border-0"
+                        style="background-color: #20382E; border-radius: 10px; padding: 9px 18px; font-weight: 700; font-size: 14.5px;">
+                    <i class="bi bi-plus-lg"></i>
                     <span>Thêm biểu phí mới</span>
                 </button>
             </div>
         </div>
 
-        <!-- Post-conditions: Flash alerts -->
-        <div th:if="${successMessage != null}" id="successAlert" data-testid="successAlert" class="alert alert-success alert-dismissible fade show py-2 small shadow-sm rounded-3 border-0 d-flex align-items-center gap-2 mb-4" role="alert" style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7 !important;">
+        <!-- Flash alerts (UC_034: successAlert, dataLoadAlert) -->
+        <div th:if="${successMessage != null}" id="successAlert" data-testid="successAlert"
+             class="alert alert-success alert-dismissible fade show py-2 small shadow-sm rounded-3 border-0 d-flex align-items-center gap-2 mb-3"
+             role="alert" style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7 !important; font-size: 14.5px;">
             <i class="bi bi-check-circle-fill fs-5"></i>
-            <span th:text="${successMessage}" style="font-weight: 600; font-size: 15px;"></span>
+            <span th:text="${successMessage}" style="font-weight: 600;"></span>
             <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
         </div>
 
-        <div th:if="${errorMessage != null or dataLoadError == true}" id="dataLoadAlert" data-testid="dataLoadAlert" class="alert alert-danger alert-dismissible fade show py-2 small shadow-sm rounded-3 border-0 d-flex align-items-center gap-2 mb-4" role="alert" style="background-color: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2 !important;">
+        <div th:if="${errorMessage != null or dataLoadError == true}" id="dataLoadAlert" data-testid="dataLoadAlert"
+             class="alert alert-danger alert-dismissible fade show py-2 small shadow-sm rounded-3 border-0 d-flex align-items-center gap-2 mb-3"
+             role="alert" style="background-color: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2 !important; font-size: 14.5px;">
             <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-            <span th:text="${errorMessage != null ? errorMessage : 'Có lỗi khi tải danh sách giao hàng!'}" style="font-weight: 600; font-size: 15px;"></span>
+            <span th:text="${errorMessage != null ? errorMessage : 'Có lỗi khi tải danh sách giao hàng!'}" style="font-weight: 600;"></span>
             <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
         </div>
 
-        <!-- Two Tabs Navigation: Đơn vị vận chuyển · Khu vực & biểu phí -->
-        <ul class="nav nav-tabs border-bottom mb-4" id="deliveryManagementTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <a class="nav-link" th:classappend="${activeTab == 'units' or activeTab == null} ? 'active' : ''"
-                   th:href="@{/admin/deliveries(tab='units', size=${pageSize})}">
-                    <i class="bi bi-truck me-1.5"></i>Đơn Vị Vận Chuyển
-                    <span class="badge rounded-pill bg-light text-dark border ms-1" style="font-size: 11.5px; padding: 2px 7px;" th:text="${totalElements != null ? totalElements : #lists.size(deliveries)}">3</span>
-                </a>
-            </li>
-            <li class="nav-item" role="presentation">
-                <a class="nav-link" th:classappend="${activeTab == 'tariffs'} ? 'active' : ''"
-                   th:href="@{/admin/deliveries(tab='tariffs')}">
-                    <i class="bi bi-geo-alt-fill me-1.5"></i>Khu Vực & Biểu Phí
-                    <span class="badge rounded-pill bg-light text-dark border ms-1" style="font-size: 11.5px; padding: 2px 7px;" th:text="${tariffs != null ? #lists.size(tariffs) : 0}">3</span>
-                </a>
-            </li>
-        </ul>
+        <!-- 2. Nhóm Tab điều hướng (Đồng bộ pills với trang Cửa hàng) -->
+        <div class="d-flex gap-2 mb-3 flex-wrap align-items-center" id="deliveryManagementTabs">
+            <a th:href="@{/admin/deliveries(tab='units', keyword=${keyword})}"
+               class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2 text-decoration-none"
+               th:classappend="${activeTab == 'units' or activeTab == null} ? 'btn-dark' : 'btn-outline-secondary bg-white'"
+               style="font-size: 14px; font-weight: 600;">
+                <i class="bi bi-truck"></i> Đơn vị vận chuyển
+                <span class="badge rounded-pill" th:classappend="${activeTab == 'units' or activeTab == null} ? 'bg-light text-dark' : 'bg-secondary text-white'" th:text="${totalElements != null ? totalElements : (deliveries != null ? #lists.size(deliveries) : 0)}">3</span>
+            </a>
+            <a th:href="@{/admin/deliveries(tab='tariffs', keyword=${keyword})}"
+               class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2 text-decoration-none"
+               th:classappend="${activeTab == 'tariffs'} ? 'btn-dark' : 'btn-outline-secondary bg-white'"
+               style="font-size: 14px; font-weight: 600;">
+                <i class="bi bi-geo-alt-fill"></i> Khu vực &amp; Biểu phí
+                <span class="badge rounded-pill" th:classappend="${activeTab == 'tariffs'} ? 'bg-light text-dark' : 'bg-secondary text-white'" th:text="${tariffs != null ? #lists.size(tariffs) : 0}">20</span>
+            </a>
+        </div>
 
         <!-- ========================================== -->
         <!-- TAB 1: DANH SÁCH ĐƠN VỊ VẬN CHUYỂN         -->
         <!-- ========================================== -->
         <div th:if="${activeTab == 'units' or activeTab == null}">
-            <!-- Phía dưới: Ô tìm kiếm và Bộ lọc Loại đơn vị, Trạng thái (Cao 44px) -->
-            <div class="bg-white p-3 rounded-3 shadow-sm mb-4 border" style="border-color: #E2E7E2 !important; border-radius: 12px;">
-            <div class="row g-3 align-items-center">
-                <!-- 1. Ô tìm kiếm -->
-                <div class="col-md-5">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0" style="height: 44px; border-color: #D1E5DA; border-radius: 8px 0 0 8px; color: #66736B;">
-                            <i class="bi bi-search"></i>
-                        </span>
-                        <input type="text" id="filterKeyword" class="form-control input-standard border-start-0" 
-                               style="border-radius: 0 8px 8px 0 !important;" 
-                               placeholder="Tìm tên, mã hoặc số điện thoại…" 
-                               oninput="applyFilter()">
+
+            <!-- 3. Thanh tìm kiếm và bộ lọc (Đồng bộ với trang Cửa hàng) -->
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4" style="border: 1px solid #E2E7E2 !important; border-radius: 14px;">
+                <form th:action="@{/admin/deliveries}" method="get" class="row g-2 align-items-center">
+                    <input type="hidden" name="tab" th:value="${activeTab != null ? activeTab : 'units'}">
+                    <div class="col-12 col-md-8 col-lg-9">
+                        <div class="input-group" style="height: 44px;">
+                            <span class="input-group-text bg-white border-end-0 text-muted" style="border-color: #E2E7E2; border-radius: 10px 0 0 10px;">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" name="keyword" th:value="${keyword}" id="filterKeyword"
+                                   class="form-control border-start-0" 
+                                   style="height: 44px; border-color: #E2E7E2; border-radius: 0 10px 10px 0; font-size: 15px;" 
+                                   placeholder="Tìm theo tên đơn vị vận chuyển, mô tả hoặc số điện thoại…">
+                        </div>
+                    </div>
+                    <div class="col-auto d-flex gap-2 flex-grow-1 justify-content-end">
+                        <button class="btn btn-primary d-inline-flex align-items-center justify-content-center px-4" 
+                                type="submit" 
+                                style="height: 44px; border-radius: 10px; font-size: 15.5px; font-weight: 700; background-color: #20382E !important; border-color: #20382E !important;">
+                            <i class="bi bi-funnel me-1"></i> Lọc
+                        </button>
+                        <a th:href="@{/admin/deliveries(tab=${activeTab != null ? activeTab : 'units'})}" 
+                           class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center px-3" 
+                           style="height: 44px; border-radius: 10px; font-size: 15px; color: #66736B; border-color: #E2E7E2; background: #FFFFFF;">
+                            Đặt lại
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 4. Bảng danh sách đơn vị vận chuyển (Đồng bộ với trang Cửa hàng) -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4" style="border: 1px solid #E2E7E2 !important; border-radius: 14px;">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" id="deliveriesTable" data-testid="deliveriesTable">
+                            <thead style="background-color: #E5EEE8 !important;">
+                            <tr style="background-color: #E5EEE8 !important;">
+                                <th class="ps-4 fw-bold" style="white-space: nowrap !important; width: 85px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; border-bottom: 2px solid #D1E5DA !important;">Mã</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 240px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; border-bottom: 2px solid #D1E5DA !important;">Đơn vị vận chuyển</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 170px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; border-bottom: 2px solid #D1E5DA !important;">Liên hệ</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 250px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; border-bottom: 2px solid #D1E5DA !important;">Mô tả dịch vụ</th>
+                                <th class="text-center fw-bold" style="white-space: nowrap !important; min-width: 150px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; border-bottom: 2px solid #D1E5DA !important;">Trạng thái</th>
+                                <th class="text-end pe-4 fw-bold" style="white-space: nowrap !important; min-width: 220px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; border-bottom: 2px solid #D1E5DA !important;">Thao tác</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <!-- Trạng thái trống -->
+                            <tr th:if="${#lists.isEmpty(deliveries)}" id="emptyRow">
+                                <td colspan="6" class="text-center py-5 text-muted" style="font-size: 15.5px;">
+                                    <i class="bi bi-truck fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                                    Chưa có đơn vị vận chuyển nào trong hệ thống. Nhấn <strong>"New delivery unit"</strong> để thêm mới.
+                                </td>
+                            </tr>
+
+                            <!-- Danh sách từng đơn vị vận chuyển -->
+                            <tr th:each="d : ${deliveries}" class="delivery-row" th:attr="data-id=${d.id}, data-name=${d.name}, data-desc=${d.description}, data-active=${d.isActive}">
+                                <!-- 1. Mã đơn vị -->
+                                <td class="ps-4 text-muted fw-bold" style="font-size: 14.5px;" th:text="'#' + ${d.id}">#1</td>
+
+                                <!-- 2. Tên đơn vị -->
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                                             style="width: 42px; height: 42px; background-color: #E5EEE8; color: #20382E; font-size: 18px; border-radius: 10px !important;">
+                                            <i class="bi bi-truck"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold" style="font-size: 15.5px; color: #20382E;" th:text="${d.name}">Giao hàng nội bộ</div>
+                                            <div class="text-muted" style="font-size: 13px;" th:text="${d.price != null and d.price.signum() > 0 ? #numbers.formatDecimal(d.price, 0, 'COMMA', 0, 'POINT') + ' ₫' : 'Giá theo biểu phí chi nhánh'}">Giá theo biểu phí chi nhánh</div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- 3. Số điện thoại liên hệ -->
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="bi bi-telephone-fill text-success" style="font-size: 13px;"></i>
+                                        <span class="fw-semibold text-dark" style="font-size: 14.5px;" th:text="${d.phone != null and !d.phone.isBlank() ? d.phone : '028 7108 8810'}">028 7108 8810</span>
+                                    </div>
+                                </td>
+
+                                <!-- 4. Mô tả -->
+                                <td>
+                                    <div style="font-size: 14px; color: #556B60; line-height: 1.45;" th:text="${d.description != null ? d.description : 'Đội ngũ giao hoa tươi giữ ẩm tận nơi'}">
+                                        Đội ngũ giao hoa tươi giữ ẩm tận nơi
+                                    </div>
+                                </td>
+
+                                <!-- 5. Trạng thái (Đáp ứng UC_034 assertions: "Đang hoạt động" / "Đã xóa") -->
+                                <td class="text-center">
+                                    <span th:if="${d.isDeleted != null and d.isDeleted}" class="status-pill-deleted">
+                                        <i class="bi bi-x-circle-fill"></i> Đã xóa
+                                    </span>
+                                    <span th:if="${d.isDeleted == null or !d.isDeleted}" th:class="${d.isActive == null or d.isActive} ? 'status-pill-active' : 'status-pill-paused'">
+                                        <i class="bi" th:classappend="${d.isActive == null or d.isActive} ? 'bi-check-circle-fill' : 'bi-pause-circle-fill'"></i>
+                                        <span th:text="${d.isActive == null or d.isActive} ? 'Đang hoạt động' : 'Tạm ngưng'">Đang hoạt động</span>
+                                    </span>
+                                </td>
+
+                                <!-- 6. Thao tác: Sửa (btnEditDelivery_{id}), Tạm ngưng, Xóa (btnDeleteDelivery_{id}), Khôi phục (btnRestoreDelivery_{id}) -->
+                                <td class="text-end pe-4" style="white-space: nowrap;">
+                                    <div class="d-inline-flex align-items-center gap-1.5">
+                                        <!-- Sửa -->
+                                        <a th:href="@{'/admin/deliveries/edit/' + ${d.id}}"
+                                           th:id="'btnEditDelivery_' + ${d.id}"
+                                           th:data-testid="'btnEditDelivery_' + ${d.id}"
+                                           class="btn btn-sm btn-outline-secondary py-1.5 px-2.5 d-inline-flex align-items-center gap-1 shadow-sm"
+                                           style="border-radius: 8px; font-size: 13px; font-weight: 600; border-color: #D1E5DA; background: #FFFFFF; color: #20382E;"
+                                           title="Chỉnh sửa đơn vị">
+                                            <i class="bi bi-pencil-square text-success"></i> Sửa
+                                        </a>
+
+                                        <!-- Tạm ngưng / Kích hoạt lại (Toggle) -->
+                                        <form th:if="${d.isDeleted == null or !d.isDeleted}" 
+                                              th:action="@{'/admin/deliveries/toggle/' + ${d.id}}" 
+                                              method="post" class="d-inline m-0">
+                                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                            <button type="submit" 
+                                                    th:id="'btnToggleDelivery_' + ${d.id}"
+                                                    class="btn btn-sm py-1.5 px-2.5 d-inline-flex align-items-center gap-1 shadow-sm"
+                                                    th:classappend="${d.isActive == null or d.isActive} ? 'btn-outline-warning' : 'btn-outline-success'"
+                                                    style="border-radius: 8px; font-size: 13px; font-weight: 600;"
+                                                    th:title="${d.isActive == null or d.isActive} ? 'Tạm ngưng đơn vị này' : 'Kích hoạt lại đơn vị này'">
+                                                <i class="bi" th:classappend="${d.isActive == null or d.isActive} ? 'bi-pause-circle' : 'bi-play-circle'"></i>
+                                                <span th:text="${d.isActive == null or d.isActive} ? 'Tạm ngưng' : 'Kích hoạt'">Tạm ngưng</span>
+                                            </button>
+                                        </form>
+
+                                        <!-- Xóa đơn vị (soft delete) -->
+                                        <form th:if="${d.isDeleted == null or !d.isDeleted}" 
+                                              th:action="@{'/admin/deliveries/delete/' + ${d.id}}" 
+                                              method="post" class="d-inline m-0"
+                                              onsubmit="return confirm('Bạn có chắc chắn muốn xóa đơn vị vận chuyển này?');">
+                                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                            <button type="submit" 
+                                                    th:id="'btnDeleteDelivery_' + ${d.id}"
+                                                    th:data-testid="'btnDeleteDelivery_' + ${d.id}"
+                                                    class="btn btn-sm btn-outline-danger py-1.5 px-2.5 d-inline-flex align-items-center gap-1 shadow-sm"
+                                                    style="border-radius: 8px; font-size: 13px; font-weight: 600;"
+                                                    title="Xóa đơn vị">
+                                                <i class="bi bi-trash"></i> Xóa
+                                            </button>
+                                        </form>
+
+                                        <!-- Khôi phục đơn vị -->
+                                        <form th:if="${d.isDeleted != null and d.isDeleted}" 
+                                              th:action="@{'/admin/deliveries/restore/' + ${d.id}}" 
+                                              method="post" class="d-inline m-0"
+                                              onsubmit="return confirm('Bạn có chắc chắn muốn khôi phục đơn vị vận chuyển này?');">
+                                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                            <button type="submit" 
+                                                    th:id="'btnRestoreDelivery_' + ${d.id}"
+                                                    th:data-testid="'btnRestoreDelivery_' + ${d.id}"
+                                                    class="btn btn-sm btn-outline-success py-1.5 px-2.5 d-inline-flex align-items-center gap-1 shadow-sm"
+                                                    style="border-radius: 8px; font-size: 13px; font-weight: 600;"
+                                                    title="Khôi phục đơn vị">
+                                                <i class="bi bi-arrow-counterclockwise"></i> Khôi phục
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-
-                <!-- 2. Bộ lọc Loại đơn vị -->
-                <div class="col-md-3">
-                    <select id="filterType" class="form-select input-standard" onchange="applyFilter()">
-                        <option value="ALL">Tất cả loại đơn vị</option>
-                        <option value="INTERNAL">Nội bộ</option>
-                        <option value="PARTNER">Đối tác</option>
-                    </select>
-                </div>
-
-                <!-- 3. Bộ lọc Trạng thái -->
-                <div class="col-md-3">
-                    <select id="filterStatus" class="form-select input-standard" onchange="applyFilter()">
-                        <option value="ALL">Tất cả trạng thái</option>
-                        <option value="ACTIVE">Đang hoạt động</option>
-                        <option value="PAUSED">Tạm ngừng</option>
-                    </select>
-                </div>
-
-                <!-- 4. Nút Xóa lọc -->
-                <div class="col-md-1 text-end">
-                    <button type="button" class="btn btn-outline-secondary w-100" style="height: 44px; border-radius: 8px; border-color: #D1E5DA; font-weight: 600;" onclick="resetFilter()" title="Xóa bộ lọc">
-                        <i class="bi bi-arrow-counterclockwise"></i>
-                    </button>
-                </div>
             </div>
-        </div>
 
-        <!-- Bảng danh sách chuẩn bo góc 12px, nền trắng -->
-        <div class="table-card">
-            <div class="table-responsive">
-                <table class="table align-middle mb-0" id="deliveriesTable" data-testid="deliveriesTable">
-                    <thead>
-                    <tr>
-                        <th class="ps-4" style="width: 10%; min-width: 80px;">Mã đơn vị</th>
-                        <th style="width: 24%; min-width: 180px;">Tên đơn vị</th>
-                        <th style="width: 18%; min-width: 150px;">Số điện thoại liên hệ</th>
-                        <th style="width: 25%; min-width: 200px;">Mô tả</th>
-                        <th class="text-center" style="width: 11%; min-width: 110px;">Trạng thái</th>
-                        <th class="text-end pe-4" style="width: 12%; min-width: 150px;">Thao tác</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <!-- Trạng thái trống -->
-                    <tr th:if="${#lists.isEmpty(deliveries)}" id="emptyRow">
-                        <td colspan="6" class="text-center py-5 text-muted" style="font-size: 16px;">
-                            <i class="bi bi-truck fs-1 d-block mb-2 text-secondary opacity-50"></i>
-                            Chưa có đơn vị vận chuyển nào trong hệ thống. Nhấn <strong>"New delivery unit"</strong> để thêm mới.
-                        </td>
-                    </tr>
+            <!-- Bước 4: Phân trang Next / Previous (UC_034: deliveriesPagination, btnPrevPage, btnNextPage, pageBtn_{n}) -->
+            <nav id="deliveriesPagination" data-testid="deliveriesPagination" th:if="${totalPages > 1}" class="mt-4 d-flex justify-content-center" aria-label="Deliveries pagination">
+                <ul class="pagination mb-0 gap-1">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+                        <a class="page-link" id="btnPrevPage" data-testid="btnPrevPage" th:href="@{/admin/deliveries(page=${currentPage - 1}, size=${pageSize}, keyword=${keyword}, tab='units')}" style="border-radius: 8px; font-weight: 600; color: #20382E; border-color: #D1E5DA;">
+                            <i class="bi bi-chevron-left me-1"></i> Previous
+                        </a>
+                    </li>
+                    <li th:each="p : ${#numbers.sequence(0, totalPages - 1)}" class="page-item" th:classappend="${p == currentPage} ? 'active' : ''">
+                        <a class="page-link" th:id="'pageBtn_' + ${p + 1}" th:href="@{/admin/deliveries(page=${p}, size=${pageSize}, keyword=${keyword}, tab='units')}" th:text="${p + 1}" style="border-radius: 8px; font-weight: 700;">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled' : ''">
+                        <a class="page-link" id="btnNextPage" data-testid="btnNextPage" th:href="@{/admin/deliveries(page=${currentPage + 1}, size=${pageSize}, keyword=${keyword}, tab='units')}" style="border-radius: 8px; font-weight: 600; color: #20382E; border-color: #D1E5DA;">
+                            Next <i class="bi bi-chevron-right ms-1"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
 
-                    <!-- Từng hàng đơn vị vận chuyển -->
-                    <tr th:each="d : ${deliveries}" class="delivery-row" th:attr="data-id=${d.id}, data-name=${d.name}, data-desc=${d.description}, data-active=${d.isActive}">
-                        <!-- 1. Mã đơn vị -->
-                        <td class="ps-4 fw-bold text-secondary" style="font-size: 14.5px;" th:text="'#' + ${d.id}">#1</td>
-
-                        <!-- 2. Tên đơn vị -->
-                        <td>
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
-                                     style="width: 40px; height: 40px; background-color: #E5EEE8; color: #20382E; font-size: 18px;">
-                                    <i class="bi bi-truck"></i>
-                                </div>
-                                <div>
-                                    <div class="unit-name fw-bold" th:text="${d.name}">Giao hàng nội bộ</div>
-                                    <div class="unit-code text-muted" style="font-size: 12.5px;" th:if="${d.coverageArea != null}" th:text="${d.coverageArea}">Toàn hệ thống</div>
-                                </div>
-                            </div>
-                        </td>
-
-                        <!-- 3. Số điện thoại liên hệ -->
-                        <td>
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="bi bi-telephone-fill text-success" style="font-size: 14px;"></i>
-                                <span class="fw-bold text-dark" style="font-size: 14.5px;" th:text="${d.phone != null and !d.phone.isBlank() ? d.phone : '028 7108 8810'}">028 7108 8810</span>
-                            </div>
-                        </td>
-
-                        <!-- 4. Mô tả -->
-                        <td>
-                            <div style="font-size: 14px; color: #556B60; line-height: 1.4;" th:text="${d.description != null ? d.description : 'Đội ngũ giao hoa tươi giữ ẩm tận nơi'}">
-                                Giao tận nơi trong vòng 4-6 giờ
-                            </div>
-                        </td>
-
-                        <!-- 5. Trạng thái -->
-                        <td class="text-center">
-                            <span th:if="${d.isDeleted != null and d.isDeleted}" class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 rounded-pill" style="font-size: 12.5px;">
-                                <i class="bi bi-x-circle-fill me-1"></i> Đã xóa
-                            </span>
-                            <span th:if="${d.isDeleted == null or !d.isDeleted}" th:classappend="${d.isActive == null or d.isActive} ? 'badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1 rounded-pill' : 'badge bg-warning-subtle text-warning border border-warning-subtle px-2.5 py-1 rounded-pill'" style="font-size: 12.5px;">
-                                <i class="bi" th:classappend="${d.isActive == null or d.isActive} ? 'bi-check-circle-fill me-1' : 'bi-pause-circle-fill me-1'"></i>
-                                <span th:text="${d.isActive == null or d.isActive} ? 'Đang hoạt động' : 'Ngừng hoạt động'">Đang hoạt động</span>
-                            </span>
-                        </td>
-
-                        <!-- 6. Thao tác: Sửa, Ngừng hoạt động/Kích hoạt, Xóa -->
-                        <td class="text-end pe-4" style="white-space: nowrap;">
-                            <div class="d-inline-flex align-items-center gap-1">
-                                <!-- Thao tác 1: Sửa -->
-                                <a th:href="@{'/admin/deliveries/edit/' + ${d.id}}"
-                                   th:id="'btnEditDelivery_' + ${d.id}"
-                                   th:data-testid="'btnEditDelivery_' + ${d.id}"
-                                   class="btn btn-sm btn-outline-secondary py-1 px-2 d-inline-flex align-items-center gap-1 shadow-sm"
-                                   style="border-radius: 8px; font-size: 13px; font-weight: 600;"
-                                   title="Chỉnh sửa đơn vị">
-                                    <i class="bi bi-pencil-square text-success"></i> Sửa
-                                </a>
-
-                                <!-- Thao tác 2: Ngừng hoạt động / Kích hoạt (Toggle) -->
-                                <form th:if="${d.isDeleted == null or !d.isDeleted}" 
-                                      th:action="@{'/admin/deliveries/toggle/' + ${d.id}}" 
-                                      method="post" class="d-inline m-0">
-                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                    <button type="submit" 
-                                            th:id="'btnToggleDelivery_' + ${d.id}"
-                                            th:classappend="${d.isActive == null or d.isActive} ? 'btn-outline-warning' : 'btn-outline-success'"
-                                            class="btn btn-sm py-1 px-2 d-inline-flex align-items-center gap-1 shadow-sm"
-                                            style="border-radius: 8px; font-size: 13px; font-weight: 600;"
-                                            th:title="${d.isActive == null or d.isActive} ? 'Ngừng hoạt động đơn vị này' : 'Kích hoạt lại đơn vị này'">
-                                        <i class="bi" th:classappend="${d.isActive == null or d.isActive} ? 'bi-pause-circle' : 'bi-play-circle'"></i>
-                                        <span th:text="${d.isActive == null or d.isActive} ? 'Ngừng' : 'Kích hoạt'">Ngừng</span>
-                                    </button>
-                                </form>
-
-                                <!-- Thao tác 3: Xóa -->
-                                <form th:if="${d.isDeleted == null or !d.isDeleted}" 
-                                      th:action="@{'/admin/deliveries/delete/' + ${d.id}}" 
-                                      method="post" class="d-inline m-0"
-                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa đơn vị vận chuyển này?');">
-                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                    <button type="submit" 
-                                            th:id="'btnDeleteDelivery_' + ${d.id}"
-                                            th:data-testid="'btnDeleteDelivery_' + ${d.id}"
-                                            class="btn btn-sm btn-outline-danger py-1 px-2 d-inline-flex align-items-center gap-1 shadow-sm"
-                                            style="border-radius: 8px; font-size: 13px; font-weight: 600;"
-                                            title="Xóa đơn vị">
-                                        <i class="bi bi-trash"></i> Xóa
-                                    </button>
-                                </form>
-
-                                <!-- Khôi phục (nếu đã xóa) -->
-                                <form th:if="${d.isDeleted != null and d.isDeleted}" 
-                                      th:action="@{'/admin/deliveries/restore/' + ${d.id}}" 
-                                      method="post" class="d-inline m-0"
-                                      onsubmit="return confirm('Bạn có chắc chắn muốn khôi phục đơn vị vận chuyển này?');">
-                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                    <button type="submit" 
-                                            th:id="'btnRestoreDelivery_' + ${d.id}"
-                                            th:data-testid="'btnRestoreDelivery_' + ${d.id}"
-                                            class="btn btn-sm btn-outline-success py-1 px-2 d-inline-flex align-items-center gap-1 shadow-sm"
-                                            style="border-radius: 8px; font-size: 13px; font-weight: 600;"
-                                            title="Khôi phục đơn vị">
-                                        <i class="bi bi-arrow-counterclockwise"></i> Khôi phục
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Bước 4: Chọn Next (hoặc Previous, hoặc trang bất kỳ) để xem trang tiếp theo (hoặc trang trước đó, hoặc trang tương ứng) -->
-        <nav id="deliveriesPagination" data-testid="deliveriesPagination" th:if="${totalPages > 1}" class="mt-4 d-flex justify-content-center" aria-label="Deliveries pagination">
-            <ul class="pagination mb-0 gap-1">
-                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
-                    <a class="page-link" id="btnPrevPage" data-testid="btnPrevPage" th:href="@{/admin/deliveries(page=${currentPage - 1}, size=${pageSize}, keyword=${keyword})}">
-                        <i class="bi bi-chevron-left me-1"></i> Previous
-                    </a>
-                </li>
-                <li th:each="p : ${#numbers.sequence(0, totalPages - 1)}" class="page-item" th:classappend="${p == currentPage} ? 'active' : ''">
-                    <a class="page-link" th:id="'pageBtn_' + ${p + 1}" th:href="@{/admin/deliveries(page=${p}, size=${pageSize}, keyword=${keyword})}" th:text="${p + 1}">1</a>
-                </li>
-                <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled' : ''">
-                    <a class="page-link" id="btnNextPage" data-testid="btnNextPage" th:href="@{/admin/deliveries(page=${currentPage + 1}, size=${pageSize}, keyword=${keyword})}">
-                        Next <i class="bi bi-chevron-right ms-1"></i>
-                    </a>
-                </li>
-            </ul>
-        </nav>
         </div><!-- Kết thúc TAB 1: ĐƠN VỊ VẬN CHUYỂN -->
 
         <!-- ========================================== -->
         <!-- TAB 2: KHU VỰC & BIỂU PHÍ GIAO HÀNG        -->
         <!-- ========================================== -->
         <div th:if="${activeTab == 'tariffs'}">
-            <!-- Thẻ hướng dẫn & Quy định tính cước, khoảng cách & Phụ phí hàng lớn -->
-            <div class="card border-0 shadow-sm rounded-4 mb-4" style="border: 1px solid #D1E5DA !important; background: linear-gradient(135deg, #F9FBFA 0%, #FFFFFF 100%);">
-                <div class="card-body p-4">
-                    <div class="row g-4">
-                        <!-- Cột 1: Quy định Khoảng cách & Bán kính -->
-                        <div class="col-lg-6 border-end-lg" style="border-color: #E2E7E2 !important;">
-                            <div class="d-flex align-items-center gap-2 mb-2 text-success">
-                                <i class="bi bi-geo-alt-fill fs-5"></i>
-                                <h6 class="fw-bold mb-0 text-dark" style="font-size: 16px;">Quy chuẩn Khoảng cách & Bán kính giao hoa tươi</h6>
-                            </div>
-                            <ul class="list-unstyled mb-0 small text-secondary" style="line-height: 1.6; font-size: 13.5px;">
-                                <li class="mb-2">
-                                    <strong class="text-success">&bull; &lt; 5km (Bán kính gần chi nhánh):</strong>
-                                    Giao nội quận / phường lân cận. Thời gian cắm và giao 60 - 90 phút hoặc hẹn giờ, bảo toàn độ ẩm cánh hoa tối đa.
-                                </li>
-                                <li class="mb-2">
-                                    <strong class="text-primary">&bull; 5 &ndash; 15km (Bán kính mở rộng nội thành):</strong>
-                                    Giao qua các quận nội thành lân cận bằng xe máy chuyên dụng có thùng che chắn gió và nước giữ ẩm chân hoa.
-                                </li>
-                                <li>
-                                    <strong class="text-danger">&bull; Ngoại vi &gt; 15km (Ngoài phạm vi phục vụ trực tiếp):</strong>
-                                    Hệ thống <em>không hỗ trợ đặt giao trực tiếp</em> bằng xe máy thông thường để tránh hoa héo/gãy dập. Đề nghị khách chọn <strong>"Đến lấy tại cửa hàng"</strong> hoặc liên hệ hotline chi nhánh để thỏa thuận giao xe tải lạnh chuyên dụng.
-                                </li>
-                            </ul>
-                        </div>
 
-                        <!-- Cột 2: Điều kiện áp dụng Phụ phí hàng lớn -->
-                        <div class="col-lg-6">
-                            <div class="d-flex align-items-center gap-2 mb-2 text-warning">
-                                <i class="bi bi-box-seam-fill fs-5 text-warning"></i>
-                                <h6 class="fw-bold mb-0 text-dark" style="font-size: 16px;">Điều kiện áp dụng Phụ phí hàng lớn (Bulky Surcharge)</h6>
-                            </div>
-                            <p class="small text-secondary mb-2" style="font-size: 13.5px;">
-                                Phụ phí này được áp dụng tự động và hiển thị minh bạch khi giỏ hàng của khách hàng có ít nhất một trong các sản phẩm sau:
-                            </p>
-                            <div class="d-flex flex-wrap gap-2 mb-2">
-                                <span class="badge bg-warning-subtle text-dark border border-warning-subtle px-2.5 py-1.5 rounded-3 fw-semibold">
-                                    <i class="bi bi-award me-1 text-warning"></i> Kệ hoa khai trương (1-2 tầng)
-                                </span>
-                                <span class="badge bg-warning-subtle text-dark border border-warning-subtle px-2.5 py-1.5 rounded-3 fw-semibold">
-                                    <i class="bi bi-flower1 me-1 text-warning"></i> Chậu lan hồ điệp lớn (&ge; 5 cành)
-                                </span>
-                                <span class="badge bg-warning-subtle text-dark border border-warning-subtle px-2.5 py-1.5 rounded-3 fw-semibold">
-                                    <i class="bi bi-heart-pulse me-1 text-warning"></i> Khung cổng hoa cưới / sự kiện
-                                </span>
-                            </div>
-                            <small class="text-muted d-block" style="font-size: 12.5px;">
-                                <i class="bi bi-info-circle me-1"></i> <strong>Lý do:</strong> Đơn hàng cồng kềnh đòi hỏi nhân viên giao bằng xe van riêng hoặc giá đỡ cố định đặc biệt nhằm đảm bảo form hoa không biến dạng khi đến tay người nhận.
-                            </small>
-                        </div>
+            <!-- Thông tin giải thích biểu phí -->
+            <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white" style="border: 1px solid #E2E7E2 !important; border-radius: 14px;">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                         style="width: 44px; height: 44px; background-color: #E5EEE8; color: #20382E; font-size: 20px; border-radius: 10px;">
+                        <i class="bi bi-info-circle-fill"></i>
+                    </div>
+                    <div style="font-size: 14.5px; color: #556B60; line-height: 1.5;">
+                        Biểu phí giao hàng được áp dụng tự động tại bước Checkout dựa trên khoảng cách từ chi nhánh đến địa chỉ khách hàng. 
+                        Đơn hàng cồng kềnh (kệ hoa khai trương, vòng hoa lớn) sẽ tự động cộng thêm phụ phí xe chuyên dụng.
                     </div>
                 </div>
             </div>
 
             <!-- Bộ lọc Chi nhánh & Loại dịch vụ -->
-            <div class="bg-white p-3 rounded-3 shadow-sm mb-4 border" style="border-color: #E2E7E2 !important; border-radius: 12px;">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4" style="border: 1px solid #E2E7E2 !important; border-radius: 14px;">
                 <form th:action="@{/admin/deliveries}" method="get" class="row g-3 align-items-center">
                     <input type="hidden" name="tab" value="tariffs">
                     <div class="col-md-5">
                         <label class="form-label small fw-bold text-muted mb-1">Điểm gửi (Chi nhánh):</label>
-                        <select name="storeId" class="form-select input-standard" onchange="this.form.submit()">
-                            <option value="" th:selected="${currentStoreId == null}">-- Tất cả chi nhánh gửi (Xem độ phủ toàn hệ thống) --</option>
+                        <select name="storeId" class="form-select" style="height: 44px; border-radius: 10px; border-color: #E2E7E2; font-size: 15px;" onchange="this.form.submit()">
+                            <option value="" th:selected="${currentStoreId == null}">-- Tất cả chi nhánh (Xem độ phủ toàn hệ thống) --</option>
                             <option th:each="st : ${stores}" th:value="${st.id}" th:text="${st.name}" th:selected="${currentStoreId == st.id}">Chi nhánh Bến Thành</option>
                         </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label small fw-bold text-muted mb-1">Dịch vụ giao hàng:</label>
-                        <select name="service" class="form-select input-standard" onchange="this.form.submit()">
+                        <select name="service" class="form-select" style="height: 44px; border-radius: 10px; border-color: #E2E7E2; font-size: 15px;" onchange="this.form.submit()">
                             <option value="ALL" th:selected="${currentService == 'ALL' or currentService == null}">-- Tất cả dịch vụ --</option>
                             <option value="Tiêu chuẩn" th:selected="${currentService == 'Tiêu chuẩn'}">Tiêu chuẩn (4-6h)</option>
                             <option value="Hỏa tốc" th:selected="${currentService == 'Hỏa tốc'}">Hỏa tốc (2h)</option>
@@ -644,7 +412,7 @@
                         </select>
                     </div>
                     <div class="col-md-3 d-flex align-items-end">
-                        <a th:href="@{/admin/deliveries(tab='tariffs')}" class="btn btn-outline-secondary w-100" style="height: 44px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                        <a th:href="@{/admin/deliveries(tab='tariffs')}" class="btn btn-outline-secondary w-100 d-inline-flex align-items-center justify-content-center gap-2" style="height: 44px; border-radius: 10px; font-weight: 600; border-color: #E2E7E2; color: #66736B; background: #FFFFFF;">
                             <i class="bi bi-arrow-counterclockwise"></i> Xóa lọc
                         </a>
                     </div>
@@ -652,86 +420,92 @@
             </div>
 
             <!-- Bảng Danh Sách Biểu Phí -->
-            <div class="table-card">
-                <div class="table-responsive">
-                    <table class="table align-middle mb-0" id="tariffsTable">
-                        <thead>
-                        <tr>
-                            <th class="ps-4" style="width: 22%;">Điểm gửi (Chi nhánh)</th>
-                            <th style="width: 20%;">Khu vực nhận</th>
-                            <th style="width: 14%;">Dịch vụ</th>
-                            <th style="width: 13%;">Phí cơ bản</th>
-                            <th style="width: 13%;">Phụ phí hàng lớn</th>
-                            <th style="width: 10%;">Thời gian</th>
-                            <th class="text-end pe-4" style="width: 8%;">Thao tác</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:if="${#lists.isEmpty(tariffs)}">
-                            <td colspan="7" class="text-center py-5 text-muted" style="font-size: 15px;">
-                                Chưa có biểu phí nào được cấu hình cho chi nhánh này. Bấm <strong>"Thêm biểu phí mới"</strong> để thiết lập.
-                            </td>
-                        </tr>
-                        <tr th:each="t : ${tariffs}">
-                            <td class="ps-4">
-                                <div class="fw-bold text-dark" style="font-size: 15px;" th:text="${t.store != null ? t.store.name : 'Áp dụng chung toàn hệ thống'}">Chi nhánh Bến Thành</div>
-                                <div class="small text-muted" th:if="${t.delivery != null}">
-                                    <i class="bi bi-truck me-1"></i><span th:text="${t.delivery.name}">Đơn vị phụ trách</span>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="fw-semibold text-dark" style="font-size: 14.5px;" th:text="${t.destinationArea}">Khu vực gần chi nhánh (< 5km)</div>
-                                <div class="small text-muted text-truncate" style="max-width: 220px;" th:if="${t.note != null}" th:text="${t.note}"></div>
-                            </td>
-                            <td>
-                                <span th:if="${t.serviceName == 'Tiêu chuẩn'}" class="service-badge-standard"><i class="bi bi-clock-history"></i> Tiêu chuẩn</span>
-                                <span th:if="${t.serviceName == 'Hỏa tốc'}" class="service-badge-express"><i class="bi bi-lightning-charge-fill"></i> Hỏa tốc</span>
-                                <span th:if="${t.serviceName != 'Tiêu chuẩn' and t.serviceName != 'Hỏa tốc'}" class="service-badge-urgent"><i class="bi bi-star-fill"></i> <span th:text="${t.serviceName}">Dịch vụ</span></span>
-                            </td>
-                            <td>
-                                <span class="fw-bold text-success" style="font-size: 15.5px;" th:text="${#numbers.formatDecimal(t.baseFee, 0, 'COMMA', 0, 'POINT')} + ' ₫'">25.000 ₫</span>
-                            </td>
-                            <td>
-                                <span th:if="${t.bulkySurcharge != null and t.bulkySurcharge.signum() > 0}" class="fw-semibold text-warning" style="font-size: 14px;" th:text="'+ ' + ${#numbers.formatDecimal(t.bulkySurcharge, 0, 'COMMA', 0, 'POINT')} + ' ₫'">+ 20.000 ₫</span>
-                                <span th:if="${t.bulkySurcharge == null or t.bulkySurcharge.signum() == 0}" class="text-muted small">0 ₫</span>
-                            </td>
-                            <td>
-                                <span class="badge bg-light text-secondary border fw-semibold" style="font-size: 12.5px;" th:text="${t.estimatedTime != null ? t.estimatedTime : 'Trong ngày'}">4 - 6 giờ</span>
-                            </td>
-                            <td class="text-end pe-4">
-                                <div class="d-inline-flex align-items-center gap-1.5">
-                                    <form th:action="@{'/admin/deliveries/tariffs/toggle/' + ${t.id}}" method="post" class="d-inline m-0">
-                                        <button type="submit" class="btn btn-sm btn-outline-secondary py-1 px-2" style="border-radius: 6px; font-size: 12px;" th:title="${t.isActive ? 'Tạm dừng áp dụng' : 'Bật áp dụng'}">
-                                            <i class="bi" th:classappend="${t.isActive ? 'bi-pause-circle text-warning' : 'bi-play-circle text-success'}"></i>
-                                        </button>
-                                    </form>
-                                    <form th:action="@{'/admin/deliveries/tariffs/delete/' + ${t.id}}" method="post" class="d-inline m-0" onsubmit="return confirm('Bạn có chắc muốn xóa biểu phí này?');">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger py-1 px-2" style="border-radius: 6px; font-size: 12px;" title="Xóa biểu phí">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4" style="border: 1px solid #E2E7E2 !important; border-radius: 14px;">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" id="tariffsTable">
+                            <thead style="background-color: #E5EEE8 !important;">
+                            <tr style="background-color: #E5EEE8 !important;">
+                                <th class="ps-4 fw-bold" style="white-space: nowrap !important; width: 22%; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; border-bottom: 2px solid #D1E5DA !important;">Điểm gửi (Chi nhánh)</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; width: 20%; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; border-bottom: 2px solid #D1E5DA !important;">Khu vực nhận</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; width: 14%; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; border-bottom: 2px solid #D1E5DA !important;">Dịch vụ</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; width: 14%; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; border-bottom: 2px solid #D1E5DA !important;">Phí cơ bản</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; width: 14%; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; border-bottom: 2px solid #D1E5DA !important;">Phụ phí hàng lớn</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; width: 10%; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; border-bottom: 2px solid #D1E5DA !important;">Thời gian</th>
+                                <th class="text-end pe-4 fw-bold" style="white-space: nowrap !important; width: 12%; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; border-bottom: 2px solid #D1E5DA !important;">Thao tác</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:if="${#lists.isEmpty(tariffs)}">
+                                <td colspan="7" class="text-center py-5 text-muted" style="font-size: 15.5px;">
+                                    <i class="bi bi-geo-alt fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                                    Chưa có biểu phí nào được cấu hình cho chi nhánh này. Bấm <strong>"Thêm biểu phí mới"</strong> để thiết lập.
+                                </td>
+                            </tr>
+                            <tr th:each="t : ${tariffs}">
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark" style="font-size: 15px;" th:text="${t.store != null ? t.store.name : 'Áp dụng chung toàn hệ thống'}">Chi nhánh Bến Thành</div>
+                                    <div class="small text-muted" th:if="${t.delivery != null}">
+                                        <i class="bi bi-truck me-1"></i><span th:text="${t.delivery.name}">Đơn vị phụ trách</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark" style="font-size: 14.5px;" th:text="${t.destinationArea}">Khu vực gần chi nhánh (&lt; 5km)</div>
+                                    <div class="small text-muted text-truncate" style="max-width: 220px;" th:if="${t.note != null}" th:text="${t.note}"></div>
+                                </td>
+                                <td>
+                                    <span th:if="${t.serviceName == 'Tiêu chuẩn'}" class="service-badge-standard"><i class="bi bi-clock-history"></i> Tiêu chuẩn</span>
+                                    <span th:if="${t.serviceName == 'Hỏa tốc'}" class="service-badge-express"><i class="bi bi-lightning-charge-fill"></i> Hỏa tốc</span>
+                                    <span th:if="${t.serviceName != 'Tiêu chuẩn' and t.serviceName != 'Hỏa tốc'}" class="service-badge-urgent"><i class="bi bi-star-fill"></i> <span th:text="${t.serviceName}">Dịch vụ</span></span>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-success" style="font-size: 15.5px;" th:text="${#numbers.formatDecimal(t.baseFee, 0, 'COMMA', 0, 'POINT')} + ' ₫'">25.000 ₫</span>
+                                </td>
+                                <td>
+                                    <span th:if="${t.bulkySurcharge != null and t.bulkySurcharge.signum() > 0}" class="fw-semibold text-warning" style="font-size: 14px;" th:text="'+ ' + ${#numbers.formatDecimal(t.bulkySurcharge, 0, 'COMMA', 0, 'POINT')} + ' ₫'">+ 20.000 ₫</span>
+                                    <span th:if="${t.bulkySurcharge == null or t.bulkySurcharge.signum() == 0}" class="text-muted small">0 ₫</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-secondary border fw-semibold" style="font-size: 12.5px; border-radius: 8px;" th:text="${t.estimatedTime != null ? t.estimatedTime : 'Trong ngày'}">4 - 6 giờ</span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="d-inline-flex align-items-center gap-1.5">
+                                        <form th:action="@{'/admin/deliveries/tariffs/toggle/' + ${t.id}}" method="post" class="d-inline m-0">
+                                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary py-1.5 px-2.5 shadow-sm" style="border-radius: 8px; font-size: 12.5px; border-color: #D1E5DA; background: #FFFFFF;" th:title="${t.isActive ? 'Tạm dừng áp dụng' : 'Bật áp dụng'}">
+                                                <i class="bi" th:classappend="${t.isActive ? 'bi-pause-circle text-warning' : 'bi-play-circle text-success'}"></i>
+                                            </button>
+                                        </form>
+                                        <form th:action="@{'/admin/deliveries/tariffs/delete/' + ${t.id}}" method="post" class="d-inline m-0" onsubmit="return confirm('Bạn có chắc muốn xóa biểu phí này?');">
+                                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger py-1.5 px-2.5 shadow-sm" style="border-radius: 8px; font-size: 12.5px;" title="Xóa biểu phí">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
 
-    </div>
+        </div><!-- Kết thúc TAB 2: KHU VỰC & BIỂU PHÍ -->
+
+    </main>
 </div>
 
 <!-- Modal Thêm Biểu Phí Mới -->
 <div class="modal fade" id="modalNewTariff" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="border: 1px solid #E2E7E2 !important; border-radius: 14px;">
             <form th:action="@{/admin/deliveries/tariffs/add}" method="post">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <div class="modal-header text-white" style="background-color: #355447; padding: 18px 24px;">
+                <div class="modal-header text-white" style="background-color: #20382E; padding: 18px 24px;">
                     <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-geo-alt-fill fs-4 text-warning"></i>
-                        <h5 class="modal-title font-serif fw-bold mb-0">Thêm Biểu Phí Giao Hàng Mới</h5>
+                        <h5 class="modal-title font-serif fw-bold mb-0 text-white">Thêm Biểu Phí Giao Hàng Mới</h5>
                     </div>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
@@ -739,18 +513,18 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label small fw-bold text-dark">Điểm gửi (Chi nhánh) (*)</label>
-                            <select name="storeId" class="form-select input-standard">
+                            <select name="storeId" class="form-select" style="height: 44px; border-radius: 10px; border-color: #E2E7E2;">
                                 <option value="">-- Áp dụng chung mọi chi nhánh --</option>
                                 <option th:each="st : ${stores}" th:value="${st.id}" th:text="${st.name}">Chi nhánh Bến Thành</option>
                             </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-bold text-dark">Khu vực nhận (*)</label>
-                            <input type="text" name="destinationArea" class="form-control input-standard" required placeholder="Ví dụ: Khu vực gần chi nhánh (< 5km)">
+                            <input type="text" name="destinationArea" class="form-control" style="height: 44px; border-radius: 10px; border-color: #E2E7E2;" required placeholder="Ví dụ: Khu vực gần chi nhánh (< 5km)">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-bold text-dark">Loại dịch vụ (*)</label>
-                            <select name="serviceName" class="form-select input-standard" required>
+                            <select name="serviceName" class="form-select" style="height: 44px; border-radius: 10px; border-color: #E2E7E2;" required>
                                 <option value="Tiêu chuẩn">Tiêu chuẩn (4-6h)</option>
                                 <option value="Hỏa tốc">Hỏa tốc (2h)</option>
                                 <option value="Siêu tốc">Siêu tốc hoa tươi</option>
@@ -758,420 +532,39 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-bold text-dark">Đơn vị giao hàng liên kết</label>
-                            <select name="deliveryId" class="form-select input-standard">
+                            <select name="deliveryId" class="form-select" style="height: 44px; border-radius: 10px; border-color: #E2E7E2;">
                                 <option value="">-- Chọn đơn vị (tùy chọn) --</option>
                                 <option th:each="del : ${allDeliveries}" th:value="${del.id}" th:text="${del.name}">Giao Hàng Tiêu Chuẩn</option>
                             </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-bold text-dark">Mức phí cơ bản (₫) (*)</label>
-                            <input type="number" name="baseFee" class="form-control input-standard" required min="0" step="1000" placeholder="25000">
+                            <input type="number" name="baseFee" class="form-control" style="height: 44px; border-radius: 10px; border-color: #E2E7E2;" required min="0" step="1000" placeholder="25000">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-bold text-dark">Phụ phí kệ hoa / hàng lớn (₫)</label>
-                            <input type="number" name="bulkySurcharge" class="form-control input-standard" min="0" step="1000" value="0" placeholder="20000">
+                            <input type="number" name="bulkySurcharge" class="form-control" style="height: 44px; border-radius: 10px; border-color: #E2E7E2;" min="0" step="1000" value="0" placeholder="20000">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-bold text-dark">Thời gian dự kiến</label>
-                            <input type="text" name="estimatedTime" class="form-control input-standard" placeholder="Ví dụ: 4 - 6 giờ hoặc Trong 2 giờ">
+                            <input type="text" name="estimatedTime" class="form-control" style="height: 44px; border-radius: 10px; border-color: #E2E7E2;" placeholder="Ví dụ: 4 - 6 giờ hoặc Trong 2 giờ">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-bold text-dark">Ghi chú biểu phí</label>
-                            <input type="text" name="note" class="form-control input-standard" placeholder="Ví dụ: Giao hoa có túi giữ ẩm">
+                            <input type="text" name="note" class="form-control" style="height: 44px; border-radius: 10px; border-color: #E2E7E2;" placeholder="Ví dụ: Giao hoa có túi giữ ẩm">
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer bg-white px-4 py-3">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn-main-green border-0"><i class="bi bi-check-lg"></i> Lưu Biểu Phí</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 10px;">Hủy</button>
+                    <button type="submit" class="btn text-white" style="background-color: #20382E; border-radius: 10px; font-weight: 700;"><i class="bi bi-check-lg"></i> Lưu Biểu Phí</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- MODAL DÙNG CHUNG: THÊM & CHỈNH SỬA ĐƠN VỊ  -->
-<!-- ========================================== -->
-<div class="modal fade" id="deliveryModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
-            <form id="deliveryForm" method="post" onsubmit="handleDeliveryFormSubmit(event)">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <input type="hidden" name="price" id="formPrice" value="0">
-                <input type="hidden" name="description" id="formFinalDescription" value="">
-
-                <!-- Modal Header -->
-                <div class="modal-header text-white" style="background-color: #355447; border-bottom: none; padding: 18px 24px;">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-truck fs-4 text-warning"></i>
-                        <h5 class="modal-title fw-bold mb-0 text-white" id="modalTitle" style="font-size: 20px;">Thêm đơn vị vận chuyển</h5>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-
-                <!-- Modal Body: Gồm các trường quy chuẩn -->
-                <div class="modal-body p-4" style="background-color: #FBFDFB;">
-                    <div class="row g-3">
-                        <!-- 1. Tên đơn vị -->
-                        <div class="col-md-8">
-                            <label class="form-label fw-bold" style="color: #20382E; font-size: 15px;">Tên đơn vị vận chuyển: <span class="text-danger">*</span></label>
-                            <input type="text" id="fieldName" name="name" class="form-control input-standard" placeholder="VD: Đội Giao Hoa Nội Bộ Sài Gòn" required>
-                        </div>
-
-                        <!-- 2. Loại đơn vị: Nội bộ / Đối tác -->
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold" style="color: #20382E; font-size: 15px;">Loại đơn vị: <span class="text-danger">*</span></label>
-                            <select id="fieldType" class="form-select input-standard" required>
-                                <option value="Nội bộ">Nội bộ</option>
-                                <option value="Đối tác">Đối tác</option>
-                            </select>
-                        </div>
-
-                        <!-- 3. Người liên hệ & Số điện thoại -->
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold" style="color: #20382E; font-size: 15px;">Người phụ trách / Liên hệ: <span class="text-danger">*</span></label>
-                            <input type="text" id="fieldContact" class="form-control input-standard" placeholder="VD: Nguyễn Văn Tuấn" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold" style="color: #20382E; font-size: 15px;">Số điện thoại hotline: <span class="text-danger">*</span></label>
-                            <input type="text" id="fieldPhone" name="phone" class="form-control input-standard" placeholder="VD: 028 7108 8810 hoặc 1900 633 677" required>
-                        </div>
-
-                        <!-- 4. Email & Địa chỉ (không bắt buộc) -->
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold" style="color: #20382E; font-size: 15px;">Email liên hệ: <span class="text-muted small fw-normal">(Không bắt buộc)</span></label>
-                            <input type="email" id="fieldEmail" class="form-control input-standard" placeholder="VD: noibo@tiemhoasaigon.vn">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold" style="color: #20382E; font-size: 15px;">Địa chỉ / Bãi đỗ xe: <span class="text-muted small fw-normal">(Không bắt buộc)</span></label>
-                            <input type="text" id="fieldAddress" class="form-control input-standard" placeholder="VD: 123 Lê Lợi, Bến Thành, Quận 1">
-                        </div>
-
-                        <!-- 5. Khu vực phục vụ -->
-                        <div class="col-12">
-                            <label class="form-label fw-bold" style="color: #20382E; font-size: 15px;">Khu vực phục vụ: <span class="text-danger">*</span></label>
-                            <input type="text" id="fieldArea" class="form-control input-standard" placeholder="VD: Nội thành TP.HCM (Quận 1, 3, 5, 10, Bình Thạnh, Phú Nhuận)" required>
-                        </div>
-
-                        <!-- 6. Ghi chú -->
-                        <div class="col-12">
-                            <label class="form-label fw-bold" style="color: #20382E; font-size: 15px;">Ghi chú vận hành & bảo quản:</label>
-                            <textarea id="fieldNotes" rows="2" class="form-control" style="border-radius: 8px; border-color: #D1E5DA; font-size: 14.5px;" placeholder="VD: Đội shipper riêng của tiệm, trang bị lồng giữ ẩm hoa tươi chuyên dụng, cam kết giao hoa nguyên vẹn..."></textarea>
-                        </div>
-
-                        <!-- 7. Trạng thái hoạt động -->
-                        <div class="col-12">
-                            <div class="p-3 rounded-3 border" style="background-color: #F8FAF8; border-color: #E2E7E2 !important;">
-                                <div class="form-check form-switch m-0 d-flex align-items-center gap-2">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="fieldActive" checked style="width: 44px; height: 22px;">
-                                    <label class="form-check-label fw-bold text-dark" for="fieldActive" style="font-size: 15px;">
-                                        Đang hoạt động (Sẵn sàng tiếp nhận điều phối đơn hoa)
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Cuối biểu mẫu có: HỦY và LƯU -->
-                <div class="modal-footer bg-white border-top d-flex justify-content-end gap-2 p-3">
-                    <button type="button" class="btn btn-secondary px-4 py-2" data-bs-dismiss="modal" style="height: 44px; border-radius: 8px; font-weight: 600;">Hủy</button>
-                    <button type="submit" class="btn btn-main-green px-4 py-2" id="submitBtn">
-                        <i class="bi bi-check2-circle"></i> Lưu
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- ========================================== -->
-<!-- MODAL CHI TIẾT: THÔNG TIN ĐẦY ĐỦ & DỊCH VỤ -->
-<!-- ========================================== -->
-<div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
-            <div class="modal-header text-white" style="background-color: #355447; border-bottom: none; padding: 18px 24px;">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-info-circle-fill fs-4 text-warning"></i>
-                    <h5 class="modal-title fw-bold mb-0 text-white" style="font-size: 20px;">Hồ sơ chi tiết đơn vị vận chuyển</h5>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4" style="background-color: #FBFDFB;">
-                <!-- Header Card đơn vị -->
-                <div class="d-flex align-items-center justify-content-between p-3 rounded-3 mb-4 border" style="background-color: #FFFFFF; border-color: #E2E7E2 !important;">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-3 d-flex align-items-center justify-content-center text-white"
-                             style="width: 52px; height: 52px; background-color: #355447; font-size: 24px;">
-                            <i class="bi bi-truck"></i>
-                        </div>
-                        <div>
-                            <h4 class="fw-bold mb-1" id="detailName" style="color: #20382E; font-size: 20px;">Tên đơn vị</h4>
-                            <div class="text-muted small">Mã định danh hệ thống: <strong id="detailId" class="text-dark">#1</strong></div>
-                        </div>
-                    </div>
-                    <div id="detailBadges">
-                        <!-- Badges loại và trạng thái -->
-                    </div>
-                </div>
-
-                <!-- Thông tin liên hệ và phạm vi -->
-                <h6 class="fw-bold text-uppercase mb-3" style="font-size: 13.5px; letter-spacing: 0.5px; color: #355447;">
-                    <i class="bi bi-person-lines-fill me-1"></i> Thông tin liên hệ & Địa bàn hoạt động
-                </h6>
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <div class="p-3 bg-white rounded-3 border" style="border-color: #E2E7E2 !important;">
-                            <div class="text-muted small mb-1">Người phụ trách điều phối</div>
-                            <div class="fw-bold" style="font-size: 16px; color: #20382E;" id="detailContact">---</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="p-3 bg-white rounded-3 border" style="border-color: #E2E7E2 !important;">
-                            <div class="text-muted small mb-1">Số điện thoại / Hotline</div>
-                            <div class="fw-bold" style="font-size: 16px; color: #20382E;" id="detailPhone">---</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="p-3 bg-white rounded-3 border" style="border-color: #E2E7E2 !important;">
-                            <div class="text-muted small mb-1">Email liên kết</div>
-                            <div class="fw-bold" style="font-size: 15px; color: #20382E;" id="detailEmail">---</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="p-3 bg-white rounded-3 border" style="border-color: #E2E7E2 !important;">
-                            <div class="text-muted small mb-1">Địa chỉ trụ sở / Bãi xe</div>
-                            <div class="fw-bold" style="font-size: 15px; color: #20382E;" id="detailAddress">---</div>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="p-3 bg-white rounded-3 border" style="border-color: #E2E7E2 !important;">
-                            <div class="text-muted small mb-1">Khu vực phục vụ giao nhận</div>
-                            <div class="fw-bold" style="font-size: 15.5px; color: #2E7D32;" id="detailArea">---</div>
-                        </div>
-                    </div>
-                    <div class="col-12" id="detailNotesContainer">
-                        <div class="p-3 bg-white rounded-3 border" style="border-color: #E2E7E2 !important;">
-                            <div class="text-muted small mb-1">Ghi chú & Quy định bảo quản hoa tươi</div>
-                            <div class="text-muted" style="font-size: 14.5px; line-height: 1.5;" id="detailNotes">---</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Các phương thức giao hàng đang liên kết -->
-                <h6 class="fw-bold text-uppercase mb-3" style="font-size: 13.5px; letter-spacing: 0.5px; color: #355447;">
-                    <i class="bi bi-box-seam me-1"></i> Phương thức giao hàng đang liên kết với đơn vị này
-                </h6>
-                <div class="p-3 rounded-3 border bg-white" style="border-color: #E2E7E2 !important;">
-                    <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge rounded-pill bg-danger-subtle text-danger px-2.5 py-1 fw-bold">Hỏa Tốc</span>
-                            <div>
-                                <strong class="text-dark">Giao Hỏa Tốc (Trong 2 Giờ)</strong>
-                                <small class="text-muted d-block">Áp dụng đơn nội thành bán kính ≤ 15km</small>
-                            </div>
-                        </div>
-                        <div class="text-end">
-                            <strong class="text-danger" style="font-size: 16px;">35.000 ₫</strong>
-                        </div>
-                    </div>
-                    <div class="d-flex align-items-center justify-content-between py-2 pt-3">
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge rounded-pill bg-success-subtle text-success px-2.5 py-1 fw-bold">Tiêu Chuẩn</span>
-                            <div>
-                                <strong class="text-dark">Giao Tiêu Chuẩn Trong Ngày</strong>
-                                <small class="text-muted d-block">Áp dụng toàn bộ khu vực thành phố theo khung giờ hẹn</small>
-                            </div>
-                        </div>
-                        <div class="text-end">
-                            <strong class="text-success" style="font-size: 16px;">20.000 ₫</strong>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer bg-white border-top d-flex justify-content-end p-3">
-                <button type="button" class="btn btn-secondary px-4 py-2" data-bs-dismiss="modal" style="height: 44px; border-radius: 8px; font-weight: 600;">Đóng</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    // Hàm phân tích description thành object
-    function parseDescription(desc, name) {
-        let type = (name && name.toLowerCase().includes('nội bộ')) ? 'Nội bộ' : 'Đối tác';
-        let contact = 'Bộ phận Điều phối';
-        let phone = '028 3822 9999';
-        let email = '';
-        let address = '';
-        let area = 'Toàn khu vực TP.HCM';
-        let notes = '';
-
-        if (desc) {
-            const parts = desc.split('|');
-            parts.forEach(part => {
-                const p = part.trim();
-                if (p.startsWith('Loại:')) type = p.replace('Loại:', '').trim();
-                else if (p.startsWith('Liên hệ:')) contact = p.replace('Liên hệ:', '').trim();
-                else if (p.startsWith('SĐT:')) phone = p.replace('SĐT:', '').trim();
-                else if (p.startsWith('Email:')) email = p.replace('Email:', '').trim();
-                else if (p.startsWith('Địa chỉ:')) address = p.replace('Địa chỉ:', '').trim();
-                else if (p.startsWith('Khu vực:')) area = p.replace('Khu vực:', '').trim();
-                else if (p.startsWith('Ghi chú:')) notes = p.replace('Ghi chú:', '').trim();
-            });
-        }
-        return { type, contact, phone, email, address, area, notes };
-    }
-
-    // Chuẩn bị Modal Thêm đơn vị mới
-    function prepareAddModal() {
-        document.getElementById('modalTitle').innerText = 'Thêm đơn vị vận chuyển mới';
-        document.getElementById('deliveryForm').action = '/admin/deliveries/add';
-        document.getElementById('fieldName').value = '';
-        document.getElementById('fieldType').value = 'Nội bộ';
-        document.getElementById('fieldContact').value = '';
-        document.getElementById('fieldPhone').value = '';
-        document.getElementById('fieldEmail').value = '';
-        document.getElementById('fieldAddress').value = '';
-        document.getElementById('fieldArea').value = 'Toàn khu vực TP.HCM';
-        document.getElementById('fieldNotes').value = '';
-        document.getElementById('fieldActive').checked = true;
-    }
-
-    // Chuẩn bị Modal Chỉnh sửa đơn vị
-    function prepareEditModal(id) {
-        const row = document.querySelector(`.delivery-row[data-id="${id}"]`);
-        if (!row) return;
-
-        const name = row.getAttribute('data-name');
-        const desc = row.getAttribute('data-desc');
-        const active = row.getAttribute('data-active') !== 'false';
-        const info = parseDescription(desc, name);
-
-        document.getElementById('modalTitle').innerText = 'Chỉnh sửa đơn vị vận chuyển';
-        document.getElementById('deliveryForm').action = '/admin/deliveries/update/' + id;
-        document.getElementById('fieldName').value = name;
-        document.getElementById('fieldType').value = info.type;
-        document.getElementById('fieldContact').value = info.contact;
-        document.getElementById('fieldPhone').value = info.phone;
-        document.getElementById('fieldEmail').value = info.email;
-        document.getElementById('fieldAddress').value = info.address;
-        document.getElementById('fieldArea').value = info.area;
-        document.getElementById('fieldNotes').value = info.notes;
-        document.getElementById('fieldActive').checked = active;
-
-        const modalEl = document.getElementById('deliveryModal');
-        const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-        modal.show();
-    }
-
-    // Đóng gói thông tin form trước khi submit
-    function handleDeliveryFormSubmit(e) {
-        const type = document.getElementById('fieldType').value;
-        const contact = document.getElementById('fieldContact').value.trim();
-        const phone = document.getElementById('fieldPhone').value.trim();
-        const email = document.getElementById('fieldEmail').value.trim();
-        const address = document.getElementById('fieldAddress').value.trim();
-        const area = document.getElementById('fieldArea').value.trim();
-        const notes = document.getElementById('fieldNotes').value.trim();
-
-        let desc = `Loại: ${type} | Liên hệ: ${contact} | SĐT: ${phone} | Khu vực: ${area}`;
-        if (email) desc += ` | Email: ${email}`;
-        if (address) desc += ` | Địa chỉ: ${address}`;
-        if (notes) desc += ` | Ghi chú: ${notes}`;
-
-        document.getElementById('formFinalDescription').value = desc;
-    }
-
-    // Mở Modal Chi tiết đơn vị
-    function openDetailModal(id) {
-        const row = document.querySelector(`.delivery-row[data-id="${id}"]`);
-        if (!row) return;
-
-        const name = row.getAttribute('data-name');
-        const desc = row.getAttribute('data-desc');
-        const active = row.getAttribute('data-active') !== 'false';
-        const info = parseDescription(desc, name);
-
-        document.getElementById('detailName').innerText = name;
-        document.getElementById('detailId').innerText = '#' + id;
-        document.getElementById('detailContact').innerText = info.contact;
-        document.getElementById('detailPhone').innerText = info.phone;
-        document.getElementById('detailEmail').innerText = info.email || 'Chưa cập nhật';
-        document.getElementById('detailAddress').innerText = info.address || 'Chưa cập nhật';
-        document.getElementById('detailArea').innerText = info.area;
-        document.getElementById('detailNotes').innerText = info.notes || 'Không có ghi chú thêm.';
-
-        // Badges
-        const typeBadge = info.type === 'Nội bộ'
-            ? '<span class="badge-type-internal me-2"><i class="bi bi-house-door-fill me-1"></i>Nội bộ</span>'
-            : '<span class="badge-type-partner me-2"><i class="bi bi-diagram-3-fill me-1"></i>Đối tác</span>';
-        const statusBadge = active
-            ? '<span class="badge-status-active"><i class="bi bi-circle-fill" style="font-size: 7px;"></i>Đang hoạt động</span>'
-            : '<span class="badge-status-paused"><i class="bi bi-pause-circle-fill" style="font-size: 10px;"></i>Tạm ngừng</span>';
-
-        document.getElementById('detailBadges').innerHTML = typeBadge + statusBadge;
-
-        const modalEl = document.getElementById('detailModal');
-        const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-        modal.show();
-    }
-
-    // Bộ lọc phía dưới tiêu đề (Real-time Filter)
-    function applyFilter() {
-        const kw = document.getElementById('filterKeyword').value.trim().toLowerCase();
-        const typeFilter = document.getElementById('filterType').value;
-        const statusFilter = document.getElementById('filterStatus').value;
-
-        const rows = document.querySelectorAll('.delivery-row');
-        let visibleCount = 0;
-
-        rows.forEach(row => {
-            const name = row.getAttribute('data-name').toLowerCase();
-            const id = row.getAttribute('data-id');
-            const desc = row.getAttribute('data-desc').toLowerCase();
-            const active = row.getAttribute('data-active') !== 'false';
-            const isInternal = name.includes('nội bộ') || desc.includes('nội bộ');
-
-            // 1. Keyword match
-            const matchKw = !kw || name.includes(kw) || id.includes(kw) || desc.includes(kw);
-
-            // 2. Type match
-            let matchType = true;
-            if (typeFilter === 'INTERNAL') matchType = isInternal;
-            else if (typeFilter === 'PARTNER') matchType = !isInternal;
-
-            // 3. Status match
-            let matchStatus = true;
-            if (statusFilter === 'ACTIVE') matchStatus = active;
-            else if (statusFilter === 'PAUSED') matchStatus = !active;
-
-            if (matchKw && matchType && matchStatus) {
-                row.style.display = '';
-                visibleCount++;
-            } else {
-                row.style.display = 'none';
-            }
-        });
-
-        // Show/hide empty row
-        const emptyRow = document.getElementById('emptyRow');
-        if (emptyRow) {
-            emptyRow.style.display = visibleCount === 0 ? '' : 'none';
-        }
-    }
-
-    function resetFilter() {
-        document.getElementById('filterKeyword').value = '';
-        document.getElementById('filterType').value = 'ALL';
-        document.getElementById('filterStatus').value = 'ALL';
-        applyFilter();
-    }
-</script>
+<th:block th:replace="~{fragments/admin-layout :: footer}"></th:block>
 <script th:src="@{/js/global-modal.js}"></script>
-<th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
 </body>
 </html>

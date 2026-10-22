@@ -213,6 +213,19 @@ public class OrderWorkflowService {
 
     @Transactional
     public Order cancelByCustomer(String username, Long id) {
+        return cancelByCustomerInternal(username, id, null);
+    }
+
+    @Transactional
+    public Order cancelByCustomer(String username, Long id, String customerReason) {
+        String reason = customerReason == null ? "" : customerReason.strip();
+        if (reason.isEmpty() || reason.length() > 240) {
+            throw new IllegalArgumentException("Vui lòng chọn lý do hủy đơn hợp lệ.");
+        }
+        return cancelByCustomerInternal(username, id, reason);
+    }
+
+    private Order cancelByCustomerInternal(String username, Long id, String customerReason) {
         Order order = lockedOrder(id);
         // Re-read after acquiring the lock: preparation may have started since the page loaded.
         entityManager.refresh(order, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
@@ -235,7 +248,10 @@ public class OrderWorkflowService {
                 throw new IllegalStateException("Thanh toán MoMo không khớp đơn hàng để hoàn tiền.");
         }
         OrderStatus previous = order.getStatus();
-        order.setCancellationReason("Khách hàng đã hủy đơn trước khi bắt đầu cắm hoa/chuẩn bị."
+        String explanation = customerReason == null
+                ? "Khách hàng đã hủy đơn trước khi bắt đầu cắm hoa/chuẩn bị."
+                : "Khách hàng đã hủy đơn với lý do: " + customerReason + ".";
+        order.setCancellationReason(explanation
                 + ("PAID".equals(order.getPaymentStatus())
                 ? " Vui lòng hoàn tiền lại cho khách hàng; chưa ghi nhận đã hoàn tiền."
                 : ""));
@@ -243,7 +259,7 @@ public class OrderWorkflowService {
         if (automaticRefund) {
             refund(order, "DEMO_AUTO", "Tự động hoàn tiền demo khi khách hủy đơn MoMo");
             order.setStatus(OrderStatus.REFUNDED);
-            order.setCancellationReason("Khách hàng đã hủy đơn trước khi bắt đầu cắm hoa/chuẩn bị. Đã hủy đơn và hoàn tiền thành công.");
+            order.setCancellationReason(explanation + " Đã hủy đơn và hoàn tiền thành công.");
             notifyOrderStatusChange(order, previous, OrderStatus.REFUNDED);
         }
         return orders.save(order);

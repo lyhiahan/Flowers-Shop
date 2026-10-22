@@ -278,6 +278,7 @@
                   th:data-product-id="${p.id}"
                   onsubmit="toggleWishlistAjax(event, this);"
                   class="absolute top-2.5 right-2.5">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
               <button type="submit"
                       class="w-8 h-8 rounded-full bg-white/95 backdrop-blur-xs flex items-center justify-center text-secondary shadow-sm hover:scale-110 active:scale-95 transition-all border border-[#C93B50]/20 cursor-pointer"
                       title="Bỏ yêu thích">
@@ -349,6 +350,7 @@
                 th:data-product-id="${p.id}"
                 onsubmit="toggleWishlistAjax(event, this);"
                 class="inline">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <button type="submit"
                     class="w-9 h-9 rounded-full bg-[#FAF7F5] border border-[#E2D7D1] text-[#7E726D] hover:text-[#BA1A1A] hover:bg-[#FFDAD6]/50 flex items-center justify-center transition-colors cursor-pointer"
                     title="Xóa khỏi yêu thích">
@@ -402,7 +404,7 @@
     <!-- Floating Toast Notification (Không giật trang, không cuộn lên đầu) -->
     <div id="wishlistToast" class="fixed top-24 right-4 sm:right-8 z-50 transform transition-all duration-300 -translate-y-4 opacity-0 pointer-events-none flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-[#1E453E] text-white shadow-xl border border-white/20">
       <span class="material-symbols-outlined text-[20px] text-[#A7F3D0]">check_circle</span>
-      <span id="wishlistToastMessage" class="text-[13.5px] font-bold">Đã hủy theo dõi sản phẩm!</span>
+      <span id="wishlistToastMessage" class="text-[13.5px] font-bold">Đã bỏ yêu thích sản phẩm!</span>
     </div>
 
   </main>
@@ -498,11 +500,12 @@
 
     // Floating Toast Notification
     let toastTimeout = null;
-    function showToast(msg) {
+    function showToast(msg, isError = false) {
       const toast = document.getElementById('wishlistToast');
       const toastMsg = document.getElementById('wishlistToastMessage');
       if (!toast || !toastMsg) return;
       toastMsg.textContent = msg;
+      toast.style.backgroundColor = isError ? '#BA1A1A' : '#1E453E';
       toast.classList.remove('-translate-y-4', 'opacity-0', 'pointer-events-none');
       toast.classList.add('translate-y-0', 'opacity-100');
       
@@ -519,16 +522,28 @@
       const productId = formEl.getAttribute('data-product-id');
       const card = formEl.closest('.wishlist-item');
       const url = formEl.getAttribute('action') || ('/customer/profile/wishlist/toggle/' + productId);
+      if (formEl.dataset.pending) return;
+      formEl.dataset.pending = 'true';
+      const csrfToken = formEl.querySelector('input[name="_csrf"]')?.value;
 
       fetch(url, {
         method: 'POST',
         headers: {
-          'X-Requested-With': 'XMLHttpRequest'
-        }
+          'X-Requested-With': 'XMLHttpRequest',
+          ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {})
+        },
+        body: new FormData(formEl)
       })
-      .then(res => res.json())
+      .then(async res => {
+        if (res.redirected) throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data?.success) {
+          throw new Error(data?.message || 'Không thể cập nhật yêu thích. Vui lòng thử lại.');
+        }
+        return data;
+      })
       .then(data => {
-        showToast(data.message || 'Đã hủy theo dõi sản phẩm!');
+        showToast(data.message || 'Đã bỏ yêu thích sản phẩm!');
         
         if (card) {
           card.style.transition = 'all 0.35s ease';
@@ -555,9 +570,10 @@
         }
       })
       .catch(err => {
-        console.error('Lỗi toggle wishlist:', err);
-        formEl.submit();
-      });
+        console.error('Lỗi cập nhật yêu thích:', err);
+        showToast(err.message || 'Không thể cập nhật yêu thích. Vui lòng thử lại.', true);
+      })
+      .finally(() => { delete formEl.dataset.pending; });
     }
   </script>
   <script th:src="@{/js/global-modal.js}"></script>

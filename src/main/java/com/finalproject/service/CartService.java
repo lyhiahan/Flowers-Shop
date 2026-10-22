@@ -8,6 +8,8 @@ public interface CartService {
     int getCartItemCount(String username);
     /** Thêm sản phẩm vào giỏ. Trả về tổng số lượng mới của toàn giỏ sau khi lưu. */
     int addToCart(String username, AddToCartRequest request);
+    /** Chuẩn bị đúng số lượng đã chọn để thanh toán riêng một dòng giỏ hàng. */
+    Long prepareBuyNow(String username, AddToCartRequest request);
     void updateQuantity(String username, Long cartItemId, Integer quantity);
     void removeCartItem(String username, Long cartItemId);
     void clearCart(String username);

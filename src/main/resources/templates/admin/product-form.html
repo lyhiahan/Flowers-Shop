@@ -51,6 +51,10 @@
         <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${errorMessage}"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-3" role="status">
+        <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 
     <!-- Form Card -->
     <div class="card form-card border-0 mb-5">
@@ -217,6 +221,16 @@
                         <div class="form-text text-muted">
                             <i class="bi bi-shield-check text-success me-1"></i>Số lượng được tự động tính từ các đơn hàng thực tế, không thể sửa trực tiếp.
                         </div>
+                        <a th:if="${stockRows != null and !#lists.isEmpty(stockRows)}"
+                           href="#restockTitle" class="btn btn-outline-success btn-sm mt-2">
+                            <i class="bi bi-plus-circle me-1"></i>Đến phần nhập thêm hàng
+                        </a>
+                        <div th:if="${stockRows == null}" class="alert alert-warning small mt-2 mb-0" role="status">
+                            Chức năng nhập hàng chưa được nạp trong phiên ứng dụng này. Hãy khởi động lại Spring Boot rồi mở lại trang sửa sản phẩm.
+                        </div>
+                        <div th:if="${stockRows != null and #lists.isEmpty(stockRows)}" class="alert alert-warning small mt-2 mb-0" role="status">
+                            Chưa tìm thấy chi nhánh phù hợp để nhập thêm sản phẩm này.
+                        </div>
                     </div>
 
                     <div class="col-md-6" th:if="${!isEdit}">
@@ -270,6 +284,41 @@
             </form>
         </div>
     </div>
+
+    <!-- Stock is branch-specific; keep restocking separate from product metadata. -->
+    <section class="card form-card border-0 mb-5" th:if="${isEdit and stockRows != null}" aria-labelledby="restockTitle">
+        <div class="card-body p-4 p-md-5">
+            <h3 class="section-title" id="restockTitle"><i class="bi bi-box-seam text-success me-2"></i>Nhập thêm hàng theo chi nhánh</h3>
+            <p class="text-muted mb-3">Nhập số lượng mới về kho của đúng chi nhánh. Số đã bán và đơn hàng cũ không thay đổi; nhập hàng không tự mở bán sản phẩm đang tạm ngừng. Nếu vừa sửa tên hoặc giá, hãy lưu sản phẩm trước khi nhập thêm.</p>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead><tr><th scope="col">Chi nhánh</th><th scope="col">Tồn hiện tại</th><th scope="col">Nhập thêm</th></tr></thead>
+                    <tbody>
+                    <tr th:each="stock : ${stockRows}">
+                        <td class="fw-semibold" th:text="${stock.storeName}">Chi nhánh</td>
+                        <td>
+                            <span th:text="${stock.quantity + ' sản phẩm'}">0 sản phẩm</span>
+                            <span class="badge text-bg-secondary ms-2" th:if="${stock.archived}">Kho đã lưu trữ</span>
+                        </td>
+                        <td>
+                            <form th:action="@{/admin/products-manage/restock/{id}(id=${productForm.id})}" method="post" class="d-flex align-items-center gap-2 flex-wrap">
+                                <input type="hidden" name="storeId" th:value="${stock.storeId}">
+                                <input type="hidden" name="returnUrl" th:value="${productForm.returnUrl}">
+                                <input type="number" name="addedQuantity" min="1" max="1000000" step="1" required
+                                       class="form-control" style="width: 140px" aria-label="Số lượng nhập thêm"
+                                       th:disabled="${stock.archived}">
+                                <button type="submit" class="btn btn-success text-nowrap" th:disabled="${stock.archived}">
+                                    <i class="bi bi-plus-circle me-1"></i>Nhập thêm
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="small text-muted mb-0" th:if="${#lists.isEmpty(stockRows)}">Chưa có chi nhánh phù hợp để nhập hàng.</p>
+        </div>
+    </section>
 </div>
 
 <!-- MODAL CẢNH BÁO BÁN LỖ (YES/NO) -->

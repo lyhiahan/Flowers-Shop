@@ -349,6 +349,17 @@ Các mục sau **tóm lược theo thứ tự chủ đề xuất hiện trong cu
 | 53 | Hỏi vì sao tin nhắn trong hàng chờ của Antigravity không tự gửi sau khi agent hoàn thành và muốn hướng dẫn cấu hình; đây là yêu cầu về công cụ AI, **không phải** chức năng website. |
 | 54 | Yêu cầu cập nhật chính báo cáo setup/danh sách prompt này để phản ánh cuộc trò chuyện, thay vì chỉ giữ 20 prompt mẫu ban đầu. |
 
+### E. Các yêu cầu bổ sung về trải nghiệm khách hàng và thanh toán
+
+| Số | Yêu cầu/prompt người dùng đã nêu (tóm lược) |
+| ---: | --- |
+| 55 | Trang đăng ký phải để trống các trường cho khách mới tự nhập; không tự điền tên đăng nhập/mật khẩu từ tài khoản đã lưu hoặc dữ liệu demo. Khi biểu mẫu có lỗi, chỉ giữ dữ liệu phù hợp do chính khách vừa nhập, không giữ mật khẩu. |
+| 56 | Tìm kiếm sản phẩm phải trả kết quả khớp từ khóa, đặc biệt khi nhập “hân” hoặc “hoa hướng dương”; kiểm tra toàn bộ luồng từ ô tìm kiếm, tham số URL đến truy vấn và cách sắp xếp. Không để sản phẩm chỉ khớp lỏng lẻo ở mô tả/thuộc tính lấn át sản phẩm khớp tên. |
+| 57 | Khi thêm hoặc sửa địa chỉ nhận hàng bị lỗi kiểm tra dữ liệu, phải báo rõ trường sai và giữ lại những thông tin khách đã nhập để họ sửa, không xóa trắng biểu mẫu. |
+| 58 | Trên chi tiết sản phẩm dùng tên thao tác “Yêu thích/Bỏ yêu thích” thay cho “Theo dõi”; thông báo sau thao tác phải đúng ngữ cảnh sản phẩm và không báo nhầm “không có quyền truy cập” khi khách bỏ yêu thích. |
+| 59 | Kiểm thử nhập sai thông tin đặt hàng: thiếu tên, số điện thoại, địa chỉ giao; chọn ngày/giờ đã qua; chưa chọn chi nhánh nhận tại cửa hàng. Mỗi lỗi phải được giải thích dễ hiểu, không tạo đơn và không giảm tồn kho. |
+| 60 | Khi thiếu tên, số điện thoại hoặc địa chỉ giao, nhấn Đặt hàng phải **hiện thông báo ngay**, không để nút im lặng do báo giá chưa xong. Người mua không tự chọn đơn vị vận chuyển; hệ thống tự chọn đơn vị phù hợp theo chi nhánh, vùng giao demo và biểu phí, hiển thị kết quả trên trang thanh toán. |
+
 <a name="prompts-tu-anh"></a>
 ### Prompt tóm lược từ các ảnh chụp màn hình người dùng đã gửi
 
@@ -376,6 +387,11 @@ Các mục sau **tóm lược theo thứ tự chủ đề xuất hiện trong cu
 | A18 | Trang admin Người dùng báo 15 người nhưng bảng danh sách trống. | “Hãy kiểm tra điều kiện lọc `role=ALL`, phân trang và truy vấn backend. Khi chọn ‘Tất cả’, phải liệt kê đúng tài khoản hiện có; test cả bộ lọc vai trò và trang rỗng hợp lệ.” |
 | A19 | Antigravity hiển thị ‘Queued Messages’ nhưng tin chỉ gửi khi bấm mũi tên. | “Hãy giải thích cơ chế hàng chờ trong Antigravity và chỉ cách kiểm tra/cấu hình tự gửi sau khi agent kết thúc, nếu phiên bản công cụ hỗ trợ; phân biệt lỗi công cụ AI với lỗi chat của website.” |
 | A20 | Form sửa sản phẩm ban đầu trống vùng thuộc tính; bản sau hiện tag cũ nhưng bố cục xấu. | “Hãy giữ nguyên các thuộc tính cũ khi mở form sửa, cho thêm/xóa từng tag bằng Enter hoặc nút Thêm, hỗ trợ gợi ý lẫn giá trị mới, và bố trí ba nhóm Loại hoa/Màu sắc/Phong cách gọn, cân đối, dễ đọc.” |
+| A21 | Form đăng ký tự hiện tên đăng nhập và mật khẩu có sẵn. | “Hãy kiểm tra nguồn dữ liệu tự điền trên form đăng ký, bao gồm template, script và autocomplete của trình duyệt. Khách mới phải thấy biểu mẫu trống; không hiển thị tài khoản demo hay mật khẩu đã lưu. Viết test cho trạng thái ban đầu.” |
+| A22 | Tìm “hân” nhưng danh sách hiện nhiều mẫu không liên quan trực tiếp. | “Hãy truy vết tham số tìm kiếm và điều kiện truy vấn. Ưu tiên kết quả khớp tên sản phẩm; nêu rõ khi nào mô tả/thuộc tính được tính là khớp và không hiển thị kết quả sai từ khóa.” |
+| A23 | Tìm “hoa hướng dương” vẫn thấy kệ hoa, giỏ hoa không có tên này. | “Hãy kiểm tra cách tách từ, so khớp cụm từ và xếp hạng kết quả. Mẫu có tên chứa ‘hoa hướng dương’ phải đứng trước; loại bỏ mẫu không khớp tiêu chí tìm kiếm đã công bố.” |
+| A24 | Biểu mẫu địa chỉ báo số điện thoại sai rồi xóa hết thông tin vừa nhập. | “Khi thêm/sửa địa chỉ không hợp lệ, hiển thị lỗi cụ thể cạnh trường hoặc ở đầu biểu mẫu, giữ lại tên người nhận, số điện thoại và địa chỉ vừa nhập; không ghi dữ liệu sai vào database.” |
+| A25 | Chi tiết sản phẩm ghi “Theo dõi”; khi bỏ yêu thích trang danh sách trống và hiện thông báo không có quyền. | “Đổi thao tác sản phẩm thành ‘Yêu thích/Bỏ yêu thích’, phân biệt với theo dõi cửa hàng. Sau khi bỏ yêu thích, hiển thị thông báo thành công đúng nghĩa và cập nhật danh sách, không báo lỗi phân quyền sai.” |
 
 ### Kết quả kiểm chứng và phần chưa hoàn tất tại thời điểm cập nhật
 

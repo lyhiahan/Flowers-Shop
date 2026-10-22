@@ -97,6 +97,55 @@ class CheckoutEdgeSafetyTests {
         tariff(chosen, "Khu vực gần chi nhánh (< 5km)", true);
         assertThat(deliveryQuote(chosen).shippingFee()).isEqualByComparingTo("25000");
     }
+    @Test void checkoutAutomaticallyAssignsStandardCarrierForTheSelectedZone() throws Exception {
+        var standard = carrier("Giao hàng tiêu chuẩn");
+        tariff(standard, "Khu vực gần chi nhánh (< 5km)", true);
+        var express = carrier("Giao hỏa tốc");
+        var expressRate = tariff(express, "Khu vực gần chi nhánh (< 5km)", true);
+        expressRate.setServiceName("Hỏa tốc");
+        expressRate.setBaseFee(new BigDecimal("10000"));
+        tariffs.saveAndFlush(expressRate);
+
+        mvc.perform(post("/checkout/quote").with(user(customer.getUsername()).roles("USER")).with(csrf())
+                .param("selectedItemIds", first.getId().toString())
+                .param("shippingMethod", "DELIVERY").param("deliveryZone", "NEAR")
+                .param("recipientAddress", "123 Lê Lợi, Quận 1")
+                .param("deliveryUnitId", express.getId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.deliveryUnitId").value(standard.getId()))
+                .andExpect(jsonPath("$.deliveryUnitName").value(standard.getName()))
+                .andExpect(jsonPath("$.shippingFee").value(25000));
+
+        var created = orderService.checkout(customer.getUsername(), java.util.List.of(first.getId()),
+                PaymentMethod.COD, "Người nhận", "0901234567", "123 Lê Lợi, Quận 1",
+                null, null, LocalDate.now().plusDays(2), "DELIVERY", null, null,
+                java.time.LocalTime.of(9, 0), "NEAR");
+        assertThat(created).isNotEmpty();
+        assertThat(created.get(0).getDeliveryUnitId()).isEqualTo(standard.getId());
+    }
+
+    @Test void missingRecipientFieldsShowErrorsWithoutCreatingAnOrderOrReducingStock() throws Exception {
+        var standard = carrier("Giao hàng tiêu chuẩn");
+        tariff(standard, "Khu vực gần chi nhánh (< 5km)", true);
+        String[] names = {"", "Người nhận", "Người nhận"};
+        String[] phones = {"0901234567", "", "0901234567"};
+        String[] addresses = {"123 Lê Lợi, Quận 1", "123 Lê Lợi, Quận 1", ""};
+        String[] messages = {"Vui lòng nhập họ tên người nhận.", "Vui lòng nhập số điện thoại người nhận.",
+                "Vui lòng nhập địa chỉ giao hàng."};
+        for (int i = 0; i < messages.length; i++) {
+            mvc.perform(post("/checkout").with(user(customer.getUsername()).roles("USER")).with(csrf())
+                    .param("selectedItemIds", first.getId().toString()).param("paymentMethod", "COD")
+                    .param("recipientName", names[i]).param("recipientPhone", phones[i])
+                    .param("recipientAddress", addresses[i]).param("shippingMethod", "DELIVERY")
+                    .param("deliveryZone", "NEAR")
+                    .param("deliveryDate", LocalDate.now().plusDays(2).toString())
+                    .param("deliveryTimeSlot", "09:00-11:00"))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(flash().attribute("errorMessage", messages[i]));
+        }
+        assertThat(orderService.getOrdersByUsernameAndStatus(customer.getUsername(), null)).isEmpty();
+        assertThat(stocks.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(10);
+    }
     @Test void duplicateDateLineMustRespectCombinedStock() {
         second(7);
         var request=new AddToCartRequest(); request.setProductId(product.getId()); request.setStoreId(store.getId());

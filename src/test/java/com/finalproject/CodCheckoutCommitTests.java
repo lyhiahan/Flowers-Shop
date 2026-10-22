@@ -65,7 +65,7 @@ class CodCheckoutCommitTests {
                 .andExpect(jsonPath("$.products['" + fixture[1] + "'].quantity").value(8));
         long id = tx.execute(status -> orders.findAll().getFirst().getId());
         for (int retry = 0; retry < 2; retry++) {
-            mvc.perform(post("/customer/orders/cancel/" + id).with(user("commit_customer").roles("USER")).with(csrf()))
+            mvc.perform(post("/customer/orders/cancel/" + id).with(user("commit_customer").roles("USER")).with(csrf()).param("reasonCode", "NO_LONGER_NEEDED"))
                     .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("successMessage"));
             assertThat(tx.<Integer>execute(status -> inventories.findByStoreIdAndProductId(fixture[0], fixture[1]).orElseThrow().getQuantity()))
                     .isEqualTo(10);

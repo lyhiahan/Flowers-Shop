@@ -1,20 +1,121 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/admin-layout :: assets('Nhật ký giám sát hội thoại')}"></head>
-<body class="admin-body"><div class="admin-layout-wrapper">
-<aside th:replace="~{fragments/admin-layout :: sidebar('chat')}"></aside>
-<main class="main-wrapper-admin">
-    <h1 class="admin-page-title">Nhật ký giám sát hội thoại</h1>
-    <p class="text-muted">Ghi nhận mỗi lần admin mở lịch sử hoặc tải tin cũ của hội thoại khách–chi nhánh. Không có thao tác sửa/xóa nhật ký.</p>
-    <a class="btn btn-outline-success mb-3" th:href="@{/admin/chat}">Trở về hội thoại</a>
-    <div class="table-responsive bg-white rounded-3 p-3"><table class="table table-striped">
-        <thead><tr><th>Admin</th><th>Hội thoại</th><th>Chi nhánh</th><th>Khách hàng</th><th>Thời điểm</th><th>Mốc tin cũ</th></tr></thead>
-        <tbody><tr th:each="entry : ${logs.content}"><td th:text="${entry.administrator}"></td><td th:text="${entry.conversationId}"></td>
-        <td th:text="${entry.storeName}"></td><td th:text="${entry.customerName}"></td>
-        <td th:text="${#temporals.format(entry.accessedAt,'dd/MM/yyyy HH:mm:ss')}"></td><td th:text="${entry.beforeMessageId ?: 'Mới nhất'}"></td></tr>
-        <tr th:if="${logs.empty}"><td colspan="6" class="text-muted">Chưa có lượt giám sát.</td></tr></tbody>
-    </table></div>
-    <nav class="d-flex gap-2 mt-3"><a th:if="${logs.hasPrevious()}" class="btn btn-outline-secondary" th:href="@{/admin/chat/access-logs(page=${logs.number - 1})}">Trang trước</a>
-    <span class="align-self-center" th:text="'Trang ' + ${logs.number + 1}"></span>
-    <a th:if="${logs.hasNext()}" class="btn btn-outline-secondary" th:href="@{/admin/chat/access-logs(page=${logs.number + 1})}">Trang sau</a></nav>
-</main></div></body></html>
+<head>
+    <th:block th:replace="~{fragments/admin-layout :: assets('Nhật Ký Giám Sát Hội Thoại - Quản Trị Hệ Thống Hoa Tươi')}"></th:block>
+    <style>
+        .admin-page-title {
+            font-size: 28px !important;
+            font-weight: 800 !important;
+            color: #20382E;
+            line-height: 1.25;
+            letter-spacing: -0.3px;
+        }
+        .table thead th {
+            background-color: #E5EEE8 !important;
+            color: #20382E !important;
+            font-weight: 800 !important;
+            font-size: 14.5px !important;
+            letter-spacing: 0.2px;
+            border-bottom: 2px solid #D1E5DA !important;
+            padding: 14px 16px;
+        }
+        .table tbody td {
+            padding: 14px 16px;
+            vertical-align: middle;
+            border-bottom: 1px solid #EAEFEA;
+            font-size: 15px;
+        }
+        .table tbody tr:hover td {
+            background-color: #FAFCFA;
+        }
+        .pagination .page-link {
+            color: #20382E;
+            border-color: #D1E5DA;
+            font-weight: 600;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: #20382E;
+            border-color: #20382E;
+            color: #FFFFFF;
+        }
+    </style>
+</head>
+<body class="admin-body">
+<div class="admin-layout-wrapper">
+    <aside th:replace="~{fragments/admin-layout :: sidebar('chat')}"></aside>
+    <main class="main-wrapper-admin">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-3">
+                    <h1 class="admin-page-title mb-0">Nhật ký giám sát hội thoại</h1>
+                    <span class="badge rounded-pill" style="background-color: #E5EEE8; color: #20382E; border: 1px solid #D1E5DA; font-size: 14px; font-weight: 700; padding: 6px 14px;">
+                        Bảo mật & Giám sát
+                    </span>
+                </div>
+                <p class="mb-0 mt-1" style="font-size: 15.5px; color: #66736B;">Ghi nhận mỗi lần quản trị viên mở lịch sử hoặc tải tin cũ của hội thoại khách–chi nhánh. Không có thao tác sửa/xóa nhật ký.</p>
+            </div>
+            <div>
+                <a class="btn btn-sm d-inline-flex align-items-center gap-2 shadow-sm text-decoration-none" 
+                   th:href="@{/admin/chat}"
+                   style="background-color: #FFFFFF; color: #20382E; border: 1px solid #D1E5DA; border-radius: 10px; padding: 9px 18px; font-weight: 700; font-size: 14.5px;">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Trở về hội thoại</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead style="background-color: #E5EEE8 !important;">
+                            <tr>
+                                <th class="ps-4 fw-bold">Admin</th>
+                                <th class="fw-bold">Hội thoại</th>
+                                <th class="fw-bold">Chi nhánh</th>
+                                <th class="fw-bold">Khách hàng</th>
+                                <th class="fw-bold">Thời điểm</th>
+                                <th class="text-end pe-4 fw-bold">Mốc tin cũ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="entry : ${logs.content}">
+                                <td class="ps-4 fw-bold text-dark" th:text="${entry.administrator}"></td>
+                                <td th:text="'#' + ${entry.conversationId}"></td>
+                                <td th:text="${entry.storeName}"></td>
+                                <td th:text="${entry.customerName}"></td>
+                                <td th:text="${#temporals.format(entry.accessedAt,'dd/MM/yyyy HH:mm:ss')}"></td>
+                                <td class="text-end pe-4" th:text="${entry.beforeMessageId ?: 'Mới nhất'}"></td>
+                            </tr>
+                            <tr th:if="${logs.empty}">
+                                <td colspan="6" class="text-center py-5 text-muted" style="font-size: 15px;">
+                                    <i class="bi bi-shield-check fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                                    Chưa có lượt giám sát nào được ghi nhận.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phân trang -->
+        <nav th:if="${logs.totalPages > 1}" class="d-flex justify-content-center mt-3">
+            <ul class="pagination mb-0">
+                <li class="page-item" th:classappend="${!logs.hasPrevious()} ? 'disabled'">
+                    <a class="page-link" th:href="@{/admin/chat/access-logs(page=${logs.number - 1})}">Previous</a>
+                </li>
+                <li class="page-item" th:each="p : ${#numbers.sequence(0, logs.totalPages - 1)}" th:classappend="${p == logs.number} ? 'active'">
+                    <a class="page-link" th:href="@{/admin/chat/access-logs(page=${p})}" th:text="${p + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${!logs.hasNext()} ? 'disabled'">
+                    <a class="page-link" th:href="@{/admin/chat/access-logs(page=${logs.number + 1})}">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </main>
+</div>
+<th:block th:replace="~{fragments/admin-layout :: footer}"></th:block>
+</body>
+</html>

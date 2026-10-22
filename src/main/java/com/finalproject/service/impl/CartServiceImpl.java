@@ -155,6 +155,56 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
+    public Long prepareBuyNow(String username, AddToCartRequest request) {
+        if (request == null || request.getProductId() == null || request.getStoreId() == null
+                || request.getQuantity() == null || request.getQuantity() < 1 || request.getQuantity() > 10000
+                || request.getOrderType() != com.finalproject.enums.OrderType.BUY) {
+            throw new IllegalArgumentException("Vui lòng chọn sản phẩm, chi nhánh và số lượng hợp lệ.");
+        }
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new ResourceNotFoundException("Sản phẩm không tồn tại"));
+        Store store = storeRepository.findById(request.getStoreId())
+                .orElseThrow(() -> new ResourceNotFoundException("Chi nhánh không tồn tại"));
+        if (!com.finalproject.service.ProductAvailability.isPublic(product)
+                || !Boolean.TRUE.equals(store.getStatus()) || !Boolean.TRUE.equals(store.getIsOpen())
+                || !com.finalproject.service.ProductAvailability.supportsBranch(product, store)) {
+            throw new IllegalStateException("Sản phẩm hiện không mở bán tại chi nhánh này.");
+        }
+        int stock = storeInventoryRepository.findByStoreIdAndProductId(store.getId(), product.getId())
+                .filter(StoreInventory::isAvailableForSale)
+                .map(inventory -> inventory.getQuantity() == null ? 0 : inventory.getQuantity()).orElse(0);
+        if (request.getQuantity() > stock) {
+            throw new IllegalArgumentException("Số lượng vượt quá tồn kho; chỉ còn " + stock + " sản phẩm tại chi nhánh này.");
+        }
+
+        Cart cart = getCartForUpdate(username);
+        java.util.List<CartItem> lines = cartItemRepository.findMatchingLines(cart.getId(), product.getId(), store.getId(),
+                com.finalproject.enums.OrderType.BUY);
+        CartItem selected;
+        if (lines.isEmpty()) {
+            selected = CartItem.builder().cart(cart).product(product).store(store)
+                    .orderType(com.finalproject.enums.OrderType.BUY).quantity(request.getQuantity())
+                    .deliveryDate(java.time.LocalDate.now()).build();
+            selected = cartItemRepository.saveAndFlush(selected);
+        } else {
+            selected = lines.getFirst();
+            selected.setQuantity(request.getQuantity());
+            selected.setDeliveryDate(java.time.LocalDate.now());
+            cartItemRepository.save(selected);
+            if (lines.size() > 1) {
+                var duplicates = lines.subList(1, lines.size());
+                if (cart.getItems() != null) {
+                    cart.getItems().removeIf(line -> duplicates.stream()
+                            .anyMatch(duplicate -> duplicate.getId().equals(line.getId())));
+                }
+                cartItemRepository.deleteAll(duplicates);
+            }
+        }
+        return selected.getId();
+    }
+
+    @Override
+    @Transactional
     public void updateQuantity(String username, Long cartItemId, Integer quantity) {
         if (quantity == null || quantity < 0) throw new IllegalArgumentException("Số lượng không được âm hoặc bỏ trống.");
         Cart cart = getCartForUpdate(username);

@@ -117,14 +117,20 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public boolean canReview(Long userId, Long productId) {
-        if (userId == null || productId == null) return false;
-        return orderDetailRepository.hasPurchasedAndReceived(userId, productId);
+        return getEligibleOrderId(userId, productId) != null;
     }
 
     @Override
     public Long getEligibleOrderId(Long userId, Long productId) {
         if (userId == null || productId == null) return null;
         List<Long> orderIds = orderDetailRepository.findReceivedOrderIdsByProduct(userId, productId);
-        return (orderIds != null && !orderIds.isEmpty()) ? orderIds.get(0) : null;
+        return orderIds == null ? null : orderIds.stream().distinct()
+                .filter(orderId -> !hasReviewed(userId, productId, orderId)).findFirst().orElse(null);
+    }
+
+    @Override
+    public boolean canReviewOrder(Long userId, Long productId, Long orderId) {
+        if (userId == null || productId == null || orderId == null || hasReviewed(userId, productId, orderId)) return false;
+        return orderDetailRepository.findReceivedOrderIdsByProduct(userId, productId).contains(orderId);
     }
 }

@@ -144,6 +144,12 @@ public class CheckoutController {
             finalRecipientPhone = resolveRecipientField(request, "recipientPhone", recipientPhone);
             finalRecipientAddress = resolveRecipientField(request, "recipientAddress", recipientAddress);
             if (selectedItemIds == null || selectedItemIds.isEmpty()) throw new IllegalArgumentException("Vui lòng chọn sản phẩm để thanh toán.");
+            if (finalRecipientName == null || finalRecipientName.isBlank())
+                throw new IllegalArgumentException("Vui lòng nhập họ tên người nhận.");
+            if (finalRecipientPhone == null || finalRecipientPhone.isBlank())
+                throw new IllegalArgumentException("Vui lòng nhập số điện thoại người nhận.");
+            if ("DELIVERY".equals(shippingMethod) && (finalRecipientAddress == null || finalRecipientAddress.isBlank()))
+                throw new IllegalArgumentException("Vui lòng nhập địa chỉ giao hàng.");
             if (deliveryDate == null) throw new IllegalArgumentException("Vui lòng chọn ngày nhận hàng.");
             if (deliveryTime == null) {
                 String slot = deliveryTimeSlot == null ? null : java.util.Arrays.stream(deliveryTimeSlot)
@@ -152,15 +158,10 @@ public class CheckoutController {
                     throw new IllegalArgumentException("Vui lòng chọn khung giờ nhận hoa hợp lệ.");
                 deliveryTime = java.time.LocalTime.parse(slot.substring(0, 5));
             }
-            if (finalRecipientName == null || finalRecipientName.isBlank() || finalRecipientPhone == null || finalRecipientPhone.isBlank())
-                throw new IllegalArgumentException("Vui lòng nhập tên và số điện thoại người nhận.");
-            if ("DELIVERY".equals(shippingMethod) && (finalRecipientAddress == null || finalRecipientAddress.isBlank()))
-                throw new IllegalArgumentException("Vui lòng nhập địa chỉ giao hàng.");
-            validateDeliverySelection(shippingMethod, deliveryUnitId);
-            validateDeliveryZone(shippingMethod, deliveryUnitId, deliveryZone);
+            validateDeliveryZone(shippingMethod, deliveryZone);
             if (paymentMethod == PaymentMethod.MOMO_DEMO && !demoPayments.isEnabled())
                 throw new IllegalArgumentException("Thanh toán MoMo demo đang tắt.");
-            List<com.finalproject.entity.Order> createdOrders = orderService.checkout(principal.getName(), selectedItemIds, paymentMethod, finalRecipientName, finalRecipientPhone, finalRecipientAddress, greetingMessage, voucherCode, deliveryDate, shippingMethod, pickupStoreId, deliveryUnitId, deliveryTime, deliveryZone);
+            List<com.finalproject.entity.Order> createdOrders = orderService.checkout(principal.getName(), selectedItemIds, paymentMethod, finalRecipientName, finalRecipientPhone, finalRecipientAddress, greetingMessage, voucherCode, deliveryDate, shippingMethod, pickupStoreId, null, deliveryTime, deliveryZone);
             if (paymentMethod == PaymentMethod.MOMO_DEMO) {
                 try {
                     String token = demoPayments.create(createdOrders.stream().map(com.finalproject.entity.Order::getId).toList(), principal.getName());
@@ -186,14 +187,16 @@ public class CheckoutController {
             if (selectedItemIds != null && !selectedItemIds.isEmpty()) {
                 redirectAttributes.addFlashAttribute("selectedItemIds", selectedItemIds);
                 redirectAttributes.addFlashAttribute("prevShippingMethod", shippingMethod);
-                redirectAttributes.addFlashAttribute("prevRecipientName", finalRecipientName);
-                redirectAttributes.addFlashAttribute("prevRecipientPhone", finalRecipientPhone);
-                redirectAttributes.addFlashAttribute("prevRecipientAddress", finalRecipientAddress);
+                redirectAttributes.addFlashAttribute("prevRecipientName", recipientName);
+                redirectAttributes.addFlashAttribute("prevRecipientPhone", recipientPhone);
+                redirectAttributes.addFlashAttribute("prevRecipientAddress", recipientAddress);
                 redirectAttributes.addFlashAttribute("prevGreetingMessage", greetingMessage);
                 redirectAttributes.addFlashAttribute("prevVoucherCode", voucherCode);
                 redirectAttributes.addFlashAttribute("prevPickupStoreId", pickupStoreId);
-                redirectAttributes.addFlashAttribute("prevDeliveryUnitId", deliveryUnitId);
                 redirectAttributes.addFlashAttribute("prevDeliveryZone", deliveryZone);
+                redirectAttributes.addFlashAttribute("prevDeliveryDate", deliveryDate);
+                redirectAttributes.addFlashAttribute("prevDeliveryTimeSlot", deliveryTimeSlot == null ? null : java.util.Arrays.stream(deliveryTimeSlot)
+                        .filter(value -> value != null && !value.isBlank()).findFirst().orElse(null));
                 String query = selectedItemIds.stream().map(id -> "selectedItemIds=" + id).collect(Collectors.joining("&"));
                 return "redirect:/checkout?" + query;
             }
@@ -212,24 +215,16 @@ public class CheckoutController {
             @RequestParam(value = "deliveryUnitId", required = false) Long deliveryUnitId,
             @RequestParam(value = "deliveryZone", required = false) String deliveryZone) {
         try {
-            validateDeliverySelection(shippingMethod, deliveryUnitId);
-            validateDeliveryZone(shippingMethod, deliveryUnitId, deliveryZone);
+            validateDeliveryZone(shippingMethod, deliveryZone);
             return org.springframework.http.ResponseEntity.ok(orderService.quote(principal.getName(), selectedItemIds,
-                    recipientAddress, voucherCode, shippingMethod, pickupStoreId, deliveryUnitId, deliveryZone));
+                    recipientAddress, voucherCode, shippingMethod, pickupStoreId, null, deliveryZone));
         } catch (IllegalArgumentException | IllegalStateException ex) {
             return org.springframework.http.ResponseEntity.badRequest().body(java.util.Map.of("message", ex.getMessage()));
         }
     }
 
-    private void validateDeliverySelection(String shippingMethod, Long deliveryUnitId) {
-        if ("DELIVERY".equals(shippingMethod) && deliveryUnitId == null && deliveryRepository.findAll().stream()
-                .anyMatch(d -> Boolean.TRUE.equals(d.getIsActive()) && !Boolean.TRUE.equals(d.getIsDeleted()))) {
-            throw new IllegalArgumentException("Vui lòng chọn đơn vị giao hàng.");
-        }
-    }
-
-    private void validateDeliveryZone(String shippingMethod, Long deliveryUnitId, String deliveryZone) {
-        if ("DELIVERY".equals(shippingMethod) && deliveryUnitId != null
+    private void validateDeliveryZone(String shippingMethod, String deliveryZone) {
+        if ("DELIVERY".equals(shippingMethod)
                 && !java.util.Set.of("NEAR", "FAR", "OUTSIDE").contains(deliveryZone == null ? "" : deliveryZone)) {
             throw new IllegalArgumentException("Vui lòng chọn vùng giao hàng demo.");
         }

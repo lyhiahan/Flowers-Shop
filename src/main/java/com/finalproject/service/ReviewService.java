@@ -9,4 +9,5 @@ public interface ReviewService {
     boolean hasReviewed(Long userId, Long productId, Long orderId);
     boolean canReview(Long userId, Long productId);
     Long getEligibleOrderId(Long userId, Long productId);
+    boolean canReviewOrder(Long userId, Long productId, Long orderId);
 }

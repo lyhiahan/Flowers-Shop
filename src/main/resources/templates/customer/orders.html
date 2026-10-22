@@ -197,7 +197,7 @@
 
                 <!-- Modal Xác Nhận Hủy Đơn (UC_011 Alternative 8a, 9a, 9b) -->
                 <div th:if="${o.isCancellable()}" class="modal fade" th:id="'confirmCancelOrderModal_' + ${o.id}" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+                    <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
                         <div class="modal-content rounded-4 border-0 shadow">
                             <div class="modal-header border-0 pb-0">
                                 <h5 class="modal-title font-serif fw-bold text-danger">
@@ -205,8 +205,22 @@
                                 </h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
+                            <form th:action="@{'/customer/orders/cancel/' + ${o.id}}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <input type="hidden" name="source" value="list">
                             <div class="modal-body py-3 text-secondary">
                                 Bạn có chắc chắn muốn hủy đơn hàng <strong class="text-dark" th:text="'#' + ${o.id}"></strong> này không?
+                                <label class="form-label fw-bold mt-3" th:for="'cancelReason_' + ${o.id}">Lý do hủy đơn <span class="text-danger">*</span></label>
+                                <select class="form-select cancel-reason-select" name="reasonCode" required
+                                        th:id="'cancelReason_' + ${o.id}" onchange="toggleCancelOther(this)">
+                                    <option value="" selected disabled>-- Chọn một lý do --</option>
+                                    <option th:each="reason : ${customerCancellationReasons}" th:value="${reason.name()}" th:text="${reason.label}"></option>
+                                </select>
+                                <div class="cancel-other-reason mt-3">
+                                    <label class="form-label" th:for="'cancelOtherReason_' + ${o.id}">Vui lòng ghi rõ lý do khác</label>
+                                    <input class="form-control" type="text" name="otherReason" maxlength="200"
+                                           th:id="'cancelOtherReason_' + ${o.id}" placeholder="Nhập lý do của bạn (tối đa 200 ký tự)">
+                                </div>
                                 <p class="small mb-0 mt-2">Bạn chỉ được hủy khi đơn chờ xác nhận hoặc đã xác nhận. Khi cửa hàng bắt đầu cắm hoa/chuẩn bị, bạn không thể tự hủy.</p>
                                 <p th:if="${o.paymentStatus == 'PAID' and o.paymentMethod == 'MOMO_DEMO'}" class="small text-success mb-0 mt-2">Đơn thanh toán MoMo sẽ được hoàn tiền tự động khi hủy, không cần cửa hàng xác nhận.</p>
                                 <p th:if="${o.paymentStatus == 'PAID' and o.paymentMethod != 'MOMO_DEMO'}" class="small text-warning-emphasis mb-0 mt-2">Đơn đã thanh toán sẽ chuyển sang chờ cửa hàng hoàn tiền.</p>
@@ -217,12 +231,9 @@
                                     Cancel
                                 </button>
                                 <!-- 9a. Bấm nút Confirm -> 9a1. Hủy đơn hàng thành công -->
-                                <form th:action="@{'/customer/orders/cancel/' + ${o.id}}" method="post" class="d-inline m-0">
-                                    <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold">
-                                        Confirm
-                                    </button>
-                                </form>
+                                <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold">Xác nhận hủy</button>
                             </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -252,5 +263,17 @@
         </nav>
 
     </main>
-<footer th:replace="~{fragments/floral :: footer}"></footer><th:block th:replace="~{fragments/floral :: scripts}"></th:block><th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
+<footer th:replace="~{fragments/floral :: footer}"></footer><th:block th:replace="~{fragments/floral :: scripts}"></th:block>
+<script>
+    function toggleCancelOther(select) {
+        const field = select.closest('form').querySelector('.cancel-other-reason');
+        const input = field.querySelector('input[name="otherReason"]');
+        const selected = select.value === 'OTHER';
+        field.hidden = !selected;
+        input.required = selected;
+        if (!selected) input.value = '';
+    }
+    document.querySelectorAll('.cancel-reason-select').forEach(toggleCancelOther);
+</script>
+<th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
 </body></html>

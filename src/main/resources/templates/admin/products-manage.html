@@ -15,15 +15,28 @@
         body { font-family: var(--font-sans) !important; background-color: var(--admin-bg); color: var(--admin-text-main); min-height: 100vh; }
         .main-wrapper { flex: 1; overflow-x: hidden; background-color: var(--admin-bg); }
         .sticky-col-right {
-            position: sticky !important;
-            right: 0 !important;
-            background-color: #FFFFFF !important;
-            z-index: 5 !important;
-            box-shadow: -4px 0 8px rgba(0, 0, 0, 0.04);
+            position: static !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
         }
         thead th.sticky-col-right {
             background-color: #E5EEE8 !important;
-            z-index: 6 !important;
+            z-index: 1 !important;
+        }
+        /* Khắc phục lỗi dropdown menu bị các dòng bên dưới che khuất */
+        .sticky-col-right:has(.dropdown-menu.show),
+        tr:has(.dropdown-menu.show) .sticky-col-right,
+        tr:has(.dropdown-menu.show) {
+            z-index: 1050 !important;
+        }
+        .dropdown-menu {
+            z-index: 1060 !important;
+        }
+        /* Đảm bảo dropdown menu không bị cắt bởi khung cuộn table trên màn hình lớn */
+        @media (min-width: 992px) {
+            .table-responsive {
+                overflow: visible !important;
+            }
         }
         .btn-outline-forest {
             border-color: #D1E5DA;
@@ -34,9 +47,6 @@
             background-color: #E5EEE8;
             color: #20382E;
             border-color: #B5D2C2;
-        }
-        .dropdown-menu {
-            z-index: 1060 !important;
         }
         .table-row-highlight {
             animation: highlightPulse 2.5s ease-in-out;
@@ -158,10 +168,6 @@
             <div>
                 <div class="d-flex align-items-center gap-3">
                     <h1 class="admin-page-title mb-0" style="font-size: 28px !important; font-weight: 800; color: #20382E;">Quản lý sản phẩm</h1>
-                    <span class="badge rounded-pill" style="background-color: #E5EEE8; color: #20382E; border: 1px solid #D1E5DA; font-size: 14px; font-weight: 700; padding: 6px 14px;">
-                        <span th:if="${totalElements > 0}" th:text="'Hiển thị ' + ${(currentPage * pageSize) + 1} + '–' + ${(currentPage + 1) * pageSize < totalElements ? (currentPage + 1) * pageSize : totalElements} + ' trong ' + ${totalElements} + ' sản phẩm'">Hiển thị 1–10 trong 38 sản phẩm</span>
-                        <span th:if="${totalElements == 0}">0 sản phẩm</span>
-                    </span>
                 </div>
                 <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Thêm, chỉnh sửa và quản lý sản phẩm toàn hệ thống.</p>
             </div>
@@ -288,20 +294,20 @@
         </div>
 
         <!-- 4. Bảng sản phẩm: Cột Tồn kho đặt ngay sau Đã bán, Kiểu dáng lồng dưới tên sản phẩm -->
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
+        <div class="card border-0 shadow-sm rounded-4 bg-white" style="border: 1px solid #E2E7E2 !important; border-radius: 12px;">
             <div class="card-body p-0">
-                <div class="table-responsive">
+                <div class="table-responsive" style="overflow-x: auto;">
                     <table class="table table-admin-products align-middle mb-0" id="productsTable">
                         <thead style="background-color: #E5EEE8 !important;">
                         <tr style="background-color: #E5EEE8 !important;">
-                            <th class="ps-4 fw-bold" style="white-space: nowrap !important; width: 75px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Mã</th>
-                            <th class="fw-bold" style="white-space: nowrap !important; min-width: 290px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Sản phẩm</th>
-                            <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 120px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Giá nhập</th>
-                            <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 120px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Giá bán</th>
-                            <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 90px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Đã bán</th>
-                            <th class="text-end fw-bold" style="white-space: nowrap !important; min-width: 155px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;" th:text="${stockColumnTitle}">Tổng tồn kho</th>
-                            <th class="fw-bold" style="white-space: nowrap !important; min-width: 140px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Trạng thái</th>
-                            <th class="text-end pe-4 fw-bold sticky-col-right" style="white-space: nowrap !important; min-width: 200px; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Thao tác</th>
+                            <th class="ps-3 fw-bold" style="white-space: nowrap !important; width: 55px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; border-bottom: 2px solid #D1E5DA !important;">Mã</th>
+                            <th class="fw-bold" style="white-space: nowrap !important; min-width: 210px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; border-bottom: 2px solid #D1E5DA !important;">Sản phẩm</th>
+                            <th class="text-end fw-bold" style="white-space: nowrap !important; width: 95px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; border-bottom: 2px solid #D1E5DA !important;">Giá nhập</th>
+                            <th class="text-end fw-bold" style="white-space: nowrap !important; width: 100px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; border-bottom: 2px solid #D1E5DA !important;">Giá bán</th>
+                            <th class="text-end fw-bold" style="white-space: nowrap !important; width: 70px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; border-bottom: 2px solid #D1E5DA !important;">Đã bán</th>
+                            <th class="text-end fw-bold" style="white-space: nowrap !important; width: 115px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; border-bottom: 2px solid #D1E5DA !important;" th:text="${stockColumnTitle}">Tổng tồn kho</th>
+                            <th class="text-center fw-bold" style="white-space: nowrap !important; width: 125px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; border-bottom: 2px solid #D1E5DA !important;">Trạng thái</th>
+                            <th class="text-end pe-3 fw-bold" style="white-space: nowrap !important; width: 165px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; border-bottom: 2px solid #D1E5DA !important;">Thao tác</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -316,24 +322,24 @@
                                      pSummary=${inventorySummaryMap[p.id]}, 
                                      pUnit=${pSummary != null ? pSummary.unit : 'bó'}">
                             <!-- 1. Mã sản phẩm -->
-                            <td class="ps-4 text-muted fw-bold" style="font-size: 14px;" th:text="'#' + ${p.id}">#1</td>
+                            <td class="ps-3 text-muted fw-bold" style="font-size: 13.5px; width: 55px; white-space: nowrap;" th:text="'#' + ${p.id}">#1</td>
 
-                            <!-- 2. Sản phẩm: Ảnh 64x64px, Tên đậm 16.5px, Danh mục & Kiểu dáng bên dưới để tiết kiệm diện tích -->
+                            <!-- 2. Sản phẩm: Ảnh 52x52px, Tên to rõ 17.5px, Danh mục & Kiểu dáng bên dưới để tiết kiệm diện tích -->
                             <td>
-                                <div class="d-flex align-items-center gap-3 py-1">
+                                <div class="d-flex align-items-center gap-2.5 py-1">
                                     <img th:src="${p.imageUrl != null and !p.imageUrl.isEmpty() ? p.imageUrl : 'https://images.unsplash.com/photo-1548094878-84ced0f68b08?w=150'}"
                                          onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=150';"
                                          alt="Hoa" 
                                          class="product-thumb-img shadow-sm"
-                                         style="width: 64px; height: 64px; border-radius: 8px; object-fit: cover; flex-shrink: 0; border: 1px solid #E2E7E2;">
-                                    <div>
-                                        <div class="fw-bold" style="font-size: 16.5px; font-weight: 700; color: #20382E; line-height: 1.35;" th:text="${p.name}">
+                                         style="width: 52px; height: 52px; border-radius: 8px; object-fit: cover; flex-shrink: 0; border: 1px solid #E2E7E2;">
+                                    <div style="min-width: 0;">
+                                        <div class="fw-bold" style="font-size: 17.5px; font-weight: 700; color: #162E23; line-height: 1.3;" th:text="${p.name}">
                                              Bó Hoa Hồng Đỏ Ecuador Tình Nồng Cháy
                                         </div>
-                                        <div class="product-category-sub d-flex align-items-center gap-2 mt-1" style="font-size: 13px; color: #66736B;">
+                                        <div class="product-category-sub d-flex align-items-center gap-1.5 mt-0.5" style="font-size: 12px; color: #66736B;">
                                             <span th:text="${p.category != null ? p.category.name : 'Hoa tươi'}">Hoa Tình Yêu & Valentine</span>
                                             <span>•</span>
-                                            <span class="badge" style="background-color: #F0F4F2; color: #375344; border: 1px solid #D5E2DA; font-size: 12px; font-weight: 600;"
+                                            <span class="badge" style="background-color: #F0F4F2; color: #375344; border: 1px solid #D5E2DA; font-size: 11px; font-weight: 600; padding: 2px 6px;"
                                                   th:text="${p.name.toLowerCase().startsWith('giỏ') ? 'Giỏ hoa' : 
                                                            (p.name.toLowerCase().startsWith('hộp') ? 'Hộp hoa' : 
                                                            (p.name.toLowerCase().startsWith('kệ') ? 'Kệ hoa' : 
@@ -347,77 +353,81 @@
                             </td>
 
                             <!-- 3. Giá nhập: Căn phải, không xuống dòng -->
-                            <td class="text-end" style="white-space: nowrap;">
-                                <span style="font-size: 15.5px; font-weight: 700; color: #526058; white-space: nowrap;"
+                            <td class="text-end" style="width: 95px; white-space: nowrap;">
+                                <span style="font-size: 14.5px; font-weight: 700; color: #526058; white-space: nowrap;"
                                       th:text="${p.importPrice != null ? #numbers.formatDecimal(p.importPrice, 0, 'COMMA', 0, 'POINT') + ' ₫' : (p.priceBuy != null ? #numbers.formatDecimal(p.priceBuy.multiply(T(java.math.BigDecimal).valueOf(0.6)), 0, 'COMMA', 0, 'POINT') + ' ₫' : 'Chưa cập nhật')}">
                                     350.000 ₫
                                 </span>
                             </td>
 
                             <!-- 4. Giá bán: Căn phải, không xuống dòng, hồng trầm #A64060 -->
-                            <td class="text-end" style="white-space: nowrap;">
-                                <span style="font-size: 17px; font-weight: 800; color: #A64060; white-space: nowrap;"
+                            <td class="text-end" style="width: 100px; white-space: nowrap;">
+                                <span style="font-size: 15.5px; font-weight: 800; color: #A64060; white-space: nowrap;"
                                       th:text="${p.priceBuy != null ? #numbers.formatDecimal(p.priceBuy, 0, 'COMMA', 0, 'POINT') + ' ₫' : 'Chưa cập nhật'}">
                                     650.000 ₫
                                 </span>
                             </td>
 
                             <!-- 5. Đã bán: Căn phải, chỉ hiển thị số -->
-                            <td class="text-end" style="font-size: 15px; font-weight: 600; color: #24332C;">
+                            <td class="text-end" style="width: 70px; white-space: nowrap; font-size: 14px; font-weight: 600; color: #24332C;">
                                 <span th:text="${p.sold != null ? p.sold : 0}">45</span>
                             </td>
 
                             <!-- 6. Tồn kho / Tổng tồn kho: Ngay sau Đã bán, bấm vào xem chi tiết các chi nhánh -->
-                            <td class="text-end" style="white-space: nowrap;">
+                            <td class="text-end" style="width: 115px; white-space: nowrap;">
                                 <button type="button" class="btn btn-link p-0 text-decoration-none text-end w-100" 
                                         data-bs-toggle="modal" th:data-bs-target="'#inventoryModal' + ${p.id}"
                                         title="Bấm để xem chi tiết tồn kho từng chi nhánh">
                                     <!-- Còn hàng (> 5): số lượng bình thường -->
-                                    <span th:if="${pStock > 5}" class="fw-bold" style="font-size: 15px; color: #20382E;" th:text="${pStock} + ' ' + ${pUnit}">24 bó</span>
+                                    <span th:if="${pStock > 5}" class="fw-bold" style="font-size: 14px; color: #20382E;" th:text="${pStock} + ' ' + ${pUnit}">24 bó</span>
 
                                     <!-- Sắp hết (1..5): nhãn vàng -->
-                                    <span th:if="${pStock > 0 and pStock <= 5}" class="badge" style="background-color: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; font-size: 12.5px; font-weight: 700; padding: 4px 9px; border-radius: 8px;">
+                                    <span th:if="${pStock > 0 and pStock <= 5}" class="badge" style="background-color: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 8px;">
                                         <i class="bi bi-exclamation-circle me-1"></i><span th:text="${pStock} + ' ' + ${pUnit} + ' · Sắp hết'">3 bó · Sắp hết</span>
                                     </span>
 
                                     <!-- Hết hàng (<= 0): số 0 kèm nhãn đỏ -->
-                                    <span th:if="${pStock <= 0}" class="badge" style="background-color: #FEE2E2; color: #B91C1C; border: 1px solid #FCA5A5; font-size: 12.5px; font-weight: 700; padding: 4px 9px; border-radius: 8px;">
+                                    <span th:if="${pStock <= 0}" class="badge" style="background-color: #FEE2E2; color: #B91C1C; border: 1px solid #FCA5A5; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 8px;">
                                         <i class="bi bi-x-circle me-1"></i><span th:text="'0 ' + ${pUnit} + ' · Hết hàng'">0 bó · Hết hàng</span>
                                     </span>
 
-                                    <span class="d-block text-muted" style="font-size: 11.5px; font-weight: 500; margin-top: 2px;">
-                                        <i class="bi bi-building me-1"></i>Chi tiết kho <i class="bi bi-chevron-right" style="font-size: 9px;"></i>
+                                    <span class="d-block text-muted" style="font-size: 11px; font-weight: 500; margin-top: 1px;">
+                                        <i class="bi bi-building me-1"></i>Chi tiết kho <i class="bi bi-chevron-right" style="font-size: 8px;"></i>
                                     </span>
                                 </button>
                             </td>
 
                             <!-- 7. Trạng thái: Tách biệt hoàn toàn với tình trạng kho -->
-                            <td style="white-space: nowrap;">
+                            <td class="text-center" style="width: 125px; white-space: nowrap;">
                                 <!-- Nếu bị cấm / từ chối cấp phép -->
-                                <span th:if="${p.isActive != null and !p.isActive}" class="badge" style="background-color: #FEE2E2; color: #B91C1C; border: 1px solid #FCA5A5; height: 28px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;">
+                                <span th:if="${p.isActive != null and !p.isActive}" class="badge" 
+                                       style="background-color: #FEE2E2; color: #B91C1C; border: 1.5px solid #EF4444 !important; height: 26px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; border-radius: 9999px; font-weight: 700; font-size: 11.5px; white-space: nowrap; box-shadow: 0 1px 2px rgba(239, 68, 68, 0.15);">
                                     <i class="bi bi-slash-circle me-1"></i>BỊ CẤM
                                 </span>
                                 <!-- Nếu đang chờ duyệt -->
-                                <span th:if="${p.isActive == null}" class="badge" style="background-color: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; height: 28px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;">
+                                <span th:if="${p.isActive == null}" class="badge" 
+                                       style="background-color: #FEF3C7; color: #92400E; border: 1.5px solid #F59E0B !important; height: 26px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; border-radius: 9999px; font-weight: 700; font-size: 11.5px; white-space: nowrap; box-shadow: 0 1px 2px rgba(245, 158, 11, 0.15);">
                                     <i class="bi bi-clock me-1"></i>CHỜ DUYỆT
                                 </span>
                                 <!-- Nếu đã cấp phép và đang mở bán -->
-                                <span th:if="${p.isActive != null and p.isActive and (p.isSelling == null or p.isSelling)}" class="badge" style="background-color: #DCFCE7; color: #166534; border: 1px solid #86EFAC; height: 28px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;">
-                                    <i class="bi bi-check-circle-fill me-1"></i>ĐANG BÁN
+                                <span th:if="${p.isActive != null and p.isActive and (p.isSelling == null or p.isSelling)}" class="badge" 
+                                       style="background-color: #DCFCE7; color: #166534; border: 1.5px solid #22C55E !important; height: 26px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; border-radius: 9999px; font-weight: 700; font-size: 11.5px; white-space: nowrap; box-shadow: 0 1px 2px rgba(34, 197, 94, 0.15);">
+                                    <i class="bi bi-check-circle-fill me-1" style="color: #16A34A;"></i>ĐANG BÁN
                                 </span>
                                 <!-- Nếu đã cấp phép nhưng tạm ngừng bán -->
-                                <span th:if="${p.isActive != null and p.isActive and p.isSelling != null and !p.isSelling}" class="badge" style="background-color: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; height: 28px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; border-radius: 9999px; font-weight: 700; font-size: 12px; white-space: nowrap;">
+                                <span th:if="${p.isActive != null and p.isActive and p.isSelling != null and !p.isSelling}" class="badge" 
+                                       style="background-color: #F1F5F9; color: #475569; border: 1.5px solid #94A3B8 !important; height: 26px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; border-radius: 9999px; font-weight: 700; font-size: 11.5px; white-space: nowrap; box-shadow: 0 1px 2px rgba(148, 163, 184, 0.15);">
                                     <i class="bi bi-pause-circle me-1"></i>NGỪNG BÁN
                                 </span>
                             </td>
 
-                            <!-- 8. Thao tác: Cố định cột bên phải (sticky-col-right) với 3 nút [Chi tiết] [Sửa] [⋯] -->
-                            <td class="text-end pe-4 sticky-col-right" style="white-space: nowrap;">
+                            <!-- 8. Thao tác: Gọn gàng không bị che khuất -->
+                            <td class="text-end pe-3" style="white-space: nowrap;">
                                 <div class="d-inline-flex align-items-center gap-1">
                                     <!-- Nút Chi tiết (mở modal) -->
                                     <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-1 shadow-sm"
                                             data-bs-toggle="modal" th:data-bs-target="'#productDetailModal' + ${p.id}"
-                                            style="height: 32px; padding: 0 10px; font-size: 13px; font-weight: 600; border-radius: 8px; border: 1px solid #D1E5DA; background-color: #FFFFFF; color: #20382E; white-space: nowrap;">
+                                            style="height: 30px; padding: 0 8px; font-size: 12.5px; font-weight: 600; border-radius: 7px; border: 1px solid #D1E5DA; background-color: #FFFFFF; color: #20382E; white-space: nowrap;">
                                         <i class="bi bi-eye"></i> Chi tiết
                                     </button>
 
@@ -426,15 +436,15 @@
                                        th:data-id="${p.id}"
                                        onclick="sessionStorage.setItem('admin_product_scroll_pos', window.scrollY); sessionStorage.setItem('admin_product_target_id', this.getAttribute('data-id'));"
                                        class="btn btn-sm btn-outline-forest d-inline-flex align-items-center gap-1 shadow-sm"
-                                       style="height: 32px; padding: 0 10px; font-size: 13px; font-weight: 600; border-radius: 8px; border: 1px solid #D1E5DA; background-color: #F4F7F5; color: #20382E; white-space: nowrap;">
+                                       style="height: 30px; padding: 0 8px; font-size: 12.5px; font-weight: 600; border-radius: 7px; border: 1px solid #D1E5DA; background-color: #F4F7F5; color: #20382E; white-space: nowrap;">
                                         <i class="bi bi-pencil-square"></i> Sửa
                                     </a>
 
                                     <!-- Menu phụ [⋯] chứa Ngừng bán/Mở bán lại và Xóa sản phẩm -->
                                     <div class="dropdown d-inline-block">
                                         <button class="btn btn-sm btn-light border dropdown-toggle no-caret d-inline-flex align-items-center justify-content-center shadow-sm" 
-                                                type="button" data-bs-toggle="dropdown" aria-expanded="false" 
-                                                style="height: 32px; width: 32px; padding: 0; border-radius: 8px; border-color: #D1E5DA !important; background: #FFFFFF;">
+                                                type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport" aria-expanded="false" 
+                                                style="height: 30px; width: 30px; padding: 0; border-radius: 7px; border-color: #D1E5DA !important; background: #FFFFFF;">
                                             <i class="bi bi-three-dots"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="border: 1px solid #E2E7E2 !important; border-radius: 10px; min-width: 175px;">
@@ -821,6 +831,29 @@
         if (savedScroll !== null) {
             window.scrollTo({ top: parseInt(savedScroll, 10), behavior: 'instant' });
         }
+
+        // Xử lý z-index động cho ô sticky khi mở/đóng dropdown menu (tương thích mọi trình duyệt)
+        document.addEventListener('show.bs.dropdown', function (event) {
+            var stickyTd = event.target.closest('.sticky-col-right');
+            if (stickyTd) {
+                stickyTd.style.setProperty('z-index', '1050', 'important');
+            }
+            var tr = event.target.closest('tr');
+            if (tr) {
+                tr.style.setProperty('z-index', '1050', 'important');
+            }
+        });
+
+        document.addEventListener('hidden.bs.dropdown', function (event) {
+            var stickyTd = event.target.closest('.sticky-col-right');
+            if (stickyTd) {
+                stickyTd.style.removeProperty('z-index');
+            }
+            var tr = event.target.closest('tr');
+            if (tr) {
+                tr.style.removeProperty('z-index');
+            }
+        });
     });
 
     function openDeleteProductModal(productId, productName) {

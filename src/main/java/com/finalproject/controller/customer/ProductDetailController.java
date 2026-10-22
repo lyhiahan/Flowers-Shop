@@ -8,11 +8,13 @@ import com.finalproject.repository.UserRepository;
 import com.finalproject.service.CartService;
 import com.finalproject.service.ProductService;
 import com.finalproject.service.ReviewService;
+import com.finalproject.service.CloudinaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 
@@ -24,12 +26,15 @@ public class ProductDetailController {
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
     private final ReviewService reviewService;
+    private final CloudinaryService cloudinaryService;
     private final UserRepository userRepository;
     private final CartService cartService;
     private final com.finalproject.repository.StoreInventoryRepository inventories;
 
     @GetMapping({"/product/{id}", "/products/{id}"})
-    public String viewProductDetail(@PathVariable("id") Long id, Principal principal, Model model) {
+    public String viewProductDetail(@PathVariable("id") Long id,
+                                    @RequestParam(value = "reviewOrderId", required = false) Long reviewOrderId,
+                                    Principal principal, Model model) {
         Product product = productService.getProductById(id);
 
         if (!com.finalproject.service.ProductAvailability.isPublic(product)) throw new com.finalproject.exception.ResourceNotFoundException("Sản phẩm không còn được bán.");
@@ -48,8 +53,9 @@ public class ProductDetailController {
             User u = userRepository.findByUsername(principal.getName()).orElse(null);
             if (u != null) {
                 isLiked = productService.isWishlisted(u.getId(), id);
-                canReview = reviewService.canReview(u.getId(), id);
-                eligibleOrderId = reviewService.getEligibleOrderId(u.getId(), id);
+                eligibleOrderId = reviewOrderId == null ? reviewService.getEligibleOrderId(u.getId(), id)
+                        : (reviewService.canReviewOrder(u.getId(), id, reviewOrderId) ? reviewOrderId : null);
+                canReview = eligibleOrderId != null;
                 try {
                     model.addAttribute("cartItemCount", cartService.getCartItemCount(principal.getName()));
                 } catch (Exception ignored) {}
@@ -90,10 +96,10 @@ public class ProductDetailController {
 
     @PostMapping({"/product/{id}/review", "/products/{id}/review"})
     public String submitReview(@PathVariable("id") Long id,
-                               @RequestParam("rating") int rating,
-                               @RequestParam("content") String content,
+                               @RequestParam(value = "rating", defaultValue = "0") int rating,
+                               @RequestParam(value = "content", defaultValue = "") String content,
                                @RequestParam(value = "orderId", required = false) Long orderId,
-                               @RequestParam(value = "imageUrl", required = false) String imageUrl,
+                               @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
                                Principal principal,
                                RedirectAttributes ra) {
         if (principal == null) {
@@ -102,31 +108,37 @@ public class ProductDetailController {
 
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
 
-        // Kiểm tra quyền đánh giá: chỉ khách hàng đã đặt hàng và nhận được hàng rồi mới được đánh giá
-        if (!reviewService.canReview(user.getId(), id)) {
-            ra.addFlashAttribute("errorMessage", "Chức năng đánh giá sản phẩm chỉ được thực hiện khi và chỉ khi khách hàng đã đặt hàng và nhận được hàng thành công!");
-            return "redirect:/product/" + id + "#review-section";
+        String error = null;
+        boolean eligibleOrder = orderId != null && reviewService.canReviewOrder(user.getId(), id, orderId);
+        if (!eligibleOrder) {
+            error = "Bạn chỉ có thể đánh giá mẫu hoa trong đơn đã nhận và chưa đánh giá.";
+        } else if (rating < 1 || rating > 5) {
+            error = "Vui lòng chọn từ 1 đến 5 sao.";
+        } else if (content.trim().length() < 50 || content.trim().length() > 1000) {
+            error = "Nội dung đánh giá cần từ 50 đến 1.000 ký tự (hiện có " + content.trim().length() + ").";
+        }
+        if (error != null) {
+            ra.addFlashAttribute("reviewError", error);
+            ra.addFlashAttribute("reviewContent", content);
+            ra.addFlashAttribute("reviewRating", rating);
+            return "redirect:/product/" + id + "?reviewOrderId=" + (orderId == null ? "" : orderId)
+                    + (eligibleOrder ? "#review-form" : "#review-section");
         }
 
-        // Kiểm tra độ dài bình luận tối thiểu 50 ký tự theo yêu cầu đề cương
-        if (content == null || content.trim().length() < 50) {
-            ra.addFlashAttribute("errorMessage", "Bình luận đánh giá sản phẩm bắt buộc phải có tối thiểu 50 ký tự! (Hiện tại: " + (content != null ? content.trim().length() : 0) + " ký tự)");
-            if (orderId != null) {
-                return "redirect:/customer/orders/detail/" + orderId;
-            }
-            return "redirect:/product/" + id + "#review-section";
-        }
-
+        CloudinaryService.UploadResult uploaded = null;
         try {
-            reviewService.addReview(user.getId(), id, orderId, rating, content, imageUrl);
-            ra.addFlashAttribute("successMessage", "Đánh giá, phản hồi thành công! Cảm ơn bạn đã đóng góp ý kiến.");
+            if (imageFile != null && !imageFile.isEmpty()) uploaded = cloudinaryService.upload(imageFile, "reviews");
+            reviewService.addReview(user.getId(), id, orderId, rating, content,
+                    uploaded == null ? null : uploaded.secureUrl());
+            ra.addFlashAttribute("reviewSuccess", "Đánh giá của bạn đã được đăng. Cảm ơn bạn!");
+            return "redirect:/product/" + id + "#review-list";
         } catch (Exception ex) {
-            ra.addFlashAttribute("errorMessage", ex.getMessage());
+            if (uploaded != null) cloudinaryService.delete(uploaded.publicId());
+            ra.addFlashAttribute("reviewError", ex instanceof IllegalArgumentException || ex instanceof IllegalStateException
+                    ? ex.getMessage() : "Chưa thể lưu đánh giá. Vui lòng thử lại.");
+            ra.addFlashAttribute("reviewContent", content);
+            ra.addFlashAttribute("reviewRating", rating);
+            return "redirect:/product/" + id + "?reviewOrderId=" + orderId + "#review-form";
         }
-
-        if (orderId != null) {
-            return "redirect:/customer/orders/detail/" + orderId;
-        }
-        return "redirect:/product/" + id + "#review-section";
     }
 }

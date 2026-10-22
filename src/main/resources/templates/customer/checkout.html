@@ -417,12 +417,13 @@
             </a>
         </div>
 
-        <form th:action="@{/checkout}" method="post" id="checkoutForm" th:data-quote-url="@{/checkout/quote}">
+        <form th:action="@{/checkout}" method="post" id="checkoutForm" th:data-quote-url="@{/checkout/quote}" novalidate>
             <!-- CSRF Token -->
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
             <!-- Chuyển các ID sản phẩm được chọn -->
             <input th:each="item : ${checkoutItems}" type="hidden" name="selectedItemIds" th:value="${item.id}">
+            <div id="checkoutValidationError" class="alert alert-danger d-none mt-3" role="alert" aria-live="assertive"></div>
 
             <!-- BỐ CỤC: CỘT TRÁI ~65% (col-lg-8) - CỘT PHẢI ~35% (col-lg-4) -->
             <div class="row g-4">
@@ -542,19 +543,15 @@
                                     </div>
                                 </div>
 
-                                <!-- A4: Đơn vị giao hàng -->
-                                <div class="mb-3" id="deliveryUnitSection" th:if="${deliveries != null and !#lists.isEmpty(deliveries)}">
-                                    <label class="form-label-custom"><i class="bi bi-box-seam me-1"></i>Đơn vị vận chuyển (*)</label>
-                                    <select name="deliveryUnitId" id="deliveryUnitSelect" class="form-select-custom w-100"
-                                            onchange="updateCheckoutTotal()">
-                                        <option th:each="d : ${deliveries}"
-                                                th:value="${d.id}"
-                                                th:text="${d.name + (d.phone != null and !d.phone.isBlank() ? ' (Hotline: ' + d.phone + ')' : '')}">
-                                        </option>
-                                    </select>
+                                <!-- Đơn vị giao do hệ thống chọn cùng lúc với báo giá -->
+                                <div class="mb-3" id="deliveryUnitSection">
+                                    <label class="form-label-custom"><i class="bi bi-box-seam me-1"></i>Đơn vị vận chuyển</label>
+                                    <div class="form-control-custom w-100" id="assignedDeliveryName" aria-live="polite">
+                                        Hệ thống sẽ tự chọn sau khi bạn chọn vùng giao hàng.
+                                    </div>
                                     <div class="mt-2 text-muted" style="font-size: 13px; line-height: 1.4;">
                                         <i class="bi bi-info-circle text-success me-1"></i>
-                                        <span>Cước phí lấy từ <strong>biểu phí giao hàng</strong> theo chi nhánh, đơn vị và vùng demo đã chọn; có thể cộng phụ phí hàng lớn.</span>
+                                        <span>Hệ thống chọn đơn vị có biểu phí phù hợp theo chi nhánh và vùng demo; có thể cộng phụ phí hàng lớn.</span>
                                     </div>
                                 </div>
 
@@ -565,24 +562,25 @@
                                             <label class="form-label-custom">Ngày giao hoa (*)</label>
                                             <input type="date" name="deliveryDate" id="deliveryDateInput"
                                                    class="form-control-custom w-100"
-                                                   th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
+                                                   th:value="${prevDeliveryDate != null ? prevDeliveryDate : #temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label-custom">Khung giờ giao</label>
                                             <select required name="deliveryTimeSlot" class="form-select-custom w-100">
                                                 <option value="">-- Chọn khung giờ --</option>
-                                                <option value="07:00-09:00">07:00 – 09:00</option>
-                                                <option value="09:00-11:00">09:00 – 11:00</option>
-                                                <option value="11:00-13:00">11:00 – 13:00</option>
-                                                <option value="13:00-15:00">13:00 – 15:00</option>
-                                                <option value="15:00-17:00">15:00 – 17:00</option>
-                                                <option value="17:00-20:00">17:00 – 20:00</option>
+                                                <option value="07:00-09:00" th:selected="${prevDeliveryTimeSlot == '07:00-09:00'}">07:00 – 09:00</option>
+                                                <option value="09:00-11:00" th:selected="${prevDeliveryTimeSlot == '09:00-11:00'}">09:00 – 11:00</option>
+                                                <option value="11:00-13:00" th:selected="${prevDeliveryTimeSlot == '11:00-13:00'}">11:00 – 13:00</option>
+                                                <option value="13:00-15:00" th:selected="${prevDeliveryTimeSlot == '13:00-15:00'}">13:00 – 15:00</option>
+                                                <option value="15:00-17:00" th:selected="${prevDeliveryTimeSlot == '15:00-17:00'}">15:00 – 17:00</option>
+                                                <option value="17:00-20:00" th:selected="${prevDeliveryTimeSlot == '17:00-20:00'}">17:00 – 20:00</option>
                                             </select>
                                         </div>
                                         <div class="col-12">
                                             <label class="form-label-custom">Lời nhắn thiệp / banner (tùy chọn)</label>
                                             <textarea name="greetingMessage" class="form-control-custom w-100" rows="2"
-                                                      placeholder="VD: Chúc mừng sinh nhật mẹ yêu, chúc mẹ luôn vui vẻ và hạnh phúc!"></textarea>
+                                                      placeholder="VD: Chúc mừng sinh nhật mẹ yêu, chúc mẹ luôn vui vẻ và hạnh phúc!"
+                                                      th:text="${prevGreetingMessage}"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -605,6 +603,7 @@
                                         <option th:each="s : ${stores}"
                                                 th:value="${s.id}"
                                                 th:data-address="${s.address}"
+                                                th:selected="${prevPickupStoreId == s.id}"
                                                 th:text="${s.name}">
                                         </option>
                                     </select>
@@ -648,24 +647,25 @@
                                             <label class="form-label-custom">Ngày đến lấy (*)</label>
                                             <input type="date" name="deliveryDate" id="pickupDateInput"
                                                    class="form-control-custom w-100"
-                                                   th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
+                                                   th:value="${prevDeliveryDate != null ? prevDeliveryDate : #temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label-custom">Khung giờ đến lấy</label>
                                             <select required name="deliveryTimeSlot" class="form-select-custom w-100">
                                                 <option value="">-- Chọn khung giờ --</option>
-                                                <option value="07:00-09:00">07:00 – 09:00</option>
-                                                <option value="09:00-11:00">09:00 – 11:00</option>
-                                                <option value="11:00-13:00">11:00 – 13:00</option>
-                                                <option value="13:00-15:00">13:00 – 15:00</option>
-                                                <option value="15:00-17:00">15:00 – 17:00</option>
-                                                <option value="17:00-20:00">17:00 – 20:00</option>
+                                                <option value="07:00-09:00" th:selected="${prevDeliveryTimeSlot == '07:00-09:00'}">07:00 – 09:00</option>
+                                                <option value="09:00-11:00" th:selected="${prevDeliveryTimeSlot == '09:00-11:00'}">09:00 – 11:00</option>
+                                                <option value="11:00-13:00" th:selected="${prevDeliveryTimeSlot == '11:00-13:00'}">11:00 – 13:00</option>
+                                                <option value="13:00-15:00" th:selected="${prevDeliveryTimeSlot == '13:00-15:00'}">13:00 – 15:00</option>
+                                                <option value="15:00-17:00" th:selected="${prevDeliveryTimeSlot == '15:00-17:00'}">15:00 – 17:00</option>
+                                                <option value="17:00-20:00" th:selected="${prevDeliveryTimeSlot == '17:00-20:00'}">17:00 – 20:00</option>
                                             </select>
                                         </div>
                                         <div class="col-12">
                                             <label class="form-label-custom">Lời nhắn thiệp / banner (tùy chọn)</label>
                                             <textarea name="greetingMessage" class="form-control-custom w-100" rows="2"
-                                                      placeholder="VD: Chúc mừng sinh nhật mẹ yêu!"></textarea>
+                                                      placeholder="VD: Chúc mừng sinh nhật mẹ yêu!"
+                                                      th:text="${prevGreetingMessage}"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -1052,6 +1052,7 @@
         function lockPickupSubmit(lock) {
             const btn = document.getElementById('btnPlaceOrder');
             if (!btn) return;
+            btn.dataset.pickupStockBlocked = lock ? 'true' : 'false';
             btn.disabled = lock;
             if (lock) {
                 btn.title = 'Chi nhánh không đủ hàng. Vui lòng chọn chi nhánh khác.';
@@ -1095,14 +1096,10 @@
                 params.append('recipientAddress', addrEl.value.trim());
             }
 
-            /* Đơn vị giao hàng (chỉ khi giao tận nơi) */
+            /* Vùng giao demo; đơn vị giao được server tự chọn theo biểu phí */
             if (!isPickup) {
                 const zoneSelect = document.getElementById('deliveryZoneSelect');
                 if (zoneSelect && zoneSelect.value) params.append('deliveryZone', zoneSelect.value);
-                const unitSelect = document.getElementById('deliveryUnitSelect');
-                if (unitSelect && unitSelect.value) {
-                    params.append('deliveryUnitId', unitSelect.value);
-                }
             }
 
             /* Chi nhánh tự lấy */
@@ -1144,9 +1141,15 @@
                     if (statusEl) {
                         statusEl.textContent = res.data.message || 'Không thể tính tổng tiền.';
                     }
+                    const assignedDeliveryName = document.getElementById('assignedDeliveryName');
+                    if (assignedDeliveryName && !isPickup) assignedDeliveryName.textContent = 'Chưa chọn được đơn vị vận chuyển phù hợp.';
                     return;
                 }
                 const d = res.data;
+                const assignedDeliveryName = document.getElementById('assignedDeliveryName');
+                if (assignedDeliveryName && !isPickup) {
+                    assignedDeliveryName.textContent = d.deliveryUnitName || 'Chưa cấu hình đơn vị vận chuyển cho vùng này.';
+                }
 
                 /* Phí giao hàng */
                 const shippingFeeEl = document.getElementById('displayShippingFee');
@@ -1189,26 +1192,17 @@
             const grandTotalEl  = document.getElementById('displayGrandTotal');
             const base = parseFloat((grandTotalEl && grandTotalEl.dataset.baseTotal) || '0');
             let shippingFee = 0;
-            if (!isPickup) {
-                const unitSelect = document.getElementById('deliveryUnitSelect');
-                if (unitSelect && unitSelect.selectedIndex >= 0) {
-                    shippingFee = parseFloat(unitSelect.options[unitSelect.selectedIndex].getAttribute('data-price') || '0') || 0;
-                }
-            }
             if (shippingFeeEl) {
                 if (isPickup) {
                     shippingFeeEl.textContent = '0 ₫';
                     shippingFeeEl.classList.remove('text-primary');
-                } else if (shippingFee > 0) {
-                    shippingFeeEl.textContent = formatVnd(shippingFee);
-                    shippingFeeEl.classList.add('text-primary');
                 } else {
-                    shippingFeeEl.textContent = 'Miễn phí';
+                    shippingFeeEl.textContent = 'Chưa xác định';
                     shippingFeeEl.classList.remove('text-primary');
                 }
             }
             if (grandTotalEl) {
-                grandTotalEl.textContent = formatVnd(base + (isPickup ? 0 : shippingFee));
+                grandTotalEl.textContent = isPickup ? formatVnd(base) : formatVnd(base) + ' + phí giao';
             }
         }
 
@@ -1256,35 +1250,56 @@
         if (checkoutForm) {
             checkoutForm.addEventListener('submit', function (e) {
                 const isPickup = document.getElementById('methodPickup') && document.getElementById('methodPickup').checked;
-                const phoneInput = isPickup ? document.getElementById('pickupPersonPhone') : document.getElementById('recipientPhoneInput');
-                if (phoneInput) {
-                    let phoneVal = phoneInput.value.trim().replace(/[\s.\-\(\)]/g, '');
-                    if (phoneVal.startsWith('+84')) {
-                        phoneVal = '0' + phoneVal.substring(3);
-                    } else if (phoneVal.startsWith('84') && phoneVal.length >= 11) {
-                        phoneVal = '0' + phoneVal.substring(2);
+                const nameInput = document.getElementById(isPickup ? 'pickupPersonName' : 'recipientNameInput');
+                const phoneInput = document.getElementById(isPickup ? 'pickupPersonPhone' : 'recipientPhoneInput');
+                const addressInput = document.getElementById('recipientAddressInput');
+                const zoneInput = document.getElementById('deliveryZoneSelect');
+                const pickupStoreInput = document.getElementById('pickupStoreSelect');
+                const dateInput = document.getElementById(isPickup ? 'pickupDateInput' : 'deliveryDateInput');
+                const slotInput = document.getElementById(isPickup ? 'sectionPickup' : 'sectionDelivery')
+                    ?.querySelector('select[name="deliveryTimeSlot"]');
+
+                function reject(message, field) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const error = document.getElementById('checkoutValidationError');
+                    if (error) {
+                        error.textContent = message;
+                        error.classList.remove('d-none');
+                        error.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }
-                    const phoneRegex = /^0[235789][0-9]{8,9}$/;
-                    if (!phoneRegex.test(phoneVal)) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (typeof window.showGlobalAlertModal === 'function') {
-                            window.showGlobalAlertModal({
-                                title: 'Thông Báo Cảnh Báo',
-                                message: 'Số điện thoại người nhận không hợp lệ (vui lòng nhập 10 chữ số, ví dụ: 0901234567).',
-                                isError: true,
-                                btnText: 'Đã hiểu & Tiếp tục',
-                                onClose: function () {
-                                    phoneInput.focus();
-                                }
-                            });
-                        } else {
-                            alert('Số điện thoại người nhận không hợp lệ (vui lòng nhập 10 chữ số, ví dụ: 0901234567).');
-                            phoneInput.focus();
-                        }
-                        return false;
+                    if (field) field.setAttribute('aria-invalid', 'true');
+                    if (typeof window.showGlobalAlertModal === 'function') {
+                        window.showGlobalAlertModal({
+                            title: 'Thông tin đặt hàng chưa hợp lệ', message: message,
+                            isError: true, btnText: 'Kiểm tra lại',
+                            onClose: function () { if (field) field.focus(); }
+                        });
+                    } else if (field) {
+                        field.focus();
                     }
+                    return false;
                 }
+
+                checkoutForm.querySelectorAll('[aria-invalid="true"]').forEach(el => el.removeAttribute('aria-invalid'));
+                const error = document.getElementById('checkoutValidationError');
+                if (error) error.classList.add('d-none');
+                if (!nameInput?.value.trim()) return reject('Vui lòng nhập họ tên người nhận.', nameInput);
+                if (!phoneInput?.value.trim()) return reject('Vui lòng nhập số điện thoại người nhận.', phoneInput);
+                if (isPickup && !pickupStoreInput?.value) return reject('Vui lòng chọn chi nhánh nhận hoa.', pickupStoreInput);
+                if (!isPickup && !addressInput?.value.trim()) return reject('Vui lòng nhập địa chỉ giao hàng.', addressInput);
+                if (!isPickup && !zoneInput?.value) return reject('Vui lòng chọn vùng giao hàng demo.', zoneInput);
+                if (!isPickup && zoneInput.value === 'OUTSIDE') return reject('Vùng này nằm ngoài phạm vi giao hoa demo. Vui lòng nhận tại cửa hàng hoặc liên hệ chi nhánh.', zoneInput);
+                if (!dateInput?.value) return reject('Vui lòng chọn ngày nhận hoa.', dateInput);
+                if (!slotInput?.value) return reject('Vui lòng chọn khung giờ nhận hoa.', slotInput);
+                const selectedTime = new Date(dateInput.value + 'T' + slotInput.value.slice(0, 5) + ':00');
+                if (Number.isNaN(selectedTime.getTime()) || selectedTime < new Date())
+                    return reject('Ngày hoặc khung giờ nhận hoa đã qua. Vui lòng chọn thời gian khác.', dateInput);
+                let phoneVal = phoneInput.value.trim().replace(/[\s.\-\(\)]/g, '');
+                if (phoneVal.startsWith('+84')) phoneVal = '0' + phoneVal.substring(3);
+                else if (phoneVal.startsWith('84') && phoneVal.length >= 11) phoneVal = '0' + phoneVal.substring(2);
+                if (!/^0(?:[35789][0-9]{8}|2[0-9]{9})$/.test(phoneVal))
+                    return reject('Số điện thoại người nhận không hợp lệ (ví dụ: 0901234567).', phoneInput);
             });
         }
 

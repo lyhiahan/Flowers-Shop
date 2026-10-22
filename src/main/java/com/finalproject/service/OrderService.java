@@ -43,6 +43,7 @@ public interface OrderService {
     void updateOrderStatus(Long orderId, com.finalproject.enums.OrderStatus status);
     void updateOrderStatus(Long orderId, com.finalproject.enums.OrderStatus status, String cancellationReason);
     Order cancelOrder(String username, Long orderId);
+    Order cancelOrder(String username, Long orderId, String customerReason);
     void requestRefund(String username, Long orderId);
     void scanAndMarkOverdueOrders(); // Cho Scheduler quét định kỳ
 }

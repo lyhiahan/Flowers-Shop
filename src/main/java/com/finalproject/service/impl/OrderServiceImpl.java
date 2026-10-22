@@ -249,7 +249,7 @@ public class OrderServiceImpl implements OrderService {
         }
         BigDecimal finalAmount = amounts.total();
         order.setShippingFee(amounts.shippingFee());
-        order.setDeliveryUnitId(isPickup ? null : deliveryUnitId);
+        order.setDeliveryUnitId(isPickup ? null : amounts.deliveryUnitId());
         order.setTotalAmount(finalAmount);
         order.setTotalDeposit(BigDecimal.ZERO);
         order.setPaymentMethod(paymentMethod != null ? paymentMethod.name() : "COD");
@@ -416,65 +416,71 @@ public class OrderServiceImpl implements OrderService {
                                                                    String shippingMethod, Long deliveryUnitId,
                                                                    String deliveryZone, List<CartItem> items) {
         BigDecimal shippingFee = BigDecimal.ZERO;
-        if ("DELIVERY".equals(shippingMethod) && deliveryUnitId != null) {
-            Delivery delivery = deliveryRepository.findById(deliveryUnitId)
-                    .orElseThrow(() -> new IllegalArgumentException("Đơn vị giao hàng không tồn tại."));
-            if (!Boolean.TRUE.equals(delivery.getIsActive()) || Boolean.TRUE.equals(delivery.getIsDeleted())) {
-                throw new IllegalArgumentException("Đơn vị giao hàng hiện không khả dụng.");
-            }
-
-            // 1. Kiểm tra độ phủ biểu phí của chi nhánh thực hiện đơn
-            long totalTariffsInDb = shippingTariffRepository.count();
-            List<ShippingTariff> storeTariffs = (store != null)
-                    ? shippingTariffRepository.searchTariffs(store.getId(), null)
-                    : Collections.emptyList();
-
-            // Nếu hệ thống đã có biểu phí nhưng chi nhánh được chọn chưa được cấu hình
-            if (totalTariffsInDb > 0 && storeTariffs.isEmpty()) {
-                String branchName = (store != null && store.getName() != null) ? store.getName() : "Chi nhánh";
-                throw new IllegalArgumentException("Chi nhánh [" + branchName + "] hiện chưa có cấu hình biểu phí giao hàng. Quý khách vui lòng chọn hình thức 'Đến lấy tại cửa hàng' hoặc liên hệ hotline để được hỗ trợ.");
-            }
-
-            // Demo: the customer explicitly chooses a delivery zone. No map distance is inferred from free text.
+        Delivery delivery = null;
+        if ("DELIVERY".equals(shippingMethod)) {
+            // Demo zone is chosen by the customer; the carrier is chosen by the server.
             if (!"NEAR".equals(deliveryZone) && !"FAR".equals(deliveryZone)
                     && !"OUTSIDE".equals(deliveryZone))
                 throw new IllegalArgumentException("Vui lòng chọn vùng giao hàng demo hợp lệ.");
             if ("OUTSIDE".equals(deliveryZone))
                 throw new IllegalArgumentException("Vùng ngoài phạm vi giao hoa demo. Vui lòng nhận tại cửa hàng hoặc liên hệ chi nhánh.");
             boolean isNearZone = "NEAR".equals(deliveryZone);
-
-            // 3. Tra cứu biểu phí phù hợp từ ShippingTariff (không lấy trực tiếp từ delivery.price)
+            boolean hasBulkyItem = items != null && items.stream().anyMatch(item -> isBulkyProduct(item.getProduct()));
+            List<ShippingTariff> activeTariffs = shippingTariffRepository.searchTariffs(store.getId(), null).stream()
+                    .filter(t -> Boolean.TRUE.equals(t.getIsActive()))
+                    .filter(t -> t.getDelivery() != null && Boolean.TRUE.equals(t.getDelivery().getIsActive())
+                            && !Boolean.TRUE.equals(t.getDelivery().getIsDeleted()))
+                    .filter(t -> isNearZone ? (t.getDestinationArea() != null && t.getDestinationArea().contains("< 5km"))
+                                            : (t.getDestinationArea() != null && (t.getDestinationArea().contains("5 - 15km") || t.getDestinationArea().contains("xa hơn"))))
+                    .toList();
+            // An inactive tariff is still configured; never fall back to a carrier's
+            // generic price just because its zone tariff was disabled.
+            boolean hasConfiguredTariffs = !shippingTariffRepository.findByIsDeletedFalseOrderByIdAsc().isEmpty();
             ShippingTariff matchedTariff = null;
-            if (!storeTariffs.isEmpty()) {
-                List<ShippingTariff> activeTariffs = storeTariffs.stream()
-                        .filter(t -> Boolean.TRUE.equals(t.getIsActive()))
-                        .sorted(java.util.Comparator.comparingInt((ShippingTariff t) -> t.getStore() == null ? 1 : 0)
-                                .thenComparing(ShippingTariff::getId))
-                        .toList();
-
-                // Ưu tiên 1: Trùng chi nhánh + trùng đơn vị vận chuyển + trùng cự ly (< 5km hoặc 5-15km)
+            if (deliveryUnitId == null && hasConfiguredTariffs) {
+                // Prefer a standard service, then the lowest applicable fee (including bulky surcharge).
                 matchedTariff = activeTariffs.stream()
-                        .filter(t -> t.getDelivery() != null && t.getDelivery().getId().equals(deliveryUnitId))
-                        .filter(t -> isNearZone ? (t.getDestinationArea() != null && t.getDestinationArea().contains("< 5km"))
-                                                : (t.getDestinationArea() != null && (t.getDestinationArea().contains("5 - 15km") || t.getDestinationArea().contains("xa hơn"))))
-                        .findFirst()
-                        .orElse(null);
+                        .min(Comparator.comparingInt((ShippingTariff t) -> t.getServiceName() != null
+                                        && t.getServiceName().toLowerCase(java.util.Locale.ROOT).contains("tiêu chuẩn") ? 0 : 1)
+                                .thenComparing(t -> tariffFee(t, hasBulkyItem))
+                                .thenComparingInt(t -> t.getStore() == null ? 1 : 0)
+                                .thenComparing(ShippingTariff::getId))
+                        .orElseThrow(() -> new IllegalArgumentException(
+                                "Chưa có đơn vị giao hàng phù hợp với chi nhánh và vùng đã chọn. Vui lòng nhận tại cửa hàng hoặc liên hệ chi nhánh."));
+                deliveryUnitId = matchedTariff.getDelivery().getId();
             }
-
-            if (matchedTariff != null) {
-                shippingFee = matchedTariff.getBaseFee() != null ? matchedTariff.getBaseFee() : BigDecimal.ZERO;
-                // Kiểm tra điều kiện phụ phí hàng lớn (Kệ hoa 1-2 tầng, Chậu lan lớn, Cổng hoa)
-                boolean hasBulkyItem = items != null && items.stream().anyMatch(item -> isBulkyProduct(item.getProduct()));
-                if (hasBulkyItem && matchedTariff.getBulkySurcharge() != null && matchedTariff.getBulkySurcharge().signum() > 0) {
-                    shippingFee = shippingFee.add(matchedTariff.getBulkySurcharge());
-                }
+            if (deliveryUnitId == null) {
+                delivery = deliveryRepository.findAll().stream()
+                        .filter(d -> Boolean.TRUE.equals(d.getIsActive()) && !Boolean.TRUE.equals(d.getIsDeleted()))
+                        .min(Comparator.comparing((Delivery d) -> d.getPrice() == null ? BigDecimal.ZERO : d.getPrice())
+                                .thenComparing(Delivery::getId))
+                        .orElse(null);
+                if (delivery != null) deliveryUnitId = delivery.getId();
             } else {
-                if (totalTariffsInDb > 0) {
-                    throw new IllegalArgumentException("Không có biểu phí đang hoạt động phù hợp với đơn vị vận chuyển và khu vực nhận hàng. Vui lòng chọn đơn vị khác hoặc nhận tại cửa hàng.");
+                delivery = deliveryRepository.findById(deliveryUnitId)
+                        .orElseThrow(() -> new IllegalArgumentException("Đơn vị giao hàng không tồn tại."));
+                if (!Boolean.TRUE.equals(delivery.getIsActive()) || Boolean.TRUE.equals(delivery.getIsDeleted()))
+                    throw new IllegalArgumentException("Đơn vị giao hàng hiện không khả dụng.");
+            }
+            if (delivery != null) {
+                if (matchedTariff == null) {
+                    Long selectedId = deliveryUnitId;
+                    matchedTariff = activeTariffs.stream()
+                            .filter(t -> t.getDelivery().getId().equals(selectedId))
+                            .sorted(Comparator.comparingInt((ShippingTariff t) -> t.getStore() == null ? 1 : 0)
+                                    .thenComparing(ShippingTariff::getId))
+                            .findFirst().orElse(null);
                 }
-                // Backward compatibility only for installations without any tariff configuration.
-                shippingFee = (delivery.getPrice() != null && delivery.getPrice().signum() >= 0)
-                        ? delivery.getPrice() : BigDecimal.ZERO;
+                if (matchedTariff != null) {
+                    shippingFee = tariffFee(matchedTariff, hasBulkyItem);
+                } else if (hasConfiguredTariffs) {
+                    throw new IllegalArgumentException("Không có biểu phí giao hàng phù hợp với chi nhánh và vùng đã chọn.");
+                } else {
+                    shippingFee = delivery.getPrice() != null && delivery.getPrice().signum() >= 0
+                            ? delivery.getPrice() : BigDecimal.ZERO;
+                }
+            } else if (hasConfiguredTariffs) {
+                throw new IllegalArgumentException("Chưa có đơn vị giao hàng khả dụng cho vùng đã chọn.");
             }
         }
         BigDecimal discount = BigDecimal.ZERO;
@@ -487,7 +493,15 @@ public class OrderServiceImpl implements OrderService {
             discount = voucherService.calculateDiscount(voucher, subtotal, shippingFee, importTotal);
         }
         BigDecimal total = subtotal.add(shippingFee).subtract(discount).max(BigDecimal.ZERO);
-        return new com.finalproject.service.CheckoutQuote(subtotal, shippingFee, discount, total, store.getId());
+        return new com.finalproject.service.CheckoutQuote(subtotal, shippingFee, discount, total, store.getId(),
+                delivery != null ? delivery.getId() : null, delivery != null ? delivery.getName() : null);
+    }
+
+    private BigDecimal tariffFee(ShippingTariff tariff, boolean hasBulkyItem) {
+        BigDecimal fee = tariff.getBaseFee() != null ? tariff.getBaseFee() : BigDecimal.ZERO;
+        if (hasBulkyItem && tariff.getBulkySurcharge() != null && tariff.getBulkySurcharge().signum() > 0)
+            fee = fee.add(tariff.getBulkySurcharge());
+        return fee;
     }
 
     private Store findDeliveryStore(String address, List<CartItem> items) {
@@ -654,6 +668,11 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public Order cancelOrder(String username, Long orderId) {
         return workflow.cancelByCustomer(username, orderId);
+    }
+
+    @Override
+    public Order cancelOrder(String username, Long orderId, String customerReason) {
+        return workflow.cancelByCustomer(username, orderId, customerReason);
     }
 
     @Override

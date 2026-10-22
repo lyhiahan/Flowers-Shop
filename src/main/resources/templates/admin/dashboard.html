@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/admin-layout :: assets('Dashboard Quản Trị Hệ Thống - Hoa Tươi Sài Gòn')}">
+<head>
+    <th:block th:replace="~{fragments/admin-layout :: assets('Dashboard Quản Trị Hệ Thống - Hoa Tươi Sài Gòn')}"></th:block>
 </head>
 <body class="admin-body">
 <div class="admin-layout-wrapper">
@@ -35,94 +36,98 @@
         <div th:unless="${dataLoadError}">
             <!-- Chỉ số trong kỳ và tồn kho hiện tại (không phụ thuộc bộ lọc ngày). -->
             <div class="row g-3 mb-4">
-                <div id="kpi-total-users" class="col-12 col-sm-6 col-xl">
+                <div id="kpi-total-users" class="col-12 col-sm-6 col-md-4 col-xl-2">
                     <div class="kpi-card-admin">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="small fw-bold text-muted">Người dùng mới trong kỳ</span>
-                            <div class="rounded-3 p-2 d-flex align-items-center justify-content-center" style="background:#E0F2FE; color:#0369A1; width:36px; height:36px;">
-                                <i class="bi bi-people-fill"></i>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="kpi-card-title">Người dùng mới trong kỳ</span>
+                            <div class="kpi-icon-badge" style="background:#E0F2FE; color:#0284C7;">
+                                <i class="bi bi-people"></i>
                             </div>
                         </div>
-                        <div>
-                            <strong id="totalUsersCount" class="fs-3 fw-bold text-dark d-block" th:text="${totalUsersCount}">0</strong>
-                            <a id="btnViewUsersChart" href="#usersChartSection" class="small fw-semibold text-success text-decoration-none mt-1 d-inline-flex align-items-center gap-1">
+                        <div class="mt-auto">
+                            <strong id="totalUsersCount" class="kpi-card-val text-dark d-block" th:text="${totalUsersCount}">0</strong>
+                            <a id="btnViewUsersChart" href="#usersChartSection" class="kpi-card-sub text-success text-decoration-none d-inline-flex align-items-center gap-1" style="font-weight: 600;">
                                 Xem biểu đồ <i class="bi bi-arrow-down-short"></i>
                             </a>
                         </div>
                     </div>
                 </div>
 
-                <div id="kpi-total-stores" class="col-12 col-sm-6 col-xl">
+                <div id="kpi-total-stores" class="col-12 col-sm-6 col-md-4 col-xl-2">
                     <div class="kpi-card-admin">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="small fw-bold text-muted">Cửa hàng mới trong kỳ</span>
-                            <div class="rounded-3 p-2 d-flex align-items-center justify-content-center" style="background:#EDE9FE; color:#6D28D9; width:36px; height:36px;">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="kpi-card-title">Cửa hàng mới trong kỳ</span>
+                            <div class="kpi-icon-badge" style="background:#EDE9FE; color:#7C3AED;">
                                 <i class="bi bi-shop"></i>
                             </div>
                         </div>
-                        <div>
-                            <strong id="totalStoresCount" class="fs-3 fw-bold text-dark d-block" th:text="${totalStoresCount}">0</strong>
-                            <a id="btnViewStoresChart" href="#storesChartSection" class="small fw-semibold text-success text-decoration-none mt-1 d-inline-flex align-items-center gap-1">
+                        <div class="mt-auto">
+                            <strong id="totalStoresCount" class="kpi-card-val text-dark d-block" th:text="${totalStoresCount}">0</strong>
+                            <a id="btnViewStoresChart" href="#storesChartSection" class="kpi-card-sub text-success text-decoration-none d-inline-flex align-items-center gap-1" style="font-weight: 600;">
                                 Xem biểu đồ <i class="bi bi-arrow-down-short"></i>
                             </a>
                         </div>
                     </div>
                 </div>
 
-                <div id="kpi-total-products" class="col-12 col-sm-6 col-xl">
+                <div id="kpi-total-products" class="col-12 col-sm-6 col-md-4 col-xl-2">
                     <div class="kpi-card-admin">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="small fw-bold text-muted">Sản phẩm mới trong kỳ</span>
-                            <div class="rounded-3 p-2 d-flex align-items-center justify-content-center" style="background:#E5EEE8; color:#20382E; width:36px; height:36px;">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="kpi-card-title">Sản phẩm mới trong kỳ</span>
+                            <div class="kpi-icon-badge" style="background:#E5EEE8; color:#20382E;">
                                 <i class="bi bi-flower1"></i>
                             </div>
                         </div>
-                        <div>
-                            <strong id="totalProductsCount" class="fs-3 fw-bold text-dark d-block" th:text="${totalProductsCount}">0</strong>
-                            <span class="small text-muted">Số mẫu mới, không phải số lượng tồn kho</span>
+                        <div class="mt-auto">
+                            <strong id="totalProductsCount" class="kpi-card-val text-dark d-block" th:text="${totalProductsCount}">0</strong>
+                            <span class="kpi-card-sub d-block text-truncate" title="Số mẫu mới, không phải số lượng tồn kho">Mẫu mới (không tính tồn kho)</span>
                         </div>
                     </div>
                 </div>
 
-                <div id="kpi-current-stock" class="col-12 col-sm-6 col-xl">
+                <div id="kpi-current-stock" class="col-12 col-sm-6 col-md-4 col-xl-2">
                     <div class="kpi-card-admin" data-stock-kpi th:data-stock-endpoint="@{/admin/dashboard/stock}">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="small fw-bold text-muted">Tồn kho còn lại toàn chuỗi</span>
-                            <div class="rounded-3 p-2" style="background:#E5EEE8;color:#20382E"><i class="bi bi-box-seam"></i></div>
-                        </div>
-                        <strong id="currentStockQuantity" data-stock-value class="fs-3 fw-bold text-dark d-block" th:text="${currentStockQuantity}">0</strong>
-                        <span class="small text-muted">Đã trừ đơn đặt thành công kể cả COD.</span>
-                        <small data-stock-status class="d-block text-warning mt-1" role="status" hidden></small>
-                    </div>
-                </div>
-
-                <div id="kpi-total-orders" class="col-12 col-sm-6 col-xl">
-                    <div class="kpi-card-admin">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="small fw-bold text-muted">Đơn hàng trong kỳ</span>
-                            <div class="rounded-3 p-2 d-flex align-items-center justify-content-center" style="background:#FEF3C7; color:#B45309; width:36px; height:36px;">
-                                <i class="bi bi-bag-check-fill"></i>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="kpi-card-title">Tồn kho toàn chuỗi</span>
+                            <div class="kpi-icon-badge" style="background:#EBF3EE; color:#2E684D;">
+                                <i class="bi bi-box-seam"></i>
                             </div>
                         </div>
-                        <div>
-                            <strong id="totalOrdersCount" class="fs-3 fw-bold text-dark d-block" th:text="${totalOrdersCount}">0</strong>
-                            <span class="small text-muted">Đơn hàng phát sinh</span>
+                        <div class="mt-auto">
+                            <strong id="currentStockQuantity" data-stock-value class="kpi-card-val text-dark d-block" th:text="${currentStockQuantity}">0</strong>
+                            <span class="kpi-card-sub d-block text-truncate" title="Đã trừ đơn đặt thành công kể cả COD.">Đã trừ đơn thành công &amp; COD</span>
+                            <small data-stock-status class="d-block text-warning mt-0.5" role="status" hidden></small>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-12 col-sm-12 col-xl">
+                <div id="kpi-total-orders" class="col-12 col-sm-6 col-md-4 col-xl-2">
                     <div class="kpi-card-admin">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="small fw-bold text-muted">Doanh thu trong kỳ</span>
-                            <div class="rounded-3 p-2 d-flex align-items-center justify-content-center" style="background:#F3E6E1; color:#A64060; width:36px; height:36px;">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="kpi-card-title">Đơn hàng trong kỳ</span>
+                            <div class="kpi-icon-badge" style="background:#FEF3C7; color:#B45309;">
+                                <i class="bi bi-bag-check"></i>
+                            </div>
+                        </div>
+                        <div class="mt-auto">
+                            <strong id="totalOrdersCount" class="kpi-card-val text-dark d-block" th:text="${totalOrdersCount}">0</strong>
+                            <span class="kpi-card-sub d-block text-truncate">Đơn hàng phát sinh</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6 col-md-4 col-xl-2">
+                    <div class="kpi-card-admin">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="kpi-card-title">Doanh thu trong kỳ</span>
+                            <div class="kpi-icon-badge" style="background:#F3E6E1; color:#A64060;">
                                 <i class="bi bi-cash-stack"></i>
                             </div>
                         </div>
-                        <div>
-                            <strong class="fs-3 fw-bold d-block text-truncate" style="color: #A64060;" th:text="${flowerRevenue != null ? #numbers.formatDecimal(flowerRevenue, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">0 ₫</strong>
+                        <div class="mt-auto">
+                            <strong class="kpi-card-val d-block text-truncate" style="color: #A64060;" th:text="${flowerRevenue != null ? #numbers.formatDecimal(flowerRevenue, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">0 ₫</strong>
                             <span class="d-none" th:text="${flowerRevenue}">0</span>
-                            <span class="small text-muted">Toàn bộ đơn hợp lệ</span>
+                            <span class="kpi-card-sub d-block text-truncate">Toàn bộ đơn hợp lệ</span>
                         </div>
                     </div>
                 </div>

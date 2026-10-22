@@ -8,7 +8,6 @@
         clearTimeout(timer);
         const current = ++sequence;
         ready = false;
-        button.disabled = true;
         status.textContent = 'Đang cập nhật số tiền…';
         request?.abort();
         timer = setTimeout(async () => {
@@ -26,13 +25,22 @@
                 document.getElementById('displayShippingFee').textContent = money(result.shippingFee);
                 document.getElementById('displayDiscount').textContent = '-' + money(result.discount);
                 document.getElementById('displayGrandTotal').textContent = money(result.total);
+                const deliveryName = document.getElementById('assignedDeliveryName');
+                if (deliveryName && form.querySelector('#methodDelivery')?.checked) {
+                    deliveryName.textContent = result.deliveryUnitName || 'Chưa cấu hình đơn vị vận chuyển cho vùng này.';
+                }
                 status.textContent = '';
                 ready = true;
-                button.disabled = false;
+                button.disabled = button.dataset.pickupStockBlocked === 'true';
             } catch (error) {
                 if (error.name === 'AbortError' || current !== sequence) return;
                 status.textContent = error.message;
                 document.getElementById('displayGrandTotal').textContent = 'Chưa xác định';
+                const deliveryName = document.getElementById('assignedDeliveryName');
+                if (deliveryName && form.querySelector('#methodDelivery')?.checked) {
+                    deliveryName.textContent = 'Chưa chọn được đơn vị vận chuyển phù hợp.';
+                }
+                button.disabled = button.dataset.pickupStockBlocked === 'true';
             }
         }, 250);
     };
@@ -40,16 +48,27 @@
         if (['voucherCode', 'recipientAddress'].includes(event.target.name)) updateCheckoutTotal();
     });
     form.addEventListener('change', event => {
-        if (['shippingMethod', 'pickupStoreId', 'deliveryUnitId', 'deliveryZone', 'voucherCode'].includes(event.target.name)) updateCheckoutTotal();
+        if (['shippingMethod', 'pickupStoreId', 'deliveryZone', 'voucherCode'].includes(event.target.name)) updateCheckoutTotal();
     });
     form.addEventListener('submit', event => {
-        if (!ready) { event.preventDefault(); updateCheckoutTotal(); return; }
+        if (event.defaultPrevented) return;
+        if (!ready) {
+            event.preventDefault();
+            const message = status.textContent && status.textContent !== 'Đang cập nhật số tiền…'
+                ? status.textContent : 'Vui lòng chờ hệ thống xác nhận phí giao hàng rồi thử lại.';
+            if (typeof window.showGlobalAlertModal === 'function') {
+                window.showGlobalAlertModal({ title: 'Chưa thể đặt hàng', message, isError: true });
+            } else {
+                const error = document.getElementById('checkoutValidationError');
+                if (error) { error.textContent = message; error.classList.remove('d-none'); }
+            }
+            updateCheckoutTotal();
+            return;
+        }
         button.disabled = true;
         button.textContent = 'Đang đặt hàng…';
     });
     document.addEventListener('DOMContentLoaded', () => {
-        const saved = document.querySelector('#savedAddressSection select');
-        if (saved) fillAddress(saved);
         toggleShippingMethod();
     });
 })();

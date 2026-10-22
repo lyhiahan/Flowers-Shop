@@ -16,6 +16,8 @@
         <div><h1 th:text="${product.id == null ? 'Thêm sản phẩm' : 'Sửa sản phẩm'}">Thông tin sản phẩm</h1><p class="text-muted mb-0">Quản lý thông tin, giá bán và hình ảnh mẫu hoa của cửa hàng.</p></div>
         <a class="btn btn-outline-success" th:href="@{/manager/products}"><i class="bi bi-arrow-left me-2"></i>Danh sách sản phẩm</a>
     </header>
+    <div th:if="${successMessage}" class="alert alert-success" role="status" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
     <form th:action="${product.id == null} ? @{/manager/products/add} : @{/manager/products/update/{id}(id=${product.id})}" method="post" enctype="multipart/form-data" data-confirm="Xác nhận lưu thông tin sản phẩm?" class="card">
         <div class="manager-form-grid">
             <div class="full-width"><label for="productName" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label><input id="productName" name="name" th:value="${product.name}" required maxlength="200" class="form-control" placeholder="Ví dụ: Bó Hoa Hồng Đỏ"></div>
@@ -73,6 +75,17 @@
         </div>
         <div class="d-flex justify-content-end flex-wrap gap-2 mt-4 pt-3 border-top"><a class="btn btn-light" th:href="@{/manager/products}">Hủy</a><button class="btn btn-primary" type="submit">Lưu sản phẩm</button></div>
     </form>
+    <section class="card mt-3" th:if="${product.id != null}" aria-labelledby="managerRestockTitle">
+        <h2 id="managerRestockTitle" class="h5">Nhập thêm hàng cho chi nhánh</h2>
+        <p class="text-muted">Tồn hiện tại: <strong th:text="${localStock + ' sản phẩm'}">0 sản phẩm</strong>. Nhập thêm không thay đổi số đã bán hoặc đơn cũ.</p>
+        <form th:action="@{/manager/products/restock/{id}(id=${product.id})}" method="post"
+              class="d-flex gap-2 align-items-end flex-wrap">
+            <div><label for="managerAddedStock" class="form-label">Số lượng nhập thêm</label>
+                <input id="managerAddedStock" name="addedQuantity" type="number" min="1" max="1000000"
+                       step="1" required class="form-control" style="max-width: 190px"></div>
+            <button class="btn btn-success" type="submit">Nhập thêm hàng</button>
+        </form>
+    </section>
 </div>
     </main>
 </div>

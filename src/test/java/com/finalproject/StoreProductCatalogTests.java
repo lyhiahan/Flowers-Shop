@@ -134,6 +134,33 @@ class StoreProductCatalogTests {
                 .andExpect(content().string(containsString("Lưu thay đổi")));
     }
 
+    @Test void managerRestocksOnlyTheirBranchWithoutChangingSales() throws Exception {
+        own.setSold(4);
+        products.save(own);
+        mvc.perform(get("/manager/products/edit/" + own.getId()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Nhập thêm hàng cho chi nhánh")));
+        mvc.perform(post("/manager/products/restock/" + own.getId()).with(csrf())
+                .param("addedQuantity", "6"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/manager/products/edit/" + own.getId()))
+                .andExpect(flash().attributeExists("successMessage"));
+        assertThat(stocks.findByStoreIdAndProductId(a.getId(), own.getId()).orElseThrow().getQuantity()).isEqualTo(16);
+        assertThat(own.getSold()).isEqualTo(4);
+
+        mvc.perform(post("/manager/products/restock/" + shared.getId()).with(csrf())
+                .param("addedQuantity", "3"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/manager/products/branch/" + shared.getId()));
+        assertThat(stocks.findByStoreIdAndProductId(a.getId(), shared.getId()).orElseThrow().getQuantity()).isEqualTo(18);
+        assertThat(stocks.findByStoreIdAndProductId(b.getId(), shared.getId()).orElseThrow().getQuantity()).isEqualTo(7);
+        mvc.perform(post("/manager/products/restock/" + foreign.getId()).with(csrf())
+                .param("addedQuantity", "1"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attributeExists("errorMessage"));
+        assertThat(stocks.findByStoreIdAndProductId(b.getId(), foreign.getId()).orElseThrow().getQuantity()).isEqualTo(6);
+    }
+
     @Test void sharedDeletePreservesStockImagesAndOtherBranchAndCanBeRestored() throws Exception {
         mvc.perform(post("/manager/products/delete/"+shared.getId()).with(csrf())).andExpect(status().is3xxRedirection());
         assertThat(shared.getIsDeleted()).isFalse();

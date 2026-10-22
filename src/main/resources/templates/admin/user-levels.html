@@ -1,27 +1,8 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cấp Bậc & Chiết Khấu Người Dùng (User Level) - Quản Trị Hệ Thống Hoa Tươi</title>
-    <!-- Google Fonts Nunito & Bootstrap 5 & Icons -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
-    <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
+    <th:block th:replace="~{fragments/admin-layout :: assets('Cấp Bậc & Chiết Khấu Người Dùng - Quản Trị Hệ Thống Hoa Tươi')}"></th:block>
     <style>
-        body { 
-            font-family: 'Nunito', var(--font-sans), sans-serif !important; 
-            background-color: var(--admin-bg) !important; 
-            color: var(--admin-text-main); 
-            min-height: 100vh; 
-        }
-        .main-wrapper { flex: 1; overflow-x: hidden; background-color: var(--admin-bg) !important; }
-        
         .page-header-title {
             font-size: 28px !important;
             font-weight: 800 !important;
@@ -34,16 +15,14 @@
             margin-bottom: 0;
             font-weight: 500;
         }
-        
         .table-admin-levels thead th {
-            background-color: #F8FAF9;
-            color: #20382E;
-            font-weight: 700;
-            font-size: 13.5px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            background-color: #E5EEE8 !important;
+            color: #20382E !important;
+            font-weight: 800 !important;
+            font-size: 14.5px !important;
+            letter-spacing: 0.2px;
             padding: 14px 16px;
-            border-bottom: 1px solid #E2E7E2;
+            border-bottom: 2px solid #D1E5DA !important;
         }
         .table-admin-levels tbody td {
             padding: 16px;
@@ -53,7 +32,6 @@
         .table-admin-levels tbody tr:hover {
             background-color: #FAFBF9;
         }
-        
         .btn-action-edit {
             background-color: #FFFFFF;
             border: 1px solid #D1E5DA;
@@ -102,97 +80,12 @@
     </style>
 </head>
 <body class="admin-body">
-<div class="d-flex">
+<div class="admin-layout-wrapper">
     <!-- Sidebar -->
-    <aside class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white">
-        <a th:href="@{/admin/dashboard}" class="d-flex align-items-center gap-3 mb-4 text-white text-decoration-none px-2 pt-2">
-            <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img flex-shrink-0" style="width: 40px; height: 40px; border-radius: 8px;">
-            <div>
-                <div class="fw-bold text-white" style="font-size: 16px; line-height: 1.2; letter-spacing: 0.5px;">HOA TƯƠI SÀI GÒN</div>
-                <div class="small" style="font-size: 11px; color: #9DB7AA !important; letter-spacing: 0.05em;">QUẢN TRỊ VIÊN HỆ THỐNG</div>
-            </div>
-        </a>
-
-        <ul class="nav nav-pills flex-column mb-auto gap-1">
-            <li>
-                <a th:href="@{/admin/dashboard}" class="nav-link">
-                    <i class="bi bi-grid"></i>
-                    <span>Thống kê</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/users}" class="nav-link">
-                    <i class="bi bi-people"></i>
-                    <span>Người dùng</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/products-manage}" class="nav-link" id="sidebarProductsLink">
-                    <i class="bi bi-box-seam"></i>
-                    <span>Sản phẩm</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/orders-manage}" class="nav-link" id="sidebarOrdersLink">
-                    <i class="bi bi-bag"></i>
-                    <span>Đơn hàng</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/categories}" class="nav-link" id="sidebarCategoriesLink">
-                    <i class="bi bi-tags"></i>
-                    <span>Danh mục hoa</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/styles}" class="nav-link" id="sidebarStylesLink">
-                    <i class="bi bi-sliders"></i>
-                    <span>Thuộc tính sản phẩm</span>
-                </a>
-            </li>
-            <!-- BƯỚC 2 & 3: Chọn Level bên thanh sidebar -> Chọn User level -->
-            <li>
-                <a th:href="@{/admin/user-levels}" class="nav-link active" id="sidebarUserLevelsLink" data-testid="sidebarLevelsLink">
-                    <i class="bi bi-award"></i>
-                    <span>Cấp bậc khách (User level)</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/store-levels}" class="nav-link">
-                    <i class="bi bi-award-fill"></i>
-                    <span>Hạng chi nhánh</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/deliveries}" class="nav-link">
-                    <i class="bi bi-truck"></i>
-                    <span>Đơn vị vận chuyển</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/vouchers}" class="nav-link">
-                    <i class="bi bi-ticket-perforated"></i>
-                    <span>Khuyến mãi</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/transactions}" class="nav-link">
-                    <i class="bi bi-journal-text"></i>
-                    <span>Lịch sử giao dịch</span>
-                </a>
-            </li>
-        </ul>
-
-        <hr class="border-secondary my-2">
-        <form th:action="@{/logout}" method="post" class="d-inline">
-            <button type="submit" class="btn btn-outline-danger btn-sm w-100 d-flex align-items-center justify-content-center gap-2">
-                <i class="bi bi-box-arrow-right"></i> Đăng xuất
-            </button>
-        </form>
-    </aside>
+    <aside th:replace="~{fragments/admin-layout :: sidebar('user-levels')}"></aside>
 
     <!-- Main Content -->
-    <div class="main-wrapper p-4">
+    <main class="main-wrapper-admin">
         <!-- 1. Header: Tiêu đề & Nút hành động -->
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
             <div>
@@ -230,19 +123,19 @@
                     <table id="userLevelsTable" class="table table-admin-levels align-middle mb-0">
                         <thead>
                         <tr>
-                            <th class="ps-4" style="width: 80px; border-top-left-radius: 14px;">MÃ</th>
-                            <th style="min-width: 240px;">TÊN CẤP BẬC (USER LEVEL)</th>
-                            <th class="text-center" style="min-width: 200px;">ĐIỂM TÍCH LŨY TỐI THIỂU</th>
-                            <th class="text-center" style="min-width: 200px;">MỨC CHIẾT KHẤU (%)</th>
-                            <th class="text-center" style="min-width: 160px;">TRẠNG THÁI</th>
-                            <th class="text-end pe-4" style="min-width: 180px; border-top-right-radius: 14px;">THAO TÁC</th>
+                            <th class="ps-4" style="width: 80px; border-top-left-radius: 14px;">Mã</th>
+                            <th style="min-width: 240px;">Tên cấp bậc</th>
+                            <th class="text-center" style="min-width: 200px;">Điểm tích lũy tối thiểu</th>
+                            <th class="text-center" style="min-width: 200px;">Mức chiết khấu</th>
+                            <th class="text-center" style="min-width: 160px;">Trạng thái</th>
+                            <th class="text-end pe-4" style="min-width: 180px; border-top-right-radius: 14px;">Thao tác</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(levels)}">
                             <td colspan="6" class="text-center py-5 text-muted" style="font-size: 15.5px;">
                                 <i class="bi bi-award fs-1 d-block mb-2 text-secondary opacity-50"></i>
-                                Chưa có cấp bậc người dùng nào. Bấm nút "New level" để thêm mới.
+                                Chưa có cấp bậc người dùng nào. Bấm nút "Thêm cấp bậc" để thêm mới.
                             </td>
                         </tr>
                         <tr th:each="l : ${levels}">
@@ -256,7 +149,7 @@
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center text-white flex-shrink-0 shadow-sm"
                                          style="width: 36px; height: 36px; background-color: #20382E; font-size: 14px;">
-                                        <i class="bi bi-award"></i>
+                                         <i class="bi bi-award"></i>
                                     </div>
                                     <div>
                                         <div class="fw-bold" style="font-size: 16px; font-weight: 700; color: #20382E;" th:text="${l.name}">
@@ -276,9 +169,15 @@
 
                             <!-- 4. MỨC CHIẾT KHẤU -->
                             <td class="text-center">
-                                <span class="badge rounded-pill px-3 py-2 fw-bold shadow-sm" 
-                                      style="background-color: #FFF3E0; color: #E65100; border: 1px solid #FFE0B2; font-size: 14px;">
-                                    <i class="bi bi-percent me-1"></i><span th:text="${l.discount}">5</span>%
+                                <span th:if="${l.discount == null or l.discount <= 0}" 
+                                      class="badge rounded-pill px-3 py-2 fw-bold" 
+                                      style="background-color: #F4F6F4; color: #526058; border: 1px solid #D5E2DA; font-size: 13.5px;">
+                                    0% (Không giảm)
+                                </span>
+                                <span th:if="${l.discount != null and l.discount > 0}" 
+                                      class="badge rounded-pill px-3 py-2 fw-bold shadow-sm" 
+                                      style="background-color: #FFF3E0; color: #D97706; border: 1px solid #FCD34D; font-size: 13.5px;">
+                                    <i class="bi bi-tag-fill me-1" style="font-size: 12px;"></i>Giảm <span th:text="${l.discount.remainder(T(java.math.BigDecimal).ONE).compareTo(T(java.math.BigDecimal).ZERO) == 0 ? #numbers.formatDecimal(l.discount, 1, 0) : l.discount}">3</span>%
                                 </span>
                             </td>
 
@@ -301,7 +200,7 @@
                                     <a th:href="@{'/admin/user-levels/edit/' + ${l.id}}" 
                                        th:id="'btnEditUserLevel_' + ${l.id}"
                                        class="btn btn-action-edit text-decoration-none" 
-                                       title="Chỉnh sửa level">
+                                       title="Chỉnh sửa cấp bậc">
                                         <i class="bi bi-pencil"></i> Sửa
                                     </a>
 
@@ -312,7 +211,7 @@
                                                 class="btn btn-action-delete"
                                                 th:data-level-name="${l.name}"
                                                 onclick="return confirm('Xác nhận XÓA cấp bậc khách hàng [' + this.getAttribute('data-level-name') + ']?')"
-                                                title="Xóa level">
+                                                title="Xóa cấp bậc">
                                             <i class="bi bi-trash"></i> Xóa
                                         </button>
                                     </form>
@@ -324,7 +223,7 @@
                                                 class="btn btn-action-restore"
                                                 th:data-level-name="${l.name}"
                                                 onclick="return confirm('Khôi phục cấp bậc khách hàng [' + this.getAttribute('data-level-name') + ']?')"
-                                                title="Khôi phục level">
+                                                title="Khôi phục cấp bậc">
                                             <i class="bi bi-arrow-counterclockwise"></i> Khôi phục
                                         </button>
                                     </form>
@@ -348,7 +247,7 @@
                 <ul class="pagination pagination-sm mb-0">
                     <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                         <a class="page-link" id="btnPrevPage" th:href="@{/admin/user-levels(page=${currentPage - 1}, size=${pageSize}, keyword=${keyword})}">
-                            <i class="bi bi-chevron-left"></i> Previous
+                            <i class="bi bi-chevron-left"></i> Trước
                         </a>
                     </li>
                     <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
@@ -356,16 +255,16 @@
                     </li>
                     <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
                         <a class="page-link" id="btnNextPage" th:href="@{/admin/user-levels(page=${currentPage + 1}, size=${pageSize}, keyword=${keyword})}">
-                            Next <i class="bi bi-chevron-right"></i>
+                            Sau <i class="bi bi-chevron-right"></i>
                         </a>
                     </li>
                 </ul>
             </nav>
         </div>
-    </div>
+    </main>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<th:block th:replace="~{fragments/admin-layout :: footer}"></th:block>
 <script th:src="@{/js/global-modal.js}"></script>
 <th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
 </body>

@@ -114,4 +114,35 @@ class FixedAccountRoleTests {
                 .andExpect(flash().attributeExists("errorMessage"));
         assertThat(addresses.findById(address.getId()).orElseThrow().getRecipientName()).isEqualTo("Tên mới");
     }
+
+    @Test void invalidAddressInputSurvivesRedirectForAddAndEdit() throws Exception {
+        var add = mvc.perform(post("/customer/profile/address/add")
+                        .with(user(customer.getUsername()).roles("USER")).with(csrf())
+                        .param("recipientName", "Người nhận mới").param("phone", "123")
+                        .param("addressDetail", "24 Đường Hoa").param("isDefault", "true"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attributeExists("errorMessage", "addressAddDraft"))
+                .andReturn();
+        String addPage = mvc.perform(get("/customer/profile?tab=address")
+                        .with(user(customer.getUsername()).roles("USER")).flashAttrs(add.getFlashMap()))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
+        assertThat(addPage).contains("value=\"Người nhận mới\"", "value=\"123\"", "24 Đường Hoa");
+        assertThat(addPage).containsPattern("id=\"checkDefaultAddress\"[^>]*checked");
+
+        UserAddress existing = addresses.saveAndFlush(UserAddress.builder().user(customer)
+                .recipientName("Tên cũ").phone("0900000000").addressDetail("1 Đường Cũ").isDefault(true).build());
+        var edit = mvc.perform(post("/customer/profile/address/update/" + existing.getId())
+                        .with(user(customer.getUsername()).roles("USER")).with(csrf())
+                        .param("recipientName", "Tên vừa sửa").param("phone", "abc")
+                        .param("addressDetail", "9 Đường Mới").param("isDefault", "true"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attributeExists("errorMessage", "addressEditDraft", "addressEditId"))
+                .andReturn();
+        String editPage = mvc.perform(get("/customer/profile?tab=address")
+                        .with(user(customer.getUsername()).roles("USER")).flashAttrs(edit.getFlashMap()))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
+        assertThat(editPage).contains("data-restore-address-id=\"" + existing.getId() + "\"",
+                "value=\"Tên vừa sửa\"", "value=\"abc\"", "9 Đường Mới");
+        assertThat(addresses.findById(existing.getId()).orElseThrow().getRecipientName()).isEqualTo("Tên cũ");
+    }
 }

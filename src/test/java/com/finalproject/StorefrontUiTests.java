@@ -120,7 +120,8 @@ class StorefrontUiTests {
         String url="/products/"+product.getId();
         String before=page(url);
         assertThat(before).contains("product-follow-group", "id=\"btnDetailFollow\"")
-                .doesNotContain("btnFollowProductTop", "action-sub-row", "Đã lưu yêu thích");
+                .contains("Yêu thích", "/customer/profile/wishlist/toggle/" + product.getId(), "lượt yêu thích")
+                .doesNotContain("btnFollowProductTop", "action-sub-row", "Đang theo dõi");
         preview("product-before.html",before);
         mvc.perform(post("/customer/following/toggle/"+product.getId()).with(user(customer.getUsername()).roles("USER"))
                         .with(csrf()).header("X-Requested-With","XMLHttpRequest"))
@@ -132,6 +133,29 @@ class StorefrontUiTests {
                         .with(csrf()).header("X-Requested-With","XMLHttpRequest"))
                 .andExpect(jsonPath("$.liked").value(false)).andExpect(jsonPath("$.followerCount").value(0));
         assertThat(page("/")).doesNotContain("customer-stock-kpi", "Sản phẩm còn hàng toàn chuỗi");
+    }
+
+    @Test void wishlistRemovalRequiresCsrfAndReturnsTheFavoriteMessage() throws Exception {
+        mvc.perform(post("/customer/profile/wishlist/toggle/" + product.getId())
+                        .with(user(customer.getUsername()).roles("USER")).with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.liked").value(true));
+        String wishlistPage = page("/customer/profile/wishlist");
+        assertThat(wishlistPage).contains("id=\"wishlistGrid\"", "X-CSRF-TOKEN", "value=\"" + product.getId() + "\"");
+
+        mvc.perform(post("/customer/profile/wishlist/toggle/" + product.getId())
+                        .with(user(customer.getUsername()).roles("USER"))
+                        .header("X-Requested-With", "XMLHttpRequest"))
+                .andExpect(status().isForbidden()).andExpect(jsonPath("$.success").value(false));
+        assertThat(page("/customer/profile/wishlist")).contains("Storefront bouquet");
+
+        mvc.perform(post("/customer/profile/wishlist/toggle/" + product.getId())
+                        .with(user(customer.getUsername()).roles("USER")).with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.liked").value(false))
+                .andExpect(jsonPath("$.message").value("Đã bỏ yêu thích sản phẩm!"));
+        assertThat(page("/customer/profile/wishlist")).contains("Danh Sách Yêu Thích Của Bạn Đang Trống");
     }
 
     @Test void profileTabsHideListMarkersAndKeepTheirPanelTargets() throws Exception {

@@ -312,7 +312,67 @@ class AdminProductsManagementUseCaseTests {
                 .andExpect(content().string(containsString("Chỉnh Sửa Sản Phẩm #" + licensedProduct1.getId())))
                 .andExpect(content().string(containsString("Hoa Hồng Đỏ")))
                 .andExpect(content().string(containsString("10 s")))
+                .andExpect(content().string(containsString("href=\"#restockTitle\"")))
+                .andExpect(content().string(containsString("id=\"restockTitle\"")))
                 .andExpect(content().string(containsString("Lưu thay đổi")));
+    }
+
+    @Test
+    @WithMockUser(username = "admin_uc28", roles = {"ADMIN"})
+    void restockAddsToOneBranchWithoutChangingSold() throws Exception {
+        var secondStore = storeRepository.save(com.finalproject.entity.Store.builder()
+                .name("Chi nhánh khác UC28").address("Đường số 2").status(true).isOpen(true).build());
+        storeInventoryRepository.save(com.finalproject.entity.StoreInventory.builder()
+                .store(secondStore).product(licensedProduct1).quantity(7).build());
+        mockMvc.perform(get("/admin/products-manage/edit/" + licensedProduct1.getId()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Nhập thêm hàng theo chi nhánh")))
+                .andExpect(content().string(containsString("24 sản phẩm")));
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                        .post("/admin/products-manage/restock/" + licensedProduct1.getId())
+                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("storeId", store1.getId().toString()).param("addedQuantity", "5"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attributeExists("successMessage"));
+
+        org.junit.jupiter.api.Assertions.assertEquals(29, storeInventoryRepository
+                .findByStoreIdAndProductId(store1.getId(), licensedProduct1.getId()).orElseThrow().getQuantity());
+        org.junit.jupiter.api.Assertions.assertEquals(7, storeInventoryRepository
+                .findByStoreIdAndProductId(secondStore.getId(), licensedProduct1.getId()).orElseThrow().getQuantity());
+        org.junit.jupiter.api.Assertions.assertEquals(10, productRepository.findById(licensedProduct1.getId()).orElseThrow().getSold());
+    }
+
+    @Test
+    @WithMockUser(username = "admin_uc28", roles = {"ADMIN"})
+    void restockRejectsZeroAndWrongBranchForOwnedProduct() throws Exception {
+        var owned = productRepository.save(Product.builder().name("Lan riêng chi nhánh")
+                .category(category).store(store1).importPrice(BigDecimal.TEN).priceBuy(new BigDecimal("100000"))
+                .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).sold(39).build());
+        var other = storeRepository.save(com.finalproject.entity.Store.builder()
+                .name("Chi nhánh không sở hữu").address("Đường số 3").status(true).isOpen(true).build());
+        for (String amount : new String[]{"0", "-2", "1000001"}) {
+            mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                            .post("/admin/products-manage/restock/" + owned.getId())
+                            .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+                            .param("storeId", store1.getId().toString()).param("addedQuantity", amount))
+                    .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("errorMessage"));
+        }
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                        .post("/admin/products-manage/restock/" + owned.getId())
+                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("storeId", other.getId().toString()).param("addedQuantity", "4"))
+                .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("errorMessage"));
+        org.junit.jupiter.api.Assertions.assertTrue(storeInventoryRepository
+                .findByStoreIdAndProductId(other.getId(), owned.getId()).isEmpty());
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                        .post("/admin/products-manage/restock/" + owned.getId())
+                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("storeId", store1.getId().toString()).param("addedQuantity", "3"))
+                .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("successMessage"));
+        org.junit.jupiter.api.Assertions.assertEquals(3, storeInventoryRepository
+                .findByStoreIdAndProductId(store1.getId(), owned.getId()).orElseThrow().getQuantity());
+        org.junit.jupiter.api.Assertions.assertEquals(39, productRepository.findById(owned.getId()).orElseThrow().getSold());
     }
 
     /**

@@ -67,9 +67,9 @@ class SqlServerMigrationLiveTests {
     @Test void emptyDatabaseMigratesAllVersionsAndValidatesAllEntities() throws Exception {
         String url = url("SQLSERVER_TEST_FRESH_DATABASE");
         var flyway = flyway(url);
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(10);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(15);
         flyway.validate();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("10");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("15");
         validateEntities(url);
         assertThat(flyway.migrate().migrationsExecuted).isZero();
     }
@@ -92,9 +92,9 @@ class SqlServerMigrationLiveTests {
         }
         var auditedVersion = Flyway.configure().configuration(flyway.getConfiguration()).target("5").load();
         assertThat(auditedVersion.migrate().migrationsExecuted).isEqualTo(1);
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(5);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(10);
         flyway.validate();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("10");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("15");
         validateEntities(url);
         assertThat(counts(url)).isEqualTo(before);
         try (var connection = connect(url); var statement = connection.createStatement()) {

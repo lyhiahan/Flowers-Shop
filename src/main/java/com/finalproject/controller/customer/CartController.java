@@ -109,6 +109,20 @@ public class CartController {
         return "redirect:/cart";
     }
 
+    @PostMapping("/buy-now")
+    public String handleBuyNow(Principal principal,
+                               @ModelAttribute AddToCartRequest request,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            Long itemId = cartService.prepareBuyNow(principal.getName(), request);
+            return "redirect:/checkout?selectedItemIds=" + itemId;
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            Long productId = request != null ? request.getProductId() : null;
+            return productId != null && productId > 0 ? "redirect:/product/" + productId : "redirect:/products";
+        }
+    }
+
     @PostMapping(value = "/update-quantity/{id}", headers = "X-Requested-With=XMLHttpRequest")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> handleUpdateQuantityAjax(Principal principal,

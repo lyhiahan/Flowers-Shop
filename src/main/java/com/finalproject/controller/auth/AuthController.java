@@ -47,9 +47,11 @@ public class AuthController {
 
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
-        if (!model.containsAttribute("registerRequest")) {
+        boolean freshRegistration = !model.containsAttribute("registerRequest");
+        if (freshRegistration) {
             model.addAttribute("registerRequest", new RegisterRequest());
         }
+        model.addAttribute("freshRegistration", freshRegistration);
         return "auth/register";
     }
 

@@ -1,17 +1,178 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/admin-layout :: assets('Trung tâm hội thoại')}"></head>
+<head>
+    <th:block th:replace="~{fragments/admin-layout :: assets('Trung Tâm Hội Thoại - Quản Trị Hệ Thống Hoa Tươi')}"></th:block>
+    <style>
+        body.admin-body.admin-chat-page {
+            font-family: 'Nunito', sans-serif !important;
+            background-color: var(--admin-bg, #F6F7F4) !important;
+            color: var(--admin-text-main, #20382E);
+        }
+        .admin-chat-page .admin-layout-wrapper {
+            background-color: var(--admin-bg, #F6F7F4) !important;
+        }
+        .admin-chat-page .main-wrapper-admin {
+            background-color: var(--admin-bg, #F6F7F4) !important;
+            padding: 24px 28px 24px 28px !important;
+        }
+        .admin-page-title {
+            font-size: 28px !important;
+            font-weight: 800 !important;
+            color: #20382E !important;
+            line-height: 1.25;
+            letter-spacing: -0.3px;
+        }
+        /* Đồng bộ Card Chat Workbench theo phong cách trang Cửa Hàng */
+        #flowerChat.chat-workbench {
+            border-radius: 12px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        }
+        #flowerChat.chat-workbench .chat-panel {
+            border: 1px solid #E2E7E2 !important;
+            border-radius: 12px !important;
+            background-color: #FFFFFF;
+        }
+        #flowerChat .chat-header {
+            background-color: #20382E !important;
+            font-size: 15.5px;
+            font-weight: 700;
+            padding: 12px 20px;
+        }
+        #flowerChat .chat-toolbar {
+            background-color: #FAFCFA;
+            border-bottom: 1px solid #E2E7E2;
+            padding: 10px 16px;
+        }
+        #flowerChat .chat-channel-tabs button {
+            border-radius: 20px !important;
+            font-size: 13.5px !important;
+            font-weight: 600 !important;
+            padding: 6px 16px !important;
+            border: 1px solid #D1E5DA !important;
+            background-color: #FFFFFF;
+            color: #20382E;
+            transition: all 0.2s ease;
+        }
+        #flowerChat .chat-channel-tabs button[aria-pressed="true"] {
+            background-color: #20382E !important;
+            border-color: #20382E !important;
+            color: #FFFFFF !important;
+            font-weight: 700 !important;
+            box-shadow: 0 2px 6px rgba(32, 56, 46, 0.15);
+        }
+        #flowerChat #chatFilterToggle {
+            border-radius: 20px !important;
+            font-size: 13.5px !important;
+            font-weight: 600 !important;
+            padding: 6px 16px !important;
+            border: 1px solid #D1E5DA !important;
+            background-color: #FFFFFF;
+            color: #20382E;
+        }
+        #flowerChat .chat-sidebar {
+            background-color: #F8FAF9;
+            border-right: 1px solid #E2E7E2;
+        }
+        #flowerChat .chat-sidebar .chat-inbox {
+            padding: 14px;
+        }
+        #flowerChat .chat-inbox-heading {
+            color: #20382E;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        #flowerChat #chatRefresh {
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border: 1px solid #D1E5DA;
+            color: #20382E;
+        }
+        #flowerChat #chatConversations button {
+            border-radius: 10px;
+            border: 1px solid #E2E7E2;
+            padding: 10px 14px;
+            margin-top: 8px;
+            transition: all 0.15s ease;
+            background-color: #FFFFFF;
+        }
+        #flowerChat #chatConversations button:hover {
+            border-color: #A5D6A7;
+            background-color: #FAFCFA;
+        }
+        #flowerChat #chatConversations button[aria-current="true"] {
+            background-color: #E5EEE8 !important;
+            border-color: #A5D6A7 !important;
+        }
+        #flowerChat .chat-current-title {
+            background-color: #FFFFFF;
+            color: #20382E;
+            font-weight: 700;
+            font-size: 15.5px;
+            padding: 12px 18px;
+            border-bottom: 1px solid #E2E7E2;
+        }
+        #flowerChat .chat-messages {
+            background-color: #FAFBF9;
+            padding: 18px;
+        }
+        #flowerChat .chat-send {
+            background-color: #FFFFFF;
+            border-top: 1px solid #E2E7E2;
+            padding: 12px 18px;
+        }
+        #flowerChat #chatText {
+            border: 1px solid #D1E5DA;
+            border-radius: 10px;
+            font-size: 14.5px;
+            padding: 8px 14px;
+            font-family: 'Nunito', sans-serif !important;
+        }
+        #flowerChat #chatSend {
+            background-color: #20382E !important;
+            border-color: #20382E !important;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            padding: 0 20px;
+            height: 42px;
+        }
+        #flowerChat .chat-file-label {
+            border: 1px solid #D1E5DA;
+            border-radius: 10px;
+        }
+    </style>
+</head>
 <body class="admin-body admin-chat-page">
 <div class="admin-layout-wrapper">
     <div id="chatAdminNavigation" class="chat-admin-navigation"><button id="chatNavigationClose" class="chat-nav-close" type="button" aria-label="Đóng menu quản trị">×</button><aside th:replace="~{fragments/admin-layout :: sidebar('chat')}"></aside></div>
     <main class="main-wrapper-admin">
-        <div class="chat-page-toolbar">
-            <button id="chatNavigationToggle" class="chat-nav-toggle btn btn-outline-success" type="button" aria-controls="chatAdminNavigation" aria-expanded="false" aria-label="Mở menu quản trị"><i class="bi bi-list" aria-hidden="true"></i></button>
-            <h1 class="admin-page-title">Trung tâm hội thoại</h1>
-            <a class="btn btn-outline-success" th:href="@{/admin/chat/access-logs}">Nhật ký truy cập</a>
+        <div class="chat-page-toolbar d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-3">
+                    <button id="chatNavigationToggle" class="chat-nav-toggle btn btn-sm btn-outline-secondary d-md-none" type="button" aria-controls="chatAdminNavigation" aria-expanded="false" aria-label="Mở menu quản trị">
+                        <i class="bi bi-list fs-5" aria-hidden="true"></i>
+                    </button>
+                    <h1 class="admin-page-title mb-0" style="font-size: 28px !important; font-weight: 800; color: #20382E;">Trung tâm hội thoại</h1>
+                    <span class="badge rounded-pill" style="background-color: #E5EEE8; color: #20382E; border: 1px solid #D1E5DA; font-size: 14px; font-weight: 700; padding: 6px 14px;">
+                        Giám sát hệ thống
+                    </span>
+                </div>
+                <p class="mb-0 mt-1" style="font-size: 15.5px; color: #66736B;">Theo dõi các cuộc hội thoại giữa khách hàng, chi nhánh cửa hàng và bộ phận quản trị</p>
+            </div>
+            <div>
+                <a class="btn btn-sm d-inline-flex align-items-center gap-2 text-white shadow-sm text-decoration-none" 
+                   th:href="@{/admin/chat/access-logs}"
+                   style="background-color: #20382E; border-color: #20382E; border-radius: 10px; padding: 9px 18px; font-weight: 700; font-size: 14.5px;">
+                    <i class="bi bi-journal-text"></i>
+                    <span>Nhật ký truy cập</span>
+                </a>
+            </div>
         </div>
         <th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
     </main>
 </div>
+<th:block th:replace="~{fragments/admin-layout :: footer}"></th:block>
 </body>
 </html>

@@ -125,9 +125,9 @@ public class DataInitializer implements CommandLineRunner {
 
         // Chính sách hoa hồng sàn (Commissions)
         if (commissionRepository.count() == 0) {
-            commissionRepository.save(Commission.builder().name("Gói Cơ Bản (Standard)").cost(new BigDecimal("10")).description("Tỷ lệ chiết khấu sàn 10% áp dụng cho chi nhánh mới gia nhập").isDeleted(false).build());
-            commissionRepository.save(Commission.builder().name("Gói Đối Tác Thân Thiết").cost(new BigDecimal("8")).description("Tỷ lệ chiết khấu ưu đãi 8% cho cửa hàng có trên 100 đơn/tháng").isDeleted(false).build());
-            commissionRepository.save(Commission.builder().name("Gói Đối Tác Chiến Lược").cost(new BigDecimal("5")).description("Tỷ lệ chiết khấu đặc biệt 5% cho chuỗi phân phối hoa tươi lớn").isDeleted(false).build());
+            commissionRepository.save(Commission.builder().name("Gói cơ bản (Standard)").cost(new BigDecimal("10")).description("Tỷ lệ chiết khấu sàn 10% áp dụng cho chi nhánh mới gia nhập").isDeleted(false).build());
+            commissionRepository.save(Commission.builder().name("Gói đối tác thân thiết").cost(new BigDecimal("8")).description("Tỷ lệ chiết khấu ưu đãi 8% cho cửa hàng có trên 100 đơn/tháng").isDeleted(false).build());
+            commissionRepository.save(Commission.builder().name("Gói đối tác chiến lược").cost(new BigDecimal("5")).description("Tỷ lệ chiết khấu đặc biệt 5% cho chuỗi phân phối hoa tươi lớn").isDeleted(false).build());
         }
 
         // 5. Khởi tạo & chuẩn hóa nhóm thuộc tính và giá trị thuộc tính mẫu

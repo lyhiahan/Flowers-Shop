@@ -163,9 +163,9 @@ class DemoPendingFundsTests {
         Order first = fixture(), second = fixture();
         String token = demo.create(List.of(first.getId(), second.getId()), customer.getUsername());
         demo.confirm(token);
-        mvc.perform(post("/customer/orders/cancel/" + first.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()))
+        mvc.perform(post("/customer/orders/cancel/" + first.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()).param("reasonCode", "NO_LONGER_NEEDED"))
                 .andExpect(flash().attribute("successMessage", "Đã hủy đơn và hoàn tiền thành công."));
-        mvc.perform(post("/customer/orders/cancel/" + first.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()))
+        mvc.perform(post("/customer/orders/cancel/" + first.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()).param("reasonCode", "NO_LONGER_NEEDED"))
                 .andExpect(flash().attributeExists("successMessage"));
         assertThat(store.getPendingBalance()).isEqualByComparingTo("100000");
         assertThat(store.getEWallet()).isEqualByComparingTo("50000");

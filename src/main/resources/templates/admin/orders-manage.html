@@ -233,13 +233,13 @@
                class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2 flex-shrink-0"
                id="tabAllOrders"
                th:style="${currentTab == 'ALL' and (currentStatus == 'ALL' or currentStatus == null)} ? 'background-color: #20382E; color: #FFFFFF; font-weight: 700; font-size: 14px;' : 'background-color: #FFFFFF; color: #4A5B53; border: 1px solid #E2E7E2; font-weight: 600; font-size: 14px;'">
-                All (Tất cả đơn) <span class="badge rounded-pill" th:classappend="${currentTab == 'ALL'} ? 'bg-light text-dark' : 'bg-secondary text-white'" th:text="${countAll}">0</span>
+                Tất cả đơn <span class="badge rounded-pill" th:classappend="${currentTab == 'ALL'} ? 'bg-light text-dark' : 'bg-secondary text-white'" th:text="${countAll}">0</span>
             </a>
             <a th:href="@{/admin/orders-manage(tab='DELIVERY_SERVICE', keyword=${keyword}, storeId=${currentStoreId}, deliveryDate=${currentDeliveryDate})}"
                class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2 flex-shrink-0"
                id="tabDeliveryServiceOrders"
                th:style="${currentTab == 'DELIVERY_SERVICE' or currentStatus == 'DELIVERY_SERVICE'} ? 'background-color: #20382E; color: #FFFFFF; font-weight: 700; font-size: 14px;' : 'background-color: #FFFFFF; color: #4A5B53; border: 1px solid #E2E7E2; font-weight: 600; font-size: 14px;'">
-                <i class="bi bi-truck"></i> Delivery Service (Đang vận chuyển) <span class="badge rounded-pill" th:classappend="${currentTab == 'DELIVERY_SERVICE'} ? 'bg-primary text-white' : 'bg-secondary text-white'" th:text="${countDeliveryService}">0</span>
+                <i class="bi bi-truck"></i> Đang vận chuyển <span class="badge rounded-pill" th:classappend="${currentTab == 'DELIVERY_SERVICE'} ? 'bg-primary text-white' : 'bg-secondary text-white'" th:text="${countDeliveryService}">0</span>
             </a>
             <a th:href="@{/admin/orders-manage(status='PENDING', keyword=${keyword}, storeId=${currentStoreId}, deliveryDate=${currentDeliveryDate})}"
                class="btn btn-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2 flex-shrink-0"

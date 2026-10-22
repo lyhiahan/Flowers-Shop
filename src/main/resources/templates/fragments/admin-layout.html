@@ -14,7 +14,7 @@
         <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
         <style>
             :root {
-                --admin-bg: #FFF0F3;
+                --admin-bg: #F6F7F4;
                 --admin-surface: #FFFFFF;
                 --admin-sidebar-bg: #1C2D24;
                 --admin-text-main: #20382E;
@@ -32,7 +32,7 @@
             .admin-layout-wrapper {
                 display: flex;
                 min-height: 100vh;
-                background-color: var(--admin-bg);
+                background-color: var(--admin-bg, #F6F7F4) !important;
             }
             .sidebar-admin {
                 width: 255px !important;
@@ -80,7 +80,7 @@
                 flex: 1;
                 min-width: 0;
                 overflow-x: hidden;
-                background-color: var(--admin-bg);
+                background-color: var(--admin-bg, #F6F7F4) !important;
                 padding: 28px 28px 96px 28px !important;
             }
             .admin-body .pagination,
@@ -109,17 +109,48 @@
                 background: #FFFFFF;
                 border: 1px solid var(--admin-border);
                 border-radius: 12px;
-                padding: 18px 20px;
+                padding: 14px 16px;
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
                 box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
                 transition: transform 0.2s ease, box-shadow 0.2s ease;
+                min-height: 118px;
                 height: 100%;
             }
             .kpi-card-admin:hover {
                 transform: translateY(-2px);
                 box-shadow: 0 6px 16px rgba(32, 56, 46, 0.08);
+            }
+            .kpi-icon-badge {
+                width: 36px;
+                height: 36px;
+                min-width: 36px;
+                min-height: 36px;
+                border-radius: 9px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 16px;
+                flex-shrink: 0;
+            }
+            .kpi-card-title {
+                font-size: 12.5px;
+                font-weight: 700;
+                color: #64748B;
+                line-height: 1.3;
+            }
+            .kpi-card-val {
+                font-size: 24px !important;
+                font-weight: 800 !important;
+                line-height: 1.2 !important;
+                margin-top: 4px;
+                margin-bottom: 2px;
+            }
+            .kpi-card-sub {
+                font-size: 11.5px;
+                line-height: 1.25;
+                color: #64748B;
             }
             @media (max-width: 991.98px) {
                 .sidebar-admin {

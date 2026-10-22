@@ -187,10 +187,10 @@ public class AdminCommissionController {
     public String resetDefaultCommissions(RedirectAttributes ra) {
         record DefComm(String name, BigDecimal cost, String desc) {}
         java.util.List<DefComm> defaults = java.util.List.of(
-            new DefComm("Gói Cơ Bản (Standard)", new BigDecimal("10"), "Tỷ lệ chiết khấu sàn 10% áp dụng cho chi nhánh mới gia nhập"),
-            new DefComm("Gói Đối Tác Thân Thiết", new BigDecimal("8"), "Tỷ lệ chiết khấu ưu đãi 8% cho cửa hàng có trên 100 đơn/tháng"),
-            new DefComm("Gói Đối Tác Chiến Lược", new BigDecimal("5"), "Tỷ lệ chiết khấu đặc biệt 5% cho chuỗi phân phối hoa tươi lớn"),
-            new DefComm("Phí Dịch Vụ Cố Định Theo Đơn", new BigDecimal("25000"), "Mức thu cố định 25.000 ₫/đơn cho đơn hoa sự kiện")
+            new DefComm("Gói cơ bản (Standard)", new BigDecimal("10"), "Tỷ lệ chiết khấu sàn 10% áp dụng cho chi nhánh mới gia nhập"),
+            new DefComm("Gói đối tác thân thiết", new BigDecimal("8"), "Tỷ lệ chiết khấu ưu đãi 8% cho cửa hàng có trên 100 đơn/tháng"),
+            new DefComm("Gói đối tác chiến lược", new BigDecimal("5"), "Tỷ lệ chiết khấu đặc biệt 5% cho chuỗi phân phối hoa tươi lớn"),
+            new DefComm("Phí dịch vụ cố định theo đơn", new BigDecimal("25000"), "Mức thu cố định 25.000 ₫/đơn cho đơn hoa sự kiện")
         );
         for (DefComm d : defaults) {
             java.util.Optional<Commission> existing = commissionRepository.findAll().stream()

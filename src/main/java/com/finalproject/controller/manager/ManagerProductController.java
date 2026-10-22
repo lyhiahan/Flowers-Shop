@@ -48,6 +48,8 @@ public class ManagerProductController {
         if (Boolean.TRUE.equals(product.getIsDeleted())) throw new IllegalArgumentException("Sản phẩm đã bị xóa.");
         model.addAttribute("product", product);
         model.addAttribute("categories", categoryRepository.findActiveCategories());
+        model.addAttribute("localStock", inventories.findByStoreIdAndProductId(
+                storeAccess.assignedStore().getId(), id).map(com.finalproject.entity.StoreInventory::getQuantity).orElse(0));
         return "manager/product-form";
     }
 
@@ -256,6 +258,23 @@ public class ManagerProductController {
         inventoryService.setStock(id, quantity);
         ra.addFlashAttribute("successMessage", "Đã cập nhật tồn kho thực tế.");
         return "redirect:/manager/products";
+    }
+
+    @PostMapping("/restock/{id}")
+    public String restock(@PathVariable Long id, @RequestParam("addedQuantity") String addedQuantity,
+                          RedirectAttributes ra) {
+        try {
+            int amount = Integer.parseInt(addedQuantity.trim());
+            int remaining = inventoryService.restockForManager(id, amount);
+            ra.addFlashAttribute("successMessage", "Đã nhập thêm " + amount
+                    + " sản phẩm vào chi nhánh của bạn. Tồn kho hiện là " + remaining + ".");
+        } catch (NumberFormatException ex) {
+            ra.addFlashAttribute("errorMessage", "Số lượng nhập thêm phải là số nguyên dương.");
+        } catch (IllegalArgumentException ex) {
+            ra.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        var product = productRepository.findById(id).orElse(null);
+        return "redirect:/manager/products/" + (product != null && product.getStore() == null ? "branch/" : "edit/") + id;
     }
 
     private com.finalproject.service.CloudinaryService.UploadResult uploadProductImage(org.springframework.web.multipart.MultipartFile file) {

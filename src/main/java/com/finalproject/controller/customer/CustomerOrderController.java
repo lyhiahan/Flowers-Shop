@@ -26,6 +26,7 @@ public class CustomerOrderController {
                                      @RequestParam(value = "size", defaultValue = "5") int size,
                                      Model model) {
         model.addAttribute("stores", storeRepository.findByStatusTrue());
+        model.addAttribute("customerCancellationReasons", com.finalproject.enums.CustomerCancellationReason.values());
         com.finalproject.enums.OrderStatus status = null;
         if (statusStr != null && !statusStr.trim().isEmpty() && !"ALL".equalsIgnoreCase(statusStr)) {
             try {
@@ -64,6 +65,7 @@ public class CustomerOrderController {
             return "redirect:/customer/orders";
         }
         model.addAttribute("order", order);
+        model.addAttribute("customerCancellationReasons", com.finalproject.enums.CustomerCancellationReason.values());
 
         // Lấy danh sách sản phẩm đã được đánh giá trong đơn hàng này
         java.util.List<com.finalproject.entity.Review> reviews = reviewRepository.findByOrderId(id);
@@ -92,15 +94,19 @@ public class CustomerOrderController {
     @PostMapping("/cancel/{id}")
     public String handleCancelOrder(Principal principal,
                                     @PathVariable("id") Long id,
+                                    @RequestParam(value = "reasonCode", required = false) String reasonCode,
+                                    @RequestParam(value = "otherReason", required = false) String otherReason,
+                                    @RequestParam(value = "source", defaultValue = "list") String source,
                                     RedirectAttributes redirectAttributes) {
         try {
-            var order = orderService.cancelOrder(principal.getName(), id);
+            String reason = com.finalproject.enums.CustomerCancellationReason.resolve(reasonCode, otherReason);
+            var order = orderService.cancelOrder(principal.getName(), id, reason);
             String message = order.getStatus() == com.finalproject.enums.OrderStatus.REFUNDED
                     ? "Đã hủy đơn và hoàn tiền thành công." : "Đã hủy đơn hàng #" + id + " thành công!";
             redirectAttributes.addFlashAttribute("successMessage", message);
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
-        return "redirect:/customer/orders";
+        return "detail".equals(source) ? "redirect:/customer/orders/detail/" + id : "redirect:/customer/orders";
     }
 }

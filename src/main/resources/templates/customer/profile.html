@@ -948,18 +948,22 @@
 
                                 <div class="mb-3">
                                     <label for="addRecipient" class="form-label">Tên người nhận <span class="text-danger">*</span></label>
-                                    <input id="addRecipient" name="recipientName" required class="form-control" placeholder="Ví dụ: Anh Tuấn, Chị Hoa...">
+                                    <input id="addRecipient" name="recipientName" required class="form-control" placeholder="Ví dụ: Anh Tuấn, Chị Hoa..."
+                                           th:value="${addressAddDraft != null ? addressAddDraft.recipientName : ''}">
                                 </div>
                                 <div class="mb-3">
                                     <label for="addPhone" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
-                                    <input id="addPhone" name="phone" type="tel" required class="form-control" placeholder="Ví dụ: 0909888777...">
+                                    <input id="addPhone" name="phone" type="tel" required class="form-control" placeholder="Ví dụ: 0909888777..."
+                                           th:value="${addressAddDraft != null ? addressAddDraft.phone : ''}">
                                 </div>
                                 <div class="mb-3">
                                     <label for="addAddress" class="form-label">Địa chỉ chi tiết <span class="text-danger">*</span></label>
-                                    <textarea id="addAddress" name="addressDetail" rows="3" required class="form-control" placeholder="Số nhà, tên đường, phường/xã, quận/huyện..."></textarea>
+                                    <textarea id="addAddress" name="addressDetail" rows="3" required class="form-control" placeholder="Số nhà, tên đường, phường/xã, quận/huyện..."
+                                              th:text="${addressAddDraft != null ? addressAddDraft.addressDetail : ''}"></textarea>
                                 </div>
                                 <div class="form-check mb-4">
-                                    <input class="form-check-input" type="checkbox" name="isDefault" value="true" id="checkDefaultAddress">
+                                    <input class="form-check-input" type="checkbox" name="isDefault" value="true" id="checkDefaultAddress"
+                                           th:checked="${addressAddDraft != null and addressAddDraft.isDefault}">
                                     <label class="form-check-label small" for="checkDefaultAddress">
                                         Đặt địa chỉ này làm mặc định khi thanh toán
                                     </label>
@@ -1042,7 +1046,8 @@
     <!-- ==============================================
          MODAL 3: SỬA ĐỊA CHỈ (#modalEditAddress)
          ============================================== -->
-    <div class="modal fade" id="modalEditAddress" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="modalEditAddress" tabindex="-1" aria-hidden="true"
+         th:attr="data-restore-address-id=${addressEditId}">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rounded-4 border-0 shadow">
                 <div class="modal-header border-bottom">
@@ -1054,20 +1059,26 @@
                 <form id="formEditAddress" method="post">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <div class="modal-body p-4">
+                        <div th:if="${addressEditDraft != null and errorMessage != null}"
+                             class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
                         <div class="mb-3">
                             <label class="form-label">Tên người nhận (*)</label>
-                            <input type="text" name="recipientName" id="editRecipientName" class="form-control" required>
+                            <input type="text" name="recipientName" id="editRecipientName" class="form-control" required
+                                   th:value="${addressEditDraft != null ? addressEditDraft.recipientName : ''}">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Số điện thoại (*)</label>
-                            <input type="tel" name="phone" id="editPhone" class="form-control" required>
+                            <input type="tel" name="phone" id="editPhone" class="form-control" required
+                                   th:value="${addressEditDraft != null ? addressEditDraft.phone : ''}">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Địa chỉ chi tiết (*)</label>
-                            <textarea name="addressDetail" id="editAddressDetail" rows="3" class="form-control" required></textarea>
+                            <textarea name="addressDetail" id="editAddressDetail" rows="3" class="form-control" required
+                                      th:text="${addressEditDraft != null ? addressEditDraft.addressDetail : ''}"></textarea>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="isDefault" value="true" id="editIsDefault">
+                            <input class="form-check-input" type="checkbox" name="isDefault" value="true" id="editIsDefault"
+                                   th:checked="${addressEditDraft != null and addressEditDraft.isDefault}">
                             <label class="form-check-label small" for="editIsDefault">Đặt làm địa chỉ mặc định</label>
                         </div>
                     </div>
@@ -1120,6 +1131,15 @@
     <script th:src="@{/js/profile-images.js}"></script>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modalEl = document.getElementById('modalEditAddress');
+            const addressId = modalEl?.dataset.restoreAddressId;
+            if (addressId && typeof bootstrap !== 'undefined') {
+                document.getElementById('formEditAddress').action = '/customer/profile/address/update/' + encodeURIComponent(addressId);
+                bootstrap.Modal.getOrCreateInstance(modalEl).show();
+            }
+        });
+
         // Đổi vai trò trong modal đăng ký
         function openEditAddressModal(id, recipientName, phone, addressDetail, isDefault) {
             const form = document.getElementById('formEditAddress');

@@ -167,6 +167,9 @@ public class ProfileController {
             ra.addFlashAttribute("successMessage", "Thêm địa chỉ mới thành công!");
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
+            ra.addFlashAttribute("addressAddDraft", java.util.Map.of(
+                    "recipientName", recipientName, "phone", phone,
+                    "addressDetail", addressDetail, "isDefault", isDefault));
         }
         return "redirect:/customer/profile?tab=address";
     }
@@ -185,6 +188,10 @@ public class ProfileController {
             ra.addFlashAttribute("successMessage", "Cập nhật địa chỉ nhận hàng thành công!");
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
+            ra.addFlashAttribute("addressEditId", id);
+            ra.addFlashAttribute("addressEditDraft", java.util.Map.of(
+                    "recipientName", recipientName, "phone", phone,
+                    "addressDetail", addressDetail, "isDefault", isDefault));
         }
         return "redirect:/customer/profile?tab=address";
     }
@@ -254,7 +261,7 @@ public class ProfileController {
         }
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         boolean liked = productService.toggleWishlist(user.getId(), productId);
-        String message = liked ? "Đã theo dõi sản phẩm thành công!" : "Đã hủy theo dõi sản phẩm!";
+        String message = liked ? "Đã thêm sản phẩm vào yêu thích!" : "Đã bỏ yêu thích sản phẩm!";
 
         if ("XMLHttpRequest".equalsIgnoreCase(requestedWith)) {
             int remainingCount = productService.getWishlist(user.getId()).size();

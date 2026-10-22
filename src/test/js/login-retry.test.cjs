@@ -44,11 +44,25 @@ test('retry restoration never overwrites typing or an explicitly selected demo a
     }
 });
 
-test('normal login page does not interfere with intentional browser autofill', () => {
+test('normal login page clears saved credentials before interaction', () => {
     const ui = setup(false);
-    assert.equal(ui.username.value, 'lygiahan');
-    assert.equal(ui.password.value, 'browser-saved-password');
-    assert.equal(ui.timers.length, 0);
+    assert.equal(ui.username.value, '');
+    assert.equal(ui.password.value, '');
+    ui.username.value = 'lygiahan'; ui.password.value = 'browser-saved-password';
+    ui.window.listeners.load();
+    for (const timer of ui.timers) timer();
+    assert.equal(ui.username.value, '');
+    assert.equal(ui.password.value, '');
+});
+
+test('normal login page preserves credentials typed after interaction', () => {
+    const ui = setup(false);
+    ui.document.listeners.keydown();
+    ui.username.value = 'another-user'; ui.password.value = 'their-password';
+    for (const timer of ui.timers) timer();
+    ui.window.listeners.pageshow();
+    assert.equal(ui.username.value, 'another-user');
+    assert.equal(ui.password.value, 'their-password');
 });
 
 test('empty failed identifier stays empty instead of falling back to another account', () => {

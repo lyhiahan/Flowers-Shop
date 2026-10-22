@@ -303,6 +303,30 @@
             gap: 12px;
             margin-bottom: 20px;
         }
+        #review-form, #review-list { scroll-margin-top: 110px; }
+        .product-buy-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+        .product-buy-actions .btn { min-width: 0; padding-inline: 12px !important; white-space: nowrap; }
+        .btn-flower-cart {
+            height: 48px;
+            border: 1.5px solid var(--flower-primary) !important;
+            border-radius: 9999px !important;
+            color: var(--flower-primary) !important;
+            background: #fff !important;
+            font-size: 16px !important;
+            font-weight: 700 !important;
+        }
+        .btn-flower-cart:hover:not(:disabled) { background: #eff5f0 !important; }
+        @media (max-width: 600px) {
+            .product-buy-form { align-items: stretch; flex-wrap: wrap; }
+            .product-buy-actions { flex-basis: 100%; }
+            .product-buy-actions .btn { font-size: 14px !important; }
+        }
 
         .quantity-stepper {
             width: 130px;
@@ -517,7 +541,7 @@
                                 <a class="dropdown-item py-2" th:href="@{/customer/profile}"><i class="bi bi-person me-2 text-secondary"></i> Hồ sơ của tôi</a>
                             </li>
                             <li sec:authorize="hasRole('USER')">
-                                <a class="dropdown-item py-2" th:href="@{/following}"><i class="bi bi-heart me-2 text-danger"></i> Đang theo dõi</a>
+                                <a class="dropdown-item py-2" th:href="@{/customer/profile/wishlist}"><i class="bi bi-heart me-2 text-danger"></i> Hoa yêu thích</a>
                             </li>
                             <li sec:authorize="hasRole('USER')">
                                 <a class="dropdown-item py-2" th:href="@{/customer/orders}"><i class="bi bi-box2-heart me-2 text-secondary"></i> Đơn hoa đã đặt</a>
@@ -657,28 +681,30 @@
                         <span class="text-muted" style="font-size: 14px;">·</span>
                         <div class="product-follow-group">
                         <span class="product-follow-count badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2 py-1" style="font-size: 13.5px;">
-                            <i class="bi bi-people-fill me-1"></i><span id="followerCount" class="fw-bold" th:text="${followerCount != null ? followerCount : 0}">0</span> theo dõi
+                            <i class="bi bi-heart-fill me-1"></i><span id="followerCount" class="fw-bold" th:text="${followerCount != null ? followerCount : 0}">0</span> lượt yêu thích
                         </span>
 
-                        <!-- Nút Theo dõi nhanh -->
+                        <!-- Nút yêu thích sản phẩm -->
                         <form sec:authorize="hasRole('USER')"
-                              th:action="@{/customer/following/toggle/{id}(id=${product.id})}"
+                              th:action="@{/customer/profile/wishlist/toggle/{id}(id=${product.id})}"
                               method="post"
                               class="m-0"
                               onsubmit="toggleDetailFollowAjax(event, this)">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                             <button type="submit" id="btnDetailFollow"
                                     class="product-follow-button btn rounded-pill px-3 py-1 fw-medium d-inline-flex align-items-center transition-all shadow-xs"
                                     th:aria-pressed="${isFollowed}"
+                                    th:aria-label="${isFollowed} ? 'Bỏ yêu thích sản phẩm' : 'Yêu thích sản phẩm'"
                                     th:style="${isFollowed} ? 'background-color: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5; font-size: 13px;' : 'background-color: #FFF1F2; color: #E11D48; border: 1px solid #FECDD3; font-size: 13px;'">
-                                <i class="bi" th:classappend="${isFollowed} ? 'bi-check-circle-fill' : 'bi-plus-circle'" style="font-size: 14px;"></i>
-                                <span th:text="${isFollowed} ? 'Đang theo dõi' : 'Theo dõi'">Theo dõi</span>
+                                <i class="bi" th:classappend="${isFollowed} ? 'bi-heart-fill' : 'bi-heart'" style="font-size: 14px;"></i>
+                                <span th:text="${isFollowed} ? 'Đã yêu thích' : 'Yêu thích'">Yêu thích</span>
                             </button>
                         </form>
                         <a sec:authorize="!hasRole('USER')" th:href="@{/login}"
                            class="product-follow-button btn rounded-pill px-3 py-1 fw-medium d-inline-flex align-items-center shadow-xs"
                            style="background-color: #FFF1F2; color: #E11D48; border: 1px solid #FECDD3; font-size: 13px;">
-                            <i class="bi bi-plus-circle" style="font-size: 14px;"></i>
-                            <span>Theo dõi</span>
+                            <i class="bi bi-heart" style="font-size: 14px;"></i>
+                            <span>Yêu thích</span>
                         </a>
                         </div>
                     </div>
@@ -765,10 +791,24 @@
                             </button>
                         </div>
 
-                        <button type="submit" th:disabled="${availableStock == 0}" class="btn btn-flower-add flex-grow-1" id="detailAddToCartBtn">
-                            <i class="bi bi-bag-plus me-2"></i> Thêm vào giỏ hàng
-                        </button>
+                        <div class="product-buy-actions">
+                            <button type="submit" th:disabled="${availableStock == 0}" class="btn btn-flower-cart" id="detailAddToCartBtn">
+                                <i class="bi bi-bag-plus me-1"></i> Thêm vào giỏ
+                            </button>
+                            <button type="submit" form="detailBuyNowForm" th:disabled="${availableStock == 0}"
+                                    class="btn btn-flower-add" id="detailBuyNowBtn">
+                                <i class="bi bi-lightning-charge-fill me-1"></i> Mua ngay
+                            </button>
+                        </div>
                     </form>
+                    <form sec:authorize="hasRole('USER')" id="detailBuyNowForm" th:action="@{/cart/buy-now}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <input type="hidden" name="productId" th:value="${product.id}">
+                        <input type="hidden" name="storeId" th:value="${purchaseStore != null ? purchaseStore.id : ''}">
+                        <input type="hidden" name="orderType" value="BUY">
+                        <input type="hidden" id="buyNowQuantity" name="quantity" value="1">
+                    </form>
+                    <p class="small text-muted mt-n2 mb-3" sec:authorize="hasRole('USER')">Mua ngay chỉ thanh toán mẫu hoa này. Nếu mẫu đã có trong giỏ, số lượng sẽ đổi theo lựa chọn; các mẫu khác vẫn giữ nguyên.</p>
                     <!-- Dòng thông báo lỗi hiển thị ngay dưới form nếu thêm thất bại -->
                     <p id="detailCartError" class="ajax-cart-error" style="display:none; font-size:13px; color:#c0392b; margin:6px 0 0;"></p>
 
@@ -943,6 +983,8 @@
                 </div>
             </div>
 
+            <div th:if="${reviewError != null and canReview != true}" class="alert alert-warning py-2 px-3 small mb-3" role="alert" th:text="${reviewError}"></div>
+
             <!-- Case 1: Unauthenticated -->
             <div sec:authorize="!isAuthenticated()" class="p-4 bg-light rounded-4 border mb-4 text-center">
                 <div class="fs-2 mb-2">🌸</div>
@@ -973,29 +1015,30 @@
             </div>
 
             <!-- Case 3: Eligible Reviewer -->
-            <div sec:authorize="isAuthenticated()" th:if="${canReview == true}" class="p-4 bg-white border border-success-subtle rounded-4 shadow-sm mb-4">
+            <div id="review-form" sec:authorize="isAuthenticated()" th:if="${canReview == true}" class="p-4 bg-white border border-success-subtle rounded-4 shadow-sm mb-4">
+                <div th:if="${reviewError}" class="alert alert-warning py-2 px-3 small mb-3" role="alert" th:text="${reviewError}"></div>
                 <div class="d-flex align-items-center gap-2 mb-3">
                     <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill small fw-semibold">
                         <i class="bi bi-patch-check-fill me-1"></i> Đã Mua & Nhận Hàng Thành Công
                     </span>
                     <h6 class="fw-bold mb-0 text-dark">Viết Đánh Giá Sản Phẩm (Tối thiểu 50 ký tự)</h6>
                 </div>
-                <form th:action="@{/product/{id}/review(id=${product.id})}" method="post" onsubmit="return validateReviewLength();">
+                <form th:action="@{/product/{id}/review(id=${product.id})}" method="post" enctype="multipart/form-data" novalidate onsubmit="return validateReviewLength();">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <input type="hidden" name="orderId" th:value="${eligibleOrderId}">
                     <div class="row g-3 mb-3">
-                        <div class="col-md-3">
-                            <label class="form-label small fw-semibold">Chấm sao (*)</label>
-                            <select name="rating" class="form-select" required>
-                                <option value="5" selected>⭐⭐⭐⭐⭐ (5 sao - Tuyệt vời)</option>
-                                <option value="4">⭐⭐⭐⭐ (4 sao - Rất tốt)</option>
-                                <option value="3">⭐⭐⭐ (3 sao - Bình thường)</option>
-                                <option value="2">⭐⭐ (2 sao - Tạm được)</option>
-                                <option value="1">⭐ (1 sao - Thất vọng)</option>
+                        <div class="col-md-4">
+                            <label for="reviewRating" class="form-label small fw-semibold">Chấm sao <span class="text-danger">*</span></label>
+                            <select id="reviewRating" name="rating" class="form-select" required>
+                                <option th:each="star : ${#numbers.sequence(5, 1)}" th:value="${star}"
+                                        th:selected="${reviewRating != null ? reviewRating == star : star == 5}"
+                                        th:text="${star} + ' sao'">5 sao</option>
                             </select>
                         </div>
-                        <div class="col-md-9">
-                            <label class="form-label small fw-semibold">Đường dẫn hình ảnh đính kèm (nếu có)</label>
-                            <input type="url" name="imageUrl" class="form-control" placeholder="https://example.com/flower-review.jpg">
+                        <div class="col-md-8">
+                            <label for="reviewImage" class="form-label small fw-semibold">Ảnh đánh giá (không bắt buộc)</label>
+                            <input id="reviewImage" type="file" name="imageFile" class="form-control" accept="image/jpeg,image/png,image/webp,image/gif">
+                            <div class="form-text">JPG, PNG, WEBP hoặc GIF, tối đa 10 MB.</div>
                         </div>
                     </div>
 
@@ -1004,10 +1047,10 @@
                             <label class="form-label small fw-semibold mb-0">Nội dung bình luận & trải nghiệm (* Tối thiểu 50 ký tự)</label>
                             <small id="charCounter" class="text-muted fw-bold">0 / 50 ký tự</small>
                         </div>
-                        <textarea id="reviewContent" name="content" rows="3" class="form-control"
+                        <textarea id="reviewContent" name="content" rows="3" class="form-control" maxlength="1000"
                                   required placeholder="Hãy chia sẻ cảm nhận chi tiết của bạn về độ tươi của hoa, cách đóng gói, thiệp mừng và thái độ phục vụ của shipper (tối thiểu 50 ký tự)..."
-                                  oninput="updateCharCount()"></textarea>
-                        <div id="reviewWarning" class="text-danger small mt-1 d-none">⚠️ Nội dung bình luận chưa đủ 50 ký tự! Vui lòng viết thêm cảm nhận.</div>
+                                  oninput="updateCharCount()" th:text="${reviewContent}"></textarea>
+                        <div id="reviewWarning" class="text-danger small mt-1 d-none" role="alert"></div>
                     </div>
 
                     <button type="submit" class="btn btn-flower-add rounded-pill px-4">Gửi Đánh Giá</button>
@@ -1015,6 +1058,8 @@
             </div>
 
             <!-- Reviews List -->
+            <div id="review-list">
+            <div th:if="${reviewSuccess}" class="alert alert-success py-2 px-3 small mb-3" role="status" th:text="${reviewSuccess}"></div>
             <div th:if="${#lists.isEmpty(reviews)}" class="text-center py-4 text-muted">
                 <i class="bi bi-chat-heart fs-1 text-secondary opacity-50"></i>
                 <p class="mt-2 mb-0">Chưa có đánh giá nào cho mẫu hoa này. Hãy là người đầu tiên trải nghiệm và để lại nhận xét!</p>
@@ -1040,6 +1085,7 @@
                         <img th:src="${r.imageUrl}" class="rounded-3 border" width="120" height="120" style="object-fit: cover;">
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     </main>
@@ -1114,7 +1160,7 @@
             const text = document.getElementById('reviewContent').value.trim();
             const counter = document.getElementById('charCounter');
             const warning = document.getElementById('reviewWarning');
-            counter.textContent = text.length + ' / 50 ký tự';
+            counter.textContent = text.length + ' / 50-1.000 ký tự';
             if (text.length >= 50) {
                 counter.className = 'text-success fw-bold';
                 warning.classList.add('d-none');
@@ -1125,13 +1171,28 @@
 
         function validateReviewLength() {
             const text = document.getElementById('reviewContent').value.trim();
-            if (text.length < 50) {
-                document.getElementById('reviewWarning').classList.remove('d-none');
-                alert('Bình luận bắt buộc tối thiểu 50 ký tự theo quy định!');
+            const warning = document.getElementById('reviewWarning');
+            if (text.length < 50 || text.length > 1000) {
+                warning.textContent = 'Nội dung đánh giá cần từ 50 đến 1.000 ký tự (hiện có ' + text.length + ').';
+                warning.classList.remove('d-none');
+                document.getElementById('reviewContent').focus();
+                return false;
+            }
+            const file = document.getElementById('reviewImage').files[0];
+            if (file && !['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
+                warning.textContent = 'Vui lòng chọn ảnh JPG, PNG, WEBP hoặc GIF.';
+                warning.classList.remove('d-none');
+                return false;
+            }
+            if (file && file.size > 10 * 1024 * 1024) {
+                warning.textContent = 'Ảnh không được vượt quá 10 MB.';
+                warning.classList.remove('d-none');
                 return false;
             }
             return true;
         }
+
+        if (document.getElementById('reviewContent')) updateCharCount();
 
         function changeQty(delta) {
             const input = document.getElementById('detailQtyInput');
@@ -1140,6 +1201,8 @@
             if (input.disabled) return;
             val = Math.max(1, Math.min(parseInt(input.max, 10) || 1, val + delta));
             input.value = val;
+            const buyNowQuantity = document.getElementById('buyNowQuantity');
+            if (buyNowQuantity) buyNowQuantity.value = val;
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -1192,28 +1255,29 @@
                     window.location.href = '/login';
                     return null;
                 }
-                if (!res.ok || res.redirected) throw new Error('Không cập nhật được theo dõi. Vui lòng kiểm tra đăng nhập rồi tải lại trang.');
+                if (!res.ok || res.redirected) throw new Error('Không cập nhật được yêu thích. Vui lòng kiểm tra đăng nhập rồi tải lại trang.');
                     return res.json();
             })
             .then(data => {
                 if (!data) return;
-                showDetailToast(data.message || (data.liked ? 'Đã theo dõi sản phẩm thành công!' : 'Đã hủy theo dõi sản phẩm!'));
+                showDetailToast(data.message || (data.liked ? 'Đã thêm sản phẩm vào yêu thích!' : 'Đã bỏ yêu thích sản phẩm!'));
                 if (btn) {
                     const icon = btn.querySelector('i');
                     const textSpan = btn.querySelector('span');
                     btn.setAttribute('aria-pressed', String(Boolean(data.liked)));
+                    btn.setAttribute('aria-label', data.liked ? 'Bỏ yêu thích sản phẩm' : 'Yêu thích sản phẩm');
                     if (data.liked) {
                         btn.style.backgroundColor = '#FEE2E2';
                         btn.style.color = '#DC2626';
                         btn.style.borderColor = '#FCA5A5';
-                        if (icon) icon.className = 'bi bi-check-circle-fill';
-                        if (textSpan) textSpan.textContent = 'Đang theo dõi';
+                        if (icon) icon.className = 'bi bi-heart-fill';
+                        if (textSpan) textSpan.textContent = 'Đã yêu thích';
                     } else {
                         btn.style.backgroundColor = '#FFF1F2';
                         btn.style.color = '#E11D48';
                         btn.style.borderColor = '#FECDD3';
-                        if (icon) icon.className = 'bi bi-plus-circle';
-                        if (textSpan) textSpan.textContent = 'Theo dõi';
+                        if (icon) icon.className = 'bi bi-heart';
+                        if (textSpan) textSpan.textContent = 'Yêu thích';
                     }
                 }
                 const countBadge = document.getElementById('followerCount');
@@ -1222,7 +1286,7 @@
                 }
             })
             .catch(err => {
-                console.error('Lỗi theo dõi:', err);
+                console.error('Lỗi yêu thích:', err);
                 showDetailToast('Chưa xác nhận được kết quả. Vui lòng tải lại trang trước khi thử lại.');
             }).finally(() => { delete formEl.dataset.pending; if (btn) btn.disabled = false; });
         }

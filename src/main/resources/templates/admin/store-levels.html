@@ -1,31 +1,8 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hạng chi nhánh - Quản Trị Hệ Thống Hoa Tươi</title>
-    <!-- Google Fonts: Nunito & Bootstrap 5 & Icons -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
-    <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
+    <th:block th:replace="~{fragments/admin-layout :: assets('Hạng chi nhánh - Quản Trị Hệ Thống Hoa Tươi')}"></th:block>
     <style>
-        body, .admin-body { 
-            font-family: 'Nunito', sans-serif !important; 
-            background-color: #F6F7F4 !important; 
-            color: #24332C; 
-            min-height: 100vh; 
-            font-size: 16px;
-        }
-        .main-wrapper { 
-            flex: 1; 
-            overflow-x: hidden; 
-            background-color: #F6F7F4 !important; 
-        }
         .page-title {
             font-size: 26px !important;
             font-weight: 800 !important;
@@ -202,135 +179,36 @@
     </style>
 </head>
 <body class="admin-body">
-<div class="d-flex">
-    <!-- Sidebar Quản Trị Hệ Thống Chuẩn Thương Hiệu Tiệm Hoa -->
-    <aside class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white" style="width: 260px; min-width: 260px; background-color: #1C2E24;">
-        <a th:href="@{/admin/dashboard}" class="d-flex align-items-center gap-3 mb-4 text-white text-decoration-none px-2 pt-2">
-            <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img flex-shrink-0" style="width: 40px; height: 40px; border-radius: 8px;">
-            <div>
-                <div class="fw-bold text-white" style="font-size: 16px; line-height: 1.2; letter-spacing: 0.5px;">HOA TƯƠI SÀI GÒN</div>
-                <div class="small" style="font-size: 11px; color: #9DB7AA !important; letter-spacing: 0.05em;">QUẢN TRỊ VIÊN HỆ THỐNG</div>
-            </div>
-        </a>
-
-        <ul class="nav nav-pills flex-column mb-auto gap-1">
-            <li>
-                <a th:href="@{/admin/dashboard}" class="nav-link">
-                    <i class="bi bi-grid"></i>
-                    <span>Thống kê</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/users}" class="nav-link">
-                    <i class="bi bi-people"></i>
-                    <span>Người dùng</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/stores}" class="nav-link">
-                    <i class="bi bi-shop"></i>
-                    <span>Cửa hàng</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/store-levels}" class="nav-link active" id="sidebarStoreLevelsLink" data-testid="sidebarStoreLevelsLink">
-                    <i class="bi bi-award"></i>
-                    <span>Hạng chi nhánh</span>
-                </a>
-            </li>
-
-            <li>
-                <a th:href="@{/admin/products-manage}" class="nav-link">
-                    <i class="bi bi-box-seam"></i>
-                    <span>Sản phẩm</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/orders-manage}" class="nav-link">
-                    <i class="bi bi-bag"></i>
-                    <span>Đơn hàng</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/categories}" class="nav-link">
-                    <i class="bi bi-tags"></i>
-                    <span>Danh mục hoa</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/styles}" class="nav-link">
-                    <i class="bi bi-sliders"></i>
-                    <span>Thuộc tính sản phẩm</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/deliveries}" class="nav-link">
-                    <i class="bi bi-truck"></i>
-                    <span>Đơn vị vận chuyển</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/vouchers}" class="nav-link">
-                    <i class="bi bi-ticket-perforated"></i>
-                    <span>Khuyến mãi</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/user-levels}" class="nav-link">
-                    <i class="bi bi-award"></i>
-                    <span>Cấp bậc khách</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/transactions}" class="nav-link">
-                    <i class="bi bi-journal-text"></i>
-                    <span>Lịch sử giao dịch</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/}" class="nav-link" target="_blank" style="color: #9DB7AA;">
-                    <i class="bi bi-box-arrow-up-right"></i>
-                    <span>Xem cửa hàng</span>
-                </a>
-            </li>
-        </ul>
-
-        <hr class="border-secondary my-2">
-        <form th:action="@{/logout}" method="post" class="d-inline">
-            <button type="submit" class="btn btn-outline-danger btn-sm w-100 d-flex align-items-center justify-content-center gap-2" style="border-radius: 8px;">
-                <i class="bi bi-box-arrow-right"></i> Đăng xuất
-            </button>
-        </form>
-    </aside>
+<div class="admin-layout-wrapper">
+    <!-- Sidebar -->
+    <aside th:replace="~{fragments/admin-layout :: sidebar('store-levels')}"></aside>
 
     <!-- Main Content -->
-    <div class="main-wrapper p-4">
-        <!-- 1. Header: Hạng chi nhánh + Nút Thêm hạng + Menu phụ nạp chuẩn -->
-        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+    <main class="main-wrapper-admin">
+        <!-- 1. Header: Hạng chi nhánh trong hệ thống + Nút Thêm cấp bậc + Quy chế xét duyệt -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
             <div>
                 <div class="d-flex align-items-center gap-3">
-                    <h1 class="page-title mb-0">Hạng chi nhánh</h1>
-                    <span class="badge rounded-pill"
-                          style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; font-size: 13.5px; font-weight: 700; padding: 5px 13px;"
-                          th:text="${#lists.size(levels)} + ' hạng'">
-                        3 hạng
+                    <h1 class="admin-page-title mb-0" style="font-size: 28px !important; font-weight: 800; color: #20382E;">Hạng chi nhánh trong hệ thống</h1>
+                    <span class="badge rounded-pill" style="background-color: #E5EEE8; color: #20382E; border: 1px solid #D1E5DA; font-size: 14.5px; font-weight: 700; padding: 6px 14px;">
+                        <span th:text="${totalElements != null ? totalElements : (levels != null ? #lists.size(levels) : 0)}">3</span> cấp bậc
                     </span>
                 </div>
-                <p class="page-description mb-0 mt-1">
-                    Xét duyệt và đãi ngộ thi đua cho các chi nhánh trong hệ thống
-                </p>
+                <p class="mb-0 mt-1" style="font-size: 16px; color: #66736B;">Xét duyệt và đãi ngộ thi đua cho các chi nhánh trong toàn hệ thống</p>
             </div>
             <div class="d-flex align-items-center gap-2">
                 <!-- Bước 6: Chọn nút Thêm cấp bậc để thêm level mới -->
-                <a th:href="@{/admin/store-levels/create}" id="btnNewStoreLevel" data-testid="btnNewStoreLevel" class="btn btn-primary-dark shadow-sm d-inline-flex align-items-center gap-2">
+                <a th:href="@{/admin/store-levels/create}" id="btnNewStoreLevel" data-testid="btnNewStoreLevel" 
+                   class="btn btn-sm d-inline-flex align-items-center gap-2 text-white shadow-sm"
+                   style="background-color: #20382E; border-color: #20382E; border-radius: 10px; padding: 9px 18px; font-weight: 700; font-size: 14.5px;">
                     <i class="bi bi-plus-lg"></i> Thêm cấp bậc
                 </a>
 
                 <!-- Nút xem quy chế xét duyệt -->
-                <button type="button" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 fw-semibold shadow-sm"
+                <button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-2 shadow-sm"
                         data-bs-toggle="modal" data-bs-target="#policyGuideModal"
-                        style="height: 44px; padding: 0 16px; border-radius: 10px; border-color: #D1E5DA; background-color: #FFFFFF; color: #20382E; font-size: 14.5px;">
-                    <i class="bi bi-book text-primary"></i> Quy chế xét duyệt
+                        style="height: 40px; padding: 0 16px; border-radius: 10px; border-color: #D1E5DA; background-color: #FFFFFF; color: #20382E; font-size: 14.5px; font-weight: 600;">
+                    <i class="bi bi-book text-success"></i> Quy chế xét duyệt
                 </button>
             </div>
         </div>
@@ -348,140 +226,194 @@
             <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
         </div>
 
+        <!-- Thanh tìm kiếm & lọc cấp bậc chi nhánh (Đồng bộ với trang Cửa hàng) -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white" style="border: 1px solid #E2E7E2 !important; border-radius: 14px;">
+            <div class="card-body p-3">
+                <form th:action="@{/admin/store-levels}" method="get" class="row g-2 align-items-center">
+                    <div class="col-md-9 col-lg-9">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 ps-3" style="border-radius: 10px 0 0 10px; border-color: #E2E7E2;">
+                                <i class="bi bi-search text-muted"></i>
+                            </span>
+                            <input type="text" name="keyword" class="form-control border-start-0 py-2" 
+                                   placeholder="Tìm theo tên cấp bậc, mã ID hoặc doanh số tối thiểu..."
+                                   th:value="${keyword}"
+                                   style="border-radius: 0 10px 10px 0; border-color: #E2E7E2; font-size: 15px;">
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-lg-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-sm d-inline-flex align-items-center justify-content-center gap-2 text-white shadow-sm flex-grow-1"
+                                style="background-color: #20382E; border-radius: 20px; font-weight: 600; padding: 8px 24px; font-size: 14.5px;">
+                            <i class="bi bi-funnel"></i> Lọc
+                        </button>
+                        <a th:href="@{/admin/store-levels}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center justify-content-center"
+                           style="border-radius: 20px; font-weight: 600; padding: 8px 18px; font-size: 14.5px; border-color: #E2E7E2; background-color: #FFFFFF;">
+                            Đặt lại
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- Bước 4: Hiển thị bảng danh sách các store level -->
-        <div class="card-table-wrap shadow-sm">
-            <div class="table-responsive">
-                <table class="table align-middle mb-0" id="storeLevelsTable" data-testid="storeLevelsTable">
-                    <thead>
-                    <tr>
-                        <th class="ps-4" style="width: 8%; min-width: 60px;">ID</th>
-                        <th style="width: 22%; min-width: 150px;">Cấp bậc cửa hàng</th>
-                        <th style="width: 20%; min-width: 140px;">Doanh số tối thiểu</th>
-                        <th style="width: 15%; min-width: 120px;">Giảm phí sàn</th>
-                        <th class="text-center" style="width: 10%; min-width: 70px;">Chi nhánh</th>
-                        <th class="text-center" style="width: 12%; min-width: 100px;">Trạng thái</th>
-                        <th class="text-end pe-4" style="width: 13%; min-width: 130px;">Thao tác</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <!-- Khi danh sách trống -->
-                    <tr th:if="${#lists.isEmpty(levels)}">
-                        <td colspan="7" class="text-center py-5 text-muted" style="font-size: 15px;">
-                            <i class="bi bi-award fs-1 d-block mb-2 text-secondary opacity-50"></i>
-                            Chưa có cấp bậc cửa hàng nào. Nhấn <strong>"New level"</strong> để khởi tạo.
-                        </td>
-                    </tr>
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4" style="border: 1px solid #E2E7E2 !important; border-radius: 14px;">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0" id="storeLevelsTable" data-testid="storeLevelsTable">
+                        <thead>
+                        <tr style="background-color: #E5EEE8; border-bottom: 2px solid #D1E5DA;">
+                            <th class="ps-4 py-3" style="background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; letter-spacing: 0.2px; width: 70px;">Mã</th>
+                            <th class="py-3" style="background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; letter-spacing: 0.2px; min-width: 200px;">Cấp bậc chi nhánh</th>
+                            <th class="py-3" style="background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; letter-spacing: 0.2px; min-width: 170px;">Doanh số tối thiểu</th>
+                            <th class="py-3 text-center" style="background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; letter-spacing: 0.2px; width: 130px;">Giảm phí sàn</th>
+                            <th class="py-3 text-center" style="background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; letter-spacing: 0.2px; width: 140px;">Chi nhánh</th>
+                            <th class="py-3 text-center" style="background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; letter-spacing: 0.2px; width: 150px;">Trạng thái</th>
+                            <th class="pe-4 py-3 text-end" style="background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important; letter-spacing: 0.2px; min-width: 240px;">Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Khi danh sách trống -->
+                        <tr th:if="${#lists.isEmpty(levels)}">
+                            <td colspan="7" class="text-center py-5 text-muted" style="font-size: 15px;">
+                                <i class="bi bi-award fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                                Chưa có cấp bậc chi nhánh nào. Nhấn <strong>"Thêm cấp bậc"</strong> để khởi tạo.
+                            </td>
+                        </tr>
 
-                    <!-- Từng dòng hạng chi nhánh -->
-                    <tr th:each="l : ${levels}">
-                        <!-- ID -->
-                        <td class="ps-4 fw-semibold text-secondary" th:text="'#' + ${l.id}">#1</td>
+                        <!-- Từng dòng hạng chi nhánh -->
+                        <tr th:each="l : ${levels}">
+                            <!-- ID -->
+                            <td class="ps-4 fw-semibold text-secondary" th:text="'#' + ${l.id}">#1</td>
 
-                        <!-- 1. Hạng (Tên bấm được để xem chi tiết) -->
-                        <td>
-                            <div>
-                                <button type="button" class="level-name-btn fw-bold"
-                                        data-bs-toggle="modal" th:data-bs-target="'#detailModal' + ${l.id}"
-                                        th:text="${l.name}">
-                                    Tiêu chuẩn
-                                </button>
-                                <div th:if="${l.minPoint == 0 or l.name.toLowerCase().contains('chuẩn')}" class="mt-0.5">
-                                    <span class="badge bg-light text-secondary border" style="font-size: 11px; font-weight: 600; padding: 2px 7px;">Mặc định</span>
+                            <!-- 1. Hạng (Tên bấm được để xem chi tiết) -->
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white flex-shrink-0" 
+                                         style="width: 38px; height: 38px; background-color: #20382E; font-size: 16px;">
+                                        <i class="bi bi-award"></i>
+                                    </div>
+                                    <div>
+                                        <button type="button" class="level-name-btn fw-bold p-0 border-0 bg-transparent text-start"
+                                                data-bs-toggle="modal" th:data-bs-target="'#detailModal' + ${l.id}"
+                                                style="color: #20382E; font-size: 15.5px;"
+                                                th:text="${l.name}">
+                                            Tiêu chuẩn
+                                        </button>
+                                        <div th:if="${l.minPoint == 0 or (l.name != null and l.name.toLowerCase().contains('chuẩn'))}" class="mt-0.5">
+                                            <span class="badge rounded-pill bg-light text-secondary border" style="font-size: 11px; font-weight: 600; padding: 2px 8px;">Mặc định</span>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </td>
+                            </td>
 
-                        <!-- 2. Điều kiện doanh số -->
-                        <td>
-                            <span th:if="${l.minPoint == null or l.minPoint == 0}" class="text-muted">0 ₫ (Mặc định)</span>
-                            <span th:if="${l.minPoint != null and l.minPoint > 0}" style="font-weight: 600; color: #24332C; white-space: nowrap;">
-                                Từ <span th:text="${#numbers.formatDecimal(l.minPoint >= 100000 ? l.minPoint : l.minPoint * 10000, 0, 'COMMA', 0, 'POINT')}">10.000.000</span> ₫
-                            </span>
-                        </td>
+                            <!-- 2. Điều kiện doanh số -->
+                            <td>
+                                <span th:if="${l.minPoint == null or l.minPoint == 0}" class="text-muted" style="font-size: 15px;">0 ₫ (Mặc định)</span>
+                                <span th:if="${l.minPoint != null and l.minPoint > 0}" style="font-weight: 700; color: #20382E; font-size: 15.5px; white-space: nowrap;">
+                                    Từ <span th:text="${#numbers.formatDecimal(l.minPoint >= 100000 ? l.minPoint : l.minPoint * 10000, 0, 'COMMA', 0, 'POINT')}">10.000.000</span> ₫
+                                </span>
+                            </td>
 
-                        <!-- 3. Chiết khấu giảm phí sàn -->
-                        <td>
-                            <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 13px;" th:text="${l.discount != null ? l.discount + '%' : '0%'}">
-                                0%
-                            </span>
-                        </td>
+                            <!-- 3. Chiết khấu giảm phí sàn -->
+                            <td class="text-center">
+                                <span class="badge rounded-pill px-3 py-2 fw-bold" 
+                                      style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; font-size: 13.5px;" 
+                                      th:text="${l.discount != null ? l.discount + '%' : '0%'}">
+                                    0%
+                                </span>
+                            </td>
 
-                        <!-- 4. Chi nhánh -->
-                        <td class="text-center">
-                            <span class="shop-count-badge"
-                                  data-bs-toggle="modal" th:data-bs-target="'#shopsModal' + ${l.id}"
-                                  title="Bấm để xem danh sách chi nhánh"
-                                  th:text="${stores != null ? #lists.size(stores.?[storeLevel != null and storeLevel.id == #root.l.id]) : 0}">
-                                0
-                            </span>
-                        </td>
+                            <!-- 4. Chi nhánh -->
+                            <td class="text-center">
+                                <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-bold d-inline-flex align-items-center gap-1 shadow-sm"
+                                        data-bs-toggle="modal" th:data-bs-target="'#shopsModal' + ${l.id}"
+                                        style="background-color: #EBF3ED; color: #20382E; border: 1px solid #CCE0D3; font-size: 13px;"
+                                        title="Bấm để xem danh sách chi nhánh">
+                                    <i class="bi bi-shop"></i>
+                                    <span th:text="${stores != null ? #lists.size(stores.?[storeLevel != null and storeLevel.id == #root.l.id]) : 0}">0</span> chi nhánh
+                                </button>
+                            </td>
 
-                        <!-- 5. Trạng thái -->
-                        <td class="text-center">
-                            <span th:if="${l.isDeleted == null or !l.isDeleted}" class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill" style="font-size: 12.5px;">
-                                <i class="bi bi-check-circle-fill me-1"></i> Đang áp dụng
-                            </span>
-                            <span th:if="${l.isDeleted != null and l.isDeleted}" class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 rounded-pill" style="font-size: 12.5px;">
-                                <i class="bi bi-x-circle-fill me-1"></i> Đã xóa
-                            </span>
-                        </td>
+                            <!-- 5. Trạng thái -->
+                            <td class="text-center">
+                                <span th:if="${l.isDeleted == null or !l.isDeleted}" 
+                                      class="badge rounded-pill px-3 py-2 d-inline-flex align-items-center gap-1" 
+                                      style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; font-size: 13px; font-weight: 700;">
+                                    <i class="bi bi-check-circle-fill text-success"></i> Đang áp dụng
+                                </span>
+                                <span th:if="${l.isDeleted != null and l.isDeleted}" 
+                                      class="badge rounded-pill px-3 py-2 d-inline-flex align-items-center gap-1" 
+                                      style="background-color: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; font-size: 13px; font-weight: 700;">
+                                    <i class="bi bi-x-circle-fill text-danger"></i> Đã xóa
+                                </span>
+                            </td>
 
-                        <!-- 6. Thao tác: Edit, Delete, Restore -->
-                        <td class="text-end pe-4" style="white-space: nowrap;">
-                            <div class="d-inline-flex align-items-center gap-1">
-                                <!-- Alternative 6a & 7a: Chọn nút Edit tại level muốn chỉnh sửa -> Form chỉnh sửa level -->
-                                <a th:href="@{'/admin/store-levels/edit/' + ${l.id}}"
-                                   th:id="'btnEditStoreLevel_' + ${l.id}"
-                                   th:data-testid="'btnEditStoreLevel_' + ${l.id}"
-                                   class="btn btn-sm btn-outline-secondary py-1 px-2 d-inline-flex align-items-center gap-1 shadow-sm"
-                                   style="border-radius: 8px; font-size: 13.5px; font-weight: 600;"
-                                   title="Chỉnh sửa level">
-                                    <i class="bi bi-pencil-square text-success"></i> Edit
-                                </a>
-
-                                <!-- Alternative 6-10b: Chọn nút Delete để xóa level -->
-                                <form th:if="${l.isDeleted == null or !l.isDeleted}" 
-                                      th:action="@{'/admin/store-levels/delete/' + ${l.id}}" 
-                                      method="post" class="d-inline"
-                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa level này?');">
-                                    <button type="submit" 
-                                            th:id="'btnDeleteStoreLevel_' + ${l.id}"
-                                            th:data-testid="'btnDeleteStoreLevel_' + ${l.id}"
-                                            class="btn btn-sm btn-outline-danger py-1 px-2 d-inline-flex align-items-center gap-1 shadow-sm"
-                                            style="border-radius: 8px; font-size: 13.5px; font-weight: 600;"
-                                            title="Xóa level">
-                                        <i class="bi bi-trash"></i> Delete
+                            <!-- 6. Thao tác: Chi tiết, Sửa, Xóa, Khôi phục -->
+                            <td class="text-end pe-4" style="white-space: nowrap;">
+                                <div class="d-inline-flex align-items-center gap-2">
+                                    <!-- Nút Chi tiết -->
+                                    <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-1"
+                                            data-bs-toggle="modal" th:data-bs-target="'#detailModal' + ${l.id}"
+                                            style="height: 34px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px; border: 1px solid #D1E5DA; background-color: #FFFFFF; color: #20382E; white-space: nowrap;">
+                                        <i class="bi bi-eye"></i> Chi tiết
                                     </button>
-                                </form>
 
-                                <!-- Alternative 6-10c: Chọn nút Restore để khôi phục level -->
-                                <form th:if="${l.isDeleted != null and l.isDeleted}" 
-                                      th:action="@{'/admin/store-levels/restore/' + ${l.id}}" 
-                                      method="post" class="d-inline"
-                                      onsubmit="return confirm('Bạn có chắc chắn muốn khôi phục level này?');">
-                                    <button type="submit" 
-                                            th:id="'btnRestoreStoreLevel_' + ${l.id}"
-                                            th:data-testid="'btnRestoreStoreLevel_' + ${l.id}"
-                                            class="btn btn-sm btn-outline-success py-1 px-2 d-inline-flex align-items-center gap-1 shadow-sm"
-                                            style="border-radius: 8px; font-size: 13.5px; font-weight: 600;"
-                                            title="Khôi phục level">
-                                        <i class="bi bi-arrow-counterclockwise"></i> Restore
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+                                    <!-- Alternative 6a & 7a: Chọn nút Sửa (Edit) -->
+                                    <a th:href="@{'/admin/store-levels/edit/' + ${l.id}}"
+                                       th:id="'btnEditStoreLevel_' + ${l.id}"
+                                       th:data-testid="'btnEditStoreLevel_' + ${l.id}"
+                                       class="btn btn-sm d-inline-flex align-items-center gap-1"
+                                       style="height: 34px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px; border: 1px solid #A5D6A7; background-color: #E8F5E9; color: #2E7D32; white-space: nowrap;"
+                                       title="Chỉnh sửa level">
+                                        <i class="bi bi-pencil-square"></i> Sửa
+                                    </a>
+
+                                    <!-- Alternative 6-10b: Chọn nút Xóa (Delete) -->
+                                    <form th:if="${l.isDeleted == null or !l.isDeleted}" 
+                                          th:action="@{'/admin/store-levels/delete/' + ${l.id}}" 
+                                          method="post" class="d-inline m-0"
+                                          onsubmit="return confirm('Bạn có chắc chắn muốn xóa level này?');">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                        <button type="submit" 
+                                                th:id="'btnDeleteStoreLevel_' + ${l.id}"
+                                                th:data-testid="'btnDeleteStoreLevel_' + ${l.id}"
+                                                class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1"
+                                                style="height: 34px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px; border: 1px solid #FCA5A5; background-color: #FFF5F5; color: #DC2626; white-space: nowrap;"
+                                                title="Xóa level">
+                                            <i class="bi bi-trash"></i> Xóa
+                                        </button>
+                                    </form>
+
+                                    <!-- Alternative 6-10c: Chọn nút Khôi phục (Restore) -->
+                                    <form th:if="${l.isDeleted != null and l.isDeleted}" 
+                                          th:action="@{'/admin/store-levels/restore/' + ${l.id}}" 
+                                          method="post" class="d-inline m-0"
+                                          onsubmit="return confirm('Bạn có chắc chắn muốn khôi phục level này?');">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                        <button type="submit" 
+                                                th:id="'btnRestoreStoreLevel_' + ${l.id}"
+                                                th:data-testid="'btnRestoreStoreLevel_' + ${l.id}"
+                                                class="btn btn-sm btn-outline-success d-inline-flex align-items-center gap-1"
+                                                style="height: 34px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px; border: 1px solid #86EFAC; background-color: #F0FDF4; color: #16A34A; white-space: nowrap;"
+                                                title="Khôi phục level">
+                                            <i class="bi bi-arrow-counterclockwise"></i> Khôi phục
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
         <!-- Bước 5: Chọn Next (hoặc Previous, hoặc trang bất kỳ) để xem trang tiếp theo (hoặc trang trước, hoặc trang tương ứng) -->
-        <nav id="storeLevelsPagination" data-testid="storeLevelsPagination" th:if="${totalPages > 1}" class="mt-4 d-flex justify-content-center" aria-label="Store levels pagination">
-            <ul class="pagination mb-0 gap-1">
+        <nav id="storeLevelsPagination" data-testid="storeLevelsPagination" th:if="${totalPages > 1}" class="my-3" aria-label="Store levels pagination">
+            <ul class="pagination mb-0">
                 <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
                     <a class="page-link" id="btnPrevPage" data-testid="btnPrevPage" th:href="@{/admin/store-levels(page=${currentPage - 1}, size=${pageSize}, keyword=${keyword})}">
-                        <i class="bi bi-chevron-left me-1"></i> Previous
+                        Previous
                     </a>
                 </li>
                 <li th:each="p : ${#numbers.sequence(0, totalPages - 1)}" class="page-item" th:classappend="${p == currentPage} ? 'active' : ''">
@@ -489,12 +421,12 @@
                 </li>
                 <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled' : ''">
                     <a class="page-link" id="btnNextPage" data-testid="btnNextPage" th:href="@{/admin/store-levels(page=${currentPage + 1}, size=${pageSize}, keyword=${keyword})}">
-                        Next <i class="bi bi-chevron-right ms-1"></i>
+                        Next
                     </a>
                 </li>
             </ul>
         </nav>
-    </div>
+    </main>
 </div>
 
 <!-- ============================================================== -->
@@ -662,61 +594,127 @@
 
     <!-- MODAL 1: CHI TIẾT ĐIỀU KIỆN, KỲ HƯỞNG & CÁCH CHI TRẢ -->
     <div class="modal fade text-start" th:id="'detailModal' + ${l.id}" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
             <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
                 <div class="modal-header text-white" style="background-color: #20382E; padding: 18px 24px;">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-award fs-5"></i>
-                        <h5 class="modal-title fw-bold mb-0 text-white" style="font-size: 18px;">
-                            Chi tiết chính sách: Hạng <span th:text="${l.name}">Tiêu chuẩn</span>
-                        </h5>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4" style="background-color: #FBFDFB;">
-                    <!-- Thẻ điều kiện xét -->
-                    <div class="p-3 rounded-3 border mb-3 bg-white">
-                        <div class="fw-bold text-dark mb-2" style="font-size: 14.5px;">
-                            <i class="bi bi-card-checklist text-success me-1"></i> Điều kiện đạt hạng trong kỳ:
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center"
+                             style="width: 42px; height: 42px; background-color: rgba(255, 255, 255, 0.15); font-size: 20px;">
+                            <i class="bi bi-award"></i>
                         </div>
-                        <div class="row g-2" style="font-size: 14px;">
-                            <div class="col-md-4">
-                                <span class="text-muted">Doanh số tối thiểu:</span><br>
-                                <strong class="text-dark" th:text="${l.minPoint != null and l.minPoint > 0 ? 'Từ ' + #numbers.formatDecimal(l.minPoint >= 100000 ? l.minPoint : l.minPoint * 10000, 0, 'COMMA', 0, 'POINT') + ' ₫' : 'Mặc định khi tạo chi nhánh'}">Mặc định</strong>
+                        <div>
+                            <div class="d-flex align-items-center gap-2">
+                                <h5 class="modal-title fw-bold mb-0 text-white" style="font-size: 18px;">
+                                    Hồ sơ cấp bậc: <span th:text="${l.name}">Tiêu chuẩn</span>
+                                </h5>
+                                <span class="badge rounded-pill bg-white text-dark fw-bold px-2 py-0.5" style="font-size: 11.5px;" th:text="'Mã: #' + ${l.id}">Mã: #1</span>
+                                <span th:if="${l.isDeleted == null or !l.isDeleted}" 
+                                      class="badge rounded-pill bg-success-subtle text-success border border-success-subtle fw-bold px-2 py-0.5" style="font-size: 11.5px;">
+                                    Đang áp dụng
+                                </span>
+                                <span th:if="${l.isDeleted != null and l.isDeleted}" 
+                                      class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle fw-bold px-2 py-0.5" style="font-size: 11.5px;">
+                                    Đã tạm ngừng
+                                </span>
                             </div>
-                            <div class="col-md-4">
-                                <span class="text-muted">Tỷ lệ giao đúng giờ:</span><br>
-                                <strong class="text-dark">
-                                    <span th:if="${l.minPoint == 0}">≥ 90%</span>
-                                    <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('uy tín') or l.name.toLowerCase().contains('bạc') or l.minPoint < 20000000)}">≥ 95%</span>
-                                    <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('xuất sắc') or l.name.toLowerCase().contains('vàng') or l.minPoint >= 20000000)}">≥ 98%</span>
-                                </strong>
+                            <small class="text-white-50" style="font-size: 12.5px;">
+                                Khung tiêu chuẩn chất lượng và chế độ đãi ngộ kinh doanh toàn hệ thống
+                            </small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body p-4" style="background-color: #F8FAF9;">
+                    <!-- Hàng 4 thẻ chỉ số nhanh (KPI Summary Cards) -->
+                    <div class="row g-2.5 mb-3">
+                        <div class="col-sm-6 col-md-3">
+                            <div class="p-3 rounded-3 bg-white border text-center h-100">
+                                <div class="text-muted small mb-1" style="font-size: 12px; font-weight: 600;">DOANH SỐ TỐI THIỂU</div>
+                                <div class="fw-bold text-dark" style="font-size: 15.5px;"
+                                     th:text="${l.minPoint != null and l.minPoint > 0 ? #numbers.formatDecimal(l.minPoint >= 100000 ? l.minPoint : l.minPoint * 10000, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫ (Mặc định)'}">
+                                    0 ₫
+                                </div>
                             </div>
-                            <div class="col-md-4">
-                                <span class="text-muted">Tỷ lệ hủy đơn tối đa:</span><br>
-                                <strong class="text-dark">
-                                    <span th:if="${l.minPoint == 0}">≤ 5%</span>
-                                    <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('uy tín') or l.name.toLowerCase().contains('bạc') or l.minPoint < 20000000)}">≤ 3%</span>
-                                    <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('xuất sắc') or l.name.toLowerCase().contains('vàng') or l.minPoint >= 20000000)}">≤ 1%</span>
-                                </strong>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="p-3 rounded-3 bg-white border text-center h-100">
+                                <div class="text-muted small mb-1" style="font-size: 12px; font-weight: 600;">GIẢM PHÍ SÀN</div>
+                                <div class="fw-bold text-success" style="font-size: 16px;"
+                                     th:text="${l.discount != null ? l.discount + '%' : '0%'}">
+                                    0%
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="p-3 rounded-3 bg-white border text-center h-100">
+                                <div class="text-muted small mb-1" style="font-size: 12px; font-weight: 600;">CHI NHÁNH ĐẠT HẠNG</div>
+                                <div class="fw-bold text-primary" style="font-size: 16px;"
+                                     th:text="${stores != null ? #lists.size(stores.?[storeLevel != null and storeLevel.id == #root.l.id]) + ' CN' : '0 CN'}">
+                                    0 CN
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="p-3 rounded-3 bg-white border text-center h-100">
+                                <div class="text-muted small mb-1" style="font-size: 12px; font-weight: 600;">CHẾ ĐỘ XÉT DUYỆT</div>
+                                <div class="fw-bold text-dark" style="font-size: 13.5px;">Hằng tháng</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Thẻ quyền lợi chi tiết: Thưởng tập thể vs Ngân sách quảng cáo -->
+                    <!-- 1. Điều kiện xét duyệt đạt hạng -->
+                    <div class="p-3 rounded-3 border mb-3 bg-white">
+                        <div class="fw-bold text-dark mb-2.5 d-flex align-items-center justify-content-between" style="font-size: 14.5px;">
+                            <span><i class="bi bi-card-checklist text-success me-1.5"></i> 1. Tiêu chí xét duyệt đạt hạng trong kỳ:</span>
+                            <span class="badge bg-light text-secondary border fw-normal" style="font-size: 11.5px;">Chu kỳ: Ngày 01 đến ngày cuối tháng</span>
+                        </div>
+                        <div class="row g-3" style="font-size: 13.5px;">
+                            <div class="col-md-4">
+                                <div class="p-2.5 rounded-2 bg-light">
+                                    <div class="text-muted small mb-0.5">Doanh số thực thu:</div>
+                                    <strong class="text-dark" th:text="${l.minPoint != null and l.minPoint > 0 ? 'Từ ' + #numbers.formatDecimal(l.minPoint >= 100000 ? l.minPoint : l.minPoint * 10000, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫ (Tự động cấp khi mở chi nhánh)'}">Mặc định</strong>
+                                    <div class="text-muted mt-1" style="font-size: 11.5px;">Đơn hủy / hoàn tiền không tính vào tích lũy</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-2.5 rounded-2 bg-light">
+                                    <div class="text-muted small mb-0.5">Tỷ lệ giao đúng giờ:</div>
+                                    <strong class="text-dark">
+                                        <span th:if="${l.minPoint == 0}">≥ 90%</span>
+                                        <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('uy tín') or l.name.toLowerCase().contains('bạc') or l.minPoint < 20000000)}">≥ 95%</span>
+                                        <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('xuất sắc') or l.name.toLowerCase().contains('vàng') or l.minPoint >= 20000000)}">≥ 98%</span>
+                                    </strong>
+                                    <div class="text-muted mt-1" style="font-size: 11.5px;">Đo lường tự động qua đơn hàng hoàn tất</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-2.5 rounded-2 bg-light">
+                                    <div class="text-muted small mb-0.5">Giới hạn đơn hủy do cửa hàng:</div>
+                                    <strong class="text-dark">
+                                        <span th:if="${l.minPoint == 0}">≤ 5% tổng đơn</span>
+                                        <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('uy tín') or l.name.toLowerCase().contains('bạc') or l.minPoint < 20000000)}">≤ 3% tổng đơn</span>
+                                        <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('xuất sắc') or l.name.toLowerCase().contains('vàng') or l.minPoint >= 20000000)}">≤ 1% tổng đơn</span>
+                                    </strong>
+                                    <div class="text-muted mt-1" style="font-size: 11.5px;">Đảm bảo trải nghiệm mua hoa tươi của khách</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Quyền lợi chi tiết: Thưởng tập thể vs Ngân sách quảng cáo vs Giảm chiết khấu -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <div class="p-3 rounded-3 border bg-white h-100">
                                 <div class="fw-bold text-success mb-1" style="font-size: 14.5px;">
-                                    <i class="bi bi-people-fill me-1"></i> Tiền thưởng tập thể:
+                                    <i class="bi bi-people-fill me-1"></i> Khoản 1: Tiền thưởng tập thể
                                 </div>
                                 <div class="fs-5 fw-bold text-dark mb-1">
-                                    <span th:if="${l.minPoint == 0}">Chưa có thưởng</span>
-                                    <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('uy tín') or l.name.toLowerCase().contains('bạc') or l.minPoint < 20000000)}">40.000 ₫/kỳ</span>
-                                    <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('xuất sắc') or l.name.toLowerCase().contains('vàng') or l.minPoint >= 20000000)}">200.000 ₫/kỳ</span>
+                                    <span th:if="${l.minPoint == 0}">0 ₫ (Chưa áp dụng)</span>
+                                    <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('uy tín') or l.name.toLowerCase().contains('bạc') or l.minPoint < 20000000)}">40.000 ₫ / kỳ</span>
+                                    <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('xuất sắc') or l.name.toLowerCase().contains('vàng') or l.minPoint >= 20000000)}">200.000 ₫ / kỳ</span>
                                 </div>
-                                <div class="small text-muted" style="font-size: 13px; line-height: 1.5;">
-                                    Quỹ thưởng chung của cả chi nhánh (không phải mỗi cá nhân nhận số tiền đó). Quản lý lập đề xuất phân bổ theo đóng góp, Ban quản trị duyệt trước khi giải ngân.
+                                <div class="small text-muted" style="font-size: 12.5px; line-height: 1.55;">
+                                    <strong>Quỹ thưởng chung của toàn chi nhánh</strong>, quản lý chi nhánh lập đề xuất chia thưởng theo tỷ lệ đóng góp thực tế của nhân sự, Ban quản trị duyệt trước khi giải ngân.
                                 </div>
                             </div>
                         </div>
@@ -724,42 +722,71 @@
                         <div class="col-md-6">
                             <div class="p-3 rounded-3 border bg-white h-100">
                                 <div class="fw-bold text-primary mb-1" style="font-size: 14.5px;">
-                                    <i class="bi bi-badge-ad-fill me-1"></i> Ngân sách quảng cáo:
+                                    <i class="bi bi-megaphone-fill me-1"></i> Khoản 2: Ngân sách quảng cáo
                                 </div>
                                 <div class="fs-5 fw-bold text-dark mb-1">
-                                    <span th:if="${l.minPoint == 0}">Hỗ trợ chung hệ thống</span>
-                                    <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('uy tín') or l.name.toLowerCase().contains('bạc') or l.minPoint < 20000000)}">Tối đa 30.000 ₫/kỳ</span>
-                                    <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('xuất sắc') or l.name.toLowerCase().contains('vàng') or l.minPoint >= 20000000)}">Tối đa 150.000 ₫/kỳ</span>
+                                    <span th:if="${l.minPoint == 0}">Hỗ trợ chung toàn hệ thống</span>
+                                    <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('uy tín') or l.name.toLowerCase().contains('bạc') or l.minPoint < 20000000)}">Tối đa 30.000 ₫ / kỳ</span>
+                                    <span th:if="${l.minPoint > 0 and (l.name.toLowerCase().contains('xuất sắc') or l.name.toLowerCase().contains('vàng') or l.minPoint >= 20000000)}">Tối đa 150.000 ₫ / kỳ</span>
                                 </div>
-                                <div class="small text-muted" style="font-size: 13px; line-height: 1.5;">
-                                    Là mức chi tối đa cho các chiến dịch tiếp thị điểm bán trong tháng kế tiếp. Quyết toán theo chứng từ chi tiêu thực tế, không mặc nhiên chuyển thành tiền thưởng.
+                                <div class="small text-muted" style="font-size: 12.5px; line-height: 1.55;">
+                                    <strong>Mức chi tối đa</strong> hỗ trợ tiếp thị và quảng bá điểm bán trong tháng kế tiếp. Quyết toán theo chứng từ chi tiêu thực tế, không chi tiền mặt trực tiếp.
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Thẻ quyền lợi bổ sung nếu có -->
-                    <div class="p-3 rounded-3 border bg-white mb-3" th:if="${l.name.toLowerCase().contains('vàng') or l.name.toLowerCase().contains('xuất sắc')}">
-                        <div class="fw-bold text-dark mb-1" style="font-size: 14px;">
-                            <i class="bi bi-mortarboard-fill text-warning me-1"></i> Quyền lợi bổ sung:
+                    <!-- 3. Đặc quyền chiết khấu & Quyền lợi bổ sung -->
+                    <div class="p-3 rounded-3 border bg-white mb-3">
+                        <div class="fw-bold text-dark mb-2" style="font-size: 14px;">
+                            <i class="bi bi-gift-fill text-warning me-1"></i> Đặc quyền chiết khấu hoa hồng & đãi ngộ gia tăng:
                         </div>
-                        <div class="text-secondary small" style="font-size: 13.5px;">
-                            Được tài trợ <strong>01 buổi đào tạo nghệ thuật cắm hoa chuyên nghiệp</strong> mỗi quý từ nghệ nhân hoa tươi của hệ thống; ưu tiên phân phối các đơn hàng sự kiện lớn.
-                        </div>
+                        <ul class="mb-0 text-secondary" style="font-size: 13.5px; line-height: 1.7; padding-left: 20px;">
+                            <li>
+                                <strong>Chiết khấu giảm phí sàn:</strong> Giảm trực tiếp <strong class="text-success" th:text="${l.discount != null ? l.discount + '%' : '0%'}">0%</strong> trên tỷ lệ hoa hồng đơn hàng mà hệ thống thu.
+                            </li>
+                            <li th:if="${l.name.toLowerCase().contains('vàng') or l.name.toLowerCase().contains('xuất sắc') or (l.minPoint != null and l.minPoint >= 20000000)}">
+                                <strong>Đào tạo chuyên sâu:</strong> Tài trợ <strong>01 buổi đào tạo nghệ thuật cắm hoa cao cấp</strong> mỗi quý từ nghệ nhân hoa tươi của hệ thống; ưu tiên phân phối các đơn hàng sự kiện lớn.
+                            </li>
+                            <li>
+                                <strong>Huy hiệu nhận diện:</strong> Huy hiệu cấp bậc hiển thị nổi bật trên gian hàng và sản phẩm giúp thu hút khách hàng mua sắm hoa tươi.
+                            </li>
+                        </ul>
                     </div>
 
-                    <!-- Thẻ quy tắc chốt và chi trả -->
-                    <div class="p-3 rounded-3" style="background-color: #F0F7F2; border: 1px solid #D1E5DA; font-size: 13.5px; color: #2E453A;">
-                        <div class="fw-bold mb-1"><i class="bi bi-clock-history me-1"></i> Kỳ hưởng và cách chi trả:</div>
-                        <div style="line-height: 1.55;">
-                            • <strong>Kỳ xét:</strong> Chốt kết quả vào ngày cuối tháng. Không tính đơn hoàn tiền hoặc hủy đơn vào doanh số tích lũy.<br>
-                            • <strong>Áp dụng:</strong> Chỉ hưởng quyền lợi của hạng cao nhất, không cộng dồn các hạng.<br>
-                            • <strong>Chi trả:</strong> Không tự động chuyển tiền khi hệ thống nhảy hạng. Quản lý chi nhánh gửi hồ sơ đề xuất thưởng và chứng từ quảng cáo trước ngày 05 hằng tháng để ban quản trị phê duyệt.
+                    <!-- 4. Danh sách các chi nhánh hiện đang đạt hạng này -->
+                    <div class="p-3 rounded-3 bg-white border">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="fw-bold text-dark" style="font-size: 14px;">
+                                <i class="bi bi-buildings text-primary me-1"></i> Chi nhánh đang đạt hạng này:
+                            </div>
+                            <span class="badge rounded-pill bg-light text-secondary border"
+                                  th:text="${stores != null ? #lists.size(stores.?[storeLevel != null and storeLevel.id == #root.l.id]) + ' chi nhánh' : '0 chi nhánh'}">
+                                0 chi nhánh
+                            </span>
+                        </div>
+                        <div th:if="${stores == null or #lists.isEmpty(stores.?[storeLevel != null and storeLevel.id == #root.l.id])}"
+                             class="text-muted small py-2">
+                            Chưa có chi nhánh nào đạt hạng này trong kỳ xét duyệt hiện tại.
+                        </div>
+                        <div th:if="${stores != null and !#lists.isEmpty(stores.?[storeLevel != null and storeLevel.id == #root.l.id])}">
+                            <div class="d-flex flex-wrap gap-2 pt-1">
+                                <span th:each="s : ${stores}" th:if="${s.storeLevel != null and s.storeLevel.id == l.id}"
+                                      class="badge rounded-pill px-3 py-2 d-inline-flex align-items-center gap-1.5"
+                                      style="background-color: #EBF3ED; color: #20382E; border: 1px solid #CCE0D3; font-size: 12.5px;">
+                                    <i class="bi bi-shop text-success"></i>
+                                    <span th:text="${s.name}">Chi nhánh Q.1</span>
+                                    <small class="text-muted" th:text="'(#' + ${s.id} + ')'">(#1)</small>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer border-top px-4 py-2.5 bg-light">
-                    <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Đóng</button>
+                <div class="modal-footer border-top px-4 py-2.5 bg-light d-flex justify-content-between align-items-center">
+                    <a th:href="@{'/admin/store-levels/edit/' + ${l.id}}" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                        <i class="bi bi-pencil-square me-1"></i> Sửa cấu hình cấp bậc
+                    </a>
+                    <button type="button" class="btn btn-secondary btn-sm rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
                 </div>
             </div>
         </div>
@@ -874,58 +901,134 @@
 
     <!-- MODAL 3: XEM DANH SÁCH CHI NHÁNH ĐANG THUỘC HẠNG NÀY -->
     <div class="modal fade text-start" th:id="'shopsModal' + ${l.id}" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
             <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
                 <div class="modal-header text-white" style="background-color: #20382E; padding: 18px 24px;">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-shop fs-5"></i>
-                        <h5 class="modal-title fw-bold mb-0 text-white" style="font-size: 18px;">
-                            Danh sách chi nhánh đạt Hạng <span th:text="${l.name}">Tiêu chuẩn</span>
-                        </h5>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center"
+                             style="width: 40px; height: 40px; background-color: rgba(255, 255, 255, 0.15); font-size: 18px;">
+                            <i class="bi bi-shop"></i>
+                        </div>
+                        <div>
+                            <div class="d-flex align-items-center gap-2">
+                                <h5 class="modal-title fw-bold mb-0 text-white" style="font-size: 18px;">
+                                    Danh sách chi nhánh đạt Hạng: <span th:text="${l.name}">Tiêu chuẩn</span>
+                                </h5>
+                                <span class="badge rounded-pill bg-white text-success fw-bold px-2.5 py-1"
+                                      style="font-size: 12px;"
+                                      th:text="${stores != null ? #lists.size(stores.?[storeLevel != null and storeLevel.id == #root.l.id]) + ' chi nhánh' : '0 chi nhánh'}">
+                                    0 chi nhánh
+                                </span>
+                            </div>
+                            <small class="text-white-50" style="font-size: 12.5px;">
+                                Điều kiện doanh số: 
+                                <strong class="text-white" th:text="${l.minPoint != null and l.minPoint > 0 ? 'Từ ' + #numbers.formatDecimal(l.minPoint >= 100000 ? l.minPoint : l.minPoint * 10000, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫ (Hạng mặc định)'}">0 ₫</strong>
+                                &nbsp;•&nbsp; Giảm phí sàn: <strong class="text-white" th:text="${l.discount != null ? l.discount + '%' : '0%'}">0%</strong>
+                            </small>
+                        </div>
                     </div>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
                 </div>
-                <div class="modal-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light">
-                            <tr style="font-size: 13.5px; color: #20382E; font-weight: 700;">
-                                <th class="ps-4 py-2.5">Mã CN</th>
-                                <th class="py-2.5">Tên chi nhánh</th>
-                                <th class="py-2.5">Địa chỉ</th>
-                                <th class="py-2.5">Quản lý / Liên hệ</th>
-                                <th class="pe-4 py-2.5 text-center">Trạng thái</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:if="${stores == null or #lists.isEmpty(stores.?[storeLevel != null and storeLevel.id == #root.l.id])}">
-                                <td colspan="5" class="text-center py-4 text-muted small">
-                                    Hiện chưa có chi nhánh nào thuộc hạng này trong kỳ xét duyệt hiện tại.
-                                </td>
-                            </tr>
-                            <tr th:each="s : ${stores}" th:if="${s.storeLevel != null and s.storeLevel.id == l.id}">
-                                <td class="ps-4 fw-bold" style="color: #20382E;" th:text="'#' + ${s.id}">#1</td>
-                                <td>
-                                    <div class="fw-bold text-dark" th:text="${s.name}">Tiệm Hoa Sài Gòn - CN Quận 1</div>
-                                </td>
-                                <td>
-                                    <small class="text-muted" th:text="${s.address != null ? s.address : 'Chưa cập nhật'}">123 Lê Lợi, Q.1</small>
-                                </td>
-                                <td>
-                                    <small class="text-dark d-block fw-semibold" th:text="${s.owner != null ? s.owner.fullname : 'Chưa gán'}">Nguyễn Văn A</small>
-                                    <small class="text-muted" th:text="${s.phone != null ? s.phone : (s.owner != null ? s.owner.phone : '')}">0901234567</small>
-                                </td>
-                                <td class="pe-4 text-center">
-                                    <span th:if="${s.isActive != null and s.isActive}" class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 11px;">Hoạt động</span>
-                                    <span th:if="${s.isActive == null or !s.isActive}" class="badge bg-secondary-subtle text-secondary" style="font-size: 11px;">Tạm đóng</span>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
+                <div class="modal-body p-4" style="background-color: #F8FAF9;">
+                    <!-- Trạng thái trống (0 chi nhánh) -->
+                    <div th:if="${stores == null or #lists.isEmpty(stores.?[storeLevel != null and storeLevel.id == #root.l.id])}"
+                         class="text-center py-5 px-3 bg-white rounded-3 border">
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3 text-secondary"
+                             style="width: 64px; height: 64px; background-color: #F1F5F9; font-size: 28px;">
+                            <i class="bi bi-shop-window"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1" style="font-size: 16px;">Chưa có chi nhánh nào đạt cấp bậc này</h6>
+                        <p class="text-muted small mb-3" style="max-width: 500px; margin: 0 auto; line-height: 1.6;">
+                            Hệ thống sẽ tự động xét duyệt và nâng hạng cho các chi nhánh trong toàn chuỗi khi đạt mức doanh số tích lũy từ 
+                            <strong class="text-dark" th:text="${l.minPoint != null and l.minPoint > 0 ? #numbers.formatDecimal(l.minPoint >= 100000 ? l.minPoint : l.minPoint * 10000, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">0 ₫</strong> trong kỳ đánh giá.
+                        </p>
+                        <a th:href="@{/admin/stores}" class="btn btn-sm px-3 py-2 fw-semibold rounded-pill"
+                           style="background-color: #EBF3ED; color: #20382E; border: 1px solid #CCE0D3;">
+                            <i class="bi bi-arrow-right-circle me-1"></i> Quản lý toàn bộ chi nhánh
+                        </a>
+                    </div>
+
+                    <!-- Bảng danh sách chi nhánh (khi có chi nhánh) -->
+                    <div th:if="${stores != null and !#lists.isEmpty(stores.?[storeLevel != null and storeLevel.id == #root.l.id])}"
+                         class="bg-white rounded-3 border overflow-hidden shadow-sm">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                <tr style="font-size: 13px; color: #20382E; font-weight: 700; background-color: #F1F5F9; text-transform: uppercase; letter-spacing: 0.5px;">
+                                    <th class="ps-4 py-3" style="width: 70px;">Mã CN</th>
+                                    <th class="py-3">Tên chi nhánh & Địa chỉ</th>
+                                    <th class="py-3">Chủ sở hữu / Quản lý</th>
+                                    <th class="py-3 text-center">Trạng thái</th>
+                                    <th class="pe-4 py-3 text-end" style="width: 140px;">Thao tác</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="s : ${stores}" th:if="${s.storeLevel != null and s.storeLevel.id == l.id}">
+                                    <td class="ps-4 fw-bold text-secondary" th:text="'#' + ${s.id}">#1</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2.5">
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 text-white"
+                                                 style="width: 36px; height: 36px; background-color: #355447; font-size: 15px;">
+                                                <i class="bi bi-shop"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold text-dark" style="font-size: 14.5px;" th:text="${s.name}">Chi Nhánh Bến Thành (Quận 1)</div>
+                                                <div class="text-muted small d-flex align-items-center gap-1" style="font-size: 12.5px;">
+                                                    <i class="bi bi-geo-alt text-danger"></i>
+                                                    <span th:text="${s.address != null and !s.address.isEmpty() ? s.address : 'Chưa cập nhật địa chỉ'}">123 Lê Lợi, Q.1</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold text-dark" style="font-size: 14px;" 
+                                             th:text="${s.owner != null and s.owner.fullName != null ? s.owner.fullName : 'Chưa gán quản lý'}">
+                                            Nguyễn Văn A
+                                        </div>
+                                        <div class="text-muted small d-flex align-items-center gap-1" style="font-size: 12px;">
+                                            <i class="bi bi-telephone text-success"></i>
+                                            <span th:text="${s.phone != null and !s.phone.isEmpty() ? s.phone : (s.owner != null and s.owner.phone != null ? s.owner.phone : 'Chưa có SĐT')}">0901234567</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-inline-flex flex-column gap-1 align-items-center">
+                                            <span th:if="${s.status == null or s.status}" 
+                                                  class="badge rounded-pill px-2.5 py-1 d-inline-flex align-items-center gap-1"
+                                                  style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; font-size: 11.5px; font-weight: 700;">
+                                                <i class="bi bi-check-circle-fill text-success"></i> Hoạt động
+                                            </span>
+                                            <span th:if="${s.status != null and !s.status}" 
+                                                  class="badge rounded-pill px-2.5 py-1 d-inline-flex align-items-center gap-1"
+                                                  style="background-color: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; font-size: 11.5px; font-weight: 700;">
+                                                <i class="bi bi-slash-circle text-danger"></i> Bị đình chỉ
+                                            </span>
+                                            <span th:if="${s.isOpen != null and s.isOpen}" class="text-muted small" style="font-size: 11px;">
+                                                <i class="bi bi-door-open text-primary me-0.5"></i> Đang mở cửa
+                                            </span>
+                                            <span th:if="${s.isOpen != null and !s.isOpen}" class="text-muted small" style="font-size: 11px;">
+                                                <i class="bi bi-door-closed text-secondary me-0.5"></i> Đang đóng cửa
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="pe-4 text-end">
+                                        <a th:href="@{/admin/stores(keyword=${s.name})}"
+                                           class="btn btn-sm d-inline-flex align-items-center gap-1 rounded-pill px-3 py-1 fw-semibold"
+                                           style="background-color: #EBF3ED; color: #20382E; border: 1px solid #CCE0D3; font-size: 12.5px;"
+                                           title="Xem hồ sơ và doanh thu chi nhánh trong quản lý cửa hàng">
+                                            <i class="bi bi-box-arrow-up-right"></i> Xem chi nhánh
+                                        </a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer border-top px-4 py-2.5 bg-light">
-                    <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Đóng</button>
+                <div class="modal-footer border-top px-4 py-2.5 bg-light d-flex justify-content-between align-items-center">
+                    <span class="text-muted small" style="font-size: 13px;">
+                        <i class="bi bi-info-circle me-1"></i> Dữ liệu chi nhánh được đồng bộ trực tiếp từ phân hệ quản lý điểm bán.
+                    </span>
+                    <button type="button" class="btn btn-secondary btn-sm rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
                 </div>
             </div>
         </div>
@@ -933,7 +1036,7 @@
 
 </th:block>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<th:block th:replace="~{fragments/admin-layout :: footer}"></th:block>
 <script th:src="@{/js/form-validation.js}"></script>
 <script th:src="@{/js/global-modal.js}"></script>
 <th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>

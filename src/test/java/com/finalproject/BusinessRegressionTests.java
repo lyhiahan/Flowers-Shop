@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.*;
@@ -926,7 +927,7 @@ class BusinessRegressionTests {
                     .andExpect(content().string(org.hamcrest.Matchers.containsString("hoàn tiền tự động")))
                     .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("MoMo giả lập"))));
         }
-        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()))
+        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()).param("reasonCode", "NO_LONGER_NEEDED"))
                 .andExpect(redirectedUrl("/customer/orders"))
                 .andExpect(flash().attribute("successMessage", "Đã hủy đơn và hoàn tiền thành công."));
         assertThat(order.getStatus()).isEqualTo(OrderStatus.REFUNDED);
@@ -938,7 +939,7 @@ class BusinessRegressionTests {
         assertThat(order.getCancellationReason()).contains("Đã hủy đơn và hoàn tiền thành công.")
                 .doesNotContain("chưa ghi nhận", "Vui lòng hoàn tiền");
         LocalDateTime refundedAt = receipt.getRefundedAt();
-        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()))
+        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()).param("reasonCode", "NO_LONGER_NEEDED"))
                 .andExpect(flash().attribute("successMessage", "Đã hủy đơn và hoàn tiền thành công."));
         assertThat(receipt.getRefundedAt()).isEqualTo(refundedAt);
         assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(10);
@@ -962,9 +963,49 @@ class BusinessRegressionTests {
         java.nio.file.Files.writeString(preview, html);
     }
 
+    @Test void customerCancellationRequiresAListedReasonAndStoresTheSelection() throws Exception {
+        Order order = checkout(PaymentMethod.COD);
+        for (String path : List.of("/customer/orders", "/customer/orders/detail/" + order.getId())) {
+            mvc.perform(get(path).with(user(customer.getUsername()).roles("USER")))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(org.hamcrest.Matchers.containsString("Muốn thay đổi địa chỉ nhận hàng")))
+                    .andExpect(content().string(org.hamcrest.Matchers.containsString("name=\"reasonCode\"")));
+        }
+        mvc.perform(post("/customer/orders/cancel/" + order.getId())
+                        .with(user(customer.getUsername()).roles("USER")).with(csrf()))
+                .andExpect(flash().attribute("errorMessage", "Vui lòng chọn lý do hủy đơn."));
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
+        mvc.perform(post("/customer/orders/cancel/" + order.getId())
+                        .with(user(customer.getUsername()).roles("USER")).with(csrf())
+                        .param("reasonCode", "UNKNOWN"))
+                .andExpect(flash().attribute("errorMessage", "Lý do hủy đơn không hợp lệ."));
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
+        mvc.perform(post("/customer/orders/cancel/" + order.getId())
+                        .with(user(customer.getUsername()).roles("USER")).with(csrf())
+                        .param("reasonCode", "CHANGE_ADDRESS").param("source", "detail"))
+                .andExpect(redirectedUrl("/customer/orders/detail/" + order.getId()))
+                .andExpect(flash().attributeExists("successMessage"));
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELLED);
+        assertThat(order.getCancellationReason()).contains("Muốn thay đổi địa chỉ nhận hàng");
+    }
+
+    @Test void customerCancellationOtherReasonMustHaveDetails() throws Exception {
+        Order order = checkout(PaymentMethod.COD);
+        mvc.perform(post("/customer/orders/cancel/" + order.getId())
+                        .with(user(customer.getUsername()).roles("USER")).with(csrf())
+                        .param("reasonCode", "OTHER"))
+                .andExpect(flash().attribute("errorMessage", "Vui lòng nhập lý do hủy đơn khác."));
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
+        mvc.perform(post("/customer/orders/cancel/" + order.getId())
+                        .with(user(customer.getUsername()).roles("USER")).with(csrf())
+                        .param("reasonCode", "OTHER").param("otherReason", "  Dời lịch sự kiện  "))
+                .andExpect(flash().attributeExists("successMessage"));
+        assertThat(order.getCancellationReason()).contains("Lý do khác: Dời lịch sự kiện");
+    }
+
     @Test void unpaidDemoMomoCancellationDoesNotCreateARefund() throws Exception {
         Order order = checkout(PaymentMethod.MOMO_DEMO);
-        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()))
+        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()).param("reasonCode", "NO_LONGER_NEEDED"))
                 .andExpect(flash().attributeExists("successMessage"));
         assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELLED);
         assertThat(order.getPaymentStatus()).isEqualTo("UNPAID");
@@ -976,13 +1017,13 @@ class BusinessRegressionTests {
     @Test void automaticDemoRefundCannotBypassOwnershipOrPreparation() throws Exception {
         Order order = checkout(PaymentMethod.MOMO_DEMO);
         demo.confirm(demo.create(List.of(order.getId()), customer.getUsername()));
-        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(outsider.getUsername()).roles("USER")).with(csrf()))
+        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(outsider.getUsername()).roles("USER")).with(csrf()).param("reasonCode", "NO_LONGER_NEEDED"))
                 .andExpect(flash().attributeExists("errorMessage"));
         assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
         login(manager);
         workflow.transition(order.getId(), OrderStatus.CONFIRMED);
         workflow.transition(order.getId(), OrderStatus.PREPARING);
-        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()))
+        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()).param("reasonCode", "NO_LONGER_NEEDED"))
                 .andExpect(flash().attributeExists("errorMessage"));
         assertThat(order.getStatus()).isEqualTo(OrderStatus.PREPARING);
         assertThat(order.getPaymentStatus()).isEqualTo("PAID");
@@ -994,7 +1035,7 @@ class BusinessRegressionTests {
         demo.confirm(demo.create(List.of(order.getId()), customer.getUsername()));
         payments.findByOrderId(order.getId()).getFirst().setAmount(BigDecimal.ONE);
         em.flush();
-        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()))
+        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()).param("reasonCode", "NO_LONGER_NEEDED"))
                 .andExpect(flash().attributeExists("errorMessage"));
         assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
         assertThat(order.getPaymentStatus()).isEqualTo("PAID");
@@ -1006,7 +1047,7 @@ class BusinessRegressionTests {
         order.setPaymentStatus("PAID");
         payments.findByOrderId(order.getId()).getFirst().setStatus(PaymentStatus.SUCCESS);
         em.flush();
-        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()))
+        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()).param("reasonCode", "NO_LONGER_NEEDED"))
                 .andExpect(flash().attributeExists("successMessage"));
         assertThat(order.getStatus()).isEqualTo(OrderStatus.REFUND_REQUESTED);
         assertThat(order.getPaymentStatus()).isEqualTo("PAID");
@@ -1034,7 +1075,7 @@ class BusinessRegressionTests {
                     .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString(
                             "id=\"confirmCancelOrderModal_" + order.getId() + "\"")));
         }
-        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()))
+        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()).param("reasonCode", "NO_LONGER_NEEDED"))
                 .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("successMessage"));
         assertThat(order.getStatus()).isEqualTo(method == PaymentMethod.BANK_TRANSFER ? OrderStatus.REFUND_REQUESTED : OrderStatus.CANCELLED);
         assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(10);
@@ -1060,7 +1101,7 @@ class BusinessRegressionTests {
                     .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString(
                             "id=\"confirmCancelOrderModal_" + order.getId() + "\""))));
         }
-        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()))
+        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()).param("reasonCode", "NO_LONGER_NEEDED"))
                 .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("errorMessage"));
         assertThat(order.getStatus()).isEqualTo(state);
         assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(8);
@@ -1087,7 +1128,7 @@ class BusinessRegressionTests {
                     .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString(
                             "id=\"confirmCancelOrderModal_" + order.getId() + "\""))));
         }
-        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()))
+        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(customer.getUsername()).roles("USER")).with(csrf()).param("reasonCode", "NO_LONGER_NEEDED"))
                 .andExpect(status().is3xxRedirection()).andExpect(flash().attribute("errorMessage",
                         org.hamcrest.Matchers.containsString("đã bắt đầu cắm hoa/chuẩn bị")));
         assertThat(order.getStatus()).isEqualTo(OrderStatus.PREPARING);
@@ -1440,8 +1481,48 @@ class BusinessRegressionTests {
         assertThatThrownBy(() -> reviewService.addReview(customer.getId(),product.getId(),order.getId(),5,"x".repeat(1001),null)).isInstanceOf(IllegalArgumentException.class);
         Review review=reviewService.addReview(customer.getId(),product.getId(),order.getId(),4,"Hoa đẹp, giao đúng hẹn. ".repeat(4),null);
         assertThat(review.getStore().getId()).isEqualTo(store.getId());
+        assertThat(review.getStars()).isEqualTo(4);
         assertThat(store.getRating()).isEqualTo(4.0);
         assertThatThrownBy(() -> reviewService.addReview(customer.getId(),product.getId(),order.getId(),5,"Hoa đẹp, giao đúng hẹn. ".repeat(4),null)).isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test void receivedOrderReviewOpensFormAndAppearsOnProductAfterSubmission() throws Exception {
+        Order order = checkout(PaymentMethod.COD);
+        login(manager);
+        workflow.transition(order.getId(), OrderStatus.CONFIRMED);
+        workflow.transition(order.getId(), OrderStatus.PREPARING);
+        workflow.transition(order.getId(), OrderStatus.COMPLETED);
+        String reviewText = "Hoa tươi, đóng gói cẩn thận, cửa hàng chuẩn bị đúng giờ và hỗ trợ rất nhiệt tình.";
+
+        mvc.perform(get("/customer/orders/detail/" + order.getId())
+                        .with(user(customer.getUsername()).roles("USER")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("reviewOrderId=" + order.getId() + "#review-form")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("reviewModal_"))));
+        mvc.perform(get("/product/" + product.getId()).param("reviewOrderId", order.getId().toString())
+                        .with(user(customer.getUsername()).roles("USER")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"review-form\"")));
+        mvc.perform(post("/product/" + product.getId() + "/review")
+                        .with(user(customer.getUsername()).roles("USER")).with(csrf())
+                        .param("orderId", order.getId().toString()).param("rating", "4").param("content", "Quá ngắn"))
+                .andExpect(redirectedUrl("/product/" + product.getId() + "?reviewOrderId=" + order.getId() + "#review-form"))
+                .andExpect(flash().attributeExists("reviewError"));
+        assertThat(reviewService.getReviewsByProduct(product.getId())).isEmpty();
+        mvc.perform(multipart("/product/" + product.getId() + "/review")
+                        .file(new MockMultipartFile("imageFile", "note.txt", "text/plain", "not an image".getBytes()))
+                        .with(user(customer.getUsername()).roles("USER")).with(csrf())
+                        .param("orderId", order.getId().toString()).param("rating", "4").param("content", reviewText))
+                .andExpect(flash().attributeExists("reviewError"));
+        assertThat(reviewService.getReviewsByProduct(product.getId())).isEmpty();
+        mvc.perform(post("/product/" + product.getId() + "/review")
+                        .with(user(customer.getUsername()).roles("USER")).with(csrf())
+                        .param("orderId", order.getId().toString()).param("rating", "4").param("content", reviewText))
+                .andExpect(redirectedUrl("/product/" + product.getId() + "#review-list"));
+        mvc.perform(get("/product/" + product.getId()).with(user(customer.getUsername()).roles("USER")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(reviewText)));
+        assertThat(reviewService.canReviewOrder(customer.getId(), product.getId(), order.getId())).isFalse();
     }
 
     @Test void deletingDefaultAddressSelectsRemainingOneAndBlankUpdateCannotOverwrite() {

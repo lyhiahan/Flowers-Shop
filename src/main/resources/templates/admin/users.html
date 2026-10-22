@@ -124,14 +124,14 @@
             overflow: hidden;
         }
 
-        /* 2. Tiêu đề cột bảng: 15.5px, đậm 800 đồng bộ trang cửa hàng */
+        /* 2. Tiêu đề cột bảng: đồng bộ trang cửa hàng */
         #usersTable thead th {
-            font-size: 15.5px !important;
+            font-size: 14.5px !important;
             font-weight: 800 !important;
             color: #20382E !important;
             text-transform: none !important;
             letter-spacing: normal !important;
-            padding: 13px 18px !important;
+            padding: 11px 12px !important;
             background-color: #E5EEE8 !important;
             border-bottom: 2px solid #D1E5DA !important;
             white-space: nowrap !important;
@@ -144,26 +144,33 @@
         }
 
         .status-dropdown-btn {
-            font-size: 13.5px;
-            font-weight: 700;
-            padding: 6px 14px;
-            border-radius: 20px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+            font-size: 11.5px !important;
+            font-weight: 700 !important;
+            padding: 3px 10px !important;
+            border-radius: 9999px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 4px !important;
+            white-space: nowrap !important;
+            line-height: 1.25 !important;
+            letter-spacing: 0.02em !important;
             transition: all 0.2s ease-in-out;
-            cursor: pointer;
+            cursor: default;
         }
         .status-dropdown-btn:hover {
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+        }
+        .status-dropdown-btn * {
+            white-space: nowrap !important;
         }
 
-        /* Từng hàng: giữ nguyên kích thước 64–76 px và bố cục bảng hiện tại */
+        /* Từng hàng: gọn gàng, tránh vỡ hàng */
         #usersTable tbody tr td {
-            padding: 13px 18px !important;
+            padding: 10px 12px !important;
             border-bottom: 1px solid #E2E7E2 !important;
             vertical-align: middle !important;
-            height: 70px;
+            height: 64px;
         }
         #usersTable tbody tr:hover {
             background-color: #F8FAF9;
@@ -459,13 +466,13 @@
                         <table class="table align-middle mb-0" id="usersTable">
                             <thead style="background-color: #E5EEE8 !important;">
                             <tr style="background-color: #E5EEE8 !important;">
-                                <th class="ps-4 fw-bold" style="white-space: nowrap !important; width: 70px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Mã</th>
-                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 240px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Người dùng</th>
-                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 260px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Địa chỉ và liên hệ</th>
-                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 140px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Vai trò</th>
-                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 180px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Chi nhánh</th>
-                                <th class="text-center fw-bold" style="white-space: nowrap !important; min-width: 180px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Trạng thái</th>
-                                <th class="text-end pe-4 fw-bold" style="white-space: nowrap !important; min-width: 180px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 15.5px !important;">Thao tác</th>
+                                <th class="ps-3 fw-bold" style="white-space: nowrap !important; width: 60px; min-width: 55px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important;">Mã</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 175px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important;">Người dùng</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 185px; max-width: 230px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important;">Địa chỉ và liên hệ</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 110px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important;">Vai trò</th>
+                                <th class="fw-bold" style="white-space: nowrap !important; min-width: 130px; max-width: 170px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important;">Chi nhánh</th>
+                                <th class="text-center fw-bold" style="white-space: nowrap !important; min-width: 120px; width: 125px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important;">Trạng thái</th>
+                                <th class="text-end pe-3 fw-bold" style="white-space: nowrap !important; min-width: 95px; width: 105px; background-color: #E5EEE8 !important; color: #20382E !important; font-weight: 800 !important; font-size: 14.5px !important;">Thao tác</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -477,29 +484,29 @@
                             </tr>
                             <tr th:each="u : ${users}">
                                 <!-- 1. Mã -->
-                                <td class="ps-4 text-muted fw-bold" style="font-size: 14.5px;" th:text="'#' + ${u.id}">#1</td>
+                                <td class="ps-3 text-muted fw-bold" style="font-size: 14px; white-space: nowrap;" th:text="'#' + ${u.id}">#1</td>
 
                                 <!-- 2. Người dùng: Avatar tròn + Tên đậm + @username -->
                                 <td>
-                                    <div class="d-flex align-items-center gap-2.5">
+                                    <div class="d-flex align-items-center gap-2">
                                         <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm"
-                                             style="width: 38px; height: 38px; background-color: #20382E; font-size: 14px; flex-shrink: 0;">
+                                             style="width: 36px; height: 36px; background-color: #20382E; font-size: 13.5px; flex-shrink: 0;">
                                             <i class="bi bi-person"></i>
                                         </div>
-                                        <div>
-                                            <div class="fw-bold" style="font-size: 16.5px; font-weight: 700; color: #20382E; line-height: 1.35;" th:text="${u.fullName}">Ly GiaHan</div>
-                                            <div style="font-size: 13.5px; color: #66736B;" th:text="'@' + ${u.username}">@lygiahan03</div>
+                                        <div style="min-width: 0;">
+                                            <div class="fw-bold text-truncate" style="font-size: 15px; font-weight: 700; color: #20382E; line-height: 1.35; max-width: 160px;" th:text="${u.fullName}" th:title="${u.fullName}">Ly GiaHan</div>
+                                            <div style="font-size: 13px; color: #66736B;" th:text="'@' + ${u.username}">@lygiahan03</div>
                                         </div>
                                     </div>
                                 </td>
 
                                 <!-- 3. Địa chỉ và liên hệ -->
                                 <td>
-                                    <div style="font-size: 14px; color: #20382E;" th:if="${u.address != null and !#strings.isEmpty(u.address)}" th:text="${u.address}">112, An Bình, Cao Lãnh</div>
-                                    <div style="font-size: 13.5px; color: #66736B; max-width: 250px;" class="text-truncate" th:title="${u.email}">
+                                    <div style="font-size: 13.5px; color: #20382E; max-width: 220px;" class="text-truncate" th:if="${u.address != null and !#strings.isEmpty(u.address)}" th:title="${u.address}" th:text="${u.address}">112, An Bình, Cao Lãnh</div>
+                                    <div style="font-size: 13px; color: #66736B; max-width: 220px;" class="text-truncate" th:title="${u.email}">
                                         <i class="bi bi-envelope me-1"></i><span th:text="${u.email}">user@gmail.com</span>
                                     </div>
-                                    <div style="font-size: 13.5px; color: #66736B;" th:if="${u.phone != null and !#strings.isEmpty(u.phone)}">
+                                    <div style="font-size: 13px; color: #66736B;" th:if="${u.phone != null and !#strings.isEmpty(u.phone)}">
                                         <i class="bi bi-telephone me-1"></i><span th:text="${u.phone}">0933141289</span>
                                     </div>
                                 </td>
@@ -528,35 +535,35 @@
                                 <!-- 5. Chi nhánh -->
                                 <td>
                                     <div th:if="${u.store != null}">
-                                        <span class="fw-semibold text-dark d-inline-block" style="font-size: 14px;"
+                                        <span class="fw-semibold text-dark d-inline-block text-truncate" style="font-size: 13.5px; max-width: 160px;"
                                               th:title="${u.store.name + (u.store.address != null ? ' — ' + u.store.address : '')}"
                                               th:text="${u.store.name}">
                                             Chi Nhánh Phú Mỹ Hưng (Quận 7)
                                         </span>
                                     </div>
                                     <div th:if="${u.store == null}">
-                                        <span class="text-muted" style="font-size: 13.5px;">Chưa gán</span>
+                                        <span class="text-muted" style="font-size: 13px;">Chưa gán</span>
                                     </div>
                                 </td>
 
-                                <!-- 6. Trạng thái hoạt động (Pill chuẩn màu trang Cửa Hàng) -->
-                                <td class="text-center">
+                                <!-- 6. Trạng thái hoạt động (Pill chuẩn màu trang Cửa Hàng, 1 hàng ngang không ngắt dòng) -->
+                                <td class="text-center" style="white-space: nowrap;">
                                     <span class="status-dropdown-btn border shadow-sm"
                                           th:style="${u.isActive == null or u.isActive} ? 'background-color: #E8F5E9; color: #2E7D32; border-color: #A5D6A7 !important;' : 'background-color: #FFEBEE; color: #C62828; border-color: #FFCDD2 !important;'">
                                         <i th:class="${u.isActive == null or u.isActive} ? 'bi bi-patch-check-fill text-success' : 'bi bi-slash-circle-fill text-danger'"></i>
-                                        <span th:text="${u.isActive == null or u.isActive} ? 'ĐANG HOẠT ĐỘNG' : 'ĐÃ KHÓA'"></span>
+                                        <span style="white-space: nowrap !important;" th:text="${u.isActive == null or u.isActive} ? 'Đang hoạt động' : 'Đã khóa'"></span>
                                     </span>
                                 </td>
 
-                                <!-- 7. Thao tác: Nút Khóa / Mở khóa dạng pill giống trang Cửa hàng + Menu phụ -->
-                                <td class="text-end pe-4" style="white-space: nowrap;">
-                                    <div class="d-inline-flex align-items-center gap-2">
+                                <!-- 7. Thao tác: Nút Khóa / Mở khóa dạng pill gọn gàng + Menu phụ -->
+                                <td class="text-end pe-3" style="white-space: nowrap;">
+                                    <div class="d-inline-flex align-items-center gap-1.5">
                                         <!-- Nút Khóa (nếu đang hoạt động) -->
                                         <form th:if="${(u.role == null or u.role.name() != 'ADMIN') and u.username != 'admin' and (u.isActive == null or u.isActive)}"
                                               th:action="@{'/admin/users/toggle-active/' + ${u.id}}" method="post" class="d-inline m-0">
                                             <button type="submit"
                                                     class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1"
-                                                    style="height: 34px; padding: 0 12px; font-size: 13.5px; font-weight: 600; border-radius: 8px; border: 1px solid #FCA5A5; background-color: #FFF5F5; color: #DC2626; white-space: nowrap;"
+                                                    style="height: 32px; padding: 0 10px; font-size: 12.5px; font-weight: 600; border-radius: 8px; border: 1px solid #FCA5A5; background-color: #FFF5F5; color: #DC2626; white-space: nowrap;"
                                                     onmouseover="this.style.backgroundColor='#FEE2E2'" onmouseout="this.style.backgroundColor='#FFF5F5'"
                                                     onclick="return confirm('Bạn có chắc muốn KHÓA tài khoản [' + this.getAttribute('data-user') + ']?')"
                                                     th:data-user="${u.username}">
@@ -569,7 +576,7 @@
                                               th:action="@{'/admin/users/toggle-active/' + ${u.id}}" method="post" class="d-inline m-0">
                                             <button type="submit"
                                                     class="btn btn-sm btn-success d-inline-flex align-items-center gap-1 text-white shadow-sm"
-                                                    style="height: 34px; padding: 0 12px; font-size: 13.5px; font-weight: 700; border-radius: 8px; white-space: nowrap; background-color: #2E7D32; border-color: #2E7D32;"
+                                                    style="height: 32px; padding: 0 10px; font-size: 12.5px; font-weight: 700; border-radius: 8px; white-space: nowrap; background-color: #2E7D32; border-color: #2E7D32;"
                                                     onclick="return confirm('Bạn có chắc muốn MỞ KHÓA tài khoản [' + this.getAttribute('data-user') + ']?')"
                                                     th:data-user="${u.username}">
                                                 <i class="bi bi-patch-check"></i> Mở khóa
