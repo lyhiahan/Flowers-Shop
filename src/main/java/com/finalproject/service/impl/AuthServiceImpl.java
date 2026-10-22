@@ -36,6 +36,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final jakarta.validation.Validator validator;
     private final jakarta.persistence.EntityManager entityManager;
+    private final java.time.Clock clock;
 
     private void lockAndRefreshUser(User user) {
         userRepository.findLockedById(user.getId()).orElseThrow();
@@ -47,7 +48,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public synchronized String registerCustomer(RegisterRequest request) {
+    public String registerCustomer(RegisterRequest request) {
         if (request == null) throw new IllegalArgumentException("Vui lòng điền thông tin đăng ký.");
         // 1. Chuẩn hóa dữ liệu đầu vào
         String username = request.getUsername() != null ? request.getUsername().trim() : "";
@@ -83,9 +84,14 @@ public class AuthServiceImpl implements AuthService {
 
         // 2. Tạo mã OTP và lưu tạm vào bộ nhớ (CHƯA LƯU VÀO DATABASE)
         String code = OtpUtil.generateOtp();
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(clock);
+        // Keep only a detached, password-free request in the pending-registration cache.
+        RegisterRequest pendingRequest = new RegisterRequest();
+        org.springframework.beans.BeanUtils.copyProperties(request, pendingRequest);
+        pendingRequest.setPassword(null);
         PendingRegistration pending = PendingRegistration.builder()
-                .request(request)
+                .request(pendingRequest)
+                .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .otpCode(code)
                 .createdAt(now)
                 .expiredAt(now.plusMinutes(5))
@@ -117,7 +123,7 @@ public class AuthServiceImpl implements AuthService {
 
         if (pending != null) {
             // Kiểm tra mã OTP và thời hạn hiệu lực (5 phút)
-            if (pending.getExpiredAt().isBefore(LocalDateTime.now())) {
+            if (pending.getExpiredAt().isBefore(LocalDateTime.now(clock))) {
                 pendingRegistrations.remove(key);
                 return false;
             }
@@ -137,7 +143,7 @@ public class AuthServiceImpl implements AuthService {
 
             User user = User.builder()
                     .username(req.getUsername())
-                    .password(passwordEncoder.encode(req.getPassword()))
+                    .password(pending.getPasswordHash())
                     .fullName(req.getFullName())
                     .email(req.getEmail())
                     .phone(req.getPhone())
@@ -145,8 +151,8 @@ public class AuthServiceImpl implements AuthService {
                     .role(Role.USER)
                     .isEmailActive(true)
                     .isActive(true)
-                    .createdDate(LocalDate.now(java.time.ZoneId.of("Asia/Bangkok")))
-                    .createdAt(java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Bangkok")))
+                    .createdDate(LocalDate.now(clock))
+                    .createdAt(java.time.LocalDateTime.now(clock))
                     .creationTimeKnown(true)
                     .build();
             user.addRole(Role.USER);
@@ -184,7 +190,7 @@ public class AuthServiceImpl implements AuthService {
                             user.getId(), OtpType.ACTIVATE_ACCOUNT)
                     .orElse(null);
 
-            if (otp == null || otp.getExpiredAt().isBefore(LocalDateTime.now()) || otp.getFailedAttempts() >= 5) {
+            if (otp == null || otp.getExpiredAt().isBefore(LocalDateTime.now(clock)) || otp.getFailedAttempts() >= 5) {
                 return false;
             }
 
@@ -212,8 +218,8 @@ public class AuthServiceImpl implements AuthService {
         PendingRegistration pending = pendingRegistrations.get(key);
 
         if (pending != null) {
-            if (pending.getCreatedAt().isBefore(LocalDateTime.now().minusMinutes(10))) {
-                pending.setCreatedAt(LocalDateTime.now()); pending.setResendCount(0);
+            if (pending.getCreatedAt().isBefore(LocalDateTime.now(clock).minusMinutes(10))) {
+                pending.setCreatedAt(LocalDateTime.now(clock)); pending.setResendCount(0);
             }
             if (pending.getResendCount() >= 3) {
                 throw new IllegalStateException("Bạn đã yêu cầu gửi mã quá 3 lần. Vui lòng đăng ký lại.");
@@ -227,7 +233,7 @@ public class AuthServiceImpl implements AuthService {
             }
             pending.setOtpCode(newCode);
             pending.setFailedAttempts(0);
-            pending.setExpiredAt(LocalDateTime.now().plusMinutes(5));
+            pending.setExpiredAt(LocalDateTime.now(clock).plusMinutes(5));
             pending.setResendCount(pending.getResendCount() + 1);
             return newCode;
         }
@@ -244,7 +250,7 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalStateException("Tài khoản này đã được kích hoạt trước đó!");
         }
 
-        LocalDateTime tenMinutesAgo = LocalDateTime.now().minusMinutes(10);
+        LocalDateTime tenMinutesAgo = LocalDateTime.now(clock).minusMinutes(10);
         long recentRequests = otpRepository.countByUserIdAndCreatedAtAfter(user.getId(), tenMinutesAgo);
         if (recentRequests >= 3) {
             throw new IllegalStateException("Bạn đã yêu cầu gửi mã quá 3 lần. Vui lòng thử lại sau 10 phút.");
@@ -264,7 +270,7 @@ public class AuthServiceImpl implements AuthService {
         rejectRetiredDeliveryAccount(user);
 
         lockAndRefreshUser(user);
-        if (otpRepository.countByUserIdAndCreatedAtAfter(user.getId(), LocalDateTime.now().minusMinutes(10)) >= 3) {
+        if (otpRepository.countByUserIdAndCreatedAtAfter(user.getId(), LocalDateTime.now(clock).minusMinutes(10)) >= 3) {
             throw new IllegalStateException("Vui lòng chờ 10 phút trước khi yêu cầu thêm mã OTP.");
         }
         return createAndSendOtp(user, OtpType.RESET_PASSWORD);
@@ -285,7 +291,7 @@ public class AuthServiceImpl implements AuthService {
                         user.getId(), otpCode != null ? otpCode.trim() : "", OtpType.RESET_PASSWORD)
                 .orElse(null);
 
-        return otp != null && otp.getFailedAttempts() < 5 && !otp.getExpiredAt().isBefore(LocalDateTime.now());
+        return otp != null && otp.getFailedAttempts() < 5 && !otp.getExpiredAt().isBefore(LocalDateTime.now(clock));
     }
 
     @Override
@@ -309,7 +315,7 @@ public class AuthServiceImpl implements AuthService {
         rejectRetiredDeliveryAccount(user);
         OtpVerification otp = otpRepository.findTopByUserIdAndTypeOrderByExpiredAtDesc(user.getId(), OtpType.RESET_PASSWORD)
                 .orElseThrow(() -> new IllegalArgumentException("Mã xác thực không hợp lệ."));
-        if (Boolean.TRUE.equals(otp.getIsUsed()) || otp.getExpiredAt().isBefore(LocalDateTime.now()) || otp.getFailedAttempts() >= 5) {
+        if (Boolean.TRUE.equals(otp.getIsUsed()) || otp.getExpiredAt().isBefore(LocalDateTime.now(clock)) || otp.getFailedAttempts() >= 5) {
             throw new IllegalArgumentException("Mã OTP đã hết hạn, đã sử dụng hoặc bị khóa. Vui lòng yêu cầu mã mới.");
         }
         if (!otp.getCode().equals(otpCode.trim())) {
@@ -337,8 +343,8 @@ public class AuthServiceImpl implements AuthService {
                 .user(user)
                 .code(code)
                 .type(type)
-                .expiredAt(LocalDateTime.now().plusMinutes(5))
-                .createdAt(LocalDateTime.now())
+                .expiredAt(LocalDateTime.now(clock).plusMinutes(5))
+                .createdAt(LocalDateTime.now(clock))
                 .isUsed(false)
                 .build();
         otpRepository.save(otp);

@@ -1,7 +1,202 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:replace="~{fragments/floral :: head('Thành viên')}"></head>
-<body><header th:replace="~{fragments/floral :: header}"></header>
-<main class="container py-4 floral-page"><h1 class="mb-4">Thành viên</h1><div th:replace="~{fragments/floral :: flashes}"></div><form th:action="@{/users}" method="get" class="input-group mb-4"><input name="keyword" class="form-control" th:value="${keyword}" placeholder="Tìm tên hoặc tài khoản" aria-label="Tìm thành viên"><button type="submit" class="btn btn-success">Tìm kiếm</button></form><p th:text="${totalUsers} + ' thành viên'"></p><p th:if="${#lists.isEmpty(users)}">Không tìm thấy thành viên phù hợp.</p><div class="row g-4"><div class="col-12 col-sm-6 col-lg-4" th:each="u : ${users}"><article class="card h-100 p-4"><img th:src="${u.avatarUrl != null and !u.avatarUrl.isEmpty() ? u.avatarUrl : '/images/flower-logo.png'}" class="floral-avatar mb-3" alt="Ảnh đại diện"><h2 class="h5" th:text="${u.fullName != null ? u.fullName : u.username}"></h2><p class="text-muted" th:text="'@' + ${u.username}"></p><a class="btn btn-outline-success mt-auto" th:href="@{/users/{id}(id=${u.id})}">Xem hồ sơ</a></article></div></div><nav th:if="${totalPages > 1}" class="mt-4" aria-label="Phân trang"><ul class="pagination flex-wrap"><li th:each="i : ${#numbers.sequence(0,totalPages-1)}" class="page-item" th:classappend="${i == currentPage} ? 'active'"><a class="page-link" th:href="@{/users(keyword=${keyword},page=${i})}" th:text="${i+1}"></a></li></ul></nav></main>
-<footer th:replace="~{fragments/floral :: footer}"></footer><th:block th:replace="~{fragments/floral :: scripts}"></th:block><th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
-</body></html>
+<head th:replace="~{fragments/floral :: head('Thành viên hệ thống')}">
+</head>
+<body class="floral-body">
+<header th:replace="~{fragments/floral :: header}"></header>
+
+<main class="floral-main-content py-5">
+    <div class="container">
+        <!-- Page Header & Title -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+            <div>
+                <nav aria-label="breadcrumb" class="mb-2">
+                    <ol class="breadcrumb mb-0 small">
+                        <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none text-muted">Trang chủ</a></li>
+                        <li class="breadcrumb-item active text-success fw-semibold" aria-current="page">Thành viên</li>
+                    </ol>
+                </nav>
+                <h1 class="h2 fw-bold text-dark mb-1" style="font-family: 'Playfair Display', serif; color: #20382E;">
+                    Cộng Đồng Thành Viên
+                </h1>
+                <p class="text-muted mb-0" style="font-size: 15px;">
+                    Gặp gỡ những người yêu hoa, đối tác và nghệ nhân cắm hoa trong hệ thống Hoa Tươi Sài Gòn
+                </p>
+            </div>
+            <div>
+                <span class="badge rounded-pill px-3 py-2" style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; font-size: 14px; font-weight: 700;">
+                    <i class="bi bi-people-fill me-1"></i> <span th:text="${totalUsers}">0</span> thành viên
+                </span>
+            </div>
+        </div>
+
+        <div th:replace="~{fragments/floral :: flashes}"></div>
+
+        <!-- Search Bar -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4" style="background-color: #F8FAF9; border: 1px solid #E2E7E2 !important;">
+            <div class="card-body p-3 p-md-4">
+                <form th:action="@{/users}" method="get" class="row g-2 align-items-center">
+                    <input type="hidden" name="size" th:value="${pageSize != null ? pageSize : 6}" />
+                    <div class="col-md-9 col-lg-10">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 ps-3" style="border-color: #D1E5DA; border-radius: 12px 0 0 12px;">
+                                <i class="bi bi-search text-muted"></i>
+                            </span>
+                            <input type="text" name="keyword" class="form-control border-start-0 ps-2"
+                                   th:value="${keyword}"
+                                   placeholder="Tìm kiếm thành viên theo họ tên, tên đăng nhập hoặc email..."
+                                   aria-label="Tìm thành viên"
+                                   style="height: 46px; border-color: #D1E5DA; border-radius: 0 12px 12px 0; font-size: 15px;">
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-lg-2 d-flex gap-2">
+                        <button type="submit" class="btn btn-success flex-grow-1 fw-bold shadow-sm"
+                                style="height: 46px; border-radius: 12px; background-color: #20382E; border-color: #20382E;">
+                            Tìm kiếm
+                        </button>
+                        <a th:if="${keyword != null and !keyword.isEmpty()}" th:href="@{/users(size=${pageSize})}"
+                           class="btn btn-outline-secondary d-flex align-items-center justify-content-center px-3"
+                           title="Xóa tìm kiếm" style="height: 46px; border-radius: 12px; border-color: #D1E5DA;">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Search Results Count / Active Filter Notice -->
+        <div th:if="${keyword != null and !keyword.isEmpty()}" class="d-flex align-items-center justify-content-between mb-3 px-1">
+            <span class="small text-muted">
+                Kết quả tìm kiếm cho: <strong class="text-dark" th:text="'“' + ${keyword} + '”'"></strong>
+                (<span th:text="${totalUsers}">0</span> thành viên)
+            </span>
+            <a th:href="@{/users(size=${pageSize})}" class="small text-success text-decoration-none fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i> Xem tất cả thành viên
+            </a>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${#lists.isEmpty(users)}" class="card border-0 shadow-sm rounded-4 text-center py-5 my-4" style="background-color: #FFFFFF; border: 1px dashed #D1E5DA !important;">
+            <div class="card-body py-4">
+                <div class="mb-3">
+                    <img th:src="@{/images/flower-logo.png}" alt="Hoa Tươi" style="width: 64px; height: 64px; opacity: 0.7;">
+                </div>
+                <h5 class="fw-bold text-dark mb-2">Không tìm thấy thành viên phù hợp</h5>
+                <p class="text-muted small mb-3" style="max-width: 420px; margin: 0 auto;">
+                    Không có thành viên nào khớp với từ khóa tìm kiếm của bạn. Hãy thử tìm bằng từ khóa khác hoặc quay lại danh sách đầy đủ.
+                </p>
+                <a th:href="@{/users}" class="btn btn-outline-success rounded-pill px-4 fw-semibold" style="border-color: #20382E; color: #20382E;">
+                    Xem danh sách đầy đủ
+                </a>
+            </div>
+        </div>
+
+        <!-- Member Grid -->
+        <div th:if="${!#lists.isEmpty(users)}" class="row g-4 mb-4">
+            <div class="col-12 col-sm-6 col-lg-4" th:each="u : ${users}">
+                <article class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative member-card"
+                         style="background-color: #FFFFFF; border: 1px solid #EAEFEA !important; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                    <div class="card-body p-4 d-flex flex-column text-center">
+                        <!-- Avatar with fallback -->
+                        <div class="mx-auto mb-3 position-relative" style="width: 88px; height: 88px;">
+                            <img th:src="${u.avatarUrl != null and !u.avatarUrl.trim().isEmpty() ? u.avatarUrl : '/images/flower-logo.png'}"
+                                 onerror="this.onerror=null; this.src='/images/flower-logo.png';"
+                                 class="rounded-circle shadow-sm border"
+                                 style="width: 88px; height: 88px; object-fit: cover; border-color: #D1E5DA !important; background-color: #F8FAF9;"
+                                 th:alt="${u.fullName != null ? u.fullName : u.username}">
+                        </div>
+
+                        <!-- Name & Username -->
+                        <h2 class="h5 fw-bold text-dark mb-1" style="font-size: 18px;" th:text="${u.fullName != null and !u.fullName.isEmpty() ? u.fullName : u.username}">
+                            Nguyễn Văn A
+                        </h2>
+                        <p class="text-muted small mb-2" style="font-size: 13.5px;" th:text="'@' + ${u.username}">
+                            @nguyenvana
+                        </p>
+
+                        <!-- Store / Role Badges -->
+                        <div class="mb-3 d-flex flex-wrap justify-content-center gap-1">
+                            <span th:if="${u.store != null}" class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2.5 py-1" style="font-size: 12px;">
+                                <i class="bi bi-shop me-1"></i> <span th:text="${u.store.name}">Chi nhánh</span>
+                            </span>
+                            <span th:if="${u.store == null}" class="badge rounded-pill bg-light text-secondary border px-2.5 py-1" style="font-size: 12px;">
+                                <i class="bi bi-person me-1"></i> Thành viên
+                            </span>
+                        </div>
+
+                        <!-- Extra Details -->
+                        <div class="small text-muted mb-4 mt-auto pt-2 border-top" style="font-size: 13px; border-color: #F0F4F1 !important;">
+                            <div th:if="${u.createdDate != null}" class="text-truncate">
+                                <i class="bi bi-calendar3 me-1 text-success"></i> Tham gia: <span th:text="${#temporals.format(u.createdDate, 'dd/MM/yyyy')}">01/01/2026</span>
+                            </div>
+                        </div>
+
+                        <!-- Profile Action -->
+                        <a th:href="@{/users/{id}(id=${u.id})}" class="btn btn-outline-success w-100 rounded-pill fw-semibold py-2"
+                           style="border-color: #20382E; color: #20382E; font-size: 14px;">
+                            Xem hồ sơ cá nhân <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </article>
+            </div>
+        </div>
+
+        <!-- Finite Sliding Window Pagination -->
+        <nav th:if="${totalPages > 1}" class="mt-4 pt-2 d-flex justify-content-center" aria-label="Phân trang thành viên">
+            <ul class="pagination mb-0 gap-1 flex-wrap justify-content-center">
+                <!-- Previous Button -->
+                <li class="page-item" th:classappend="${!hasPrevious} ? 'disabled' : ''">
+                    <a class="page-link rounded-3 px-3 py-2 fw-semibold"
+                       th:href="@{/users(keyword=${keyword}, page=${currentPage - 1}, size=${pageSize})}"
+                       aria-label="Trang trước" style="color: #20382E; border-color: #D1E5DA;">
+                        <i class="bi bi-chevron-left me-1"></i> Trước
+                    </a>
+                </li>
+
+                <!-- Sliding Page Numbers (Current +/- 2) -->
+                <th:block th:with="startPage=${T(java.lang.Math).max(0, currentPage - 2)}, endPage=${T(java.lang.Math).min(totalPages - 1, currentPage + 2)}">
+                    <!-- First page jump if far -->
+                    <li th:if="${startPage > 0}" class="page-item">
+                        <a class="page-link rounded-3 px-3 py-2" th:href="@{/users(keyword=${keyword}, page=0, size=${pageSize})}">1</a>
+                    </li>
+                    <li th:if="${startPage > 1}" class="page-item disabled">
+                        <span class="page-link rounded-3 px-3 py-2">...</span>
+                    </li>
+
+                    <!-- Window sequence -->
+                    <li th:each="i : ${#numbers.sequence(startPage, endPage)}" class="page-item" th:classappend="${i == currentPage} ? 'active' : ''">
+                        <a class="page-link rounded-3 px-3 py-2 fw-semibold"
+                           th:href="@{/users(keyword=${keyword}, page=${i}, size=${pageSize})}"
+                           th:text="${i + 1}"
+                           th:style="${i == currentPage} ? 'background-color: #20382E; border-color: #20382E; color: #FFFFFF;' : 'color: #20382E; border-color: #D1E5DA;'">
+                            1
+                        </a>
+                    </li>
+
+                    <!-- Last page jump if far -->
+                    <li th:if="${endPage < totalPages - 2}" class="page-item disabled">
+                        <span class="page-link rounded-3 px-3 py-2">...</span>
+                    </li>
+                    <li th:if="${endPage < totalPages - 1}" class="page-item">
+                        <a class="page-link rounded-3 px-3 py-2" th:href="@{/users(keyword=${keyword}, page=${totalPages - 1}, size=${pageSize})}" th:text="${totalPages}">10</a>
+                    </li>
+                </th:block>
+
+                <!-- Next Button -->
+                <li class="page-item" th:classappend="${!hasNext} ? 'disabled' : ''">
+                    <a class="page-link rounded-3 px-3 py-2 fw-semibold"
+                       th:href="@{/users(keyword=${keyword}, page=${currentPage + 1}, size=${pageSize})}"
+                       aria-label="Trang sau" style="color: #20382E; border-color: #D1E5DA;">
+                        Sau <i class="bi bi-chevron-right ms-1"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/floral :: footer}"></footer>
+<th:block th:replace="~{fragments/floral :: scripts}"></th:block>
+<th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
+</body>
+</html>

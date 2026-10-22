@@ -4,7 +4,7 @@
 
 Tài liệu này hướng dẫn chi tiết từng bước (Step-by-Step) cách kiểm tra và nghiệm thu toàn bộ các chức năng của hệ thống trên giao diện web thực tế (Chrome / Edge / Firefox) theo đúng Đề cương đặc tả yêu cầu chức năng hệ thống bán hoa tươi (100% mô hình Bán hoa - Không cho thuê).
 
-> Cập nhật 12/10/2026: dùng [README](README.md) và [báo cáo chạy thử mới nhất](docs/SYSTEM_REVIEW_20261012.md) cho cấu hình và kết quả hiện hành. Tài khoản demo chỉ có khi chủ động bật seed trên database demo; vai trò/cổng Shipper đã ngừng sử dụng, các phần Shipper phía dưới là mô tả lịch sử. OTP lấy từ email, không từ console hoặc URL. Báo cáo hiện có Hôm nay / 7 ngày / 30 ngày / Từ ngày–Đến ngày; chọn đủ hai ngày rồi bấm Áp dụng.
+> Cập nhật 22/10/2026: dùng [README](README.md) và [báo cáo khắc phục mới nhất](docs/REMEDIATION_RESULTS_20261022.md) cho cấu hình và kết quả hiện hành (schema V15). Tài khoản demo chỉ có khi chủ động bật seed trên database demo; vai trò/cổng Shipper đã ngừng sử dụng, các phần Shipper phía dưới là mô tả lịch sử. OTP lấy từ email, không từ console hoặc URL. Báo cáo hiện có Hôm nay / 7 ngày / 30 ngày / Từ ngày–Đến ngày; chọn đủ hai ngày rồi bấm Áp dụng.
 
 ---
 

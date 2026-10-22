@@ -1,5 +1,19 @@
 # Chuỗi cửa hàng hoa — Spring Boot
 
+### Cập nhật khắc phục 22/10/2026
+
+Chuỗi migration hiện tại kết thúc ở **V15**. V11 gốc `review_image_public_id` được giữ nguyên checksum; migration mới dùng V12–V15. Không repair/xóa lịch sử V11 để xử lý xung đột. Xem [kết quả khắc phục ngày 22/10](docs/REMEDIATION_RESULTS_20261022.md) và [kế hoạch gốc](docs/REMEDIATION_PLAN_20261021.md).
+
+Chạy cục bộ bằng Java 21, khai báo credential trong `.env` theo `.env.example`:
+
+```powershell
+# Chọn rõ database; script không ghi credential vào log.
+.\scripts\run-local.ps1 -DatabaseName RentalShop -Mode Validate
+.\scripts\run-local.ps1 -DatabaseName RentalShop -Mode Run
+```
+
+`Run` bật Flyway, chỉ bind localhost và tắt seed/tunnel tự động. Database cần được sao lưu và diễn tập trên bản sao trước khi dùng `-Mode Migrate` để nâng cấp dữ liệu cũ. Prod vô hiệu hóa các cổng thanh toán thử nghiệm; checkout prod chỉ cung cấp COD. Đổi/reset mật khẩu yêu cầu đăng nhập lại ở các phiên cũ.
+
 Website bán hoa theo mô hình nhiều chi nhánh. Khách hàng xem sản phẩm, chọn chi nhánh còn hàng, đặt hàng, thanh toán và chat với cửa hàng/admin. Quản lý xử lý tồn kho, đơn hàng, nhân sự, voucher, doanh thu và ví theo quyền tại từng chi nhánh. Admin quản trị toàn chuỗi.
 
 Khách chỉ được hủy đơn ở trạng thái chờ xác nhận hoặc đã xác nhận, không giới hạn một giờ kể từ lúc đặt. Từ lúc cửa hàng bắt đầu cắm hoa/chuẩn bị (`PREPARING`), khách không thể tự hủy, kể cả đơn chưa giao hoặc nhận tại quầy. Chính sách được hiển thị trước khi đặt hàng, trên đơn và trong thông báo bắt đầu chuẩn bị; quản lý/admin phải xác nhận cảnh báo trước khi bắt đầu cắm hoa. Hủy đơn chưa thanh toán trả tồn kho và chuyển sang đã hủy; đơn đã thanh toán chuyển sang chờ cửa hàng hoàn tiền, không tự ghi nhận tiền đã được hoàn.
@@ -169,7 +183,7 @@ Hiện chưa có API key/người gửi được cấu hình tại máy kiểm t
 
 Java test dùng H2 ở chế độ SQL Server, không ghi database SQL Server đang có. Test WebSocket thực tế cần được phép mở kết nối localhost. Mockito được nạp bằng Java agent để tránh tự attach bị treo. JavaScript test cần Node.js 22; trên máy hiện tại đã có runtime portable trong `.tools`.
 
-Kết quả ngày 19/10/2026: Java 622 ca (616 đạt, 6 bỏ qua có chủ đích, không thất bại/lỗi); JavaScript 102/102 ca đạt. Kiểm tra sổ số dư SQL Server V10 chỉ đọc đạt khi chạy riêng; test Cloudinary live không nằm trong lượt chạy mặc định.
+Kết quả lịch sử ngày 19/10/2026: Java 622 ca (616 đạt, 6 bỏ qua có chủ đích, không thất bại/lỗi); JavaScript 102/102 ca đạt. Kiểm tra sổ số dư SQL Server V10 chỉ đọc đạt khi chạy riêng; test Cloudinary live không nằm trong lượt chạy mặc định. Xem [báo cáo ngày 22/10](docs/REMEDIATION_RESULTS_20261022.md) cho kết quả sau khắc phục và migration V15.
 
 Phí giao hàng demo dùng **vùng do người mua chọn** (gần/xa/ngoài phạm vi) để đối chiếu biểu phí của chi nhánh; hệ thống không đo khoảng cách bản đồ và không suy từ chuỗi địa chỉ như “Quận 1”. Không thể đặt hàng khi chọn ngoài phạm vi hoặc khi không có biểu phí phù hợp. Đối soát tồn kho cũ: [báo cáo 19/10/2026](docs/DOI_SOAT_KHO_LECH_CHI_NHANH_20261019.md).
 

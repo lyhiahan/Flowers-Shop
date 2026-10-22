@@ -1,7 +1,176 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:replace="~{fragments/floral :: head('Hồ sơ thành viên')}"></head>
-<body><header th:replace="~{fragments/floral :: header}"></header>
-<main class="container py-4 floral-page"><h1 class="mb-4">Hồ sơ thành viên</h1><div th:replace="~{fragments/floral :: flashes}"></div><a th:href="@{/users}" class="btn btn-outline-secondary mb-4">Danh sách thành viên</a><article class="card overflow-hidden"><img th:if="${user.cover != null and !user.cover.isEmpty()}" th:src="${user.cover}" class="floral-cover" alt="Ảnh bìa"><div class="card-body p-4"><img class="floral-avatar mb-3" th:src="${user.avatarUrl != null and !user.avatarUrl.isEmpty() ? user.avatarUrl : '/images/flower-logo.png'}" alt="Ảnh đại diện"><h2 th:text="${user.fullName != null ? user.fullName : user.username}"></h2><p class="text-muted" th:text="'@' + ${user.username}"></p><p th:if="${user.createdDate != null}" th:text="'Tham gia từ ' + ${#temporals.format(user.createdDate,'dd/MM/yyyy')}"></p><a th:if="${user.store != null}" th:href="@{/stores/{id}(id=${user.store.id})}" class="btn btn-outline-success" th:text="${user.store.name}"></a></div></article></main>
-<footer th:replace="~{fragments/floral :: footer}"></footer><th:block th:replace="~{fragments/floral :: scripts}"></th:block><th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
-</body></html>
+<head th:replace="~{fragments/floral :: head(${user.fullName != null ? user.fullName + ' - Hồ sơ thành viên' : user.username + ' - Hồ sơ thành viên'})}">
+</head>
+<body class="floral-body">
+<header th:replace="~{fragments/floral :: header}"></header>
+
+<main class="floral-main-content py-5">
+    <div class="container">
+        <!-- Breadcrumbs & Navigation -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 small">
+                    <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none text-muted">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/users}" class="text-decoration-none text-muted">Thành viên</a></li>
+                    <li class="breadcrumb-item active text-success fw-semibold" aria-current="page"
+                        th:text="${user.fullName != null and !user.fullName.isEmpty() ? user.fullName : user.username}">
+                        Hồ sơ
+                    </li>
+                </ol>
+            </nav>
+            <a th:href="@{/users}" class="btn btn-outline-secondary rounded-pill px-3 py-1.5 small fw-semibold"
+               style="border-color: #D1E5DA; color: #20382E;">
+                <i class="bi bi-arrow-left me-1"></i> Danh sách thành viên
+            </a>
+        </div>
+
+        <div th:replace="~{fragments/floral :: flashes}"></div>
+
+        <!-- Main Profile Card -->
+        <article class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4"
+                 style="background-color: #FFFFFF; border: 1px solid #E2E7E2 !important;">
+
+            <!-- Cover Header -->
+            <div class="position-relative" style="height: 220px; background: linear-gradient(135deg, #1C3328 0%, #2D4D3E 50%, #446C58 100%);">
+                <img th:if="${user.cover != null and !user.cover.trim().isEmpty()}"
+                     th:src="${user.cover}"
+                     class="w-100 h-100"
+                     style="object-fit: cover;"
+                     alt="Ảnh bìa"
+                     onerror="this.onerror=null; this.style.display='none';">
+                <div class="position-absolute top-0 end-0 p-3 opacity-25">
+                    <i class="bi bi-flower1 text-white" style="font-size: 5rem;"></i>
+                </div>
+            </div>
+
+            <!-- Profile Info Container -->
+            <div class="card-body px-4 pb-4 pt-0">
+                <div class="row align-items-end mb-4">
+                    <!-- Overlapping Avatar -->
+                    <div class="col-auto" style="margin-top: -60px;">
+                        <div class="position-relative" style="width: 120px; height: 120px;">
+                            <img th:src="${user.avatarUrl != null and !user.avatarUrl.trim().isEmpty() ? user.avatarUrl : '/images/flower-logo.png'}"
+                                 onerror="this.onerror=null; this.src='/images/flower-logo.png';"
+                                 class="rounded-circle shadow border border-4 border-white"
+                                 style="width: 120px; height: 120px; object-fit: cover; background-color: #F8FAF9;"
+                                 th:alt="${user.fullName != null ? user.fullName : user.username}">
+                        </div>
+                    </div>
+
+                    <!-- Name & Subtitle -->
+                    <div class="col pt-3 pt-md-0">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                            <div>
+                                <h1 class="h3 fw-bold mb-1" style="font-family: 'Playfair Display', serif; color: #20382E;"
+                                    th:text="${user.fullName != null and !user.fullName.isEmpty() ? user.fullName : user.username}">
+                                    Họ và tên
+                                </h1>
+                                <p class="text-muted mb-0 small" th:text="'@' + ${user.username}">
+                                    @username
+                                </p>
+                            </div>
+
+                            <!-- Badges -->
+                            <div class="d-flex flex-wrap gap-2">
+                                <span th:if="${user.store != null}" class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3 py-2" style="font-size: 13px;">
+                                    <i class="bi bi-shop me-1"></i> <span th:text="${user.store.name}">Chi nhánh đối tác</span>
+                                </span>
+                                <span th:if="${user.userLevel != null}" class="badge rounded-pill bg-warning-subtle text-dark border border-warning-subtle px-3 py-2" style="font-size: 13px;">
+                                    <i class="bi bi-award-fill me-1 text-warning"></i> <span th:text="${user.userLevel.name}">Hạng thành viên</span>
+                                </span>
+                                <span th:if="${user.store == null and user.userLevel == null}" class="badge rounded-pill bg-light text-secondary border px-3 py-2" style="font-size: 13px;">
+                                    <i class="bi bi-person me-1"></i> Thành viên
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Information Grid -->
+                <div class="row g-4 mt-2">
+                    <div class="col-lg-8">
+                        <div class="p-4 rounded-4" style="background-color: #F8FAF9; border: 1px solid #EAEFEA;">
+                            <h2 class="h6 fw-bold text-dark mb-3 text-uppercase" style="letter-spacing: 0.5px; color: #20382E !important;">
+                                <i class="bi bi-person-lines-fill me-2 text-success"></i> Thông tin thành viên
+                            </h2>
+                            <dl class="row mb-0 g-2 small">
+                                <dt class="col-sm-4 text-muted fw-normal">Tên đăng nhập:</dt>
+                                <dd class="col-sm-8 text-dark fw-semibold" th:text="${user.username}">username</dd>
+
+                                <dt class="col-sm-4 text-muted fw-normal">Họ và tên:</dt>
+                                <dd class="col-sm-8 text-dark fw-semibold" th:text="${user.fullName != null and !user.fullName.isEmpty() ? user.fullName : 'Chưa cập nhật'}">Họ tên</dd>
+
+                                <dt class="col-sm-4 text-muted fw-normal">Ngày tham gia:</dt>
+                                <dd class="col-sm-8 text-dark" th:text="${user.createdDate != null ? #temporals.format(user.createdDate, 'dd/MM/yyyy') : (user.createdAt != null ? #temporals.format(user.createdAt, 'dd/MM/yyyy') : 'Thành viên lâu năm')}">01/01/2026</dd>
+
+                                <dt class="col-sm-4 text-muted fw-normal">Trạng thái:</dt>
+                                <dd class="col-sm-8">
+                                    <span th:if="${user.isActive}" class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Đang hoạt động
+                                    </span>
+                                    <span th:if="${!user.isActive}" class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">
+                                        <i class="bi bi-pause-circle me-1"></i> Tạm khóa
+                                    </span>
+                                </dd>
+                            </dl>
+                        </div>
+
+                        <!-- Store Showcase if user manages a store -->
+                        <div th:if="${user.store != null}" class="p-4 rounded-4 mt-3" style="background-color: #F8FAF9; border: 1px solid #EAEFEA;">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                                <h2 class="h6 fw-bold mb-0 text-uppercase" style="letter-spacing: 0.5px; color: #20382E !important;">
+                                    <i class="bi bi-shop me-2 text-success"></i> Chi nhánh quản lý
+                                </h2>
+                                <a th:href="@{/stores/{id}(id=${user.store.id})}" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold" style="border-color: #20382E; color: #20382E;">
+                                    Ghé thăm cửa hàng <i class="bi bi-box-arrow-up-right ms-1"></i>
+                                </a>
+                            </div>
+                            <div class="card border-0 rounded-3 p-3 bg-white shadow-sm">
+                                <h3 class="h6 fw-bold text-dark mb-1" th:text="${user.store.name}">Tên Chi Nhánh</h3>
+                                <p th:if="${user.store.address != null}" class="text-muted small mb-1">
+                                    <i class="bi bi-geo-alt me-1 text-danger"></i> <span th:text="${user.store.address}">Địa chỉ cửa hàng</span>
+                                </p>
+                                <p th:if="${user.store.phone != null}" class="text-muted small mb-0">
+                                    <i class="bi bi-telephone me-1 text-success"></i> <span th:text="${user.store.phone}">Số điện thoại</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Quick Info & Actions -->
+                    <div class="col-lg-4">
+                        <div class="card border-0 rounded-4 p-4 shadow-sm" style="background-color: #F8FAF9; border: 1px solid #EAEFEA !important;">
+                            <h2 class="h6 fw-bold text-dark mb-3 text-uppercase" style="letter-spacing: 0.5px; color: #20382E !important;">
+                                <i class="bi bi-info-circle me-2 text-success"></i> Hoạt động
+                            </h2>
+                            <p class="small text-muted mb-4">
+                                Thành viên thuộc hệ sinh thái bán và cho thuê hoa tươi chất lượng cao tại TP. Hồ Chí Minh.
+                            </p>
+                            <div class="d-grid gap-2">
+                                <a th:if="${user.store != null}" th:href="@{/stores/{id}(id=${user.store.id})}"
+                                   class="btn btn-success fw-bold py-2 rounded-pill shadow-sm"
+                                   style="background-color: #20382E; border-color: #20382E;">
+                                    <i class="bi bi-shop me-1"></i> Xem gian hàng
+                                </a>
+                                <a th:href="@{/users}" class="btn btn-outline-secondary py-2 rounded-pill fw-semibold"
+                                   style="border-color: #D1E5DA; color: #20382E;">
+                                    <i class="bi bi-people me-1"></i> Tìm thêm thành viên
+                                </a>
+                                <a th:href="@{/}" class="btn btn-link text-decoration-none text-muted small py-1">
+                                    <i class="bi bi-house me-1"></i> Trở về trang chủ
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/floral :: footer}"></footer>
+<th:block th:replace="~{fragments/floral :: scripts}"></th:block>
+<th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
+</body>
+</html>

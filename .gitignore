@@ -50,3 +50,6 @@ application-local.properties
 *.7z
 *.tar.gz
 .tmp/
+
+# Local HTTP authentication sessions
+/cookies.txt

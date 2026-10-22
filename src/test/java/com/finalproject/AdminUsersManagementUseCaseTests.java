@@ -146,7 +146,7 @@ class AdminUsersManagementUseCaseTests {
                 .andExpect(model().attributeExists("totalElements"))
                 .andExpect(model().attributeExists("currentPage"))
                 .andExpect(content().string(containsString("id=\"usersTable\"")))
-                .andExpect(content().string(containsString("Quản Lý Người Dùng & Vai Trò")))
+                .andExpect(content().string(containsString("Quản Lý Người Dùng &amp; Vai Trò")))
                 .andExpect(content().string(containsString("user1_uc27")))
                 .andExpect(content().string(containsString("user2_uc27")));
     }

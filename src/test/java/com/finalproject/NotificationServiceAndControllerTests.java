@@ -41,6 +41,7 @@ class NotificationServiceAndControllerTests {
         @Mock UserRepository userRepository;
         @Mock StoreRepository storeRepository;
         @Mock SimpMessagingTemplate messagingTemplate;
+        @org.mockito.Spy com.finalproject.service.NotificationNavigationResolver navigationResolver = new com.finalproject.service.NotificationNavigationResolver();
         @InjectMocks NotificationServiceImpl notificationService;
 
         @Test
@@ -60,9 +61,25 @@ class NotificationServiceAndControllerTests {
             assertThat(result.getContent()).isEqualTo("Nội dung");
             assertThat(result.getType()).isEqualTo("ORDER_CREATED");
             assertThat(result.getRelatedOrderId()).isEqualTo(50L);
+            assertThat(result.getTargetUrl()).isEqualTo("/customer/orders/detail/50");
             assertThat(result.getIsRead()).isFalse();
 
-            verify(messagingTemplate).convertAndSend(eq("/topic/user/10/notifications"), any(Notification.class));
+            verify(messagingTemplate).convertAndSend(eq("/topic/user/10/notifications"), any(com.finalproject.dto.response.NotificationEvent.class));
+        }
+
+        @Test
+        void sendNotificationUsesEffectiveAdminRoleInTheRealtimePayload() {
+            User user = User.builder().id(10L).role(com.finalproject.enums.Role.MANAGER)
+                    .roles(java.util.Set.of(com.finalproject.enums.Role.ADMIN)).build();
+            when(notificationRepository.save(any(Notification.class))).thenAnswer(inv -> {
+                Notification saved = inv.getArgument(0);
+                saved.setId(100L);
+                return saved;
+            });
+            notificationService.sendNotification(user, "Khách hàng bị khóa", "Đơn cần xử lý", "ORDER_UPDATE", 4L);
+            var event = org.mockito.ArgumentCaptor.forClass(com.finalproject.dto.response.NotificationEvent.class);
+            verify(messagingTemplate).convertAndSend(eq("/topic/user/10/notifications"), event.capture());
+            assertThat(event.getValue().targetUrl()).isEqualTo("/admin/orders/4");
         }
 
         @Test
@@ -103,9 +120,9 @@ class NotificationServiceAndControllerTests {
 
             // Phải gửi cho owner (1 lần) và staff1, staff2 (mỗi người 1 lần, không bị trùng owner)
             verify(notificationRepository, times(3)).save(any(Notification.class));
-            verify(messagingTemplate).convertAndSend(eq("/topic/user/1/notifications"), any(Notification.class));
-            verify(messagingTemplate).convertAndSend(eq("/topic/user/2/notifications"), any(Notification.class));
-            verify(messagingTemplate).convertAndSend(eq("/topic/user/3/notifications"), any(Notification.class));
+            verify(messagingTemplate).convertAndSend(eq("/topic/user/1/notifications"), any(com.finalproject.dto.response.NotificationEvent.class));
+            verify(messagingTemplate).convertAndSend(eq("/topic/user/2/notifications"), any(com.finalproject.dto.response.NotificationEvent.class));
+            verify(messagingTemplate).convertAndSend(eq("/topic/user/3/notifications"), any(com.finalproject.dto.response.NotificationEvent.class));
         }
 
         @Test
@@ -153,6 +170,7 @@ class NotificationServiceAndControllerTests {
         @Mock NotificationService notificationService;
         @Mock UserRepository userRepository;
         @Mock com.finalproject.service.StoreAccessService storeAccess;
+        @org.mockito.Spy com.finalproject.service.NotificationNavigationResolver navigationResolver = new com.finalproject.service.NotificationNavigationResolver();
         @InjectMocks NotificationController controller;
 
         @Test
@@ -166,7 +184,7 @@ class NotificationServiceAndControllerTests {
         @Test
         @DisplayName("viewAllNotifications populates model and returns customer/notifications view")
         void viewAll_authenticated() {
-            User user = User.builder().id(10L).username("customer1").build();
+            User user = User.builder().id(10L).username("customer1").role(com.finalproject.enums.Role.USER).build();
             Notification n1 = Notification.builder().id(1L).title("T1").isRead(false).build();
             when(userRepository.findByUsername("customer1")).thenReturn(Optional.of(user));
             when(notificationService.getUserNotifications(10L)).thenReturn(List.of(n1));
@@ -179,6 +197,36 @@ class NotificationServiceAndControllerTests {
             assertThat(model.getAttribute("notifications")).isEqualTo(List.of(n1));
             assertThat(model.getAttribute("unreadCount")).isEqualTo(1L);
             assertThat(model.getAttribute("user")).isEqualTo(user);
+        }
+
+        @Test
+        @DisplayName("viewAllNotifications redirects admin to /admin/notifications")
+        void viewAll_adminRole() {
+            User admin = User.builder().id(1L).username("admin1").role(com.finalproject.enums.Role.ADMIN).build();
+            when(userRepository.findByUsername("admin1")).thenReturn(Optional.of(admin));
+
+            Model model = new ConcurrentModel();
+            String view = controller.viewAllNotifications(() -> "admin1", model);
+
+            assertThat(view).isEqualTo("redirect:/admin/notifications");
+        }
+
+        @Test
+        @DisplayName("viewAdminNotifications returns admin/notifications view with active key")
+        void viewAdmin_authenticated() {
+            User admin = User.builder().id(1L).username("admin1").role(com.finalproject.enums.Role.ADMIN).build();
+            Notification n1 = Notification.builder().id(1L).title("Khách khóa").relatedOrderId(4L).build();
+            when(userRepository.findByUsername("admin1")).thenReturn(Optional.of(admin));
+            when(notificationService.getUserNotifications(1L)).thenReturn(List.of(n1));
+            when(notificationService.getUnreadCount(1L)).thenReturn(1L);
+
+            Model model = new ConcurrentModel();
+            String view = controller.viewAdminNotifications(() -> "admin1", model);
+
+            assertThat(view).isEqualTo("admin/notifications");
+            assertThat(model.getAttribute("notifications")).isEqualTo(List.of(n1));
+            assertThat(model.getAttribute("unreadCount")).isEqualTo(1L);
+            assertThat(model.getAttribute("active")).isEqualTo("notifications");
         }
 
         @Test
@@ -199,37 +247,40 @@ class NotificationServiceAndControllerTests {
         }
 
         @Test
-        @DisplayName("getUnreadCount returns correct json")
+        @DisplayName("getUnreadCount returns correct json with isAdmin flag")
         void getUnreadCount_api() {
-            User user = User.builder().id(10L).username("customer1").build();
+            User user = User.builder().id(10L).username("customer1").role(com.finalproject.enums.Role.USER).build();
             when(userRepository.findByUsername("customer1")).thenReturn(Optional.of(user));
             when(notificationService.getUnreadCount(10L)).thenReturn(3L);
 
             ResponseEntity<Map<String, Object>> response = controller.getUnreadCount(() -> "customer1");
             assertThat(response.getBody()).isNotNull();
             assertThat(response.getBody().get("unreadCount")).isEqualTo(3L);
+            assertThat(response.getBody().get("isManager")).isEqualTo(false);
+            assertThat(response.getBody().get("isAdmin")).isEqualTo(false);
         }
 
         @Test
-        @DisplayName("getLatestNotifications returns top 6 mapped records")
+        @DisplayName("getLatestNotifications returns top 6 mapped records with targetUrl")
         void getLatestNotifications_api() {
-            User user = User.builder().id(10L).username("customer1").build();
+            User user = User.builder().id(1L).username("admin").role(com.finalproject.enums.Role.ADMIN).build();
             Notification n1 = Notification.builder()
-                    .id(1L).title("T1").content("C1").type("ORDER_CREATED")
-                    .isRead(false).relatedOrderId(88L).createdAt(LocalDateTime.of(2026, 10, 4, 12, 0))
+                    .id(1L).title("Khách hàng bị khóa").content("Hoàn tiền").type("ORDER_UPDATE")
+                    .isRead(false).relatedOrderId(4L).createdAt(LocalDateTime.of(2026, 10, 4, 12, 0))
                     .build();
 
-            when(userRepository.findByUsername("customer1")).thenReturn(Optional.of(user));
-            when(notificationService.getUserNotifications(10L)).thenReturn(List.of(n1));
+            when(userRepository.findByUsername("admin")).thenReturn(Optional.of(user));
+            when(notificationService.getUserNotifications(1L)).thenReturn(List.of(n1));
 
-            ResponseEntity<List<Map<String, Object>>> response = controller.getLatestNotifications(() -> "customer1");
+            ResponseEntity<List<Map<String, Object>>> response = controller.getLatestNotifications(() -> "admin");
             assertThat(response.getBody()).isNotNull();
             assertThat(response.getBody()).hasSize(1);
             Map<String, Object> map = response.getBody().get(0);
             assertThat(map.get("id")).isEqualTo(1L);
-            assertThat(map.get("title")).isEqualTo("T1");
-            assertThat(map.get("relatedOrderId")).isEqualTo(88L);
-            assertThat(map.get("type")).isEqualTo("ORDER_CREATED");
+            assertThat(map.get("title")).isEqualTo("Khách hàng bị khóa");
+            assertThat(map.get("relatedOrderId")).isEqualTo(4L);
+            assertThat(map.get("type")).isEqualTo("ORDER_UPDATE");
+            assertThat(map.get("targetUrl")).isEqualTo("/admin/orders/4");
         }
 
         @Test

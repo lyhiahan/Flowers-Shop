@@ -14,6 +14,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class PendingRegistration {
     private RegisterRequest request;
+    @lombok.ToString.Exclude
+    private String passwordHash;
     private String otpCode;
     private LocalDateTime expiredAt;
     private LocalDateTime createdAt;

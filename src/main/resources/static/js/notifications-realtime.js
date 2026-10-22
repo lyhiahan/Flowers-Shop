@@ -13,6 +13,7 @@
     let currentUserId = null;
     let currentUnreadCount = 0;
     let isManagerUser = false;
+    let isAdminUser = false;
     let stompClient = null;
     let isConnecting = false;
 
@@ -25,6 +26,31 @@
             headers[csrfHeader] = csrfToken;
         }
         return headers;
+    }
+
+    // Helper: Validate & Sanitize internal targetUrl
+    function sanitizeTargetUrl(url, fallbackUrl) {
+        if (!url || typeof url !== 'string') return fallbackUrl;
+        const trimmed = url.trim();
+        // Must start with exactly one '/' and not '//', no backslashes, no scheme/protocol
+        if (!trimmed.startsWith('/') || trimmed.startsWith('//') || trimmed.includes('\\') || trimmed.includes(':')) {
+            return fallbackUrl;
+        }
+        // Match entire backend routes, rejecting traversal and lookalike prefixes.
+        const isAllowed = /^\/(?:(?:admin|manager)\/orders\/[1-9]\d*|customer\/orders\/detail\/[1-9]\d*|(?:(?:admin|manager)\/)?notifications(?:#notif_[1-9]\d*)?)$/.test(trimmed);
+        return isAllowed ? trimmed : fallbackUrl;
+    }
+
+    function getDefaultNotificationCenterUrl() {
+        const isAdminPath = window.location.pathname.startsWith('/admin');
+        const isManagerPath = window.location.pathname.startsWith('/manager');
+        if (isAdminPath || isAdminUser) {
+            return '/admin/notifications';
+        }
+        if (isManagerPath || isManagerUser) {
+            return '/manager/notifications';
+        }
+        return '/notifications';
     }
 
     // Helper: Format relative time
@@ -112,6 +138,7 @@
             const data = await res.json();
             currentUserId = data.userId;
             isManagerUser = Boolean(data.isManager);
+            isAdminUser = Boolean(data.isAdmin);
             updateBadges(data.unreadCount);
 
             if (currentUserId && !stompClient && !isConnecting) {
@@ -189,10 +216,18 @@
         toast.className = 'notif-toast-item shadow-lg';
         toast.style.cssText = 'pointer-events:auto;background:#FFFFFF;border-radius:14px;border:1px solid #E5EEE8;border-left:5px solid ' + visuals.color + ';padding:14px 16px;box-shadow:0 12px 32px rgba(32,56,46,0.12);transition:all 0.3s ease;transform:translateX(50px);opacity:0;';
 
-        let targetUrl = '/notifications';
-        if (notif.relatedOrderId) {
+        const centerUrl = getDefaultNotificationCenterUrl();
+        let targetUrl = notif.targetUrl ? sanitizeTargetUrl(notif.targetUrl, null) : null;
+        if (!targetUrl) {
             const isManagerPath = window.location.pathname.startsWith('/manager');
-            targetUrl = isManagerPath || isManagerUser ? '/manager/orders/' + notif.relatedOrderId : '/customer/orders/detail/' + notif.relatedOrderId;
+            const isAdminPath = window.location.pathname.startsWith('/admin');
+            if (isAdminPath || isAdminUser) {
+                targetUrl = notif.relatedOrderId ? '/admin/orders/' + notif.relatedOrderId : '/admin/notifications';
+            } else if (isManagerPath || isManagerUser) {
+                targetUrl = notif.relatedOrderId ? '/manager/orders/' + notif.relatedOrderId : '/manager/notifications';
+            } else {
+                targetUrl = notif.relatedOrderId ? '/customer/orders/detail/' + notif.relatedOrderId : '/notifications';
+            }
         }
 
         toast.innerHTML = `
@@ -247,9 +282,16 @@
         const isManagerPage = Boolean(document.querySelector('.manager-layout'));
         const timeStr = formatTimeAgo(notif.createdAt) || 'Vừa xong';
 
-        let targetUrl = '';
-        if (notif.relatedOrderId) {
-            targetUrl = isManagerPage ? '/manager/orders/' + notif.relatedOrderId : '/customer/orders/detail/' + notif.relatedOrderId;
+        let targetUrl = notif.targetUrl ? sanitizeTargetUrl(notif.targetUrl, null) : null;
+        if (!targetUrl && notif.relatedOrderId) {
+            const isAdminPath = window.location.pathname.startsWith('/admin');
+            if (isAdminPath || isAdminUser) {
+                targetUrl = '/admin/orders/' + notif.relatedOrderId;
+            } else if (isManagerPage || isManagerUser) {
+                targetUrl = '/manager/orders/' + notif.relatedOrderId;
+            } else {
+                targetUrl = '/customer/orders/detail/' + notif.relatedOrderId;
+            }
         }
 
         const card = document.createElement('div');
@@ -306,9 +348,17 @@
                 const visuals = getNotifVisuals(item.type);
                 const timeStr = formatTimeAgo(item.createdAt);
                 const isManagerPath = window.location.pathname.startsWith('/manager');
-                let targetUrl = (isManagerPath || isManagerUser ? '/manager/notifications' : '/notifications') + '#notif_' + encodeURIComponent(item.id);
-                if (item.relatedOrderId) {
-                    targetUrl = isManagerPath || isManagerUser ? '/manager/orders/' + item.relatedOrderId : '/customer/orders/detail/' + item.relatedOrderId;
+                const isAdminPath = window.location.pathname.startsWith('/admin');
+
+                let targetUrl = item.targetUrl ? sanitizeTargetUrl(item.targetUrl, null) : null;
+                if (!targetUrl) {
+                    if (isAdminPath || isAdminUser) {
+                        targetUrl = (item.relatedOrderId ? '/admin/orders/' + item.relatedOrderId : '/admin/notifications#notif_' + encodeURIComponent(item.id));
+                    } else if (isManagerPath || isManagerUser) {
+                        targetUrl = (item.relatedOrderId ? '/manager/orders/' + item.relatedOrderId : '/manager/notifications#notif_' + encodeURIComponent(item.id));
+                    } else {
+                        targetUrl = (item.relatedOrderId ? '/customer/orders/detail/' + item.relatedOrderId : '/notifications#notif_' + encodeURIComponent(item.id));
+                    }
                 }
 
                 const row = document.createElement('a');
@@ -339,7 +389,7 @@
                 container.appendChild(row);
             });
         } catch (e) {
-            const pageUrl = window.location.pathname.startsWith('/manager') || isManagerUser ? '/manager/notifications' : '/notifications';
+            const pageUrl = getDefaultNotificationCenterUrl();
             container.innerHTML = '<div class="p-3 text-center text-danger small">Không thể tải thông báo lúc này. <a href="' + pageUrl + '" class="d-block mt-2">Mở trang thông báo</a></div>';
         }
     }

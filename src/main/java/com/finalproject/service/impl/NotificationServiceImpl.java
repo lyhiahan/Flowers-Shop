@@ -25,6 +25,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final com.finalproject.service.NotificationNavigationResolver navigationResolver;
 
     @Override
     @Transactional
@@ -40,9 +41,12 @@ public class NotificationServiceImpl implements NotificationService {
                 .createdAt(LocalDateTime.now())
                 .build();
         Notification saved = notificationRepository.save(notif);
+        String targetUrl = navigationResolver != null ? navigationResolver.resolveTargetUrl(user, saved.getId(), saved.getRelatedOrderId()) : null;
+        saved.setTargetUrl(targetUrl);
+        var event = com.finalproject.dto.response.NotificationEvent.from(saved, targetUrl);
 
         Runnable publish = () -> {
-            try { messagingTemplate.convertAndSend("/topic/user/" + user.getId() + "/notifications", saved); }
+            try { messagingTemplate.convertAndSend("/topic/user/" + user.getId() + "/notifications", event); }
             catch (Exception ex) { log.debug("WebSocket push notification bypassed: {}", ex.getMessage()); }
         };
         if (org.springframework.transaction.support.TransactionSynchronizationManager.isSynchronizationActive()) {
@@ -77,7 +81,14 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public List<Notification> getUserNotifications(Long userId) {
-        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        List<Notification> list = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        if (navigationResolver != null && !list.isEmpty()) {
+            User user = userRepository.findById(userId).orElse(null);
+            for (Notification n : list) {
+                n.setTargetUrl(navigationResolver.resolveTargetUrl(user, n.getId(), n.getRelatedOrderId()));
+            }
+        }
+        return list;
     }
 
     @Override

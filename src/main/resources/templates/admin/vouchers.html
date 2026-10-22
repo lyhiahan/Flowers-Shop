@@ -1,127 +1,14 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta charset="UTF-8">
-    <title>Khuyến Mãi Toàn Sàn - Quản Trị Hệ Thống Hoa Tươi</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
-    <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
-    <style>
-        body { font-family: var(--font-sans) !important; background-color: var(--admin-bg); color: var(--admin-text-main); min-height: 100vh; }
-        .main-wrapper { flex: 1; overflow-x: hidden; background-color: var(--admin-bg); }
-    </style>
+    <th:block th:replace="~{fragments/admin-layout :: assets('Khuyến Mãi Toàn Sàn')}"></th:block>
 </head>
 <body class="admin-body">
-<div class="d-flex">
-    <!-- Sidebar -->
-        <!-- Sidebar Quản Trị Hệ Thống Chuẩn Thương Hiệu Tiệm Hoa -->
-    <aside class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white">
-        <a th:href="@{/admin/dashboard}" class="d-flex align-items-center gap-3 mb-4 text-white text-decoration-none px-2 pt-2">
-            <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img flex-shrink-0" style="width: 40px; height: 40px; border-radius: 8px;">
-            <div>
-                <div class="fw-bold text-white" style="font-size: 16px; line-height: 1.2; letter-spacing: 0.5px;">HOA TƯƠI SÀI GÒN</div>
-                <div class="small" style="font-size: 11px; color: #9DB7AA !important; letter-spacing: 0.05em;">QUẢN TRỊ VIÊN HỆ THỐNG</div>
-            </div>
-        </a>
-
-        <ul class="nav nav-pills flex-column mb-auto gap-1">
-            <li>
-                <a th:href="@{/admin/dashboard}" class="nav-link">
-                    <i class="bi bi-grid"></i>
-                    <span>Thống kê</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/users}" class="nav-link">
-                    <i class="bi bi-people"></i>
-                    <span>Người dùng</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/stores}" class="nav-link">
-                    <i class="bi bi-shop"></i>
-                    <span>Cửa hàng</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/store-levels}" class="nav-link">
-                    <i class="bi bi-award"></i>
-                    <span>Hạng chi nhánh</span>
-                </a>
-            </li>
-
-            <li>
-                <a th:href="@{/admin/products-manage}" class="nav-link">
-                    <i class="bi bi-box-seam"></i>
-                    <span>Sản phẩm</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/orders-manage}" class="nav-link">
-                    <i class="bi bi-bag"></i>
-                    <span>Đơn hàng</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/categories}" class="nav-link">
-                    <i class="bi bi-tags"></i>
-                    <span>Danh mục hoa</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/styles}" class="nav-link">
-                    <i class="bi bi-sliders"></i>
-                    <span>Thuộc tính sản phẩm</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/deliveries}" class="nav-link">
-                    <i class="bi bi-truck"></i>
-                    <span>Đơn vị vận chuyển</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/vouchers}" class="nav-link active">
-                    <i class="bi bi-ticket-perforated"></i>
-                    <span>Khuyến mãi</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/admin/user-levels}" class="nav-link">
-                    <i class="bi bi-award"></i>
-                    <span>Cấp bậc khách</span>
-                </a>
-            </li>
-
-            <li>
-                <a th:href="@{/admin/transactions}" class="nav-link">
-                    <i class="bi bi-journal-text"></i>
-                    <span>Lịch sử giao dịch</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/}" class="nav-link" target="_blank" style="color: #9DB7AA;">
-                    <i class="bi bi-box-arrow-up-right"></i>
-                    <span>Xem cửa hàng</span>
-                </a>
-            </li>
-        </ul>
-
-        <hr class="border-secondary my-2">
-        <form th:action="@{/logout}" method="post" class="d-inline">
-            <button type="submit" class="btn btn-outline-danger btn-sm w-100 d-flex align-items-center justify-content-center gap-2">
-                <i class="bi bi-box-arrow-right"></i> Đăng xuất
-            </button>
-        </form>
-    </aside>
-
-    <!-- Main Content -->
-    <div class="main-wrapper p-4">
+<div class="admin-layout-wrapper">
+    <aside th:replace="~{fragments/admin-layout :: sidebar('vouchers')}"></aside>
+    <main class="main-wrapper-admin">
+        <div th:replace="~{fragments/admin-layout :: mobile-topbar('Khuyến mãi toàn sàn')}"></div>
+        <div class="p-4">
         <!-- 1. Header trang & Thống kê tổng quan -->
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
             <div>
@@ -308,7 +195,8 @@
                 </div>
             </div>
         </div>
-    </div>
+        </div>
+    </main>
 </div>
 
 <!-- ========================================== -->
@@ -581,7 +469,7 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<th:block th:replace="~{fragments/admin-layout :: footer}"></th:block>
 
 <!-- JAVASCRIPT XỬ LÝ RÀNG BUỘC ĐIỀU KIỆN KHI THÊM / SỬA KHUYẾN MÃI -->
 <script>

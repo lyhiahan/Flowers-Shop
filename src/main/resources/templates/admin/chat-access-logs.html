@@ -1,20 +1,54 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/admin-layout :: assets('Nhật ký giám sát hội thoại')}"></head>
-<body class="admin-body"><div class="admin-layout-wrapper">
-<aside th:replace="~{fragments/admin-layout :: sidebar('chat')}"></aside>
-<main class="main-wrapper-admin">
-    <h1 class="admin-page-title">Nhật ký giám sát hội thoại</h1>
-    <p class="text-muted">Ghi nhận mỗi lần admin mở lịch sử hoặc tải tin cũ của hội thoại khách–chi nhánh. Không có thao tác sửa/xóa nhật ký.</p>
-    <a class="btn btn-outline-success mb-3" th:href="@{/admin/chat}">Trở về hội thoại</a>
-    <div class="table-responsive bg-white rounded-3 p-3"><table class="table table-striped">
-        <thead><tr><th>Admin</th><th>Hội thoại</th><th>Chi nhánh</th><th>Khách hàng</th><th>Thời điểm</th><th>Mốc tin cũ</th></tr></thead>
-        <tbody><tr th:each="entry : ${logs.content}"><td th:text="${entry.administrator}"></td><td th:text="${entry.conversationId}"></td>
-        <td th:text="${entry.storeName}"></td><td th:text="${entry.customerName}"></td>
-        <td th:text="${#temporals.format(entry.accessedAt,'dd/MM/yyyy HH:mm:ss')}"></td><td th:text="${entry.beforeMessageId ?: 'Mới nhất'}"></td></tr>
-        <tr th:if="${logs.empty}"><td colspan="6" class="text-muted">Chưa có lượt giám sát.</td></tr></tbody>
-    </table></div>
-    <nav class="d-flex gap-2 mt-3"><a th:if="${logs.hasPrevious()}" class="btn btn-outline-secondary" th:href="@{/admin/chat/access-logs(page=${logs.number - 1})}">Trang trước</a>
-    <span class="align-self-center" th:text="'Trang ' + ${logs.number + 1}"></span>
-    <a th:if="${logs.hasNext()}" class="btn btn-outline-secondary" th:href="@{/admin/chat/access-logs(page=${logs.number + 1})}">Trang sau</a></nav>
-</main></div></body></html>
+<body class="admin-body">
+<div class="admin-layout-wrapper">
+    <aside th:replace="~{fragments/admin-layout :: sidebar('chat')}"></aside>
+    <main class="main-wrapper-admin">
+        <div th:replace="~{fragments/admin-layout :: mobile-topbar('Nhật ký hội thoại')}"></div>
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 pb-2 border-bottom">
+            <div>
+                <h1 class="admin-page-title mb-1">Nhật ký giám sát hội thoại</h1>
+                <p class="text-muted small mb-0">Ghi nhận mỗi lần admin mở lịch sử hoặc tải tin cũ của hội thoại khách–chi nhánh. Không có thao tác sửa/xóa nhật ký.</p>
+            </div>
+            <a class="btn btn-outline-success btn-sm rounded-pill px-3" th:href="@{/admin/chat}">
+                <i class="bi bi-arrow-left me-1"></i> Trở về hội thoại
+            </a>
+        </div>
+        <div class="table-responsive bg-white rounded-3 p-3 shadow-sm border">
+            <table class="table table-striped table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Admin</th>
+                        <th>Hội thoại</th>
+                        <th>Chi nhánh</th>
+                        <th>Khách hàng</th>
+                        <th>Thời điểm</th>
+                        <th>Mốc tin cũ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="entry : ${logs.content}">
+                        <td th:text="${entry.administrator}"></td>
+                        <td th:text="${entry.conversationId}"></td>
+                        <td th:text="${entry.storeName}"></td>
+                        <td th:text="${entry.customerName}"></td>
+                        <td th:text="${#temporals.format(entry.accessedAt,'dd/MM/yyyy HH:mm:ss')}"></td>
+                        <td th:text="${entry.beforeMessageId ?: 'Mới nhất'}"></td>
+                    </tr>
+                    <tr th:if="${logs.empty}">
+                        <td colspan="6" class="text-muted text-center py-4">Chưa có lượt giám sát.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <nav th:if="${logs.hasPrevious() or logs.hasNext()}" class="d-flex gap-2 mt-3" aria-label="Phân trang nhật ký">
+            <a th:if="${logs.hasPrevious()}" class="btn btn-sm btn-outline-secondary" th:href="@{/admin/chat/access-logs(page=${logs.number - 1})}">Trang trước</a>
+            <span class="align-self-center small fw-semibold" th:text="'Trang ' + ${logs.number + 1}"></span>
+            <a th:if="${logs.hasNext()}" class="btn btn-sm btn-outline-secondary" th:href="@{/admin/chat/access-logs(page=${logs.number + 1})}">Trang sau</a>
+        </nav>
+    </main>
+</div>
+<th:block th:replace="~{fragments/admin-layout :: footer}"></th:block>
+</body>
+</html>

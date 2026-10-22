@@ -67,14 +67,32 @@ class SqlServerMigrationLiveTests {
     @Test void emptyDatabaseMigratesAllVersionsAndValidatesAllEntities() throws Exception {
         String url = url("SQLSERVER_TEST_FRESH_DATABASE");
         var flyway = flyway(url);
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(10);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(15);
         flyway.validate();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("10");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("15");
         validateEntities(url);
         assertThat(flyway.migrate().migrationsExecuted).isZero();
     }
 
-    @Test void existingDatabaseCopyRequiresExplicitBaselineAndPreservesBusinessRows() throws Exception {
+    @Test void existingV11CopyMigratesWithoutRepairAndPreservesBusinessRows() throws Exception {
+        String url = url("SQLSERVER_TEST_COPY_DATABASE");
+        var flyway = flyway(url);
+        Map<String, Long> before = counts(url);
+        flyway.validateWithResult(); // Pending V12-V15 are expected before migrate.
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("11");
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(4);
+        flyway.validate();
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("15");
+        assertThat(java.util.Arrays.stream(flyway.info().applied()).filter(m -> "11".equals(m.getVersion().getVersion())).findFirst().orElseThrow().getChecksum())
+                .isEqualTo(306107251);
+        validateEntities(url);
+        assertThat(counts(url)).isEqualTo(before);
+        assertThat(flyway.migrate().migrationsExecuted).isZero();
+    }
+
+    /** Requires an actual pre-Flyway/V2 copy, not a V11 database with its history removed. */
+    @Test @EnabledIfSystemProperty(named="sqlserver.legacy-baseline.live", matches="true")
+    void existingDatabaseCopyRequiresExplicitBaselineAndPreservesBusinessRows() throws Exception {
         String url = url("SQLSERVER_TEST_COPY_DATABASE");
         Map<String, Long> before = counts(url);
         var flyway = flyway(url);
@@ -92,9 +110,9 @@ class SqlServerMigrationLiveTests {
         }
         var auditedVersion = Flyway.configure().configuration(flyway.getConfiguration()).target("5").load();
         assertThat(auditedVersion.migrate().migrationsExecuted).isEqualTo(1);
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(5);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(10);
         flyway.validate();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("10");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("15");
         validateEntities(url);
         assertThat(counts(url)).isEqualTo(before);
         try (var connection = connect(url); var statement = connection.createStatement()) {

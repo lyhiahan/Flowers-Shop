@@ -24,7 +24,7 @@ class OtpDeliveryFailureTests {
     private AuthServiceImpl auth() {
         var validator = mock(Validator.class);
         when(validator.validate(any(RegisterRequest.class))).thenReturn(Set.of());
-        return new AuthServiceImpl(users, otps, carts, email, mock(PasswordEncoder.class), validator, mock(EntityManager.class));
+        return new AuthServiceImpl(users, otps, carts, email, mock(PasswordEncoder.class), validator, mock(EntityManager.class), java.time.Clock.system(java.time.ZoneId.of("Asia/Bangkok")));
     }
     private RegisterRequest request() {
         var request = new RegisterRequest();

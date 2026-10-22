@@ -33,4 +33,7 @@ public class Notification {
     private Boolean isRead = false;
 
     private LocalDateTime createdAt;
+
+    @Transient
+    private String targetUrl;
 }

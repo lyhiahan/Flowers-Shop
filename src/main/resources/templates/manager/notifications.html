@@ -92,7 +92,7 @@
 
 <div class="manager-layout">
     <aside th:replace="~{fragments/manager-layout :: sidebar('notifications')}"></aside>
-    
+
     <main id="managerMain" class="manager-main dashboard-main">
         <!-- Header thông báo -->
         <header class="d-flex justify-content-between align-items-start flex-wrap gap-3 pb-3 mb-4 border-bottom">
@@ -126,20 +126,20 @@
 
         <!-- Danh sách thông báo -->
         <div id="notificationsList" th:classappend="${#lists.isEmpty(notifications)} ? 'd-none' : ''" class="d-flex flex-column gap-3">
-            <div th:each="n : ${notifications}" 
-                 class="notif-card-manager" 
+            <div th:each="n : ${notifications}"
+                 class="notif-card-manager"
                  th:classappend="${!n.isRead} ? 'unread' : ''"
                  th:id="'notif_' + ${n.id}">
                 <div class="d-flex align-items-start gap-3">
                     <!-- Icon theo loại thông báo -->
-                    <div class="notif-icon-circle" 
-                         th:style="${n.type == 'ORDER_CREATED'} ? 'background-color: #ECFDF5; color: #059669;' : 
-                                    (${n.type == 'ORDER_DELIVERED' or n.type == 'ORDER_CONFIRMED'} ? 'background-color: #E0F2FE; color: #0284C7;' : 
-                                    (${n.type == 'ORDER_CANCELLED'} ? 'background-color: #FEE2E2; color: #DC2626;' : 
+                    <div class="notif-icon-circle"
+                         th:style="${n.type == 'ORDER_CREATED'} ? 'background-color: #ECFDF5; color: #059669;' :
+                                    (${n.type == 'ORDER_DELIVERED' or n.type == 'ORDER_CONFIRMED'} ? 'background-color: #E0F2FE; color: #0284C7;' :
+                                    (${n.type == 'ORDER_CANCELLED'} ? 'background-color: #FEE2E2; color: #DC2626;' :
                                     (${n.type == 'WALLET_DEPOSIT' or n.type == 'WALLET_WITHDRAW'} ? 'background-color: #FEF3C7; color: #D97706;' : 'background-color: #E5EEE8; color: #20382E;')))">
-                        <i th:class="${n.type == 'ORDER_CREATED'} ? 'bi bi-bag-plus-fill' : 
-                                    (${n.type == 'ORDER_DELIVERED' or n.type == 'ORDER_CONFIRMED'} ? 'bi bi-flower1' : 
-                                    (${n.type == 'ORDER_CANCELLED'} ? 'bi bi-x-circle-fill' : 
+                        <i th:class="${n.type == 'ORDER_CREATED'} ? 'bi bi-bag-plus-fill' :
+                                    (${n.type == 'ORDER_DELIVERED' or n.type == 'ORDER_CONFIRMED'} ? 'bi bi-flower1' :
+                                    (${n.type == 'ORDER_CANCELLED'} ? 'bi bi-x-circle-fill' :
                                     (${n.type == 'WALLET_DEPOSIT' or n.type == 'WALLET_WITHDRAW'} ? 'bi bi-coin' : 'bi bi-bell-fill')))"></i>
                     </div>
 
@@ -150,18 +150,18 @@
                             <small class="text-muted" th:text="${#temporals.format(n.createdAt, 'dd/MM/yyyy HH:mm')}">Thời gian</small>
                         </div>
                         <p class="text-secondary small mb-2" th:text="${n.content}">Nội dung chi tiết thông báo.</p>
-                        
+
                         <div class="d-flex align-items-center gap-3">
-                            <a th:if="${n.relatedOrderId != null}" 
-                               th:href="@{'/manager/orders/' + ${n.relatedOrderId}}" 
+                            <a th:if="${n.relatedOrderId != null}"
+                               th:href="${n.targetUrl != null ? n.targetUrl : ('/manager/orders/' + n.relatedOrderId)}"
                                onclick="markNotificationReadDirect(this)"
                                th:data-id="${n.id}"
                                class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold" style="font-size: 12.5px;">
                                 Xem đơn hàng #<span th:text="${n.relatedOrderId}"></span> <i class="bi bi-arrow-right ms-1"></i>
                             </a>
-                            <button th:if="${!n.isRead}" 
-                                    onclick="markSingleNotificationRead(this)" 
-                                    th:data-id="${n.id}" 
+                            <button th:if="${!n.isRead}"
+                                    onclick="markSingleNotificationRead(this)"
+                                    th:data-id="${n.id}"
                                     class="btn btn-link btn-sm text-muted p-0 text-decoration-none" style="font-size: 12.5px;">
                                 <i class="bi bi-check2"></i> Đánh dấu đã đọc
                             </button>

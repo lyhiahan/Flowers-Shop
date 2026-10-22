@@ -92,18 +92,18 @@
 
     <!-- Danh sách thông báo -->
     <div id="notificationsList" th:classappend="${#lists.isEmpty(notifications)} ? 'd-none' : ''" class="d-flex flex-column gap-3">
-        <div th:each="n : ${notifications}" 
-             class="notif-card" 
+        <div th:each="n : ${notifications}"
+             class="notif-card"
              th:classappend="${!n.isRead} ? 'unread' : ''"
              th:id="'notif_' + ${n.id}">
             <div class="d-flex align-items-start gap-3">
                 <!-- Icon theo loại thông báo -->
-                <div class="notif-icon-circle" 
-                     th:style="${n.type == 'PAYMENT_SUCCESS'} ? 'background-color: #FDF2F8; color: #DB2777;' : 
-                                (${n.type == 'ORDER_CREATED'} ? 'background-color: #ECFDF5; color: #059669;' : 
+                <div class="notif-icon-circle"
+                     th:style="${n.type == 'PAYMENT_SUCCESS'} ? 'background-color: #FDF2F8; color: #DB2777;' :
+                                (${n.type == 'ORDER_CREATED'} ? 'background-color: #ECFDF5; color: #059669;' :
                                 (${n.type == 'ORDER_DELIVERED'} ? 'background-color: #FEF3C7; color: #D97706;' : 'background-color: #EFF6FF; color: #2563EB;'))">
-                    <i th:class="${n.type == 'PAYMENT_SUCCESS'} ? 'bi bi-credit-card-fill' : 
-                                (${n.type == 'ORDER_CREATED'} ? 'bi bi-bag-plus-fill' : 
+                    <i th:class="${n.type == 'PAYMENT_SUCCESS'} ? 'bi bi-credit-card-fill' :
+                                (${n.type == 'ORDER_CREATED'} ? 'bi bi-bag-plus-fill' :
                                 (${n.type == 'ORDER_DELIVERED'} ? 'bi bi-flower1' : 'bi bi-bell-fill'))"></i>
                 </div>
 
@@ -114,18 +114,18 @@
                         <small class="text-muted" th:text="${#temporals.format(n.createdAt, 'dd/MM/yyyy HH:mm')}"></small>
                     </div>
                     <p class="text-secondary small mb-2" th:text="${n.content}">Nội dung</p>
-                    
+
                     <div class="d-flex align-items-center gap-3">
-                        <a th:if="${n.relatedOrderId != null}" 
-                           th:href="@{'/customer/orders/detail/' + ${n.relatedOrderId}}" 
+                        <a th:if="${n.relatedOrderId != null}"
+                           th:href="${n.targetUrl != null ? n.targetUrl : ('/customer/orders/detail/' + n.relatedOrderId)}"
                            onclick="markReadDirect(this)"
                            th:data-id="${n.id}"
                            class="btn btn-sm btn-light border rounded-pill px-3 text-danger fw-semibold" style="font-size: 12px;">
                             Xem đơn hoa #<span th:text="${n.relatedOrderId}"></span> <i class="bi bi-arrow-right ms-1"></i>
                         </a>
-                        <button th:if="${!n.isRead}" 
-                                onclick="markOneRead(this)" 
-                                th:data-id="${n.id}" 
+                        <button th:if="${!n.isRead}"
+                                onclick="markOneRead(this)"
+                                th:data-id="${n.id}"
                                 class="btn btn-link btn-sm text-muted p-0 text-decoration-none" style="font-size: 12px;">
                             <i class="bi bi-check2"></i> Đánh dấu đã đọc
                         </button>
