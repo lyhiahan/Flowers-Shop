@@ -150,6 +150,22 @@ class CancellationWalletAcceptanceTests extends DemoPendingFundsTests {
         assertThat(tx.getStatus()).isEqualTo("PENDING");
     }
 
+    @Test void adminPaidWithdrawalCannotPayAgainOrLaterReturnMoney() throws Exception {
+        withdrawal("50000", PASSWORD, UUID.randomUUID().toString());
+        Transaction tx = withdrawals().getFirst();
+        mvc.perform(post("/admin/transactions/" + tx.getId() + "/resolve").with(user(admin.getUsername()).roles("ADMIN"))
+                        .with(csrf()).param("paid", "true")).andExpect(flash().attributeExists("successMessage"));
+        assertBalances("0", "0");
+        assertThat(tx.getStatus()).isEqualTo("COMPLETED");
+        for (String repeatedDecision : new String[]{"true", "false"}) {
+            mvc.perform(post("/admin/transactions/" + tx.getId() + "/resolve").with(user(admin.getUsername()).roles("ADMIN"))
+                            .with(csrf()).param("paid", repeatedDecision)).andExpect(flash().attributeExists("errorMessage"));
+            assertBalances("0", "0");
+            assertThat(tx.getStatus()).isEqualTo("COMPLETED");
+        }
+        assertThat(withdrawals()).hasSize(1);
+    }
+
     private void managerTransition(Order order, String state, String reason) throws Exception {
         var request = post("/manager/orders/update-status/" + order.getId()).with(user(manager.getUsername()).roles("MANAGER"))
                 .with(csrf()).param("status", state);

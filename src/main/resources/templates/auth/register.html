@@ -132,7 +132,8 @@
                         </div>
                     </div>
 
-                    <form id="registerForm" th:action="@{/register}" th:object="${registerRequest}" method="post" novalidate>
+                    <form id="registerForm" th:action="@{/register}" th:object="${registerRequest}" method="post" novalidate
+                          th:attr="data-fresh-registration=${freshRegistration}">
                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <!-- Thông tin tài khoản -->
                         <div class="section-subtitle">Thông tin tài khoản đăng nhập</div>
@@ -158,9 +159,9 @@
                                 </label>
                                 <div class="input-group has-validation">
                                     <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                                    <input type="password" id="passwordInput" th:field="*{password}" class="form-control"
+                                    <input type="password" id="passwordInput" name="password" class="form-control"
                                            th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''"
-                                           placeholder="Tối thiểu 6 ký tự" required>
+                                           placeholder="Tối thiểu 6 ký tự" required autocomplete="new-password">
                                     <button class="btn btn-outline-secondary btn-toggle-pw" type="button" id="togglePasswordBtn" title="Hiện/ẩn mật khẩu">
                                         <i class="bi bi-eye" id="togglePasswordIcon"></i>
                                     </button>
@@ -737,6 +738,7 @@
     });
 </script>
 <script th:src="@{/js/form-validation.js}"></script>
+<script th:src="@{/js/register-autofill.js}"></script>
 <script th:src="@{/js/global-modal.js}"></script>
 <th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
 </body>

@@ -437,6 +437,21 @@
         modalBackdrop.classList.add('show');
     };
 
+    function submitConfirmedForm(form, submitter) {
+        var rawOnsubmit = form.getAttribute('onsubmit');
+        // Keep the clicked button and native validation without opening confirmation again.
+        form.removeAttribute('onsubmit');
+        try {
+            if (submitter) {
+                form.requestSubmit(submitter);
+            } else {
+                form.requestSubmit();
+            }
+        } finally {
+            if (rawOnsubmit !== null) form.setAttribute('onsubmit', rawOnsubmit);
+        }
+    }
+
     // 3. Tự động chặn và chuyển đổi mọi onclick có confirm(...) thành Global Modal
     document.addEventListener('click', function (e) {
         var btn = e.target.closest('[onclick*="confirm("], a[onclick*="confirm("]');
@@ -458,8 +473,7 @@
                         if (btn.tagName === 'A' && btn.href && !btn.href.startsWith('javascript:')) {
                             window.location.href = btn.href;
                         } else if (btn.form && (btn.type === 'submit' || !btn.type)) {
-                            btn.form.__global_confirmed = true;
-                            btn.form.submit();
+                            submitConfirmedForm(btn.form, btn);
                         } else {
                             var origOnclick = btn.getAttribute('onclick');
                             btn.removeAttribute('onclick');
@@ -478,9 +492,10 @@
         var form = e.target;
         if (!form) return;
         var rawOnsubmit = form.getAttribute('onsubmit');
-        if (rawOnsubmit && rawOnsubmit.indexOf('confirm(') !== -1 && !form.__global_confirmed) {
+        if (rawOnsubmit && rawOnsubmit.indexOf('confirm(') !== -1) {
             e.preventDefault();
             e.stopImmediatePropagation();
+            var submitter = e.submitter;
 
             var message = extractConfirmMessage(form, rawOnsubmit);
             var isDanger = /xóa|hủy|ngừng|cấm|từ chối|bỏ theo dõi|rút yêu cầu|thu hồi|vĩnh viễn/i.test(message);
@@ -491,8 +506,7 @@
                 isDanger: isDanger,
                 confirmText: isDanger ? 'Xác nhận' : 'Đồng ý',
                 onConfirm: function () {
-                    form.__global_confirmed = true;
-                    form.submit();
+                    submitConfirmedForm(form, submitter);
                 }
             });
         }
