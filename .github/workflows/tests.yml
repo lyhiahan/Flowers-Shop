@@ -18,8 +18,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Java tests (disposable H2; live SQL tests require separate opt-in)
-        run: bash mvnw -B test
+      - name: Java tests (UTC JVM; disposable H2; live SQL tests require separate opt-in)
+        run: bash mvnw -B -Duser.timezone=UTC test
       - name: JavaScript tests
         run: node --test src/test/js/*.test.cjs
       - name: Preserve Java reports

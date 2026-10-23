@@ -64,6 +64,7 @@ class BusinessRegressionTests {
     @Autowired DemoPaymentService demo;
     @Autowired NotificationRepository notifications;
     @Autowired ProductService productService;
+    @Autowired Clock clock;
     Store store, otherStore;
     User customer, manager, outsider;
     Product product;
@@ -128,7 +129,7 @@ class BusinessRegressionTests {
         assertThat(customer.getIsActive()).isFalse();
         assertThat(customer.getAccountDisabledByAdmin()).isTrue();
         otps.save(OtpVerification.builder().user(customer).code("123456").type(OtpType.ACTIVATE_ACCOUNT)
-                .expiredAt(java.time.LocalDateTime.now().plusMinutes(5)).build());
+                .expiredAt(LocalDateTime.now(clock).plusMinutes(5)).build());
         assertThat(auth.verifyOtp(customer.getEmail(), "123456")).isFalse();
         assertThatThrownBy(() -> auth.resendOtp(customer.getEmail())).hasMessageContaining("quản trị viên");
         assertThat(order.getStatus()).isEqualTo(OrderStatus.REFUND_REQUESTED);
@@ -552,7 +553,7 @@ class BusinessRegressionTests {
 
     @Test void resetPasswordRejectsMissingAndIncorrectOtp() {
         otps.save(OtpVerification.builder().user(customer).type(OtpType.RESET_PASSWORD).code("123456")
-                .createdAt(LocalDateTime.now()).expiredAt(LocalDateTime.now().plusMinutes(5)).build());
+                .createdAt(LocalDateTime.now(clock)).expiredAt(LocalDateTime.now(clock).plusMinutes(5)).build());
         assertThatThrownBy(() -> auth.resetPassword(customer.getEmail(), null, "newpassword")).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> auth.resetPassword(customer.getEmail(), "000000", "newpassword")).isInstanceOf(IllegalArgumentException.class);
         assertThat(encoder.matches("oldpassword", customer.getPassword())).isTrue();
@@ -560,7 +561,7 @@ class BusinessRegressionTests {
 
     @Test void validOtpIsConsumedAndNeverExposedByPublicPages() throws Exception {
         otps.save(OtpVerification.builder().user(customer).type(OtpType.RESET_PASSWORD).code("987654")
-                .createdAt(LocalDateTime.now()).expiredAt(LocalDateTime.now().plusMinutes(5)).build());
+                .createdAt(LocalDateTime.now(clock)).expiredAt(LocalDateTime.now(clock).plusMinutes(5)).build());
         mvc.perform(get("/reset-password").param("email", customer.getEmail()))
                 .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("987654"))));
         auth.resetPassword(customer.getEmail(), "987654", "newpassword");
@@ -754,7 +755,7 @@ class BusinessRegressionTests {
 
     @Test void resetOtpLocksAfterFiveFailedAttempts() {
         OtpVerification otp = otps.save(OtpVerification.builder().user(customer).type(OtpType.RESET_PASSWORD).code("123456")
-                .createdAt(LocalDateTime.now()).expiredAt(LocalDateTime.now().plusMinutes(5)).build());
+                .createdAt(LocalDateTime.now(clock)).expiredAt(LocalDateTime.now(clock).plusMinutes(5)).build());
         for (int i = 0; i < 5; i++) {
             assertThatThrownBy(() -> auth.resetPassword(customer.getEmail(), "000000", "newpassword")).isInstanceOf(IllegalArgumentException.class);
         }
@@ -1472,9 +1473,9 @@ class BusinessRegressionTests {
     @Autowired UserService userService;
 
     @Test void onlineOrdersHaveBankDeadlineAndExpiryRestocksOnce() {
-        LocalDateTime before = LocalDateTime.now();
+        LocalDateTime before = LocalDateTime.now(clock);
         Order order = checkout(PaymentMethod.BANK_TRANSFER);
-        assertThat(order.getPaymentExpiresAt()).isBetween(before.plusHours(24), LocalDateTime.now().plusHours(24));
+        assertThat(order.getPaymentExpiresAt()).isBetween(before.plusHours(24), LocalDateTime.now(clock).plusHours(24));
         assertThat(workflow.expireUnpaid(order.getId(), before)).isFalse();
         assertThat(workflow.expireUnpaid(order.getId(), order.getPaymentExpiresAt())).isTrue();
         assertThat(workflow.expireUnpaid(order.getId(), order.getPaymentExpiresAt().plusDays(1))).isFalse();
@@ -1486,7 +1487,7 @@ class BusinessRegressionTests {
 
     @Test void lateBankConfirmationRequestsRefundWithoutReservingStockAgain() throws Exception {
         Order order = checkout(PaymentMethod.BANK_TRANSFER);
-        order.setPaymentExpiresAt(LocalDateTime.now().minusSeconds(1)); orders.saveAndFlush(order);
+        order.setPaymentExpiresAt(LocalDateTime.now(clock).minusSeconds(1)); orders.saveAndFlush(order);
         login(manager); workflow.confirmPayment(order.getId());
         assertThat(order.getStatus()).isEqualTo(OrderStatus.REFUND_REQUESTED);
         assertThat(order.getPaymentStatus()).isEqualTo("PAID");
@@ -1500,18 +1501,18 @@ class BusinessRegressionTests {
 
     @Test void preparingAndPaidOrdersDoNotExpire() {
         Order order = checkout(PaymentMethod.MOMO);
-        assertThat(order.getPaymentExpiresAt()).isBefore(LocalDateTime.now().plusMinutes(31));
-        order.setStatus(OrderStatus.PREPARING); order.setPaymentExpiresAt(LocalDateTime.now().minusMinutes(1)); orders.saveAndFlush(order);
-        assertThat(workflow.expireUnpaid(order.getId(), LocalDateTime.now())).isFalse();
+        assertThat(order.getPaymentExpiresAt()).isBefore(LocalDateTime.now(clock).plusMinutes(31));
+        order.setStatus(OrderStatus.PREPARING); order.setPaymentExpiresAt(LocalDateTime.now(clock).minusMinutes(1)); orders.saveAndFlush(order);
+        assertThat(workflow.expireUnpaid(order.getId(), LocalDateTime.now(clock))).isFalse();
         momo.simulatePayment(order.getId(),customer.getUsername());
         order.setStatus(OrderStatus.PENDING); orders.saveAndFlush(order);
-        assertThat(workflow.expireUnpaid(order.getId(), LocalDateTime.now())).isFalse();
+        assertThat(workflow.expireUnpaid(order.getId(), LocalDateTime.now(clock))).isFalse();
         assertThat(order.getPaymentStatus()).isEqualTo("PAID");
     }
 
     @Test void mockMomoCannotPayExpiredPendingOrder() {
         Order order = checkout(PaymentMethod.MOMO);
-        order.setPaymentExpiresAt(LocalDateTime.now().minusMinutes(1)); orders.saveAndFlush(order);
+        order.setPaymentExpiresAt(LocalDateTime.now(clock).minusMinutes(1)); orders.saveAndFlush(order);
         assertThatThrownBy(() -> momo.simulatePayment(order.getId(),customer.getUsername())).hasMessageContaining("hết thời hạn");
         assertThat(order.getPaymentStatus()).isEqualTo("UNPAID");
     }
@@ -1555,7 +1556,7 @@ class BusinessRegressionTests {
     @Test void activationOtpLocksAfterFiveIncorrectAttemptsForPersistedAccount() {
         customer.setIsActive(false); users.saveAndFlush(customer);
         OtpVerification otp=otps.saveAndFlush(OtpVerification.builder().user(customer).code("123456").type(OtpType.ACTIVATE_ACCOUNT)
-                .expiredAt(LocalDateTime.now().plusMinutes(5)).build());
+                .expiredAt(LocalDateTime.now(clock).plusMinutes(5)).build());
         for(int i=0;i<5;i++) assertThat(auth.verifyOtp(customer.getEmail(),"000000")).isFalse();
         assertThat(otp.getFailedAttempts()).isEqualTo(5);
         assertThat(auth.verifyOtp(customer.getEmail(),"123456")).isFalse();
@@ -1757,7 +1758,7 @@ class BusinessRegressionTests {
                 .totalAmount(BigDecimal.TEN).status(OrderStatus.PENDING).paymentStatus("PAID").paymentMethod("BANK_TRANSFER").build());
         Order preparing=orders.saveAndFlush(Order.builder().user(customer).pickupStore(store).orderType(OrderType.BUY)
                 .totalAmount(BigDecimal.TEN).status(OrderStatus.PREPARING).paymentStatus("UNPAID").paymentMethod("BANK_TRANSFER").build());
-        LocalDateTime deadline=LocalDateTime.now().plusMinutes(30).truncatedTo(java.time.temporal.ChronoUnit.MICROS);
+        LocalDateTime deadline=LocalDateTime.now(clock).plusMinutes(30).truncatedTo(java.time.temporal.ChronoUnit.MICROS);
         assertThat(orders.initializeLegacyPaymentDeadlines(deadline,deadline.plusHours(24))).isEqualTo(1);
         em.refresh(legacy);em.refresh(paid);em.refresh(preparing);
         assertThat(legacy.getPaymentExpiresAt()).isEqualTo(deadline);

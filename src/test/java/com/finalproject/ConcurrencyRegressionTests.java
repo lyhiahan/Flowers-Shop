@@ -16,6 +16,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.jdbc.core.JdbcTemplate;
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.*;
@@ -42,6 +43,7 @@ class ConcurrencyRegressionTests {
     @Autowired OrderWorkflowService workflow;
     @Autowired CustomerAccountClosureService accountClosure;
     @Autowired DemoPaymentService demo;
+    @Autowired Clock clock;
 
     record Fixture(Long storeId, Long productId, Long categoryId, String manager, List<String> customers, List<Long> userIds, List<Long> itemIds) {}
 
@@ -365,7 +367,7 @@ class ConcurrencyRegressionTests {
         try {
             new TransactionTemplate(transactionManager).executeWithoutResult(tx -> otps.save(OtpVerification.builder()
                     .user(users.findById(f.userIds().get(0)).orElseThrow()).code("123456").type(OtpType.RESET_PASSWORD)
-                    .createdAt(java.time.LocalDateTime.now()).expiredAt(java.time.LocalDateTime.now().plusMinutes(5)).build()));
+                    .createdAt(java.time.LocalDateTime.now(clock)).expiredAt(java.time.LocalDateTime.now(clock).plusMinutes(5)).build()));
             for (int i = 0; i < 5; i++) {
                 assertThatThrownBy(() -> auth.resetPassword(f.customers().get(0), "000000", "newpassword"))
                         .isInstanceOf(IllegalArgumentException.class);
