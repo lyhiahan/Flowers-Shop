@@ -316,13 +316,28 @@ public class AdminProductController {
                                 RedirectAttributes ra) {
         Product product = productRepository.findById(id).orElse(null);
         if (product != null) {
-            productService.softDeleteProduct(id);
-            ra.addFlashAttribute("successMessage", "Đã xóa sản phẩm [" + product.getName() + "] khỏi danh sách bán. Toàn bộ lịch sử và dữ liệu đơn hàng liên quan được bảo toàn nguyên vẹn.");
+            try {
+                productService.softDeleteProduct(id);
+                ra.addFlashAttribute("successMessage", "Đã xóa sản phẩm [" + product.getName() + "] khỏi danh sách bán. Có thể khôi phục về Ngừng bán tại mục Đã xóa.");
+            } catch (IllegalArgumentException ex) {
+                ra.addFlashAttribute("errorMessage", ex.getMessage());
+            }
         } else {
             ra.addFlashAttribute("errorMessage", "Không tìm thấy sản phẩm cần xóa.");
         }
         String target = safeReturnUrl(returnUrl);
         return "redirect:" + target;
+    }
+
+    @PostMapping("/restore/{id}")
+    public String restoreProduct(@PathVariable("id") Long id, RedirectAttributes ra) {
+        try {
+            productService.restoreProduct(id);
+            ra.addFlashAttribute("successMessage", "Đã khôi phục sản phẩm về Ngừng bán. Kiểm tra thông tin và tồn kho trước khi mở bán lại.");
+        } catch (IllegalArgumentException ex) {
+            ra.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/admin/products-manage?status=PAUSED";
     }
 
     @PostMapping({"/seed-defaults", "/reset-defaults"})

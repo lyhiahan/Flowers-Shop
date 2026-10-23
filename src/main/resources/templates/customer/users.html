@@ -8,105 +8,36 @@
 <main class="floral-main-content py-4">
     <div class="flower-container" style="max-width: 1240px; margin: 0 auto; padding: 0 20px;">
         
-        <!-- Grounded Hero & KPI Metrics Container -->
-        <section class="card border-0 shadow-sm rounded-4 p-4 p-md-4 mb-4" style="background: #FFFFFF; border: 1px solid #E7DED4 !important; border-radius: 18px !important;">
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-                <div>
+        <!-- Grounded Hero Container -->
+        <section class="floral-hero-card">
+            <div class="row align-items-center g-3">
+                <div class="col-lg-6">
                     <nav aria-label="breadcrumb" class="mb-1">
                         <ol class="breadcrumb mb-0" style="font-size: 13px;">
                             <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none text-muted">Trang chủ</a></li>
-                            <li class="breadcrumb-item active fw-bold" style="color: #A64060;" aria-current="page">Thành viên</li>
+                            <li class="breadcrumb-item active fw-bold" style="color: var(--flower-accent, #A64060);" aria-current="page">Thành viên</li>
                         </ol>
                     </nav>
-                    <h1 class="fw-bold mb-1" style="font-family: 'Nunito', Arial, sans-serif !important; font-size: 24px; color: #293B32;">
-                        Cộng Đồng Thành Viên
-                    </h1>
-                    <p class="text-muted mb-0" style="font-size: 14.5px;">
-                        Gặp gỡ những người yêu hoa, đối tác và nghệ nhân cắm hoa trong hệ thống Hoa Tươi Sài Gòn
-                    </p>
-                </div>
-                <div>
-                    <span class="badge rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2" style="background-color: #EBF3EE; color: #355447; border: 1px solid #C8DDD0; font-size: 13.5px; font-weight: 700;">
-                        <i class="bi bi-people-fill"></i> <span th:text="${totalUsers}">0</span> thành viên
-                    </span>
-                </div>
-            </div>
-
-            <!-- KPI Metric Summary Strip (Đồng bộ font chữ & bộ icon) -->
-            <div class="row g-3 mb-4">
-                <div class="col-6 col-lg-3">
-                    <div class="unified-kpi-card">
-                        <div class="unified-kpi-icon">
+                    <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                        <h1 class="fw-bold mb-0" style="font-size: 24px; color: var(--flower-primary, #355447);">Cộng Đồng Thành Viên</h1>
+                        <span class="floral-count-badge">
                             <i class="bi bi-people-fill"></i>
-                        </div>
-                        <div>
-                            <div class="unified-kpi-label">Tổng thành viên</div>
-                            <div class="unified-kpi-value" th:text="${totalUsers} + ' Thành viên'">0 Thành viên</div>
-                        </div>
+                            <span th:text="(${totalUsers != null ? totalUsers : 0}) + ' thành viên'">0 thành viên</span>
+                        </span>
                     </div>
+                    <p class="text-muted mb-0" style="font-size: 14.5px;">Gặp gỡ những người yêu hoa, đối tác và nghệ nhân cắm hoa trong hệ thống Hoa Tươi Sài Gòn</p>
                 </div>
-                <div class="col-6 col-lg-3">
-                    <div class="unified-kpi-card">
-                        <div class="unified-kpi-icon">
-                            <i class="bi bi-patch-check-fill"></i>
-                        </div>
-                        <div>
-                            <div class="unified-kpi-label">Xác thực tài khoản</div>
-                            <div class="unified-kpi-value">100% Tin cậy</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-lg-3">
-                    <div class="unified-kpi-card">
-                        <div class="unified-kpi-icon">
-                            <i class="bi bi-shop"></i>
-                        </div>
-                        <div>
-                            <div class="unified-kpi-label">Chuỗi chi nhánh</div>
-                            <div class="unified-kpi-value">Toàn TP.HCM</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-lg-3">
-                    <div class="unified-kpi-card">
-                        <div class="unified-kpi-icon">
-                            <i class="bi bi-flower1"></i>
-                        </div>
-                        <div>
-                            <div class="unified-kpi-label">Nghệ nhân hoa</div>
-                            <div class="unified-kpi-value">Atelier Floral</div>
-                        </div>
-                    </div>
+                <div class="col-lg-6">
+                    <form th:action="@{/users}" method="get" class="floral-search-box d-flex align-items-center">
+                        <input type="hidden" name="size" th:value="${pageSize != null ? pageSize : 6}" />
+                        <i class="bi bi-search text-muted ms-1 me-2"></i>
+                        <input type="text" name="keyword" th:value="${keyword}" class="floral-search-input" placeholder="Tìm thành viên theo họ tên, email...">
+                        <button type="submit" class="floral-search-btn">
+                            <i class="bi bi-search me-1"></i> Tìm kiếm
+                        </button>
+                    </form>
                 </div>
             </div>
-
-            <!-- Search Form -->
-            <form th:action="@{/users}" method="get" class="row g-2 align-items-center pt-2">
-                <input type="hidden" name="size" th:value="${pageSize != null ? pageSize : 6}" />
-                <div class="col-md-9 col-lg-10">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0 ps-3" style="border-color: #E7DED4; border-radius: 9999px 0 0 9999px;">
-                            <i class="bi bi-search text-muted"></i>
-                        </span>
-                        <input type="text" name="keyword" class="form-control border-start-0 ps-2"
-                               th:value="${keyword}"
-                               placeholder="Tìm kiếm thành viên theo họ tên, tên đăng nhập hoặc email..."
-                               aria-label="Tìm thành viên"
-                               style="height: 46px; border-color: #E7DED4; border-radius: 0 9999px 9999px 0; font-size: 14.5px;">
-                    </div>
-                </div>
-                <div class="col-md-3 col-lg-2 d-flex gap-2">
-                    <button type="submit" class="btn text-white flex-grow-1 fw-bold shadow-sm"
-                            style="height: 46px; border-radius: 9999px; background-color: #355447; border-color: #355447;">
-                        <i class="bi bi-search me-1"></i> Tìm kiếm
-                    </button>
-                    <a th:if="${keyword != null and !keyword.isEmpty()}" th:href="@{/users(size=${pageSize})}"
-                       class="btn btn-outline-secondary d-flex align-items-center justify-content-center px-3"
-                       title="Xóa tìm kiếm" style="height: 46px; border-radius: 9999px; border-color: #E7DED4;">
-                        <i class="bi bi-x-lg"></i>
-                    </a>
-                </div>
-            </form>
         </section>
 
         <div th:replace="~{fragments/floral :: flashes}"></div>
@@ -115,7 +46,7 @@
         <div th:if="${keyword != null and !keyword.isEmpty()}" class="d-flex align-items-center justify-content-between mb-3 px-1">
             <span class="small text-muted">
                 Kết quả tìm kiếm cho: <strong class="text-dark" th:text="'“' + ${keyword} + '”'"></strong>
-                (<span th:text="${totalUsers}">0</span> thành viên)
+                (<span th:text="(${totalUsers != null ? totalUsers : 0}) + ' thành viên'">0 thành viên</span>)
             </span>
             <a th:href="@{/users(size=${pageSize})}" class="small text-success text-decoration-none fw-bold">
                 <i class="bi bi-arrow-left me-1"></i> Xem tất cả thành viên
@@ -123,7 +54,7 @@
         </div>
 
         <!-- Empty State -->
-        <div th:if="${#lists.isEmpty(users)}" class="card border-0 shadow-sm rounded-4 text-center py-5 my-4" style="background-color: #FFFFFF; border: 1px dashed #E7DED4 !important; border-radius: 18px !important;">
+        <div th:if="${#lists.isEmpty(users)}" class="card border-0 shadow-sm rounded-4 text-center py-5 my-4" style="background-color: var(--flower-surface, #FFFCF8); border: 1px dashed #E7DED4 !important; border-radius: 18px !important;">
             <div class="card-body py-4">
                 <div class="mb-3">
                     <img th:src="@{/images/flower-logo.png}" alt="Hoa Tươi" style="width: 64px; height: 64px; opacity: 0.7;">
@@ -142,7 +73,7 @@
         <div th:if="${!#lists.isEmpty(users)}" class="row g-4 mb-4">
             <div class="col-12 col-sm-6 col-lg-4" th:each="u : ${users}">
                 <article class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative member-card"
-                         style="background-color: #FFFFFF; border: 1px solid #E7DED4 !important; border-radius: 18px !important; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                         style="background-color: var(--flower-surface, #FFFCF8); border: 1px solid #E7DED4 !important; border-radius: 18px !important; transition: transform 0.2s ease, box-shadow 0.2s ease;">
                     <div class="card-body p-4 d-flex flex-column text-center">
                         <!-- Avatar with fallback -->
                         <div class="mx-auto mb-3 position-relative" style="width: 88px; height: 88px;">

@@ -94,6 +94,7 @@ class CheckoutPhoneValidationTests {
                 mock(com.finalproject.repository.UserRepository.class),
                 mock(com.finalproject.repository.StoreRepository.class),
                 mock(com.finalproject.repository.DeliveryRepository.class),
+                mock(com.finalproject.repository.StoreInventoryRepository.class),
                 mock(com.finalproject.service.UserService.class),
                 mock(com.finalproject.service.VoucherService.class),
                 mock(com.finalproject.config.MomoConfig.class),

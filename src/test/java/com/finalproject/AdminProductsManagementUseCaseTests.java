@@ -434,7 +434,8 @@ class AdminProductsManagementUseCaseTests {
         Product softDeleted = productRepository.findById(licensedProduct1.getId()).orElseThrow();
         org.junit.jupiter.api.Assertions.assertTrue(softDeleted.getIsDeleted());
         org.junit.jupiter.api.Assertions.assertFalse(softDeleted.getIsSelling());
-        org.junit.jupiter.api.Assertions.assertFalse(softDeleted.getIsActive());
+        // Soft deletion hides the product without revoking its approval.
+        org.junit.jupiter.api.Assertions.assertTrue(softDeleted.getIsActive());
 
         // Kiểm tra sản phẩm đã xóa không còn xuất hiện trong danh sách hiển thị
         mockMvc.perform(get("/admin/products-manage"))

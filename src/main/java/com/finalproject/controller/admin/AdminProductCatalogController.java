@@ -64,7 +64,10 @@ public class AdminProductCatalogController {
             @RequestParam(value = "size", defaultValue = "10") int size,
             Model model) {
         try {
-            List<Product> allProducts = productRepository.findAll().stream()
+            List<Product> products = productRepository.findAll();
+            List<Product> deletedProducts = products.stream()
+                    .filter(p -> Boolean.TRUE.equals(p.getIsDeleted())).toList();
+            List<Product> allProducts = products.stream()
                     .filter(p -> !Boolean.TRUE.equals(p.getIsDeleted()))
                     .toList();
 
@@ -197,7 +200,7 @@ public class AdminProductCatalogController {
             long countBanned = allProducts.stream().filter(p -> Boolean.FALSE.equals(p.getIsActive())).count();
 
             // Lọc theo Tab kiểm duyệt / cấp phép (UC_028: Licensed products vs Unlicensed products)
-            List<Product> filtered = allProducts;
+            List<Product> filtered = "DELETED".equalsIgnoreCase(tab) ? deletedProducts : allProducts;
             if ("LICENSED".equalsIgnoreCase(tab) || "APPROVED".equalsIgnoreCase(tab)) {
                 filtered = filtered.stream().filter(p -> Boolean.TRUE.equals(p.getIsActive())).toList();
             } else if ("UNLICENSED".equalsIgnoreCase(tab) || "BANNED".equalsIgnoreCase(tab) || "REJECTED".equalsIgnoreCase(tab)) {
@@ -269,9 +272,16 @@ public class AdminProductCatalogController {
             int toIndex = Math.min(fromIndex + size, totalElements);
             List<Product> pagedProducts = filtered.subList(fromIndex, toIndex);
 
+            java.util.Map<Long, Long> openOrderCounts = new java.util.HashMap<>();
+            for (Object[] row : orderDetailRepository.countOpenOrdersByProduct()) {
+                openOrderCounts.put(((Number) row[0]).longValue(), ((Number) row[1]).longValue());
+            }
+
             model.addAttribute("products", pagedProducts);
+            model.addAttribute("openOrderCounts", openOrderCounts);
             model.addAttribute("stores", stores);
             model.addAttribute("countAll", countAll);
+            model.addAttribute("countDeleted", deletedProducts.size());
             model.addAttribute("countApproved", countApproved);
             model.addAttribute("countPending", countPending);
             model.addAttribute("countBanned", countBanned);

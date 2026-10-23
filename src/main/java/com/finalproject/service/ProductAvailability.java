@@ -9,8 +9,12 @@ public final class ProductAvailability {
                 || java.util.Objects.equals(product.getStore().getId(), store.getId()));
     }
     public static boolean isPublic(Product p) {
+        return isVisible(p) && Boolean.TRUE.equals(p.getIsSelling());
+    }
+    /** Paused products remain viewable, but cannot be purchased. */
+    public static boolean isVisible(Product p) {
         return p != null && !Boolean.TRUE.equals(p.getIsDeleted()) && Boolean.TRUE.equals(p.getIsActive())
-                && Boolean.TRUE.equals(p.getIsSelling()) && (p.getStore() == null
+                && (p.getStore() == null
                 || (Boolean.TRUE.equals(p.getStore().getStatus()) && Boolean.TRUE.equals(p.getStore().getIsOpen())));
     }
 }

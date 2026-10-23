@@ -48,12 +48,12 @@
 
         /* Hero / Control KPI Card: Grounded layout, no floating */
         .store-hero-card {
-            background: #FFFFFF;
+            background: var(--flower-surface, #FFFCF8);
             border: 1px solid var(--flower-border);
-            border-radius: 20px;
-            padding: 28px;
-            box-shadow: 0 4px 16px rgba(41, 59, 50, 0.04);
-            margin-bottom: 28px;
+            border-radius: 18px;
+            padding: 24px 28px;
+            box-shadow: 0 2px 8px rgba(41, 59, 50, 0.03);
+            margin-bottom: 24px;
         }
 
         .store-search-box {
@@ -96,34 +96,21 @@
             color: #ffffff;
         }
 
-        /* KPI Metric Mini Cards */
-        .kpi-mini-card {
-            background: #FFFCF8;
-            border: 1px solid var(--flower-border);
-            border-radius: 14px;
-            padding: 14px 16px;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-        }
-        .kpi-mini-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(41, 59, 50, 0.05);
-        }
-
-        /* Store card */
+        /* Store card: Đồng bộ phong cách thẻ sản phẩm .flower-card của Trang chủ Mẫu hoa */
         .store-card {
-            background: #FFFFFF;
+            background: var(--flower-surface, #FFFCF8);
             border: 1px solid var(--flower-border);
-            border-radius: 18px;
-            padding: 24px;
+            border-radius: 16px;
+            padding: 22px;
             transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
             display: flex;
             flex-direction: column;
             height: 100%;
-            box-shadow: 0 3px 12px rgba(41, 59, 50, 0.04);
+            box-shadow: 0 2px 6px rgba(53, 84, 71, 0.03);
         }
         .store-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 24px rgba(41, 59, 50, 0.08);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(53, 84, 71, 0.06);
             border-color: var(--flower-border-hover);
         }
         .store-avatar {
@@ -298,10 +285,9 @@
 
     <!-- Page Content -->
     <main class="flower-container py-4">
-        
-        <!-- Grounded Hero & KPI Metrics Container -->
-        <section class="store-hero-card">
-            <div class="row align-items-center g-3 mb-4">
+        <!-- Grounded Hero Container -->
+        <section class="floral-hero-card">
+            <div class="row align-items-center g-3">
                 <div class="col-lg-6">
                     <nav aria-label="breadcrumb" class="mb-1">
                         <ol class="breadcrumb mb-0" style="font-size: 13px;">
@@ -309,74 +295,34 @@
                             <li class="breadcrumb-item active fw-bold" style="color: var(--flower-accent);" aria-current="page">Hệ thống cửa hàng</li>
                         </ol>
                     </nav>
-                    <h1 class="fw-bold mb-1" style="font-size: 24px; color: var(--flower-primary);">Hệ Thống Chi Nhánh Cửa Hàng</h1>
+                    <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                        <h1 class="fw-bold mb-0" style="font-size: 24px; color: var(--flower-primary);">Hệ Thống Chi Nhánh Cửa Hàng</h1>
+                        <span class="floral-count-badge">
+                            <i class="bi bi-shop"></i>
+                            <span th:text="(${totalItems != null ? totalItems : (stores != null ? #lists.size(stores) : 0)}) + ' chi nhánh'">0 chi nhánh</span>
+                        </span>
+                    </div>
                     <p class="text-muted mb-0" style="font-size: 14.5px;">Tìm kiếm và tham quan các chi nhánh cửa hàng hoa tươi gần bạn trong hệ thống Hoa Tươi Sài Gòn</p>
                 </div>
                 <div class="col-lg-6">
-                    <form th:action="@{/stores}" method="get" class="store-search-box d-flex align-items-center">
+                    <form th:action="@{/stores}" method="get" class="floral-search-box d-flex align-items-center">
                         <i class="bi bi-geo-alt text-muted ms-1 me-2"></i>
-                        <input type="text" id="storeKeywordInput" name="keyword" th:value="${keyword}" class="store-search-input" placeholder="Tìm theo tên hoặc địa chỉ chi nhánh...">
-                        <button type="submit" id="btnSearchStore" class="store-search-btn">
+                        <input type="text" id="storeKeywordInput" name="keyword" th:value="${keyword}" class="floral-search-input" placeholder="Tìm theo tên hoặc địa chỉ chi nhánh...">
+                        <button type="submit" id="btnSearchStore" class="floral-search-btn">
                             <i class="bi bi-search me-1"></i> Tìm kiếm
                         </button>
                     </form>
                 </div>
             </div>
-
-            <!-- KPI Summary Strip (Đồng bộ font chữ & bộ icon) -->
-            <div class="row g-3">
-                <div class="col-6 col-lg-3">
-                    <div class="unified-kpi-card">
-                        <div class="unified-kpi-icon">
-                            <i class="bi bi-shop"></i>
-                        </div>
-                        <div>
-                            <div class="unified-kpi-label">Tổng chi nhánh</div>
-                            <div class="unified-kpi-value" th:text="(${totalItems != null ? totalItems : #lists.size(stores)}) + ' Chi nhánh'">3 Chi nhánh</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-lg-3">
-                    <div class="unified-kpi-card">
-                        <div class="unified-kpi-icon">
-                            <i class="bi bi-clock-history"></i>
-                        </div>
-                        <div>
-                            <div class="unified-kpi-label">Phục vụ chu đáo</div>
-                            <div class="unified-kpi-value">100% Đang mở cửa</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-lg-3">
-                    <div class="unified-kpi-card">
-                        <div class="unified-kpi-icon">
-                            <i class="bi bi-star-fill"></i>
-                        </div>
-                        <div>
-                            <div class="unified-kpi-label">Đánh giá hài lòng</div>
-                            <div class="unified-kpi-value">5.0 <i class="bi bi-star-fill text-warning" style="font-size: 13px;"></i> Xuất sắc</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-lg-3">
-                    <div class="unified-kpi-card">
-                        <div class="unified-kpi-icon">
-                            <i class="bi bi-lightning-charge-fill"></i>
-                        </div>
-                        <div>
-                            <div class="unified-kpi-label">Giao hoa hỏa tốc</div>
-                            <div class="unified-kpi-value">60 – 90 Phút</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </section>
+
+
 
         <!-- Search Results Count Notice -->
         <div th:if="${keyword != null and !keyword.isEmpty()}" class="d-flex align-items-center justify-content-between mb-3 px-1">
             <span class="small text-muted">
                 Kết quả tìm kiếm cho: <strong class="text-dark" th:text="'“' + ${keyword} + '”'"></strong>
-                (<span th:text="${totalItems != null ? totalItems : #lists.size(stores)}">0</span> chi nhánh)
+                (<span th:text="(${totalItems != null ? totalItems : (stores != null ? #lists.size(stores) : 0)}) + ' chi nhánh'">0 chi nhánh</span>)
             </span>
             <a th:href="@{/stores}" class="small text-success text-decoration-none fw-bold">
                 <i class="bi bi-arrow-left me-1"></i> Xem tất cả chi nhánh
@@ -384,8 +330,8 @@
         </div>
 
         <!-- Empty State -->
-        <div th:if="${#lists.isEmpty(stores)}" class="text-center py-5 rounded-4 border p-5 shadow-sm" style="background: #FFFFFF; border-color: var(--flower-border) !important;">
-            <div class="fs-1 text-secondary opacity-50 mb-3">🏬</div>
+        <div th:if="${#lists.isEmpty(stores)}" class="text-center py-5 rounded-4 border p-5 shadow-sm" style="background: var(--flower-surface, #FFFCF8); border-color: var(--flower-border) !important;">
+            <i class="bi bi-shop fs-1 text-muted opacity-50 mb-3 d-block"></i>
             <h5 class="fw-bold" style="color: var(--flower-primary);">Không tìm thấy chi nhánh cửa hàng nào</h5>
             <p class="text-muted small mb-3">Hãy thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc để xem toàn bộ chi nhánh.</p>
             <a th:href="@{/stores}" class="btn rounded-pill px-4 py-2 text-white fw-bold" style="background-color: var(--flower-primary);">Xem tất cả chi nhánh</a>

@@ -98,7 +98,7 @@ public class StorePublicController {
             products = productRepository.findByStoreIdOrderByCreatedAtDesc(id);
         }
 
-        products = products.stream().filter(com.finalproject.service.ProductAvailability::isPublic).toList();
+        products = products.stream().filter(com.finalproject.service.ProductAvailability::isVisible).toList();
         var reviews = reviewRepository.findByStoreIdOrderByCreatedAtDesc(id);
 
         boolean isFollowed = false;

@@ -13,10 +13,33 @@ import java.util.List;
 @Repository
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> {
     @Query("""
+        select count(distinct d.order.id) from OrderDetail d where d.product.id=:productId
+        and d.order.status in (com.finalproject.enums.OrderStatus.PENDING, com.finalproject.enums.OrderStatus.CONFIRMED,
+            com.finalproject.enums.OrderStatus.PREPARING, com.finalproject.enums.OrderStatus.PICKED_UP,
+            com.finalproject.enums.OrderStatus.DELIVERING, com.finalproject.enums.OrderStatus.RENTING,
+            com.finalproject.enums.OrderStatus.OVERDUE)
+        """)
+    long countOpenOrders(@Param("productId") Long productId);
+
+    default boolean hasOpenOrders(Long productId) {
+        return countOpenOrders(productId) > 0;
+    }
+
+    @Query("""
+        select d.product.id, count(distinct d.order.id) from OrderDetail d
+        where d.order.status in (com.finalproject.enums.OrderStatus.PENDING, com.finalproject.enums.OrderStatus.CONFIRMED,
+            com.finalproject.enums.OrderStatus.PREPARING, com.finalproject.enums.OrderStatus.PICKED_UP,
+            com.finalproject.enums.OrderStatus.DELIVERING, com.finalproject.enums.OrderStatus.RENTING,
+            com.finalproject.enums.OrderStatus.OVERDUE)
+        group by d.product.id
+        """)
+    List<Object[]> countOpenOrdersByProduct();
+
+    @Query("""
         select count(d) > 0 from OrderDetail d where d.product.id=:productId and d.order.pickupStore.id=:storeId
         and d.order.status in (com.finalproject.enums.OrderStatus.PENDING, com.finalproject.enums.OrderStatus.CONFIRMED,
             com.finalproject.enums.OrderStatus.PREPARING, com.finalproject.enums.OrderStatus.PICKED_UP,
-            com.finalproject.enums.OrderStatus.DELIVERING, com.finalproject.enums.OrderStatus.DELIVERED,
+            com.finalproject.enums.OrderStatus.DELIVERING,
             com.finalproject.enums.OrderStatus.RENTING, com.finalproject.enums.OrderStatus.OVERDUE)
         """)
     boolean hasOpenOrdersAtStore(Long productId, Long storeId);

@@ -24,6 +24,7 @@
 - [PHẦN 2: DANH SÁCH PROMPT VÀ YÊU CẦU AI ĐÃ GHI NHẬN](#phan-2-prompts)
   - [Prompt 1–20 đang có trong bản báo cáo](#phan-2-prompts)
   - [Nhật ký yêu cầu bổ sung từ cuộc trò chuyện](#nhat-ky-bo-sung)
+  - [Prompt nguyên văn bổ sung ngày 23/10/2026](#prompts-bo-sung-20261023)
   - [Prompt tóm lược từ các ảnh chụp màn hình](#prompts-tu-anh)
 
 ---
@@ -360,6 +361,52 @@ Các mục sau **tóm lược theo thứ tự chủ đề xuất hiện trong cu
 | 59 | Kiểm thử nhập sai thông tin đặt hàng: thiếu tên, số điện thoại, địa chỉ giao; chọn ngày/giờ đã qua; chưa chọn chi nhánh nhận tại cửa hàng. Mỗi lỗi phải được giải thích dễ hiểu, không tạo đơn và không giảm tồn kho. |
 | 60 | Khi thiếu tên, số điện thoại hoặc địa chỉ giao, nhấn Đặt hàng phải **hiện thông báo ngay**, không để nút im lặng do báo giá chưa xong. Người mua không tự chọn đơn vị vận chuyển; hệ thống tự chọn đơn vị phù hợp theo chi nhánh, vùng giao demo và biểu phí, hiển thị kết quả trên trang thanh toán. |
 
+### F. Các yêu cầu tiếp theo về quản lý sản phẩm, mua hàng và đánh giá
+
+Các mục dưới đây diễn đạt lại yêu cầu người dùng trong các lượt sau; **không phải trích dẫn nguyên văn** và không mặc nhiên chứng minh chức năng đã hoàn thành.
+
+| Số | Yêu cầu/prompt người dùng đã nêu (tóm lược) |
+| ---: | --- |
+| 61 | Admin/người bán phải có cách **nhập thêm hàng để bán** cho sản phẩm đã hết (ví dụ chậu lan hồ điệp). Tách số lượng đã bán — thống kê không sửa trực tiếp — khỏi số lượng tồn có thể bổ sung theo đúng chi nhánh, có kiểm tra hợp lệ và ghi nhận biến động. |
+| 62 | Nút “Đến phần nhập thêm hàng” trên form sửa sản phẩm phải thao tác được và thực sự đưa người dùng đến khu vực nhập hàng; không chỉ thêm liên kết `#restockTitle` mà không mở/hiển thị form tương ứng. |
+| 63 | Rà soát danh mục không còn đơn hàng hoặc liên kết liên quan trước khi đề xuất xóa khỏi database; không xóa chỉ vì nhãn đang “Đã xóa”. Đề xuất bộ danh mục bao quát, dễ gắn cho sản phẩm, giữ lịch sử đơn và quan hệ còn dùng. |
+| 64 | Trang đăng nhập phải để trống tên đăng nhập và mật khẩu khi mở để người dùng đăng nhập tài khoản khác; phân biệt dữ liệu điền từ ứng dụng với tính năng tự điền của trình duyệt. |
+| 65 | Đồng bộ trang chi tiết đơn hàng với giao diện trang chủ: font/chữ tiếng Việt, hệ icon, màu trạng thái “Đã tiếp nhận”, viền và khoảng cách; không trộn kiểu chữ hoặc nút tiếng Anh. |
+| 66 | Ở trang “Đơn hoa của tôi”, thẻ đơn phải ưu tiên **trạng thái và mã đơn → ảnh/tên sản phẩm, số lượng → tổng thanh toán → nút xem chi tiết**. Địa chỉ/chi nhánh chỉ là dòng tóm tắt, chi tiết đầy đủ nằm ở trang chi tiết đơn. |
+| 67 | Thêm nút “Mua ngay” trên trang chi tiết sản phẩm; thiết kế luồng chỉ thanh toán sản phẩm và số lượng đang chọn, không vô ý mua cả giỏ hoặc làm mất các mặt hàng khác. Kiểm tra đăng nhập, chi nhánh, tồn kho, trạng thái bán trước khi sang checkout. |
+| 68 | Sau khi nhận hàng thành công, nút “Đánh giá” trên đơn phải mở thẳng `#review-form` của đúng sản phẩm. Lỗi thiếu sao/nội dung chưa đủ 50 ký tự hoặc dữ liệu ảnh sai chỉ hiện thông báo nhỏ cạnh biểu mẫu, không mở hộp thoại lớn. |
+| 69 | Chỉnh ô chấm sao không đè lên chữ; ảnh đánh giá được **tải từ máy** thay vì bắt khách nhập URL. Sau khi gửi, đánh giá hợp lệ phải lưu và xuất hiện ở phần đánh giá cuối trang chi tiết sản phẩm. |
+| 70 | Điều tra lỗi SQL khi gửi đánh giá: bảng `reviews` yêu cầu cột `stars` không null nhưng câu lệnh chỉ ghi `rating`. Đồng bộ entity, migration và schema thật; không lộ lỗi SQL thô cho khách. |
+| 71 | Kiểm tra đường dẫn “Mua ngay” `/cart/buy-now` không chuyển đến trang “Trang hoặc chức năng này không tồn tại”; form, phương thức HTTP, phân quyền và redirect phải khớp với controller. |
+| 72 | Khi khách yêu cầu hủy đơn, cho chọn một lý do trong danh sách: đổi địa chỉ nhận hàng, đổi mã giảm giá, đặt nhầm sản phẩm, không còn nhu cầu, chưa sẵn sàng thanh toán hoặc lý do khác; lưu lý do cùng yêu cầu hủy và giữ ràng buộc trạng thái đơn. |
+| 73 | Giải thích vì sao ảnh/sản phẩm và thay đổi người dùng trên máy người phát triển không xuất hiện khi đồng đội `git pull`: Git chia sẻ mã/migration, không tự đồng bộ bản ghi SQL Server hay ảnh upload cục bộ. Hướng dẫn cách chia sẻ database/seed/backup an toàn; không đẩy khóa Cloudinary lên GitHub. |
+| 74 | Hướng dẫn kiểm thử thông tin cửa hàng và nhân sự: sửa tên/điện thoại/địa chỉ/ảnh, thêm rồi gỡ nhân sự, xác minh người bị gỡ mất quyền; dùng tài khoản đối tác thử thao tác chỉ dành cho chủ cửa hàng như quản lý nhân sự hoặc rút tiền. |
+| 75 | Sản phẩm đã có trong giỏ nhưng sau đó bị quản lý **ngừng bán** phải được chặn ở cả giỏ và checkout, không tạo đơn hay trừ kho. Giỏ và trang chi tiết sản phẩm phải báo trạng thái ngừng bán ngay, trước khi khách điền đủ thông tin đặt hàng. |
+| 76 | Không cho admin xóa sản phẩm vẫn có đơn đang xử lý (ví dụ đơn chờ xác nhận). Với sản phẩm không còn đơn đang xử lý, xóa mềm rồi khôi phục phải trở về trạng thái **ngừng bán**, chỉ mua được khi người có quyền mở bán lại. |
+| 77 | Trước khi admin xác nhận xóa sản phẩm, phải thấy rõ tên sản phẩm và cửa hàng/chi nhánh sở hữu để tránh xóa nhầm sản phẩm của cửa hàng khác. |
+| 78 | Sau khi sửa trạng thái sản phẩm, phải giữ nguyên các phần chức năng trên trang chi tiết: số lượng, “Thêm vào giỏ”, “Mua ngay”, liên hệ cửa hàng, chăm sóc hoa và đánh giá. Nếu ngừng bán/hết hàng thì hiển thị lý do và vô hiệu hóa thao tác mua, **không làm trang bị cắt giữa chừng**. |
+| 79 | Khi một biến mới của controller chưa có trong tiến trình Java đang chạy, template Thymeleaf phải xử lý an toàn; bổ sung test kiểm tra HTML trả về có đủ phần mua, chăm sóc và đánh giá cho sản phẩm đang bán lẫn ngừng bán. |
+
+<a name="prompts-bo-sung-20261023"></a>
+### G. Prompt nguyên văn bổ sung từ cuộc trò chuyện ngày 21–23/10/2026
+
+Cập nhật ngày **23/10/2026**. Các câu trong cột “Prompt của người dùng” được giữ nguyên cách viết trong cuộc trò chuyện, gồm cả lỗi gõ. Cột “Nội dung yêu cầu” chỉ diễn giải để dễ tra cứu; đây là nhật ký yêu cầu, không phải xác nhận mọi hạng mục đã được kiểm thử hoàn tất.
+
+| Số | Prompt của người dùng (nguyên văn) | Nội dung yêu cầu |
+| ---: | --- | --- |
+| 80 | “đọc lại cấu trúc toàn dự án và lên kịch bản cho tôi tất cả trường hợp tôi tự test” | Đọc cấu trúc toàn dự án, soạn kịch bản tự kiểm thử theo chức năng, có bước thực hiện và kết quả mong đợi. |
+| 81 | “lập kịch bản để toi test thủ công, nói dễ hiểu” | Viết lại hướng dẫn test bằng ngôn ngữ dễ hiểu, lần lượt theo vai khách hàng, quản lý và admin. |
+| 82 | “tại sao khi tôi đăng kí tài khoản không gửi được email” | Điều tra việc đăng ký báo đã gửi OTP nhưng khách chưa nhận email; đối chiếu cấu hình đang chạy và nhật ký gửi thư. |
+| 83 | “tại sao lại gửi lâu như vậy” | Giải thích độ trễ gửi OTP dựa trên thời điểm dịch vụ nhận yêu cầu và giao thư; phân biệt điều đã xác minh với nguyên nhân chưa đủ bằng chứng. |
+| 84 | “tại sao lịa bị ẩn hết các nút” | Kiểm tra trang admin quản lý sản phẩm bị mất các nút cùng giá, tồn kho và trạng thái; xử lý lỗi hiển thị giữa dòng. |
+| 85 | “không hiển thị full hết  tất cả sản phẩm” | Kiểm tra danh sách sản phẩm có bị cắt, thiếu dòng hoặc mất phân trang; đối chiếu đủ sản phẩm qua các trang và chế độ tăng số dòng. |
+| 86 | “khi sản phẩm ngưng bán thì không phát ra thông báo lỗi như này bà ghi một tag nhỏ thay thế Còn x sản phẩm thành sản phẩm tạm ngưng bán, nếu khách đã thêm vào giỏ hàng thì ghi ở góc trên bên phải tại thẻ này và khóa không cho đặt sản phẩm mặc dù đã thêm vào giỏ hàng còn nếu đang ở trạng thái chờ xác nhận thì vẫn được giao vì khách đặt hàng trowcs khi ngưng bán” | Sản phẩm tạm ngưng bán vẫn xem được; thay số lượng bằng nhãn nhỏ “Sản phẩm tạm ngưng bán”. Trong giỏ, đặt nhãn ở góc trên bên phải và khóa chọn/đặt hàng. Đơn đã đặt trước khi ngưng bán, kể cả chờ xác nhận, vẫn được tiếp tục xử lý và giao. |
+| 87 | “không hiện thông báo "1 đơn đang xử lý, chưa thể xóa' nhỏ như này cần hiện hộp thoại để thong báo” | Bỏ cảnh báo nhỏ dưới tên sản phẩm. Khi bấm Xóa mà còn đơn đang xử lý, mở hộp thoại nêu tên sản phẩm, số đơn và lý do chưa thể xóa. |
+| 88 | “hình ảnh và chữ quá gần nhau hãy giản cách khoảng nhỏ để dễ nhìn hơn” | Tăng nhẹ khoảng cách giữa ảnh và phần chữ trong danh sách quản lý sản phẩm; giãn phần danh mục cho dễ đọc. |
+| 89 | “thêm những promt của tôi vào file .md promt AI” | Bổ sung các prompt của người dùng vào tài liệu Markdown tổng hợp prompt AI này. |
+
+Tài liệu liên quan: [Kịch bản tự test toàn dự án](KICH_BAN_TU_TEST_TOAN_DU_AN.md) và [Bản đồ cấu trúc và route](BAN_DO_CAU_TRUC_VA_ROUTE.md).
+
 <a name="prompts-tu-anh"></a>
 ### Prompt tóm lược từ các ảnh chụp màn hình người dùng đã gửi
 
@@ -392,6 +439,18 @@ Các mục sau **tóm lược theo thứ tự chủ đề xuất hiện trong cu
 | A23 | Tìm “hoa hướng dương” vẫn thấy kệ hoa, giỏ hoa không có tên này. | “Hãy kiểm tra cách tách từ, so khớp cụm từ và xếp hạng kết quả. Mẫu có tên chứa ‘hoa hướng dương’ phải đứng trước; loại bỏ mẫu không khớp tiêu chí tìm kiếm đã công bố.” |
 | A24 | Biểu mẫu địa chỉ báo số điện thoại sai rồi xóa hết thông tin vừa nhập. | “Khi thêm/sửa địa chỉ không hợp lệ, hiển thị lỗi cụ thể cạnh trường hoặc ở đầu biểu mẫu, giữ lại tên người nhận, số điện thoại và địa chỉ vừa nhập; không ghi dữ liệu sai vào database.” |
 | A25 | Chi tiết sản phẩm ghi “Theo dõi”; khi bỏ yêu thích trang danh sách trống và hiện thông báo không có quyền. | “Đổi thao tác sản phẩm thành ‘Yêu thích/Bỏ yêu thích’, phân biệt với theo dõi cửa hàng. Sau khi bỏ yêu thích, hiển thị thông báo thành công đúng nghĩa và cập nhật danh sách, không báo lỗi phân quyền sai.” |
+| A26 | Form admin sửa sản phẩm chỉ hiện “Số lượng đã bán” bị khóa, không có chỗ bổ sung kho. | “Thêm luồng nhập hàng theo chi nhánh cho sản phẩm hết hàng; giữ số lượng đã bán là thống kê tính từ đơn thật, không dùng nó làm ô sửa tồn kho.” |
+| A27 | Nút “Đến phần nhập thêm hàng” hiện trên form nhưng bấm không có tác dụng. | “Truy vết liên kết `#restockTitle`, vị trí đích và trạng thái phần nhập hàng; sửa để nút cuộn/mở đúng form nhập hàng, có phản hồi khi không đủ quyền.” |
+| A28 | Trang admin Danh mục hiển thị 10 loại, nhiều mục có nhãn “Đã xóa”. | “Đối soát từng danh mục với sản phẩm, đơn và quan hệ khác trước khi xóa dữ liệu dư. Đề xuất hệ danh mục bao quát theo dịp/mục đích; không làm mất lịch sử.” |
+| A29 | Trang đăng nhập tự có sẵn tên tài khoản và mật khẩu. | “Khi mở `/login`, để trống trường đăng nhập và mật khẩu để có thể dùng tài khoản khác; kiểm tra cả dữ liệu demo từ script lẫn browser autofill.” |
+| A30 | Chi tiết đơn hàng dùng font, khung và nhãn trạng thái khác trang chủ. | “Lấy trang chủ làm chuẩn thiết kế, đồng bộ font, icon, màu và viền của chi tiết đơn; thay nhãn tiếng Anh, giữ rõ trạng thái ‘Đã tiếp nhận’.” |
+| A31 | Trang chi tiết sản phẩm có “Thêm vào giỏ” nhưng thiếu “Mua ngay”. | “Bổ sung Mua ngay dùng đúng sản phẩm/số lượng đang xem, đi thẳng vào checkout riêng mà không xóa các món khác trong giỏ.” |
+| A32 | Biểu mẫu đánh giá: sao đè chữ, nhập URL ảnh, lỗi 50 ký tự hiện modal; sau khi gửi phát sinh lỗi `reviews.stars`. | “Đưa nút Đánh giá đến đúng form, dùng thông báo nhỏ cạnh trường, chỉnh bố cục sao, cho upload ảnh từ máy và sửa lệch schema `rating`/`stars`; đánh giá thành công phải hiện trên chi tiết sản phẩm.” |
+| A33 | Truy cập `/cart/buy-now` gặp trang báo không tồn tại. | “Kiểm tra route GET/POST của Mua ngay, form action, quyền truy cập và đường chuyển trang; người mua không được rơi vào lỗi 404.” |
+| A34 | Ảnh/sản phẩm trên máy chủ của một thành viên không xuất hiện sau khi đồng đội kéo mã từ GitHub. | “Phân biệt dữ liệu SQL Server, ảnh Cloudinary và mã Git. Hướng dẫn chia sẻ bản sao dữ liệu/seed và cấu hình Cloudinary mà không commit khóa bí mật hoặc giả định `git pull` đồng bộ database.” |
+| A35 | Thẻ đơn hàng để khối địa chỉ quá lớn trong khi sản phẩm/số lượng/tổng tiền khó nhìn. | “Sắp lại thẻ đơn theo ưu tiên trạng thái, sản phẩm có ảnh và số lượng, tổng thanh toán, thao tác; thu gọn địa chỉ/chi nhánh thành một dòng.” |
+| A36 | Sản phẩm ngừng bán vẫn có thể đi đến bước đặt hàng; admin xóa sản phẩm có đơn chờ xác nhận và thiếu tên cửa hàng trong xác nhận. | “Báo ngừng bán ngay ở giỏ/chi tiết, chặn lại ở backend checkout, khóa xóa khi còn đơn đang xử lý và nêu tên chi nhánh sở hữu trước khi admin xác nhận xóa.” |
+| A37 | Trang `/product/40` chỉ còn ảnh và thuộc tính; mất nút mua, liên hệ, chăm sóc hoa và đánh giá. | “Tìm điểm làm HTML bị cắt sau dòng Kích thước; đảm bảo template an toàn khi biến controller chưa được nạp, giữ các khu vực chức năng cho sản phẩm đang bán và thông báo rõ khi ngừng bán.” |
 
 ### Kết quả kiểm chứng và phần chưa hoàn tất tại thời điểm cập nhật
 

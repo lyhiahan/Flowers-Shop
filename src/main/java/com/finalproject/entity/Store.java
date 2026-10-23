@@ -92,4 +92,31 @@ public class Store {
     public void prePersist() {
         if (createdAt == null) createdAt = java.time.LocalDateTime.now();
     }
+
+    /**
+     * Tên chi nhánh chính (tách bỏ phần khu vực/quận trong ngoặc đơn nếu có).
+     * Ví dụ: "Chi Nhánh Phú Mỹ Hưng (Quận 7)" -> "Chi Nhánh Phú Mỹ Hưng"
+     */
+    public String getBranchDisplayName() {
+        if (name == null) return "";
+        int idx = name.indexOf('(');
+        if (idx > 0) {
+            return name.substring(0, idx).trim();
+        }
+        return name.trim();
+    }
+
+    /**
+     * Khu vực/Quận của chi nhánh (lấy từ phần trong ngoặc đơn nếu có).
+     * Ví dụ: "Chi Nhánh Phú Mỹ Hưng (Quận 7)" -> "Quận 7"
+     */
+    public String getBranchAreaName() {
+        if (name == null) return "";
+        int start = name.indexOf('(');
+        int end = name.lastIndexOf(')');
+        if (start >= 0 && end > start) {
+            return name.substring(start + 1, end).trim();
+        }
+        return "";
+    }
 }

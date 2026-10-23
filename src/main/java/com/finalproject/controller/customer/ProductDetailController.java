@@ -37,7 +37,8 @@ public class ProductDetailController {
                                     Principal principal, Model model) {
         Product product = productService.getProductById(id);
 
-        if (!com.finalproject.service.ProductAvailability.isPublic(product)) throw new com.finalproject.exception.ResourceNotFoundException("Sản phẩm không còn được bán.");
+        if (!com.finalproject.service.ProductAvailability.isVisible(product))
+            throw new com.finalproject.exception.ResourceNotFoundException("Sản phẩm không còn được bán.");
 
         // Tăng lượt xem
         productRepository.incrementViewCount(id);
@@ -63,15 +64,21 @@ public class ProductDetailController {
         }
 
         model.addAttribute("product", product);
-        var branchStock = inventories.findByProductId(product.getId()).stream()
+        var inventoryRows = inventories.findByProductId(product.getId()).stream()
+                .filter(row -> com.finalproject.service.ProductAvailability.supportsBranch(product, row.getStore())).toList();
+        var branchStock = inventoryRows.stream()
                 .filter(com.finalproject.entity.StoreInventory::isAvailableForSale)
                 .filter(s -> Boolean.TRUE.equals(s.getStore().getStatus()) && Boolean.TRUE.equals(s.getStore().getIsOpen()))
                 .filter(s -> product.getStore() == null || product.getStore().getId().equals(s.getStore().getId()))
                 .sorted(java.util.Comparator.comparing(s -> s.getStore().getId())).toList();
         var selected = branchStock.stream().filter(s -> s.getQuantity() != null && s.getQuantity() > 0).findFirst().orElse(null);
         int availableStock = selected == null ? 0 : selected.getQuantity();
+        boolean salePaused = !Boolean.TRUE.equals(product.getIsSelling()) || (selected == null && inventoryRows.stream()
+                .anyMatch(s -> Boolean.FALSE.equals(s.getIsSelling()) || Boolean.TRUE.equals(s.getIsDeleted())
+                        || !Boolean.TRUE.equals(s.getStore().getStatus()) || !Boolean.TRUE.equals(s.getStore().getIsOpen())));
         model.addAttribute("purchaseStore", selected == null ? product.getStore() : selected.getStore());
         model.addAttribute("availableStock", availableStock);
+        model.addAttribute("salePaused", salePaused);
         var images = productImageRepository.findByProductId(id);
         if (images.isEmpty() && product.getImageUrl() != null && !product.getImageUrl().isEmpty()) {
             images = java.util.List.of(com.finalproject.entity.ProductImage.builder()

@@ -252,24 +252,32 @@ public class ProductServiceImpl implements ProductService {
 
         // 2. Upload danh sách ảnh lên Cloudinary
         if (form.getImageFiles() != null && !form.getImageFiles().isEmpty()) {
-            boolean isFirst = true;
+            int mainIndex = (form.getMainImageIndex() != null && form.getMainImageIndex() >= 0) ? form.getMainImageIndex() : 0;
+            int currentIndex = 0;
+            String chosenMainUrl = null;
             for (MultipartFile file : form.getImageFiles()) {
-                if (!file.isEmpty()) {
+                if (file != null && !file.isEmpty()) {
                     CloudinaryService.UploadResult result = cloudinaryService.upload(file, "rental_shop_products");
                     if (result == null) continue;
+                    boolean isMain = (currentIndex == mainIndex);
                     ProductImage productImage = ProductImage.builder()
                             .product(savedProduct)
                             .imageUrl(result.secureUrl())
                             .cloudinaryPublicId(result.publicId())
-                            .isMain(isFirst)
+                            .isMain(isMain)
                             .build();
                     productImageRepository.save(productImage);
-                    if (isFirst) {
-                        savedProduct.setImageUrl(result.secureUrl());
-                        productRepository.save(savedProduct);
+                    if (isMain) {
+                        chosenMainUrl = result.secureUrl();
+                    } else if (chosenMainUrl == null) {
+                        chosenMainUrl = result.secureUrl();
                     }
-                    isFirst = false;
+                    currentIndex++;
                 }
+            }
+            if (chosenMainUrl != null) {
+                savedProduct.setImageUrl(chosenMainUrl);
+                productRepository.save(savedProduct);
             }
         }
 
@@ -337,23 +345,38 @@ public class ProductServiceImpl implements ProductService {
 
         // Upload ảnh mới nếu có
         if (form.getImageFiles() != null && !form.getImageFiles().isEmpty()) {
-            boolean isFirst = true;
+            int mainIndex = (form.getMainImageIndex() != null && form.getMainImageIndex() >= 0) ? form.getMainImageIndex() : 0;
+            int currentIndex = 0;
+            String newMainUrl = null;
+            boolean resetPrevious = false;
             for (MultipartFile file : form.getImageFiles()) {
-                if (!file.isEmpty()) {
+                if (file != null && !file.isEmpty()) {
+                    if (!resetPrevious) {
+                        var previous = productImageRepository.findByProductId(product.getId());
+                        previous.forEach(img -> img.setIsMain(false));
+                        productImageRepository.saveAll(previous);
+                        resetPrevious = true;
+                    }
                     CloudinaryService.UploadResult result = cloudinaryService.upload(file, "rental_shop_products");
                     if (result == null) continue;
+                    boolean isMain = (currentIndex == mainIndex);
                     ProductImage productImage = ProductImage.builder()
                             .product(product)
                             .imageUrl(result.secureUrl())
                             .cloudinaryPublicId(result.publicId())
-                            .isMain(isFirst)
+                            .isMain(isMain)
                             .build();
                     productImageRepository.save(productImage);
-                    if (isFirst) {
-                        product.setImageUrl(result.secureUrl());
+                    if (isMain) {
+                        newMainUrl = result.secureUrl();
+                    } else if (newMainUrl == null) {
+                        newMainUrl = result.secureUrl();
                     }
-                    isFirst = false;
+                    currentIndex++;
                 }
+            }
+            if (newMainUrl != null) {
+                product.setImageUrl(newMainUrl);
             }
         }
 
@@ -363,12 +386,30 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public void softDeleteProduct(Long id) {
-        Product product = productRepository.findById(id)
+        Product product = productRepository.findLockedById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm có ID: " + id));
+        long openOrders = orderDetailRepository.countOpenOrders(id);
+        if (openOrders > 0) {
+            throw new IllegalArgumentException("Không thể xóa sản phẩm #" + id + " vì còn " + openOrders
+                    + " đơn đang xử lý. Hãy ngừng bán và hoàn tất các đơn trước.");
+        }
         // Soft delete: loại khỏi danh sách bán nhưng bảo toàn toàn bộ đơn hàng và lịch sử
         product.setIsDeleted(true);
         product.setIsSelling(false);
-        product.setIsActive(false);
+        productRepository.save(product);
+    }
+
+    @Override
+    @Transactional
+    public void restoreProduct(Long id) {
+        Product product = productRepository.findLockedById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm có ID: " + id));
+        if (!Boolean.TRUE.equals(product.getIsDeleted())) {
+            throw new IllegalArgumentException("Sản phẩm chưa bị xóa.");
+        }
+        product.setIsDeleted(false);
+        product.setIsActive(true);
+        product.setIsSelling(false);
         productRepository.save(product);
     }
 

@@ -44,7 +44,7 @@ public class ProductSpecification {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isTrue(root.get("isActive")));
-            predicates.add(cb.isTrue(root.get("isSelling")));
+            // A paused product remains in the catalog with a disabled purchase action.
             // Legacy rows predate soft deletion; NULL means not deleted, as in Product.getIsDeleted().
             predicates.add(cb.or(cb.isFalse(root.get("isDeleted")), cb.isNull(root.get("isDeleted"))));
             var ownerStore = root.join("store", jakarta.persistence.criteria.JoinType.LEFT);
@@ -87,7 +87,7 @@ public class ProductSpecification {
                 var inventory = query.subquery(Long.class);
                 var stock = inventory.from(com.finalproject.entity.StoreInventory.class);
                 inventory.select(stock.get("id")).where(cb.equal(stock.get("product").get("id"), root.get("id")), cb.equal(stock.get("store").get("id"), storeId),
-                        cb.isTrue(stock.get("isSelling")), cb.isFalse(stock.get("isDeleted")));
+                        cb.isFalse(stock.get("isDeleted")));
                 predicates.add(cb.or(cb.equal(ownerStore.get("id"), storeId), cb.and(cb.isNull(ownerStore.get("id")), cb.exists(inventory))));
             }
 

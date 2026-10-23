@@ -84,7 +84,7 @@ class CodStockKpiTests {
     org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder checkoutRequest() {
         return post("/checkout").with(user(customer.getUsername()).roles("USER")).with(csrf())
                 .param("selectedItemIds", item.getId().toString()).param("paymentMethod", "COD")
-                .param("shippingMethod", "DELIVERY").param("recipientName", "Khách COD")
+                .param("shippingMethod", "DELIVERY").param("deliveryZone", "NEAR").param("recipientName", "Khách COD")
                 .param("recipientPhone", "0900000000").param("recipientAddress", "Quận 1")
                 .param("deliveryDate", LocalDate.now().plusDays(1).toString()).param("deliveryTimeSlot", "09:00-11:00");
     }

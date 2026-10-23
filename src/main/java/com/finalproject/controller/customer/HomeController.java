@@ -229,7 +229,10 @@ public class HomeController {
             // 5. Đưa dữ liệu sang View
             List<Product> stockProducts = new ArrayList<>(productPage.getContent());
             if (guestFeatured != null) stockProducts.addAll(guestFeatured);
-            model.addAttribute("catalogStock", catalogStockService.summarize(stockProducts, storeId));
+            var catalogStock = catalogStockService.summarize(stockProducts, storeId);
+            model.addAttribute("catalogStock", catalogStock);
+            model.addAttribute("catalogPausedIds", catalogStock.entrySet().stream()
+                    .filter(entry -> entry.getValue().paused()).map(java.util.Map.Entry::getKey).collect(java.util.stream.Collectors.toSet()));
             model.addAttribute("customerStockQuantity", catalogStockService.availableQuantity(storeId));
             model.addAttribute("productPage", productPage);
             model.addAttribute("products", productPage.getContent());

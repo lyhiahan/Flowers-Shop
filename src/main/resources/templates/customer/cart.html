@@ -189,6 +189,35 @@
             color: #ffffff;
             box-shadow: 0 6px 18px rgba(53, 84, 71, 0.35);
         }
+        /* Cart Table: Đồng bộ giao diện bảng giỏ hàng & ngăn tràn hàng lộn xộn */
+        .cart-table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+        }
+        .cart-table thead th {
+            background-color: #F4EFEA !important;
+            color: var(--flower-text-main, #293B32) !important;
+            font-family: 'Nunito', Arial, sans-serif !important;
+            font-size: 13.5px !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            white-space: nowrap !important;
+            padding: 13px 14px !important;
+            vertical-align: middle !important;
+            border-bottom: 1px solid var(--flower-border, #E7DED4) !important;
+        }
+        .cart-table tbody td {
+            vertical-align: middle !important;
+            padding: 14px 14px !important;
+        }
+        .cart-col-nowrap {
+            white-space: nowrap !important;
+        }
+        .cart-table tr[data-paused="true"] { position: relative; }
+        .cart-table tr[data-paused="true"] > td { padding-top: 42px !important; }
+        .cart-paused-tag { position: absolute; top: 10px; right: 14px; z-index: 1; }
     </style>
 </head>
 
@@ -264,55 +293,6 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <!-- Grounded Cart KPI Strip -->
-        <section class="card border-0 shadow-sm rounded-4 p-3 p-md-4 mb-4" style="background: #FFFFFF; border: 1px solid #E7DED4 !important; border-radius: 20px !important;">
-            <div class="row g-3">
-                <div class="col-6 col-lg-3">
-                    <div class="p-2 rounded-3 h-100 d-flex align-items-center gap-3" style="background: #FFFCF8; border: 1px solid #E7DED4;">
-                        <div class="d-inline-flex align-items-center justify-content-center rounded-3" style="width: 40px; height: 40px; background: #EBF3EE; color: #355447; flex-shrink: 0;">
-                            <i class="bi bi-flower1 fs-5"></i>
-                        </div>
-                        <div>
-                            <div class="text-muted small" style="font-size: 12px;">Chất lượng hoa</div>
-                            <strong class="fs-6 fw-bold" style="color: #293B32;">100% Nhập mới</strong>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-lg-3">
-                    <div class="p-2 rounded-3 h-100 d-flex align-items-center gap-3" style="background: #FFFCF8; border: 1px solid #E7DED4;">
-                        <div class="d-inline-flex align-items-center justify-content-center rounded-3" style="width: 40px; height: 40px; background: #ECFDF5; color: #059669; flex-shrink: 0;">
-                            <i class="bi bi-lightning-charge-fill fs-5"></i>
-                        </div>
-                        <div>
-                            <div class="text-muted small" style="font-size: 12px;">Tốc độ giao</div>
-                            <strong class="fs-6 fw-bold" style="color: #059669;">60 – 90 Phút</strong>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-lg-3">
-                    <div class="p-2 rounded-3 h-100 d-flex align-items-center gap-3" style="background: #FFFCF8; border: 1px solid #E7DED4;">
-                        <div class="d-inline-flex align-items-center justify-content-center rounded-3" style="width: 40px; height: 40px; background: #FFFBEB; color: #B45309; flex-shrink: 0;">
-                            <i class="bi bi-gift-fill fs-5"></i>
-                        </div>
-                        <div>
-                            <div class="text-muted small" style="font-size: 12px;">Ưu đãi kèm theo</div>
-                            <strong class="fs-6 fw-bold" style="color: #B45309;">Tặng thiệp & banner</strong>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-lg-3">
-                    <div class="p-2 rounded-3 h-100 d-flex align-items-center gap-3" style="background: #FFFCF8; border: 1px solid #E7DED4;">
-                        <div class="d-inline-flex align-items-center justify-content-center rounded-3" style="width: 40px; height: 40px; background: #F3E6E1; color: #A64060; flex-shrink: 0;">
-                            <i class="bi bi-shield-check fs-5"></i>
-                        </div>
-                        <div>
-                            <div class="text-muted small" style="font-size: 12px;">Bảo hành tươi lâu</div>
-                            <strong class="fs-6 fw-bold" style="color: #A64060;">Đổi mới nếu không tươi</strong>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
 
         <!-- Khi giỏ hàng trống -->
         <div th:if="${cart == null or #lists.isEmpty(cart.items)}" class="flower-card text-center p-5 my-4 bg-white shadow-sm">
@@ -328,7 +308,7 @@
 
         <!-- Khi giỏ hàng có sản phẩm -->
         <div th:if="${cart != null and not #lists.isEmpty(cart.items)}" class="row g-4">
-            
+
             <!-- Danh sách hoa đã chọn -->
             <div class="col-lg-8">
                 <div class="flower-card overflow-hidden">
@@ -343,27 +323,35 @@
                     </div>
 
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light small text-muted">
+                        <table class="table table-hover align-middle mb-0 cart-table">
+                            <thead class="cart-table-head">
                             <tr>
-                                <th style="width: 40px; padding-left: 20px;"></th>
-                                <th>Mẫu hoa & Chi nhánh</th>
-                                <th>Đơn giá</th>
-                                <th style="width: 140px;">Số lượng</th>
-                                <th>Thành tiền</th>
-                                <th style="width: 50px; padding-right: 20px;"></th>
+                                <th style="width: 44px; min-width: 44px; padding-left: 20px;"></th>
+                                <th class="cart-col-nowrap" style="min-width: 260px;">Mẫu hoa &amp; Chi nhánh</th>
+                                <th class="text-center cart-col-nowrap" style="width: 140px; min-width: 130px;">Đơn giá</th>
+                                <th class="text-center cart-col-nowrap" style="width: 150px; min-width: 145px;">Số lượng</th>
+                                <th class="text-end cart-col-nowrap" style="width: 150px; min-width: 140px;">Thành tiền</th>
+                                <th class="text-center" style="width: 50px; min-width: 50px; padding-right: 20px;"></th>
                             </tr>
                             </thead>
                             <!-- Hiển thị khi có itemsByStore (UC_012 Step 8) -->
                             <tbody th:if="${itemsByStore != null and not #maps.isEmpty(itemsByStore)}">
                                 <th:block th:each="entry : ${itemsByStore}">
                                     <tr class="table-light border-top border-bottom">
-                                        <td colspan="6" class="py-2 px-3 bg-light">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <i class="bi bi-shop text-danger fs-5"></i>
-                                                <strong class="text-dark" th:text="${entry.key != null ? entry.key.name : 'Chi nhánh trung tâm'}">Chi nhánh</strong>
-                                                <small class="text-muted" th:if="${entry.key != null and entry.key.address != null}" th:text="'(' + ${entry.key.address} + ')'"></small>
-                                                <span class="badge bg-danger-subtle text-danger rounded-pill ms-auto" th:text="${#lists.size(entry.value)} + ' mẫu hoa'"></span>
+                                        <td colspan="6" class="py-2.5 px-3" style="background-color: #FAF6F0 !important;">
+                                            <div class="d-flex align-items-center gap-2.5">
+                                                <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 34px; height: 34px; background-color: #FEE2E2; color: #DC2626; flex-shrink: 0;">
+                                                    <i class="bi bi-shop fs-6"></i>
+                                                </div>
+                                                <div class="lh-sm">
+                                                    <strong class="text-dark d-block fw-bold" style="font-size: 14.5px;" th:text="${entry.key != null ? entry.key.branchDisplayName : 'Chi nhánh trung tâm'}">Chi Nhánh Phú Mỹ Hưng</strong>
+                                                    <div class="text-muted small mt-1" style="font-size: 12.5px;">
+                                                        <span class="fw-bold text-danger" th:if="${entry.key != null and !#strings.isEmpty(entry.key.branchAreaName)}" th:text="${entry.key.branchAreaName}">Quận 7</span>
+                                                        <span class="text-secondary opacity-50 mx-1" th:if="${entry.key != null and entry.key.address != null and !#strings.isEmpty(entry.key.branchAreaName)}">&bull;</span>
+                                                        <span th:if="${entry.key != null and entry.key.address != null}" th:text="${entry.key.address}">456 Nguyễn Thị Thập, Tân Hưng, Quận 7, TP.HCM</span>
+                                                    </div>
+                                                </div>
+                                                <span class="badge bg-danger-subtle text-danger rounded-pill ms-auto px-3 py-1.5 fw-semibold cart-col-nowrap" th:text="${#lists.size(entry.value)} + ' mẫu hoa'">1 mẫu hoa</span>
                                             </div>
                                         </td>
                                     </tr>
@@ -374,35 +362,41 @@
                                         th:data-subtotal="${item.orderType.name() == 'BUY' ? item.buyAmount : item.rentAmount}"
                                         th:data-deposit="${item.depositAmount}"
                                         th:data-total="${item.totalAmount}"
-                                        th:with="stock=${itemStockMap != null and itemStockMap.containsKey(item.id) ? itemStockMap.get(item.id) : 0}, isOutOfStock=${stock <= 0}"
+                                        th:with="stock=${itemStockMap != null and itemStockMap.containsKey(item.id) ? itemStockMap.get(item.id) : 0}, isPaused=${itemPausedMap != null and itemPausedMap.get(item.id) == true}, isOutOfStock=${stock <= 0 or isPaused}"
+                                        th:data-paused="${isPaused}"
                                         th:classappend="${isOutOfStock} ? 'table-light opacity-75' : ''">
-                                        
+
                                         <!-- Checkbox chọn thanh toán -->
-                                        <td style="padding-left: 20px;">
+                                        <td style="width: 44px; min-width: 44px; padding-left: 20px;">
                                             <input type="checkbox" 
                                                    class="form-check-input item-check" 
                                                    th:value="${item.id}" 
                                                    th:checked="${!isOutOfStock}" 
                                                    th:disabled="${isOutOfStock}"
-                                                   th:title="${isOutOfStock} ? 'Mẫu hoa này hiện đang tạm hết hàng tại chi nhánh' : ''"
+                                                   th:title="${isPaused ? 'Sản phẩm tạm ngưng bán' : (isOutOfStock ? 'Mẫu hoa này hiện đang tạm hết hàng tại chi nhánh' : '')}"
                                                    onchange="updateSummary()"
                                                    style="cursor: pointer; width: 18px; height: 18px;">
                                         </td>
 
                                         <!-- Mẫu Hoa, Ảnh & Lời chúc -->
-                                        <td>
+                                        <td style="min-width: 260px;">
                                             <div class="d-flex align-items-start gap-3 py-1">
                                                 <img th:src="@{${item.product.imageUrl != null and !#strings.isEmpty(#strings.trim(item.product.imageUrl)) ? #strings.trim(item.product.imageUrl) : '/images/flower-logo.png'}}"
                                                      class="item-thumb" width="72" height="72" decoding="async" data-cart-product-image
                                                      th:data-fallback-src="@{/images/flower-logo.png}" th:alt="${item.product.name}">
                                                 <div>
                                                     <a th:href="@{/products/{id}(id=${item.product.id})}" class="fw-semibold text-dark text-decoration-none d-block mb-1" th:text="${item.product.name}">Tên hoa tươi</a>
-                                                    <div class="small text-muted mb-1">
-                                                        <i class="bi bi-shop text-secondary me-1"></i><span th:text="${item.store.name}">Chi nhánh</span>
+                                                    <div class="small text-muted mb-1 lh-sm">
+                                                        <div class="d-flex align-items-center gap-1">
+                                                            <i class="bi bi-shop text-secondary" style="font-size: 13px;"></i>
+                                                            <span class="fw-semibold text-dark" th:text="${item.store != null ? item.store.branchDisplayName : 'Chi nhánh'}">Chi Nhánh Phú Mỹ Hưng</span>
+                                                        </div>
+                                                        <div class="text-muted ps-3 small" style="font-size: 12px;" th:if="${item.store != null and !#strings.isEmpty(item.store.branchAreaName)}" th:text="${item.store.branchAreaName}">Quận 7</div>
                                                     </div>
-                                                    <div class="small text-success mb-1" th:if="${stock > 0}" th:text="'Còn ' + ${stock} + ' mẫu tại chi nhánh'"></div>
+                                                    <div class="small text-success mb-1" th:if="${stock > 0 and !isPaused}" th:text="'Còn ' + ${stock} + ' mẫu tại chi nhánh'"></div>
                                                     <!-- Badge trạng thái tồn kho -->
-                                                    <div th:if="${isOutOfStock}" class="mb-1">
+
+                                                    <div th:if="${isOutOfStock and !isPaused}" class="mb-1">
                                                         <span class="badge bg-danger rounded-pill px-2.5 py-1 small fw-bold d-inline-flex align-items-center gap-1">
                                                             <i class="bi bi-x-circle-fill"></i> Tạm hết hàng tại chi nhánh
                                                         </span>
@@ -412,7 +406,6 @@
                                                             <i class="bi bi-exclamation-triangle-fill"></i> Chỉ còn <span th:text="${stock}"></span> bó (vui lòng giảm số lượng)
                                                         </span>
                                                     </div>
-                                                    <!-- Hiển thị ngày giao nếu có -->
                                                     <!-- Hiển thị thiệp chúc mừng nếu có -->
                                                     <div th:if="${item.greetingMessage != null and !item.greetingMessage.isEmpty()}" class="greeting-badge">
                                                         <i class="bi bi-envelope-paper-heart text-danger me-1"></i>
@@ -423,13 +416,13 @@
                                         </td>
 
                                         <!-- Đơn giá -->
-                                        <td>
-                                            <strong class="text-dark small" th:text="${#numbers.formatDecimal(item.product.sellingPrice != null ? item.product.sellingPrice : (item.buyAmount / item.quantity), 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</strong>
+                                        <td class="text-center cart-col-nowrap" style="width: 140px; min-width: 130px;">
+                                            <strong class="text-dark small cart-col-nowrap" style="font-size: 14.5px;" th:text="${#numbers.formatDecimal(item.product.sellingPrice != null ? item.product.sellingPrice : (item.buyAmount / item.quantity), 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</strong>
                                         </td>
 
                                         <!-- Số lượng -->
-                                        <td>
-                                            <form th:action="@{'/cart/update-quantity/' + ${item.id}}" method="post" class="d-flex align-items-center" th:onsubmit="'updateQty(' + ${item.id} + '); return false;'">
+                                        <td class="text-center cart-col-nowrap" style="width: 150px; min-width: 145px;">
+                                            <form th:action="@{'/cart/update-quantity/' + ${item.id}}" method="post" class="d-inline-flex align-items-center justify-content-center" th:onsubmit="'updateQty(' + ${item.id} + '); return false;'">
                                                 <div class="qty-pill">
                                                     <button type="button" class="qty-btn" th:disabled="${isOutOfStock}" th:onclick="'changeQty(' + ${item.id} + ', -1)'">−</button>
                                                     <input type="number" 
@@ -443,16 +436,16 @@
                                                     <button type="button" class="qty-btn" th:disabled="${isOutOfStock or stock <= item.quantity}" th:onclick="'changeQty(' + ${item.id} + ', 1)'">+</button>
                                                 </div>
                                             </form>
-                                            <div class="small text-danger mt-1" th:id="'err_' + ${item.id}" role="alert"></div>
+                                            <div class="small text-danger mt-1 text-center" th:id="'err_' + ${item.id}" role="alert"></div>
                                         </td>
 
                                         <!-- Thành tiền -->
-                                        <td>
-                                            <strong class="text-danger fw-bold" th:id="'amount_' + ${item.id}" th:text="${#numbers.formatDecimal(item.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</strong>
+                                        <td class="text-end cart-col-nowrap" style="width: 150px; min-width: 140px;">
+                                            <strong class="text-danger fw-bold cart-col-nowrap" style="font-size: 15.5px;" th:id="'amount_' + ${item.id}" th:text="${#numbers.formatDecimal(item.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</strong>
                                         </td>
 
                                         <!-- Nút xóa -->
-                                        <td style="padding-right: 20px;">
+                                        <td class="text-center" style="width: 50px; min-width: 50px; padding-right: 20px;"><span th:if="${isPaused}" class="cart-paused-tag sale-paused-tag"><i class="bi bi-pause-circle" aria-hidden="true"></i> Sản phẩm tạm ngưng bán</span>
                                             <button type="button" class="btn btn-sm btn-link text-danger p-0" title="Xóa mẫu hoa này"
                                                     th:data-id="${item.id}"
                                                     th:data-name="${item.product.name}"
@@ -474,35 +467,41 @@
                                 th:data-subtotal="${item.orderType.name() == 'BUY' ? item.buyAmount : item.rentAmount}"
                                 th:data-deposit="${item.depositAmount}"
                                 th:data-total="${item.totalAmount}"
-                                th:with="stock=${itemStockMap != null and itemStockMap.containsKey(item.id) ? itemStockMap.get(item.id) : 0}, isOutOfStock=${stock <= 0}"
+                                th:with="stock=${itemStockMap != null and itemStockMap.containsKey(item.id) ? itemStockMap.get(item.id) : 0}, isPaused=${itemPausedMap != null and itemPausedMap.get(item.id) == true}, isOutOfStock=${stock <= 0 or isPaused}"
+                                th:data-paused="${isPaused}"
                                 th:classappend="${isOutOfStock} ? 'table-light opacity-75' : ''">
-                                
+
                                 <!-- Checkbox chọn thanh toán -->
-                                <td style="padding-left: 20px;">
+                                <td style="width: 44px; min-width: 44px; padding-left: 20px;">
                                     <input type="checkbox" 
                                            class="form-check-input item-check" 
                                            th:value="${item.id}" 
                                            th:checked="${!isOutOfStock}" 
                                            th:disabled="${isOutOfStock}"
-                                           th:title="${isOutOfStock} ? 'Mẫu hoa này hiện đang tạm hết hàng tại chi nhánh' : ''"
+                                           th:title="${isPaused ? 'Sản phẩm tạm ngưng bán' : (isOutOfStock ? 'Mẫu hoa này hiện đang tạm hết hàng tại chi nhánh' : '')}"
                                            onchange="updateSummary()"
                                            style="cursor: pointer; width: 18px; height: 18px;">
                                 </td>
 
                                 <!-- Mẫu Hoa, Ảnh & Lời chúc -->
-                                <td>
+                                <td style="min-width: 260px;">
                                     <div class="d-flex align-items-start gap-3 py-1">
                                         <img th:src="@{${item.product.imageUrl != null and !#strings.isEmpty(#strings.trim(item.product.imageUrl)) ? #strings.trim(item.product.imageUrl) : '/images/flower-logo.png'}}"
                                              class="item-thumb" width="72" height="72" decoding="async" data-cart-product-image
                                              th:data-fallback-src="@{/images/flower-logo.png}" th:alt="${item.product.name}">
                                         <div>
                                             <a th:href="@{/products/{id}(id=${item.product.id})}" class="fw-semibold text-dark text-decoration-none d-block mb-1" th:text="${item.product.name}">Tên hoa tươi</a>
-                                            <div class="small text-muted mb-1">
-                                                <i class="bi bi-shop text-secondary me-1"></i><span th:text="${item.store.name}">Chi nhánh</span>
+                                            <div class="small text-muted mb-1 lh-sm">
+                                                <div class="d-flex align-items-center gap-1">
+                                                    <i class="bi bi-shop text-secondary" style="font-size: 13px;"></i>
+                                                    <span class="fw-semibold text-dark" th:text="${item.store != null ? item.store.branchDisplayName : 'Chi nhánh'}">Chi Nhánh Phú Mỹ Hưng</span>
+                                                </div>
+                                                <div class="text-muted ps-3 small" style="font-size: 12px;" th:if="${item.store != null and !#strings.isEmpty(item.store.branchAreaName)}" th:text="${item.store.branchAreaName}">Quận 7</div>
                                             </div>
-                                            <div class="small text-success mb-1" th:if="${stock > 0}" th:text="'Còn ' + ${stock} + ' mẫu tại chi nhánh'"></div>
+                                            <div class="small text-success mb-1" th:if="${stock > 0 and !isPaused}" th:text="'Còn ' + ${stock} + ' mẫu tại chi nhánh'"></div>
                                             <!-- Badge trạng thái tồn kho -->
-                                            <div th:if="${isOutOfStock}" class="mb-1">
+
+                                            <div th:if="${isOutOfStock and !isPaused}" class="mb-1">
                                                 <span class="badge bg-danger rounded-pill px-2.5 py-1 small fw-bold d-inline-flex align-items-center gap-1">
                                                     <i class="bi bi-x-circle-fill"></i> Tạm hết hàng tại chi nhánh
                                                 </span>
@@ -512,7 +511,6 @@
                                                     <i class="bi bi-exclamation-triangle-fill"></i> Chỉ còn <span th:text="${stock}"></span> bó (vui lòng giảm số lượng)
                                                 </span>
                                             </div>
-                                            <!-- Hiển thị ngày giao nếu có -->
                                             <!-- Hiển thị thiệp chúc mừng nếu có -->
                                             <div th:if="${item.greetingMessage != null and !item.greetingMessage.isEmpty()}" class="greeting-badge">
                                                 <i class="bi bi-envelope-paper-heart text-danger me-1"></i>
@@ -523,13 +521,13 @@
                                 </td>
 
                                 <!-- Đơn giá -->
-                                <td>
-                                    <strong class="text-dark small" th:text="${#numbers.formatDecimal(item.product.sellingPrice != null ? item.product.sellingPrice : (item.buyAmount / item.quantity), 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</strong>
+                                <td class="text-center cart-col-nowrap" style="width: 140px; min-width: 130px;">
+                                    <strong class="text-dark small cart-col-nowrap" style="font-size: 14.5px;" th:text="${#numbers.formatDecimal(item.product.sellingPrice != null ? item.product.sellingPrice : (item.buyAmount / item.quantity), 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</strong>
                                 </td>
 
                                 <!-- Số lượng -->
-                                <td>
-                                    <form th:action="@{'/cart/update-quantity/' + ${item.id}}" method="post" class="d-flex align-items-center" th:onsubmit="'updateQty(' + ${item.id} + '); return false;'">
+                                <td class="text-center cart-col-nowrap" style="width: 150px; min-width: 145px;">
+                                    <form th:action="@{'/cart/update-quantity/' + ${item.id}}" method="post" class="d-inline-flex align-items-center justify-content-center" th:onsubmit="'updateQty(' + ${item.id} + '); return false;'">
                                         <div class="qty-pill">
                                             <button type="button" class="qty-btn" th:disabled="${isOutOfStock}" th:onclick="'changeQty(' + ${item.id} + ', -1)'">−</button>
                                             <input type="number" 
@@ -543,16 +541,16 @@
                                             <button type="button" class="qty-btn" th:disabled="${isOutOfStock or stock <= item.quantity}" th:onclick="'changeQty(' + ${item.id} + ', 1)'">+</button>
                                         </div>
                                     </form>
-                                    <div class="small text-danger mt-1" th:id="'err_' + ${item.id}" role="alert"></div>
+                                    <div class="small text-danger mt-1 text-center" th:id="'err_' + ${item.id}" role="alert"></div>
                                 </td>
 
                                 <!-- Thành tiền -->
-                                <td>
-                                    <strong class="text-danger fw-bold" th:id="'amount_' + ${item.id}" th:text="${#numbers.formatDecimal(item.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</strong>
+                                <td class="text-end cart-col-nowrap" style="width: 150px; min-width: 140px;">
+                                    <strong class="text-danger fw-bold cart-col-nowrap" style="font-size: 15.5px;" th:id="'amount_' + ${item.id}" th:text="${#numbers.formatDecimal(item.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</strong>
                                 </td>
 
                                 <!-- Nút xóa -->
-                                <td style="padding-right: 20px;">
+                                <td class="text-center" style="width: 50px; min-width: 50px; padding-right: 20px;"><span th:if="${isPaused}" class="cart-paused-tag sale-paused-tag"><i class="bi bi-pause-circle" aria-hidden="true"></i> Sản phẩm tạm ngưng bán</span>
                                     <button type="button" class="btn btn-sm btn-link text-danger p-0" title="Xóa mẫu hoa này"
                                             th:data-id="${item.id}"
                                             th:data-name="${item.product.name}"
@@ -572,7 +570,7 @@
             <div class="col-lg-4">
                 <div id="cart-order-summary" class="flower-card p-4">
                     <h5 class="fw-bold mb-3 pb-2 border-bottom text-dark" style="font-family: 'Nunito', Arial, sans-serif !important; border-color: #F1EAE2 !important;">Tóm Tắt Đơn Hoa</h5>
-                    
+
                     <div class="d-flex justify-content-between mb-2 small text-muted">
                         <span>Số mẫu hoa đã chọn:</span>
                         <strong class="text-dark"><span id="selectedCount">0</span></strong>
@@ -764,7 +762,7 @@
             var row = document.getElementById('row_' + itemId);
             if (!row) return;
             row.querySelectorAll('.qty-btn, .qty-input').forEach(function (el) {
-                el.disabled = busy;
+                el.disabled = busy || row.getAttribute('data-paused') === 'true';
             });
         }
 
@@ -778,6 +776,10 @@
             (state.items || []).forEach(function (it) {
                 var row = document.getElementById('row_' + it.id);
                 if (!row) return;
+                if ((row.getAttribute('data-paused') === 'true') !== Boolean(it.paused)) {
+                    window.location.reload();
+                    return;
+                }
                 row.setAttribute('data-quantity', it.quantity);
                 row.setAttribute('data-subtotal', it.subtotal || 0);
                 row.setAttribute('data-deposit', it.deposit || 0);
@@ -788,8 +790,13 @@
                 if (amount) amount.innerText = formatVnd(it.total || 0);
                 var btns = row.querySelectorAll('.qty-btn');
                 if (btns.length === 2) {
-                    btns[0].disabled = false;
-                    btns[1].disabled = it.stock <= it.quantity;
+                    btns[0].disabled = Boolean(it.paused) || it.stock <= 0;
+                    btns[1].disabled = Boolean(it.paused) || it.stock <= it.quantity;
+                }
+                var checkbox = row.querySelector('.item-check');
+                if (checkbox) {
+                    checkbox.disabled = Boolean(it.paused) || it.stock <= 0;
+                    if (checkbox.disabled) checkbox.checked = false;
                 }
             });
             var rc = document.getElementById('cartRowCount');
@@ -859,7 +866,7 @@
                     setRowBusy(itemId, false);
                     var b = r2.querySelectorAll('.qty-btn');
                     var mx = parseInt(input.max, 10) || 1;
-                    if (b.length === 2) b[1].disabled = stillSaved >= mx;
+                    if (b.length === 2) b[1].disabled = r2.getAttribute('data-paused') === 'true' || stillSaved >= mx;
                 }
             });
         }
@@ -932,7 +939,7 @@
 
             if (count === 0) {
                 checkoutBtn.disabled = true;
-                checkoutBtn.innerText = enabledCheckboxes.length === 0 ? 'Tất cả mẫu hoa trong giỏ tạm hết hàng' : 'Vui lòng chọn mẫu hoa';
+                checkoutBtn.innerText = enabledCheckboxes.length === 0 ? 'Các mẫu hoa đã ngừng bán hoặc hết hàng' : 'Vui lòng chọn mẫu hoa';
                 checkoutBtn.style.opacity = '0.6';
                 checkoutBtn.style.cursor = 'not-allowed';
             } else {
@@ -945,6 +952,9 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             updateSummary();
+            syncCartState().catch(function () {});
+            setInterval(function () { if (!document.hidden && !Object.values(qtyBusy).some(Boolean)) syncCartState().catch(function () {}); }, 5000);
+            window.addEventListener('focus', function () { syncCartState().catch(function () {}); });
             var savedCartScroll = sessionStorage.getItem('cart_scroll_pos');
             if (savedCartScroll !== null) {
                 sessionStorage.removeItem('cart_scroll_pos');

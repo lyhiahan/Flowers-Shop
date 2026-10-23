@@ -66,6 +66,9 @@ public class ProductForm {
     // Danh sách ảnh tải lên Cloudinary
     private List<MultipartFile> imageFiles;
 
+    // Vị trí ảnh chính được người bán chọn (mặc định là 0 - ảnh đầu tiên)
+    private Integer mainImageIndex = 0;
+
     // Cờ xác nhận bán lỗ có chủ đích khi Admin chọn [YES] trên cảnh báo Modal
     private boolean confirmSellAtLoss = false;
 

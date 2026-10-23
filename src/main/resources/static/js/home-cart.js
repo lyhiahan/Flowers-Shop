@@ -78,11 +78,23 @@
                     btn.style.background = '#2ecc71';
                     setTimeout(function () {
                         btn.innerHTML = orig;
-                        if (form.dataset.stockAvailable === 'false') btn.innerHTML = '<i class="bi bi-x-circle"></i><span>Hết hàng</span>';
+                        if (form.dataset.stockAvailable === 'false') btn.innerHTML = '<i class="bi bi-x-circle"></i><span>' + (form.dataset.salePaused === 'true' ? 'Tạm ngưng bán' : 'Hết hàng') + '</span>';
                         btn.style.background = '';
                     }, 800);
                 }
             } else {
+                if (data.paused === true) {
+                    form.dataset.stockAvailable = 'false';
+                    form.dataset.salePaused = 'true';
+                    if (btn) btn.innerHTML = '<i class="bi bi-pause-circle"></i><span>Tạm ngưng bán</span>';
+                    const card = form.closest('[data-catalog-product-id]');
+                    const label = card ? card.querySelector('.catalog-stock') : document.getElementById('productStock');
+                    if (label) {
+                        label.classList.add('sale-paused-tag');
+                        label.textContent = 'Sản phẩm tạm ngưng bán';
+                    }
+                    return;
+                }
                 if (errEl) { errEl.textContent = data.error || 'Không thể thêm vào giỏ.'; errEl.style.display = 'block'; }
             }
         })

@@ -31,10 +31,90 @@ class CatalogStockDisplayTests {
     @Autowired CategoryRepository categories;
     @Autowired UserRepository users;
     @Autowired CatalogStockService stockService;
+    @Autowired com.finalproject.service.OrderWorkflowService workflow;
+    @Autowired OrderRepository orders;
+    @Autowired CartRepository carts;
+    @Autowired CartItemRepository cartItems;
+    @Autowired com.finalproject.service.OrderService orderService;
     Store first, second, closed, inactive;
     Product available, soldOut, global, missingInventory;
     Category category;
     User customer;
+
+    @Test void pausedProductStaysViewableAndCannotBePurchasedFromCatalogOrOldCart() throws Exception {
+        var cart = carts.save(Cart.builder().user(customer).build());
+        var line = cartItems.save(CartItem.builder().cart(cart).product(available).store(first)
+                .orderType(com.finalproject.enums.OrderType.BUY).quantity(1).build());
+        cart.getItems().add(line);
+        available.setIsSelling(false);
+        products.saveAndFlush(available);
+
+        String html = mvc.perform(get("/products").param("keyword", available.getName()).with(user(customer.getUsername()).roles("USER")))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        assertThat(html).contains("Sản phẩm tạm ngưng bán");
+        assertThat(cartForm(html, available.getId())).containsPattern("<button[^>]*disabled");
+        mvc.perform(get("/products/" + available.getId()).with(user(customer.getUsername()).roles("USER")))
+                .andExpect(status().isOk()).andExpect(view().name("customer/product-detail"))
+                .andExpect(model().attribute("salePaused", true));
+        String cartHtml = mvc.perform(get("/cart").with(user(customer.getUsername()).roles("USER")))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        assertThat(cartHtml).contains("cart-paused-tag sale-paused-tag", "Sản phẩm tạm ngưng bán")
+                .containsPattern("<input[^>]*class=\"[^\"]*item-check[^\"]*\"[^>]*disabled");
+        mvc.perform(post("/checkout/quote").with(user(customer.getUsername()).roles("USER"))
+                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("selectedItemIds", line.getId().toString()).param("shippingMethod", "PICKUP")
+                        .param("pickupStoreId", first.getId().toString()))
+                .andExpect(status().isBadRequest());
+        mvc.perform(post("/checkout").with(user(customer.getUsername()).roles("USER"))
+                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("selectedItemIds", line.getId().toString()).param("paymentMethod", "COD")
+                        .param("recipientName", "Người nhận").param("recipientPhone", "0901234567")
+                        .param("shippingMethod", "PICKUP").param("pickupStoreId", first.getId().toString())
+                        .param("deliveryDate", java.time.LocalDate.now().plusDays(1).toString()).param("deliveryTime", "09:00"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("errorMessage", org.hamcrest.Matchers.containsString("ngừng bán")));
+        assertThat(inventories.findByStoreIdAndProductId(first.getId(), available.getId()).orElseThrow().getQuantity()).isEqualTo(17);
+    }
+
+    @Test void branchPauseDoesNotBlockOtherBranchesAndResumingRestoresPurchase() {
+        var row = inventories.findByStoreIdAndProductId(first.getId(), global.getId()).orElseThrow();
+        row.setIsSelling(false); inventories.saveAndFlush(row);
+        assertThat(stockService.summarizeIds(List.of(global.getId()), first.getId()).get(global.getId()).paused()).isTrue();
+        var other = stockService.summarizeIds(List.of(global.getId()), null).get(global.getId());
+        assertThat(other.paused()).isFalse();
+        assertThat(other.quantity()).isEqualTo(4);
+        row.setIsSelling(true); inventories.saveAndFlush(row);
+        assertThat(stockService.summarizeIds(List.of(global.getId()), first.getId()).get(global.getId()).paused()).isFalse();
+    }
+
+    @Test void orderPlacedBeforePauseCanStillBeConfirmedPreparedAndCompleted() {
+        var auth = org.springframework.security.authentication.UsernamePasswordAuthenticationToken.authenticated(
+                customer.getUsername(), "unused", org.springframework.security.core.authority.AuthorityUtils.createAuthorityList("ROLE_USER"));
+        org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
+        try {
+            var cart = carts.save(Cart.builder().user(customer).build());
+            var line = cartItems.save(CartItem.builder().cart(cart).product(available).store(first)
+                    .orderType(com.finalproject.enums.OrderType.BUY).quantity(1).build());
+            cart.getItems().add(line);
+            var placed = orderService.checkout(customer.getUsername(), List.of(line.getId()), com.finalproject.enums.PaymentMethod.COD,
+                    "Người nhận", "0901234567", "Địa chỉ thử", null, null, java.time.LocalDate.now().plusDays(1), "DELIVERY", null).get(0);
+            available.setIsSelling(false); products.saveAndFlush(available);
+            users.saveAndFlush(User.builder().username("paused_order_manager").email("paused_order_manager@test.local")
+                    .password("unused").fullName("Manager").role(Role.MANAGER).store(first).isActive(true).build());
+            org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(
+                    org.springframework.security.authentication.UsernamePasswordAuthenticationToken.authenticated("paused_order_manager", "unused",
+                            org.springframework.security.core.authority.AuthorityUtils.createAuthorityList("ROLE_MANAGER")));
+            workflow.transition(placed.getId(), com.finalproject.enums.OrderStatus.CONFIRMED);
+            workflow.transition(placed.getId(), com.finalproject.enums.OrderStatus.PREPARING);
+            workflow.transition(placed.getId(), com.finalproject.enums.OrderStatus.DELIVERING);
+            workflow.transition(placed.getId(), com.finalproject.enums.OrderStatus.DELIVERED);
+            workflow.transition(placed.getId(), com.finalproject.enums.OrderStatus.COMPLETED);
+            assertThat(orders.findById(placed.getId()).orElseThrow().getStatus()).isEqualTo(com.finalproject.enums.OrderStatus.COMPLETED);
+            assertThat(inventories.findByStoreIdAndProductId(first.getId(), available.getId()).orElseThrow().getQuantity()).isEqualTo(16);
+        } finally {
+            org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        }
+    }
 
     @BeforeEach void fixture() {
         first = branch("Stock branch 1", true, true);

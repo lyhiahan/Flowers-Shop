@@ -31,6 +31,7 @@ public class CheckoutController {
     private final UserRepository userRepository;
     private final com.finalproject.repository.StoreRepository storeRepository;
     private final com.finalproject.repository.DeliveryRepository deliveryRepository;
+    private final com.finalproject.repository.StoreInventoryRepository storeInventoryRepository;
     private final com.finalproject.service.UserService userService;
     private final com.finalproject.service.VoucherService voucherService;
     private final com.finalproject.config.MomoConfig momoConfig;
@@ -75,6 +76,29 @@ public class CheckoutController {
             }
         } else {
             checkoutItems = new ArrayList<>(allItems);
+        }
+
+        for (CartItem item : checkoutItems) {
+            var product = item.getProduct();
+            var store = item.getStore();
+            if (store == null || !com.finalproject.service.ProductAvailability.supportsBranch(product, store)
+                    || !com.finalproject.service.ProductAvailability.isPublic(product)
+                    || !Boolean.TRUE.equals(store.getStatus()) || !Boolean.TRUE.equals(store.getIsOpen())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Sản phẩm " + product.getName()
+                        + " đã ngừng bán. Vui lòng bỏ chọn sản phẩm này trong giỏ hàng.");
+                return "redirect:/cart";
+            }
+            var stock = storeInventoryRepository.findByStoreIdAndProductId(store.getId(), product.getId()).orElse(null);
+            if (stock == null || !stock.isAvailableForSale()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Sản phẩm " + product.getName()
+                        + " đã ngừng bán tại chi nhánh. Vui lòng bỏ chọn sản phẩm này trong giỏ hàng.");
+                return "redirect:/cart";
+            }
+            if (stock.getQuantity() == null || item.getQuantity() == null || stock.getQuantity() < item.getQuantity()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Sản phẩm " + product.getName()
+                        + " không đủ tồn kho. Vui lòng điều chỉnh số lượng trong giỏ hàng.");
+                return "redirect:/cart";
+            }
         }
 
         // Kiểm tra tồn kho tại chi nhánh: Chặn thanh toán nếu có sản phẩm hết hàng

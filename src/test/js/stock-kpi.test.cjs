@@ -123,7 +123,7 @@ test('back-forward cache restoration resumes refresh and polling', async () => {
 
 function productCard(id, withForm = true) {
     const stockText = {textContent: 'Còn 10 sản phẩm'}, stockIcon = {className: 'bi bi-box-seam'};
-    const label = {outOfStock: false, classList: {toggle(name, enabled) {label.outOfStock = enabled;}},
+    const label = {outOfStock: false, classList: {toggle(name, enabled) {if (name === 'is-out-of-stock') label.outOfStock = enabled;}},
         querySelector(selector) {return selector === 'span' ? stockText : stockIcon;}};
     const buttonText = {textContent: 'Thêm vào giỏ'}, buttonIcon = {className: 'bi bi-cart-plus'};
     const button = {disabled: false, querySelector(selector) {return selector === 'span' ? buttonText : buttonIcon;}};
@@ -225,4 +225,18 @@ test('customer product labels update again after returning to a cached page', as
     await settle();
     assert.equal(ui.value.textContent, '8');
     assert.equal(product.stockText.textContent, 'Còn 8 sản phẩm');
+});
+
+test('paused catalog card replaces stock label and locks buying, then resumes', async () => {
+    const card = productCard('1');
+    let paused = true;
+    const ui = setup(async () => ({ok:true,json:async () => ({currentStockQuantity:0,products:{'1':{quantity:paused ? 0 : 4,purchaseStoreId:paused ? null : 2,paused}}})}),
+        true, {catalog:true,withoutSummary:true,cards:[card]});
+    await settle();
+    assert.equal(card.stockText.textContent, 'Sản phẩm tạm ngưng bán');
+    assert.equal(card.button.disabled, true);
+    paused = false;
+    await ui.timers[0].fn();
+    assert.equal(card.stockText.textContent, 'Còn 4 sản phẩm');
+    assert.equal(card.button.disabled, false);
 });

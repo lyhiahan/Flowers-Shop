@@ -15,18 +15,20 @@ public interface StoreInventoryRepository extends JpaRepository<StoreInventory, 
         Long getProductId();
         Long getStoreId();
         Integer getQuantity();
+        Boolean getPaused();
     }
 
     // One projection query for all visible cards, respecting the same branch rules as product detail.
     @Query("""
-            SELECT p.id AS productId, s.id AS storeId, si.quantity AS quantity
+            SELECT p.id AS productId, s.id AS storeId,
+                CASE WHEN p.isSelling = true AND si.isSelling = true THEN COALESCE(si.quantity, 0) ELSE 0 END AS quantity,
+                CASE WHEN p.isSelling = true AND si.isSelling = true THEN false ELSE true END AS paused
             FROM StoreInventory si JOIN si.product p JOIN si.store s LEFT JOIN p.store ownerStore
             WHERE p.id IN :productIds AND s.status = true AND s.isOpen = true
-                AND p.isActive = true AND p.isSelling = true
-                AND si.isSelling = true AND si.isDeleted = false
+                AND p.isActive = true AND si.isDeleted = false
                 AND (p.isDeleted = false OR p.isDeleted IS NULL)
                 AND (ownerStore.id IS NULL OR ownerStore.id = s.id)
-                AND (:storeId IS NULL OR s.id = :storeId) AND si.quantity > 0
+                AND (:storeId IS NULL OR s.id = :storeId)
             ORDER BY p.id, s.id
             """)
     List<CatalogStockRow> findCatalogStock(@Param("productIds") List<Long> productIds,

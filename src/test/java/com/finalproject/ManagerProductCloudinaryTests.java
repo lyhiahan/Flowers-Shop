@@ -62,4 +62,27 @@ class ManagerProductCloudinaryTests {
         assertThat(old.getIsMain()).isFalse(); assertThat(product.getImageUrl()).endsWith("new.png");
         verify(images).save(argThat(p -> p.getCloudinaryPublicId().equals("products/new") && p.getIsMain()));
     }
+
+    @Test void creatingWithMultiplePhotosSelectsChosenMainPhotoOrDefaultsToFirst() throws Exception {
+        Store store = Store.builder().id(1L).build(); Category category = Category.builder().id(2L).build();
+        when(users.findByUsername("manager")).thenReturn(Optional.of(User.builder().build()));
+        when(access.assignedStore()).thenReturn(store); when(categories.findById(2L)).thenReturn(Optional.of(category));
+        when(products.save(any())).thenAnswer(call -> { Product p = call.getArgument(0); p.setId(5L); return p; });
+        when(images.findByProductId(5L)).thenReturn(List.of());
+
+        var file1 = new MockMultipartFile("imageFiles", "photo1.png", "image/png", new byte[]{1});
+        var file2 = new MockMultipartFile("imageFiles", "photo2.png", "image/png", new byte[]{2});
+        when(cloud.upload(file1, "rental_shop_products")).thenReturn(new CloudinaryService.UploadResult("https://res.cloudinary.com/project/photo1.png", "products/photo1"));
+        when(cloud.upload(file2, "rental_shop_products")).thenReturn(new CloudinaryService.UploadResult("https://res.cloudinary.com/project/photo2.png", "products/photo2"));
+
+        // Seller chooses file2 (index 1) as main image
+        controller.addProduct(() -> "manager", "Hoa Tuyệt Đẹp", 2L, new BigDecimal("150000"), null, 5,
+                null, null, List.of(file1, file2), 1, "Mô tả", null, false, false, null, null, null, null, false, new RedirectAttributesModelMap());
+
+        // Verify product.imageUrl is the chosen main image (photo2)
+        verify(products).save(argThat(p -> "https://res.cloudinary.com/project/photo2.png".equals(p.getImageUrl())));
+        // Verify photo1 is saved as non-main and photo2 is saved as main
+        verify(images).save(argThat(p -> "products/photo1".equals(p.getCloudinaryPublicId()) && !p.getIsMain()));
+        verify(images).save(argThat(p -> "products/photo2".equals(p.getCloudinaryPublicId()) && p.getIsMain()));
+    }
 }

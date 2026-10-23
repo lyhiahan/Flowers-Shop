@@ -6,6 +6,7 @@ import com.finalproject.entity.Store;
 import com.finalproject.repository.CategoryRepository;
 import com.finalproject.repository.ProductRepository;
 import com.finalproject.repository.UserRepository;
+import com.finalproject.service.CloudinaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -103,6 +104,8 @@ public class ManagerProductController {
                              @RequestParam(value = "initialStock", defaultValue = "0") int initialStock,
                              @RequestParam(value = "imageUrl", required = false) String imageUrl,
                              @RequestParam(value = "imageFile", required = false) org.springframework.web.multipart.MultipartFile imageFile,
+                             @RequestParam(value = "imageFiles", required = false) java.util.List<org.springframework.web.multipart.MultipartFile> imageFiles,
+                             @RequestParam(value = "mainImageIndex", defaultValue = "0") int mainImageIndex,
                              @RequestParam(value = "description", required = false) String description,
                              @RequestParam(value = "styleValueIds", required = false) java.util.List<Long> styleValueIds,
                              @RequestParam(value = "attributesSubmitted", defaultValue = "false") boolean attributesSubmitted,
@@ -124,7 +127,28 @@ public class ManagerProductController {
         if (imageUrl != null && !imageUrl.isBlank() && !com.finalproject.utils.ImageUrls.valid(imageUrl)) throw new IllegalArgumentException("URL ảnh không hợp lệ.");
         if (description != null && description.length() > 10000) throw new IllegalArgumentException("Mô tả tối đa 10000 ký tự.");
         if (initialStock < 0 || initialStock > 1000000) throw new IllegalArgumentException("Tồn kho phải từ 0 đến 1.000.000.");
-        var uploaded = uploadProductImage(imageFile);
+
+        List<org.springframework.web.multipart.MultipartFile> filesToUpload = new java.util.ArrayList<>();
+        if (imageFiles != null) {
+            for (var f : imageFiles) {
+                if (f != null && !f.isEmpty()) filesToUpload.add(f);
+            }
+        }
+        if (filesToUpload.isEmpty() && imageFile != null && !imageFile.isEmpty()) {
+            filesToUpload.add(imageFile);
+        }
+
+        List<CloudinaryService.UploadResult> uploadedResults = uploadProductImages(filesToUpload);
+        int targetMainIndex = (mainImageIndex >= 0 && mainImageIndex < uploadedResults.size()) ? mainImageIndex : 0;
+        String resolvedMainUrl = null;
+        if (!uploadedResults.isEmpty()) {
+            resolvedMainUrl = uploadedResults.get(targetMainIndex).secureUrl();
+        } else if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+            resolvedMainUrl = imageUrl.trim();
+        } else {
+            resolvedMainUrl = "/images/flower-logo.png";
+        }
+
         Product product = Product.builder()
                 .name(name)
                 .category(category)
@@ -136,7 +160,7 @@ public class ManagerProductController {
                 .promotionalPrice(promotionalPrice != null ? promotionalPrice : priceBuy)
                 .sold(0)
                 .rating(5.0)
-                .imageUrl(uploaded != null ? uploaded.secureUrl() : (imageUrl != null && !imageUrl.trim().isEmpty() ? imageUrl.trim() : "/images/flower-logo.png"))
+                .imageUrl(resolvedMainUrl)
                 .description(description)
                 .isActive(true)
                 .isSelling(true)
@@ -149,10 +173,33 @@ public class ManagerProductController {
         }
         else if (attributesSubmitted) attributes.assign(product, styleValueIds, true);
         productRepository.save(product);
-        saveUploadedImage(product, uploaded);
+        saveUploadedImages(product, uploadedResults, targetMainIndex);
         inventoryService.setStock(product.getId(), initialStock);
         ra.addFlashAttribute("successMessage", "Thêm mẫu hoa [" + name + "] thành công!");
         return "redirect:/manager/products";
+    }
+
+    public String addProduct(Principal principal,
+                             String name,
+                             Long categoryId,
+                             BigDecimal priceBuy,
+                             BigDecimal promotionalPrice,
+                             int initialStock,
+                             String imageUrl,
+                             org.springframework.web.multipart.MultipartFile imageFile,
+                             String description,
+                             java.util.List<Long> styleValueIds,
+                             boolean attributesSubmitted,
+                             boolean flowerAttributesSubmitted,
+                             String flowerTypes,
+                             String flowerColors,
+                             String flowerStyles,
+                             List<Long> additionalCategoryIds,
+                             boolean categoriesSubmitted,
+                             RedirectAttributes ra) {
+        return addProduct(principal, name, categoryId, priceBuy, promotionalPrice, initialStock, imageUrl, imageFile, null, 0,
+                description, styleValueIds, attributesSubmitted, flowerAttributesSubmitted, flowerTypes, flowerColors,
+                flowerStyles, additionalCategoryIds, categoriesSubmitted, ra);
     }
 
     @PostMapping("/update/{id}")
@@ -164,6 +211,8 @@ public class ManagerProductController {
                                 @RequestParam(value = "promotionalPrice", required = false) BigDecimal promotionalPrice,
                                 @RequestParam(value = "imageUrl", required = false) String imageUrl,
                                 @RequestParam(value = "imageFile", required = false) org.springframework.web.multipart.MultipartFile imageFile,
+                                @RequestParam(value = "imageFiles", required = false) java.util.List<org.springframework.web.multipart.MultipartFile> imageFiles,
+                                @RequestParam(value = "mainImageIndex", defaultValue = "0") int mainImageIndex,
                                 @RequestParam(value = "description", required = false) String description,
                                 @RequestParam(value = "styleValueIds", required = false) java.util.List<Long> styleValueIds,
                                 @RequestParam(value = "attributesSubmitted", defaultValue = "false") boolean attributesSubmitted,
@@ -183,7 +232,20 @@ public class ManagerProductController {
         validateName(name);
         if (imageUrl != null && !imageUrl.isBlank() && !com.finalproject.utils.ImageUrls.valid(imageUrl)) throw new IllegalArgumentException("URL ảnh không hợp lệ.");
         if (description != null && description.length() > 10000) throw new IllegalArgumentException("Mô tả tối đa 10000 ký tự.");
-        var uploaded = uploadProductImage(imageFile);
+
+        List<org.springframework.web.multipart.MultipartFile> filesToUpload = new java.util.ArrayList<>();
+        if (imageFiles != null) {
+            for (var f : imageFiles) {
+                if (f != null && !f.isEmpty()) filesToUpload.add(f);
+            }
+        }
+        if (filesToUpload.isEmpty() && imageFile != null && !imageFile.isEmpty()) {
+            filesToUpload.add(imageFile);
+        }
+
+        List<CloudinaryService.UploadResult> uploadedResults = uploadProductImages(filesToUpload);
+        int targetMainIndex = (mainImageIndex >= 0 && mainImageIndex < uploadedResults.size()) ? mainImageIndex : 0;
+
         p.setName(name);
         p.setCategory(cat);
         categoryService.assignAdditional(p, additionalCategoryIds, categoriesSubmitted);
@@ -194,16 +256,38 @@ public class ManagerProductController {
         else if (attributesSubmitted) attributes.assign(p, styleValueIds, true);
         p.setPriceBuy(priceBuy);
         p.setPromotionalPrice(promotionalPrice != null ? promotionalPrice : priceBuy);
-        if (uploaded != null) {
-            p.setImageUrl(uploaded.secureUrl());
+        if (!uploadedResults.isEmpty()) {
+            p.setImageUrl(uploadedResults.get(targetMainIndex).secureUrl());
         } else if (imageUrl != null && !imageUrl.trim().isEmpty()) {
             p.setImageUrl(imageUrl.trim());
         }
         p.setDescription(description);
         productRepository.save(p);
-        saveUploadedImage(p, uploaded);
+        saveUploadedImages(p, uploadedResults, targetMainIndex);
         ra.addFlashAttribute("successMessage", "Cập nhật mẫu hoa [" + name + "] thành công!");
         return "redirect:/manager/products";
+    }
+
+    public String updateProduct(Long id,
+                                String name,
+                                Long categoryId,
+                                BigDecimal priceBuy,
+                                BigDecimal promotionalPrice,
+                                String imageUrl,
+                                org.springframework.web.multipart.MultipartFile imageFile,
+                                String description,
+                                java.util.List<Long> styleValueIds,
+                                boolean attributesSubmitted,
+                                boolean flowerAttributesSubmitted,
+                                String flowerTypes,
+                                String flowerColors,
+                                String flowerStyles,
+                                List<Long> additionalCategoryIds,
+                                boolean categoriesSubmitted,
+                                RedirectAttributes ra) {
+        return updateProduct(id, name, categoryId, priceBuy, promotionalPrice, imageUrl, imageFile, null, 0,
+                description, styleValueIds, attributesSubmitted, flowerAttributesSubmitted, flowerTypes, flowerColors,
+                flowerStyles, additionalCategoryIds, categoriesSubmitted, ra);
     }
 
     @PostMapping("/toggle-selling/{id}")
@@ -278,6 +362,7 @@ public class ManagerProductController {
     }
 
     private com.finalproject.service.CloudinaryService.UploadResult uploadProductImage(org.springframework.web.multipart.MultipartFile file) {
+        if (file == null || file.isEmpty()) return null;
         try {
             return cloudinaryService.upload(file, "rental_shop_products");
         } catch (java.io.IOException ex) {
@@ -285,13 +370,47 @@ public class ManagerProductController {
         }
     }
 
-    private void saveUploadedImage(Product product, com.finalproject.service.CloudinaryService.UploadResult uploaded) {
-        if (uploaded == null) return;
+    private List<com.finalproject.service.CloudinaryService.UploadResult> uploadProductImages(List<org.springframework.web.multipart.MultipartFile> files) {
+        if (files == null || files.isEmpty()) return List.of();
+        List<com.finalproject.service.CloudinaryService.UploadResult> results = new java.util.ArrayList<>();
+        for (var file : files) {
+            if (file != null && !file.isEmpty()) {
+                try {
+                    var res = cloudinaryService.upload(file, "rental_shop_products");
+                    if (res != null) results.add(res);
+                } catch (java.io.IOException ex) {
+                    throw new IllegalStateException("Không thể tải ảnh lên Cloudinary. Vui lòng thử lại.", ex);
+                }
+            }
+        }
+        return results;
+    }
+
+    private void saveUploadedImages(Product product, List<com.finalproject.service.CloudinaryService.UploadResult> uploads, int mainIndex) {
+        if (uploads == null || uploads.isEmpty()) return;
         var previous = productImages.findByProductId(product.getId());
         previous.forEach(image -> image.setIsMain(false));
         productImages.saveAll(previous);
-        productImages.save(com.finalproject.entity.ProductImage.builder().product(product).imageUrl(uploaded.secureUrl())
-                .cloudinaryPublicId(uploaded.publicId()).isMain(true).build());
+
+        int targetIndex = (mainIndex >= 0 && mainIndex < uploads.size()) ? mainIndex : 0;
+        for (int i = 0; i < uploads.size(); i++) {
+            var up = uploads.get(i);
+            boolean isMain = (i == targetIndex);
+            productImages.save(com.finalproject.entity.ProductImage.builder()
+                    .product(product)
+                    .imageUrl(up.secureUrl())
+                    .cloudinaryPublicId(up.publicId())
+                    .isMain(isMain)
+                    .build());
+            if (isMain) {
+                product.setImageUrl(up.secureUrl());
+            }
+        }
+    }
+
+    private void saveUploadedImage(Product product, com.finalproject.service.CloudinaryService.UploadResult uploaded) {
+        if (uploaded == null) return;
+        saveUploadedImages(product, List.of(uploaded), 0);
     }
 
     private void validatePrice(BigDecimal price, BigDecimal promotion) {

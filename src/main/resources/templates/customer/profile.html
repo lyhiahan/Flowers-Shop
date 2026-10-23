@@ -179,7 +179,7 @@
         }
         .cart-badge-pill {
             position: absolute;
-            top: 1px;
+            top: 2px;
             right: -2px;
             background-color: var(--flower-accent);
             color: #ffffff;
@@ -191,7 +191,16 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0 4px;
+            padding: 1px 4px 0 4px;
+            line-height: 1;
+            box-sizing: border-box;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .no-caret::after,
+        .dropdown-toggle.no-caret::after {
+            display: none !important;
         }
 
         /* Account Pill Button */

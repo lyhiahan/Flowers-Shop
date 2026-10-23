@@ -50,18 +50,21 @@
     }
 
     function updateProduct(item, stock) {
-        const available = stock.quantity > 0;
+        const paused = stock.paused === true;
+        const available = !paused && stock.quantity > 0;
         const label = item.querySelector('.catalog-stock');
         if (label) {
             label.classList.toggle('is-out-of-stock', !available);
+            label.classList.toggle('is-sale-paused', paused);
             const text = label.querySelector('span');
             const icon = label.querySelector('i');
-            if (text) text.textContent = available ? 'Còn ' + stock.quantity.toLocaleString('vi-VN') + ' sản phẩm' : 'Hết hàng';
-            if (icon) icon.className = available ? 'bi bi-box-seam' : 'bi bi-x-octagon-fill';
+            if (text) text.textContent = paused ? 'Sản phẩm tạm ngưng bán' : (available ? 'Còn ' + stock.quantity.toLocaleString('vi-VN') + ' sản phẩm' : 'Hết hàng');
+            if (icon) icon.className = paused ? 'bi bi-pause-circle' : (available ? 'bi bi-box-seam' : 'bi bi-x-octagon-fill');
         }
         const form = item.querySelector('.ajax-add-to-cart');
         if (!form) return;
         form.dataset.stockAvailable = available ? 'true' : 'false';
+        form.dataset.salePaused = paused ? 'true' : 'false';
         const store = form.querySelector('[name="storeId"]');
         if (store) store.value = available ? String(stock.purchaseStoreId) : '';
         const button = form.querySelector('button[type="submit"]');
@@ -70,7 +73,7 @@
         if (!form.dataset.pending) {
             const text = button.querySelector('span');
             const icon = button.querySelector('i');
-            if (text) text.textContent = available ? 'Thêm vào giỏ' : 'Hết hàng';
+            if (text) text.textContent = paused ? 'Tạm ngưng bán' : (available ? 'Thêm vào giỏ' : 'Hết hàng');
             if (icon) icon.className = available ? 'bi bi-cart-plus' : 'bi bi-x-circle';
         }
     }

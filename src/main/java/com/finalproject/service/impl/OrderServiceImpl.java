@@ -26,6 +26,7 @@ public class OrderServiceImpl implements OrderService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
     private final StoreInventoryRepository storeInventoryRepository;
     private final PaymentRepository paymentRepository;
     private final UserRepository userRepository;
@@ -186,6 +187,14 @@ public class OrderServiceImpl implements OrderService {
                 .createdAt(LocalDateTime.now(clock))
                 .build();
 
+        // Lock products first so a concurrent stop/delete cannot pass between validation and order creation.
+        Map<Long, Product> lockedProducts = new HashMap<>();
+        for (Long productId : items.stream().map(i -> i.getProduct().getId()).distinct().sorted().toList()) {
+            Product product = productRepository.findLockedById(productId)
+                    .orElseThrow(() -> new IllegalStateException("Sản phẩm không còn tồn tại."));
+            entityManager.refresh(product, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+            lockedProducts.put(productId, product);
+        }
         // Lock each stock row once, in the same product order for all checkouts.
         // Delivery selection may already have loaded stale stock into this persistence context.
         Map<Long, StoreInventory> lockedStock = new HashMap<>();
@@ -196,7 +205,7 @@ public class OrderServiceImpl implements OrderService {
             lockedStock.put(productId, stock);
         }
         for (CartItem item : items) {
-            Product product = item.getProduct();
+            Product product = lockedProducts.get(item.getProduct().getId());
 
             if (item.getOrderType() != OrderType.BUY || item.getQuantity() == null || item.getQuantity() <= 0) {
                 throw new IllegalArgumentException("Giỏ hàng chỉ hỗ trợ mua hoa với số lượng dương.");

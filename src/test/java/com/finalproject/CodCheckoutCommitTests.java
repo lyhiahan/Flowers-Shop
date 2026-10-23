@@ -53,7 +53,7 @@ class CodCheckoutCommitTests {
         });
         mvc.perform(post("/checkout").with(user("commit_customer").roles("USER")).with(csrf())
                         .param("selectedItemIds", Long.toString(fixture[2])).param("paymentMethod", "COD")
-                        .param("shippingMethod", "DELIVERY").param("recipientName", "Commit customer")
+                        .param("shippingMethod", "DELIVERY").param("deliveryZone", "NEAR").param("recipientName", "Commit customer")
                         .param("recipientPhone", "0900000000").param("recipientAddress", "Quận 1")
                         .param("deliveryDate", LocalDate.now().plusDays(1).toString()).param("deliveryTimeSlot", "09:00-11:00"))
                 .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/customer/orders"))

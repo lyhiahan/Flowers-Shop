@@ -255,10 +255,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0 4px;
+            padding: 1px 4px 0 4px;
+            line-height: 1;
+            box-sizing: border-box;
+            pointer-events: none;
+            z-index: 2;
         }
 
-        .no-caret::after {
+        .no-caret::after,
+        .dropdown-toggle.no-caret::after {
             display: none !important;
         }
 
@@ -1748,7 +1753,7 @@
             <!-- Lưới sản phẩm: 4 sản phẩm mỗi hàng trên máy tính, 2 trên điện thoại, khoảng cách 24px (g-4) -->
             <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
                 <div class="col" th:each="fp : ${guestFeaturedProducts}" th:data-catalog-product-id="${fp.id}"
-                     th:with="stock=${catalogStock[fp.id]}, remaining=${stock != null ? stock.quantity : 0}">
+                     th:with="stock=${catalogStock[fp.id]}, remaining=${stock != null ? stock.quantity : 0}, salePaused=${fp.isSelling == false or (catalogPausedIds != null and catalogPausedIds.contains(fp.id))}">
                     <a th:href="@{/product/{id}(id=${fp.id})}" class="text-decoration-none">
                         <div class="card flower-card h-100">
                             <!-- Ảnh sản phẩm: tỷ lệ 1:1, bo góc đồng đều, bỏ nhãn 'Đã bán ...' trên ảnh -->
@@ -2072,7 +2077,7 @@
         <!-- LƯỚI SẢN PHẨM ĐỒNG NHẤT (Quy chuẩn 1 & 5: 2 hàng × 4 cột máy tính, tối đa 8 sản phẩm/trang) -->
         <div th:if="${not #lists.isEmpty(products)}" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="productGrid">
             <div class="col" th:each="p : ${products}" th:data-catalog-product-id="${p.id}"
-                 th:with="stock=${catalogStock[p.id]}, remaining=${stock != null ? stock.quantity : 0}">
+                 th:with="stock=${catalogStock[p.id]}, remaining=${stock != null ? stock.quantity : 0}, salePaused=${p.isSelling == false or (catalogPausedIds != null and catalogPausedIds.contains(p.id))}">
                 <div class="flower-card h-100 position-relative">
                     <!-- Nút theo dõi / Yêu thích nhanh 36x36px ở góc trên bên phải -->
                     <form sec:authorize="hasRole('USER')"
@@ -2126,9 +2131,9 @@
                             <input type="hidden" name="storeId" th:value="${stock != null ? stock.purchaseStoreId : null}">
                             <input type="hidden" name="orderType" value="BUY">
                             <input type="hidden" name="quantity" value="1">
-                            <button type="submit" class="btn-add-cart" th:disabled="${remaining <= 0}">
+                            <button type="submit" class="btn-add-cart" th:disabled="${remaining <= 0 or salePaused}">
                                 <i class="bi" th:classappend="${remaining > 0} ? 'bi-cart-plus' : 'bi-x-circle'"></i>
-                                <span th:text="${remaining > 0} ? 'Thêm vào giỏ' : 'Hết hàng'"></span>
+                                <span th:text="${salePaused ? 'Tạm ngưng bán' : (remaining > 0 ? 'Thêm vào giỏ' : 'Hết hàng')}"></span>
                             </button>
                             <p class="ajax-cart-error" style="display:none; font-size:13px; color:#c0392b; margin:4px 0 0; text-align:center;"></p>
                         </form>
@@ -2143,11 +2148,11 @@
 
                         <!-- 3. Dành cho Khách vãng lai chưa đăng nhập: Chuyển hướng đăng nhập -->
                         <div sec:authorize="isAnonymous()" class="mt-auto">
-                            <a th:if="${remaining > 0}" th:href="@{/login}" class="btn-add-cart text-decoration-none d-flex align-items-center justify-content-center gap-1.5">
+                            <a th:if="${remaining > 0 and !salePaused}" th:href="@{/login}" class="btn-add-cart text-decoration-none d-flex align-items-center justify-content-center gap-1.5">
                                 <i class="bi bi-cart-plus"></i> Thêm vào giỏ
                             </a>
-                            <button th:unless="${remaining > 0}" type="button" class="btn-add-cart" disabled>
-                                <i class="bi bi-x-circle"></i> Hết hàng
+                            <button th:unless="${remaining > 0 and !salePaused}" type="button" class="btn-add-cart" disabled>
+                                <i class="bi bi-x-circle"></i> <span th:text="${salePaused ? 'Tạm ngưng bán' : 'Hết hàng'}">Hết hàng</span>
                             </button>
                         </div>
                     </div>

@@ -604,6 +604,123 @@ class BusinessRegressionTests {
         assertThat(product.getIsSelling()).isTrue();
     }
 
+    @Test void pausedProductAlreadyInCartCannotCreateOrderOrReduceStock() throws Exception {
+        mvc.perform(post("/manager/products/toggle-selling/" + product.getId())
+                        .with(user(manager.getUsername()).roles("MANAGER")).with(csrf())
+                        .param("selling", "false"))
+                .andExpect(status().is3xxRedirection());
+        em.flush(); em.clear();
+        long beforeOrders = orders.count();
+        int beforeStock = inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity();
+        assertThatThrownBy(() -> checkout(PaymentMethod.COD))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("ngừng bán");
+        assertThat(orders.count()).isEqualTo(beforeOrders);
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity())
+                .isEqualTo(beforeStock);
+    }
+
+    @Test void pausedProductIsMarkedInCartAndOnDetailBeforeCheckout() throws Exception {
+        mvc.perform(post("/manager/products/toggle-selling/" + product.getId())
+                        .with(user(manager.getUsername()).roles("MANAGER")).with(csrf())
+                        .param("selling", "false"))
+                .andExpect(status().is3xxRedirection());
+        em.flush(); em.clear();
+        mvc.perform(get("/cart").with(user(customer.getUsername()).roles("USER")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Sản phẩm tạm ngưng bán")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-paused=\"true\"")));
+        mvc.perform(get("/product/" + product.getId()).with(user(customer.getUsername()).roles("USER")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Sản phẩm tạm ngưng bán")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"detailAddToCartBtn\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"detailBuyNowBtn\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Cách chăm sóc hoa tươi bền lâu")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"review-section\"")));
+        mvc.perform(get("/checkout").param("selectedItemIds", item.getId().toString())
+                        .with(user(customer.getUsername()).roles("USER")))
+                .andExpect(redirectedUrl("/cart"))
+                .andExpect(flash().attributeExists("errorMessage"));
+    }
+
+    @Test void availableProductDetailKeepsPurchaseCareAndReviewSections() throws Exception {
+        String html = mvc.perform(get("/product/" + product.getId())
+                        .with(user(customer.getUsername()).roles("USER")))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        assertThat(html).contains("id=\"productStock\"", "id=\"detailAddToCartForm\"",
+                "id=\"detailAddToCartBtn\"", "id=\"detailBuyNowBtn\"",
+                "Cách chăm sóc hoa tươi bền lâu", "id=\"review-section\"");
+        assertThat(html).doesNotContain("id=\"detailAddToCartBtn\" disabled",
+                "id=\"detailBuyNowBtn\" disabled");
+    }
+
+    @Test void customerOrderCardPrioritizesProductAndExplainsTotal() throws Exception {
+        product.setImageUrl("https://example.test/rose.jpg");
+        Order order = checkout(PaymentMethod.COD);
+        order.setShippingFee(new BigDecimal("25000"));
+        order.setTotalAmount(order.getTotalAmount().add(new BigDecimal("25000")));
+        orders.saveAndFlush(order);
+
+        String html = mvc.perform(get("/customer/orders").with(user(customer.getUsername()).roles("USER")))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        assertThat(html).contains("order-product-image", "https://example.test/rose.jpg",
+                "Hoa hồng", "Số lượng: 2", "Tổng thanh toán", "Phí giao hàng: 25,000 đ", "Xem chi tiết");
+        assertThat(html.indexOf("order-product-row")).isLessThan(html.indexOf("order-fulfillment-summary"));
+    }
+
+    @Test void productWithPendingOrderCannotBeDeletedByManagerOrAdmin() throws Exception {
+        checkout(PaymentMethod.COD);
+        mvc.perform(get("/admin/products-manage").with(user("admin-test").roles("ADMIN")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-open-orders=\"1\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Chi nhánh: Quận 1")));
+        mvc.perform(post("/manager/products/delete/" + product.getId())
+                        .with(user(manager.getUsername()).roles("MANAGER")).with(csrf()))
+                .andExpect(flash().attributeExists("errorMessage"));
+        mvc.perform(post("/admin/products-manage/delete/" + product.getId())
+                        .with(user("admin-test").roles("ADMIN")).with(csrf()))
+                .andExpect(flash().attributeExists("errorMessage"));
+        assertThat(products.findById(product.getId()).orElseThrow().getIsDeleted()).isFalse();
+        assertThat(orders.count()).isEqualTo(1);
+    }
+
+    @Test void deletedProductRestoresToPausedUntilManagerOpensSelling() throws Exception {
+        mvc.perform(post("/manager/products/delete/" + product.getId())
+                        .with(user(manager.getUsername()).roles("MANAGER")).with(csrf()))
+                .andExpect(flash().attributeExists("successMessage"));
+        assertThat(products.findAll(StoreProductService.catalog(store.getId(), "deleted")))
+                .extracting(Product::getId).contains(product.getId());
+        mvc.perform(post("/manager/products/restore/" + product.getId())
+                        .with(user(manager.getUsername()).roles("MANAGER")).with(csrf()))
+                .andExpect(redirectedUrl("/manager/products?tab=stored"));
+        assertThat(products.findAll(StoreProductService.catalog(store.getId(), "stored")))
+                .extracting(Product::getId).contains(product.getId());
+        assertThatThrownBy(() -> checkout(PaymentMethod.COD)).isInstanceOf(IllegalStateException.class);
+        mvc.perform(post("/manager/products/toggle-selling/" + product.getId())
+                        .with(user(manager.getUsername()).roles("MANAGER")).with(csrf())
+                        .param("selling", "true"))
+                .andExpect(status().is3xxRedirection());
+        assertThat(checkout(PaymentMethod.COD)).isNotNull();
+    }
+
+    @Test void adminCanFindDeletedProductAndRestoreItWithoutOpeningSales() throws Exception {
+        mvc.perform(post("/admin/products-manage/delete/" + product.getId())
+                        .with(user("admin-test").roles("ADMIN")).with(csrf()))
+                .andExpect(flash().attributeExists("successMessage"));
+        mvc.perform(get("/admin/products-manage").param("tab", "DELETED")
+                        .with(user("admin-test").roles("ADMIN")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("/admin/products-manage/restore/" + product.getId())));
+        mvc.perform(post("/admin/products-manage/restore/" + product.getId())
+                        .with(user("admin-test").roles("ADMIN")).with(csrf()))
+                .andExpect(redirectedUrl("/admin/products-manage?status=PAUSED"));
+        Product restored = products.findById(product.getId()).orElseThrow();
+        assertThat(restored.getIsDeleted()).isFalse();
+        assertThat(restored.getIsSelling()).isFalse();
+        assertThatThrownBy(() -> checkout(PaymentMethod.COD)).isInstanceOf(IllegalStateException.class);
+    }
+
     @Test void newStoreHasNoInventedRevenue() {
         assertThat(analytics.getRevenueChart("day", otherStore.getId()).getTotal()).isEqualByComparingTo("0");
         assertThat(analytics.getProductRevenueChart(otherStore.getId()).getData()).isEmpty();
@@ -1647,5 +1764,39 @@ class BusinessRegressionTests {
         assertThat(paid.getPaymentExpiresAt()).isNull();assertThat(preparing.getPaymentExpiresAt()).isNull();
         assertThat(orders.initializeLegacyPaymentDeadlines(deadline.plusDays(1),deadline.plusDays(2))).isZero();
         em.refresh(legacy);assertThat(legacy.getPaymentExpiresAt()).isEqualTo(deadline);
+    }
+
+    @Test
+    void storeBranchDisplayAndAreaNameExtraction() {
+        Store s1 = Store.builder().name("Chi Nhánh Phú Mỹ Hưng (Quận 7)").build();
+        assertThat(s1.getBranchDisplayName()).isEqualTo("Chi Nhánh Phú Mỹ Hưng");
+        assertThat(s1.getBranchAreaName()).isEqualTo("Quận 7");
+
+        Store s2 = Store.builder().name("Chi Nhánh Làng Đại Học (TP. Thủ Đức)").build();
+        assertThat(s2.getBranchDisplayName()).isEqualTo("Chi Nhánh Làng Đại Học");
+        assertThat(s2.getBranchAreaName()).isEqualTo("TP. Thủ Đức");
+
+        Store s3 = Store.builder().name("Chi Nhánh Bến Thành (Quận 1)").build();
+        assertThat(s3.getBranchDisplayName()).isEqualTo("Chi Nhánh Bến Thành");
+        assertThat(s3.getBranchAreaName()).isEqualTo("Quận 1");
+
+        Store s4 = Store.builder().name("Cửa hàng hoa tươi").build();
+        assertThat(s4.getBranchDisplayName()).isEqualTo("Cửa hàng hoa tươi");
+        assertThat(s4.getBranchAreaName()).isEmpty();
+
+        Store s5 = Store.builder().name(null).build();
+        assertThat(s5.getBranchDisplayName()).isEmpty();
+        assertThat(s5.getBranchAreaName()).isEmpty();
+    }
+
+    @Test
+    void adminProductCreateFormRendersCorrectly() throws Exception {
+        var result = mvc.perform(get("/admin/products-manage/create").with(user("admin-test").roles("ADMIN")))
+                .andExpect(status().isOk())
+                .andReturn();
+        String html = result.getResponse().getContentAsString();
+        assertThat(html).contains("1. Thông tin cơ bản");
+        assertThat(html).contains("2. Định giá bán");
+        assertThat(html).contains("Hình ảnh sản phẩm");
     }
 }

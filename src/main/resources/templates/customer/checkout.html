@@ -158,6 +158,30 @@
             box-shadow: 0 0 0 3px rgba(53, 84, 71, 0.15);
             outline: none;
         }
+        .form-control-custom.is-invalid, .form-select-custom.is-invalid {
+            border-color: #dc2626 !important;
+            background-color: #FFFDFD !important;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12) !important;
+        }
+        .checkout-field-error {
+            color: #dc2626;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            line-height: 1.35;
+            animation: fieldErrorAppear 0.2s ease-out;
+        }
+        .checkout-field-error i {
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        @keyframes fieldErrorAppear {
+            0% { opacity: 0; transform: translateY(-3px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
         textarea.form-control-custom {
             height: auto;
             min-height: 80px;
@@ -952,6 +976,13 @@
             // Khi chuyển về Giao tận nơi: bỏ khóa nút (khóa chỉ áp dụng cho chế độ Pickup)
             if (!isPickup) lockPickupSubmit(false);
 
+            // Xóa các cảnh báo lỗi khi đổi cách nhận hàng
+            document.querySelectorAll('.checkout-field-error').forEach(function(el) { el.remove(); });
+            document.querySelectorAll('.is-invalid').forEach(function(el) {
+                el.classList.remove('is-invalid');
+                el.removeAttribute('aria-invalid');
+            });
+
             updateCheckoutTotal();
         }
 
@@ -1244,11 +1275,57 @@
         }
 
         /* ============================================================
-         * Kiểm tra tính hợp lệ của Số điện thoại khi ấn Đặt hàng
+         * Xác thực thông tin đặt hàng (Hiển thị cảnh báo trực tiếp dưới ô, không hiện popup)
          * ============================================================ */
+        function clearCheckoutFieldError(field) {
+            if (!field) return;
+            field.classList.remove('is-invalid');
+            field.removeAttribute('aria-invalid');
+            const parent = field.parentElement;
+            if (parent) {
+                const existing = parent.querySelector('.checkout-field-error');
+                if (existing) existing.remove();
+            }
+        }
+
+        function setCheckoutFieldError(field, message) {
+            if (!field) return;
+            clearCheckoutFieldError(field);
+            field.classList.add('is-invalid');
+            field.setAttribute('aria-invalid', 'true');
+
+            const errorEl = document.createElement('div');
+            errorEl.className = 'checkout-field-error';
+            errorEl.setAttribute('role', 'alert');
+            errorEl.innerHTML = '<i class="bi bi-exclamation-circle-fill"></i><span>' + message + '</span>';
+
+            if (field.parentElement && field.parentElement.classList.contains('input-group')) {
+                field.parentElement.after(errorEl);
+            } else {
+                field.after(errorEl);
+            }
+
+            const clearFn = function () {
+                clearCheckoutFieldError(field);
+                field.removeEventListener('input', clearFn);
+                field.removeEventListener('change', clearFn);
+            };
+            field.addEventListener('input', clearFn);
+            field.addEventListener('change', clearFn);
+        }
+
         const checkoutForm = document.getElementById('checkoutForm');
         if (checkoutForm) {
             checkoutForm.addEventListener('submit', function (e) {
+                // Xóa toàn bộ cảnh báo lỗi cũ
+                checkoutForm.querySelectorAll('.checkout-field-error').forEach(function(el) { el.remove(); });
+                checkoutForm.querySelectorAll('.is-invalid').forEach(function(el) {
+                    el.classList.remove('is-invalid');
+                    el.removeAttribute('aria-invalid');
+                });
+                const topError = document.getElementById('checkoutValidationError');
+                if (topError) topError.classList.add('d-none');
+
                 const isPickup = document.getElementById('methodPickup') && document.getElementById('methodPickup').checked;
                 const nameInput = document.getElementById(isPickup ? 'pickupPersonName' : 'recipientNameInput');
                 const phoneInput = document.getElementById(isPickup ? 'pickupPersonPhone' : 'recipientPhoneInput');
@@ -1259,47 +1336,73 @@
                 const slotInput = document.getElementById(isPickup ? 'sectionPickup' : 'sectionDelivery')
                     ?.querySelector('select[name="deliveryTimeSlot"]');
 
-                function reject(message, field) {
+                let firstInvalidField = null;
+                function markInvalid(field, message) {
+                    if (!field) return;
+                    setCheckoutFieldError(field, message);
+                    if (!firstInvalidField) {
+                        firstInvalidField = field;
+                    }
+                }
+
+                // 1. Kiểm tra Họ tên
+                if (!nameInput?.value.trim()) {
+                    markInvalid(nameInput, isPickup ? 'Vui lòng nhập họ tên người đến lấy hoa.' : 'Vui lòng nhập họ tên người nhận.');
+                }
+
+                // 2. Kiểm tra Số điện thoại
+                if (!phoneInput?.value.trim()) {
+                    markInvalid(phoneInput, isPickup ? 'Vui lòng nhập số điện thoại người đến lấy hoa.' : 'Vui lòng nhập số điện thoại người nhận.');
+                } else {
+                    let phoneVal = phoneInput.value.trim().replace(/[\s.\-\(\)]/g, '');
+                    if (phoneVal.startsWith('+84')) phoneVal = '0' + phoneVal.substring(3);
+                    else if (phoneVal.startsWith('84') && phoneVal.length >= 11) phoneVal = '0' + phoneVal.substring(2);
+                    if (!/^0(?:[35789][0-9]{8}|2[0-9]{9})$/.test(phoneVal)) {
+                        markInvalid(phoneInput, 'Số điện thoại không hợp lệ (ví dụ: 0901234567).');
+                    }
+                }
+
+                // 3. Thông tin địa điểm theo hình thức nhận
+                if (isPickup) {
+                    if (!pickupStoreInput?.value) {
+                        markInvalid(pickupStoreInput, 'Vui lòng chọn chi nhánh nhận hoa.');
+                    }
+                } else {
+                    if (!addressInput?.value.trim()) {
+                        markInvalid(addressInput, 'Vui lòng nhập địa chỉ giao hàng.');
+                    }
+                    if (!zoneInput?.value) {
+                        markInvalid(zoneInput, 'Vui lòng chọn vùng giao hàng demo.');
+                    } else if (zoneInput.value === 'OUTSIDE') {
+                        markInvalid(zoneInput, 'Vùng này nằm ngoài phạm vi giao hoa demo. Vui lòng nhận tại cửa hàng hoặc liên hệ chi nhánh.');
+                    }
+                }
+
+                // 4. Ngày và khung giờ nhận
+                if (!dateInput?.value) {
+                    markInvalid(dateInput, isPickup ? 'Vui lòng chọn ngày đến lấy hoa.' : 'Vui lòng chọn ngày giao hoa.');
+                }
+                if (!slotInput?.value) {
+                    markInvalid(slotInput, isPickup ? 'Vui lòng chọn khung giờ đến lấy hoa.' : 'Vui lòng chọn khung giờ giao hoa.');
+                } else if (dateInput?.value) {
+                    const selectedTime = new Date(dateInput.value + 'T' + slotInput.value.slice(0, 5) + ':00');
+                    if (Number.isNaN(selectedTime.getTime()) || selectedTime < new Date()) {
+                        markInvalid(slotInput, 'Khung giờ này đã qua. Vui lòng chọn thời gian khác.');
+                    }
+                }
+
+                // Nếu có trường chưa điền hoặc điền sai: Chặn submit, KHÔNG hiện popup, cuộn mượt về đúng ô đầu tiên và focus
+                if (firstInvalidField) {
                     e.preventDefault();
                     e.stopPropagation();
-                    const error = document.getElementById('checkoutValidationError');
-                    if (error) {
-                        error.textContent = message;
-                        error.classList.remove('d-none');
-                        error.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                    if (field) field.setAttribute('aria-invalid', 'true');
-                    if (typeof window.showGlobalAlertModal === 'function') {
-                        window.showGlobalAlertModal({
-                            title: 'Thông tin đặt hàng chưa hợp lệ', message: message,
-                            isError: true, btnText: 'Kiểm tra lại',
-                            onClose: function () { if (field) field.focus(); }
-                        });
-                    } else if (field) {
-                        field.focus();
+                    firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    try {
+                        firstInvalidField.focus({ preventScroll: true });
+                    } catch (_) {
+                        firstInvalidField.focus();
                     }
                     return false;
                 }
-
-                checkoutForm.querySelectorAll('[aria-invalid="true"]').forEach(el => el.removeAttribute('aria-invalid'));
-                const error = document.getElementById('checkoutValidationError');
-                if (error) error.classList.add('d-none');
-                if (!nameInput?.value.trim()) return reject('Vui lòng nhập họ tên người nhận.', nameInput);
-                if (!phoneInput?.value.trim()) return reject('Vui lòng nhập số điện thoại người nhận.', phoneInput);
-                if (isPickup && !pickupStoreInput?.value) return reject('Vui lòng chọn chi nhánh nhận hoa.', pickupStoreInput);
-                if (!isPickup && !addressInput?.value.trim()) return reject('Vui lòng nhập địa chỉ giao hàng.', addressInput);
-                if (!isPickup && !zoneInput?.value) return reject('Vui lòng chọn vùng giao hàng demo.', zoneInput);
-                if (!isPickup && zoneInput.value === 'OUTSIDE') return reject('Vùng này nằm ngoài phạm vi giao hoa demo. Vui lòng nhận tại cửa hàng hoặc liên hệ chi nhánh.', zoneInput);
-                if (!dateInput?.value) return reject('Vui lòng chọn ngày nhận hoa.', dateInput);
-                if (!slotInput?.value) return reject('Vui lòng chọn khung giờ nhận hoa.', slotInput);
-                const selectedTime = new Date(dateInput.value + 'T' + slotInput.value.slice(0, 5) + ':00');
-                if (Number.isNaN(selectedTime.getTime()) || selectedTime < new Date())
-                    return reject('Ngày hoặc khung giờ nhận hoa đã qua. Vui lòng chọn thời gian khác.', dateInput);
-                let phoneVal = phoneInput.value.trim().replace(/[\s.\-\(\)]/g, '');
-                if (phoneVal.startsWith('+84')) phoneVal = '0' + phoneVal.substring(3);
-                else if (phoneVal.startsWith('84') && phoneVal.length >= 11) phoneVal = '0' + phoneVal.substring(2);
-                if (!/^0(?:[35789][0-9]{8}|2[0-9]{9})$/.test(phoneVal))
-                    return reject('Số điện thoại người nhận không hợp lệ (ví dụ: 0901234567).', phoneInput);
             });
         }
 

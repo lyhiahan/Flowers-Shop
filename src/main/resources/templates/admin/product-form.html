@@ -9,6 +9,11 @@
         .form-control, .form-select { border-color: #D1E5DA; border-radius: 9px; font-size: 15px; padding: 10px 14px; }
         .form-control:focus, .form-select:focus { border-color: #2E7D32; box-shadow: 0 0 0 0.2rem rgba(46, 125, 50, 0.15); }
         .current-img-preview { width: 100px; height: 100px; object-fit: cover; border-radius: 10px; border: 1px solid #D1E5DA; }
+        .product-img-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; }
+        .product-img-card { border-radius: 12px; padding: 10px; background: #ffffff; border: 1.5px solid #E2E7E2; transition: all 0.2s ease; cursor: pointer; user-select: none; }
+        .product-img-card:hover { border-color: #355447; transform: translateY(-2px); }
+        .product-img-card.is-main-card { border: 2px solid #355447 !important; background: #F4F9F6 !important; box-shadow: 0 4px 14px rgba(53, 84, 71, 0.2) !important; }
+        .btn-xs { padding: 4px 8px; font-size: 12px; border-radius: 6px; font-weight: 700; }
     </style>
 </head>
 <body class="admin-body">
@@ -174,9 +179,52 @@
                     </div>
                 </div>
 
-                <!-- 3. Phạm vi áp dụng & Trạng thái kinh doanh -->
+                <!-- 3. Hình ảnh sản phẩm -->
                 <div class="section-title d-flex align-items-center gap-2">
-                    <i class="bi bi-shop text-success"></i> 3. Phạm vi áp dụng & Trạng thái bán
+                    <i class="bi bi-image text-success"></i> 3. Hình ảnh sản phẩm
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-12" th:if="${isEdit and productForm.imageUrl != null and !productForm.imageUrl.isEmpty()}">
+                        <label class="form-label d-block">Ảnh đại diện hiện tại:</label>
+                        <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3 border" style="border-color: #E2E7E2 !important;">
+                            <img th:src="${productForm.imageUrl}" class="current-img-preview shadow-sm" alt="Ảnh hoa hiện tại">
+                            <div>
+                                <span class="badge bg-success mb-1">Ảnh chính đang hiển thị</span>
+                                <div class="small text-muted">Tải ảnh mới bên dưới nếu bạn muốn thay đổi ảnh đại diện hoặc bổ sung góc chụp khác.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label" th:text="${isEdit ? 'Tải ảnh mới thay thế hoặc bổ sung (chọn nhiều ảnh nếu cần):' : 'Chọn ảnh sản phẩm (chọn nhiều ảnh, ảnh đầu tiên làm ảnh chính):'}">Hình ảnh sản phẩm</label>
+                        <input type="file" th:field="*{imageFiles}" class="form-control" multiple accept="image/*" id="adminImageFiles">
+                        <input type="hidden" th:field="*{mainImageIndex}" id="adminMainImageIndex" value="0">
+                        <div class="form-text text-muted">Định dạng hỗ trợ: JPG, PNG, WEBP. Dung lượng tối đa mỗi ảnh 5MB. Bấm vào ảnh để chọn làm ảnh chính (mặc định: ảnh đầu tiên).</div>
+
+                        <!-- Khung xem trước ảnh và chọn ảnh chính -->
+                        <div id="adminImagePreviewContainer" class="d-none mt-3 p-3 rounded-3" style="background: #F8FAF9; border: 1.5px dashed #355447; border-radius: 12px;">
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-wrap gap-2">
+                                <div>
+                                    <span class="fw-bold text-success" style="font-size: 14.5px;">
+                                        <i class="bi bi-ui-radios-grid me-1"></i> Danh sách ảnh tải lên
+                                    </span>
+                                    <div class="small text-muted mt-0.5">Bấm vào ảnh bất kỳ hoặc nút bên dưới để chọn làm ảnh đại diện chính (Mặc định: ảnh đầu tiên).</div>
+                                </div>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1.5" style="font-size: 13px;">
+                                    <i class="bi bi-star-fill me-1"></i> <span id="adminCurrentMainLabel">Ảnh #1 là ảnh chính</span>
+                                </span>
+                            </div>
+                            <div id="adminImagePreviewGrid" class="product-img-grid">
+                                <!-- Dynamic Preview Cards rendered by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Phạm vi áp dụng & Trạng thái kinh doanh -->
+                <div class="section-title d-flex align-items-center gap-2">
+                    <i class="bi bi-shop text-success"></i> 4. Phạm vi áp dụng & Trạng thái bán
                 </div>
 
                 <div class="row g-3 mb-4">
@@ -234,30 +282,6 @@
                         <label class="form-label">Tồn kho ban đầu mỗi chi nhánh</label>
                         <input type="number" th:field="*{initialStock}" min="0" max="1000000" class="form-control" placeholder="10">
                         <div class="form-text text-muted">Số lượng hoa tự động nhập vào kho của từng chi nhánh đang hoạt động.</div>
-                    </div>
-                </div>
-
-                <!-- 4. Hình ảnh sản phẩm -->
-                <div class="section-title d-flex align-items-center gap-2">
-                    <i class="bi bi-image text-success"></i> 4. Hình ảnh sản phẩm
-                </div>
-
-                <div class="row g-3 mb-4">
-                    <div class="col-12" th:if="${isEdit and productForm.imageUrl != null and !productForm.imageUrl.isEmpty()}">
-                        <label class="form-label d-block">Ảnh đại diện hiện tại:</label>
-                        <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3 border" style="border-color: #E2E7E2 !important;">
-                            <img th:src="${productForm.imageUrl}" class="current-img-preview shadow-sm" alt="Ảnh hoa hiện tại">
-                            <div>
-                                <span class="badge bg-success mb-1">Ảnh chính đang hiển thị</span>
-                                <div class="small text-muted">Tải ảnh mới bên dưới nếu bạn muốn thay đổi ảnh đại diện hoặc bổ sung góc chụp khác.</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12">
-                        <label class="form-label" th:text="${isEdit ? 'Tải ảnh mới thay thế hoặc bổ sung (chọn nhiều ảnh nếu cần):' : 'Chọn ảnh sản phẩm (chọn nhiều ảnh, ảnh đầu tiên làm ảnh chính):'}">Hình ảnh sản phẩm</label>
-                        <input type="file" th:field="*{imageFiles}" class="form-control" multiple accept="image/*">
-                        <div class="form-text text-muted">Định dạng hỗ trợ: JPG, PNG, WEBP. Dung lượng tối đa mỗi ảnh 5MB.</div>
                     </div>
                 </div>
 
@@ -491,6 +515,112 @@
     function handleYes() {
         document.getElementById('confirmSellAtLoss').value = 'true';
         document.getElementById('productForm').submit();
+    }
+
+    // Multi-image upload, live preview & main image selection for Admin
+    var adminFileInput = document.getElementById('adminImageFiles');
+    var adminMainIndexInput = document.getElementById('adminMainImageIndex');
+    var adminPreviewContainer = document.getElementById('adminImagePreviewContainer');
+    var adminPreviewGrid = document.getElementById('adminImagePreviewGrid');
+    var adminMainLabel = document.getElementById('adminCurrentMainLabel');
+
+    if (adminFileInput && adminPreviewGrid && adminMainIndexInput) {
+        var adminCurrentFiles = [];
+        var adminSelectedMainIndex = 0;
+
+        function formatBytesAdmin(bytes) {
+            if (!bytes || bytes === 0) return '0 B';
+            var k = 1024;
+            var sizes = ['B', 'KB', 'MB'];
+            var i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        function renderAdminPreviews() {
+            adminPreviewGrid.innerHTML = '';
+            if (adminCurrentFiles.length === 0) {
+                if (adminPreviewContainer) adminPreviewContainer.classList.add('d-none');
+                adminMainIndexInput.value = '0';
+                return;
+            }
+
+            if (adminPreviewContainer) adminPreviewContainer.classList.remove('d-none');
+
+            if (adminSelectedMainIndex < 0 || adminSelectedMainIndex >= adminCurrentFiles.length) {
+                adminSelectedMainIndex = 0;
+            }
+            adminMainIndexInput.value = adminSelectedMainIndex;
+            if (adminMainLabel) {
+                adminMainLabel.textContent = 'Ảnh #' + (adminSelectedMainIndex + 1) + ' là ảnh chính';
+            }
+
+            adminCurrentFiles.forEach(function (file, index) {
+                var isMain = (index === adminSelectedMainIndex);
+                var card = document.createElement('div');
+                card.className = 'product-img-card position-relative ' + (isMain ? 'is-main-card' : '');
+                card.setAttribute('data-index', index);
+
+                var objectUrl = URL.createObjectURL(file);
+
+                card.innerHTML = `
+                    <div class="position-absolute top-0 start-0 m-2 z-2">
+                        ${isMain 
+                            ? '<span class="badge rounded-pill bg-success text-white shadow-sm px-2 py-1"><i class="bi bi-star-fill me-1"></i> Ảnh chính</span>' 
+                            : '<span class="badge rounded-pill bg-white text-muted border shadow-xs px-2 py-1"><i class="bi bi-image me-1"></i> #' + (index + 1) + '</span>'}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 rounded-circle p-0 remove-admin-file-btn shadow-xs" 
+                            data-index="${index}" title="Xóa ảnh này" style="width: 24px; height: 24px; line-height: 1; z-index: 3;">
+                        <i class="bi bi-x"></i>
+                    </button>
+                    <div class="ratio ratio-1x1 rounded-3 overflow-hidden bg-light border mb-2">
+                        <img src="${objectUrl}" class="w-100 h-100 object-fit-cover" alt="Ảnh ${index + 1}">
+                    </div>
+                    <div class="text-center">
+                        <div class="text-truncate fw-semibold mb-0" title="${file.name}" style="font-size: 12px; color: #20382E;">${file.name}</div>
+                        <div class="text-muted" style="font-size: 11px;">${formatBytesAdmin(file.size)}</div>
+                        <button type="button" class="btn btn-xs w-100 mt-2 select-main-btn ${isMain ? 'btn-success text-white' : 'btn-outline-success'}" data-index="${index}">
+                            <i class="bi ${isMain ? 'bi-check2-circle' : 'bi-star'} me-1"></i> ${isMain ? 'Đang là ảnh chính' : 'Đặt làm ảnh chính'}
+                        </button>
+                    </div>
+                `;
+
+                card.addEventListener('click', function (e) {
+                    if (e.target.closest('.remove-admin-file-btn')) return;
+                    adminSelectedMainIndex = index;
+                    renderAdminPreviews();
+                });
+
+                var removeBtn = card.querySelector('.remove-admin-file-btn');
+                if (removeBtn) {
+                    removeBtn.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        adminCurrentFiles.splice(index, 1);
+                        try {
+                            var dt = new DataTransfer();
+                            adminCurrentFiles.forEach(function(f) { dt.items.add(f); });
+                            adminFileInput.files = dt.files;
+                        } catch (err) {}
+                        if (adminSelectedMainIndex >= adminCurrentFiles.length) {
+                            adminSelectedMainIndex = Math.max(0, adminCurrentFiles.length - 1);
+                        }
+                        renderAdminPreviews();
+                    });
+                }
+
+                adminPreviewGrid.appendChild(card);
+            });
+        }
+
+        adminFileInput.addEventListener('change', function () {
+            if (adminFileInput.files && adminFileInput.files.length > 0) {
+                adminCurrentFiles = Array.from(adminFileInput.files);
+                adminSelectedMainIndex = 0;
+                renderAdminPreviews();
+            } else {
+                adminCurrentFiles = [];
+                renderAdminPreviews();
+            }
+        });
     }
     /*]]>*/
 </script>

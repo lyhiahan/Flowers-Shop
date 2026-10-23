@@ -31,6 +31,7 @@ public class CartController {
         // Nhóm các sản phẩm theo chi nhánh/cửa hàng (UC_012 Step 8) và tính tồn kho thực tế
         java.util.Map<com.finalproject.entity.Store, java.util.List<com.finalproject.entity.CartItem>> itemsByStore = new java.util.LinkedHashMap<>();
         java.util.Map<Long, Integer> itemStockMap = new java.util.HashMap<>();
+        java.util.Map<Long, Boolean> itemPausedMap = new java.util.HashMap<>();
 
         int totalQuantity = 0;
         if (cart != null && cart.getItems() != null) {
@@ -39,17 +40,14 @@ public class CartController {
                 com.finalproject.entity.Store store = item.getStore();
                 itemsByStore.computeIfAbsent(store, k -> new java.util.ArrayList<>()).add(item);
 
-                int stock = 0;
-                if (com.finalproject.service.ProductAvailability.supportsBranch(item.getProduct(), store)) {
-                    stock = storeInventoryRepository.findByStoreIdAndProductId(store.getId(), item.getProduct().getId())
-                            .map(com.finalproject.entity.StoreInventory::getQuantity)
-                            .orElse(0);
-                }
-                itemStockMap.put(item.getId(), stock);
+                CartAvailability availability = availabilityFor(item);
+                itemStockMap.put(item.getId(), availability.stock());
+                itemPausedMap.put(item.getId(), availability.paused());
             }
         }
         model.addAttribute("itemsByStore", itemsByStore);
         model.addAttribute("itemStockMap", itemStockMap);
+        model.addAttribute("itemPausedMap", itemPausedMap);
         model.addAttribute("stockByItem", itemStockMap);
         model.addAttribute("totalQuantity", totalQuantity);
         return "customer/cart";
@@ -79,6 +77,7 @@ public class CartController {
             return ResponseEntity.ok(body);
         } catch (Exception ex) {
             body.put("success", false);
+            body.put("paused", ex.getMessage() != null && ex.getMessage().contains("ngừng bán"));
             body.put("error", ex.getMessage());
             return ResponseEntity.badRequest().body(body);
         }
@@ -157,14 +156,12 @@ public class CartController {
             for (com.finalproject.entity.CartItem it : cart.getItems()) {
                 int q = it.getQuantity() != null ? it.getQuantity() : 0;
                 totalQty += q;
-                int stock = com.finalproject.service.ProductAvailability.supportsBranch(it.getProduct(), it.getStore())
-                        ? storeInventoryRepository.findByStoreIdAndProductId(it.getStore().getId(), it.getProduct().getId())
-                                .map(com.finalproject.entity.StoreInventory::getQuantity).orElse(0)
-                        : 0;
+                CartAvailability availability = availabilityFor(it);
                 Map<String, Object> m = new HashMap<>();
                 m.put("id", it.getId());
                 m.put("quantity", q);
-                m.put("stock", stock);
+                m.put("stock", availability.stock());
+                m.put("paused", availability.paused());
                 m.put("subtotal", it.getOrderType() == com.finalproject.enums.OrderType.BUY ? it.getBuyAmount() : it.getRentAmount());
                 m.put("deposit", it.getDepositAmount());
                 m.put("total", it.getTotalAmount());
@@ -178,6 +175,23 @@ public class CartController {
         body.put("count", totalQty);
         return body;
     }
+
+    private CartAvailability availabilityFor(com.finalproject.entity.CartItem item) {
+        var product = item.getProduct();
+        var store = item.getStore();
+        if (store == null || !com.finalproject.service.ProductAvailability.supportsBranch(product, store)
+                || !com.finalproject.service.ProductAvailability.isPublic(product)
+                || !Boolean.TRUE.equals(store.getStatus()) || !Boolean.TRUE.equals(store.getIsOpen())) {
+            return new CartAvailability(0, true);
+        }
+        var inventory = storeInventoryRepository.findByStoreIdAndProductId(store.getId(), product.getId()).orElse(null);
+        if (inventory == null || !inventory.isAvailableForSale()) {
+            return new CartAvailability(0, true);
+        }
+        return new CartAvailability(Math.max(0, inventory.getQuantity() == null ? 0 : inventory.getQuantity()), false);
+    }
+
+    private record CartAvailability(int stock, boolean paused) {}
 
     @PostMapping("/update-quantity/{id}")
     public String handleUpdateQuantity(Principal principal,

@@ -206,21 +206,21 @@
         </div>
     </div>
 
-    <!-- Tầng 2: Thanh điều hướng tinh gọn (🌸 Mẫu hoa · 🏬 Cửa hàng · 👥 Thành viên · 🛍️ Đơn hoa của tôi · Kênh Quản lý) -->
+    <!-- Tầng 2: Thanh điều hướng tinh gọn (Đồng bộ Bootstrap Icons chuẩn trang chủ Mẫu hoa) -->
     <div class="nav-categories-bar">
         <div class="flower-container">
-            <div class="d-flex align-items-center justify-content-start gap-2 gap-md-3 overflow-x-auto py-1">
-                <a th:href="@{/products}" class="cat-nav-link">
-                    🌸 Mẫu hoa
+            <div class="d-flex align-items-center justify-content-start gap-3 gap-md-4 overflow-x-auto py-1">
+                <a th:href="@{/products}" class="cat-nav-link" id="navLinkProducts">
+                    <i class="bi bi-flower1 me-1 text-danger"></i>Mẫu hoa
                 </a>
-                <a th:href="@{/stores}" class="cat-nav-link">
-                    🏬 Cửa hàng
+                <a th:href="@{/stores}" class="cat-nav-link" id="navLinkStores">
+                    <i class="bi bi-shop me-1 text-success"></i>Cửa hàng
                 </a>
-                <a th:href="@{/users}" class="cat-nav-link">
-                    👥 Thành viên
+                <a th:href="@{/users}" class="cat-nav-link" id="navLinkUsers">
+                    <i class="bi bi-people me-1 text-primary"></i>Thành viên
                 </a>
-                <a sec:authorize="hasRole('USER')" th:href="@{/customer/orders}" class="cat-nav-link">
-                    🛍️ Đơn hoa của tôi
+                <a sec:authorize="hasRole('USER')" th:href="@{/customer/orders}" class="cat-nav-link" id="navLinkOrders">
+                    <i class="bi bi-bag-heart me-1" style="color: var(--flower-accent, #A64060);"></i>Đơn hoa của tôi
                 </a>
                 <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/dashboard}" class="cat-nav-link fw-bold" style="color: #355447;" title="Chuyển đến trang quản trị hệ thống">
                     <i class="bi bi-speedometer2 me-1 text-success"></i>Trang quản trị
@@ -304,6 +304,20 @@
                 window.location.href = '/stores' + (kw ? '?keyword=' + encodeURIComponent(kw) : '');
             }
         });
+
+        // Tự động kích hoạt trạng thái active cho thanh điều hướng tinh gọn giống trang chủ Mẫu hoa
+        (function() {
+            var path = window.location.pathname.replace(/\/$/, '') || '/';
+            var links = document.querySelectorAll('.nav-categories-bar .cat-nav-link');
+            links.forEach(function(link) {
+                var href = link.getAttribute('href');
+                if (!href) return;
+                var cleanHref = href.split('?')[0].split('#')[0].replace(/\/$/, '') || '/';
+                if (cleanHref === path || (cleanHref !== '/' && path.indexOf(cleanHref) === 0)) {
+                    link.classList.add('active');
+                }
+            });
+        })();
     </script>
 </th:block>
 </html>

@@ -512,11 +512,11 @@
 
                 <!-- Right Menu: Cart & Account -->
                 <div class="d-flex align-items-center gap-2">
-                    <a th:href="@{/cart}" id="headerCartLink" class="btn btn-light rounded-pill px-3 py-2 d-flex align-items-center gap-2 border position-relative header-cart-link" style="background:#ffffff; font-size:14px;" title="Giỏ hàng">
-                        <i class="bi bi-bag-heart text-danger fs-5"></i>
-                        <span class="d-none d-sm-inline fw-semibold text-dark">Giỏ hàng</span>
-                        <span id="headerCartBadge" class="badge bg-danger rounded-pill px-2 cart-badge-pill"
-                              th:style="${cartItemCount != null and cartItemCount > 0} ? '' : 'display:none;'"
+                    <a th:href="@{/cart}" id="headerCartLink" class="btn btn-light rounded-pill px-3 py-2 d-flex align-items-center gap-2 border position-relative" style="background:#ffffff; font-size:14px; text-decoration:none;" title="Giỏ hàng">
+                        <i class="bi bi-bag-heart text-danger" style="font-size: 17px; line-height: 1;"></i>
+                        <span class="d-none d-sm-inline fw-semibold text-dark" style="font-size: 14px; line-height: 1;">Giỏ hàng</span>
+                        <span id="headerCartBadge" class="cart-btn-badge"
+                              th:style="${cartItemCount != null and cartItemCount > 0} ? 'display:inline-flex;' : 'display:none;'"
                               th:text="${cartItemCount != null and cartItemCount > 0 ? cartItemCount : ''}"></span>
                     </a>
 
@@ -758,9 +758,9 @@
                     </div>
 
                     <!-- Tồn kho tại chi nhánh -->
-                    <p id="productStock" class="small mb-3" th:classappend="${availableStock > 0 ? 'text-success' : 'text-danger'}">
+                    <p id="productStock" class="small mb-3" th:classappend="${salePaused == true ? 'sale-paused-tag' : (availableStock > 0 ? 'text-success' : 'text-danger')}">
                         <i class="bi bi-box-seam me-1"></i>
-                        <span th:text="${availableStock > 0 ? 'Còn ' + availableStock + ' mẫu tại chi nhánh' : 'Hết hàng tại chi nhánh'}"></span>
+                        <span th:text="${salePaused == true ? 'Sản phẩm tạm ngưng bán' : (availableStock > 0 ? 'Còn ' + availableStock + ' mẫu tại chi nhánh' : 'Hết hàng tại chi nhánh')}"></span>
                         <span th:if="${product.store != null}" th:text="${product.store.name}"></span>
                     </p>
 
@@ -784,7 +784,7 @@
                             <button class="btn-qty-step" type="button" onclick="changeQty(-1)" aria-label="Giảm số lượng">
                                 <i class="bi bi-dash"></i>
                             </button>
-                            <input type="number" id="detailQtyInput" name="quantity" value="1" min="1" th:max="${availableStock}" th:disabled="${availableStock == 0}"
+                            <input type="number" id="detailQtyInput" name="quantity" value="1" min="1" th:max="${availableStock}" th:disabled="${availableStock == 0 or salePaused == true}"
                                    class="qty-input" readonly>
                             <button class="btn-qty-step" type="button" onclick="changeQty(1)" aria-label="Tăng số lượng">
                                 <i class="bi bi-plus"></i>
@@ -792,10 +792,10 @@
                         </div>
 
                         <div class="product-buy-actions">
-                            <button type="submit" th:disabled="${availableStock == 0}" class="btn btn-flower-cart" id="detailAddToCartBtn">
+                            <button type="submit" th:disabled="${availableStock == 0 or salePaused == true}" class="btn btn-flower-cart" id="detailAddToCartBtn">
                                 <i class="bi bi-bag-plus me-1"></i> Thêm vào giỏ
                             </button>
-                            <button type="submit" form="detailBuyNowForm" th:disabled="${availableStock == 0}"
+                            <button type="submit" form="detailBuyNowForm" th:disabled="${availableStock == 0 or salePaused == true}"
                                     class="btn btn-flower-add" id="detailBuyNowBtn">
                                 <i class="bi bi-lightning-charge-fill me-1"></i> Mua ngay
                             </button>
@@ -1316,13 +1316,13 @@
             if (!isNaN(num) && num > 0) {
                 if (badge) {
                     badge.textContent = num;
-                    badge.style.display = 'inline-block';
+                    badge.style.display = 'inline-flex';
                 } else if (cartLink) {
                     badge = document.createElement('span');
                     badge.id = 'headerCartBadge';
-                    badge.className = 'badge bg-danger rounded-pill px-2 cart-badge-pill';
+                    badge.className = 'cart-btn-badge';
                     badge.textContent = num;
-                    badge.style.display = 'inline-block';
+                    badge.style.display = 'inline-flex';
                     cartLink.appendChild(badge);
                 }
             } else {
