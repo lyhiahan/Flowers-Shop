@@ -1,0 +1,298 @@
+{
+  "environment": "Isolated H2 test databases, not Gia Han SQL Server",
+  "tests": 49.0,
+  "failures": 0.0,
+  "errors": 0.0,
+  "suites": [
+    {
+      "suite": "CancellationWalletAcceptanceTests",
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "fulfillmentSettlesOnceUsingThePaymentTimeCommission(String)[1]",
+          "seconds": "1.271",
+          "failed": false
+        },
+        {
+          "name": "fulfillmentSettlesOnceUsingThePaymentTimeCommission(String)[2]",
+          "seconds": "1.798",
+          "failed": false
+        },
+        {
+          "name": "cancellationRefundsOnlyItsOwnHeldAmountAndNeverDebitsAvailableFunds",
+          "seconds": "0.71",
+          "failed": false
+        },
+        {
+          "name": "unpaidCancellationNeverChangesEitherBalance",
+          "seconds": "0.328",
+          "failed": false
+        },
+        {
+          "name": "confirmedPaymentIsHeldOnceAndPersistsWithoutBecomingRevenue",
+          "seconds": "0.711",
+          "failed": false
+        },
+        {
+          "name": "refundAfterFulfillmentReversesIncomeAndCommissionWithoutTouchingPendingFunds",
+          "seconds": "0.912",
+          "failed": false
+        },
+        {
+          "name": "reviewRequiredOrdersShowWarningAndCannotGenerateAnotherPayout",
+          "seconds": "0.43",
+          "failed": false
+        },
+        {
+          "name": "deliveryReleasesPendingFundsBeforeTheFinalCompletedTransitionAndOnlyOnce",
+          "seconds": "0.738",
+          "failed": false
+        },
+        {
+          "name": "managerPaidCancellationWaitsForExplicitRefundAndNeverRefundsOrRestocksTwice",
+          "seconds": "1.215",
+          "failed": false
+        },
+        {
+          "name": "managerCannotCancelWithoutAReason(String)[1]",
+          "seconds": "0.851",
+          "failed": false
+        },
+        {
+          "name": "managerCannotCancelWithoutAReason(String)[2]",
+          "seconds": "0.639",
+          "failed": false
+        },
+        {
+          "name": "managerCannotCancelWithoutAReason(String)[3]",
+          "seconds": "0.35",
+          "failed": false
+        },
+        {
+          "name": "validWithdrawalAndAdminRejectionReturnMoneyExactlyOnce",
+          "seconds": "0.627",
+          "failed": false
+        },
+        {
+          "name": "invalidWithdrawalsCannotSpendThePendingBalance(String)[1]",
+          "seconds": "0.479",
+          "failed": false
+        },
+        {
+          "name": "invalidWithdrawalsCannotSpendThePendingBalance(String)[2]",
+          "seconds": "0.453",
+          "failed": false
+        },
+        {
+          "name": "invalidWithdrawalsCannotSpendThePendingBalance(String)[3]",
+          "seconds": "0.468",
+          "failed": false
+        },
+        {
+          "name": "managerUnpaidCancellationShowsActorAndReasonToCustomerAndRestocksOnce",
+          "seconds": "0.358",
+          "failed": false
+        },
+        {
+          "name": "wrongWithdrawalPasswordNeverChangesTheBalance",
+          "seconds": "0.396",
+          "failed": false
+        },
+        {
+          "name": "missingAdminDecisionIsRejectedWithoutChangingWalletOrWithdrawal",
+          "seconds": "0.546",
+          "failed": false
+        }
+      ]
+    },
+    {
+      "suite": "ConcurrencyRegressionTests",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "paymentRacingCancellationCannotLeaveHeldMoneyForACancelledOrder",
+          "seconds": "0.632",
+          "failed": false
+        },
+        {
+          "name": "multiBranchHoldFailureRollsBackPreviouslyUpdatedBranchAndAllReceipts",
+          "seconds": "0.393",
+          "failed": false
+        },
+        {
+          "name": "cancellationAndStartingDeliveryCannotBothSucceed",
+          "seconds": "0.437",
+          "failed": false
+        },
+        {
+          "name": "duplicateDemoPaymentAndCancellationEachApplyOnceUnderConcurrency",
+          "seconds": "0.306",
+          "failed": false
+        },
+        {
+          "name": "accountLockAndCheckoutCannotLeaveAnOpenOrderForDisabledCustomer",
+          "seconds": "0.132",
+          "failed": false
+        },
+        {
+          "name": "simultaneousCancellationsRestoreAllReservedStock",
+          "seconds": "0.191",
+          "failed": false
+        },
+        {
+          "name": "simultaneousWithdrawalsCannotOverdrawWallet",
+          "seconds": "0.086",
+          "failed": false
+        },
+        {
+          "name": "submittingTheSameCartTwiceCreatesOneOrder",
+          "seconds": "0.09",
+          "failed": false
+        },
+        {
+          "name": "simultaneousCheckoutCannotSellTheSameLastItemTwice",
+          "seconds": "0.09",
+          "failed": false
+        },
+        {
+          "name": "concurrentDemoConfirmationsAggregateHeldFundsWithoutLostUpdates",
+          "seconds": "0.133",
+          "failed": false
+        },
+        {
+          "name": "twoCheckoutsCannotConsumeTheLastVoucherTwice",
+          "seconds": "0.074",
+          "failed": false
+        },
+        {
+          "name": "multiBranchPaymentHoldsMoneyInTheCorrectBranches",
+          "seconds": "0.123",
+          "failed": false
+        },
+        {
+          "name": "simultaneousFulfillmentSettlesHeldMoneyOnlyOnce",
+          "seconds": "0.139",
+          "failed": false
+        },
+        {
+          "name": "failedOtpAttemptsRemainRecordedAfterTheRequestRollsBack",
+          "seconds": "0.073",
+          "failed": false
+        },
+        {
+          "name": "failedHoldRollsBackPaymentReceiptAndAllBalanceChanges",
+          "seconds": "0.095",
+          "failed": false
+        }
+      ]
+    },
+    {
+      "suite": "StoreManagementEwalletUseCaseTests",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "testViewWalletAsNonOwnerHidesWithdrawButton",
+          "seconds": "0.547",
+          "failed": false
+        },
+        {
+          "name": "testWithdrawFailsWithIncorrectPassword",
+          "seconds": "0.553",
+          "failed": false
+        },
+        {
+          "name": "testWithdrawSuccessWithCorrectPassword",
+          "seconds": "0.342",
+          "failed": false
+        },
+        {
+          "name": "testPaginationOnTransactions",
+          "seconds": "0.217",
+          "failed": false
+        },
+        {
+          "name": "testViewWalletSuccessAsOwner",
+          "seconds": "0.196",
+          "failed": false
+        }
+      ]
+    },
+    {
+      "suite": "StoreManagementOrderUseCaseTests",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "testPaginationOnOrders",
+          "seconds": "0.299",
+          "failed": false
+        },
+        {
+          "name": "testListProcessedOrders",
+          "seconds": "0.128",
+          "failed": false
+        },
+        {
+          "name": "testUpdateOrderStatusSuccess",
+          "seconds": "0.109",
+          "failed": false
+        },
+        {
+          "name": "testListProcessingOrders",
+          "seconds": "0.235",
+          "failed": false
+        },
+        {
+          "name": "testViewOrderDetail",
+          "seconds": "1.378",
+          "failed": false
+        }
+      ]
+    },
+    {
+      "suite": "AdminTransactionManagementUseCaseTests",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "testStep4_PaginationNextPreviousAndSpecificPage",
+          "seconds": "1.788",
+          "failed": false
+        },
+        {
+          "name": "testStep1To3_NavigateFromDashboardToTransactions",
+          "seconds": "0.579",
+          "failed": false
+        },
+        {
+          "name": "testPreCondition_CustomerDeniedAccessToAdminTransactions",
+          "seconds": "0.093",
+          "failed": false
+        },
+        {
+          "name": "testPostConditions_SuccessTableAndErrorMessage",
+          "seconds": "0.095",
+          "failed": false
+        },
+        {
+          "name": "testTransactionSearchByKeyword",
+          "seconds": "0.099",
+          "failed": false
+        }
+      ]
+    }
+  ]
+}

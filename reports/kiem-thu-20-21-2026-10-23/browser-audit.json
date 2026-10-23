@@ -1,0 +1,779 @@
+[
+  {
+    "phase": "paid-manager-cancellation",
+    "state": {
+      "database": "DISPOSABLE_H2",
+      "ids": {
+        "store": 1,
+        "product": 1,
+        "cancelOrder": 1,
+        "deliveryOrder": 2
+      },
+      "wallet": {
+        "E_WALLET": 50000,
+        "PENDING_BALANCE": 100000
+      },
+      "stock": 9,
+      "orders": [
+        {
+          "ID": 1,
+          "STATUS": "REFUND_REQUESTED",
+          "PAYMENT_STATUS": "PAID",
+          "FUNDS_STATUS": "HELD",
+          "CANCELLATION_REASON": "Đơn hàng của bạn đã bị hủy bởi quản lý cửa hàng với lý do: Khong du hoa de giao - acceptance test. Vui lòng hoàn tiền lại cho khách hàng; chưa ghi nhận đã hoàn tiền."
+        },
+        {
+          "ID": 2,
+          "STATUS": "PENDING",
+          "PAYMENT_STATUS": "UNPAID",
+          "FUNDS_STATUS": "NONE",
+          "CANCELLATION_REASON": null
+        }
+      ],
+      "ledger": [
+        {
+          "ID": 1,
+          "ORDER_ID": 1,
+          "TYPE": "PAYMENT_HOLD",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        }
+      ]
+    }
+  },
+  {
+    "phase": "after-second-momo-payment",
+    "state": {
+      "database": "DISPOSABLE_H2",
+      "ids": {
+        "store": 1,
+        "product": 1,
+        "cancelOrder": 1,
+        "deliveryOrder": 2
+      },
+      "wallet": {
+        "E_WALLET": 50000,
+        "PENDING_BALANCE": 100000
+      },
+      "stock": 9,
+      "orders": [
+        {
+          "ID": 1,
+          "STATUS": "REFUND_REQUESTED",
+          "PAYMENT_STATUS": "PAID",
+          "FUNDS_STATUS": "HELD",
+          "CANCELLATION_REASON": "Đơn hàng của bạn đã bị hủy bởi quản lý cửa hàng với lý do: Khong du hoa de giao - acceptance test. Vui lòng hoàn tiền lại cho khách hàng; chưa ghi nhận đã hoàn tiền."
+        },
+        {
+          "ID": 2,
+          "STATUS": "PENDING",
+          "PAYMENT_STATUS": "UNPAID",
+          "FUNDS_STATUS": "NONE",
+          "CANCELLATION_REASON": null
+        }
+      ],
+      "ledger": [
+        {
+          "ID": 1,
+          "ORDER_ID": 1,
+          "TYPE": "PAYMENT_HOLD",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        }
+      ]
+    }
+  },
+  {
+    "phase": "momo-confirmed",
+    "state": {
+      "database": "DISPOSABLE_H2",
+      "ids": {
+        "store": 1,
+        "product": 1,
+        "cancelOrder": 1,
+        "deliveryOrder": 2
+      },
+      "wallet": {
+        "E_WALLET": 50000,
+        "PENDING_BALANCE": 200000
+      },
+      "stock": 9,
+      "orders": [
+        {
+          "ID": 1,
+          "STATUS": "REFUND_REQUESTED",
+          "PAYMENT_STATUS": "PAID",
+          "FUNDS_STATUS": "HELD",
+          "CANCELLATION_REASON": "Đơn hàng của bạn đã bị hủy bởi quản lý cửa hàng với lý do: Khong du hoa de giao - acceptance test. Vui lòng hoàn tiền lại cho khách hàng; chưa ghi nhận đã hoàn tiền."
+        },
+        {
+          "ID": 2,
+          "STATUS": "PENDING",
+          "PAYMENT_STATUS": "PAID",
+          "FUNDS_STATUS": "HELD",
+          "CANCELLATION_REASON": null
+        }
+      ],
+      "ledger": [
+        {
+          "ID": 1,
+          "ORDER_ID": 1,
+          "TYPE": "PAYMENT_HOLD",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 2,
+          "ORDER_ID": 2,
+          "TYPE": "PAYMENT_HOLD",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        }
+      ]
+    }
+  },
+  {
+    "phase": "manager-confirmed-refund",
+    "state": {
+      "database": "DISPOSABLE_H2",
+      "ids": {
+        "store": 1,
+        "product": 1,
+        "cancelOrder": 1,
+        "deliveryOrder": 2
+      },
+      "wallet": {
+        "E_WALLET": 50000,
+        "PENDING_BALANCE": 100000
+      },
+      "stock": 9,
+      "orders": [
+        {
+          "ID": 1,
+          "STATUS": "REFUNDED",
+          "PAYMENT_STATUS": "REFUNDED",
+          "FUNDS_STATUS": "REFUNDED",
+          "CANCELLATION_REASON": "Đơn hàng của bạn đã bị hủy bởi quản lý cửa hàng với lý do: Khong du hoa de giao - acceptance test. Đã xác nhận hoàn tiền cho khách hàng."
+        },
+        {
+          "ID": 2,
+          "STATUS": "PENDING",
+          "PAYMENT_STATUS": "PAID",
+          "FUNDS_STATUS": "HELD",
+          "CANCELLATION_REASON": null
+        }
+      ],
+      "ledger": [
+        {
+          "ID": 1,
+          "ORDER_ID": 1,
+          "TYPE": "PAYMENT_HOLD",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 2,
+          "ORDER_ID": 2,
+          "TYPE": "PAYMENT_HOLD",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 3,
+          "ORDER_ID": 1,
+          "TYPE": "REFUND",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        }
+      ]
+    }
+  },
+  {
+    "phase": "delivering-not-settled",
+    "state": {
+      "database": "DISPOSABLE_H2",
+      "ids": {
+        "store": 1,
+        "product": 1,
+        "cancelOrder": 1,
+        "deliveryOrder": 2
+      },
+      "wallet": {
+        "E_WALLET": 50000,
+        "PENDING_BALANCE": 100000
+      },
+      "stock": 9,
+      "orders": [
+        {
+          "ID": 1,
+          "STATUS": "REFUNDED",
+          "PAYMENT_STATUS": "REFUNDED",
+          "FUNDS_STATUS": "REFUNDED",
+          "CANCELLATION_REASON": "Đơn hàng của bạn đã bị hủy bởi quản lý cửa hàng với lý do: Khong du hoa de giao - acceptance test. Đã xác nhận hoàn tiền cho khách hàng."
+        },
+        {
+          "ID": 2,
+          "STATUS": "DELIVERING",
+          "PAYMENT_STATUS": "PAID",
+          "FUNDS_STATUS": "HELD",
+          "CANCELLATION_REASON": null
+        }
+      ],
+      "ledger": [
+        {
+          "ID": 1,
+          "ORDER_ID": 1,
+          "TYPE": "PAYMENT_HOLD",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 2,
+          "ORDER_ID": 2,
+          "TYPE": "PAYMENT_HOLD",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 3,
+          "ORDER_ID": 1,
+          "TYPE": "REFUND",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        }
+      ]
+    }
+  },
+  {
+    "phase": "delivered-net-income",
+    "state": {
+      "database": "DISPOSABLE_H2",
+      "ids": {
+        "store": 1,
+        "product": 1,
+        "cancelOrder": 1,
+        "deliveryOrder": 2
+      },
+      "wallet": {
+        "E_WALLET": 140000,
+        "PENDING_BALANCE": 0
+      },
+      "stock": 9,
+      "orders": [
+        {
+          "ID": 1,
+          "STATUS": "REFUNDED",
+          "PAYMENT_STATUS": "REFUNDED",
+          "FUNDS_STATUS": "REFUNDED",
+          "CANCELLATION_REASON": "Đơn hàng của bạn đã bị hủy bởi quản lý cửa hàng với lý do: Khong du hoa de giao - acceptance test. Đã xác nhận hoàn tiền cho khách hàng."
+        },
+        {
+          "ID": 2,
+          "STATUS": "DELIVERED",
+          "PAYMENT_STATUS": "PAID",
+          "FUNDS_STATUS": "SETTLED",
+          "CANCELLATION_REASON": null
+        }
+      ],
+      "ledger": [
+        {
+          "ID": 1,
+          "ORDER_ID": 1,
+          "TYPE": "PAYMENT_HOLD",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 2,
+          "ORDER_ID": 2,
+          "TYPE": "PAYMENT_HOLD",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 3,
+          "ORDER_ID": 1,
+          "TYPE": "REFUND",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 4,
+          "ORDER_ID": 2,
+          "TYPE": "HOLD_RELEASE",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 5,
+          "ORDER_ID": 2,
+          "TYPE": "COMMISSION_FEE",
+          "AMOUNT": 10000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PLATFORM"
+        },
+        {
+          "ID": 6,
+          "ORDER_ID": 2,
+          "TYPE": "ORDER_PAYMENT",
+          "AMOUNT": 90000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "AVAILABLE"
+        }
+      ]
+    }
+  },
+  {
+    "phase": "completed-no-double-credit",
+    "state": {
+      "database": "DISPOSABLE_H2",
+      "ids": {
+        "store": 1,
+        "product": 1,
+        "cancelOrder": 1,
+        "deliveryOrder": 2
+      },
+      "wallet": {
+        "E_WALLET": 140000,
+        "PENDING_BALANCE": 0
+      },
+      "stock": 9,
+      "orders": [
+        {
+          "ID": 1,
+          "STATUS": "REFUNDED",
+          "PAYMENT_STATUS": "REFUNDED",
+          "FUNDS_STATUS": "REFUNDED",
+          "CANCELLATION_REASON": "Đơn hàng của bạn đã bị hủy bởi quản lý cửa hàng với lý do: Khong du hoa de giao - acceptance test. Đã xác nhận hoàn tiền cho khách hàng."
+        },
+        {
+          "ID": 2,
+          "STATUS": "COMPLETED",
+          "PAYMENT_STATUS": "PAID",
+          "FUNDS_STATUS": "SETTLED",
+          "CANCELLATION_REASON": null
+        }
+      ],
+      "ledger": [
+        {
+          "ID": 1,
+          "ORDER_ID": 1,
+          "TYPE": "PAYMENT_HOLD",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 2,
+          "ORDER_ID": 2,
+          "TYPE": "PAYMENT_HOLD",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 3,
+          "ORDER_ID": 1,
+          "TYPE": "REFUND",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 4,
+          "ORDER_ID": 2,
+          "TYPE": "HOLD_RELEASE",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 5,
+          "ORDER_ID": 2,
+          "TYPE": "COMMISSION_FEE",
+          "AMOUNT": 10000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PLATFORM"
+        },
+        {
+          "ID": 6,
+          "ORDER_ID": 2,
+          "TYPE": "ORDER_PAYMENT",
+          "AMOUNT": 90000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "AVAILABLE"
+        }
+      ]
+    }
+  },
+  {
+    "phase": "after-wrong-password-attempt",
+    "state": {
+      "database": "DISPOSABLE_H2",
+      "ids": {
+        "store": 1,
+        "product": 1,
+        "cancelOrder": 1,
+        "deliveryOrder": 2
+      },
+      "wallet": {
+        "E_WALLET": 140000,
+        "PENDING_BALANCE": 0
+      },
+      "stock": 9,
+      "orders": [
+        {
+          "ID": 1,
+          "STATUS": "REFUNDED",
+          "PAYMENT_STATUS": "REFUNDED",
+          "FUNDS_STATUS": "REFUNDED",
+          "CANCELLATION_REASON": "Đơn hàng của bạn đã bị hủy bởi quản lý cửa hàng với lý do: Khong du hoa de giao - acceptance test. Đã xác nhận hoàn tiền cho khách hàng."
+        },
+        {
+          "ID": 2,
+          "STATUS": "COMPLETED",
+          "PAYMENT_STATUS": "PAID",
+          "FUNDS_STATUS": "SETTLED",
+          "CANCELLATION_REASON": null
+        }
+      ],
+      "ledger": [
+        {
+          "ID": 1,
+          "ORDER_ID": 1,
+          "TYPE": "PAYMENT_HOLD",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 2,
+          "ORDER_ID": 2,
+          "TYPE": "PAYMENT_HOLD",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 3,
+          "ORDER_ID": 1,
+          "TYPE": "REFUND",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 4,
+          "ORDER_ID": 2,
+          "TYPE": "HOLD_RELEASE",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 5,
+          "ORDER_ID": 2,
+          "TYPE": "COMMISSION_FEE",
+          "AMOUNT": 10000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PLATFORM"
+        },
+        {
+          "ID": 6,
+          "ORDER_ID": 2,
+          "TYPE": "ORDER_PAYMENT",
+          "AMOUNT": 90000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "AVAILABLE"
+        }
+      ]
+    }
+  },
+  {
+    "phase": "valid-withdrawal-created",
+    "state": {
+      "database": "DISPOSABLE_H2",
+      "ids": {
+        "store": 1,
+        "product": 1,
+        "cancelOrder": 1,
+        "deliveryOrder": 2
+      },
+      "wallet": {
+        "E_WALLET": 90000,
+        "PENDING_BALANCE": 0
+      },
+      "stock": 9,
+      "orders": [
+        {
+          "ID": 1,
+          "STATUS": "REFUNDED",
+          "PAYMENT_STATUS": "REFUNDED",
+          "FUNDS_STATUS": "REFUNDED",
+          "CANCELLATION_REASON": "Đơn hàng của bạn đã bị hủy bởi quản lý cửa hàng với lý do: Khong du hoa de giao - acceptance test. Đã xác nhận hoàn tiền cho khách hàng."
+        },
+        {
+          "ID": 2,
+          "STATUS": "COMPLETED",
+          "PAYMENT_STATUS": "PAID",
+          "FUNDS_STATUS": "SETTLED",
+          "CANCELLATION_REASON": null
+        }
+      ],
+      "ledger": [
+        {
+          "ID": 1,
+          "ORDER_ID": 1,
+          "TYPE": "PAYMENT_HOLD",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 2,
+          "ORDER_ID": 2,
+          "TYPE": "PAYMENT_HOLD",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 3,
+          "ORDER_ID": 1,
+          "TYPE": "REFUND",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 4,
+          "ORDER_ID": 2,
+          "TYPE": "HOLD_RELEASE",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 5,
+          "ORDER_ID": 2,
+          "TYPE": "COMMISSION_FEE",
+          "AMOUNT": 10000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PLATFORM"
+        },
+        {
+          "ID": 6,
+          "ORDER_ID": 2,
+          "TYPE": "ORDER_PAYMENT",
+          "AMOUNT": 90000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "AVAILABLE"
+        },
+        {
+          "ID": 7,
+          "ORDER_ID": null,
+          "TYPE": "WITHDRAWAL",
+          "AMOUNT": 50000,
+          "STATUS": "PENDING",
+          "WALLET_BUCKET": "AVAILABLE"
+        }
+      ]
+    }
+  },
+  {
+    "phase": "admin-rejection-ui-failed",
+    "state": {
+      "database": "DISPOSABLE_H2",
+      "ids": {
+        "store": 1,
+        "product": 1,
+        "cancelOrder": 1,
+        "deliveryOrder": 2
+      },
+      "wallet": {
+        "E_WALLET": 90000,
+        "PENDING_BALANCE": 0
+      },
+      "stock": 9,
+      "orders": [
+        {
+          "ID": 1,
+          "STATUS": "REFUNDED",
+          "PAYMENT_STATUS": "REFUNDED",
+          "FUNDS_STATUS": "REFUNDED",
+          "CANCELLATION_REASON": "Đơn hàng của bạn đã bị hủy bởi quản lý cửa hàng với lý do: Khong du hoa de giao - acceptance test. Đã xác nhận hoàn tiền cho khách hàng."
+        },
+        {
+          "ID": 2,
+          "STATUS": "COMPLETED",
+          "PAYMENT_STATUS": "PAID",
+          "FUNDS_STATUS": "SETTLED",
+          "CANCELLATION_REASON": null
+        }
+      ],
+      "ledger": [
+        {
+          "ID": 1,
+          "ORDER_ID": 1,
+          "TYPE": "PAYMENT_HOLD",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 2,
+          "ORDER_ID": 2,
+          "TYPE": "PAYMENT_HOLD",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 3,
+          "ORDER_ID": 1,
+          "TYPE": "REFUND",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 4,
+          "ORDER_ID": 2,
+          "TYPE": "HOLD_RELEASE",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 5,
+          "ORDER_ID": 2,
+          "TYPE": "COMMISSION_FEE",
+          "AMOUNT": 10000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PLATFORM"
+        },
+        {
+          "ID": 6,
+          "ORDER_ID": 2,
+          "TYPE": "ORDER_PAYMENT",
+          "AMOUNT": 90000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "AVAILABLE"
+        },
+        {
+          "ID": 7,
+          "ORDER_ID": null,
+          "TYPE": "WITHDRAWAL",
+          "AMOUNT": 50000,
+          "STATUS": "PENDING",
+          "WALLET_BUCKET": "AVAILABLE"
+        }
+      ]
+    }
+  },
+  {
+    "phase": "repeat-admin-rejection-ui-still-pending",
+    "state": {
+      "database": "DISPOSABLE_H2",
+      "ids": {
+        "store": 1,
+        "product": 1,
+        "cancelOrder": 1,
+        "deliveryOrder": 2
+      },
+      "wallet": {
+        "E_WALLET": 90000,
+        "PENDING_BALANCE": 0
+      },
+      "stock": 9,
+      "orders": [
+        {
+          "ID": 1,
+          "STATUS": "REFUNDED",
+          "PAYMENT_STATUS": "REFUNDED",
+          "FUNDS_STATUS": "REFUNDED",
+          "CANCELLATION_REASON": "Đơn hàng của bạn đã bị hủy bởi quản lý cửa hàng với lý do: Khong du hoa de giao - acceptance test. Đã xác nhận hoàn tiền cho khách hàng."
+        },
+        {
+          "ID": 2,
+          "STATUS": "COMPLETED",
+          "PAYMENT_STATUS": "PAID",
+          "FUNDS_STATUS": "SETTLED",
+          "CANCELLATION_REASON": null
+        }
+      ],
+      "ledger": [
+        {
+          "ID": 1,
+          "ORDER_ID": 1,
+          "TYPE": "PAYMENT_HOLD",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 2,
+          "ORDER_ID": 2,
+          "TYPE": "PAYMENT_HOLD",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 3,
+          "ORDER_ID": 1,
+          "TYPE": "REFUND",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 4,
+          "ORDER_ID": 2,
+          "TYPE": "HOLD_RELEASE",
+          "AMOUNT": 100000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PENDING"
+        },
+        {
+          "ID": 5,
+          "ORDER_ID": 2,
+          "TYPE": "COMMISSION_FEE",
+          "AMOUNT": 10000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "PLATFORM"
+        },
+        {
+          "ID": 6,
+          "ORDER_ID": 2,
+          "TYPE": "ORDER_PAYMENT",
+          "AMOUNT": 90000,
+          "STATUS": "COMPLETED",
+          "WALLET_BUCKET": "AVAILABLE"
+        },
+        {
+          "ID": 7,
+          "ORDER_ID": null,
+          "TYPE": "WITHDRAWAL",
+          "AMOUNT": 50000,
+          "STATUS": "PENDING",
+          "WALLET_BUCKET": "AVAILABLE"
+        }
+      ]
+    }
+  }
+]

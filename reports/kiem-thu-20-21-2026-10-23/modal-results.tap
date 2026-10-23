@@ -1,0 +1,98 @@
+TAP version 13
+# Subtest: shared dialogs have explicit opaque backgrounds, padding and small-screen overflow protection
+ok 1 - shared dialogs have explicit opaque backgrounds, padding and small-screen overflow protection
+  ---
+  duration_ms: 10.5442
+  type: 'test'
+  ...
+# Subtest: cancel closes confirmation without executing the action
+ok 2 - cancel closes confirmation without executing the action
+  ---
+  duration_ms: 3.7539
+  type: 'test'
+  ...
+# Subtest: confirm executes its callback once and alert resets the shared button state
+ok 3 - confirm executes its callback once and alert resets the shared button state
+  ---
+  duration_ms: 2.5159
+  type: 'test'
+  ...
+# Subtest: Escape and clicking the backdrop dismiss without executing a destructive action
+ok 4 - Escape and clicking the backdrop dismiss without executing a destructive action
+  ---
+  duration_ms: 4.0166
+  type: 'test'
+  ...
+# Subtest: form confirmations submit only after explicit confirmation
+ok 5 - form confirmations submit only after explicit confirmation
+  ---
+  duration_ms: 1.9968
+  type: 'test'
+  ...
+# Subtest: wishlist logout uses the same styled dialog and preserves cancellation
+ok 6 - wishlist logout uses the same styled dialog and preserves cancellation
+  ---
+  duration_ms: 2.6255
+  type: 'test'
+  ...
+# Subtest: UC21 admin confirmation preserves paid=false from the clicked submit button
+not ok 7 - UC21 admin confirmation preserves paid=false from the clicked submit button
+  ---
+  duration_ms: 3.5896
+  type: 'test'
+  location: 'D:\\ky1_nam3\\LT_web\\CK\\Rental-Retail-Shop\\reports\\kiem-thu-20-21-2026-10-23\\submitter-regression.cjs:16:5'
+  failureType: 'testCodeFailure'
+  error: |-
+    The admin controller requires the clicked button decision.
+    
+    null !== 'false'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'false'
+  actual: ~
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (D:\ky1_nam3\LT_web\CK\Rental-Retail-Shop\reports\kiem-thu-20-21-2026-10-23\submitter-regression.cjs:29:16)
+    Test.runInAsyncScope (node:async_hooks:226:14)
+    Test.run (node:internal/test_runner/test:1366:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:946:18)
+    Test.postRun (node:internal/test_runner/test:1506:19)
+    Test.run (node:internal/test_runner/test:1431:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:946:7)
+  ...
+# Subtest: UC21 admin confirmation preserves paid=true from the clicked submit button
+not ok 8 - UC21 admin confirmation preserves paid=true from the clicked submit button
+  ---
+  duration_ms: 2.3829
+  type: 'test'
+  location: 'D:\\ky1_nam3\\LT_web\\CK\\Rental-Retail-Shop\\reports\\kiem-thu-20-21-2026-10-23\\submitter-regression.cjs:16:5'
+  failureType: 'testCodeFailure'
+  error: |-
+    The admin controller requires the clicked button decision.
+    
+    null !== 'true'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'true'
+  actual: ~
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (D:\ky1_nam3\LT_web\CK\Rental-Retail-Shop\reports\kiem-thu-20-21-2026-10-23\submitter-regression.cjs:29:16)
+    Test.runInAsyncScope (node:async_hooks:226:14)
+    Test.run (node:internal/test_runner/test:1366:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:946:18)
+    Test.postRun (node:internal/test_runner/test:1506:19)
+    Test.run (node:internal/test_runner/test:1431:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:946:7)
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 6
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 175.1523

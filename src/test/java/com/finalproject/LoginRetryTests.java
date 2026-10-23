@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -34,6 +37,7 @@ class LoginRetryTests {
     @Autowired MockMvc mvc;
     @Autowired UserRepository users;
     @Autowired PasswordEncoder passwords;
+    @Autowired CustomAuthenticationFailureHandler failureHandler;
 
     @BeforeEach void account() {
         users.saveAndFlush(User.builder().username("keep-me").email("remembered@example.test")
@@ -79,6 +83,34 @@ class LoginRetryTests {
         var session = new MockHttpSession();
         fail(session, identifier);
         assertThat(page(session, identifier)).doesNotContain("<script>alert('retry')</script>");
+    }
+
+    @Test void authenticationServiceFailureDoesNotClaimThePasswordIsWrongOrExposeInternalDetails() throws Exception {
+        var session = new MockHttpSession();
+        serviceFailure(session);
+        mvc.perform(get("/login").session(session).param("error", "true"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("loginUsername", "keep-me"))
+                .andExpect(model().attribute("errorMessage", "Hệ thống đăng nhập đang tạm thời gián đoạn. Vui lòng thử lại sau."))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("fixture-internal-database-detail"))))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("mật khẩu không chính xác"))));
+    }
+
+    @Test void wrongPasswordAfterServiceRecoveryUsesTheNormalGenericError() throws Exception {
+        var session = new MockHttpSession();
+        serviceFailure(session);
+        fail(session, "keep-me");
+        mvc.perform(get("/login").session(session).param("error", "true"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("errorMessage", "Đăng nhập thất bại: Email, tên đăng nhập hoặc mật khẩu không chính xác!"));
+    }
+
+    private void serviceFailure(MockHttpSession session) throws Exception {
+        var request = new MockHttpServletRequest();
+        request.setSession(session);
+        request.addParameter("username", "keep-me");
+        failureHandler.onAuthenticationFailure(request, new MockHttpServletResponse(),
+                new InternalAuthenticationServiceException("fixture-internal-database-detail"));
     }
 
     @Test void refreshingErrorPageKeepsLastAttemptAndAnotherFailureReplacesIt() throws Exception {

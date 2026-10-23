@@ -4,6 +4,7 @@ import com.finalproject.dto.request.RegisterRequest;
 import com.finalproject.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -34,7 +35,12 @@ public class AuthController {
         model.addAttribute("loginUsername", identifier);
         model.addAttribute("loginFailed", error != null);
         if (error != null) {
-            model.addAttribute("errorMessage", "Đăng nhập thất bại: Email, tên đăng nhập hoặc mật khẩu không chính xác!");
+            boolean serviceUnavailable = session != null
+                    && session.getAttribute(org.springframework.security.web.WebAttributes.AUTHENTICATION_EXCEPTION)
+                    instanceof AuthenticationServiceException;
+            model.addAttribute("errorMessage", serviceUnavailable
+                    ? "Hệ thống đăng nhập đang tạm thời gián đoạn. Vui lòng thử lại sau."
+                    : "Đăng nhập thất bại: Email, tên đăng nhập hoặc mật khẩu không chính xác!");
         }
         if (logout != null) {
             model.addAttribute("successMessage", "Bạn đã đăng xuất thành công.");
