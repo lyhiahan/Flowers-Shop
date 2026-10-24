@@ -37,6 +37,7 @@ public class CheckoutController {
     private final com.finalproject.config.MomoConfig momoConfig;
     private final com.finalproject.service.MomoService momoService;
     private final com.finalproject.service.DemoPaymentService demoPayments;
+    private final com.finalproject.service.CustomerWalletService customerWallet;
 
     @GetMapping
     public String showCheckoutPage(
@@ -130,7 +131,9 @@ public class CheckoutController {
         model.addAttribute("totalDeposit", totalDeposit);
         model.addAttribute("grandTotal", grandTotal);
         model.addAttribute("paymentMethods", demoPayments.isEnabled()
-                ? List.of(PaymentMethod.COD, PaymentMethod.MOMO_DEMO) : List.of(PaymentMethod.COD));
+                ? List.of(PaymentMethod.COD, PaymentMethod.MOMO_DEMO, PaymentMethod.WALLET_DEMO) : List.of(PaymentMethod.COD));
+        model.addAttribute("customerWalletEnabled", customerWallet.isEnabled());
+        model.addAttribute("walletBalance", customerWallet.balance(principal.getName()));
         model.addAttribute("momoMock", momoConfig.isMock());
         model.addAttribute("demoPaymentEnabled", demoPayments.isEnabled());
 
@@ -211,6 +214,7 @@ public class CheckoutController {
             if (selectedItemIds != null && !selectedItemIds.isEmpty()) {
                 redirectAttributes.addFlashAttribute("selectedItemIds", selectedItemIds);
                 redirectAttributes.addFlashAttribute("prevShippingMethod", shippingMethod);
+                redirectAttributes.addFlashAttribute("prevPaymentMethod", paymentMethod.name());
                 redirectAttributes.addFlashAttribute("prevRecipientName", recipientName);
                 redirectAttributes.addFlashAttribute("prevRecipientPhone", recipientPhone);
                 redirectAttributes.addFlashAttribute("prevRecipientAddress", recipientAddress);

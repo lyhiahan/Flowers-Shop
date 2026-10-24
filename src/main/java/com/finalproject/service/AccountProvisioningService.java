@@ -35,7 +35,7 @@ public class AccountProvisioningService {
                 || password.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72) {
             throw new IllegalArgumentException("Mật khẩu phải có ít nhất 8 ký tự, tối đa 72 byte.");
         }
-        if (!"USER".equals(role) && !"MANAGER".equals(role)) throw new IllegalArgumentException("Chỉ được tạo tài khoản Khách hàng hoặc Quản lý.");
+        if (!"USER".equals(role) && !"MANAGER".equals(role) && !"STAFF".equals(role)) throw new IllegalArgumentException("Chỉ được tạo tài khoản Khách hàng, Quản lý chi nhánh hoặc Nhân viên cửa hàng.");
         if (users.existsByUsername(name) || users.existsByEmail(mail)) throw new IllegalArgumentException("Tên đăng nhập hoặc email đã được sử dụng.");
         // Database unique constraints also reject simultaneous duplicate submissions.
         return users.saveAndFlush(User.builder().username(name).email(mail).fullName(display).phone(number.isEmpty() ? null : number)

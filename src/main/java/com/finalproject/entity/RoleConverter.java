@@ -17,7 +17,7 @@ public class RoleConverter implements AttributeConverter<Role, String> {
         if (value == null) return null;
         return switch (value) {
             case "CUSTOMER", "SHIPPER" -> Role.USER;
-            case "VENDOR", "STAFF" -> Role.MANAGER;
+            case "VENDOR" -> Role.MANAGER;
             default -> Role.valueOf(value);
         };
     }

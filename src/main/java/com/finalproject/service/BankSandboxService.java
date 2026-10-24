@@ -35,7 +35,7 @@ public class BankSandboxService {
         entityManager.refresh(actor, LockModeType.PESSIMISTIC_WRITE);
         if (!Boolean.TRUE.equals(actor.getIsActive()) || Boolean.TRUE.equals(actor.getAccountDisabledByAdmin())
                 || actor.isRetiredDeliveryAccount() || actor.getRole() != Role.USER
-                || actor.hasRole(Role.ADMIN) || actor.hasRole(Role.MANAGER))
+                || actor.hasRole(Role.ADMIN) || actor.isStoreWorker())
             throw new AccessDeniedException("Chỉ khách hàng đang hoạt động được thanh toán thử nghiệm.");
         var order = orders.findLockedById(id).orElseThrow();
         entityManager.refresh(order, LockModeType.PESSIMISTIC_WRITE);

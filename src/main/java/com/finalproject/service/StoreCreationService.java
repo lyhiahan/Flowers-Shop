@@ -15,6 +15,7 @@ public class StoreCreationService {
     private final CommissionRepository commissions;
     private final StoreLevelRepository levels;
     private final Clock clock;
+    private final jakarta.persistence.EntityManager entityManager;
 
     @Transactional
     public Store create(Store input, Long commissionId, String requestId) {
@@ -22,10 +23,14 @@ public class StoreCreationService {
         if (!current.hasRole(com.finalproject.enums.Role.MANAGER)
                 && !current.hasRole(com.finalproject.enums.Role.ADMIN)) throw new org.springframework.security.access.AccessDeniedException("Chức năng dành cho người bán.");
         var owner = users.findLockedById(current.getId()).orElseThrow();
+        entityManager.refresh(owner, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
         String key = requestId == null || requestId.isBlank() ? null : owner.getId() + ":" + java.util.UUID.fromString(requestId);
         if (key != null) {
             var previous = stores.findByCreationRequestKey(key);
             if (previous.isPresent()) return previous.get();
+        }
+        if (!owner.hasRole(com.finalproject.enums.Role.ADMIN) && access.hasStoreAffiliation(owner)) {
+            throw new IllegalArgumentException("Mỗi manager chỉ được quản lý một cửa hàng. Bạn đã có cửa hàng phụ trách.");
         }
         if (commissionId == null) throw new IllegalArgumentException("Vui lòng chọn chính sách hoa hồng.");
         var commission = commissions.findById(commissionId).filter(c -> !Boolean.TRUE.equals(c.getIsDeleted()))
@@ -39,8 +44,13 @@ public class StoreCreationService {
         }
         if (input.getBio() != null && input.getBio().length() > 500) throw new IllegalArgumentException("Bio tối đa 500 ký tự.");
         var level = levels.findByIsDeletedFalseOrderByMinPointAsc().stream().filter(l -> Integer.valueOf(0).equals(l.getMinPoint())).findFirst().orElse(null);
-        return stores.save(Store.builder().name(name).address(address).phone(phone).bio(input.getBio())
+        Store created = stores.save(Store.builder().name(name).address(address).phone(phone).bio(input.getBio())
                 .owner(owner).commission(commission).storeLevel(level).rating(0.0)
                 .isOpen(input.getIsOpen() == null || input.getIsOpen()).createdAt(LocalDateTime.now(clock)).creationRequestKey(key).build());
+        if (!owner.hasRole(com.finalproject.enums.Role.ADMIN)) {
+            owner.setStore(created);
+            users.save(owner);
+        }
+        return created;
     }
 }

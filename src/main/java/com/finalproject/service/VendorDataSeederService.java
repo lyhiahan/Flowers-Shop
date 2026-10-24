@@ -109,37 +109,25 @@ public class VendorDataSeederService {
         storeB.setOwner(vendorFlower);
         storeRepository.save(storeB);
 
-        // Một người quản lý khác, không dùng cùng họ tên hoặc bí danh theo chức vụ.
+        // Nhân viên hỗ trợ của chi nhánh, không cấp quyền quản lý.
         User vendorAlias = userRepository.findByUsername("tranminhtuan").or(() -> userRepository.findByEmail("vendor.demo@rentalshop.vn")).orElseGet(() -> userRepository.save(User.builder()
                 .username("tranminhtuan")
                 .password(passwordEncoder.encode("123456"))
                 .fullName("Trần Minh Tuấn")
                 .email("vendor.demo@rentalshop.vn")
                 .phone("0988776699")
-                .role(Role.MANAGER)
+                .role(Role.STAFF)
                 .store(storeB)
                 .isActive(true)
                 .isEmailActive(true)
                 .createdDate(LocalDate.now().minusMonths(4))
                 .build()));
-        vendorAlias.setRole(Role.MANAGER);
-        vendorAlias.addRole(Role.MANAGER);
+        vendorAlias.setRole(Role.STAFF);
+        vendorAlias.getRoles().remove(Role.MANAGER);
+        vendorAlias.addRole(Role.STAFF);
         vendorAlias.setStore(storeB);
         userRepository.save(vendorAlias);
 
-        // Thêm liên kết đối tác cho vendor_flower tại chi nhánh Quận 1 (để tab Danh Sách Cửa Hàng có 2 chi nhánh)
-        Store storeA = storeRepository.findFirstByNameOrderByIdAsc("Chi Nhánh Bến Thành (Quận 1)").orElse(null);
-        if (storeA != null && !storeA.getId().equals(storeB.getId())) {
-            if (storeMembershipRepository.findByUserIdAndStoreId(vendorFlower.getId(), storeA.getId()).isEmpty()) {
-                storeMembershipRepository.save(StoreMembership.builder()
-                        .user(vendorFlower)
-                        .store(storeA)
-                        .accessRole("PARTNER")
-                        .active(true)
-                        .joinedAt(LocalDateTime.now().minusMonths(2))
-                        .build());
-            }
-        }
 
         // 3. Khởi tạo đội ngũ nhân viên chi nhánh Phú Mỹ Hưng (Quản Lý Nhân Viên)
         staffSeeder.seed(storeB, vendorAlias);

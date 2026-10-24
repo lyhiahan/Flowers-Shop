@@ -40,6 +40,7 @@ public class OrderServiceImpl implements OrderService {
     private final java.time.Clock clock;
     private final com.finalproject.service.DemoPaymentService demoPayments;
     private final com.finalproject.config.MomoConfig momoConfig;
+    private final com.finalproject.service.CustomerWalletService customerWallet;
 
     @Override
     @Transactional
@@ -93,7 +94,8 @@ public class OrderServiceImpl implements OrderService {
                                LocalDate deliveryDate, String shippingMethod, Long pickupStoreId, Long deliveryUnitId,
                                String deliveryZone) {
         if (paymentMethod != PaymentMethod.COD && paymentMethod != PaymentMethod.BANK_TRANSFER
-                && paymentMethod != PaymentMethod.MOMO && paymentMethod != PaymentMethod.MOMO_DEMO) {
+                && paymentMethod != PaymentMethod.MOMO && paymentMethod != PaymentMethod.MOMO_DEMO
+                && paymentMethod != PaymentMethod.WALLET_DEMO) {
             throw new IllegalArgumentException("Phương thức thanh toán chưa được hỗ trợ.");
         }
         if (paymentMethod == PaymentMethod.MOMO) momoConfig.requireEnabled();
@@ -281,6 +283,7 @@ public class OrderServiceImpl implements OrderService {
                 .paidAt(null)
                 .build();
         paymentRepository.save(payment);
+        if (paymentMethod == PaymentMethod.WALLET_DEMO) customerWallet.pay(savedOrder, payment);
 
         createdOrders.add(savedOrder);
 
@@ -637,6 +640,9 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại"));
         if (status == null) {
             return orderRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
+        }
+        if (status == OrderStatus.CANCELLED) {
+            return orderRepository.findCancelledByUserId(user.getId());
         }
         return orderRepository.findByUserIdAndStatusOrderByCreatedAtDesc(user.getId(), status);
     }

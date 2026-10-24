@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head><th:block th:replace="~{fragments/staff-layout :: assets('Chi tiết đơn hàng')}"></th:block></head>
+<body class="staff-page" th:attr="data-staff-store-id=${staffStore != null ? staffStore.id : null}">
+<header th:replace="~{fragments/staff-layout :: header('orders')}"></header>
+<main class="staff-main">
+    <a th:href="@{/staff/orders}" class="staff-order-link d-inline-block mb-3"><i class="bi bi-arrow-left" aria-hidden="true"></i> Danh sách đơn hàng</a>
+    <div class="staff-page-heading">
+        <div><h1 th:text="${'Đơn hàng #HD' + order.id}"></h1><p th:if="${order.createdAt != null}" th:text="${'Đặt lúc ' + #temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}"></p></div>
+        <span class="staff-status" th:text="${order.status.displayName}"></span>
+    </div>
+    <th:block th:replace="~{fragments/staff-layout :: alerts}"></th:block>
+    <section class="staff-card" aria-label="Tiến trình đơn hàng">
+        <ol class="staff-timeline"><li th:each="step, stepStat : ${steps}" th:classappend="${stepStat.index == stepIndex ? 'is-current' : (stepStat.index < stepIndex ? 'is-done' : '')}" th:attr="aria-current=${stepStat.index == stepIndex ? 'step' : null}" th:text="${step.displayName}"></li></ol>
+        <p th:if="${stepIndex < 0}" class="staff-note mt-3 mb-0" th:text="${'Trạng thái hiện tại: ' + order.status.displayName}"></p>
+    </section>
+    <div class="staff-detail-grid">
+        <div>
+            <section class="staff-card">
+                <h2 th:text="${order.pickup ? 'Thông tin khách nhận tại quầy' : 'Thông tin giao hoa'}"></h2>
+                <dl class="staff-facts">
+                    <dt>Người nhận</dt><dd th:text="${order.recipientName ?: order.user.fullName}"></dd>
+                    <dt>Số điện thoại</dt><dd><a th:if="${order.recipientPhone != null or order.user.phone != null}" th:href="${'tel:' + (order.recipientPhone ?: order.user.phone)}" th:text="${order.recipientPhone ?: order.user.phone}"></a><span th:unless="${order.recipientPhone != null or order.user.phone != null}">Chưa có số điện thoại</span></dd>
+                    <dt>Hình thức</dt><dd th:text="${order.pickup ? 'Nhận tại quầy' : 'Giao tận nơi'}"></dd>
+                    <dt th:text="${order.pickup ? 'Địa điểm nhận' : 'Địa chỉ giao'}"></dt><dd th:text="${order.pickup ? order.pickupStore.address : (order.recipientAddress ?: 'Chưa có địa chỉ giao hoa')}"></dd>
+                    <dt>Ngày hẹn</dt><dd th:text="${order.deliveryDate != null ? #temporals.format(order.deliveryDate, 'dd/MM/yyyy') : 'Chưa có lịch hẹn'}"></dd>
+                    <dt>Giờ hẹn</dt><dd th:text="${order.deliveryTime != null ? #temporals.format(order.deliveryTime, 'HH:mm') : 'Chưa có giờ hẹn'}"></dd>
+                    <dt>Chi nhánh</dt><dd th:text="${order.pickupStore.name}"></dd>
+                    <th:block th:if="${!order.pickup}"><dt>Đơn vị giao</dt><dd th:text="${deliveryUnit != null ? deliveryUnit.name : 'Chưa có đơn vị giao hàng'}"></dd></th:block>
+                </dl>
+                <div class="border-top mt-3 pt-3"><strong>Lời chúc trên thiệp</strong><p class="mt-2 mb-0" style="white-space:pre-wrap" th:text="${order.greetingMessage != null and !#strings.isEmpty(order.greetingMessage) ? order.greetingMessage : 'Không có lời chúc'}"></p></div>
+            </section>
+            <section class="staff-card">
+                <h2>Hoa cần chuẩn bị</h2>
+                <div class="table-responsive"><table class="table align-middle">
+                    <thead><tr><th>Sản phẩm</th><th>Số lượng</th><th>Đơn giá</th><th>Thành tiền</th></tr></thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(order.orderDetails)}"><td colspan="4" class="text-muted">Chưa có thông tin sản phẩm. Liên hệ quản lý trước khi xử lý.</td></tr>
+                        <tr th:each="line : ${order.orderDetails}">
+                            <td><div class="staff-product"><img th:if="${line.product != null and line.product.imageUrl != null}" th:src="${line.product.imageUrl}" alt="Ảnh sản phẩm"><strong th:text="${line.product != null ? line.product.name : 'Sản phẩm trong đơn'}"></strong></div></td>
+                            <td th:text="${line.quantity}"></td>
+                            <td th:text="${#numbers.formatDecimal(line.unitPrice ?: 0, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></td>
+                            <td th:text="${#numbers.formatDecimal(line.subtotal, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></td>
+                        </tr>
+                    </tbody>
+                </table></div>
+                <p class="staff-note mb-0">Kiểm tra đúng mẫu hoa, số lượng, thiệp và thời gian hẹn trước khi bàn giao.</p>
+            </section>
+            <section th:if="${order.cancellationReason != null}" class="staff-card"><h2>Thông tin hủy / hoàn tiền</h2><p class="mb-0" th:text="${order.cancellationReason}"></p></section>
+        </div>
+        <div>
+            <section class="staff-card">
+                <h2>Thanh toán của đơn</h2>
+                <dl class="staff-facts">
+                    <dt>Phương thức</dt><dd th:text="${order.paymentMethod == 'COD' ? 'COD · Thanh toán khi nhận hoa' : (order.paymentMethod == 'CASH' ? 'Tiền mặt tại quầy' : (order.paymentMethod == 'BANK_TRANSFER' ? 'Chuyển khoản' : order.paymentMethod))}"></dd>
+                    <dt>Trạng thái</dt><dd th:text="${order.paymentStatus == 'PAID' ? 'Đã thanh toán' : (order.paymentStatus == 'REFUNDED' ? 'Đã hoàn tiền' : 'Chưa thanh toán')}"></dd>
+                    <dt>Phí giao hoa</dt><dd th:text="${#numbers.formatDecimal(order.shippingFee ?: 0, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></dd>
+                    <dt>Giảm giá</dt><dd th:text="${#numbers.formatDecimal(order.discountAmount ?: 0, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></dd>
+                    <dt>Tổng đơn</dt><dd><strong th:text="${#numbers.formatDecimal(order.totalAmount ?: 0, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></strong></dd>
+                </dl>
+                <div class="border-top mt-3 pt-3"><span class="staff-note">COD / tiền mặt còn cần thu</span><div id="staffCashDue" class="staff-cod-amount" th:text="${#numbers.formatDecimal(order.amountToCollect, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></div></div>
+                <p class="staff-note mt-2 mb-0" th:if="${order.paymentMethod != 'COD' and order.paymentMethod != 'CASH' and order.paymentStatus != 'PAID'}">Đơn thanh toán trực tuyến cần được xác nhận đã thanh toán trước khi giao hoặc hoàn tất. Chuyển yêu cầu xác nhận chuyển khoản cho quản lý.</p>
+            </section>
+            <section class="staff-card">
+                <h2>Bước xử lý tiếp theo</h2>
+                <div th:each="action : ${orderActions}" class="mb-3">
+                    <p th:if="${action.status.name() == 'PREPARING'}" class="staff-note">Chỉ bắt đầu khi cửa hàng thực sự chuẩn bị hoa. Sau bước này khách không thể tự hủy đơn.</p>
+                    <button class="btn btn-success w-100" type="button" data-bs-toggle="modal" th:attr="data-bs-target=${'#staffAction-' + action.status}" th:text="${action.label}"></button>
+                    <div class="modal fade" th:id="${'staffAction-' + action.status}" tabindex="-1" th:attr="aria-labelledby=${'staffActionTitle-' + action.status}" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4">
+                            <form th:action="@{/staff/orders/status/{id}(id=${order.id})}" method="post">
+                                <input type="hidden" name="status" th:value="${action.status}"><input type="hidden" name="returnTo" value="detail">
+                                <div class="modal-header border-0"><h3 class="modal-title fs-5" th:id="${'staffActionTitle-' + action.status}">Xác nhận xử lý đơn</h3><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
+                                <div class="modal-body">
+                                    <p><strong th:text="${'#HD' + order.id}"></strong> · <span th:text="${action.label}"></span></p>
+                                    <p class="staff-note" th:if="${action.status.name() == 'PREPARING'}">Khách sẽ không thể tự hủy đơn sau khi cửa hàng bắt đầu chuẩn bị hoa.</p>
+                                    <div th:if="${action.collectCod}" class="alert alert-warning">
+                                        <p>Tiền cần thu: <strong th:text="${#numbers.formatDecimal(action.amount, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></strong></p>
+                                        <label class="d-flex gap-2"><input type="checkbox" class="form-check-input flex-shrink-0" name="codCollected" value="true" required><span>Tôi xác nhận đã giao hoa và thu đủ tiền COD / tiền mặt của đơn này.</span></label>
+                                    </div>
+                                    <p th:unless="${action.collectCod}" class="staff-note mb-0">Chỉ xác nhận khi công việc tương ứng đã thực hiện xong.</p>
+                                </div>
+                                <div class="modal-footer border-0"><button class="btn btn-light" type="button" data-bs-dismiss="modal">Quay lại</button><button class="btn btn-success" type="submit">Xác nhận</button></div>
+                            </form>
+                        </div></div>
+                    </div>
+                </div>
+                <p th:if="${#lists.isEmpty(orderActions)}" class="text-muted">Không có bước xử lý dành cho nhân viên ở trạng thái hiện tại.</p>
+                <p class="staff-note mb-0">Hủy đơn từ cửa hàng, xác nhận chuyển khoản và hoàn tiền do quản lý xử lý.</p>
+            </section>
+            <a th:href="@{/staff/chat}" class="btn btn-outline-success w-100"><i class="bi bi-chat-dots me-2" aria-hidden="true"></i>Mở hộp thư khách hàng</a>
+        </div>
+    </div>
+</main>
+<th:block th:replace="~{fragments/staff-layout :: scripts}"></th:block>
+</body>
+</html>

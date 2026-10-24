@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head><th:block th:replace="~{fragments/staff-layout :: assets('Tin nhắn khách hàng')}"></th:block></head>
+<body class="staff-page" th:attr="data-staff-store-id=${staffStore != null ? staffStore.id : null}">
+<header th:replace="~{fragments/staff-layout :: header('chat')}"></header>
+<main class="staff-main">
+    <div class="staff-page-heading"><div><h1>Tin nhắn khách hàng</h1><p>Đọc lịch sử và trả lời khách của chi nhánh phụ trách. Chọn một cuộc trò chuyện để bắt đầu.</p></div></div>
+    <th:block th:replace="~{fragments/staff-layout :: alerts}"></th:block>
+    <section class="staff-chat-shell" th:if="${staffStore != null}" aria-label="Hộp thư khách hàng chi nhánh">
+        <th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
+    </section>
+</main>
+<th:block th:replace="~{fragments/staff-layout :: scripts}"></th:block>
+</body>
+</html>

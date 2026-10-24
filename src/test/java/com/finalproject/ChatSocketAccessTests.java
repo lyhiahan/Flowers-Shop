@@ -17,12 +17,13 @@ import static org.mockito.Mockito.*;
 
 class ChatSocketAccessTests {
     UserRepository users;
+    com.finalproject.service.StoreAccessService access;
     ChannelInterceptor interceptor;
     User user;
     @BeforeEach void setup() {
         users=mock(UserRepository.class);
         var registration=mock(ChannelRegistration.class);
-        new WebSocketConfig(users,mock(StoreRepository.class)).configureClientInboundChannel(registration);
+        new WebSocketConfig(users,mock(StoreRepository.class),access=mock(com.finalproject.service.StoreAccessService.class)).configureClientInboundChannel(registration);
         var capture=org.mockito.ArgumentCaptor.forClass(ChannelInterceptor.class);
         verify(registration).interceptors(capture.capture());
         interceptor=capture.getValue();
@@ -58,8 +59,9 @@ class ChatSocketAccessTests {
     }
     @Test void managerSocketMustSubscribeToItsBoundBranchNotGenericOrForeignQueue() {
         user.setRole(Role.MANAGER);
-        when(users.findChatManagers(1L,Role.MANAGER)).thenReturn(java.util.List.of(user));
-        when(users.findChatManagers(2L,Role.MANAGER)).thenReturn(java.util.List.of(user));
+        when(access.managesStore(user,1L)).thenReturn(true);
+        when(access.managesStore(user,2L)).thenReturn(false);
+        assertThatThrownBy(()->interceptor.preSend(managerFrame(StompCommand.CONNECT,null,null,"2"),null)).isInstanceOf(AccessDeniedException.class);
         var connect=managerFrame(StompCommand.CONNECT,null,null,"1");
         assertThat(interceptor.preSend(connect,null)).isNotNull();
         assertThat(org.springframework.messaging.simp.SimpMessageHeaderAccessor.getSessionAttributes(connect.getHeaders())).containsEntry("chatStoreId",1L);
@@ -68,7 +70,7 @@ class ChatSocketAccessTests {
         for(String target:java.util.List.of("/user/queue/chat","/user/queue/chat.store.2","/user/queue/chat.support.2"))
             assertThatThrownBy(()->interceptor.preSend(managerFrame(StompCommand.SUBSCRIBE,target,1L,null),null)).isInstanceOf(AccessDeniedException.class);
         assertThatThrownBy(()->interceptor.preSend(managerFrame(StompCommand.SEND,"/app/chat.send",null,null),null)).isInstanceOf(AccessDeniedException.class);
-        when(users.findChatManagers(1L,Role.MANAGER)).thenReturn(java.util.List.of());
+        when(access.managesStore(user,1L)).thenReturn(false);
         assertThatThrownBy(()->interceptor.preSend(managerFrame(StompCommand.SEND,"/app/chat.send",1L,null),null)).isInstanceOf(AccessDeniedException.class);
     }
     @Test void unauthorizedBranchCannotBeBoundAndCustomersCannotSubscribeToManagerQueues() {
@@ -80,5 +82,18 @@ class ChatSocketAccessTests {
         user.setRole(Role.MANAGER);
         for(String target:java.util.List.of("1","-1","bad"))
             assertThatThrownBy(()->interceptor.preSend(managerFrame(StompCommand.CONNECT,null,null,target),null)).isInstanceOf(AccessDeniedException.class);
+    }
+
+    @Test void staffSocketUsesOnlyAssignedBranchCustomerQueueAndCannotReceiveInternalSupport() {
+        user.setRole(Role.STAFF);
+        when(access.managesStore(user,1L)).thenReturn(true);
+        assertThat(interceptor.preSend(managerFrame(StompCommand.CONNECT,null,null,"1"),null)).isNotNull();
+        assertThat(interceptor.preSend(managerFrame(StompCommand.SUBSCRIBE,"/user/queue/chat.store.1",1L,null),null)).isNotNull();
+        for (String target : java.util.List.of("/user/queue/chat.support.1", "/user/queue/chat.store.2", "/user/queue/chat"))
+            assertThatThrownBy(()->interceptor.preSend(managerFrame(StompCommand.SUBSCRIBE,target,1L,null),null))
+                    .isInstanceOf(AccessDeniedException.class);
+        when(access.managesStore(user,1L)).thenReturn(false);
+        assertThatThrownBy(()->interceptor.preSend(managerFrame(StompCommand.SEND,"/app/chat.send",1L,null),null))
+                .isInstanceOf(AccessDeniedException.class);
     }
 }

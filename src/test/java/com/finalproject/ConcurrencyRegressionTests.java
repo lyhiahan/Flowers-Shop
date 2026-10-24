@@ -75,6 +75,10 @@ class ConcurrencyRegressionTests {
 
     void cleanup(Fixture f) {
         new TransactionTemplate(transactionManager).executeWithoutResult(tx -> {
+            for (Long userId : f.userIds()) {
+                jdbc.update("delete from customer_wallet_entries where user_id=?", userId);
+                jdbc.update("delete from customer_wallets where user_id=?", userId);
+            }
             jdbc.update("delete from payments where order_id in (select id from orders where pickup_store_id=?)", f.storeId());
             jdbc.update("delete from order_details where order_id in (select id from orders where pickup_store_id=?)", f.storeId());
             jdbc.update("delete from transactions where store_id=?", f.storeId());

@@ -27,7 +27,7 @@ public class DemoStaffSeeder {
             storeMembershipRepository.save(StoreMembership.builder()
                     .user(partnerVendor)
                     .store(storeB)
-                    .accessRole("PARTNER")
+                    .accessRole("STAFF")
                     .active(true)
                     .joinedAt(LocalDateTime.now().minusMonths(3))
                     .build());
@@ -40,21 +40,22 @@ public class DemoStaffSeeder {
                 .fullName("Nguyễn Thị Mai Lan")
                 .email("mailan.florist@rentalshop.vn")
                 .phone("0938112233")
-                .role(Role.MANAGER)
+                .role(Role.STAFF)
                 .store(storeB)
                 .isActive(true)
                 .isEmailActive(true)
                 .createdDate(LocalDate.now().minusMonths(5))
                 .build()));
         staff1.setStore(storeB);
-        staff1.setRole(Role.MANAGER);
-        staff1.addRole(Role.MANAGER);
+        staff1.setRole(Role.STAFF);
+        staff1.getRoles().remove(Role.MANAGER);
+        staff1.addRole(Role.STAFF);
         userRepository.save(staff1);
         if (storeMembershipRepository.findByUserIdAndStoreId(staff1.getId(), storeB.getId()).isEmpty()) {
             storeMembershipRepository.save(StoreMembership.builder()
                     .user(staff1)
                     .store(storeB)
-                    .accessRole("PARTNER")
+                    .accessRole("STAFF")
                     .active(true)
                     .joinedAt(LocalDateTime.now().minusMonths(5))
                     .build());
@@ -67,21 +68,22 @@ public class DemoStaffSeeder {
                 .fullName("Trần Bảo Phúc")
                 .email("baophuc.orders@rentalshop.vn")
                 .phone("0938223344")
-                .role(Role.MANAGER)
+                .role(Role.STAFF)
                 .store(storeB)
                 .isActive(true)
                 .isEmailActive(true)
                 .createdDate(LocalDate.now().minusMonths(3))
                 .build()));
         staff2.setStore(storeB);
-        staff2.setRole(Role.MANAGER);
-        staff2.addRole(Role.MANAGER);
+        staff2.setRole(Role.STAFF);
+        staff2.getRoles().remove(Role.MANAGER);
+        staff2.addRole(Role.STAFF);
         userRepository.save(staff2);
         if (storeMembershipRepository.findByUserIdAndStoreId(staff2.getId(), storeB.getId()).isEmpty()) {
             storeMembershipRepository.save(StoreMembership.builder()
                     .user(staff2)
                     .store(storeB)
-                    .accessRole("PARTNER")
+                    .accessRole("STAFF")
                     .active(true)
                     .joinedAt(LocalDateTime.now().minusMonths(3))
                     .build());
@@ -94,21 +96,22 @@ public class DemoStaffSeeder {
                 .fullName("Lê Hoàng Khôi")
                 .email("hoangkhoi.stock@rentalshop.vn")
                 .phone("0938334455")
-                .role(Role.MANAGER)
+                .role(Role.STAFF)
                 .store(storeB)
                 .isActive(true)
                 .isEmailActive(true)
                 .createdDate(LocalDate.now().minusMonths(2))
                 .build()));
         staff3.setStore(storeB);
-        staff3.setRole(Role.MANAGER);
-        staff3.addRole(Role.MANAGER);
+        staff3.setRole(Role.STAFF);
+        staff3.getRoles().remove(Role.MANAGER);
+        staff3.addRole(Role.STAFF);
         userRepository.save(staff3);
         if (storeMembershipRepository.findByUserIdAndStoreId(staff3.getId(), storeB.getId()).isEmpty()) {
             storeMembershipRepository.save(StoreMembership.builder()
                     .user(staff3)
                     .store(storeB)
-                    .accessRole("PARTNER")
+                    .accessRole("STAFF")
                     .active(true)
                     .joinedAt(LocalDateTime.now().minusMonths(2))
                     .build());

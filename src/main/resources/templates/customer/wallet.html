@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/floral :: head('Ví của tôi')}"></head>
+<link rel="stylesheet" th:href="@{/css/customer-wallet.css}">
+<body class="floral-body">
+<header th:replace="~{fragments/floral :: header}"></header>
+<main class="flower-container py-4 wallet-page">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <h1 class="h3 mb-0"><i class="bi bi-wallet2 me-2" aria-hidden="true"></i>Ví của tôi</h1>
+        <a class="btn btn-outline-secondary" th:href="@{/customer/orders}"><i class="bi bi-bag-check me-2" aria-hidden="true"></i>Đơn hàng của tôi</a>
+    </div>
+    <section class="wallet-balance-band" aria-labelledby="balance-heading">
+        <div>
+            <h2 class="h6 text-secondary" id="balance-heading">Số dư ví</h2>
+            <p class="wallet-balance mb-0" id="customerWalletBalance" th:text="${#numbers.formatDecimal(walletBalance, 0, 'POINT', 0, 'COMMA')} + ' đ'">0 đ</p>
+        </div>
+        <a class="btn btn-success" th:href="@{/products}"><i class="bi bi-flower1 me-2" aria-hidden="true"></i>Chọn hoa</a>
+    </section>
+    <p class="small text-secondary py-3 mb-0">Không hỗ trợ nạp, rút hoặc chuyển tiền.</p>
+    <p th:unless="${walletEnabled}" class="text-warning-emphasis small">Thanh toán bằng ví hiện đang tắt. Lịch sử giao dịch vẫn được giữ nguyên.</p>
+    <section class="wallet-history" aria-labelledby="history-heading">
+        <h2 class="h5 py-3 mb-0" id="history-heading">Lịch sử giao dịch</h2>
+        <div th:if="${history.empty}" class="wallet-empty py-5 text-center">
+            <i class="bi bi-receipt fs-2 text-secondary" aria-hidden="true"></i>
+            <p class="mt-2 mb-0">Chưa có giao dịch ví</p>
+        </div>
+        <div th:unless="${history.empty}" class="table-responsive">
+            <table class="table align-middle wallet-table">
+                <thead><tr><th>Thời gian</th><th>Giao dịch</th><th>Đơn hàng</th><th class="text-end">Số tiền</th><th class="text-end">Số dư sau giao dịch</th></tr></thead>
+                <tbody>
+                <tr th:each="entry : ${history.content}">
+                    <td th:text="${#temporals.format(entry.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                    <td><i th:class="${entry.type == 'REFUND' ? 'bi bi-arrow-down-left text-success me-2' : 'bi bi-arrow-up-right text-secondary me-2'}" aria-hidden="true"></i><span th:text="${entry.type == 'REFUND' ? 'Hoàn tiền vào ví' : 'Thanh toán đơn hàng'}"></span></td>
+                    <td><a th:href="@{/customer/orders/{id}(id=${entry.orderId})}" th:text="'#' + ${entry.orderId}"></a></td>
+                    <td class="text-end fw-bold" th:classappend="${entry.type == 'REFUND' ? 'text-success' : 'text-danger'}" th:text="${entry.type == 'REFUND' ? '+' : '-'} + ${#numbers.formatDecimal(entry.amount, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
+                    <td class="text-end" th:text="${#numbers.formatDecimal(entry.balanceAfter, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <nav th:if="${history.totalPages > 1}" aria-label="Phân trang lịch sử ví" class="d-flex justify-content-between align-items-center gap-3 py-3">
+            <a th:if="${history.hasPrevious()}" th:href="@{/customer/wallet(page=${history.number - 1})}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-chevron-left me-1" aria-hidden="true"></i>Trước</a>
+            <span th:text="'Trang ' + ${history.number + 1} + ' / ' + ${history.totalPages}"></span>
+            <a th:if="${history.hasNext()}" th:href="@{/customer/wallet(page=${history.number + 1})}" class="btn btn-outline-secondary btn-sm">Sau<i class="bi bi-chevron-right ms-1" aria-hidden="true"></i></a>
+        </nav>
+    </section>
+</main>
+<footer th:replace="~{fragments/floral :: footer}"></footer>
+<th:block th:replace="~{fragments/floral :: scripts}"></th:block>
+</body>
+</html>

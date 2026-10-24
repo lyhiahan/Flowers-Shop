@@ -33,6 +33,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (isAdmin) {
             // ADMIN: Không được tự động cấp ROLE_USER (Tách bạch quản trị và mua hàng)
             authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        } else if (user.hasRole(com.finalproject.enums.Role.STAFF) && !user.hasRole(com.finalproject.enums.Role.MANAGER)) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_STAFF"));
         } else {
             // Người dùng thông thường (Customer, Vendor, Manager) giữ quyền Khách hàng
             authorities.add(new SimpleGrantedAuthority("ROLE_USER"));

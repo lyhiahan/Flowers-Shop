@@ -2,7 +2,6 @@ package com.finalproject.controller.admin;
 
 import com.finalproject.entity.User;
 import com.finalproject.enums.Role;
-import com.finalproject.repository.StoreRepository;
 import com.finalproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,12 +21,7 @@ public class AdminUserController {
     private final UserRepository userRepository;
     private final com.finalproject.service.AccountProvisioningService provisioning;
     private final com.finalproject.service.CustomerAccountClosureService accountClosure;
-    private final StoreRepository storeRepository;
-    private final com.finalproject.repository.OrderRepository orderRepository;
-    private final com.finalproject.repository.CartRepository cartRepository;
-    private final com.finalproject.repository.CartItemRepository cartItemRepository;
-    @jakarta.persistence.PersistenceContext
-    private jakarta.persistence.EntityManager entityManager;
+    private final com.finalproject.service.AccountDeletionService accountDeletion;
 
     @GetMapping
     public String listUsers(@RequestParam(value = "tab", required = false, defaultValue = "users") String tab,
@@ -119,76 +113,14 @@ public class AdminUserController {
     }
 
     @PostMapping("/delete/{id}")
-    @org.springframework.transaction.annotation.Transactional
     public String deleteUser(@PathVariable("id") Long id, Principal principal, RedirectAttributes ra) {
         try {
-            User user = userRepository.findLockedById(id).orElse(null);
-            if (user == null) {
-                ra.addFlashAttribute("errorMessage", "Không tìm thấy người dùng #" + id);
-                return "redirect:/admin/users?tab=users";
-            }
-            entityManager.refresh(user, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
-
-            // 1. Chặn xóa admin tối cao hoặc chính mình
-            if ("admin".equalsIgnoreCase(user.getUsername()) || (user.getRole() != null && user.getRole() == Role.ADMIN)) {
-                ra.addFlashAttribute("errorMessage", "Không thể xóa tài khoản Quản trị viên tối cao!");
-                return "redirect:/admin/users?tab=users";
-            }
-            if (principal != null && principal.getName().equalsIgnoreCase(user.getUsername())) {
-                ra.addFlashAttribute("errorMessage", "Bạn không thể tự xóa tài khoản của chính mình khi đang đăng nhập!");
-                return "redirect:/admin/users?tab=users";
-            }
-
-            // 2. Chặn xóa nếu là chủ cửa hàng
-            if (!storeRepository.findByOwnerId(id).isEmpty()) {
-                ra.addFlashAttribute("errorMessage", "Không thể xóa: Người dùng đang là Chủ sở hữu chi nhánh/cửa hàng. Vui lòng chuyển giao hoặc xóa cửa hàng trước!");
-                return "redirect:/admin/users?tab=users";
-            }
-
-            // 3. Chặn xóa nếu đã có đơn hàng (để bảo toàn hóa đơn và kế toán)
-            boolean hasOrders = !orderRepository.findByUserIdOrderByCreatedAtDesc(id).isEmpty()
-                    || orderRepository.existsByLegacyDeliveryContactId(id)
-                    || ((Number) entityManager.createNativeQuery("SELECT COUNT(*) FROM chat_conversations WHERE customer_id = :uid")
-                        .setParameter("uid", id).getSingleResult()).longValue() > 0
-                    || ((Number) entityManager.createNativeQuery("SELECT COUNT(*) FROM chat_messages WHERE sender_id = :uid")
-                        .setParameter("uid", id).getSingleResult()).longValue() > 0;
-            if (hasOrders) {
-                var result = accountClosure.disable(id, true);
-                ra.addFlashAttribute("successMessage", "Đã vô hiệu hóa tài khoản [" + user.getUsername()
-                        + "] theo yêu cầu xóa; giữ hồ sơ để bảo toàn chứng từ. " + result.message());
-                return "redirect:/admin/users?tab=users";
-            }
-
-            String username = user.getUsername();
-            String email = user.getEmail();
-
-            // 4. Xóa giỏ hàng và các phụ thuộc
-            cartRepository.findByUserId(id).ifPresent(c -> {
-                if (c.getItems() != null && !c.getItems().isEmpty()) {
-                    cartItemRepository.deleteAll(c.getItems());
-                }
-                cartRepository.delete(c);
-            });
-
-            // Xóa các bảng phụ thuộc an toàn bằng native queries
-            entityManager.createNativeQuery("DELETE FROM user_roles WHERE user_id = :uid").setParameter("uid", id).executeUpdate();
-            entityManager.createNativeQuery("DELETE FROM user_addresses WHERE user_id = :uid").setParameter("uid", id).executeUpdate();
-            entityManager.createNativeQuery("DELETE FROM product_wishlists WHERE user_id = :uid").setParameter("uid", id).executeUpdate();
-            entityManager.createNativeQuery("DELETE FROM recently_viewed WHERE user_id = :uid").setParameter("uid", id).executeUpdate();
-            entityManager.createNativeQuery("DELETE FROM notifications WHERE user_id = :uid").setParameter("uid", id).executeUpdate();
-            entityManager.createNativeQuery("DELETE FROM role_requests WHERE user_id = :uid").setParameter("uid", id).executeUpdate();
-            entityManager.createNativeQuery("DELETE FROM role_audit_logs WHERE user_id = :uid").setParameter("uid", id).executeUpdate();
-            entityManager.createNativeQuery("DELETE FROM otp_verifications WHERE user_id = :uid").setParameter("uid", id).executeUpdate();
-            entityManager.createNativeQuery("DELETE FROM user_follow_store WHERE user_id = :uid").setParameter("uid", id).executeUpdate();
-            entityManager.createNativeQuery("DELETE FROM activity_logs WHERE user_id = :uid").setParameter("uid", id).executeUpdate();
-            entityManager.createNativeQuery("DELETE FROM reviews WHERE user_id = :uid").setParameter("uid", id).executeUpdate();
-
-            // Xóa người dùng khỏi database
-            userRepository.delete(user);
-
-            ra.addFlashAttribute("successMessage", "Đã xóa vĩnh viễn tài khoản [" + username + "] và giải phóng email [" + email + "] thành công! Bây giờ có thể dùng email này để đăng ký tài khoản mới.");
+            String username = accountDeletion.delete(id, principal.getName());
+            ra.addFlashAttribute("successMessage", "Đã xóa tài khoản [" + username + "] thành công.");
+        } catch (IllegalArgumentException ex) {
+            ra.addFlashAttribute("errorMessage", ex.getMessage());
         } catch (Exception ex) {
-            ra.addFlashAttribute("errorMessage", "Lỗi khi xóa tài khoản: " + ex.getMessage());
+            ra.addFlashAttribute("errorMessage", "Không thể xóa tài khoản. Vui lòng thử lại.");
         }
         return "redirect:/admin/users?tab=users";
     }

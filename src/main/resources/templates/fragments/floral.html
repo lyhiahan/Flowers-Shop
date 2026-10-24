@@ -16,6 +16,28 @@
     <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
 </head>
 
+<form th:fragment="search" id="globalSearchForm" th:action="@{/products#product-catalog}" method="get" class="w-100" role="search">
+    <div class="header-search-box d-flex align-items-center">
+        <div class="header-search-type-wrapper">
+            <select id="searchScopeSelect" class="header-search-type" aria-label="Phạm vi tìm kiếm">
+                <option value="products" selected>🌸 Mẫu hoa</option>
+                <option value="stores">🏬 Cửa hàng</option>
+                <option value="users">👥 Người dùng</option>
+            </select>
+            <i class="bi bi-chevron-down header-search-type-icon" aria-hidden="true"></i>
+        </div>
+        <input type="search" id="headerSearchInput" name="keyword" th:value="${keyword}"
+            class="form-control header-search-input shadow-none flex-grow-1"
+            aria-label="Từ khóa tìm kiếm" placeholder="Tìm hoa hồng, cửa hàng hoặc người dùng...">
+        <button class="btn header-search-btn d-flex align-items-center gap-1 flex-shrink-0"
+            type="submit" id="btnHeaderSearch" title="Tìm kiếm" aria-label="Tìm kiếm">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <span class="d-none d-sm-inline">Tìm</span>
+        </button>
+    </div>
+    <script defer th:src="@{/js/global-search.js}"></script>
+</form>
+
 <!-- Header 2 Tầng Chuẩn Đồng Bộ Với Trang Chủ (index.html làm tham chiếu) -->
 <header th:fragment="header" class="header-main-bar sticky-top shadow-sm" style="z-index: 1020; padding: 0; background-color: var(--flower-surface, #FFFCF8);">
     <!-- Tầng 1: Dòng chính (Logo, Ô tìm kiếm đa năng, Bookmark, Giỏ hàng, Chuông thông báo, Tài khoản) -->
@@ -31,33 +53,12 @@
                 </div>
 
                 <!-- Ô tìm kiếm thông minh 3 phạm vi -->
-                <div class="col-lg-6 col-md-5 col-12 order-3 order-md-2">
-                    <form id="globalSearchForm" th:action="@{/products#product-catalog}" method="get" class="w-100">
-                        <div class="header-search-box d-flex align-items-center">
-                            <div class="header-search-type-wrapper">
-                                <select id="searchScopeSelect" class="header-search-type"
-                                    onchange="this.style.width = this.value === 'users' ? '115px' : (this.value === 'stores' ? '103px' : '96px')"
-                                    style="width: 96px;">
-                                    <option value="products" selected>🌸 Mẫu hoa</option>
-                                    <option value="stores">🏬 Cửa hàng</option>
-                                    <option value="users">👥 Người dùng</option>
-                                </select>
-                                <i class="bi bi-chevron-down header-search-type-icon" style="font-size: 11px;"></i>
-                            </div>
-                            <input type="text" id="headerSearchInput" name="keyword" th:value="${keyword}"
-                                class="form-control header-search-input shadow-none flex-grow-1"
-                                placeholder="Tìm hoa tươi, cửa hàng hoặc người dùng...">
-                            <button class="btn header-search-btn d-flex align-items-center gap-1 flex-shrink-0"
-                                type="submit" id="btnHeaderSearch" title="Tìm kiếm">
-                                <i class="bi bi-search" style="font-size: 13px;"></i>
-                                <span class="d-none d-sm-inline">Tìm</span>
-                            </button>
-                        </div>
-                    </form>
+                <div class="col-lg-6 col-md-6 col-12 order-3 order-md-2">
+                    <form th:replace="~{fragments/floral :: search}"></form>
                 </div>
 
                 <!-- Các nút hành động bên phải: Theo dõi, Giỏ hàng, Thông báo, Tài khoản -->
-                <div class="col-lg-3 col-md-4 col-6 order-2 order-md-3 d-flex align-items-center justify-content-end gap-2 gap-sm-3">
+                <div class="storefront-header-actions col-lg-3 col-md-3 col-6 order-2 order-md-3 d-flex align-items-center justify-content-end gap-2 gap-sm-3">
                     <!-- Phím tắt theo dõi -->
                     <a sec:authorize="hasRole('USER')" th:href="@{/following}" class="header-cart-link" id="navFollowingHeader" title="Bộ sưu tập theo dõi">
                         <i class="bi bi-bookmark-heart"></i>
@@ -164,6 +165,11 @@
                                 </a>
                             </li>
 
+                            <li sec:authorize="hasRole('USER')">
+                                <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/customer/wallet}">
+                                    <i class="bi bi-wallet2 text-secondary" aria-hidden="true"></i><span>Ví của tôi</span>
+                                </a>
+                            </li>
                             <th:block th:replace="~{fragments/chat-widget :: system-chat-link}"></th:block>
 
                             <!-- Thông báo của tôi -->
@@ -285,26 +291,6 @@
     <script th:src="@{/js/notifications-realtime.js}"></script>
     <!-- Script điều hướng tìm kiếm thông minh theo phạm vi (🌸 Mẫu hoa / 🏬 Cửa hàng / 👥 Người dùng) -->
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const scopeSel = document.getElementById('searchScopeSelect');
-            if (scopeSel) {
-                scopeSel.style.width = scopeSel.value === 'users' ? '115px' : (scopeSel.value === 'stores' ? '103px' : '96px');
-            }
-        });
-
-        document.getElementById('globalSearchForm')?.addEventListener('submit', function (e) {
-            const scope = document.getElementById('searchScopeSelect')?.value;
-            const kwInput = this.querySelector('input[name="keyword"]');
-            const kw = kwInput ? kwInput.value.trim() : '';
-            if (scope === 'users') {
-                e.preventDefault();
-                window.location.href = '/users' + (kw ? '?keyword=' + encodeURIComponent(kw) : '');
-            } else if (scope === 'stores') {
-                e.preventDefault();
-                window.location.href = '/stores' + (kw ? '?keyword=' + encodeURIComponent(kw) : '');
-            }
-        });
-
         // Tự động kích hoạt trạng thái active cho thanh điều hướng tinh gọn giống trang chủ Mẫu hoa
         (function() {
             var path = window.location.pathname.replace(/\/$/, '') || '/';

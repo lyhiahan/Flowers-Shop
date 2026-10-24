@@ -12,6 +12,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final com.finalproject.repository.UserRepository users;
     private final com.finalproject.repository.StoreRepository stores;
+    private final com.finalproject.service.StoreAccessService storeAccess;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -47,20 +48,20 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     if (!Boolean.TRUE.equals(sender.getIsActive()) || Boolean.TRUE.equals(sender.getAccountDisabledByAdmin()) || sender.isRetiredDeliveryAccount()) {
                         throw new org.springframework.security.access.AccessDeniedException("Tài khoản đã bị khóa.");
                     }
-                    boolean manager = sender.hasRole(com.finalproject.enums.Role.MANAGER) && !sender.hasRole(com.finalproject.enums.Role.ADMIN);
+                    boolean manager = sender.isStoreWorker() && !sender.hasRole(com.finalproject.enums.Role.ADMIN);
                     if (manager && command == org.springframework.messaging.simp.stomp.StompCommand.CONNECT
                             && headers.getFirstNativeHeader("chat-store-id") != null) {
                         Long branch;
                         try { branch = Long.valueOf(headers.getFirstNativeHeader("chat-store-id")); }
                         catch (NumberFormatException ex) { throw new org.springframework.security.access.AccessDeniedException("Chi nhánh chat không hợp lệ."); }
-                        if (branch <= 0 || users.findChatManagers(branch, com.finalproject.enums.Role.MANAGER).stream().noneMatch(m -> m.getId().equals(sender.getId())))
+                        if (branch <= 0 || !storeAccess.managesStore(sender, branch))
                             throw new org.springframework.security.access.AccessDeniedException("Không có quyền chat chi nhánh này.");
                         if (headers.getSessionAttributes() == null) throw new org.springframework.security.access.AccessDeniedException("Phiên chat không hợp lệ.");
                         headers.getSessionAttributes().put("chatStoreId", branch);
                     }
                     if (manager && command == org.springframework.messaging.simp.stomp.StompCommand.SEND) {
                         Object branch = headers.getSessionAttributes() == null ? null : headers.getSessionAttributes().get("chatStoreId");
-                        if (!(branch instanceof Long id) || users.findChatManagers(id, com.finalproject.enums.Role.MANAGER).stream().noneMatch(m -> m.getId().equals(sender.getId())))
+                        if (!(branch instanceof Long id) || !storeAccess.managesStore(sender, id))
                             throw new org.springframework.security.access.AccessDeniedException("Phiên chat không có quyền chi nhánh.");
                     }
                     if (command == org.springframework.messaging.simp.stomp.StompCommand.SEND
@@ -79,15 +80,17 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     }
                     if ("/user/queue/chat.errors".equals(destination) || "/user/queue/chat.acks".equals(destination)) return message;
                     if ("/user/queue/chat".equals(destination)) {
-                        if (user.hasRole(com.finalproject.enums.Role.MANAGER) && !user.hasRole(com.finalproject.enums.Role.ADMIN))
+                        if (user.isStoreWorker() && !user.hasRole(com.finalproject.enums.Role.ADMIN))
                             throw new org.springframework.security.access.AccessDeniedException("Quản lý phải nhận chat theo chi nhánh.");
                         return message;
                     }
                     if (destination.matches("^/user/queue/chat\\.(store|support)\\.[0-9]+$")) {
                         Long branch = Long.valueOf(destination.substring(destination.lastIndexOf('.')+1));
+                        if (destination.contains(".support.") && !user.hasRole(com.finalproject.enums.Role.MANAGER))
+                            throw new org.springframework.security.access.AccessDeniedException("Nhân viên không có quyền hỗ trợ nội bộ.");
                         Object bound = headers.getSessionAttributes() == null ? null : headers.getSessionAttributes().get("chatStoreId");
-                        if (!user.hasRole(com.finalproject.enums.Role.MANAGER) || user.hasRole(com.finalproject.enums.Role.ADMIN)
-                                || !branch.equals(bound) || users.findChatManagers(branch, com.finalproject.enums.Role.MANAGER).stream().noneMatch(m -> m.getId().equals(user.getId())))
+                        if (!user.isStoreWorker() || user.hasRole(com.finalproject.enums.Role.ADMIN)
+                                || !branch.equals(bound) || !storeAccess.managesStore(user, branch))
                             throw new org.springframework.security.access.AccessDeniedException("Không có quyền nhận chat chi nhánh này.");
                         return message;
                     }
@@ -95,9 +98,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         Long storeId = Long.valueOf(destination.split("/")[3]);
                         stores.findById(storeId).orElseThrow();
                         boolean roleAllowed = user.hasRole(com.finalproject.enums.Role.ADMIN)
-                                || user.hasRole(com.finalproject.enums.Role.MANAGER);
+                                || user.isStoreWorker();
                         boolean allowed = user.hasRole(com.finalproject.enums.Role.ADMIN)
-                                || users.findChatManagers(storeId, com.finalproject.enums.Role.MANAGER).stream().anyMatch(m -> m.getId().equals(user.getId()));
+                                || storeAccess.managesStore(user, storeId);
                         if (!roleAllowed || !allowed) {
                             throw new org.springframework.security.access.AccessDeniedException("Không có quyền nhận thông báo chi nhánh này.");
                         }

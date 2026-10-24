@@ -1371,12 +1371,14 @@ h2.section-title, h3.section-title, .h2-title {
 
 .header-search-box {
     background: #FFFFFF !important;
-    border: 1.5px solid var(--flower-border, #E7DED4) !important;
+    border: 1px solid var(--flower-border, #E7DED4) !important;
     border-radius: 9999px !important;
-    padding: 3px 6px 3px 12px !important;
+    padding: 2px 5px 2px 12px !important;
     box-shadow: 0 1px 3px rgba(41, 59, 50, 0.03) !important;
     transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
     width: 100% !important;
+    min-height: 40px;
+    min-width: 0;
 }
 
 .header-search-box:focus-within {
@@ -1397,14 +1399,42 @@ h2.section-title, h3.section-title, .h2-title {
     background: transparent !important;
     font-size: 13.5px !important;
     color: #4A3E3D !important;
-    font-weight: 600 !important;
-    padding: 2px 4px !important;
+    font-weight: 500 !important;
+    width: 100px;
+    height: 30px;
+    padding: 2px 20px 2px 2px !important;
+    appearance: none;
+    -webkit-appearance: none;
     outline: none !important;
     border: none !important;
     cursor: pointer !important;
 }
 
+.header-search-type-wrapper:has(option[value="stores"]:checked) .header-search-type {
+    width: 110px;
+}
+
+.header-search-type-wrapper:has(option[value="users"]:checked) .header-search-type {
+    width: 126px;
+}
+
+.header-search-type-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    font-size: 11px;
+    color: var(--flower-text-main, #293B32);
+}
+
+.header-search-type:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
 .header-search-input {
+    min-width: 0;
     border: none !important;
     outline: none !important;
     font-size: 13.5px !important;
@@ -1420,6 +1450,7 @@ h2.section-title, h3.section-title, .h2-title {
 }
 
 .header-search-btn {
+    min-height: 32px;
     background-color: var(--flower-primary, #355447) !important;
     border: none !important;
     color: #ffffff !important;
@@ -1433,6 +1464,53 @@ h2.section-title, h3.section-title, .h2-title {
 .header-search-btn:hover {
     background-color: var(--flower-primary-hover, #243D32) !important;
     color: #ffffff !important;
+}
+
+@media (max-width: 991.98px) {
+    .storefront-header-actions {
+        gap: 6px !important;
+    }
+
+    .storefront-header-actions .account-pill-btn > span {
+        display: none !important;
+    }
+
+    .storefront-header-actions .account-pill-btn {
+        padding: 6px 10px !important;
+    }
+
+    .header-main-bar .storefront-header-actions .header-cart-link {
+        padding: 4px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .header-main-bar .brand-logo-text {
+        min-width: 0;
+        font-size: 15px !important;
+        line-height: 1.2 !important;
+        letter-spacing: 0 !important;
+    }
+
+    .header-main-bar .brand-logo-img {
+        width: 32px !important;
+        height: 32px !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .storefront-header-actions {
+        gap: 4px !important;
+    }
+
+    .header-main-bar .storefront-header-actions .header-cart-link {
+        padding: 2px;
+        font-size: 18px;
+    }
+
+    .storefront-header-actions .account-pill-btn {
+        padding: 6px !important;
+    }
 }
 
 a.header-cart-link:not(.btn),

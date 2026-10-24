@@ -123,6 +123,19 @@ public class Order {
     }
 
     @Transient
+    public boolean isPickup() {
+        return "PICKUP".equals(shippingMethod) || "STORE_PICKUP".equals(shippingMethod);
+    }
+
+    @Transient
+    public BigDecimal getAmountToCollect() {
+        if ((!"COD".equals(paymentMethod) && !"CASH".equals(paymentMethod)) || "PAID".equals(paymentStatus) || "REFUNDED".equals(paymentStatus)
+                || status == OrderStatus.CANCELLED || status == OrderStatus.REFUNDED || status == OrderStatus.REFUND_REQUESTED)
+            return BigDecimal.ZERO;
+        return totalAmount == null ? BigDecimal.ZERO : totalAmount.max(BigDecimal.ZERO);
+    }
+
+    @Transient
     public String getCancellationActorDisplay() {
         if (cancellationReason == null || cancellationReason.isBlank()) return null;
         String lower = cancellationReason.toLowerCase();
@@ -143,7 +156,7 @@ public class Order {
         if (text.toLowerCase().startsWith("lý do:")) {
             text = text.substring("lý do:".length()).trim();
         }
-        return text;
+        return text.replace("ví demo", "ví");
     }
 }
 

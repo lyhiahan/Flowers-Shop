@@ -28,6 +28,10 @@ public class OrderFundsService {
     private final TransactionRepository transactions;
     private final EntityManager entityManager;
 
+    public static boolean isDemoFunded(Order order) {
+        return "MOMO_DEMO".equals(order.getPaymentMethod()) || "WALLET_DEMO".equals(order.getPaymentMethod());
+    }
+
     public void holdPaidOrders(List<Order> orders) {
         Map<Long, Store> lockedStores = new HashMap<>();
         // A checkout can span branches; all confirmations acquire branch locks in the same order.
@@ -37,7 +41,7 @@ public class OrderFundsService {
             lockedStores.put(id, store);
         }
         for (Order order : orders) {
-            if (!"MOMO_DEMO".equals(order.getPaymentMethod()) || !"PAID".equals(order.getPaymentStatus()))
+            if (!isDemoFunded(order) || !"PAID".equals(order.getPaymentStatus()))
                 throw new IllegalStateException("Chỉ giữ tiền cho giao dịch MoMo demo đã thanh toán.");
             if (order.getFundsStatus() == OrderFundsStatus.HELD) {
                 validateSnapshot(order);
@@ -75,7 +79,7 @@ public class OrderFundsService {
     }
 
     public boolean refundHeld(Order order, Store store) {
-        if (!"MOMO_DEMO".equals(order.getPaymentMethod())) return false;
+        if (!isDemoFunded(order)) return false;
         if (order.getFundsStatus() == OrderFundsStatus.SETTLED) {
             validateSnapshot(order);
             return false;

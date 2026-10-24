@@ -206,6 +206,9 @@ class CodStockKpiTests {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.currentStockQuantity").value(4_000_000_010L));
         mvc.perform(get("/manager/dashboard/stock").param("storeId", empty.getId().toString())
                         .with(user(manager.getUsername()).roles("MANAGER")))
+                .andExpect(status().isForbidden());
+        mvc.perform(get("/manager/dashboard/stock").param("storeId", empty.getId().toString())
+                        .with(user(admin.getUsername()).roles("ADMIN")))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.currentStockQuantity").value(0));
     }
 

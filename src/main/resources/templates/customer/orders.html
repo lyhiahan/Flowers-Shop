@@ -8,84 +8,33 @@
 <main class="floral-main-content py-4">
     <div class="flower-container" style="max-width: 1240px; margin: 0 auto; padding: 0 20px;">
         
-        <!-- Grounded Hero Container -->
-        <section class="floral-hero-card">
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
-                <div>
-                    <nav aria-label="breadcrumb" class="mb-1">
-                        <ol class="breadcrumb mb-0" style="font-size: 13.5px;">
-                            <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none text-muted">Trang chủ</a></li>
-                            <li class="breadcrumb-item active fw-bold" style="color: #A64060;" aria-current="page">Đơn hoa của tôi</li>
-                        </ol>
-                    </nav>
-                    <h1 class="fw-bold mb-1" style="font-family: 'Nunito', Arial, sans-serif !important; font-size: 26px; color: #293B32;">
-                        Đơn Hoa Của Tôi
-                    </h1>
-                    <p class="text-muted mb-0" style="font-size: 15px;">
-                        Theo dõi tiến trình cắm hoa tươi, trạng thái vận chuyển và lịch sử các đơn hoa của bạn
-                    </p>
+        <section class="customer-orders-heading" aria-labelledby="customerOrdersTitle">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/}">Trang chủ</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Đơn hoa của tôi</li>
+                </ol>
+            </nav>
+            <div class="customer-orders-toolbar">
+                <div class="customer-orders-title">
+                    <h1 id="customerOrdersTitle">Đơn hoa của tôi</h1>
+                    <span class="customer-orders-count" th:text="(${totalOrders != null ? totalOrders : 0}) + ' đơn hàng'">0 đơn hàng</span>
                 </div>
-                <div>
-                    <span class="floral-count-badge">
-                        <i class="bi bi-box2-heart-fill"></i>
-                        <span th:text="(${totalOrders != null ? totalOrders : 0}) + ' đơn đặt hoa'">0 đơn đặt hoa</span>
-                    </span>
-                </div>
-            </div>
-
-
-            <!-- Thanh Lọc Trạng Thái Đơn Hoa (Đồng bộ Bootstrap Icons & Font chữ) -->
-            <div class="border-top pt-3" style="border-color: #F1EAE2 !important;">
-                <div class="fw-bold text-muted mb-2 d-flex align-items-center gap-2" style="font-size: 14px;">
-                    <i class="bi bi-funnel-fill text-success"></i> Trạng thái đơn hoa:
-                </div>
-                <nav class="d-flex flex-wrap gap-2" aria-label="Lọc trạng thái">
-                    <a class="status-filter-pill"
-                       th:classappend="${currentStatus == 'ALL' or currentStatus == null} ? 'active' : ''"
-                       th:href="@{/customer/orders}">
-                        <i class="bi bi-grid-fill"></i> Tất cả
-                    </a>
-                    <a class="status-filter-pill"
-                       th:classappend="${currentStatus == 'PENDING'} ? 'active' : ''"
-                       th:href="@{/customer/orders(status='PENDING')}">
-                        <i class="bi bi-hourglass-split"></i> Chờ xác nhận
-                    </a>
-                    <a class="status-filter-pill"
-                       th:classappend="${currentStatus == 'CONFIRMED'} ? 'active' : ''"
-                       th:href="@{/customer/orders(status='CONFIRMED')}">
-                        <i class="bi bi-check2-circle"></i> Đã xác nhận
-                    </a>
-                    <a class="status-filter-pill"
-                       th:classappend="${currentStatus == 'PREPARING'} ? 'active' : ''"
-                       th:href="@{/customer/orders(status='PREPARING')}">
-                        <i class="bi bi-flower1"></i> Đang chuẩn bị
-                    </a>
-                    <a class="status-filter-pill"
-                       th:classappend="${currentStatus == 'DELIVERING'} ? 'active' : ''"
-                       th:href="@{/customer/orders(status='DELIVERING')}">
-                        <i class="bi bi-truck"></i> Đang giao
-                    </a>
-                    <a class="status-filter-pill"
-                       th:classappend="${currentStatus == 'COMPLETED'} ? 'active' : ''"
-                       th:href="@{/customer/orders(status='COMPLETED')}">
-                        <i class="bi bi-check-circle-fill"></i> Hoàn tất
-                    </a>
-                    <a class="status-filter-pill"
-                       th:classappend="${currentStatus == 'CANCELLED'} ? 'active' : ''"
-                       th:href="@{/customer/orders(status='CANCELLED')}">
-                        <i class="bi bi-x-circle"></i> Đã hủy
-                    </a>
-                    <a class="status-filter-pill"
-                       th:classappend="${currentStatus == 'REFUND_REQUESTED'} ? 'active' : ''"
-                       th:href="@{/customer/orders(status='REFUND_REQUESTED')}">
-                        <i class="bi bi-arrow-counterclockwise"></i> Chờ hoàn tiền
-                    </a>
-                    <a class="status-filter-pill"
-                       th:classappend="${currentStatus == 'REFUNDED'} ? 'active' : ''"
-                       th:href="@{/customer/orders(status='REFUNDED')}">
-                        <i class="bi bi-cash-stack"></i> Đã hoàn tiền
-                    </a>
-                </nav>
+                <form class="customer-orders-filter" th:action="@{/customer/orders}" method="get">
+                    <label for="orderStatusFilter">Trạng thái</label>
+                    <select id="orderStatusFilter" name="status" class="form-select" onchange="this.form.requestSubmit()">
+                        <option value="ALL" th:selected="${currentStatus == null or currentStatus == 'ALL'}">Tất cả</option>
+                        <option value="PENDING" th:selected="${currentStatus == 'PENDING'}">Chờ xác nhận</option>
+                        <option value="CONFIRMED" th:selected="${currentStatus == 'CONFIRMED'}">Đã xác nhận</option>
+                        <option value="PREPARING" th:selected="${currentStatus == 'PREPARING'}">Đang chuẩn bị</option>
+                        <option value="DELIVERING" th:selected="${currentStatus == 'DELIVERING'}">Đang giao</option>
+                        <option value="COMPLETED" th:selected="${currentStatus == 'COMPLETED'}">Hoàn tất</option>
+                        <option value="CANCELLED" th:selected="${currentStatus == 'CANCELLED'}">Đã hủy</option>
+                        <option value="REFUND_REQUESTED" th:selected="${currentStatus == 'REFUND_REQUESTED'}">Chờ hoàn tiền</option>
+                        <option value="REFUNDED" th:selected="${currentStatus == 'REFUNDED'}">Đã hoàn tiền</option>
+                    </select>
+                    <noscript><button type="submit" class="btn btn-outline-secondary">Lọc</button></noscript>
+                </form>
             </div>
         </section>
 
@@ -121,6 +70,7 @@
                         <span th:if="${o.paymentMethod == 'BANK_TRANSFER'}" class="badge bg-primary rounded-pill text-white ms-1 px-3 py-1.5" style="font-size: 13px; font-weight: 600;">
                             <span th:text="${o.paymentStatus == 'PAID' ? 'VietQR: Đã thanh toán' : 'VietQR: Chờ chuyển khoản'}"></span>
                         </span>
+                        <span th:if="${o.paymentMethod == 'WALLET_DEMO'}" class="badge text-bg-success ms-1"><i class="bi bi-wallet2 me-1" aria-hidden="true"></i>Ví của tôi</span>
                         <span th:if="${o.paymentMethod == 'COD'}" class="badge rounded-pill text-dark ms-1 px-3 py-1.5" style="background-color: #E2E8F0; font-size: 13px; font-weight: 600;">
                             <span>COD: Tiền mặt</span>
                         </span>
@@ -162,8 +112,8 @@
 
                 <div class="card-body p-4">
                     <div th:if="${o.cancellationReason != null and !#strings.isEmpty(o.cancellationReason)}" class="alert alert-warning py-3 px-4 mb-3 rounded-3" role="alert" style="line-height: 1.5; font-size: 14.5px; border-radius: 12px !important; border: 1px solid #FDE68A; background-color: #FEF9C3;">
-                        <div class="fw-bold text-dark mb-1" style="font-size: 15.5px;" th:text="${#strings.containsIgnoreCase(o.cancellationReason, 'admin') ? 'Đã hủy bởi Admin' : (#strings.containsIgnoreCase(o.cancellationReason, 'quản lý') or #strings.containsIgnoreCase(o.cancellationReason, 'cửa hàng') ? 'Đã hủy bởi Cửa hàng' : 'Đã hủy đơn')}">Đã hủy đơn</div>
-                        <div class="text-secondary">Lý do: <span th:text="${#strings.contains(o.cancellationReason, 'với lý do:') ? #strings.substringAfter(o.cancellationReason, 'với lý do:') : (#strings.startsWith(#strings.toLowerCase(o.cancellationReason), 'lý do:') ? #strings.substring(o.cancellationReason, 6) : o.cancellationReason)}">không còn hàng.</span></div>
+                        <div class="fw-bold text-dark mb-1" style="font-size: 15.5px;" th:text="${o.cancellationActorDisplay}">Đã hủy đơn</div>
+                        <div class="text-secondary">Lý do: <span th:text="${o.cancellationReasonDetail}">không còn hàng.</span></div>
                     </div>
 
                     <!-- Sản phẩm là thông tin chính của thẻ đơn hàng. -->
@@ -294,8 +244,8 @@
                                            th:id="'cancelOtherReason_' + ${o.id}" placeholder="Nhập lý do của bạn (tối đa 200 ký tự)" style="border-radius: 12px; border-color: #E7DED4;">
                                 </div>
                                 <p class="small mb-0 mt-2">Bạn chỉ được hủy khi đơn chờ xác nhận hoặc đã xác nhận. Khi cửa hàng bắt đầu cắm hoa/chuẩn bị, bạn không thể tự hủy.</p>
-                                <p th:if="${o.paymentStatus == 'PAID' and o.paymentMethod == 'MOMO_DEMO'}" class="small text-success mb-0 mt-2">Đơn thanh toán MoMo sẽ được hoàn tiền tự động khi hủy, không cần cửa hàng xác nhận.</p>
-                                <p th:if="${o.paymentStatus == 'PAID' and o.paymentMethod != 'MOMO_DEMO'}" class="small text-warning-emphasis mb-0 mt-2">Đơn đã thanh toán sẽ chuyển sang chờ cửa hàng hoàn tiền.</p>
+                                <p th:if="${o.paymentStatus == 'PAID' and (o.paymentMethod == 'MOMO_DEMO' or o.paymentMethod == 'WALLET_DEMO')}" class="small text-success mb-0 mt-2">Đơn được hoàn tiền tự động vào ví khi hủy hợp lệ, không chuyển về MoMo hay ngân hàng thật. <a th:href="@{/customer/wallet}">Ví của tôi</a></p>
+                                <p th:if="${o.paymentStatus == 'PAID' and o.paymentMethod != 'MOMO_DEMO' and o.paymentMethod != 'WALLET_DEMO'}" class="small text-warning-emphasis mb-0 mt-2">Đơn đã thanh toán sẽ chuyển sang chờ cửa hàng hoàn tiền.</p>
                             </div>
                             <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
                                 <!-- Bấm nút Bỏ qua / Hủy thao tác -->
@@ -314,7 +264,7 @@
 
         <!-- Phân trang (UC_011 Step 6) -->
         <nav th:if="${totalPages > 1}" aria-label="Page navigation" class="mt-4 d-flex justify-content-center">
-            <ul class="pagination pagination-rounded shadow-sm gap-1">
+            <ul class="pagination pagination-rounded gap-1">
                 <!-- Chọn Trước -->
                 <li class="page-item" th:classappend="${!hasPrevious} ? 'disabled'">
                     <a class="page-link rounded-pill px-3" th:href="@{/customer/orders(status=${currentStatus}, page=${currentPage - 1})}" style="color: #293B32; border-color: #E7DED4; background: #FFFFFF;">

@@ -316,7 +316,7 @@
                         <div class="form-check mb-0 d-flex align-items-center gap-2">
                             <input class="form-check-input" type="checkbox" id="selectAll" checked onchange="toggleSelectAll(this)" style="cursor: pointer; width: 18px; height: 18px;">
                             <label class="form-check-label fw-bold text-dark user-select-none" for="selectAll" style="cursor: pointer;">
-                                Chọn tất cả (<span id="cartRowCount" th:text="${#lists.size(cart.items)}">0</span> mục sản phẩm &middot; Tổng số lượng: <span id="cartTotalQty" th:text="${totalQuantity != null ? totalQuantity : #lists.size(cart.items)}">0</span>)
+                                Chọn tất cả (<span id="cartRowCount" th:text="${selectableRowCount}">0</span> mục sản phẩm &middot; Tổng số lượng: <span id="cartTotalQty" th:text="${totalQuantity}">0</span>)
                             </label>
                         </div>
                         <span class="small text-muted d-none d-sm-inline"><i class="bi bi-shield-check text-success me-1"></i>100% hoa tươi nhập mới trong ngày</span>
@@ -799,10 +799,6 @@
                     if (checkbox.disabled) checkbox.checked = false;
                 }
             });
-            var rc = document.getElementById('cartRowCount');
-            if (rc) rc.innerText = state.rowCount;
-            var tq = document.getElementById('cartTotalQty');
-            if (tq) tq.innerText = state.count;
             document.querySelectorAll('.cart-badge-pill').forEach(function (b) {
                 b.textContent = state.count;
             });
@@ -885,6 +881,13 @@
 
         function updateSummary() {
             var enabledCheckboxes = document.querySelectorAll('.item-check:not(:disabled)');
+            var availableQty = 0;
+            enabledCheckboxes.forEach(function (cb) {
+                var row = document.getElementById('row_' + cb.value);
+                if (row) availableQty += parseInt(row.getAttribute('data-quantity'), 10) || 1;
+            });
+            document.getElementById('cartRowCount').innerText = enabledCheckboxes.length;
+            document.getElementById('cartTotalQty').innerText = availableQty;
             var selectAll = document.getElementById('selectAll');
             var container = document.getElementById('hiddenItemIdsContainer');
             var checkoutBtn = document.getElementById('checkoutBtn');

@@ -79,6 +79,7 @@ class ChatSessionIntegrationTests {
         User manager = account("socket_manager", Role.MANAGER);
         account("socket_admin", Role.ADMIN);
         Store store = stores.saveAndFlush(Store.builder().name("Socket branch").address("Branch address").owner(manager).status(true).build());
+        manager.setStore(store); users.saveAndFlush(manager);
         var customerCookies = login(customer.getUsername());
         var managerCookies = login(manager.getUsername());
         var adminCookies = login("socket_admin");
@@ -102,9 +103,11 @@ class ChatSessionIntegrationTests {
             send(managerSocket, branch, "Chi nhánh trả lời");
             assertThat(customerInbox.poll(10, TimeUnit.SECONDS)).contains("Chi nhánh trả lời");
             assertThat(managerInbox.poll(10, TimeUnit.SECONDS)).contains("Chi nhánh trả lời");
-            // Even a manager assigned to both branches gets separate per-connection inboxes.
-            Store secondStore=stores.saveAndFlush(Store.builder().name("Second socket branch").address("Second address").owner(manager).status(true).build());
-            var secondSocket=connect(client,managerCookies,secondStore.getId());opened.add(secondSocket);
+            // Each branch's designated manager receives only that branch's messages.
+            User secondManager=account("socket_manager_second",Role.MANAGER);
+            Store secondStore=stores.saveAndFlush(Store.builder().name("Second socket branch").address("Second address").owner(secondManager).status(true).build());
+            secondManager.setStore(secondStore);users.saveAndFlush(secondManager);
+            var secondSocket=connect(client,login(secondManager.getUsername()),secondStore.getId());opened.add(secondSocket);
             var secondInbox=new LinkedBlockingQueue<String>();var secondErrors=new LinkedBlockingQueue<String>();
             secondSocket.subscribe("/user/queue/chat.store."+secondStore.getId(),receiver(secondInbox));
             secondSocket.subscribe("/user/queue/chat.errors",receiver(secondErrors));

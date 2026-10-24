@@ -111,8 +111,8 @@
 
     <main class="container order-detail-container py-4 floral-page">
         <div th:if="${order.cancellationReason != null and !#strings.isEmpty(order.cancellationReason)}" class="alert alert-warning py-2 px-3 mb-4 rounded-4" role="alert" style="line-height: 1.4;">
-            <div class="fw-bold" th:text="${#strings.containsIgnoreCase(order.cancellationReason, 'admin') ? 'Đã hủy bởi Admin' : (#strings.containsIgnoreCase(order.cancellationReason, 'quản lý') or #strings.containsIgnoreCase(order.cancellationReason, 'cửa hàng') ? 'Đã hủy bởi Cửa hàng' : 'Đã hủy đơn')}">Đã hủy đơn</div>
-            <div>Lý do: <span th:text="${#strings.contains(order.cancellationReason, 'với lý do:') ? #strings.substringAfter(order.cancellationReason, 'với lý do:') : (#strings.startsWith(#strings.toLowerCase(order.cancellationReason), 'lý do:') ? #strings.substring(order.cancellationReason, 6) : order.cancellationReason)}">không còn hàng.</span></div>
+            <div class="fw-bold" th:text="${order.cancellationActorDisplay}">Đã hủy đơn</div>
+            <div>Lý do: <span th:text="${order.cancellationReasonDetail}">không còn hàng.</span></div>
         </div>
         <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-4 mb-4 shadow-sm border-0" role="alert">
             <i class="bi bi-check-circle-fill me-2"></i><span th:text="${successMessage}"></span>
@@ -195,6 +195,7 @@
                                 <span th:if="${order.paymentMethod == 'BANK_TRANSFER'}" class="badge bg-primary rounded-pill px-2 py-1 ms-1">
                                     <span th:text="${order.paymentStatus == 'REFUNDED' ? 'VietQR - Đã hoàn tiền' : (order.paymentStatus == 'PAID' ? 'VietQR - Đã chuyển khoản' : 'VietQR - Chờ chuyển khoản')}"></span>
                                 </span>
+                                <span th:if="${order.paymentMethod == 'WALLET_DEMO'}" class="badge text-bg-success px-2 py-1 ms-1"><i class="bi bi-wallet2 me-1" aria-hidden="true"></i>Ví của tôi</span>
                                 <span th:if="${order.paymentMethod == 'COD'}" class="badge bg-secondary rounded-pill px-2 py-1 ms-1">
                                     <span>COD (Tiền mặt khi nhận hoa)</span>
                                 </span>
@@ -326,8 +327,8 @@
                                    th:id="'cancelOtherReason_' + ${order.id}" placeholder="Nhập lý do của bạn (tối đa 200 ký tự)">
                         </div>
                         <p class="small mb-0 mt-2">Bạn chỉ được hủy khi đơn chờ xác nhận hoặc đã xác nhận. Khi cửa hàng bắt đầu cắm hoa/chuẩn bị, bạn không thể tự hủy.</p>
-                        <p th:if="${order.paymentStatus == 'PAID' and order.paymentMethod == 'MOMO_DEMO'}" class="small text-success mb-0 mt-2">Đơn thanh toán MoMo sẽ được hoàn tiền tự động khi hủy, không cần cửa hàng xác nhận.</p>
-                        <p th:if="${order.paymentStatus == 'PAID' and order.paymentMethod != 'MOMO_DEMO'}" class="small text-warning-emphasis mb-0 mt-2">Đơn đã thanh toán sẽ chuyển sang chờ cửa hàng hoàn tiền.</p>
+                        <p th:if="${order.paymentStatus == 'PAID' and (order.paymentMethod == 'MOMO_DEMO' or order.paymentMethod == 'WALLET_DEMO')}" class="small text-success mb-0 mt-2">Đơn được hoàn tiền tự động vào ví khi hủy hợp lệ, không chuyển về MoMo hay ngân hàng thật. <a th:href="@{/customer/wallet}">Ví của tôi</a></p>
+                        <p th:if="${order.paymentStatus == 'PAID' and order.paymentMethod != 'MOMO_DEMO' and order.paymentMethod != 'WALLET_DEMO'}" class="small text-warning-emphasis mb-0 mt-2">Đơn đã thanh toán sẽ chuyển sang chờ cửa hàng hoàn tiền.</p>
                     </div>
                     <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
                         <!-- 9b. Bấm nút Cancel -> 9b1. Hủy thao tác -->

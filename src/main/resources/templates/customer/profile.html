@@ -713,6 +713,9 @@
                                     </a>
                                 </li>
 
+                                <li sec:authorize="hasRole('USER')">
+                                    <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/customer/wallet}"><i class="bi bi-wallet2 text-secondary" aria-hidden="true"></i><span>Ví của tôi</span></a>
+                                </li>
                                 <th:block th:replace="~{fragments/chat-widget :: system-chat-link}"></th:block>
                                 <!-- Thông báo của tôi -->
                                 <li>

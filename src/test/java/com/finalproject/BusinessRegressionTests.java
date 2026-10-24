@@ -148,18 +148,133 @@ class BusinessRegressionTests {
         assertThat(order.getPaymentStatus()).isEqualTo("REFUNDED");
     }
 
-    @Test void deletingPaidMomoCustomerKeepsReceiptAndRequiresRefund() throws Exception {
+    @Test void deletingPaidMomoCustomerIsBlockedWithoutCancellingOrRefunding() throws Exception {
         User admin = createUser("account-admin", Role.ADMIN, null);
         Order order = checkout(PaymentMethod.MOMO);
         momo.simulatePayment(order.getId(), customer.getUsername());
+        OrderStatus before = order.getStatus();
+        int stock = inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity();
         login(admin);
         mvc.perform(post("/admin/users/delete/" + customer.getId()).with(user(admin.getUsername()).roles("ADMIN")).with(csrf()))
-                .andExpect(status().is3xxRedirection());
-        assertThat(customer.getIsActive()).isFalse();
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("errorMessage", "Không thể xóa tài khoản còn đơn đang xử lý hoặc chờ hoàn tiền."))
+                .andExpect(flash().attributeCount(1));
+        assertThat(customer.getIsActive()).isTrue();
         assertThat(users.findById(customer.getId())).isPresent();
-        assertThat(order.getStatus()).isEqualTo(OrderStatus.REFUND_REQUESTED);
-        assertThat(order.getCancellationReason()).contains("xóa", "Vui lòng hoàn tiền");
+        assertThat(order.getStatus()).isEqualTo(before);
+        assertThat(order.getCancellationReason()).isNull();
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(stock);
         assertThat(payments.findByOrderId(order.getId()).get(0).getStatus()).isEqualTo(PaymentStatus.SUCCESS);
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.EnumSource(value = OrderStatus.class,
+            names = {"COMPLETED", "CANCELLED", "REFUNDED", "RETURNED"}, mode = org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE)
+    void deletingCustomerWithUnfinishedOrderIsBlocked(OrderStatus state) throws Exception {
+        Order order = checkout(PaymentMethod.COD);
+        order.setStatus(state); orders.saveAndFlush(order);
+        mvc.perform(post("/admin/users/delete/" + customer.getId()).with(user("admin-test").roles("ADMIN")).with(csrf()))
+                .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("errorMessage"));
+        assertThat(customer.getIsActive()).isTrue();
+        assertThat(customer.getAccountDisabledByAdmin()).isFalse();
+        assertThat(order.getStatus()).isEqualTo(state);
+        assertThat(inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().getQuantity()).isEqualTo(8);
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.EnumSource(value = OrderStatus.class, names = {"COMPLETED", "CANCELLED", "REFUNDED", "RETURNED"})
+    void deletingCustomerWithFinishedOrderPreservesInvoice(OrderStatus state) throws Exception {
+        Order order = checkout(PaymentMethod.COD);
+        order.setStatus(state); orders.saveAndFlush(order);
+        mvc.perform(post("/admin/users/delete/" + customer.getId()).with(user("admin-test").roles("ADMIN")).with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("successMessage", "Đã xóa tài khoản [customer] thành công."));
+        assertThat(customer.getIsActive()).isFalse();
+        assertThat(customer.getAccountDisabledByAdmin()).isTrue();
+        assertThat(orders.findById(order.getId())).isPresent();
+        assertThat(order.getStatus()).isEqualTo(state);
+    }
+
+    @Test void deletingCancelledButPaidCustomerStillRequiresRefund() throws Exception {
+        Order order = checkout(PaymentMethod.COD);
+        order.setStatus(OrderStatus.CANCELLED); order.setPaymentStatus("PAID"); orders.saveAndFlush(order);
+        mvc.perform(post("/admin/users/delete/" + customer.getId()).with(user("admin-test").roles("ADMIN")).with(csrf()))
+                .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("errorMessage"));
+        assertThat(customer.getIsActive()).isTrue();
+        assertThat(order.getPaymentStatus()).isEqualTo("PAID");
+    }
+
+    @Test void deletingStaffRevokesMembershipWithoutChangingBranchOrders() throws Exception {
+        User staff = createUser("staff-delete", Role.STAFF, store);
+        StoreMembership membership = em.merge(StoreMembership.builder().user(staff).store(store).accessRole("STAFF").build());
+        Order order = checkout(PaymentMethod.COD); em.flush();
+        mvc.perform(post("/admin/users/delete/" + staff.getId()).with(user("admin-test").roles("ADMIN")).with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("successMessage", "Đã xóa tài khoản [staff-delete] thành công."));
+        assertThat(staff.getIsActive()).isFalse();
+        assertThat(staff.getStore()).isNull();
+        assertThat(membership.getActive()).isFalse();
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
+        mvc.perform(get("/staff/orders").with(user(staff.getUsername()).roles("STAFF")))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test void deletingResponsibleManagerRequiresReplacementFirst() throws Exception {
+        mvc.perform(post("/admin/users/delete/" + manager.getId()).with(user("admin-test").roles("ADMIN")).with(csrf()))
+                .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("errorMessage"));
+        assertThat(manager.getIsActive()).isTrue();
+        assertThat(store.getOwner()).isEqualTo(manager);
+        User replacement = createUser("replacement", Role.MANAGER, store);
+        store.setOwner(replacement); stores.saveAndFlush(store);
+        mvc.perform(post("/admin/users/delete/" + manager.getId()).with(user("admin-test").roles("ADMIN")).with(csrf()))
+                .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("successMessage"));
+        assertThat(manager.getIsActive()).isFalse();
+        assertThat(store.getOwner()).isEqualTo(replacement);
+    }
+
+    @Autowired CustomerAccountClosureService accountClosure;
+
+    @Test void directDeletionServiceCannotBypassActiveOrderGuard() {
+        Order order = checkout(PaymentMethod.COD);
+        login(users.findByUsername("admin-test").orElseThrow());
+        assertThatThrownBy(() -> accountClosure.disable(customer.getId(), true))
+                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("đơn đang xử lý");
+        assertThat(customer.getIsActive()).isTrue();
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.EnumSource(value = Role.class, names = {"STAFF", "MANAGER"})
+    void deletingWorkerWithPersonalPendingOrderIsBlocked(Role role) throws Exception {
+        Order order = checkout(PaymentMethod.COD);
+        customer.setRole(role); customer.setStore(store); users.saveAndFlush(customer);
+        mvc.perform(post("/admin/users/delete/" + customer.getId()).with(user("admin-test").roles("ADMIN")).with(csrf()))
+                .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("errorMessage"));
+        assertThat(customer.getIsActive()).isTrue();
+        assertThat(customer.getStore()).isEqualTo(store);
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
+    }
+
+    @Test void deletingCustomerWithJwtSessionRetainsReferencesAndBlocksAccess() throws Exception {
+        JwtSession session = em.merge(JwtSession.builder().id(UUID.randomUUID().toString()).user(customer)
+                .credentialHash("x".repeat(64)).expiresAt(Instant.now().plusSeconds(3600)).build());
+        em.flush();
+        mvc.perform(post("/admin/users/delete/" + customer.getId()).with(user("admin-test").roles("ADMIN")).with(csrf()))
+                .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("successMessage"));
+        assertThat(customer.getIsActive()).isFalse();
+        assertThat(em.find(JwtSession.class, session.getId())).isNotNull();
+        mvc.perform(get("/customer/orders").with(user(customer.getUsername()).roles("USER")))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test void deletingUnusedCustomerCleansCartAndRemovesAccount() throws Exception {
+        Long id = customer.getId();
+        mvc.perform(post("/admin/users/delete/" + id).with(user("admin-test").roles("ADMIN")).with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("successMessage", "Đã xóa tài khoản [customer] thành công."));
+        em.flush(); em.clear();
+        assertThat(users.findById(id)).isEmpty();
+        assertThat(carts.findByUserId(id)).isEmpty();
     }
 
     @Test void lockingCustomerCancelsUnpaidPickupButNeverCancelsHandedOverDelivery() throws Exception {
@@ -620,6 +735,28 @@ class BusinessRegressionTests {
                 .isEqualTo(beforeStock);
     }
 
+    @Test void cartHeaderCountsOnlyAvailableRowsAndQuantities() throws Exception {
+        Product paused = products.save(Product.builder().name("Hoa ngừng bán").category(product.getCategory()).store(store)
+                .priceBuy(new BigDecimal("90000")).importPrice(BigDecimal.ZERO)
+                .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).isSelling(false).build());
+        inventory.save(StoreInventory.builder().store(store).product(paused).quantity(20).build());
+        CartItem pausedItem = items.save(CartItem.builder().cart(cart).product(paused).store(store)
+                .quantity(5).orderType(OrderType.BUY).build());
+        cart.getItems().add(pausedItem);
+        em.flush();
+        mvc.perform(get("/cart").with(user(customer.getUsername()).roles("USER")))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("selectableRowCount", 1))
+                .andExpect(model().attribute("totalQuantity", 2))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Hoa ngừng bán")));
+        inventory.findByStoreIdAndProductId(store.getId(), product.getId()).orElseThrow().setQuantity(0);
+        em.flush();
+        mvc.perform(get("/cart").with(user(customer.getUsername()).roles("USER")))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("selectableRowCount", 0))
+                .andExpect(model().attribute("totalQuantity", 0));
+    }
+
     @Test void pausedProductIsMarkedInCartAndOnDetailBeforeCheckout() throws Exception {
         mvc.perform(post("/manager/products/toggle-selling/" + product.getId())
                         .with(user(manager.getUsername()).roles("MANAGER")).with(csrf())
@@ -628,6 +765,8 @@ class BusinessRegressionTests {
         em.flush(); em.clear();
         mvc.perform(get("/cart").with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk())
+                .andExpect(model().attribute("selectableRowCount", 0))
+                .andExpect(model().attribute("totalQuantity", 0))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Sản phẩm tạm ngưng bán")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("data-paused=\"true\"")));
         mvc.perform(get("/product/" + product.getId()).with(user(customer.getUsername()).roles("USER")))

@@ -24,14 +24,19 @@ public class OrderWorkflowService {
     private final java.time.Clock clock;
     private final NotificationService notificationService;
     private final OrderFundsService funds;
+    private final CustomerWalletService customerWallet;
+    private final UserRepository users;
 
     public Order lockedOrder(Long id) {
+        // Match checkout, demo confirmation and account closure: user before order, stock and store.
+        Long ownerId = orders.findCustomerIdById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng."));
+        users.findLockedById(ownerId).orElseThrow();
         return orders.findLockedById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng."));
     }
 
     public java.util.List<OrderStatus> availableTransitions(Order order) {
         if (order == null || order.getStatus() == null) return java.util.List.of();
-        boolean pickup = "PICKUP".equals(order.getShippingMethod());
+        boolean pickup = order.isPickup();
         return switch (order.getStatus()) {
             case PENDING -> java.util.List.of(OrderStatus.CONFIRMED, OrderStatus.CANCELLED);
             case CONFIRMED -> java.util.List.of(OrderStatus.PREPARING, OrderStatus.CANCELLED);
@@ -52,7 +57,7 @@ public class OrderWorkflowService {
             case PICKED_UP -> "Bàn giao cho người giao hàng";
             case DELIVERING -> "Đang giao hoa đến khách";
             case DELIVERED -> "Đã giao hoa thành công";
-            case COMPLETED -> "PICKUP".equals(order.getShippingMethod()) ? "Khách nhận hoa tại quầy - Hoàn tất" : "Hoàn tất đơn hàng";
+            case COMPLETED -> order.isPickup() ? "Khách nhận hoa tại quầy - Hoàn tất" : "Hoàn tất đơn hàng";
             case CANCELLED -> order.getStatus() == OrderStatus.PREPARING
                     ? "Hủy ngoại lệ từ cửa hàng (khách không được tự hủy)" : "Hủy đơn hàng";
             case REFUNDED -> "Xác nhận đã hoàn tiền cho khách";
@@ -70,10 +75,10 @@ public class OrderWorkflowService {
         Order order = lockedOrder(id);
         entityManager.refresh(order, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
         access.requireStore(order.getPickupStore());
-        if (next == OrderStatus.REFUNDED) access.requireManager(order.getPickupStore());
+        if (next == OrderStatus.REFUNDED || next == OrderStatus.CANCELLED) access.requireManager(order.getPickupStore());
         OrderStatus previous = order.getStatus();
         if (previous == next) return order;
-        if ("PICKUP".equals(order.getShippingMethod()) && (next == OrderStatus.PICKED_UP || next == OrderStatus.DELIVERING || next == OrderStatus.DELIVERED))
+        if (order.isPickup() && (next == OrderStatus.PICKED_UP || next == OrderStatus.DELIVERING || next == OrderStatus.DELIVERED))
             throw new IllegalStateException("Đơn khách nhận tại tiệm không có bước vận chuyển. Khi khách đã nhận hoa, chọn 'Khách nhận hoa tại quầy - Hoàn tất'.");
         boolean allowed = availableTransitions(order).contains(next);
         if (!allowed) throw new IllegalStateException("Không thể chuyển đơn từ " + previous + " sang " + next);
@@ -178,17 +183,17 @@ public class OrderWorkflowService {
         Store store = stores.findLockedById(order.getPickupStore().getId()).orElseThrow();
         entityManager.refresh(store, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
         if (!transactions.findAllByOrderIdAndType(order.getId(), "ORDER_PAYMENT").isEmpty()) {
-            if ("MOMO_DEMO".equals(order.getPaymentMethod()) && order.getFundsStatus() != OrderFundsStatus.SETTLED)
+            if (OrderFundsService.isDemoFunded(order) && order.getFundsStatus() != OrderFundsStatus.SETTLED)
                 throw new IllegalStateException("Thu nhập của đơn không khớp trạng thái tiền, cần đối soát.");
             return;
         }
 
-        BigDecimal rate = "MOMO_DEMO".equals(order.getPaymentMethod()) ? order.getCommissionRateSnapshot()
+        BigDecimal rate = OrderFundsService.isDemoFunded(order) ? order.getCommissionRateSnapshot()
                 : store.getCommission() == null ? BigDecimal.TEN : store.getCommission().getCost();
         if (rate == null || rate.signum() < 0 || rate.compareTo(BigDecimal.valueOf(100)) > 0) {
             throw new IllegalStateException("Tỷ lệ hoa hồng phải nằm trong khoảng 0 đến 100%.");
         }
-        BigDecimal income = "MOMO_DEMO".equals(order.getPaymentMethod()) ? funds.settleHeld(order, store)
+        BigDecimal income = OrderFundsService.isDemoFunded(order) ? funds.settleHeld(order, store)
                 : order.getTotalAmount().multiply(BigDecimal.ONE.subtract(rate.movePointLeft(2)))
                     .setScale(2, RoundingMode.HALF_UP);
         store.setEWallet(store.getEWallet().add(income));
@@ -231,21 +236,13 @@ public class OrderWorkflowService {
         entityManager.refresh(order, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
         requireCustomer(order, username);
         if (order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.REFUND_REQUESTED
-                || (order.getStatus() == OrderStatus.REFUNDED && "MOMO_DEMO".equals(order.getPaymentMethod())
+                || (order.getStatus() == OrderStatus.REFUNDED && OrderFundsService.isDemoFunded(order)
                     && "REFUNDED".equals(order.getPaymentStatus()))) return order;
         if (!order.isCancellable())
             throw new IllegalStateException("Không thể hủy đơn đã bắt đầu cắm hoa/chuẩn bị, đang giao hoặc đã kết thúc. Bạn chỉ được hủy khi đơn đang chờ xác nhận hoặc đã xác nhận.");
-        boolean automaticRefund = "MOMO_DEMO".equals(order.getPaymentMethod()) && "PAID".equals(order.getPaymentStatus());
+        boolean automaticRefund = OrderFundsService.isDemoFunded(order) && "PAID".equals(order.getPaymentStatus());
         if (automaticRefund) {
-            var records = payments.findByOrderId(order.getId());
-            if (records.size() != 1) throw new IllegalStateException("Không tìm thấy thanh toán MoMo hợp lệ để hoàn tiền.");
-            Payment receipt = records.get(0);
-            if (receipt.getMethod() != PaymentMethod.MOMO_DEMO || receipt.getStatus() != PaymentStatus.SUCCESS
-                    || receipt.getAmount() == null || order.getTotalAmount() == null
-                    || receipt.getAmount().compareTo(order.getTotalAmount()) != 0
-                    || !"demo".equals(receipt.getMomoEnvironment())
-                    || !("DEMO-MOMO-" + order.getId()).equals(receipt.getTransactionCode()))
-                throw new IllegalStateException("Thanh toán MoMo không khớp đơn hàng để hoàn tiền.");
+            customerWallet.validateRefund(order);
         }
         OrderStatus previous = order.getStatus();
         String explanation = customerReason == null
@@ -257,9 +254,9 @@ public class OrderWorkflowService {
                 : ""));
         cancel(order);
         if (automaticRefund) {
-            refund(order, "DEMO_AUTO", "Tự động hoàn tiền demo khi khách hủy đơn MoMo");
+            refund(order, "DEMO_AUTO", "Tự động hoàn tiền vào ví demo khi khách hủy đơn");
             order.setStatus(OrderStatus.REFUNDED);
-            order.setCancellationReason(explanation + " Đã hủy đơn và hoàn tiền thành công.");
+            order.setCancellationReason(explanation + " Đã hủy đơn và hoàn tiền thành công. Tiền được cộng vào ví của bạn.");
             notifyOrderStatusChange(order, previous, OrderStatus.REFUNDED);
         }
         return orders.save(order);
@@ -356,6 +353,8 @@ public class OrderWorkflowService {
 
     private void refund(Order order, String method, String note) {
         if (!"PAID".equals(order.getPaymentStatus())) throw new IllegalStateException("Đơn chưa được thanh toán.");
+        boolean toWallet = OrderFundsService.isDemoFunded(order);
+        if (toWallet) customerWallet.creditRefund(order);
         Store store = stores.findLockedById(order.getPickupStore().getId()).orElseThrow();
         entityManager.refresh(store, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
         boolean refundedFromPending = funds.refundHeld(order, store);
@@ -368,7 +367,7 @@ public class OrderWorkflowService {
             transactions.save(Transaction.builder().order(order).store(store).amount(income.getAmount()).isUp(false)
                     .type("REFUND").status("COMPLETED").description("Hoàn thu nhập đơn #" + order.getId()).build());
         });
-        if ("MOMO_DEMO".equals(order.getPaymentMethod()) && !refundedFromPending) {
+        if (toWallet && !refundedFromPending) {
             funds.reverseCommission(order);
             order.setFundsStatus(OrderFundsStatus.REFUNDED);
         }
@@ -380,7 +379,7 @@ public class OrderWorkflowService {
             payment.setStatus(PaymentStatus.REFUNDED);
             payment.setRefundedAt(LocalDateTime.now(clock));
             payment.setRefundMethod(method);
-            payment.setRefundNote(note);
+            payment.setRefundNote(note + (toWallet ? ". Đã cộng vào ví demo của khách hàng, không phải tiền thật." : ""));
             payments.save(payment);
         });
         order.setPaymentStatus("REFUNDED");
@@ -450,8 +449,8 @@ public class OrderWorkflowService {
                 case REFUNDED -> {
                     notificationService.sendNotification(order.getUser(),
                             "💰 Hoàn tiền thành công đơn #" + orderId,
-                            "MOMO_DEMO".equals(order.getPaymentMethod())
-                                    ? "Hoàn tiền thành công. Giao dịch demo, không phát sinh chuyển tiền MoMo thật."
+                            OrderFundsService.isDemoFunded(order)
+                                    ? "Hoàn tiền thành công vào ví của bạn. Không phát sinh chuyển tiền MoMo hoặc ngân hàng thật."
                                     : "Yêu cầu hoàn tiền cho đơn hoa #" + orderId + " đã được cửa hàng xử lý hoàn tất.",
                             "REFUND_COMPLETED", orderId);
                 }

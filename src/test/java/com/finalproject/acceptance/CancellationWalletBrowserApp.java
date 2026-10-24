@@ -36,7 +36,7 @@ public class CancellationWalletBrowserApp {
                 "--app.demo-payment.base-url=http://127.0.0.1:8083", "--momo.mode=mock");
     }
 
-    record Ids(Long store, Long product, Long cancelOrder, Long deliveryOrder) {}
+    record Ids(Long store, Long product, Long cancelOrder, Long deliveryOrder, Long customer) {}
 
     @TestConfiguration(proxyBeanMethods = false)
     static class Fixtures {
@@ -46,7 +46,7 @@ public class CancellationWalletBrowserApp {
                 UserRepository users, StoreRepository stores, CommissionRepository commissions, CategoryRepository categories,
                 ProductRepository products, StoreInventoryRepository inventories, OrderRepository orders,
                 OrderDetailRepository details, PaymentRepository payments, DemoPaymentService demo,
-                PasswordEncoder passwords, AtomicReference<Ids> fixtureIds) {
+                PasswordEncoder passwords, AtomicReference<Ids> fixtureIds, CartRepository carts, CartItemRepository cartItems) {
             return ignored -> {
                 try (var connection = dataSource.getConnection()) {
                     if (!connection.getMetaData().getURL().startsWith("jdbc:h2:mem:acceptance-browser-"))
@@ -70,6 +70,8 @@ public class CancellationWalletBrowserApp {
                             .priceBuy(new BigDecimal("100000")).importPrice(BigDecimal.ONE)
                             .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).build());
                     inventories.save(StoreInventory.builder().store(store).product(product).quantity(8).build());
+                    var cart = carts.save(Cart.builder().user(customer).items(new ArrayList<>()).build());
+                    cartItems.save(CartItem.builder().cart(cart).store(store).product(product).quantity(1).orderType(OrderType.BUY).build());
                     var created = new ArrayList<Order>();
                     for (int index = 0; index < 2; index++) {
                         var order = orders.save(Order.builder().user(customer).pickupStore(store).orderType(OrderType.BUY)
@@ -85,7 +87,7 @@ public class CancellationWalletBrowserApp {
                     }
                     orders.flush();
                     demo.confirm(demo.create(List.of(created.getFirst().getId()), customer.getUsername()));
-                    return new Ids(store.getId(), product.getId(), created.get(0).getId(), created.get(1).getId());
+                    return new Ids(store.getId(), product.getId(), created.get(0).getId(), created.get(1).getId(), customer.getId());
                 });
                 fixtureIds.set(ids);
                 System.out.println("ACCEPTANCE_FIXTURES_READY store=" + ids.store() + " cancel=" + ids.cancelOrder() + " delivery=" + ids.deliveryOrder());
@@ -101,6 +103,8 @@ public class CancellationWalletBrowserApp {
                 state.put("ids", ids);
                 state.put("wallet", jdbc.queryForMap("select e_wallet, pending_balance from stores where id=?", ids.store()));
                 state.put("stock", jdbc.queryForObject("select quantity from store_inventories where store_id=? and product_id=?", Integer.class, ids.store(), ids.product()));
+                state.put("customerWallet", jdbc.queryForObject("select coalesce(sum(balance),0) from customer_wallets where user_id=?", java.math.BigDecimal.class, ids.customer()));
+                state.put("customerLedger", jdbc.queryForList("select id,order_id,type,amount,balance_after from customer_wallet_entries where user_id=? order by id", ids.customer()));
                 state.put("orders", jdbc.queryForList("select id,status,payment_status,funds_status,cancellation_reason from orders where pickup_store_id=? order by id", ids.store()));
                 state.put("ledger", jdbc.queryForList("select id,order_id,type,amount,status,wallet_bucket from transactions where store_id=? order by id", ids.store()));
                 return ServerResponse.ok().body(state);

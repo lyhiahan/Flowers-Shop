@@ -206,6 +206,7 @@
                                               th:style="${o.paymentStatus == 'PAID'} ? 'background-color: #059669;' : 'background-color: #D82D8B;'"
                                               th:text="${o.paymentStatus == 'PAID' ? 'MoMo: Đã thanh toán' : 'MoMo: Chờ thanh toán'}">
                                         </span>
+                                        <span th:if="${o.paymentMethod == 'WALLET_DEMO'}" class="badge text-bg-success"><i class="bi bi-wallet2 me-1" aria-hidden="true"></i>Ví khách (demo)</span>
                                         <span th:if="${o.paymentMethod == 'BANK_TRANSFER'}"
                                               class="badge rounded-pill text-white px-2 py-1"
                                               th:classappend="${o.paymentStatus == 'PAID' ? 'bg-success' : 'bg-primary'}"

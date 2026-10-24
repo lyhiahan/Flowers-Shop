@@ -1,0 +1,9 @@
+.wallet-page { min-height: 55vh; }
+.wallet-balance-band { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 24px 0; border-top: 1px solid #dce2df; border-bottom: 1px solid #dce2df; }
+.wallet-page .wallet-balance { font-size: 32px !important; font-weight: 800 !important; color: #264d40; overflow-wrap: anywhere; }
+.wallet-table { min-width: 680px; }
+.wallet-table th { font-size: 13px; color: #626c72; font-weight: 600; }
+.wallet-table td { font-size: 14px; padding-top: 16px; padding-bottom: 16px; }
+.wallet-history a { color: #315c50; }
+.wallet-empty { border-top: 1px solid #dce2df; }
+@media (max-width: 575px) { .wallet-balance-band { align-items: flex-start; flex-direction: column; gap: 16px; } }

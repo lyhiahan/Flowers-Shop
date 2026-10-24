@@ -8,6 +8,7 @@
         clearTimeout(timer);
         const current = ++sequence;
         ready = false;
+        window.updateWalletAvailability?.(null, false);
         status.textContent = 'Đang cập nhật số tiền…';
         request?.abort();
         timer = setTimeout(async () => {
@@ -32,6 +33,7 @@
                 status.textContent = '';
                 ready = true;
                 button.disabled = button.dataset.pickupStockBlocked === 'true';
+                window.updateWalletAvailability?.(result.total, true);
             } catch (error) {
                 if (error.name === 'AbortError' || current !== sequence) return;
                 status.textContent = error.message;
@@ -41,6 +43,7 @@
                     deliveryName.textContent = 'Chưa chọn được đơn vị vận chuyển phù hợp.';
                 }
                 button.disabled = button.dataset.pickupStockBlocked === 'true';
+                window.updateWalletAvailability?.(null, false);
             }
         }, 250);
     };
@@ -64,6 +67,10 @@
             }
             updateCheckoutTotal();
             return;
+        }
+        if (typeof window.syncPaymentSubmitState === 'function') {
+            window.syncPaymentSubmitState();
+            if (button.disabled) { event.preventDefault(); return; }
         }
         button.disabled = true;
         button.textContent = 'Đang đặt hàng…';

@@ -99,7 +99,8 @@ class CheckoutPhoneValidationTests {
                 mock(com.finalproject.service.VoucherService.class),
                 mock(com.finalproject.config.MomoConfig.class),
                 mock(com.finalproject.service.MomoService.class),
-                mock(com.finalproject.service.DemoPaymentService.class)
+                mock(com.finalproject.service.DemoPaymentService.class),
+                mock(com.finalproject.service.CustomerWalletService.class)
         );
 
         Principal principal = () -> "testuser";

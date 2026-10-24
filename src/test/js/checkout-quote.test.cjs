@@ -4,16 +4,18 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
 
-function checkout(fetch) {
+function checkout(fetch, walletBalance) {
     const nodes = new Map(), timers = new Map();
     let nextTimer = 0;
     const node = id => {
-        if (!nodes.has(id)) nodes.set(id, {
+        if (!nodes.has(id)) { const classes = new Set(); nodes.set(id, {
             dataset: { quoteUrl: '/checkout/quote' }, disabled: false, textContent: '', events: {},
-            classList: { remove() {} },
+            checked: id === 'pay_cod', setAttribute() {},
+            classList: { remove: c => classes.delete(c), add: c => classes.add(c),
+                toggle(c, value) { if (value) classes.add(c); else classes.delete(c); } },
             addEventListener(name, callback) { this.events[name] = callback; },
             querySelector() { return null; }
-        });
+        }); }
         return nodes.get(id);
     };
     const context = {
@@ -23,8 +25,14 @@ function checkout(fetch) {
         clearTimeout(id) { timers.delete(id); }
     };
     context.window = context;
+    if (walletBalance !== undefined) {
+        node('payOptionWallet').dataset.walletBalance = String(walletBalance);
+        const html = fs.readFileSync(path.join(__dirname, '../../main/resources/templates/customer/checkout.html'), 'utf8');
+        const start = html.indexOf('        function selectPayment(');
+        vm.runInNewContext(html.slice(start, html.indexOf('        /*', start)), context);
+    }
     vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../../main/resources/static/js/checkout-quote.js'), 'utf8'), context);
-    return { node, update: context.updateCheckoutTotal, run: () => [...timers.values()].at(-1)() };
+    return { node, select: context.selectPayment, update: context.updateCheckoutTotal, run: () => [...timers.values()].at(-1)() };
 }
 const ok = total => ({ ok: true, redirected: false, json: async () => ({ subtotal: total, shippingFee: 0, discount: 0, total }) });
 
@@ -107,4 +115,31 @@ test('a pickup stock failure remains blocked after a quote response', async () =
     app.update();
     await app.run();
     assert.equal(app.node('btnPlaceOrder').disabled, true);
+});
+
+test('shipping and discounts update wallet affordability using the server total', async () => {
+    let total = 100000;
+    const app = checkout(async () => ok(total), 100000);
+    app.update(); await app.run(); app.select('pay_wallet');
+    assert.equal(app.node('pay_wallet').disabled, false);
+    assert.equal(app.node('btnPlaceOrder').disabled, false);
+    total = 125000; app.update(); await app.run();
+    assert.equal(app.node('pay_wallet').disabled, true);
+    assert.equal(app.node('pay_wallet').checked, false);
+    assert.equal(app.node('btnPlaceOrder').disabled, true);
+    total = 95000; app.update(); await app.run();
+    assert.equal(app.node('pay_wallet').disabled, false);
+    assert.equal(app.node('pay_wallet').checked, false);
+    app.select('pay_wallet');
+    assert.equal(app.node('btnPlaceOrder').disabled, false);
+});
+
+test('a late affordable quote cannot re-enable a wallet blocked by the latest total', async () => {
+    let resolveFirst, calls = 0;
+    const app = checkout(() => ++calls === 1 ? new Promise(resolve => { resolveFirst = resolve; }) : Promise.resolve(ok(125000)), 100000);
+    app.update(); const first = app.run();
+    app.update(); await app.run();
+    resolveFirst(ok(90000)); await first;
+    assert.equal(app.node('pay_wallet').disabled, true);
+    assert.equal(app.node('walletAvailabilityStatus').textContent, 'Số dư ví không đủ');
 });

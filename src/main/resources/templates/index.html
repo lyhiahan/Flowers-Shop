@@ -136,95 +136,6 @@
             flex-shrink: 0 !important;
         }
 
-        /* Menu, ô nhập, nút bấm: Giống cấu trúc trang profile */
-        .header-search-box {
-            background: var(--flower-surface);
-            border: 1px solid var(--flower-border);
-            border-radius: 9999px;
-            padding: 3px 4px 3px 10px;
-            box-shadow: 0 1px 3px rgba(41, 59, 50, 0.03);
-            transition: border-color 0.2s, box-shadow 0.2s;
-            width: 100%;
-        }
-
-        .header-search-box:focus-within {
-            border-color: var(--flower-primary);
-            box-shadow: 0 0 0 3px rgba(53, 84, 71, 0.12);
-        }
-
-        .header-search-type-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-            border-right: 1px solid var(--flower-border);
-            padding-right: 4px;
-            flex-shrink: 0;
-        }
-
-        .header-search-type {
-            background: transparent;
-            font-size: 13.5px !important;
-            color: #4A3E3D !important;
-            font-weight: 500 !important;
-            padding-left: 2px;
-            padding-right: 18px;
-            padding-top: 2px;
-            padding-bottom: 2px;
-            outline: none;
-            border: none;
-            cursor: pointer;
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            transition: width 0.2s ease, all 0.2s ease;
-        }
-
-        .header-search-type-icon {
-            font-size: 16px !important;
-            color: #5C4A42;
-            pointer-events: none;
-            position: absolute;
-            right: 4px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .header-search-input {
-            border: none;
-            outline: none;
-            font-size: 13.5px;
-            font-weight: 400;
-            color: var(--flower-text-main);
-            background: transparent;
-            padding-left: 10px;
-            padding-right: 10px;
-        }
-
-        .header-search-input:focus {
-            box-shadow: none;
-            background: transparent;
-        }
-
-        /* Nút “Tìm”: xanh lá trầm, chữ trắng */
-        .header-search-btn {
-            background-color: var(--flower-primary);
-            border: none;
-            color: #ffffff;
-            border-radius: 9999px;
-            font-weight: 600;
-            font-size: 13px;
-            padding: 6px 18px;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-        }
-
-        .header-search-btn:hover {
-            background-color: var(--flower-primary-hover);
-            color: #ffffff;
-        }
-
         /* Cart & Account buttons */
         .header-cart-link {
             color: var(--flower-text-main);
@@ -1360,34 +1271,12 @@
 
                     <!-- Ô Tìm Kiếm -->
                     <div class="col-lg-6 col-md-6 col-12 order-3 order-md-2">
-                        <form id="globalSearchForm" th:action="@{/products#product-catalog}" method="get" class="w-100">
-                            <div class="header-search-box d-flex align-items-center">
-                                <!-- Khối chọn phạm vi tìm kiếm (khoảng cách gọn gàng, tự điều chỉnh giống profile) -->
-                                <div class="header-search-type-wrapper">
-                                    <select id="searchScopeSelect" class="header-search-type"
-                                        onchange="this.style.width = this.value === 'users' ? '115px' : (this.value === 'stores' ? '103px' : '96px')"
-                                        style="width: 96px;">
-                                        <option value="products" selected>🌸 Mẫu hoa</option>
-                                        <option value="stores">🏬 Cửa hàng</option>
-                                        <option value="users">👥 Người dùng</option>
-                                    </select>
-                                    <span class="material-symbols-outlined header-search-type-icon">expand_more</span>
-                                </div>
-                                <input type="text" id="headerSearchInput" name="keyword" th:value="${keyword}"
-                                    class="form-control header-search-input shadow-none flex-grow-1"
-                                    placeholder="Tìm hoa hồng, cửa hàng hoặc người dùng...">
-                                <button class="btn header-search-btn d-flex align-items-center gap-1 flex-shrink-0"
-                                    type="submit" id="btnHeaderSearch" title="Tìm kiếm">
-                                    <span class="material-symbols-outlined" style="font-size: 16px;">search</span>
-                                    <span class="d-none d-sm-inline">Tìm</span>
-                                </button>
-                            </div>
-                        </form>
+                        <form th:replace="~{fragments/floral :: search}"></form>
                     </div>
 
                     <!-- Giỏ Hàng + Tài Khoản (Trên cùng một hàng) -->
                     <div
-                        class="col-lg-3 col-md-3 col-6 order-2 order-md-3 d-flex align-items-center justify-content-end gap-3">
+                        class="storefront-header-actions col-lg-3 col-md-3 col-6 order-2 order-md-3 d-flex align-items-center justify-content-end gap-3">
                         <!-- Following shortcut -->
 
                         <a sec:authorize="hasRole('USER')" th:href="@{/following}" class="header-cart-link" id="navFollowingHeader" title="Bộ sưu tập theo dõi">
@@ -1444,10 +1333,10 @@
                                         <span class="badge rounded-pill" style="background-color: #E3F2FD; color: #1565C0; border: 1px solid #BBDEFB; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')">
                                             Quản lý chi nhánh
                                         </span>
-                                        <span class="badge rounded-pill" style="background-color: #FFF3E0; color: #E65100; border: 1px solid #FFE0B2; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="hasRole('MANAGER') and !hasAnyRole('ADMIN', 'MANAGER')">
-                                            Đối tác bán hoa
+                                        <span class="badge rounded-pill" style="background-color: #FFF3E0; color: #E65100; border: 1px solid #FFE0B2; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="hasRole('STAFF') and !hasAnyRole('ADMIN', 'MANAGER')">
+                                            Nhân viên cửa hàng
                                         </span>
-                                        <span class="badge rounded-pill" style="background-color: #F5F5F5; color: #424242; border: 1px solid #E0E0E0; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="!hasAnyRole('ADMIN', 'MANAGER')">
+                                        <span class="badge rounded-pill" style="background-color: #F5F5F5; color: #424242; border: 1px solid #E0E0E0; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="!hasAnyRole('ADMIN', 'MANAGER', 'STAFF')">
                                             Khách hàng
                                         </span>
                                     </div>
@@ -1459,7 +1348,7 @@
                                         <i class="bi bi-shop text-success" style="font-size: 12px;"></i>
                                         <span>Chế độ quản lý chi nhánh (Xem website)</span>
                                     </div>
-                                    <div sec:authorize="!hasAnyRole('ADMIN', 'MANAGER')" class="mt-1 d-flex align-items-center gap-1.5" style="font-size: 12.5px; color: #2E7D32; font-weight: 600;">
+                                    <div sec:authorize="!hasAnyRole('ADMIN', 'MANAGER', 'STAFF')" class="mt-1 d-flex align-items-center gap-1.5" style="font-size: 12.5px; color: #2E7D32; font-weight: 600;">
                                         <i class="bi bi-check-circle-fill text-success" style="font-size: 11px;"></i>
                                         <span>Đang ở chế độ mua hàng</span>
                                     </div>
@@ -1485,17 +1374,17 @@
                                 </li>
 
                                 <!-- Nút Shop Manager (cho Vendor) -->
-                                <li sec:authorize="hasRole('MANAGER') and !hasAnyRole('ADMIN', 'MANAGER')" class="px-2 mb-2">
-                                    <a th:href="@{/manager/stores}" class="btn btn-sm w-100 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
-                                       id="navVendorStoresDropdown"
+                                <li sec:authorize="hasRole('STAFF') and !hasAnyRole('ADMIN', 'MANAGER')" class="px-2 mb-2">
+                                    <a th:href="@{/staff/orders}" class="btn btn-sm w-100 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
+                                       id="navStaffOrdersDropdown"
                                        style="background-color: #20382E; color: #FFFFFF; border-radius: 8px; padding: 7px 12px; font-size: 13.5px; text-decoration: none;">
                                         <i class="bi bi-shop-window"></i>
-                                        <span>Kênh đối tác cửa hàng</span>
+                                        <span>Bàn làm việc nhân viên</span>
                                     </a>
                                 </li>
 
                                 <!-- Hồ sơ cá nhân -->
-                                <li>
+                                <li sec:authorize="!hasRole('STAFF')">
                                     <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/customer/profile}">
                                         <i class="bi bi-person text-secondary"></i>
                                         <span>Hồ sơ cá nhân</span>
@@ -1530,6 +1419,9 @@
                                     </a>
                                 </li>
 
+                                <li sec:authorize="hasRole('USER')">
+                                    <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/customer/wallet}"><i class="bi bi-wallet2 text-secondary" aria-hidden="true"></i><span>Ví của tôi</span></a>
+                                </li>
                                 <th:block th:replace="~{fragments/chat-widget :: system-chat-link}"></th:block>
                                 <!-- Thông báo của tôi -->
                                 <li>
@@ -1639,11 +1531,11 @@
                        title="Chuyển đến kênh quản lý chi nhánh cửa hàng">
                         <i class="bi bi-shop me-1 text-success"></i>Kênh Quản Lý
                     </a>
-                    <a sec:authorize="hasRole('MANAGER') and !hasAnyRole('ADMIN', 'MANAGER')"
-                       th:href="@{/manager/stores}"
-                       class="cat-nav-link fw-semibold" id="navVendorNav"
-                       title="Chuyển đến kênh đối tác quản lý">
-                        <i class="bi bi-shop-window me-1 text-primary"></i>Shop Manager
+                    <a sec:authorize="hasRole('STAFF') and !hasAnyRole('ADMIN', 'MANAGER')"
+                       th:href="@{/staff/orders}"
+                       class="cat-nav-link fw-semibold" id="navStaffNav"
+                       title="Chuyển đến bàn làm việc nhân viên">
+                        <i class="bi bi-shop-window me-1 text-primary"></i>Nhân viên cửa hàng
                     </a>
                 </div>
             </div>
@@ -2554,26 +2446,6 @@
 
     <!-- Script điều hướng tìm kiếm thông minh theo Phạm vi (Hoa / Cửa Hàng / Người Dùng) & Theo dõi nhanh -->
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const scopeSel = document.getElementById('searchScopeSelect');
-            if (scopeSel) {
-                scopeSel.style.width = scopeSel.value === 'users' ? '115px' : (scopeSel.value === 'stores' ? '103px' : '96px');
-            }
-        });
-
-        document.getElementById('globalSearchForm')?.addEventListener('submit', function (e) {
-            const scope = document.getElementById('searchScopeSelect')?.value;
-            const kwInput = this.querySelector('input[name="keyword"]');
-            const kw = kwInput ? kwInput.value.trim() : '';
-            if (scope === 'users') {
-                e.preventDefault();
-                window.location.href = '/users' + (kw ? '?keyword=' + encodeURIComponent(kw) : '');
-            } else if (scope === 'stores') {
-                e.preventDefault();
-                window.location.href = '/stores' + (kw ? '?keyword=' + encodeURIComponent(kw) : '');
-            }
-        });
-
         let cardFollowToastTimer = null;
         function showCardToast(msg) {
             const toast = document.getElementById('cardFollowToast');

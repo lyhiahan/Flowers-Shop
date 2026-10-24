@@ -1,3 +1,83 @@
+.customer-orders-heading {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e7ded4;
+}
+
+.customer-orders-heading .breadcrumb {
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+.customer-orders-heading .breadcrumb a {
+    color: #55685f;
+    text-decoration: none;
+}
+
+.customer-orders-heading .breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.customer-orders-toolbar,
+.customer-orders-title,
+.customer-orders-filter {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.customer-orders-toolbar {
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px 24px;
+}
+
+.customer-orders-title {
+    flex-wrap: wrap;
+    gap: 4px 16px;
+}
+
+.customer-orders-title h1 {
+    margin: 0;
+    font-size: 26px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0;
+    color: #20382e;
+}
+
+.customer-orders-count,
+.customer-orders-filter label {
+    color: #55685f;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.customer-orders-filter .form-select {
+    width: 208px;
+    min-height: 42px;
+    font-size: 15px !important;
+    border: 1px solid #cbd6d0;
+    border-radius: 6px;
+    background-color: #fff;
+}
+
+.customer-orders-filter .form-select:focus {
+    border-color: #355447;
+    box-shadow: 0 0 0 3px rgba(53, 84, 71, 0.12);
+}
+
+@media (max-width: 575.98px) {
+    .customer-orders-filter {
+        width: 100%;
+    }
+
+    .customer-orders-filter .form-select {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
 .order-products {
     border: 1px solid #e7ded4;
     border-radius: 14px;

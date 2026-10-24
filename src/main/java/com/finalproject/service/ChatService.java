@@ -16,6 +16,7 @@ public class ChatService {
  private final UserRepository users;
  private final StoreRepository stores;
  private final StoreMembershipRepository memberships;
+ private final StoreAccessService storeAccess;
  private final ChatConversationRepository conversations;
  private final ChatMessageRepository messages;
  private final SimpMessagingTemplate broker;
@@ -45,14 +46,13 @@ public class ChatService {
     .orElseThrow(()->new AccessDeniedException("Tài khoản không còn quyền nhắn tin."));
  }
  private List<User> managers(Long storeId) {
-  return users.findChatManagers(storeId,Role.MANAGER).stream().filter(u->Boolean.TRUE.equals(u.getIsActive()) && !u.hasRole(Role.ADMIN) && !u.isRetiredDeliveryAccount()).toList();
+  return java.util.stream.Stream.concat(users.findChatManagers(storeId,Role.MANAGER).stream(), users.findChatManagers(storeId,Role.STAFF).stream()).distinct().filter(u->storeAccess.managesStore(u,storeId)).toList();
  }
  private List<User> admins() {
   return users.findByRole(Role.ADMIN).stream().filter(u->Boolean.TRUE.equals(u.getIsActive()) && !Boolean.TRUE.equals(u.getAccountDisabledByAdmin()) && !u.isRetiredDeliveryAccount()).toList();
  }
  private boolean managesStore(User user,Store store) {
-  return store!=null && user.hasRole(Role.MANAGER)
-    && managers(store.getId()).stream().anyMatch(manager->manager.getId().equals(user.getId()));
+  return store!=null && storeAccess.managesStore(user,store.getId());
  }
  private void rejectSelfConversation(User user,ChatConversation conversation) {
   if("STORE".equals(conversation.getKind()) && user.getId().equals(conversation.getCustomer().getId())
@@ -83,9 +83,9 @@ public class ChatService {
  private void authorize(User user,ChatConversation conversation,Long scopeStoreId) {
   if(user.hasRole(Role.ADMIN) && ("ADMIN".equals(conversation.getKind()) || "BRANCH_SUPPORT".equals(conversation.getKind()))) return;
   if(user.hasRole(Role.ADMIN)) throw new AccessDeniedException("Hội thoại khách–chi nhánh chỉ được giám sát, không được gửi tin thay cửa hàng.");
-  if(user.hasRole(Role.MANAGER)) {
+  if(user.isStoreWorker()) {
    Store selected=managerStore(user,scopeStoreId);
-   if("BRANCH_SUPPORT".equals(conversation.getKind()) && selected.getId().equals(conversation.getStore().getId())) return;
+   if("BRANCH_SUPPORT".equals(conversation.getKind()) && user.hasRole(Role.MANAGER) && selected.getId().equals(conversation.getStore().getId())) return;
    if("STORE".equals(conversation.getKind()) && selected.getId().equals(conversation.getStore().getId())
       && !user.getId().equals(conversation.getCustomer().getId())) return;
    throw new AccessDeniedException("Hội thoại không thuộc hộp thư khách hàng của chi nhánh đang chọn.");
@@ -96,8 +96,8 @@ public class ChatService {
  @Transactional(readOnly=true)
  public Context context(String username) {
   User user=activeUser(username);
-  String role=user.hasRole(Role.ADMIN)?"ADMIN":user.hasRole(Role.MANAGER)?"MANAGER":"USER";
-  Store selected="MANAGER".equals(role)?managerStore(user,null):null;
+  String role=user.hasRole(Role.ADMIN)?"ADMIN":user.hasRole(Role.MANAGER)?"MANAGER":user.hasRole(Role.STAFF)?"STAFF":"USER";
+  Store selected=user.isStoreWorker() && !user.hasRole(Role.ADMIN)?managerStore(user,null):null;
   return new Context(user.getId(),role,List.of(),selected==null?null:selected.getId(),selected==null?null:selected.getName());
  }
  @Transactional
@@ -108,7 +108,7 @@ public class ChatService {
    if(!user.hasRole(Role.MANAGER) || user.hasRole(Role.ADMIN)) throw new AccessDeniedException("Chỉ quản lý được mở hỗ trợ nội bộ chi nhánh.");
    storeId=managerStore(user,storeId).getId();
    if(admins().isEmpty()) throw new IllegalStateException("Chưa có nhân viên hỗ trợ toàn chuỗi hoạt động.");
-  } else if(user.hasRole(Role.ADMIN) || user.hasRole(Role.MANAGER) || !user.hasRole(Role.USER)) throw new AccessDeniedException("Chỉ khách hàng được mở hội thoại. Quản lý chỉ tiếp nhận tin của chi nhánh mình.");
+  } else if(user.hasRole(Role.ADMIN) || user.isStoreWorker() || !user.hasRole(Role.USER)) throw new AccessDeniedException("Chỉ khách hàng được mở hội thoại. Quản lý chỉ tiếp nhận tin của chi nhánh mình.");
   user=users.findLockedById(user.getId()).orElseThrow();
   if(!"STORE".equals(kind) && !"ADMIN".equals(kind) && !internal) throw new IllegalArgumentException("Kênh hội thoại không hợp lệ.");
   Store store=internal?managerStore(user,storeId):null;
@@ -131,7 +131,7 @@ public class ChatService {
  @Transactional
  public Contact contact(String username,Long productId,Long orderId,Long storeId) {
   User user=activeUser(username);
-  if(user.hasRole(Role.ADMIN) || user.hasRole(Role.MANAGER)) throw new AccessDeniedException("Chỉ khách hàng được liên hệ cửa hàng.");
+  if(user.hasRole(Role.ADMIN) || user.isStoreWorker()) throw new AccessDeniedException("Chỉ khách hàng được liên hệ cửa hàng.");
   if((productId==null)==(orderId==null)) throw new IllegalArgumentException("Vui lòng chọn một sản phẩm hoặc đơn hàng cần liên hệ.");
   if(orderId!=null) {
    Order order=orders.findById(orderId).orElseThrow(()->new IllegalArgumentException("Không tìm thấy đơn hàng."));
@@ -153,7 +153,7 @@ public class ChatService {
  }
  private ProductView questionProduct(User user,ChatConversation conversation,Long productId) {
   if(productId==null) return null;
-  if(user.hasRole(Role.ADMIN) || user.hasRole(Role.MANAGER) || !"STORE".equals(conversation.getKind())
+  if(user.hasRole(Role.ADMIN) || user.isStoreWorker() || !"STORE".equals(conversation.getKind())
       || !user.getId().equals(conversation.getCustomer().getId())) throw new AccessDeniedException("Chỉ khách được gửi sản phẩm cần hỏi tới cửa hàng.");
   var product=products.findById(productId).filter(ProductAvailability::isPublic)
     .orElseThrow(()->new IllegalArgumentException("Sản phẩm không còn khả dụng."));
@@ -174,9 +174,10 @@ public class ChatService {
  public Inbox inbox(String username,int page,Long scopeStoreId,String requestedKind,String keyword,LocalDate from,LocalDate to) {
   User user=activeUser(username);
   if(page<0 || page>10000) throw new IllegalArgumentException("Trang hội thoại không hợp lệ.");
-  Store selected=user.hasRole(Role.MANAGER) && !user.hasRole(Role.ADMIN)?managerStore(user,scopeStoreId):null;
+  Store selected=user.isStoreWorker() && !user.hasRole(Role.ADMIN)?managerStore(user,scopeStoreId):null;
   String kind=requestedKind==null?(user.hasRole(Role.ADMIN)?"ADMIN":selected!=null?"STORE":null):requestedKind;
   if(kind!=null && !List.of("STORE","ADMIN","BRANCH_SUPPORT").contains(kind)) throw new IllegalArgumentException("Kênh hội thoại không hợp lệ.");
+  if(user.hasRole(Role.STAFF) && !user.hasRole(Role.MANAGER) && !"STORE".equals(kind)) throw new AccessDeniedException("Nhân viên chỉ được hỗ trợ khách hàng của chi nhánh.");
   if(selected!=null && !List.of("STORE","BRANCH_SUPPORT").contains(kind)) throw new AccessDeniedException("Quản lý không được mở hộp thư CSKH khách hàng.");
   if(from!=null && to!=null && from.isAfter(to)) throw new IllegalArgumentException("Ngày bắt đầu phải trước hoặc bằng ngày kết thúc.");
   if(keyword!=null && keyword.length()>100) throw new IllegalArgumentException("Từ khóa tối đa 100 ký tự.");
@@ -296,7 +297,8 @@ public class ChatService {
   conversation.setLastMessage(text.isEmpty()?(product!=null?"[Hỏi sản phẩm] "+product.name():"[Ảnh]"):text);conversation.setUpdatedAt(now);conversations.save(conversation);
   var recipients=new ArrayList<User>();recipients.add(conversation.getCustomer());
   if("BRANCH_SUPPORT".equals(conversation.getKind())) { recipients.clear();recipients.addAll(managers(conversation.getStore().getId()));recipients.addAll(admins()); }
-  else recipients.addAll("ADMIN".equals(conversation.getKind())?admins():managers(conversation.getStore().getId()));
+  else recipients.addAll("ADMIN".equals(conversation.getKind())?admins():managers(conversation.getStore().getId()).stream()
+   .filter(u -> !"BRANCH_SUPPORT".equals(conversation.getKind()) || u.hasRole(Role.MANAGER)).toList());
   var result=messageView(message);
   publish(recipients,new Event("MESSAGE",view(conversation),result));
   return result;
@@ -307,10 +309,10 @@ public class ChatService {
    @Override public void afterCommit(){usernames.forEach(name->{
     try {
      User recipient=activeUser(name);
-     if(recipient.hasRole(Role.MANAGER) && !recipient.hasRole(Role.ADMIN) && "STORE".equals(event.conversation().kind()) && recipient.getId().equals(event.conversation().customerId())) return;
-     String destination=recipient.hasRole(Role.MANAGER) && !recipient.hasRole(Role.ADMIN) && "STORE".equals(event.conversation().kind())
+     if(recipient.isStoreWorker() && !recipient.hasRole(Role.ADMIN) && "STORE".equals(event.conversation().kind()) && recipient.getId().equals(event.conversation().customerId())) return;
+     String destination=recipient.isStoreWorker() && !recipient.hasRole(Role.ADMIN) && "STORE".equals(event.conversation().kind())
        ? "/queue/chat.store."+event.conversation().storeId()
-       : recipient.hasRole(Role.MANAGER) && !recipient.hasRole(Role.ADMIN) && "BRANCH_SUPPORT".equals(event.conversation().kind())
+       : recipient.isStoreWorker() && !recipient.hasRole(Role.ADMIN) && "BRANCH_SUPPORT".equals(event.conversation().kind())
          ? "/queue/chat.support."+event.conversation().storeId() : "/queue/chat";
      var online=socketUsers.getUser(name);
      if(online==null) return;

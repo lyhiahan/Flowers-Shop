@@ -232,6 +232,13 @@
             margin-top: 6px;
             padding-left: 28px;
         }
+        .payment-card-option.is-unavailable {
+            opacity: 0.55;
+            cursor: not-allowed;
+            background-color: #f3f4f4;
+        }
+        .payment-card-option.is-unavailable:hover { border-color: var(--flower-border-input); }
+        .payment-card-option.is-unavailable label { cursor: not-allowed; }
 
         /* Product line items */
         .product-line-item {
@@ -717,7 +724,7 @@
                             <!-- Lựa chọn 1: Tiền mặt khi nhận hàng (COD) -->
                             <div class="payment-card-option active" id="payOptionCod" onclick="selectPayment('pay_cod')">
                                 <div class="form-check mb-0">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="pay_cod" value="COD" checked onchange="updatePaymentStyle()">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="pay_cod" value="COD" th:checked="${prevPaymentMethod == null or prevPaymentMethod == 'COD'}" onchange="updatePaymentStyle()">
                                     <label class="form-check-label fw-bold text-dark ps-2" for="pay_cod" style="cursor: pointer;">
                                         Tiền mặt khi nhận hàng (COD)
                                     </label>
@@ -727,9 +734,16 @@
                                 </div>
                             </div>
 
+                            <div th:if="${customerWalletEnabled}" class="payment-card-option is-unavailable" id="payOptionWallet" th:data-wallet-balance="${walletBalance}" aria-disabled="true" onclick="selectPayment('pay_wallet')">
+                                <div class="form-check mb-0">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="pay_wallet" value="WALLET_DEMO" disabled hidden th:checked="${prevPaymentMethod == 'WALLET_DEMO'}" onchange="updatePaymentStyle()" aria-describedby="desc_pay_wallet walletAvailabilityStatus">
+                                    <label class="form-check-label fw-bold ps-2" for="pay_wallet"><i class="bi bi-wallet2 me-1" aria-hidden="true"></i>Ví của tôi</label>
+                                </div>
+                                <div class="payment-desc" id="desc_pay_wallet">Số dư hiện có: <strong id="checkoutWalletBalance" th:text="${#numbers.formatDecimal(walletBalance, 0, 'POINT', 0, 'COMMA')} + ' đ'"></strong><div id="walletAvailabilityStatus" role="status" aria-live="polite">Đang xác nhận tổng thanh toán</div></div>
+                            </div>
                             <div th:if="${demoPaymentEnabled}" class="payment-card-option" id="payOptionMomo" onclick="selectPayment('pay_momo')">
                                 <div class="form-check mb-0">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="pay_momo" value="MOMO_DEMO" onchange="updatePaymentStyle()">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="pay_momo" value="MOMO_DEMO" th:checked="${prevPaymentMethod == 'MOMO_DEMO'}" onchange="updatePaymentStyle()">
                                     <label class="form-check-label fw-bold ps-2" for="pay_momo" style="cursor:pointer;color:#a50064;">
                                         <i class="bi bi-qr-code me-1"></i> MoMo
                                     </label>
@@ -1084,7 +1098,7 @@
             const btn = document.getElementById('btnPlaceOrder');
             if (!btn) return;
             btn.dataset.pickupStockBlocked = lock ? 'true' : 'false';
-            btn.disabled = lock;
+            syncPaymentSubmitState();
             if (lock) {
                 btn.title = 'Chi nhánh không đủ hàng. Vui lòng chọn chi nhánh khác.';
             } else {
@@ -1246,12 +1260,54 @@
          * ============================================================ */
         function selectPayment(radioId) {
             const radio = document.getElementById(radioId);
-            if (radio) { radio.checked = true; updatePaymentStyle(); }
+            if (!radio || radio.disabled) return;
+            for (const id of ['pay_cod', 'pay_momo', 'pay_wallet']) {
+                const option = document.getElementById(id);
+                if (option) option.checked = id === radioId;
+            }
+            updatePaymentStyle();
+        }
+
+        function updateWalletAvailability(total, quoteReady) {
+            const radio = document.getElementById('pay_wallet');
+            const card = document.getElementById('payOptionWallet');
+            if (!radio || !card) return;
+            const balance = Number(card.dataset.walletBalance);
+            const amount = total == null ? NaN : Number(total);
+            const known = !!quoteReady && Number.isFinite(amount) && amount > 0 && Number.isFinite(balance);
+            const enough = known && balance >= amount;
+            radio.disabled = !enough;
+            radio.hidden = !enough;
+            if (known && !enough) radio.checked = false;
+            card.classList.toggle('is-unavailable', !enough);
+            card.setAttribute('aria-disabled', String(!enough));
+            const status = document.getElementById('walletAvailabilityStatus');
+            if (status) {
+                status.textContent = !known ? 'Đang chờ xác nhận tổng thanh toán' : enough ? '' : 'Số dư ví không đủ';
+                status.classList.toggle('text-danger', known && !enough);
+            }
+            updatePaymentStyle();
+        }
+
+        function syncPaymentSubmitState() {
+            const button = document.getElementById('btnPlaceOrder');
+            if (!button) return;
+            const selected = ['pay_cod', 'pay_momo', 'pay_wallet'].some(id => {
+                const radio = document.getElementById(id);
+                return radio && radio.checked && !radio.disabled;
+            });
+            button.disabled = button.dataset.pickupStockBlocked === 'true' || !selected;
         }
 
         function updatePaymentStyle() {
             const isCod  = document.getElementById('pay_cod')  && document.getElementById('pay_cod').checked;
             const isMomo = document.getElementById('pay_momo') && document.getElementById('pay_momo').checked;
+            const walletRadio = document.getElementById('pay_wallet');
+            const isWallet = walletRadio && walletRadio.checked && !walletRadio.disabled;
+            const optWallet = document.getElementById('payOptionWallet');
+            const descWallet = document.getElementById('desc_pay_wallet');
+            if (optWallet) optWallet.classList.toggle('active', !!isWallet);
+            if (descWallet) descWallet.classList.remove('d-none');
 
             const optCod  = document.getElementById('payOptionCod');
             const optMomo = document.getElementById('payOptionMomo');
@@ -1269,9 +1325,12 @@
                 if (optCod) optCod.classList.remove('active');
                 if (descCod) descCod.classList.add('d-none');
                 if (btnPlaceOrder) {
-                    btnPlaceOrder.innerHTML = '<i class="bi bi-credit-card me-2"></i>Tiếp tục thanh toán';
+                    btnPlaceOrder.innerHTML = isWallet
+                        ? '<i class="bi bi-wallet2 me-2"></i>Thanh toán bằng ví'
+                        : '<i class="bi bi-credit-card me-2"></i>Tiếp tục thanh toán';
                 }
             }
+            syncPaymentSubmitState();
         }
 
         /* ============================================================

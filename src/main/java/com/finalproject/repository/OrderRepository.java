@@ -12,6 +12,8 @@ import java.util.List;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long>, org.springframework.data.jpa.repository.JpaSpecificationExecutor<Order> {
+    @Query("select o.user.id from Order o where o.id = :id")
+    java.util.Optional<Long> findCustomerIdById(@Param("id") Long id);
     @org.springframework.data.jpa.repository.Modifying
     @Query("""
         update Order o set o.paymentExpiresAt = case when o.paymentMethod = 'MOMO' then :momoDeadline else :bankDeadline end
@@ -51,6 +53,15 @@ public interface OrderRepository extends JpaRepository<Order, Long>, org.springf
 
     // Lọc theo User và trạng thái
     List<Order> findByUserIdAndStatusOrderByCreatedAtDesc(Long userId, OrderStatus status);
+
+    @Query("""
+        select o from Order o where o.user.id = :userId and
+        (o.status = com.finalproject.enums.OrderStatus.CANCELLED or
+         (o.status in (com.finalproject.enums.OrderStatus.REFUND_REQUESTED, com.finalproject.enums.OrderStatus.REFUNDED)
+          and o.cancellationReason is not null and trim(o.cancellationReason) <> ''))
+        order by o.createdAt desc
+        """)
+    List<Order> findCancelledByUserId(@Param("userId") Long userId);
 
     boolean existsByLegacyDeliveryContactId(Long userId);
 

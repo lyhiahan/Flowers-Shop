@@ -32,8 +32,10 @@ public class ManagerStoreController {
                              @RequestParam(value = "size", defaultValue = "6") int size,
                              Principal principal, Model model) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
-        Long legacyId = user.getStore() != null && storeAccess.accessibleStores().stream().anyMatch(s -> s.getId().equals(user.getStore().getId())) ? user.getStore().getId() : -1L;
-        var result = com.finalproject.utils.StorePages.load(page, size, pageable -> storeRepository.findAccessible(user.getId(), legacyId, pageable));
+        Store assigned = storeAccess.managedStore(user);
+        var result = com.finalproject.utils.StorePages.load(page, size, pageable ->
+                user.hasRole(com.finalproject.enums.Role.ADMIN) ? storeRepository.findAll(pageable)
+                        : storeRepository.findAll((root, query, cb) -> cb.equal(root.get("id"), assigned == null ? -1L : assigned.getId()), pageable));
         model.addAttribute("stores", result.getContent());
         com.finalproject.utils.StorePages.model(model, result);
         model.addAttribute("currentUser", user);
@@ -63,7 +65,11 @@ public class ManagerStoreController {
     }
 
     @GetMapping("/create")
-    public String showCreateStoreForm(Model model) {
+    public String showCreateStoreForm(Model model, RedirectAttributes ra) {
+        if (!storeAccess.canCreateStore()) {
+            ra.addFlashAttribute("errorMessage", "Mỗi manager chỉ được quản lý một cửa hàng. Bạn đã có cửa hàng phụ trách.");
+            return "redirect:/manager/stores";
+        }
         if (!model.containsAttribute("store")) model.addAttribute("store", new Store());
         model.addAttribute("requestId", java.util.UUID.randomUUID().toString());
         model.addAttribute("commissions", commissionRepository.findByIsDeletedFalse());
