@@ -4,47 +4,118 @@
 <link rel="stylesheet" th:href="@{/css/customer-wallet.css}">
 <body class="floral-body">
 <header th:replace="~{fragments/floral :: header}"></header>
+
 <main class="flower-container py-4 wallet-page">
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-        <h1 class="h3 mb-0"><i class="bi bi-wallet2 me-2" aria-hidden="true"></i>Ví của tôi</h1>
-        <a class="btn btn-outline-secondary" th:href="@{/customer/orders}"><i class="bi bi-bag-check me-2" aria-hidden="true"></i>Đơn hàng của tôi</a>
+    <nav aria-label="Đường dẫn trang" class="wallet-breadcrumb">
+        <a th:href="@{/}">Trang chủ</a><span aria-hidden="true">/</span><span aria-current="page">Ví của tôi</span>
+    </nav>
+    <div class="wallet-heading">
+        <h1><i class="bi bi-wallet2" aria-hidden="true"></i> Ví của tôi</h1>
+        <a class="btn btn-outline-secondary" th:href="@{/customer/orders}">
+            <i class="bi bi-bag-check me-1" aria-hidden="true"></i>Đơn hàng của tôi
+        </a>
     </div>
-    <section class="wallet-balance-band" aria-labelledby="balance-heading">
+
+    <section class="wallet-summary" aria-labelledby="balance-heading">
         <div>
-            <h2 class="h6 text-secondary" id="balance-heading">Số dư ví</h2>
-            <p class="wallet-balance mb-0" id="customerWalletBalance" th:text="${#numbers.formatDecimal(walletBalance, 0, 'POINT', 0, 'COMMA')} + ' đ'">0 đ</p>
+            <h2 id="balance-heading">Số dư ví</h2>
+            <p class="wallet-balance mb-0" id="customerWalletBalance"
+               th:text="${#numbers.formatDecimal(walletBalance, 0, 'POINT', 0, 'COMMA')} + ' đ'">0 đ</p>
         </div>
-        <a class="btn btn-success" th:href="@{/products}"><i class="bi bi-flower1 me-2" aria-hidden="true"></i>Chọn hoa</a>
+        <div class="wallet-status">
+            <span>Trạng thái ví</span>
+            <strong th:classappend="${walletEnabled} ? 'is-enabled' : 'is-disabled'">
+                <i class="bi bi-shield-check" aria-hidden="true"></i>
+                <span th:text="${walletEnabled ? 'Sẵn sàng sử dụng' : 'Tạm tắt'}">Sẵn sàng sử dụng</span>
+            </strong>
+        </div>
     </section>
-    <p class="small text-secondary py-3 mb-0">Không hỗ trợ nạp, rút hoặc chuyển tiền.</p>
-    <p th:unless="${walletEnabled}" class="text-warning-emphasis small">Thanh toán bằng ví hiện đang tắt. Lịch sử giao dịch vẫn được giữ nguyên.</p>
+    <p class="wallet-policy">Không hỗ trợ nạp, rút hoặc chuyển tiền.</p>
+    <div th:unless="${walletEnabled}" class="alert alert-warning" role="status">
+        Thanh toán bằng ví hiện đang tắt. Lịch sử giao dịch vẫn được giữ nguyên.
+    </div>
+
     <section class="wallet-history" aria-labelledby="history-heading">
-        <h2 class="h5 py-3 mb-0" id="history-heading">Lịch sử giao dịch</h2>
-        <div th:if="${history.empty}" class="wallet-empty py-5 text-center">
-            <i class="bi bi-receipt fs-2 text-secondary" aria-hidden="true"></i>
-            <p class="mt-2 mb-0">Chưa có giao dịch ví</p>
+        <h2 id="history-heading">Lịch sử giao dịch</h2>
+        <form class="wallet-date-filter" th:action="@{/customer/wallet}" method="get" aria-label="Lọc ngày giao dịch">
+            <div class="wallet-date-field">
+                <label for="walletFromDate">Từ ngày</label>
+                <input type="date" id="walletFromDate" name="fromDate" class="form-control"
+                       min="0001-01-01" max="9999-12-31" th:value="${fromDate}"
+                       th:attr="aria-invalid=${filterError != null},aria-describedby=${filterError != null ? 'walletFilterError' : null}">
+            </div>
+            <div class="wallet-date-field">
+                <label for="walletToDate">Đến ngày</label>
+                <input type="date" id="walletToDate" name="toDate" class="form-control"
+                       min="0001-01-01" max="9999-12-31" th:value="${toDate}"
+                       th:attr="aria-invalid=${filterError != null},aria-describedby=${filterError != null ? 'walletFilterError' : null}">
+            </div>
+            <button type="submit" class="btn wallet-filter-submit">
+                <i class="bi bi-funnel me-1" aria-hidden="true"></i>Lọc
+            </button>
+            <a th:if="${dateFilterActive}" th:href="@{/customer/wallet}" class="wallet-filter-reset">
+                <i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Xóa lọc
+            </a>
+        </form>
+        <p th:if="${filterError != null}" id="walletFilterError" class="wallet-filter-error" role="alert" th:text="${filterError}"></p>
+
+        <div th:if="${history.empty and filterError == null}" class="wallet-empty">
+            <i class="bi bi-receipt" aria-hidden="true"></i>
+            <h3 th:text="${dateFilterActive ? 'Không có giao dịch trong khoảng ngày đã chọn' : 'Chưa có giao dịch ví'}">Chưa có giao dịch ví</h3>
         </div>
+
         <div th:unless="${history.empty}" class="table-responsive">
             <table class="table align-middle wallet-table">
-                <thead><tr><th>Thời gian</th><th>Giao dịch</th><th>Đơn hàng</th><th class="text-end">Số tiền</th><th class="text-end">Số dư sau giao dịch</th></tr></thead>
+                <caption class="visually-hidden">Lịch sử giao dịch ví</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Thời gian</th>
+                        <th scope="col">Giao dịch</th>
+                        <th scope="col">Đơn hàng</th>
+                        <th scope="col" class="text-end">Số tiền</th>
+                        <th scope="col" class="text-end">Số dư sau giao dịch</th>
+                    </tr>
+                </thead>
                 <tbody>
-                <tr th:each="entry : ${history.content}">
-                    <td th:text="${#temporals.format(entry.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
-                    <td><i th:class="${entry.type == 'REFUND' ? 'bi bi-arrow-down-left text-success me-2' : 'bi bi-arrow-up-right text-secondary me-2'}" aria-hidden="true"></i><span th:text="${entry.type == 'REFUND' ? 'Hoàn tiền vào ví' : 'Thanh toán đơn hàng'}"></span></td>
-                    <td><a th:href="@{/customer/orders/{id}(id=${entry.orderId})}" th:text="'#' + ${entry.orderId}"></a></td>
-                    <td class="text-end fw-bold" th:classappend="${entry.type == 'REFUND' ? 'text-success' : 'text-danger'}" th:text="${entry.type == 'REFUND' ? '+' : '-'} + ${#numbers.formatDecimal(entry.amount, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
-                    <td class="text-end" th:text="${#numbers.formatDecimal(entry.balanceAfter, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
-                </tr>
+                    <tr th:each="entry : ${history.content}">
+                        <td class="wallet-time">
+                            <time th:datetime="${entry.createdAt}" th:text="${#temporals.format(entry.createdAt, 'dd/MM/yyyy HH:mm')}"></time>
+                        </td>
+                        <td>
+                            <span class="wallet-entry-type" th:classappend="${entry.type == 'REFUND' ? 'is-refund' : 'is-payment'}">
+                                <i th:class="${entry.type == 'REFUND' ? 'bi bi-arrow-down-left' : 'bi bi-arrow-up-right'}" aria-hidden="true"></i>
+                                <span th:text="${entry.type == 'REFUND' ? 'Hoàn tiền vào ví' : 'Thanh toán đơn hàng'}"></span>
+                            </span>
+                        </td>
+                        <td><a class="wallet-order-link" th:href="@{/customer/orders/{id}(id=${entry.orderId})}" th:text="'#' + ${entry.orderId}"></a></td>
+                        <td class="text-end">
+                            <strong class="wallet-amount" th:classappend="${entry.type == 'REFUND' ? 'is-refund' : 'is-payment'}"
+                                    th:text="${entry.type == 'REFUND' ? '+' : '-'} + ${#numbers.formatDecimal(entry.amount, 0, 'POINT', 0, 'COMMA')} + ' đ'"></strong>
+                        </td>
+                        <td class="text-end">
+                            <span class="wallet-after" th:text="${#numbers.formatDecimal(entry.balanceAfter, 0, 'POINT', 0, 'COMMA')} + ' đ'"></span>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
-        <nav th:if="${history.totalPages > 1}" aria-label="Phân trang lịch sử ví" class="d-flex justify-content-between align-items-center gap-3 py-3">
-            <a th:if="${history.hasPrevious()}" th:href="@{/customer/wallet(page=${history.number - 1})}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-chevron-left me-1" aria-hidden="true"></i>Trước</a>
+
+        <nav th:if="${history.totalPages > 1}" aria-label="Phân trang lịch sử ví" class="wallet-pagination">
+            <a th:if="${history.hasPrevious()}"
+               th:href="@{/customer/wallet(page=${history.number - 1},fromDate=${fromDate},toDate=${toDate})}"
+               class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-chevron-left me-1" aria-hidden="true"></i>Trước
+            </a>
             <span th:text="'Trang ' + ${history.number + 1} + ' / ' + ${history.totalPages}"></span>
-            <a th:if="${history.hasNext()}" th:href="@{/customer/wallet(page=${history.number + 1})}" class="btn btn-outline-secondary btn-sm">Sau<i class="bi bi-chevron-right ms-1" aria-hidden="true"></i></a>
+            <a th:if="${history.hasNext()}"
+               th:href="@{/customer/wallet(page=${history.number + 1},fromDate=${fromDate},toDate=${toDate})}"
+               class="btn btn-outline-secondary btn-sm">
+                Sau<i class="bi bi-chevron-right ms-1" aria-hidden="true"></i>
+            </a>
         </nav>
     </section>
 </main>
+
 <footer th:replace="~{fragments/floral :: footer}"></footer>
 <th:block th:replace="~{fragments/floral :: scripts}"></th:block>
 </body>

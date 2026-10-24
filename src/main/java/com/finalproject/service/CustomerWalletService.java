@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Clock;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -46,8 +47,22 @@ public class CustomerWalletService {
 
     @Transactional(readOnly = true)
     public Page<Entry> history(String username, int page) {
+        return history(username, page, null, null);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Entry> history(String username, int page, LocalDate fromDate, LocalDate toDate) {
         User owner = requireOwner(username);
-        return entries.findByWalletUserIdOrderByIdDesc(owner.getId(), PageRequest.of(Math.max(0, page), 15))
+        if ((fromDate != null && (fromDate.getYear() < 1 || fromDate.getYear() > 9999))
+                || (toDate != null && (toDate.getYear() < 1 || toDate.getYear() > 9999)))
+            throw new IllegalArgumentException("Ngày lọc không hợp lệ. Vui lòng chọn lại ngày.");
+        if (fromDate != null && toDate != null && fromDate.isAfter(toDate))
+            throw new IllegalArgumentException("Từ ngày không được sau đến ngày.");
+        LocalDateTime fromTime = fromDate == null ? null : fromDate.atStartOfDay();
+        // The SQL Server datetime2 range ends on 9999-12-31, so that end date is unbounded.
+        LocalDateTime untilTime = toDate == null || toDate.equals(LocalDate.of(9999, 12, 31))
+                ? null : toDate.plusDays(1).atStartOfDay();
+        return entries.findHistory(owner.getId(), fromTime, untilTime, PageRequest.of(Math.max(0, page), 15))
                 .map(e -> new Entry(e.getId(), e.getOrder().getId(), e.getType(), e.getAmount(),
                         e.getBalanceAfter(), e.getCreatedAt()));
     }

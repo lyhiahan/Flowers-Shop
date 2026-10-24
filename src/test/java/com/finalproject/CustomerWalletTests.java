@@ -7,6 +7,9 @@ import com.finalproject.service.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.data.domain.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -328,6 +331,122 @@ class CustomerWalletTests {
     private User actor(String name, Role role) {
         return User.builder().username(name).email(name + "@test.local").password("unused").fullName(name)
                 .phone("0900000000").address("Quan 1").role(role).isActive(true).build();
+    }
+
+    @Test void walletDateRangeIncludesWholeBoundaryDaysAndOnlyTheOwner() throws Exception {
+        historyEntry(LocalDateTime.of(2026, 9, 30, 23, 59, 59), false);
+        Long first = historyEntry(LocalDateTime.of(2026, 10, 1, 0, 0), false);
+        Long last = historyEntry(LocalDateTime.of(2026, 10, 31, 23, 59, 59, 999999000), false);
+        historyEntry(LocalDateTime.of(2026, 11, 1, 0, 0), false);
+        historyEntry(LocalDateTime.of(2026, 10, 15, 12, 0), true);
+        BigDecimal before = wallets.balance(customer);
+        assertThat(wallets.history(customer, 0, LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 31)))
+                .extracting(CustomerWalletService.Entry::id).containsExactly(last, first);
+        var result = mvc.perform(get("/customer/wallet").param("fromDate", "2026-10-01").param("toDate", "2026-10-31")
+                        .with(user(customer).roles("USER")))
+                .andExpect(status().isOk()).andExpect(model().attributeDoesNotExist("filterError"))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("value=\"2026-10-01\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("value=\"2026-10-31\"")))
+                .andReturn();
+        assertThat(((Page<?>) result.getModelAndView().getModel().get("history")).getTotalElements()).isEqualTo(2);
+        login(customer, Role.USER);
+        assertThat(wallets.balance(customer)).isEqualByComparingTo(before);
+        assertThat(wallets.history(customer, 0).getTotalElements()).isEqualTo(4);
+    }
+
+    @Test void walletDateRangeSupportsEitherEndAndASingleDay() {
+        Long before = historyEntry(LocalDateTime.of(2026, 10, 23, 23, 59, 59), false);
+        Long today = historyEntry(LocalDateTime.of(2026, 10, 24, 12, 0), false);
+        Long after = historyEntry(LocalDateTime.of(2026, 10, 25, 0, 0), false);
+        LocalDate day = LocalDate.of(2026, 10, 24);
+        assertThat(wallets.history(customer, 0, day, null)).extracting(CustomerWalletService.Entry::id)
+                .containsExactly(after, today);
+        assertThat(wallets.history(customer, 0, null, day)).extracting(CustomerWalletService.Entry::id)
+                .containsExactly(today, before);
+        assertThat(wallets.history(customer, 0, day, day)).extracting(CustomerWalletService.Entry::id)
+                .containsExactly(today);
+        assertThat(wallets.history(customer, 0, null, LocalDate.of(9999, 12, 31))).hasSize(3);
+    }
+
+    @Test void walletDateRangePaginationPreservesFiltersAndDoesNotChangeBalance() throws Exception {
+        for (int i = 0; i < 16; i++) historyEntry(LocalDateTime.of(2026, 10, 24, 10, i), false);
+        historyEntry(LocalDateTime.of(2026, 9, 30, 23, 59), false);
+        historyEntry(LocalDateTime.of(2026, 11, 1, 0, 0), false);
+        var first = mvc.perform(get("/customer/wallet").param("fromDate", "2026-10-01").param("toDate", "2026-10-31")
+                        .with(user(customer).roles("USER")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("page=1&amp;fromDate=2026-10-01&amp;toDate=2026-10-31")))
+                .andReturn();
+        Page<?> firstPage = (Page<?>) first.getModelAndView().getModel().get("history");
+        assertThat(firstPage.getTotalElements()).isEqualTo(16);
+        assertThat(firstPage.getTotalPages()).isEqualTo(2);
+        assertThat(firstPage.getContent()).hasSize(15);
+        var second = mvc.perform(get("/customer/wallet").param("page", "1")
+                        .param("fromDate", "2026-10-01").param("toDate", "2026-10-31")
+                        .with(user(customer).roles("USER")))
+                .andExpect(status().isOk()).andReturn();
+        Page<?> secondPage = (Page<?>) second.getModelAndView().getModel().get("history");
+        assertThat(secondPage.getContent()).hasSize(1);
+        assertThat(secondPage.getTotalElements()).isEqualTo(16);
+        login(customer, Role.USER);
+        assertThat(wallets.balance(customer)).isEqualByComparingTo("675000");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"2026-02-30", "invalid", "2026-13-01", "0000-01-01", "+10000-01-01"})
+    void invalidWalletDateShowsAnErrorWithoutFallingBackToUnfilteredHistory(String value) throws Exception {
+        historyEntry(LocalDateTime.of(2026, 10, 24, 12, 0), false);
+        var result = mvc.perform(get("/customer/wallet").param("fromDate", value)
+                        .with(user(customer).roles("USER")))
+                .andExpect(status().isOk()).andExpect(model().attributeExists("filterError"))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"walletFilterError\"")))
+                .andReturn();
+        assertThat((Page<?>) result.getModelAndView().getModel().get("history")).isEmpty();
+        login(customer, Role.USER);
+        assertThat(wallets.history(customer, 0)).hasSize(1);
+        assertThat(wallets.balance(customer)).isEqualByComparingTo("675000");
+    }
+
+    @Test void reversedWalletDateRangeIsRejectedAndEmptyRangesStayClear() throws Exception {
+        historyEntry(LocalDateTime.of(2026, 10, 24, 12, 0), false);
+        mvc.perform(get("/customer/wallet").param("fromDate", "2026-10-31").param("toDate", "2026-10-01")
+                        .with(user(customer).roles("USER")))
+                .andExpect(status().isOk()).andExpect(model().attribute("filterError", "Từ ngày không được sau đến ngày."));
+        login(customer, Role.USER);
+        assertThatThrownBy(() -> wallets.history(customer, 0, LocalDate.of(2026, 10, 31), LocalDate.of(2026, 10, 1)))
+                .isInstanceOf(IllegalArgumentException.class);
+        mvc.perform(get("/customer/wallet").param("fromDate", "2026-11-01").param("toDate", "2026-11-30")
+                        .with(user(customer).roles("USER")))
+                .andExpect(status().isOk()).andExpect(model().attributeDoesNotExist("filterError"))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Không có giao dịch trong khoảng ngày đã chọn")));
+    }
+
+    @Test void walletFiltersCannotExposeAnotherCustomersHistoryAndRemovedPanelsStayAbsent() throws Exception {
+        historyEntry(LocalDateTime.of(2026, 10, 24, 12, 0), false);
+        login(other, Role.USER);
+        assertThatThrownBy(() -> wallets.history(customer, 0, LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 31)))
+                .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
+        mvc.perform(get("/customer/wallet").param("fromDate", "2026-10-01").param("toDate", "2026-10-31")
+                        .param("username", customer).param("userId", customerId.toString()).with(user(other).roles("USER")))
+                .andExpect(status().isOk()).andExpect(model().attribute("walletBalance", BigDecimal.ZERO))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Không có giao dịch trong khoảng ngày đã chọn")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("WALLET"))))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Thanh toán hoa tươi 1 chạm"))))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Tổng lượt giao dịch"))));
+    }
+
+    private Long historyEntry(LocalDateTime time, boolean foreign) {
+        Order order = demoOrder("1000");
+        return tx(() -> {
+            Long ownerId = foreign ? otherId : customerId;
+            User owner = users.findById(ownerId).orElseThrow();
+            Order linked = orders.findById(order.getId()).orElseThrow();
+            linked.setUser(owner);
+            CustomerWallet wallet = walletRows.findById(ownerId).orElseGet(() -> walletRows.saveAndFlush(
+                    CustomerWallet.builder().userId(ownerId).user(owner).balance(new BigDecimal("675000")).build()));
+            return ledger.saveAndFlush(CustomerWalletEntry.builder().wallet(wallet).order(linked).type("REFUND")
+                    .amount(new BigDecimal("1000")).balanceAfter(new BigDecimal("675000")).createdAt(time).build()).getId();
+        });
     }
     private void login(String name, Role role) {
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(name, "",
