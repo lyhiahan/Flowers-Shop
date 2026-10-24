@@ -464,3 +464,45 @@ Tài liệu liên quan: [Kịch bản tự test toàn dự án](KICH_BAN_TU_TEST
 1. **Tính định hướng kỹ thuật cao**: Các câu lệnh prompt đều chỉ rõ mục tiêu công nghệ (Spring Boot, JWT Stateless, Pessimistic Lock, Flyway), không để AI tự phán đoán mơ hồ.
 2. **Kiểm soát chất lượng bằng kiểm thử**: Lượt kiểm tra gần nhất có 622 ca Java (616 đạt, 6 bỏ qua) và 102/102 ca JavaScript đạt; một số tích hợp bên ngoài vẫn cần demo trực tiếp.
 3. **Bảo mật cần được duy trì**: Đưa secret ra khỏi tài liệu/mã nguồn, thu hồi khóa đã lộ và kiểm tra cấu hình môi trường trước khi nộp hoặc triển khai.
+
+
+### Bổ sung prompt ngày 24/10/2026 — phạm vi quản lý cửa hàng
+
+- Vấn đề người dùng phản ánh: “Nghiệp vụ của manager chưa rõ, một người có thể quản lý nhiều cửa hàng”.
+- Quy định người dùng xác nhận: “Mỗi manager chỉ được quản lý một cửa hàng; chỉ chủ chuỗi/admin quản lý nhiều cửa hàng.”
+- Phạm vi triển khai: giới hạn cửa hàng trong backend, danh sách/tổng quan, tạo cửa hàng, phân công nhân sự, chat và thông báo. Giữ dữ liệu lịch sử; tài khoản cũ có phân công rõ thì chỉ truy cập cửa hàng đó. Các bước tự kiểm tra nằm ở phần bổ sung ngày 24/10/2026 trong `KICH_BAN_TU_TEST_TOAN_DU_AN.md`.
+
+
+### Bổ sung prompt ngày 24/10/2026 — tách Staff
+
+- Phản ánh: “Vai trò staff chưa rõ, vai trò cửa hàng chưa rõ”.
+- Người dùng xác nhận: “Tách riêng quyền Staff như trên (đề xuất)”: Admin quản lý toàn chuỗi; Manager một chi nhánh; Staff xử lý đơn và hỗ trợ khách ở một chi nhánh, không quản lý nhân sự/tài chính/cấu hình; Khách hàng mua hàng.
+- Thực hiện: thêm STAFF riêng, đổi nhãn Chủ sở hữu thành Quản lý chi nhánh, giới hạn chức năng và chat theo chi nhánh, bổ sung migration V16 cho nhân viên cũ. Quy định và kịch bản test nằm trong `PHAN_QUYEN_CUA_HANG.md`.
+
+- Prompt bổ sung: “tạo role đăng nhập nhanh staff cho tôi”. Thêm nút chọn tài khoản Staff `nguyenmailan` trên trang đăng nhập, dùng tài khoản demo đã được phân công chi nhánh.
+
+- Prompt bổ sung: “xóa phần này và đặt nút thông báo về vị trí phù hợp, menu và thống kê không cần vì nó đã có trang riêng”. Bỏ nút Menu và nhãn trang lặp trong đầu trang admin; đưa chuông thông báo lên góc phải, giữ huy hiệu chưa đọc.
+
+
+### Bổ sung prompt — hoàn thiện khu vực Nhân viên
+
+Yêu cầu: “Bổ sung đầy đủ chức năng của staff, có thể trang thành các trang trong role nhân viên”: xem đơn và thông tin giao hàng; xác nhận/chuẩn bị hoa; cập nhật giao hàng/hoàn tất đúng thứ tự; giao hoa và thu COD tại quầy; đọc/trả lời tin nhắn khách của cửa hàng.
+
+Triển khai thành Đơn hàng, Chi tiết đơn, Chuẩn bị hoa, Giao & nhận hoa và Tin nhắn khách hàng. Giới hạn theo chi nhánh trong backend, xác nhận thu đủ COD trước khi ghi nhận đã thanh toán, kiểm thử chống nhảy bước và ghi nhận tiền trùng. Kịch bản tự test trong `KICH_BAN_TEST_NHAN_VIEN.md`.
+
+- Prompt bổ sung: “tôi muốn các khu vực là thanh dọc như trong role admin”. Chuyển điều hướng Staff sang sidebar xanh đậm bên trái, mục đang chọn nổi bật; ghim tài khoản/đăng xuất ở dưới và hỗ trợ mở/đóng trên màn hình nhỏ.
+
+
+### Bổ sung prompt — xóa tài khoản
+
+- Yêu cầu: “hiển thị đã xóa tài khoản.... thành công, không hiển thị dài dòng” và làm rõ khi Admin xóa khách hàng có đơn đang đặt, nhân viên, quản lý.
+- Người dùng chọn: **Chặn xóa đến khi đơn xử lý xong (đề xuất)**.
+- Thực hiện: thông báo xóa ngắn; chặn đơn chưa kết thúc/chờ hoàn tiền; thu hồi phân công và quyền của Staff; Manager phụ trách phải được thay thế trước; bảo toàn lịch sử. Không tự hủy đơn khi xóa.
+
+- Prompt bổ sung: “Ngừng bán ko được chọn nhưng vẫn tính vào tổng mục sản phẩm”. Sửa dòng Chọn tất cả trong giỏ chỉ đếm mục và số lượng còn có thể đặt; loại sản phẩm ngừng bán/hết hàng, cập nhật lại sau đồng bộ giỏ.
+
+
+### Bổ sung prompt — quyền quản trị database dùng chung (24/10/2026)
+
+- Yêu cầu: “nâng cấp database lên tài khoản quản trị”. Xác nhận phạm vi: “Cả tv_thanhtai và tv_quocanh”.
+- Đã cấp db_owner cho hai tài khoản trong RentalShop và kiểm tra tư cách thành viên thành công. Không cấp sysadmin trên SQL Server; giữ nguyên mật khẩu. Hai tài khoản có quyền tạo/sửa/xóa bảng và dữ liệu, chạy migration trong RentalShop.
