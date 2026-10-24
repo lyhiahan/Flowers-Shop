@@ -372,3 +372,29 @@ test('workbench layout consumes available height with independently scrollable p
     assert.match(css,/#flowerChat \.chat-sidebar \.chat-inbox\s*\{[^}]*max-height:\s*none/);
     assert.ok(!css.includes('calc(100dvh - 190px)'));
 });
+
+
+test('staff receives only its branch customer queue and has no internal support controls', async () => {
+    const app = widget({role: 'STAFF', storeId: 5}); await flush();
+    const socket = app.sockets[0]; socket.open();
+    assert.ok(socket.frames.some(frame => frame.includes('chat-store-id:5')));
+    socket.message('CONNECTED\nversion:1.2\n\n\0'); await flush();
+    assert.ok(socket.frames.some(frame => frame.includes('destination:/user/queue/chat.store.5\n')));
+    assert.ok(!socket.frames.some(frame => frame.includes('destination:/user/queue/chat.support.')));
+    assert.equal(app.node('chatBranchSupportButton').hidden, true);
+    assert.equal(app.node('chatChannelTabs').hidden, true);
+    assert.match(app.node('chatHeading').textContent, /Hộp thư khách hàng/);
+});
+
+
+test('staff workbench scopes requests and ignores conversations from another branch', async () => {
+    const app = widget({role: 'STAFF', storeId: 5, workbench: true, conversations: [
+        {id: 7, kind: 'STORE', storeId: 5, storeName: 'Quận 7', customerId: 2},
+        {id: 8, kind: 'STORE', storeId: 9, storeName: 'Chi nhánh khác', customerId: 3}
+    ]}); await flush(); await flush();
+    assert.equal(app.node('chatPanel').hidden, false);
+    assert.equal(app.node('chatConversations').children.length, 1);
+    assert.ok(app.requests.some(request => request.url.includes('/conversations?') && request.url.includes('storeId=5')));
+    await app.node('chatConversations').children[0].events.click();
+    assert.ok(app.requests.some(request => request.url.includes('/conversations/7/messages?storeId=5')));
+});

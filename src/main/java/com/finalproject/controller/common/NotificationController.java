@@ -41,6 +41,8 @@ public class NotificationController {
             return "redirect:/admin/notifications";
         }
 
+        if (effectiveRole == Role.STAFF) return "redirect:/staff/orders";
+
         if (effectiveRole == Role.MANAGER) {
             if (request != null && "/notifications".equals(request.getRequestURI())) {
                 return "redirect:/manager/notifications";

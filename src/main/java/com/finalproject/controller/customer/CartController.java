@@ -34,13 +34,17 @@ public class CartController {
         java.util.Map<Long, Boolean> itemPausedMap = new java.util.HashMap<>();
 
         int totalQuantity = 0;
+        int selectableRowCount = 0;
         if (cart != null && cart.getItems() != null) {
             for (com.finalproject.entity.CartItem item : cart.getItems()) {
-                totalQuantity += (item.getQuantity() != null ? item.getQuantity() : 0);
                 com.finalproject.entity.Store store = item.getStore();
                 itemsByStore.computeIfAbsent(store, k -> new java.util.ArrayList<>()).add(item);
 
                 CartAvailability availability = availabilityFor(item);
+                if (!availability.paused() && availability.stock() > 0) {
+                    selectableRowCount++;
+                    totalQuantity += item.getQuantity() != null ? item.getQuantity() : 0;
+                }
                 itemStockMap.put(item.getId(), availability.stock());
                 itemPausedMap.put(item.getId(), availability.paused());
             }
@@ -50,6 +54,7 @@ public class CartController {
         model.addAttribute("itemPausedMap", itemPausedMap);
         model.addAttribute("stockByItem", itemStockMap);
         model.addAttribute("totalQuantity", totalQuantity);
+        model.addAttribute("selectableRowCount", selectableRowCount);
         return "customer/cart";
     }
 

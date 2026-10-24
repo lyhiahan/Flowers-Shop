@@ -1,192 +1,47 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nghiệp Vụ Quầy Nhân Viên - Cửa Hàng Hoa Tươi Sài Gòn</title>
-    <!-- Bootstrap 5 & Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="icon" type="image/png" th:href="@{/images/flower-logo.png}">
-    <!-- Unified Floral Theme CSS -->
-    <link rel="stylesheet" th:href="@{/css/floral-theme.css}">
-    <!-- WebSocket / STOMP -->
-    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-</head>
-<body>
-<div class="container-fluid py-4 px-4 px-lg-5">
-    <!-- Header -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-3 border-bottom" style="border-color: var(--border-soft) !important;">
-        <div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <img th:src="@{/images/flower-logo.png}" alt="Logo" class="brand-logo-img" style="width: 36px; height: 36px; object-fit: contain; flex-shrink: 0;">
-                <h2 class="font-serif fw-bold mb-0" style="color: var(--brand-green);">Bàn Làm Việc Nhân Viên</h2>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head><th:block th:replace="~{fragments/staff-layout :: assets('Đơn hàng nhân viên')}"></th:block></head>
+<body class="staff-page" th:attr="data-staff-store-id=${staffStore != null ? staffStore.id : null}">
+<header th:replace="~{fragments/staff-layout :: header(${staffActive})}"></header>
+<main class="staff-main">
+    <div class="staff-page-heading">
+        <div><h1 th:text="${pageTitle}"></h1><p th:text="${staffActive == 'preparation' ? 'Các đơn đã xác nhận và đang chuẩn bị hoa.' : (staffActive == 'delivery' ? 'Bàn giao vận chuyển, giao hoa tại quầy và xác nhận hoàn tất.' : 'Tìm đơn, kiểm tra thông tin giao hàng và mở chi tiết để xử lý.')} "></p></div>
+        <span class="staff-status" th:if="${staffStore != null}" th:text="${totalElements + ' đơn hàng'}"></span>
+    </div>
+    <th:block th:replace="~{fragments/staff-layout :: alerts}"></th:block>
+    <th:block th:if="${staffStore != null}">
+        <form method="get" th:action="${listPath}" class="staff-card staff-filters">
+            <label>Tìm đơn<input name="keyword" th:value="${keyword}" maxlength="100" class="form-control" placeholder="Mã đơn, tên hoặc số điện thoại"></label>
+            <label>Trạng thái<select name="status" class="form-select"><option value="">Tất cả trạng thái</option><option th:each="s : ${statusOptions}" th:value="${s}" th:selected="${s == selectedStatus}" th:text="${s.displayName}"></option></select></label>
+            <label>Hình thức nhận hoa<select name="fulfillment" class="form-select"><option value="ALL" th:selected="${fulfillment == 'ALL'}">Tất cả</option><option value="PICKUP" th:selected="${fulfillment == 'PICKUP'}">Nhận tại quầy</option><option value="DELIVERY" th:selected="${fulfillment == 'DELIVERY'}">Giao tận nơi</option></select></label>
+            <button class="btn btn-success">Tìm đơn</button><a th:href="${listPath}" class="btn btn-outline-secondary">Xóa lọc</a>
+        </form>
+        <section class="staff-card p-0 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0 staff-table">
+                    <thead><tr><th>Đơn hàng</th><th>Người nhận</th><th>Giao / nhận hoa</th><th>Thanh toán</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(orders)}"><td colspan="6" class="text-center py-5 text-muted">Không có đơn hàng phù hợp. Thử thay đổi bộ lọc hoặc kiểm tra trang Đơn hàng.</td></tr>
+                        <tr th:each="o : ${orders}">
+                            <td><a class="staff-order-link" th:href="@{/staff/orders/{id}(id=${o.id})}" th:text="${'#HD' + o.id}"></a><small class="d-block text-muted mt-1" th:if="${o.createdAt != null}" th:text="${#temporals.format(o.createdAt, 'dd/MM/yyyy HH:mm')}"></small></td>
+                            <td><strong th:text="${o.recipientName ?: o.user.fullName}"></strong><small class="d-block text-muted mt-1" th:text="${o.recipientPhone ?: o.user.phone}"></small></td>
+                            <td><span th:text="${o.pickup ? 'Nhận tại quầy' : 'Giao tận nơi'}"></span><small class="d-block text-muted mt-1" th:text="${o.pickup ? staffStore.address : (o.recipientAddress ?: 'Chưa có địa chỉ')}"></small><small class="d-block text-muted" th:if="${o.deliveryDate != null}" th:text="${'Hẹn: ' + #temporals.format(o.deliveryDate, 'dd/MM/yyyy') + (o.deliveryTime != null ? ' · ' + #temporals.format(o.deliveryTime, 'HH:mm') : '')}"></small></td>
+                            <td><strong th:text="${#numbers.formatDecimal(o.totalAmount ?: 0, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></strong><small class="d-block text-muted mt-1" th:text="${o.paymentStatus == 'PAID' ? 'Đã thanh toán' : (o.paymentStatus == 'REFUNDED' ? 'Đã hoàn tiền' : 'Chưa thanh toán')}"></small></td>
+                            <td><span class="staff-status" th:text="${o.status.displayName}"></span></td>
+                            <td><a class="btn btn-sm btn-outline-success" th:href="@{/staff/orders/{id}(id=${o.id})}">Xem &amp; xử lý</a></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            <p class="text-muted small mb-0">
-                Chi nhánh trực ca: <strong class="text-dark" th:text="${staffStore.name}">Chi Nhánh Hoa Tươi</strong>
-                <span class="mx-2 text-secondary">•</span>
-                <span class="text-muted" th:text="${staffStore.address}">Địa chỉ chi nhánh</span>
-            </p>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <span class="badge rounded-pill px-3 py-2" id="wsStatus" style="background: var(--brand-green-light); color: var(--brand-green); font-weight: 600;">
-                <i class="bi bi-broadcast me-1"></i> Đang kết nối thông báo
-            </span>
-            <a th:href="@{/}" class="btn btn-sm btn-outline-forest rounded-pill px-3">
-                <i class="bi bi-house me-1"></i> Trang chủ
-            </a>
-            <form th:action="@{/logout}" method="post" class="d-inline m-0">
-                <button type="submit" class="btn btn-sm btn-light text-danger rounded-pill px-3">
-                    <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Alert realtime WebSocket -->
-    <div id="realtimeAlert" class="alert alert-dismissible fade show d-none card-floral border-0 shadow-sm mb-4" role="alert" style="background: var(--accent-rose-soft); color: var(--accent-rose);">
-        <i class="bi bi-bell-fill me-2 fs-5"></i>
-        <strong id="alertContent"></strong>
-        <button type="button" class="btn-close" onclick="closeAlert()"></button>
-    </div>
-
-    <!-- Flash message -->
-    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-3 py-2 small" role="alert">
-        <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${successMessage}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show rounded-3 py-2 small" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-1"></i> <span th:text="${errorMessage}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-
-    <!-- Order Table Card -->
-    <div class="card card-floral shadow-sm border-0">
-        <div class="card-header py-3 px-4 d-flex justify-content-between align-items-center">
-            <span class="fs-6 fw-bold"><i class="bi bi-inbox-fill me-2"></i>Danh Sách Đơn Đặt Hoa Cần Phục Vụ</span>
-            <span class="badge rounded-pill px-3 py-1" style="background: var(--brand-green-light); color: var(--brand-green);" th:text="${#lists.size(orders)} + ' đơn'">0 đơn</span>
-        </div>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead>
-                <tr>
-                    <th>Mã đơn</th>
-                    <th>Khách hàng & Người nhận</th>
-                    <th>Sản phẩm</th>
-                    <th>Tổng thanh toán</th>
-                    <th>Hình thức</th>
-                    <th>Trạng thái</th>
-                    <th class="text-end">Nghiệp vụ quầy</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:if="${#lists.isEmpty(orders)}">
-                    <td colspan="7" class="text-center py-5 text-muted">
-                        <i class="bi bi-check2-circle fs-2 d-block mb-2 text-secondary"></i>
-                        Hiện tại chi nhánh chưa có đơn hàng nào cần xử lý.
-                    </td>
-                </tr>
-                <tr th:each="o : ${orders}">
-                    <td class="fw-bold" style="color: var(--brand-green);" th:text="'#HD' + ${o.id}"></td>
-                    <td>
-                        <div class="fw-semibold" th:text="${o.recipientName != null and !o.recipientName.isEmpty() ? o.recipientName : (o.user != null ? o.user.fullName : 'Khách vãng lai')}">Khách hàng</div>
-                        <small class="text-muted d-block" style="font-size: 0.78rem;">
-                            <i class="bi bi-telephone text-secondary me-1"></i>
-                            <span th:text="${o.recipientPhone != null and !o.recipientPhone.isEmpty() ? o.recipientPhone : (o.user != null ? o.user.phone : '---')}">0901234567</span>
-                        </small>
-                    </td>
-                    <td>
-                        <span class="badge px-2 py-1 rounded-pill" style="background: var(--brand-green-light); color: var(--brand-green); font-size: 0.78rem;">
-                            🌸 Hoa tươi
-                        </span>
-                    </td>
-                    <td>
-                        <strong style="color: var(--accent-rose);" th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
-                        <div class="text-muted small" style="font-size: 0.72rem;" th:text="${o.paymentStatus == 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'}"></div>
-                    </td>
-                    <td>
-                        <span th:if="${o.shippingMethod == 'PICKUP' or o.shippingMethod == 'STORE_PICKUP'}" class="badge px-2 py-1 rounded-pill" style="background: #E0F2FE; color: #0369A1; font-weight: 500;">
-                            <i class="bi bi-shop me-1"></i> Tại quầy
-                        </span>
-                        <span th:if="${o.shippingMethod != 'PICKUP' and o.shippingMethod != 'STORE_PICKUP'}" class="badge px-2 py-1 rounded-pill" style="background: #EDE9FE; color: #6D28D9; font-weight: 500;">
-                            <i class="bi bi-truck me-1"></i> Giao tận nơi
-                        </span>
-                    </td>
-                    <td>
-                        <span th:if="${o.status.name() == 'PENDING'}" class="badge rounded-pill px-2 py-1" style="background: var(--amber-bg); color: var(--amber-text); border: 1px solid var(--amber-border);">Chờ tiếp nhận</span>
-                        <span th:if="${o.status.name() == 'CONFIRMED'}" class="badge rounded-pill px-2 py-1" style="background: #E0F2FE; color: #0369A1;">Đã duyệt</span>
-                        <span th:if="${o.status.name() == 'PREPARING'}" class="badge rounded-pill px-2 py-1" style="background: #F3E8FF; color: #7E22CE;">Đang cắm hoa</span>
-                        <span th:if="${o.status.name() == 'DELIVERED' or o.status.name() == 'COMPLETED'}" class="badge rounded-pill px-2 py-1" style="background: var(--brand-green-light); color: var(--brand-green);">Đã giao hoa</span>
-                        <span th:if="${o.status.name() == 'CANCELLED'}" class="badge rounded-pill px-2 py-1" style="background: var(--alert-red-bg); color: var(--alert-red-text);">Đã hủy</span>
-                    </td>
-                    <td class="text-end">
-                        <!-- Nút Duyệt đơn khi PENDING -->
-                        <form th:if="${o.status.name() == 'PENDING'}" th:action="@{'/staff/orders/approve/' + ${o.id}}" method="post" class="d-inline">
-                            <button class="btn btn-sm btn-primary rounded-pill px-3">
-                                <i class="bi bi-check-lg me-1"></i> Duyệt Đơn
-                            </button>
-                        </form>
-
-                        <!-- Nút Chuẩn bị hoa khi CONFIRMED -->
-                        <form th:if="${o.status.name() == 'CONFIRMED'}" th:action="@{/staff/orders/prepare/{id}(id=${o.id})}" method="post" class="d-inline">
-                            <button class="btn btn-sm btn-primary rounded-pill px-3">
-                                <i class="bi bi-flower1 me-1"></i> Chuẩn bị hoa
-                            </button>
-                        </form>
-
-                        <!-- Nút Giao hoa tại quầy khi PREPARING và nhận tại quầy -->
-                        <form th:if="${o.status.name() == 'PREPARING' and (o.shippingMethod == 'PICKUP' or o.shippingMethod == 'STORE_PICKUP')}" th:action="@{/staff/orders/deliver/{id}(id=${o.id})}" method="post" class="d-inline">
-                            <button class="btn btn-sm btn-success rounded-pill px-3">
-                                <i class="bi bi-bag-check me-1"></i> Giao hoa & Thu tiền
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    var staffStoreId = /*[[${staffStore.id}]]*/ 1;
-
-    function closeAlert() {
-        document.getElementById('realtimeAlert').classList.add('d-none');
-    }
-
-    // Kết nối WebSocket STOMP
-    var socket = new SockJS('/ws');
-    var stompClient = Stomp.over(socket);
-
-    stompClient.connect({}, function (frame) {
-        var wsStatus = document.getElementById("wsStatus");
-        if (wsStatus) {
-            wsStatus.innerHTML = '<i class="bi bi-broadcast me-1"></i> Đã kết nối thông báo';
-        }
-        stompClient.subscribe('/topic/store/' + staffStoreId + '/orders', function (message) {
-            var alertBox = document.getElementById('realtimeAlert');
-            var alertContent = document.getElementById('alertContent');
-            if (alertBox && alertContent) {
-                alertContent.innerText = "🔔 " + message.body;
-                alertBox.classList.remove('d-none');
-            }
-        });
-    }, function(error) {
-        var wsStatus = document.getElementById("wsStatus");
-        if (wsStatus) {
-            wsStatus.style.background = "var(--alert-red-bg)";
-            wsStatus.style.color = "var(--alert-red-text)";
-            wsStatus.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i> Mất kết nối realtime';
-        }
-    });
-    /*]]>*/
-</script>
-<script th:src="@{/js/global-modal.js}"></script>
-<th:block th:replace="~{fragments/chat-widget :: widget}"></th:block>
+        </section>
+        <nav class="d-flex justify-content-center align-items-center gap-3 mb-3" aria-label="Phân trang đơn hàng" th:if="${totalPages > 1}">
+            <a th:if="${currentPage > 0}" class="btn btn-sm btn-outline-success" th:href="@{${listPath}(page=${currentPage - 1},size=${pageSize},keyword=${keyword},status=${selectedStatus},fulfillment=${fulfillment})}">Trang trước</a>
+            <span th:text="${'Trang ' + (currentPage + 1) + ' / ' + totalPages}"></span>
+            <a th:if="${currentPage + 1 < totalPages}" class="btn btn-sm btn-outline-success" th:href="@{${listPath}(page=${currentPage + 1},size=${pageSize},keyword=${keyword},status=${selectedStatus},fulfillment=${fulfillment})}">Trang sau</a>
+        </nav>
+        <p class="staff-note">Mở chi tiết đơn để xem hoa cần chuẩn bị, lời chúc, thông tin người nhận và bước xử lý tiếp theo.</p>
+    </th:block>
+</main>
+<th:block th:replace="~{fragments/staff-layout :: scripts}"></th:block>
 </body>
 </html>

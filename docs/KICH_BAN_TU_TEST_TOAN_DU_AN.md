@@ -35,7 +35,7 @@ Tài liệu này là kế hoạch test thủ công dựa trên cấu trúc, cont
 
 ### Những quy tắc phải dùng khi đánh giá
 
-1. Role hiện tại chỉ có **ADMIN, MANAGER, USER**. Không test đăng ký/chuyển sang SHIPPER; `/shipper/**` đã bị chặn. `/staff/orders` dành cho ADMIN/MANAGER, không có role STAFF độc lập.
+1. Role hiện tại có **ADMIN, MANAGER, STAFF, USER**. STAFF là nhân viên riêng, làm việc tại `/staff/orders`; xem quy định và kịch bản mới nhất trong `PHAN_QUYEN_CUA_HANG.md`. Không đăng ký/chuyển sang SHIPPER; `/shipper/**` đã bị chặn.
 2. Tài khoản có vai trò cố định. Admin tạo tài khoản riêng theo vai trò, không dùng luồng yêu cầu nâng quyền cũ. ADMIN không mua hàng; trang cart/checkout/customer yêu cầu USER.
 3. Giao diện checkout hiện đưa ra **COD và MOMO_DEMO khi demo được bật**, chỉ COD khi tắt. `BANK_TRANSFER` bị từ chối khi tạo đơn qua checkout. Backend còn luồng BANK_TRANSFER/MOMO để hỗ trợ dữ liệu/đường đi cũ; xem mục test tùy điều kiện.
 4. Đặt thành công trừ kho ngay, kể cả COD. Đặt lỗi rollback. Hủy trước giao hoàn kho đúng một lần về chi nhánh trên đơn.
@@ -289,6 +289,7 @@ Tiền điều kiện: C1 có giỏ riêng, P1/PG bán được. Trang `/cart`. 
 | CART-11 | P0 | M1 đổi giá P1 khi C1 đang mở giỏ → báo giá/đặt | Dùng giá hiệu lực phía server, không tin giá cũ do client gửi |
 | CART-12 | P1 | Hai tab C1 thay số lượng/xóa dòng, quay lại tab kia | Badge/trạng thái cuối khớp server; không hồi sinh dòng đã xóa |
 | CART-13 | P1 | Ngắt mạng khi thêm/cập nhật rồi nối lại và thử lại | Có phản hồi lỗi; không tăng số lượng âm thầm do retry ngoài ý muốn |
+| CART-15 | P1 | Giỏ có 1 mẫu đang bán số lượng 2 và 1 mẫu ngừng bán số lượng 5; sau đó mẫu còn lại hết hàng | Dòng Chọn tất cả chỉ hiện 1 mục, tổng số lượng 2; khi hết hàng hiện 0/0 và không đặt được; mẫu ngừng bán vẫn hiện để xóa |
 | CART-14 | P0 | Giả `orderType=RENT` hoặc tham số thuê ở request giỏ/checkout | Luồng hiện tại chỉ mua hoa, không tạo đơn thuê mới |
 
 ### 4.5 Báo giá, chọn chi nhánh, checkout — CHK
@@ -490,7 +491,9 @@ Tiền điều kiện: A; luôn dùng record test khi xóa/reset. Với “CRUD�
 | ADMIN-04 | P0 | Khóa CX đang có đơn UNPAID PENDING/CONFIRMED/PREPARING | Account bị chặn; đơn trước giao bị hủy và hoàn kho một lần |
 | ADMIN-05 | P0 | Khóa CX có đơn PAID trước giao; có đơn DELIVERING/DELIVERED | Đơn paid trước giao vào chờ hoàn; không tự hủy đơn đã bàn giao/giao thành công |
 | ADMIN-06 | P0 | CX dùng session/JWT/chat/QR cũ sau bị khóa | Bị chặn chức năng bảo vệ, không mua/trả/gửi tin tiếp |
-| ADMIN-07 | P0 | Xóa account test đã có đơn/giao dịch | Vô hiệu hóa/xử lý quan hệ theo luồng; giữ lịch sử và nghĩa vụ hoàn tiền, không xóa cứng làm mất chứng từ |
+| ADMIN-07 | P0 | Xóa khách có đơn đang xử lý/chờ hoàn tiền; thử lại khi mọi đơn đã kết thúc | Khi còn đơn: chặn xóa, không đổi tài khoản/đơn/kho. Khi đủ điều kiện: thông báo ngắn, giữ lịch sử hóa đơn |
+| ADMIN-07A | P0 | Xóa Staff đang đăng nhập | Thu hồi phân công/quyền; yêu cầu tiếp theo bị chặn; đơn khách của chi nhánh và tin nhắn lịch sử vẫn còn |
+| ADMIN-07B | P0 | Xóa Manager phụ trách rồi phân công người thay và thử lại | Chặn trước khi thay; sau thay có thể xóa, người mới tiếp tục quản lý và đơn không bị hủy |
 | ADMIN-08 | P0 | Khóa/xóa A khác hoặc chính admin, kể cả admin đổi username | Bảo vệ theo role, không theo tên đăng nhập cố định |
 | ADMIN-09 | P1 | Mở khóa CX rồi đăng nhập lại | Account hoạt động theo trạng thái mới; đơn hủy không tự phục hồi |
 | ADMIN-10 | P0 | Dùng endpoint nâng/đổi vai trò cũ hoặc gửi role trên form hồ sơ | Không chuyển role account có sẵn hoặc tự cấp quyền |
@@ -748,3 +751,33 @@ Các ca migration dùng database trắng/bản sao riêng. Không chạy SQL s�
 - Test tham chiếu: `BusinessRegressionTests`, `ConcurrencyRegressionTests`, `BranchStockConsistencyTests`, `StoreProductCatalogTests`, `CheckoutEdgeSafetyTests`, `DemoPendingFundsTests`, `DemoPaymentTests`, `ReportRangeTests`, `ReportDateFilteringTests`, `ChatSecurityTests`, `ChatSocketAccessTests`, `JwtAuthenticationTests`, các `*UseCaseTests`, test JS và test SQL Server riêng.
 
 Đường dẫn Java ở mục này tương đối từ `src/main/java/com/finalproject/`; tên test từ `src/test/java/com/finalproject/`. Xem thêm bản kê cấu trúc và route: [BAN_DO_CAU_TRUC_VA_ROUTE.md](BAN_DO_CAU_TRUC_VA_ROUTE.md).
+
+
+## Bổ sung ngày 24/10/2026: mỗi manager phụ trách một cửa hàng
+
+Quy định: một tài khoản MANAGER chỉ được quản lý một cửa hàng. Chủ chuỗi dùng tài khoản ADMIN để quản lý nhiều chi nhánh. Manager vẫn có thể tạo cửa hàng đầu tiên nếu chưa được phân công.
+
+| Mã | Thao tác tự kiểm tra | Kết quả cần thấy |
+|---|---|---|
+| M1-01 | Đăng nhập manager đã có cửa hàng, mở Tổng quan | Chỉ thấy dữ liệu cửa hàng phụ trách, không có ô chọn cửa hàng khác |
+| M1-02 | Mở Cửa hàng của tôi | Chỉ thấy một cửa hàng; không có nút thêm cửa hàng thứ hai |
+| M1-03 | Gõ trực tiếp `/manager/stores/create` khi đã có cửa hàng | Quay về danh sách và thông báo mỗi manager chỉ quản lý một cửa hàng |
+| M1-04 | Đổi `storeId` trên URL tổng quan, tồn kho, sửa cửa hàng sang chi nhánh khác | Bị từ chối quyền truy cập; không thay đổi dữ liệu |
+| M1-05 | Thêm một manager chưa được phân công vào cửa hàng | Thêm thành công; tài khoản đó được phân công đúng cửa hàng |
+| M1-06 | Thêm cùng manager vào cửa hàng thứ hai, thử cả hai lựa chọn vai trò | Bị từ chối; phân công cũ giữ nguyên |
+| M1-07 | Gỡ manager không phải chủ khỏi cửa hàng cũ rồi thêm vào cửa hàng mới | Chuyển được sang cửa hàng mới; mất quyền cửa hàng cũ |
+| M1-08 | Đăng nhập manager chưa có cửa hàng, tạo cửa hàng đầu tiên | Tạo thành công và tự phân công vào cửa hàng vừa tạo |
+| M1-09 | Mở chat/thông báo của cửa hàng khác, kể cả tài khoản còn liên kết cũ | Không được đọc, gửi hoặc nhận tin của cửa hàng khác |
+| M1-10 | Đăng nhập admin | Quản lý được toàn bộ cửa hàng, tạo nhiều cửa hàng và chuyển cửa hàng để xem tổng quan |
+
+Dữ liệu cũ: ưu tiên cửa hàng đã phân công trong tài khoản (`users.store_id`). Nếu chưa có phân công, chỉ chấp nhận khi tài khoản có đúng một cửa hàng liên kết. Nếu có nhiều liên kết mà chưa rõ cửa hàng phụ trách, hệ thống chặn truy cập và cần kiểm tra lại phân công; không tự chọn ngẫu nhiên hoặc xóa dữ liệu lịch sử.
+
+
+## Bổ sung ngày 24/10/2026: tách quyền Staff
+
+Quy định và 10 bước kiểm tra thủ công mới nhất: [Phân quyền cửa hàng](PHAN_QUYEN_CUA_HANG.md). Phần này thay thế mô tả cũ về PARTNER/nhân viên dùng quyền MANAGER ở các kịch bản STAFF và WAL trước đây. Nhân viên dùng STAFF, không truy cập các trang quản lý, không tự rút tiền hay rời chi nhánh qua trang quản lý. Quản lý thực hiện việc thêm/gỡ và chuyển chi nhánh.
+
+
+## Bổ sung khu vực làm việc Nhân viên
+
+Xem [Kịch bản test Nhân viên](KICH_BAN_TEST_NHAN_VIEN.md) để kiểm tra đầy đủ các trang đơn, chi tiết giao hàng, chuẩn bị hoa, giao/nhận hoa, thu COD và chat theo chi nhánh. Các bước này thay cho luồng Staff chỉ có một bảng đơn trước đây.

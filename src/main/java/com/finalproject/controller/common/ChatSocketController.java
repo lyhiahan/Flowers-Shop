@@ -15,7 +15,7 @@ public class ChatSocketController {
  public ChatService.MessageView send(SendRequest input,Principal principal,@Header("simpSessionAttributes") Map<String,Object> attributes){
   Long storeId=attributes.get("chatStoreId") instanceof Long id?id:null;
   var actor=chat.activeUser(principal==null?null:principal.getName());
-  if(actor.hasRole(com.finalproject.enums.Role.MANAGER) && !actor.hasRole(com.finalproject.enums.Role.ADMIN) && storeId==null)
+  if(actor.isStoreWorker() && !actor.hasRole(com.finalproject.enums.Role.ADMIN) && storeId==null)
    throw new org.springframework.security.access.AccessDeniedException("Phiên chat quản lý chưa chọn chi nhánh.");
   return chat.send(principal.getName(),input.conversationId(),input.content(),input.clientMessageId(),storeId,input.productId());
  }

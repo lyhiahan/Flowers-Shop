@@ -43,11 +43,42 @@ public class StoreAccessService {
     public java.util.List<Store> accessibleStores() {
         User user = currentUser();
         if (user.hasRole(Role.ADMIN)) return stores.findAll();
-        java.util.Map<Long, Store> result = new java.util.LinkedHashMap<>();
-        stores.findByOwnerId(user.getId()).forEach(s -> result.put(s.getId(), s));
-        memberships.findByUserIdAndActiveTrue(user.getId()).forEach(m -> result.put(m.getStore().getId(), m.getStore()));
-        if (user.getStore() != null && canAccess(user, user.getStore())) result.put(user.getStore().getId(), user.getStore());
-        return new java.util.ArrayList<>(result.values());
+        Store assigned = managedStore(user);
+        return assigned == null ? java.util.List.of() : java.util.List.of(assigned);
+    }
+
+    /** One primary assignment; ambiguous legacy links never grant access to several shops. */
+    public Store managedStore(User user) {
+        if (!user.isStoreWorker() || user.hasRole(Role.ADMIN)
+                || !Boolean.TRUE.equals(user.getIsActive()) || Boolean.TRUE.equals(user.getAccountDisabledByAdmin())
+                || user.isRetiredDeliveryAccount()) return null;
+        if (user.getStore() != null) {
+            Store primary = user.getStore();
+            var member = memberships.findByUserIdAndStoreId(user.getId(), primary.getId());
+            boolean owner = primary.getOwner() != null && user.getId().equals(primary.getOwner().getId());
+            return owner || member.isEmpty() || Boolean.TRUE.equals(member.get().getActive()) ? primary : null;
+        }
+        java.util.Map<Long, Store> legacy = new java.util.LinkedHashMap<>();
+        stores.findByOwnerId(user.getId()).forEach(s -> legacy.put(s.getId(), s));
+        memberships.findByUserIdAndActiveTrue(user.getId()).forEach(m -> legacy.put(m.getStore().getId(), m.getStore()));
+        return legacy.size() == 1 ? legacy.values().iterator().next() : null;
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public boolean managesStore(User user, Long storeId) {
+        // Socket users may be detached; resolve lazy store links within this transaction.
+        Store assigned = userRepository.findById(user.getId()).map(this::managedStore).orElse(null);
+        return assigned != null && assigned.getId().equals(storeId);
+    }
+
+    public boolean hasStoreAffiliation(User user) {
+        return user.getStore() != null || !stores.findByOwnerId(user.getId()).isEmpty()
+                || memberships.existsByUserIdAndActiveTrue(user.getId());
+    }
+
+    public boolean canCreateStore() {
+        User user = currentUser();
+        return user.hasRole(Role.ADMIN) || user.hasRole(Role.MANAGER) && !hasStoreAffiliation(user);
     }
 
     public Store selectedStore() {
@@ -76,11 +107,7 @@ public class StoreAccessService {
 
     private boolean canAccess(User user, Store store) {
         if (user.hasRole(Role.ADMIN)) return true;
-        if (store.getOwner() != null && user.getId().equals(store.getOwner().getId())) return true;
-        var member = memberships.findByUserIdAndStoreId(user.getId(), store.getId());
-        if (member.isPresent()) return Boolean.TRUE.equals(member.get().getActive());
-        // Compatibility for assignments created before the membership migration.
-        return user.getStore() != null && store.getId().equals(user.getStore().getId());
+        return store != null && managesStore(user, store.getId());
     }
 
     public void requireManager(Store store) {
@@ -99,16 +126,17 @@ public class StoreAccessService {
 
     public void requireOwner(Store store) {
         User user = currentUser();
+        requireManager(store);
         requireStore(store);
-        if (store.getOwner() == null || !user.getId().equals(store.getOwner().getId())) {
-            throw new AccessDeniedException("Chỉ chủ cửa hàng được thực hiện thao tác này.");
+        if (!user.hasRole(Role.ADMIN) && (store.getOwner() == null || !user.getId().equals(store.getOwner().getId()))) {
+            throw new AccessDeniedException("Chỉ quản lý phụ trách chi nhánh hoặc admin được thực hiện thao tác này.");
         }
     }
 
     public void requireStore(Store store) {
         User user = currentUser();
         if (user.hasRole(Role.ADMIN)) return;
-        if (store == null || !user.hasRole(Role.MANAGER)) {
+        if (store == null || !user.isStoreWorker()) {
             throw new AccessDeniedException("Bạn không có quyền xử lý chi nhánh này.");
         }
         if (!canAccess(user, store)) throw new AccessDeniedException("Bạn không có quyền xử lý chi nhánh khác.");

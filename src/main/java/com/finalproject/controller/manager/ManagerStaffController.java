@@ -50,7 +50,7 @@ public class ManagerStaffController {
         storeAccess.requireManager(store);
 
         // Kiểm tra xem người quản lý có phải là Chủ cửa hàng hay Đối tác (Partner)
-        boolean isOwner = (store.getOwner() != null && user.getId().equals(store.getOwner().getId()));
+        boolean isOwner = user.hasRole(Role.ADMIN) || (store.getOwner() != null && user.getId().equals(store.getOwner().getId()));
         boolean isPartner = !isOwner;
 
         // Chủ cửa hàng (Shop owner)
@@ -60,9 +60,18 @@ public class ManagerStaffController {
         List<User> pagedStaff = result.getContent();
         com.finalproject.utils.StorePages.model(model, result);
         var candidates = com.finalproject.utils.StorePages.load(candidatePage, 20, pageable -> userRepository.findAll((root, query, cb) -> {
-            var eligibility = cb.or(cb.equal(root.get("role"), Role.MANAGER), cb.isMember(Role.MANAGER, root.get("roles")));
+            var eligibility = cb.or(cb.equal(root.get("role"), Role.STAFF), cb.isMember(Role.STAFF, root.get("roles")));
+            var owned = query.subquery(Long.class);
+            var ownedStore = owned.from(Store.class);
+            owned.select(ownedStore.get("id")).where(cb.equal(ownedStore.get("owner"), root));
+            var linked = query.subquery(Long.class);
+            var membership = linked.from(com.finalproject.entity.StoreMembership.class);
+            linked.select(membership.get("id")).where(cb.equal(membership.get("user"), root), cb.isTrue(membership.get("active")));
             String kw = "%" + candidateKeyword.trim().toLowerCase() + "%";
-            return cb.and(eligibility, cb.isTrue(root.get("isActive")), cb.isFalse(root.get("accountDisabledByAdmin")), cb.notEqual(root.get("id"), user.getId()),
+            return cb.and(eligibility, cb.isNull(root.get("store")), cb.not(cb.exists(owned)), cb.not(cb.exists(linked)),
+                    cb.notEqual(root.get("role"), Role.ADMIN), cb.isNotMember(Role.ADMIN, root.get("roles")),
+                    cb.notEqual(root.get("role"), Role.MANAGER), cb.isNotMember(Role.MANAGER, root.get("roles")),
+                    cb.isTrue(root.get("isActive")), cb.isFalse(root.get("accountDisabledByAdmin")), cb.notEqual(root.get("id"), user.getId()),
                     cb.or(cb.like(cb.lower(root.get("username")), kw), cb.like(cb.lower(root.get("fullName")), kw)));
         }, pageable));
         List<User> candidateUsers = candidates.getContent();
@@ -95,16 +104,16 @@ public class ManagerStaffController {
                            @RequestParam(value = "email", required = false) String email,
                            @RequestParam(value = "phone", required = false) String phone,
                            @RequestParam(value = "password", required = false) String password,
-                           @RequestParam(value = "role", defaultValue = "MANAGER") String roleStr,
+                           @RequestParam(value = "role", defaultValue = "STAFF") String roleStr,
                            RedirectAttributes ra) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         Store store = resolveStore(user);
         if (store == null) return "redirect:/manager/stores";
         storeAccess.requireManager(store);
 
-        boolean isOwner = (store.getOwner() != null && user.getId().equals(store.getOwner().getId()));
+        boolean isOwner = user.hasRole(Role.ADMIN) || (store.getOwner() != null && user.getId().equals(store.getOwner().getId()));
         if (!isOwner) {
-            throw new AccessDeniedException("Chỉ chủ cửa hàng mới có quyền thêm nhân viên.");
+            throw new AccessDeniedException("Chỉ quản lý phụ trách chi nhánh hoặc admin có quyền thêm nhân viên.");
         }
 
         try {
@@ -112,7 +121,35 @@ public class ManagerStaffController {
             ra.addFlashAttribute("successMessage", "Đã thêm " + addedCount + " nhân viên vào cửa hàng thành công!");
         } catch (Exception ex) {
             log.error("Lỗi thêm nhân viên", ex);
-            ra.addFlashAttribute("errorMessage", "Thêm nhân viên thất bại: " + ex.getMessage());
+            String msg = ex.getMessage();
+            ra.addFlashAttribute("errorMessage", "Thêm nhân viên thất bại: " + msg);
+            ra.addFlashAttribute("reopenAddStaffModal", true);
+            ra.addFlashAttribute("prevUsername", username);
+            ra.addFlashAttribute("prevFullName", fullName);
+            ra.addFlashAttribute("prevEmail", email);
+            ra.addFlashAttribute("prevPhone", phone);
+            ra.addFlashAttribute("prevSelectedUserIds", selectedUserIds);
+
+            String lower = msg != null ? msg.toLowerCase() : "";
+            if (lower.contains("email")) {
+                ra.addFlashAttribute("fieldError_email", msg);
+                ra.addFlashAttribute("focusField", "inputStaffEmail");
+            } else if (lower.contains("tên đăng nhập") || lower.contains("username")) {
+                ra.addFlashAttribute("fieldError_username", msg);
+                ra.addFlashAttribute("focusField", "inputStaffUsername");
+            } else if (lower.contains("mật khẩu") || lower.contains("password")) {
+                ra.addFlashAttribute("fieldError_password", msg);
+                ra.addFlashAttribute("focusField", "inputStaffPassword");
+            } else if (lower.contains("họ và tên") || lower.contains("họ tên")) {
+                ra.addFlashAttribute("fieldError_fullName", msg);
+                ra.addFlashAttribute("focusField", "inputStaffFullName");
+            } else if (lower.contains("ứng viên") || lower.contains("chọn") || lower.contains("danh sách")) {
+                ra.addFlashAttribute("fieldError_candidate", msg);
+                ra.addFlashAttribute("focusField", "candidatesListContainer");
+            } else if (lower.contains("số điện thoại") || lower.contains("phone")) {
+                ra.addFlashAttribute("fieldError_phone", msg);
+                ra.addFlashAttribute("focusField", "inputStaffPhone");
+            }
         }
 
         return "redirect:/manager/staff?tab=staffs";
@@ -130,9 +167,9 @@ public class ManagerStaffController {
         if (store == null) return "redirect:/manager/stores";
         storeAccess.requireManager(store);
 
-        boolean isOwner = (store.getOwner() != null && user.getId().equals(store.getOwner().getId()));
+        boolean isOwner = user.hasRole(Role.ADMIN) || (store.getOwner() != null && user.getId().equals(store.getOwner().getId()));
         if (!isOwner) {
-            throw new AccessDeniedException("Chỉ chủ cửa hàng mới có quyền xóa nhân viên khỏi cửa hàng.");
+            throw new AccessDeniedException("Chỉ quản lý phụ trách chi nhánh hoặc admin có quyền xóa nhân viên khỏi cửa hàng.");
         }
 
         staffManagement.remove(store, id);

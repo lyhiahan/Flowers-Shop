@@ -130,10 +130,21 @@ public class User {
         return roles != null && roles.contains(checkRole);
     }
 
+    public boolean isStoreWorker() {
+        return hasRole(Role.MANAGER) || hasRole(Role.STAFF);
+    }
+
+    public String getRoleDisplayName() {
+        if (hasRole(Role.ADMIN)) return "Chủ chuỗi / Quản trị viên";
+        if (hasRole(Role.MANAGER)) return "Quản lý chi nhánh";
+        if (hasRole(Role.STAFF)) return "Nhân viên cửa hàng";
+        return "Khách hàng";
+    }
+
     public void addRole(Role newRole) {
         if (this.roles == null) this.roles = new java.util.HashSet<>();
         this.roles.add(newRole);
-        if (hasRole(Role.ADMIN) || this.role == Role.ADMIN) {
+        if (hasRole(Role.ADMIN) || (hasRole(Role.STAFF) && !hasRole(Role.MANAGER))) {
             this.roles.remove(Role.USER); // Admin không bao giờ giữ vai trò Khách hàng
         } else {
             this.roles.add(Role.USER); // Quản lý và Người bán vẫn giữ quyền khách hàng
@@ -143,7 +154,7 @@ public class User {
     public void removeRole(Role targetRole) {
         if (this.roles != null) {
             this.roles.remove(targetRole);
-            if (hasRole(Role.ADMIN) || this.role == Role.ADMIN) {
+            if (hasRole(Role.ADMIN) || (hasRole(Role.STAFF) && !hasRole(Role.MANAGER))) {
                 this.roles.remove(Role.USER);
             } else {
                 this.roles.add(Role.USER);

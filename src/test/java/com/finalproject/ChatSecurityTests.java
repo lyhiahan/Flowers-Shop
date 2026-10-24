@@ -38,12 +38,12 @@ class ChatSecurityTests {
     }
     Long conversation() {return chat.open(customer.getUsername(),"STORE",store.getId()).id();}
     String key() {return UUID.randomUUID().toString();}
-    @Test void onlyThreeCanonicalRolesAndLegacyValuesRemainReadable() {
-        assertThat(Role.values()).containsExactly(Role.ADMIN,Role.MANAGER,Role.USER);
+    @Test void fourCanonicalRolesAndLegacyValuesRemainReadable() {
+        assertThat(Role.values()).containsExactly(Role.ADMIN,Role.MANAGER,Role.STAFF,Role.USER);
         var converter=new RoleConverter();
         assertThat(converter.convertToEntityAttribute("CUSTOMER")).isEqualTo(Role.USER);
         assertThat(converter.convertToEntityAttribute("VENDOR")).isEqualTo(Role.MANAGER);
-        assertThat(converter.convertToEntityAttribute("STAFF")).isEqualTo(Role.MANAGER);
+        assertThat(converter.convertToEntityAttribute("STAFF")).isEqualTo(Role.STAFF);
     }
     @Test void reopenReusesConversationAndOwnerWithoutAssignedStoreCanReply() {
         Long id=conversation(); assertThat(conversation()).isEqualTo(id);

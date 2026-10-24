@@ -17,6 +17,8 @@ public class ManagerLayoutAdvice {
     public void managerLayout(HttpServletRequest request, Model model) {
         if ("GET".equals(request.getMethod())) {
             model.addAttribute("managerStore", storeAccess.selectedStore());
+            model.addAttribute("canCreateStore", storeAccess.canCreateStore());
+            model.addAttribute("canManageMultipleStores", storeAccess.currentUser().hasRole(com.finalproject.enums.Role.ADMIN));
         }
     }
 }

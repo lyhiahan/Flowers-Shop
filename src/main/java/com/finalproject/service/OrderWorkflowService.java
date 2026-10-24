@@ -31,7 +31,7 @@ public class OrderWorkflowService {
 
     public java.util.List<OrderStatus> availableTransitions(Order order) {
         if (order == null || order.getStatus() == null) return java.util.List.of();
-        boolean pickup = "PICKUP".equals(order.getShippingMethod());
+        boolean pickup = order.isPickup();
         return switch (order.getStatus()) {
             case PENDING -> java.util.List.of(OrderStatus.CONFIRMED, OrderStatus.CANCELLED);
             case CONFIRMED -> java.util.List.of(OrderStatus.PREPARING, OrderStatus.CANCELLED);
@@ -52,7 +52,7 @@ public class OrderWorkflowService {
             case PICKED_UP -> "Bàn giao cho người giao hàng";
             case DELIVERING -> "Đang giao hoa đến khách";
             case DELIVERED -> "Đã giao hoa thành công";
-            case COMPLETED -> "PICKUP".equals(order.getShippingMethod()) ? "Khách nhận hoa tại quầy - Hoàn tất" : "Hoàn tất đơn hàng";
+            case COMPLETED -> order.isPickup() ? "Khách nhận hoa tại quầy - Hoàn tất" : "Hoàn tất đơn hàng";
             case CANCELLED -> order.getStatus() == OrderStatus.PREPARING
                     ? "Hủy ngoại lệ từ cửa hàng (khách không được tự hủy)" : "Hủy đơn hàng";
             case REFUNDED -> "Xác nhận đã hoàn tiền cho khách";
@@ -70,10 +70,10 @@ public class OrderWorkflowService {
         Order order = lockedOrder(id);
         entityManager.refresh(order, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
         access.requireStore(order.getPickupStore());
-        if (next == OrderStatus.REFUNDED) access.requireManager(order.getPickupStore());
+        if (next == OrderStatus.REFUNDED || next == OrderStatus.CANCELLED) access.requireManager(order.getPickupStore());
         OrderStatus previous = order.getStatus();
         if (previous == next) return order;
-        if ("PICKUP".equals(order.getShippingMethod()) && (next == OrderStatus.PICKED_UP || next == OrderStatus.DELIVERING || next == OrderStatus.DELIVERED))
+        if (order.isPickup() && (next == OrderStatus.PICKED_UP || next == OrderStatus.DELIVERING || next == OrderStatus.DELIVERED))
             throw new IllegalStateException("Đơn khách nhận tại tiệm không có bước vận chuyển. Khi khách đã nhận hoa, chọn 'Khách nhận hoa tại quầy - Hoàn tất'.");
         boolean allowed = availableTransitions(order).contains(next);
         if (!allowed) throw new IllegalStateException("Không thể chuyển đơn từ " + previous + " sang " + next);

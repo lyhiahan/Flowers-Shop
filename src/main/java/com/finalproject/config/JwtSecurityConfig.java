@@ -35,6 +35,7 @@ public class JwtSecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/auth/login", "/api/auth/refresh").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/manager/**", "/api/vendor/**").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers("/api/staff/**").hasAnyRole("ADMIN", "MANAGER", "STAFF")
                 .requestMatchers("/api/customer/**").hasRole("USER")
                 .requestMatchers("/api/inventory/check", "/api/public/**").permitAll()
                 .anyRequest().authenticated())

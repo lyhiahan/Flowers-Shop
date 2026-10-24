@@ -14,11 +14,11 @@
     const channelButtons = [...document.querySelectorAll('[data-chat-channel]')];
     function monitorMode() { return context?.role === 'ADMIN' && (mailbox === 'STORE' || current?.kind === 'STORE'); }
     function scoped(path) {
-        return context?.role === 'MANAGER' ? path + (path.includes('?') ? '&' : '?') + 'storeId=' + context.storeId : path;
+        return ['MANAGER', 'STAFF'].includes(context?.role) ? path + (path.includes('?') ? '&' : '?') + 'storeId=' + context.storeId : path;
     }
     function visible(conversation) {
         if (context?.role === 'ADMIN') return conversation.kind === mailbox;
-        return context?.role !== 'MANAGER' || (conversation.kind === mailbox && Number(conversation.storeId) === Number(context.storeId)
+        return !['MANAGER', 'STAFF'].includes(context?.role) || (conversation.kind === mailbox && Number(conversation.storeId) === Number(context.storeId)
             && (conversation.kind !== 'STORE' || Number(conversation.customerId) !== Number(context.userId)));
     }
     function status(message, reconnect = false) { el('chatStatus').textContent = message; el('chatStatus').title = message; el('chatReconnect').hidden = !(reconnect || stopped); }
@@ -225,7 +225,7 @@
         }, 10000);
         connection.onopen = () => {
             if (socket === connection) frame('CONNECT', {'accept-version': '1.2', host: location.host, 'heart-beat': '20000,0',
-                ...(context.role === 'MANAGER' ? {'chat-store-id': String(context.storeId)} : {})});
+                ...(['MANAGER', 'STAFF'].includes(context.role) ? {'chat-store-id': String(context.storeId)} : {})});
         };
         connection.onmessage = event => {
             if (socket !== connection) return;
@@ -239,7 +239,7 @@
                 lines.forEach(line => { const colon = line.indexOf(':'); if (colon > 0) headers[line.slice(0, colon)] = line.slice(colon + 1); });
                 if (command === 'CONNECTED') {
                     clearTimeout(connectTimer);
-                    connected = true; retry = 0; frame('SUBSCRIBE', {id: 'chat-messages', destination: context.role === 'MANAGER'
+                    connected = true; retry = 0; frame('SUBSCRIBE', {id: 'chat-messages', destination: ['MANAGER', 'STAFF'].includes(context.role)
                         ? '/user/queue/chat.store.' + context.storeId : '/user/queue/chat', ack: 'auto'});
                     frame('SUBSCRIBE', {id: 'chat-errors', destination: '/user/queue/chat.errors', ack: 'auto'});
                     frame('SUBSCRIBE', {id: 'chat-acks', destination: '/user/queue/chat.acks', ack: 'auto'});
@@ -281,20 +281,20 @@
     async function ensureContext() {
             if (!context) {
                 context = await api('/context');
-                mailbox = context.role === 'ADMIN' ? 'ADMIN' : context.role === 'MANAGER' ? 'STORE' : null;
+                mailbox = context.role === 'ADMIN' ? 'ADMIN' : ['MANAGER', 'STAFF'].includes(context.role) ? 'STORE' : null;
                 el('chatBranchSupportButton').hidden = context.role !== 'MANAGER';
-                el('chatChannelTabs').hidden = context.role === 'USER';
+                el('chatChannelTabs').hidden = ['USER', 'STAFF'].includes(context.role);
                 el('chatToolbar').hidden = context.role === 'USER';
                 updateFilters();
                 el('chatScope').hidden = context.role === 'ADMIN';
                 channelButtons.forEach(button => {
-                    button.hidden = context.role === 'USER' || (context.role === 'MANAGER' && button.dataset.chatChannel === 'ADMIN');
+                    button.hidden = ['USER', 'STAFF'].includes(context.role) || (context.role === 'MANAGER' && button.dataset.chatChannel === 'ADMIN');
                     if (context.role === 'ADMIN' && button.dataset.chatChannel === 'STORE') button.textContent = 'Giám sát chỉ đọc';
                     if (context.role === 'MANAGER' && button.dataset.chatChannel === 'BRANCH_SUPPORT') button.textContent = 'Hỗ trợ từ admin';
                     button.setAttribute('aria-pressed', String(button.dataset.chatChannel === mailbox));
                 });
-                el('chatHeading').textContent = context.role === 'MANAGER' ? 'Hộp thư khách hàng · ' + context.storeName : 'Tin nhắn';
-                el('chatScope').textContent = context.role === 'MANAGER' ? 'Chỉ nhận tin của ' + context.storeName
+                el('chatHeading').textContent = ['MANAGER', 'STAFF'].includes(context.role) ? 'Hộp thư khách hàng · ' + context.storeName : 'Tin nhắn';
+                el('chatScope').textContent = ['MANAGER', 'STAFF'].includes(context.role) ? 'Chỉ nhận tin của ' + context.storeName
                     : context.role === 'ADMIN' ? 'Hai kênh hỗ trợ được trả lời; giám sát khách–chi nhánh chỉ đọc và có nhật ký.'
                     : 'Đây là tất cả lịch sử trò chuyện của bạn. Hỗ trợ toàn chuỗi: Tài khoản → Trò chuyện với hệ thống. Hỏi sản phẩm: bấm Nhắn tin với cửa hàng trên chi tiết sản phẩm. Admin có thể giám sát chỉ đọc chat chi nhánh.';
             }

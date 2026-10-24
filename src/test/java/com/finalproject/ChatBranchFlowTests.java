@@ -100,20 +100,17 @@ class ChatBranchFlowTests {
                 .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
         verifyNoInteractions(cloud);
     }
-    @Test void multiBranchManagerSeesOnlySelectedBranchNotMergedInbox() throws Exception {
+    @Test void legacySecondMembershipCannotGrantForeignInboxAccess() throws Exception {
         memberships.saveAndFlush(StoreMembership.builder().user(manager).store(b).active(true).accessRole("PARTNER").build());
-        Long own=thread(a), selected=thread(b);
+        Long own=thread(a), foreign=thread(b);
         var session=new MockHttpSession();session.setAttribute("activeStoreId",b.getId());
         mvc.perform(get("/api/chat/context").session(session).with(user(manager.getUsername()).roles("MANAGER")))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.storeId").value(b.getId())).andExpect(jsonPath("$.stores").isEmpty());
-        mvc.perform(get("/api/chat/conversations").session(session).with(user(manager.getUsername()).roles("MANAGER")))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.conversations.length()").value(1))
-                .andExpect(jsonPath("$.conversations[0].id").value(selected));
-        assertThatThrownBy(()->chat.history(manager.getUsername(),own,null,b.getId())).isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
-        assertThatThrownBy(()->chat.send(manager.getUsername(),own,"wrong scope",UUID.randomUUID().toString(),b.getId()))
+                .andExpect(status().isForbidden());
+        mvc.perform(get("/api/chat/conversations").param("storeId",b.getId().toString()).with(user(manager.getUsername()).roles("MANAGER")))
+                .andExpect(status().isForbidden());
+        assertThat(chat.inbox(manager.getUsername(),0).conversations()).extracting(ChatService.ConversationView::id).containsExactly(own);
+        assertThatThrownBy(()->chat.send(manager.getUsername(),foreign,"wrong branch",UUID.randomUUID().toString(),b.getId()))
                 .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
-        chat.send(manager.getUsername(),selected,"Quận 7 trả lời",UUID.randomUUID().toString(),b.getId());
-        assertThat(chat.history(customer.getUsername(),selected,null).messages()).hasSize(1);
     }
     @Test void managerCannotUseOldOpenApiToCreatePersonalBuyerChats() throws Exception {
         mvc.perform(post("/api/chat/conversations").with(user(manager.getUsername()).roles("MANAGER")).with(csrf())

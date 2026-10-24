@@ -75,7 +75,7 @@ public class SecurityConfig {
                 // Retired delivery portal must not accept old sessions.
                 .requestMatchers("/shipper", "/shipper/**").denyAll()
                 // Quyền Staff
-                .requestMatchers("/staff", "/staff/**").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers("/staff", "/staff/**", "/api/staff/**").hasAnyRole("ADMIN", "MANAGER", "STAFF")
                 // Endpoint WebSocket SockJS
                 .requestMatchers("/ws", "/ws/**", "/ws-chat", "/api/chat/**").authenticated()
                 // MoMo Callback & IPN Webhook (cho phép chuyển hướng và webhook không bị chặn)

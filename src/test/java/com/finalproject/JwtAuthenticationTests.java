@@ -121,6 +121,17 @@ class JwtAuthenticationTests {
         }
     }
 
+    @Test void staffTokensCannotCarryManagerAuthorityAfterRoleChange() throws Exception {
+        customer.setRole(Role.MANAGER); users.saveAndFlush(customer);
+        Pair pair=login();
+        customer.setRole(Role.STAFF); customer.getRoles().clear(); users.saveAndFlush(customer);
+        mvc.perform(get("/api/auth/me").header("Authorization","Bearer "+pair.access()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.roles[0]").value("STAFF"))
+                .andExpect(jsonPath("$.roles.length()").value(1));
+        for(String path: List.of("/api/manager/unknown", "/api/admin/unknown", "/api/customer/unknown"))
+            mvc.perform(get(path).header("Authorization","Bearer "+pair.access())).andExpect(status().isForbidden());
+    }
+
     @Test void refreshRotatesAndReplayRevokesEntireFamily() throws Exception {
         Pair first = login();
         String json = mvc.perform(post("/api/auth/refresh").contentType(MediaType.APPLICATION_JSON)

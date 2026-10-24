@@ -87,7 +87,7 @@ class StoreUseCaseAuditTests {
         routes.put("/manager/vouchers", "sidebarVouchers");
         routes.put("/manager/profile", "sidebarProfile");
         routes.put("/manager/stores", "sidebarStores");
-        routes.put("/manager/stores/create", "sidebarStores");
+
         routes.put("/manager/stores/edit/" + store.getId(), "sidebarStores");
         for (var route : routes.entrySet()) {
             String html = mvc.perform(get(route.getKey()).with(user(owner.getUsername()).roles("MANAGER")))
@@ -107,6 +107,7 @@ class StoreUseCaseAuditTests {
     }
 
     @Test void uc017CreatesStoreWithSelectedCommission() throws Exception {
+        owner = account("new_shop_owner", Role.MANAGER);
         mvc.perform(post("/manager/stores/create").with(user(owner.getUsername()).roles("MANAGER")).with(csrf())
                 .param("name", "New audit shop").param("phone", "0901234567").param("address", "123 Test street")
                 .param("commissionId", commission.getId().toString()))
@@ -116,6 +117,7 @@ class StoreUseCaseAuditTests {
         assertThat(created.getEWallet()).isEqualByComparingTo(BigDecimal.ZERO);
     }
     @Test void uc017RejectsInvalidPhoneWithoutCreatingStore() throws Exception {
+        owner = account("invalid_shop_owner", Role.MANAGER);
         long before = stores.count();
         mvc.perform(post("/manager/stores/create").with(user(owner.getUsername()).roles("MANAGER")).with(csrf())
                 .param("name", "Invalid audit shop").param("phone", "123").param("address", "123 Test street"))
@@ -123,6 +125,7 @@ class StoreUseCaseAuditTests {
         assertThat(stores.count()).isEqualTo(before);
     }
     @Test void uc017MustRejectDeletedCommission() throws Exception {
+        owner = account("deleted_commission_owner", Role.MANAGER);
         commission.setIsDeleted(true); commissions.save(commission);
         long before = stores.count();
         mvc.perform(post("/manager/stores/create").with(user(owner.getUsername()).roles("MANAGER")).with(csrf())
@@ -138,8 +141,8 @@ class StoreUseCaseAuditTests {
     @Test void uc018ListsOnlyAccessibleStoresAndSupportsPaging() throws Exception {
         stores.save(Store.builder().name("Second owned store").owner(owner).address("789 Test street").build());
         mvc.perform(get("/manager/stores").with(user(owner.getUsername()).roles("MANAGER")).param("size", "1").param("page", "1"))
-                .andExpect(status().isOk()).andExpect(model().attribute("totalElements", 2))
-                .andExpect(model().attribute("totalPages", 2)).andExpect(model().attribute("currentPage", 1));
+                .andExpect(status().isOk()).andExpect(model().attribute("totalElements", 1))
+                .andExpect(model().attribute("totalPages", 1)).andExpect(model().attribute("currentPage", 0));
         mvc.perform(get("/manager/stores/switch/" + foreignStore.getId()).with(user(owner.getUsername()).roles("MANAGER")))
                 .andExpect(status().isForbidden());
     }
@@ -183,11 +186,11 @@ class StoreUseCaseAuditTests {
         assertThat(store.getIsOpen()).as("Basic info form does not submit isOpen; saving must preserve it").isTrue();
     }
     @Test void uc020OwnerAddsAndRemovesCandidate() throws Exception {
-        User candidate = account("audit_candidate", Role.MANAGER);
+        User candidate = account("audit_candidate", Role.STAFF);
         mvc.perform(post("/manager/staff/add").with(user(owner.getUsername()).roles("MANAGER")).with(csrf())
                 .param("selectedUserIds", candidate.getId().toString())).andExpect(flash().attributeExists("successMessage"));
         assertThat(candidate.getStore().getId()).isEqualTo(store.getId());
-        assertThat(candidate.getRole()).isEqualTo(Role.MANAGER);
+        assertThat(candidate.getRole()).isEqualTo(Role.STAFF);
         mvc.perform(post("/manager/staff/remove/" + candidate.getId()).with(user(owner.getUsername()).roles("MANAGER")).with(csrf()));
         assertThat(candidate.getStore()).isNull();
     }
@@ -231,7 +234,70 @@ class StoreUseCaseAuditTests {
 
     @Autowired StoreMembershipRepository memberships;
 
-    @Test void uc017RetryCreatesExactlyOneStoreAndDoesNotChangeAssignment() throws Exception {
+    @Test void assignedManagerCannotCreateSecondStoreOrOpenCreationForm() throws Exception {
+        long before = stores.count();
+        mvc.perform(get("/manager/stores/create").with(user(owner.getUsername()).roles("MANAGER")))
+                .andExpect(redirectedUrl("/manager/stores")).andExpect(flash().attributeExists("errorMessage"));
+        mvc.perform(post("/manager/stores/create").with(user(owner.getUsername()).roles("MANAGER")).with(csrf())
+                .param("name", "Forbidden second shop").param("address", "123 Test street").param("phone", "0901234567")
+                .param("commissionId", commission.getId().toString()))
+                .andExpect(flash().attributeExists("errorMessage"));
+        assertThat(stores.count()).isEqualTo(before);
+        assertThat(owner.getStore().getId()).isEqualTo(store.getId());
+    }
+
+    @Test void legacySecondOwnedStoreCannotBeOpenedByUrlAndManagerHasNoSelector() throws Exception {
+        Store second = stores.save(Store.builder().name("Legacy owned shop").address("123 Test street").owner(owner).build());
+        mvc.perform(get("/manager/dashboard").param("storeId", second.getId().toString())
+                .with(user(owner.getUsername()).roles("MANAGER"))).andExpect(status().isForbidden());
+        mvc.perform(get("/manager/stores/edit/" + second.getId()).with(user(owner.getUsername()).roles("MANAGER")))
+                .andExpect(status().isForbidden());
+        String html = mvc.perform(get("/manager/dashboard").with(user(owner.getUsername()).roles("MANAGER")))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        assertThat(html).doesNotContain("id=\"dashboardStoreSelect\"");
+    }
+
+    @Test void adminCanCreateAndSelectSeveralStoresInSeparateSessions() throws Exception {
+        long before = stores.count();
+        for (String name : List.of("Admin shop one", "Admin shop two")) {
+            mvc.perform(post("/manager/stores/create").with(user("admin").roles("ADMIN")).with(csrf())
+                    .param("name", name).param("address", "123 Test street").param("phone", "0901234567")
+                    .param("commissionId", commission.getId().toString()))
+                    .andExpect(flash().attributeExists("successMessage"));
+        }
+        assertThat(stores.count()).isEqualTo(before + 2);
+        var first = new org.springframework.mock.web.MockHttpSession();
+        var second = new org.springframework.mock.web.MockHttpSession();
+        mvc.perform(post("/manager/stores/switch/" + foreignStore.getId()).session(first).with(csrf())
+                .with(user("admin").roles("ADMIN"))).andExpect(redirectedUrl("/manager/dashboard"));
+        assertThat(first.getAttribute("activeStoreId")).isEqualTo(foreignStore.getId());
+        assertThat(second.getAttribute("activeStoreId")).isNull();
+        mvc.perform(get("/manager/dashboard").session(first).with(user("admin").roles("ADMIN")))
+                .andExpect(model().attribute("store", foreignStore))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"dashboardStoreSelect\"")));
+    }
+
+    @Test void ownerWithoutPrimaryAssignmentCannotJoinAnotherShop() throws Exception {
+        User legacyOwner = account("legacy_shop_owner", Role.MANAGER);
+        stores.saveAndFlush(Store.builder().name("Legacy sole shop").address("123 Test street").owner(legacyOwner).build());
+        mvc.perform(post("/manager/staff/add").with(user(owner.getUsername()).roles("MANAGER")).with(csrf())
+                .param("selectedUserIds", legacyOwner.getId().toString()).param("role", "STAFF"))
+                .andExpect(flash().attributeExists("errorMessage"));
+        assertThat(memberships.findByUserIdAndActiveTrue(legacyOwner.getId())).isEmpty();
+    }
+
+    @Test void ambiguousLegacyLinksRequireAssignmentRatherThanGrantMultipleStores() throws Exception {
+        User legacy = account("ambiguous_shop_manager", Role.MANAGER);
+        memberships.save(StoreMembership.builder().user(legacy).store(store).accessRole("PARTNER").build());
+        memberships.save(StoreMembership.builder().user(legacy).store(foreignStore).accessRole("PARTNER").build());
+        mvc.perform(get("/manager/stores").with(user(legacy.getUsername()).roles("MANAGER")))
+                .andExpect(model().attribute("totalElements", 0)).andExpect(model().attribute("canCreateStore", false));
+        mvc.perform(get("/manager/dashboard").param("storeId", store.getId().toString())
+                .with(user(legacy.getUsername()).roles("MANAGER"))).andExpect(status().isForbidden());
+    }
+
+    @Test void uc017RetryCreatesExactlyOneStoreAndAssignsIt() throws Exception {
+        owner = account("retry_shop_owner", Role.MANAGER);
         String key = java.util.UUID.randomUUID().toString();
         long before = stores.count();
         for (int i = 0; i < 2; i++) mvc.perform(post("/manager/stores/create")
@@ -240,19 +306,20 @@ class StoreUseCaseAuditTests {
                 .param("commissionId", commission.getId().toString()).param("requestId", key))
                 .andExpect(flash().attributeExists("successMessage"));
         assertThat(stores.count()).isEqualTo(before + 1);
-        assertThat(owner.getStore().getId()).isEqualTo(store.getId());
+        assertThat(owner.getStore().getName()).isEqualTo("Idempotent store");
     }
 
-    @Test void uc020PartnerCanJoinMultipleStoresWithoutMovingLegacyAssignment() throws Exception {
+    @Test void uc020PartnerCannotJoinSecondStore() throws Exception {
+        partner = account("single_shop_partner", Role.STAFF);
         mvc.perform(post("/manager/staff/add").with(user(owner.getUsername()).roles("MANAGER")).with(csrf())
-                .param("selectedUserIds", partner.getId().toString()).param("role", "PARTNER"))
+                .param("selectedUserIds", partner.getId().toString()).param("role", "STAFF"))
                 .andExpect(flash().attributeExists("successMessage"));
         User otherOwner = foreignStore.getOwner();
         otherOwner.setStore(foreignStore); users.save(otherOwner);
         mvc.perform(post("/manager/staff/add").with(user(otherOwner.getUsername()).roles("MANAGER")).with(csrf())
-                .param("selectedUserIds", partner.getId().toString()).param("role", "PARTNER"))
-                .andExpect(flash().attributeExists("successMessage"));
-        assertThat(memberships.findByUserIdAndActiveTrue(partner.getId())).hasSize(2);
+                .param("selectedUserIds", partner.getId().toString()).param("role", "STAFF"))
+                .andExpect(flash().attributeExists("errorMessage"));
+        assertThat(memberships.findByUserIdAndActiveTrue(partner.getId())).hasSize(1);
         assertThat(partner.getStore().getId()).isEqualTo(store.getId());
     }
 
@@ -265,13 +332,13 @@ class StoreUseCaseAuditTests {
         assertThat(memberships.findByUserIdAndStoreId(candidate.getId(), store.getId())).isEmpty();
     }
 
-    @Test void uc018SelectionIsPerSessionAndCannotRestoreRevokedMembership() throws Exception {
+    @Test void uc018LegacyMembershipCannotOverridePrimaryAssignment() throws Exception {
         memberships.save(StoreMembership.builder().store(foreignStore).user(partner).accessRole("PARTNER").build());
         var first = new org.springframework.mock.web.MockHttpSession();
         var second = new org.springframework.mock.web.MockHttpSession();
         mvc.perform(post("/manager/stores/switch/" + foreignStore.getId()).with(csrf()).session(first)
-                .with(user(partner.getUsername()).roles("MANAGER"))).andExpect(status().is3xxRedirection());
-        assertThat(first.getAttribute("activeStoreId")).isEqualTo(foreignStore.getId());
+                .with(user(partner.getUsername()).roles("MANAGER"))).andExpect(status().isForbidden());
+        first.setAttribute("activeStoreId", foreignStore.getId());
         assertThat(second.getAttribute("activeStoreId")).isNull();
         var member = memberships.findByUserIdAndStoreId(partner.getId(), foreignStore.getId()).orElseThrow();
         member.setActive(false); memberships.save(member);

@@ -24,6 +24,8 @@ public class NotificationNavigationResolver {
             return hasOrder ? "/admin/orders/" + relatedOrderId : "/admin/notifications" + notifAnchor;
         } else if (role == Role.MANAGER) {
             return hasOrder ? "/manager/orders/" + relatedOrderId : "/manager/notifications" + notifAnchor;
+        } else if (role == Role.STAFF) {
+            return "/staff/orders";
         } else {
             return hasOrder ? "/customer/orders/detail/" + relatedOrderId : "/notifications" + notifAnchor;
         }
@@ -39,6 +41,7 @@ public class NotificationNavigationResolver {
         if (user.hasRole(Role.MANAGER)) {
             return Role.MANAGER;
         }
+        if (user.hasRole(Role.STAFF)) return Role.STAFF;
         return Role.USER;
     }
 
@@ -68,6 +71,7 @@ public class NotificationNavigationResolver {
         if (isManager) {
             return Role.MANAGER;
         }
+        if (authorities.stream().anyMatch(a -> "ROLE_STAFF".equals(a.getAuthority()))) return Role.STAFF;
         return Role.USER;
     }
 }

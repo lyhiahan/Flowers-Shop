@@ -155,6 +155,7 @@
         .role-pill-admin { background-color: #EDE9FE; color: #5B21B6; border: 1px solid #DDD6FE; }
         .role-pill-manager { background-color: #E0F2FE; color: #0369A1; border: 1px solid #BAE6FD; }
         .role-pill-vendor { background-color: #FFEDD5; color: #C2410C; border: 1px solid #FED7AA; }
+        .role-pill-staff { background-color: #EBF3EE; color: #2E684D; border: 1px solid #D1E5DA; }
         .role-pill-customer { background-color: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; }
 
         .status-badge-inline {
@@ -313,7 +314,7 @@
                     <div class="col-md-6"><label for="newFullName" class="form-label fw-semibold">Họ tên</label><input id="newFullName" name="fullName" class="form-control" style="height: 42px; border-radius: 8px;" required maxlength="100"></div>
                     <div class="col-md-6"><label for="newPhone" class="form-label fw-semibold">Số điện thoại</label><input id="newPhone" name="phone" type="tel" class="form-control" style="height: 42px; border-radius: 8px;" pattern="0[0-9]{9}" maxlength="10"></div>
                     <div class="col-md-6"><label for="newPassword" class="form-label fw-semibold">Mật khẩu</label><input id="newPassword" name="password" type="password" class="form-control" style="height: 42px; border-radius: 8px;" required minlength="8" maxlength="72" autocomplete="new-password"></div>
-                    <div class="col-md-6"><label for="newRole" class="form-label fw-semibold">Vai trò tài khoản</label><select id="newRole" name="role" class="form-select" style="height: 42px; border-radius: 8px;" required><option value="USER">Khách hàng</option><option value="MANAGER">Quản lý</option></select></div>
+                    <div class="col-md-6"><label for="newRole" class="form-label fw-semibold">Vai trò tài khoản</label><select id="newRole" name="role" class="form-select" style="height: 42px; border-radius: 8px;" required><option value="USER">Khách hàng</option><option value="MANAGER">Quản lý chi nhánh</option><option value="STAFF">Nhân viên cửa hàng</option></select></div>
                     <div class="col-12 d-flex justify-content-between align-items-center pt-2">
                         <p class="small text-muted mb-0">Vai trò được chọn khi tạo tài khoản. Không đổi hoặc cấp thêm vai trò cho tài khoản đã tồn tại.</p>
                         <button type="submit" class="btn btn-primary px-4 fw-bold" style="height: 42px; border-radius: 8px; background-color: #20382E !important; border-color: #20382E !important;">Tạo tài khoản</button>
@@ -341,7 +342,7 @@
                     <select name="role" class="form-select" style="height: 44px; border-color: #E2E7E2; border-radius: 10px; font-size: 15px; color: #20382E; font-weight: 600;">
                         <option value="ALL" th:selected="${currentRole == 'ALL' or currentRole == null}">Tất cả vai trò</option>
                         <option value="USER" th:selected="${currentRole == 'USER'}">Khách hàng</option>
-                        <option value="MANAGER" th:selected="${currentRole == 'MANAGER'}">Quản lý (Manager)</option>
+                        <option value="MANAGER" th:selected="${currentRole == 'MANAGER'}">Quản lý chi nhánh</option><option value="STAFF" th:selected="${currentRole == 'STAFF'}">Nhân viên cửa hàng</option>
                         <option value="ADMIN" th:selected="${currentRole == 'ADMIN'}">Quản trị viên (Admin)</option>
                     </select>
                 </div>
@@ -424,16 +425,16 @@
                                     <div class="d-flex flex-wrap gap-1 align-items-center">
                                         <th:block th:if="${not #sets.isEmpty(u.roles)}">
                                             <span th:each="r : ${u.roles}" class="role-pill"
-                                                  th:classappend="${r.name() == 'ADMIN' ? 'role-pill-admin' : (r.name() == 'MANAGER' ? 'role-pill-manager' : 'role-pill-customer')}">
-                                                <i class="bi" th:classappend="${r.name() == 'ADMIN' ? 'bi-shield-shaded' : (r.name() == 'MANAGER' ? 'bi-building' : 'bi-person')}"></i>
-                                                <span th:text="${r.name() == 'ADMIN' ? 'Quản trị viên' : (r.name() == 'MANAGER' ? 'Quản lý' : 'Khách hàng')}"></span>
+                                                  th:classappend="${r.name() == 'ADMIN' ? 'role-pill-admin' : (r.name() == 'MANAGER' ? 'role-pill-manager' : (r.name() == 'STAFF' ? 'role-pill-staff' : 'role-pill-customer'))}">
+                                                <i class="bi" th:classappend="${r.name() == 'ADMIN' ? 'bi-shield-shaded' : (r.name() == 'MANAGER' ? 'bi-building' : (r.name() == 'STAFF' ? 'bi-person-badge' : 'bi-person'))}"></i>
+                                                <span th:text="${r.name() == 'ADMIN' ? 'Quản trị viên' : (r.name() == 'MANAGER' ? 'Quản lý chi nhánh' : (r.name() == 'STAFF' ? 'Nhân viên cửa hàng' : 'Khách hàng'))}"></span>
                                             </span>
                                         </th:block>
                                         <th:block th:if="${#sets.isEmpty(u.roles) and u.role != null}">
                                             <span class="role-pill"
-                                                  th:classappend="${u.role.name() == 'ADMIN' ? 'role-pill-admin' : (u.role.name() == 'MANAGER' ? 'role-pill-manager' : 'role-pill-customer')}">
-                                                <i class="bi" th:classappend="${u.role.name() == 'ADMIN' ? 'bi-shield-shaded' : (u.role.name() == 'MANAGER' ? 'bi-building' : 'bi-person')}"></i>
-                                                <span th:text="${u.role.name() == 'ADMIN' ? 'Quản trị viên' : (u.role.name() == 'MANAGER' ? 'Quản lý' : 'Khách hàng')}"></span>
+                                                  th:classappend="${u.role.name() == 'ADMIN' ? 'role-pill-admin' : (u.role.name() == 'MANAGER' ? 'role-pill-manager' : (u.role.name() == 'STAFF' ? 'role-pill-staff' : 'role-pill-customer'))}">
+                                                <i class="bi" th:classappend="${u.role.name() == 'ADMIN' ? 'bi-shield-shaded' : (u.role.name() == 'MANAGER' ? 'bi-building' : (u.role.name() == 'STAFF' ? 'bi-person-badge' : 'bi-person'))}"></i>
+                                                <span th:text="${u.role.name() == 'ADMIN' ? 'Quản trị viên' : (u.role.name() == 'MANAGER' ? 'Quản lý chi nhánh' : (u.role.name() == 'STAFF' ? 'Nhân viên cửa hàng' : 'Khách hàng'))}"></span>
                                             </span>
                                         </th:block>
                                         <span th:if="${#sets.isEmpty(u.roles) and u.role == null}" class="text-muted" style="font-size: 13.5px;">Chưa gán</span>
@@ -507,8 +508,8 @@
                                                         <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2 py-1.5 px-3"
                                                                 th:data-user="${u.username}"
                                                                 th:data-email="${u.email}"
-                                                                title="Xóa tài khoản vĩnh viễn và giải phóng email"
-                                                                onclick="return confirm('CẢNH BÁO: Bạn có chắc chắn muốn XÓA VĨNH VIỄN tài khoản [' + this.getAttribute('data-user') + '] (' + this.getAttribute('data-email') + ')?\n\nHành động này sẽ giải phóng email để có thể sử dụng đăng ký lại.')">
+                                                                title="Xóa tài khoản"
+                                                                onclick="return confirm('Bạn có muốn xóa tài khoản [' + this.getAttribute('data-user') + ']?')">
                                                             <i class="bi bi-trash3"></i>
                                                             <span>Xóa tài khoản</span>
                                                         </button>

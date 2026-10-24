@@ -206,7 +206,7 @@
                     <i class="bi bi-shop me-2" style="color:var(--brand);"></i>
                     Danh Sách Cửa Hàng
                 </h1>
-                <p class="page-sub">Danh sách cửa hàng, chi nhánh và liên kết nhanh đến cửa hàng bạn quản lý.</p>
+                <p class="page-sub">Mỗi manager phụ trách một cửa hàng. Chủ chuỗi/admin quản lý toàn bộ chi nhánh.</p>
             </div>
             <div class="d-flex align-items-center gap-2">
                 <!-- Badge đếm (chỉ hiện khi > 1) -->
@@ -216,7 +216,7 @@
                     <span th:text="${totalElements ?: stores.size()}">2</span> cửa hàng
                 </span>
                 <!-- Bước 3 của UC_017: Chọn nút New shop (Thêm cửa hàng) -->
-                <a th:href="@{/manager/stores/create}" class="btn-create-store" id="btnNewShop">
+                <a th:if="${canCreateStore}" th:href="@{/manager/stores/create}" class="btn-create-store" id="btnNewShop">
                     <i class="bi bi-plus-lg"></i> Thêm cửa hàng
                 </a>
             </div>
@@ -227,10 +227,10 @@
         <!-- Empty state -->
         <div th:if="${stores == null or stores.isEmpty()}" class="empty-state">
             <i class="bi bi-shop-window"></i>
-            <h5>Chưa có cửa hàng nào</h5>
-            <p>Tài khoản của bạn chưa có cửa hàng nào trên hệ thống.<br>
-               Bấm nút bên dưới để tạo cửa hàng mới ngay.</p>
-            <a th:href="@{/manager/stores/create}" class="btn-create-store mt-3" id="btnNewShopEmpty">
+            <h5 th:text="${canCreateStore == true ? 'Chưa có cửa hàng nào' : 'Chưa xác định cửa hàng phụ trách'}">Chưa có cửa hàng nào</h5>
+            <p th:if="${canCreateStore}">Bạn có thể tạo cửa hàng đầu tiên hoặc liên hệ admin để được phân công.</p>
+            <p th:unless="${canCreateStore}">Vui lòng liên hệ admin để kiểm tra lại phân công cửa hàng của tài khoản.</p>
+            <a th:if="${canCreateStore}" th:href="@{/manager/stores/create}" class="btn-create-store mt-3" id="btnNewShopEmpty">
                 <i class="bi bi-plus-lg"></i> Thêm cửa hàng mới
             </a>
         </div>

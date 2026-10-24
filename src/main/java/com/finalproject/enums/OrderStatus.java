@@ -13,5 +13,23 @@ public enum OrderStatus {
     REFUNDED,   // Trả hàng - Hoàn tiền
     RENTING,    // Đang thuê phụ kiện/cổng hoa
     RETURNED,   // Đã hoàn trả phụ kiện
-    OVERDUE     // Quá hạn hoàn trả
+    OVERDUE;     // Quá hạn hoàn trả
+
+    public String getDisplayName() {
+        return switch (this) {
+            case PENDING -> "Chờ xác nhận";
+            case CONFIRMED -> "Đã xác nhận";
+            case PREPARING -> "Đang chuẩn bị hoa";
+            case PICKED_UP -> "Đã bàn giao vận chuyển";
+            case DELIVERING -> "Đang giao hoa";
+            case DELIVERED -> "Đã giao hoa";
+            case COMPLETED -> "Hoàn tất";
+            case CANCELLED -> "Đã hủy";
+            case REFUND_REQUESTED -> "Chờ hoàn tiền";
+            case REFUNDED -> "Đã hoàn tiền";
+            case RENTING -> "Đang thuê";
+            case RETURNED -> "Đã trả";
+            case OVERDUE -> "Quá hạn";
+        };
+    }
 }
