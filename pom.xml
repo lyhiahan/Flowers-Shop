@@ -51,6 +51,15 @@
 			<artifactId>flyway-sqlserver</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-postgresql</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
@@ -144,13 +153,58 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Spring Session JDBC (SQL Server) -->
+		<!-- JDBC session support; browser authentication currently uses servlet sessions. -->
 		<dependency>
 			<groupId>org.springframework.session</groupId>
 			<artifactId>spring-session-jdbc</artifactId>
 		</dependency>
 	</dependencies>
 
+	<profiles>
+		<profile>
+			<id>isolated-tests</id>
+			<build>
+				<directory>${project.basedir}/target/isolated-tests</directory>
+			</build>
+		</profile>
+		<profile>
+			<id>postgresql-tests</id>
+			<dependencies>
+				<dependency>
+					<groupId>io.zonky.test</groupId>
+					<artifactId>embedded-postgres</artifactId>
+					<version>2.2.2</version>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>build-helper-maven-plugin</artifactId>
+						<version>3.6.1</version>
+						<executions>
+							<execution>
+								<id>postgresql-test-sources</id>
+								<phase>generate-test-sources</phase>
+								<goals><goal>add-test-source</goal></goals>
+								<configuration>
+									<sources><source>src/postgresql-test/java</source></sources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<excludes combine.self="override" />
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 	<build>
 		<plugins>
 			<plugin>
@@ -198,6 +252,9 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<argLine>-javaagent:${org.mockito:mockito-core:jar}</argLine>
+					<excludes>
+						<exclude>**/PostgreSql*Tests.java</exclude>
+					</excludes>
 				</configuration>
 			</plugin>
 			<plugin>

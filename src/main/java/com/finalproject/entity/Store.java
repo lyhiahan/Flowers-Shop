@@ -47,10 +47,14 @@ public class Store {
     @Column(name = "cover_public_id", length = 255)
     private String coverPublicId;
 
-    @Column(name = "featured_images", columnDefinition = "NVARCHAR(MAX)")
+    @org.hibernate.annotations.Nationalized
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.NVARCHAR)
+    @Column(name = "featured_images", length = org.hibernate.Length.LONG32)
     private String featuredImages;
 
-    @Column(columnDefinition = "NVARCHAR(MAX)")
+    @org.hibernate.annotations.Nationalized
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.NVARCHAR)
+    @Column(length = org.hibernate.Length.LONG32)
     private String featuredImagePublicIds;
 
     @ManyToOne(fetch = FetchType.LAZY)

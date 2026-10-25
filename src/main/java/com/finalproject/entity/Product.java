@@ -58,7 +58,8 @@ public class Product {
     private String name;
 
     @org.hibernate.annotations.Nationalized
-    @Column(columnDefinition = "NVARCHAR(MAX)")
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.NVARCHAR)
+    @Column(length = org.hibernate.Length.LONG32)
     private String description;
 
     @Column(nullable = false)

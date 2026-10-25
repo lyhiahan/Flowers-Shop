@@ -12,11 +12,12 @@ public class Category {
     private Long id;
 
     @org.hibernate.annotations.Nationalized
-    @Column(nullable = false, unique = true, length = 100, columnDefinition = "NVARCHAR(100)")
+    @Column(nullable = false, unique = true, length = 100)
     private String name;
 
     @org.hibernate.annotations.Nationalized
-    @Column(columnDefinition = "NVARCHAR(MAX)")
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.NVARCHAR)
+    @Column(length = org.hibernate.Length.LONG32)
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)

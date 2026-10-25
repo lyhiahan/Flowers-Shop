@@ -13,7 +13,8 @@ public class Promotion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 150, columnDefinition = "NVARCHAR(150)")
+    @org.hibernate.annotations.Nationalized
+    @Column(nullable = false, length = 150)
     private String name;
 
     @Column(nullable = false)

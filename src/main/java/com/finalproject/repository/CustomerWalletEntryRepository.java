@@ -16,8 +16,8 @@ public interface CustomerWalletEntryRepository extends JpaRepository<CustomerWal
     @Query("""
             select e from CustomerWalletEntry e
             where e.wallet.userId = :userId
-              and (:fromTime is null or e.createdAt >= :fromTime)
-              and (:untilTime is null or e.createdAt < :untilTime)
+              and (cast(:fromTime as LocalDateTime) is null or e.createdAt >= :fromTime)
+              and (cast(:untilTime as LocalDateTime) is null or e.createdAt < :untilTime)
             order by e.id desc
             """)
     Page<CustomerWalletEntry> findHistory(@Param("userId") Long userId,

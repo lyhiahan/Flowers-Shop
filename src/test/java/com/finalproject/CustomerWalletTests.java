@@ -65,9 +65,17 @@ class CustomerWalletTests {
     String customer, other, manager;
 
     @BeforeEach void fixture() throws Exception {
+        assertIsolatedDatabase();
+        createFixture();
+    }
+
+    void assertIsolatedDatabase() throws Exception {
         try (var connection = dataSource.getConnection()) {
             assertThat(connection.getMetaData().getURL()).startsWith("jdbc:h2:mem:customer-wallet-");
         }
+    }
+
+    private void createFixture() {
         tx(() -> {
             String prefix = "wallet-" + UUID.randomUUID().toString().substring(0, 8);
             customer = prefix + "-customer"; other = prefix + "-other"; manager = prefix + "-manager";

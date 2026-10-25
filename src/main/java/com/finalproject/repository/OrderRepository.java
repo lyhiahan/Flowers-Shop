@@ -16,7 +16,8 @@ public interface OrderRepository extends JpaRepository<Order, Long>, org.springf
     java.util.Optional<Long> findCustomerIdById(@Param("id") Long id);
     @org.springframework.data.jpa.repository.Modifying
     @Query("""
-        update Order o set o.paymentExpiresAt = case when o.paymentMethod = 'MOMO' then :momoDeadline else :bankDeadline end
+        update Order o set o.paymentExpiresAt = case when o.paymentMethod = 'MOMO'
+            then cast(:momoDeadline as LocalDateTime) else cast(:bankDeadline as LocalDateTime) end
         where o.paymentExpiresAt is null and o.paymentStatus = 'UNPAID'
         and o.paymentMethod in ('MOMO','BANK_TRANSFER')
         and o.status in (com.finalproject.enums.OrderStatus.PENDING,com.finalproject.enums.OrderStatus.CONFIRMED)
@@ -26,7 +27,8 @@ public interface OrderRepository extends JpaRepository<Order, Long>, org.springf
     @Query("""
         select coalesce(sum(o.totalAmount), 0) from Order o
         where (:storeId is null or o.pickupStore.id = :storeId)
-        and (:start is null or o.createdAt >= :start) and (:end is null or o.createdAt < :end)
+        and (cast(:start as LocalDateTime) is null or o.createdAt >= :start)
+        and (cast(:end as LocalDateTime) is null or o.createdAt < :end)
         and o.paymentStatus = 'PAID'
         and (o.status in (com.finalproject.enums.OrderStatus.DELIVERED, com.finalproject.enums.OrderStatus.COMPLETED)
           or (o.status = com.finalproject.enums.OrderStatus.REFUND_REQUESTED

@@ -21,7 +21,8 @@ public class Notification {
     private String title;
 
     @org.hibernate.annotations.Nationalized
-    @Column(nullable = false, columnDefinition = "NVARCHAR(MAX)")
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.NVARCHAR)
+    @Column(nullable = false, length = org.hibernate.Length.LONG32)
     private String content;
 
     @Column(length = 50)
