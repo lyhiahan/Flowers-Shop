@@ -6,6 +6,15 @@ import java.util.Properties;
 import static org.assertj.core.api.Assertions.*;
 
 class AivenConfigurationTests {
+    @Test void mavenRunDefaultsToAivenWithoutChangingOtherSpringProfiles() throws Exception {
+        var factory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        var document = factory.newDocumentBuilder().parse("pom.xml");
+        assertThat(document.getElementsByTagName("spring-boot.run.profiles").item(0).getTextContent()).isEqualTo("aiven");
+        var properties = new Properties();
+        try (var stream = getClass().getResourceAsStream("/application.properties")) { properties.load(stream); }
+        assertThat(properties.getProperty("spring.profiles.active")).isEqualTo("${SPRING_PROFILES_ACTIVE:dev}");
+    }
     @Test void profileNeverImportsSqlServerSecretsAndUsesVerifiedTls() throws Exception {
         var properties = new Properties();
         try (var stream = getClass().getResourceAsStream("/application-aiven.properties")) {
@@ -21,6 +30,8 @@ class AivenConfigurationTests {
         assertThat(properties.getProperty("spring.flyway.baseline-on-migrate")).isEqualTo("false");
         assertThat(properties.getProperty("spring.flyway.clean-disabled")).isEqualTo("true");
         assertThat(properties.getProperty("spring.jpa.hibernate.ddl-auto")).isEqualTo("validate");
+        assertThat(properties.getProperty("app.demo-payment.auto-tunnel.enabled"))
+                .isEqualTo("${DEMO_PAYMENT_AUTO_TUNNEL_ENABLED:true}");
     }
 
     @Test void mixedProfilesAreRejectedBeforeConnectingToADatabase() {

@@ -6,9 +6,14 @@ param(
     [string]$DatabaseUser = 'avnadmin',
     [string]$CaCertificate = (Join-Path (Split-Path -Parent $PSScriptRoot) '../ca.pem'),
     [ValidateRange(1024, 65535)][int]$Port = 8080,
-    [string]$JavaHome = $env:JAVA_HOME
+    [string]$JavaHome = $env:JAVA_HOME,
+    [switch]$SaveLocalConfiguration,
+    [switch]$PasswordDialog
 )
 $ErrorActionPreference = 'Stop'
+if ($SaveLocalConfiguration -and $Mode -ne 'Check') {
+    throw 'Use -Mode Check -SaveLocalConfiguration for the one-time setup.'
+}
 $root = Split-Path -Parent $PSScriptRoot
 $ca = (Resolve-Path -LiteralPath $CaCertificate -ErrorAction Stop).Path
 if ([string]::IsNullOrWhiteSpace($JavaHome) -or !(Test-Path -LiteralPath (Join-Path $JavaHome 'bin/java.exe'))) {
@@ -36,7 +41,6 @@ $settings['SPRING_PROFILES_ACTIVE'] = 'aiven'
 $settings['SERVER_ADDRESS'] = '127.0.0.1'
 $settings['SERVER_PORT'] = [string]$Port
 $settings['APP_DEMO_DATA_ENABLED'] = 'false'
-$settings['DEMO_PAYMENT_AUTO_TUNNEL_ENABLED'] = 'false'
 $settings['AIVEN_PASSWORD'] = $env:AIVEN_PASSWORD
 $settings['JWT_SECRET'] = $env:JWT_SECRET
 $settings['JAVA_HOME'] = $JavaHome
@@ -45,10 +49,45 @@ $pointer = [IntPtr]::Zero
 $result = 1
 try {
     if ([string]::IsNullOrWhiteSpace($settings['AIVEN_PASSWORD'])) {
-        Write-Host 'Paste the copied Aiven password with Shift+Insert or right-click, then press Enter. Input stays hidden.'
-        $secret = Read-Host 'Aiven password (hidden; not saved)' -AsSecureString
-        $pointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secret)
-        $settings['AIVEN_PASSWORD'] = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($pointer)
+        if ($PasswordDialog) {
+            Add-Type -AssemblyName System.Windows.Forms
+            $dialog = New-Object Windows.Forms.Form
+            $dialog.Text = 'Aiven - private password setup'
+            $dialog.ClientSize = New-Object Drawing.Size(460, 150)
+            $dialog.StartPosition = 'CenterScreen'
+            $dialog.FormBorderStyle = 'FixedDialog'
+            $dialog.MaximizeBox = $false
+            $dialog.MinimizeBox = $false
+            $dialog.TopMost = $true
+            $label = New-Object Windows.Forms.Label
+            $label.Text = 'Paste the NEW Aiven database password. It will stay on this PC.'
+            $label.SetBounds(15, 15, 430, 35)
+            $passwordBox = New-Object Windows.Forms.TextBox
+            $passwordBox.UseSystemPasswordChar = $true
+            $passwordBox.SetBounds(15, 55, 430, 25)
+            $ok = New-Object Windows.Forms.Button
+            $ok.Text = 'Continue'
+            $ok.SetBounds(250, 105, 95, 30)
+            $ok.DialogResult = [Windows.Forms.DialogResult]::OK
+            $cancel = New-Object Windows.Forms.Button
+            $cancel.Text = 'Cancel'
+            $cancel.SetBounds(350, 105, 95, 30)
+            $cancel.DialogResult = [Windows.Forms.DialogResult]::Cancel
+            $dialog.Controls.AddRange(@($label, $passwordBox, $ok, $cancel))
+            $dialog.AcceptButton = $ok
+            $dialog.CancelButton = $cancel
+            try {
+                if ($dialog.ShowDialog() -ne [Windows.Forms.DialogResult]::OK) { throw 'Setup cancelled. No credentials saved.' }
+                $settings['AIVEN_PASSWORD'] = $passwordBox.Text
+                $passwordBox.Clear()
+            } finally { $dialog.Dispose() }
+        } else {
+            Write-Host 'Paste the copied Aiven password with Shift+Insert or right-click, then press Enter. Input stays hidden.'
+            $prompt = if ($SaveLocalConfiguration) { 'Aiven password (hidden; saved locally only after successful verification)' } else { 'Aiven password (hidden; not saved)' }
+            $secret = Read-Host $prompt -AsSecureString
+            $pointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secret)
+            $settings['AIVEN_PASSWORD'] = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($pointer)
+        }
     }
     if ([string]::IsNullOrWhiteSpace($settings['AIVEN_PASSWORD'])) { throw 'Aiven password is required.' }
     if ($settings['AIVEN_PASSWORD'].Length -eq 1 -or $settings['AIVEN_PASSWORD'] -match '[\x00-\x1F\x7F]') {
@@ -76,6 +115,12 @@ try {
         if ($LASTEXITCODE -ne 0) {
             Write-Warning 'Aiven connection check failed. No database changes were made. See the message above, then retry.'
             exit 1
+        }
+        if ($SaveLocalConfiguration) {
+            & $mavenExecutable -Pisolated-tests '-DskipTests' compile -q
+            if ($LASTEXITCODE -ne 0) { throw 'Could not prepare local setup. No credentials saved.' }
+            & $java --class-path (Join-Path $root 'target/isolated-tests/classes') com.finalproject.tools.AivenLocalSetup
+            if ($LASTEXITCODE -ne 0) { throw 'Local setup failed. No database data was changed.' }
         }
         if ($Mode -eq 'Run') {
             Write-Host 'Starting with PostgreSQL migrations. This does NOT copy SQL Server data.'

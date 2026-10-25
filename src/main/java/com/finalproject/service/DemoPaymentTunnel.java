@@ -30,7 +30,7 @@ public class DemoPaymentTunnel {
     public DemoPaymentTunnel(Environment environment) { this.environment = environment; }
 
     public boolean automatic() {
-        return environment.matchesProfiles("dev") && !environment.matchesProfiles("prod", "test")
+        return environment.matchesProfiles("dev", "aiven") && !environment.matchesProfiles("prod", "test")
                 && environment.getProperty("app.demo-payment.enabled", Boolean.class, false)
                 && environment.getProperty("app.demo-payment.auto-tunnel.enabled", Boolean.class, false);
     }

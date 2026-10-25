@@ -2,6 +2,8 @@ package com.finalproject.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.mock.env.MockEnvironment;
 
 import java.io.*;
@@ -24,9 +26,10 @@ class DemoPaymentTunnelTests {
         return environment;
     }
 
-    @Test void testAndProductionNeverLaunchEvenWhenBothFlagsAreEnabled() {
+    @ParameterizedTest @ValueSource(strings = {"dev", "aiven"})
+    void testAndProductionNeverLaunchEvenWhenBothFlagsAreEnabled(String baseProfile) {
         for (String profile : new String[]{"test", "prod"}) {
-            var service = new DemoPaymentTunnel(environment("dev", profile)) {
+            var service = new DemoPaymentTunnel(environment(baseProfile, profile)) {
                 @Override protected Process launch(ProcessBuilder builder) { throw new AssertionError("Must not launch"); }
             };
             assertThat(service.automatic()).isFalse();
@@ -36,13 +39,18 @@ class DemoPaymentTunnelTests {
         }
     }
 
-    @Test void explicitOptOutAndDisabledDemoDoNotLaunch() {
-        var environment = environment("dev");
+    @ParameterizedTest @ValueSource(strings = {"dev", "aiven"})
+    void explicitOptOutAndDisabledDemoDoNotLaunch(String profile) {
+        var environment = environment(profile);
         environment.setProperty("app.demo-payment.auto-tunnel.enabled", "false");
         assertThat(new DemoPaymentTunnel(environment).automatic()).isFalse();
         environment.setProperty("app.demo-payment.auto-tunnel.enabled", "true");
         environment.setProperty("app.demo-payment.enabled", "false");
         assertThat(new DemoPaymentTunnel(environment).automatic()).isFalse();
+    }
+
+    @Test void unrelatedProfilesNeverLaunchAnAutomaticPublicTunnel() {
+        assertThat(new DemoPaymentTunnel(environment("staging")).automatic()).isFalse();
     }
 
     @Test void onlyValidatedSupervisorOriginsCanBeAdvertisedAndAnErrorRevokesThem() {
@@ -71,16 +79,18 @@ class DemoPaymentTunnelTests {
         service.stop();
     }
 
-    @Test void repeatedReadyEventsLaunchOnceWithActualPortAndStopOnlyTheOwnedProcess() throws Exception {
+    @ParameterizedTest @ValueSource(strings = {"dev", "aiven"})
+    void repeatedReadyEventsLaunchOnceWithActualPortAndStopOnlyTheOwnedProcess(String profile) throws Exception {
         Files.createDirectories(root.resolve("scripts")); Files.createDirectories(root.resolve(".tools"));
         Files.createFile(root.resolve("scripts/demo-phone-tunnel.cjs")); Files.createFile(root.resolve(".tools/cloudflared.exe"));
         var owned = new FakeProcess();
         var launches = new AtomicInteger();
-        var service = new DemoPaymentTunnel(environment("dev")) {
+        var service = new DemoPaymentTunnel(environment(profile)) {
             @Override protected Process launch(ProcessBuilder builder) {
                 launches.incrementAndGet();
                 assertThat(builder.command()).containsSubsequence("--app-port", "9080");
-                assertThat(builder.environment().keySet()).noneMatch(key -> key.startsWith("SPRING_") || key.contains("API_KEY"));
+                assertThat(builder.environment().keySet()).noneMatch(key -> key.startsWith("SPRING_")
+                        || key.startsWith("AIVEN_") || key.contains("API_KEY") || key.equals("JWT_SECRET"));
                 return owned;
             }
         };

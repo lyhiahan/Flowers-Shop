@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 /** Reuses the same checkout/refund/concurrency/ownership cases against actual PostgreSQL. */
 @SpringBootTest(properties = {
         "app.jwt.secret=YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=",
-        "app.mail.mock-enabled=true", "spring.config.import=",
+        "app.mail.mock-enabled=true", "spring.config.import=", "app.demo-payment.auto-tunnel.enabled=false",
         "spring.jpa.hibernate.ddl-auto=validate", "spring.flyway.enabled=true"
 })
 @ActiveProfiles(value = "aiven", inheritProfiles = false)
