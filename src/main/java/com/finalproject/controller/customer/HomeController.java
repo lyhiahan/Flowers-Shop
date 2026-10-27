@@ -203,7 +203,7 @@ public class HomeController {
                 activeFilterTitle = "Tất cả sản phẩm";
             }
 
-            boolean hasAttributeFilters = (!cleanStyles.isEmpty())
+            boolean hasAttributeFilters = storeId != null || (!cleanStyles.isEmpty())
                     || (!cleanTypes.isEmpty())
                     || (!cleanColors.isEmpty())
                     || (!cleanOccasions.isEmpty())
