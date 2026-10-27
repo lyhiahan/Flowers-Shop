@@ -37,6 +37,7 @@ public class CatalogFilterTests {
     private CategoryRepository categoryRepository;
 
     @Autowired private com.finalproject.repository.StoreRepository storeRepository;
+    @Autowired private com.finalproject.repository.StoreInventoryRepository inventories;
     @Autowired private com.finalproject.repository.StyleRepository styles;
     @Autowired private com.finalproject.repository.StyleValueRepository values;
     @BeforeEach
@@ -143,6 +144,79 @@ public class CatalogFilterTests {
         assertThat(html).contains("Kết quả tìm kiếm: “Bó Hoa Hồng Đỏ Tươi 1”");
         assertThat(html).contains("id=\"productGrid\"");
         assertThat(html).contains("Bó Hoa Hồng Đỏ Tươi 1");
+    }
+
+    @Test
+    void branchSearchIncludesOwnAndSharedProductsWithoutLeakingOtherBranches() throws Exception {
+        Product own = productRepository.findAll().getFirst();
+        own.setName("Branch search own");
+        productRepository.saveAndFlush(own);
+        var selected = own.getStore();
+        var other = storeRepository.save(com.finalproject.entity.Store.builder()
+                .name("Other search branch").address("Other street").status(true).isOpen(true).build());
+        Product shared = branchSearchProduct("Branch search shared", own.getCategory(), null);
+        Product foreign = branchSearchProduct("Branch search foreign", own.getCategory(), other);
+        Product removed = branchSearchProduct("Branch search removed", own.getCategory(), null);
+        Product elsewhere = branchSearchProduct("Branch search elsewhere", own.getCategory(), null);
+        inventories.save(com.finalproject.entity.StoreInventory.builder().store(selected).product(shared).quantity(5).build());
+        // A stale inventory link must not expose another branch's private product.
+        inventories.save(com.finalproject.entity.StoreInventory.builder().store(selected).product(foreign).quantity(5).build());
+        inventories.save(com.finalproject.entity.StoreInventory.builder().store(selected).product(removed).quantity(5).isDeleted(true).build());
+        inventories.save(com.finalproject.entity.StoreInventory.builder().store(other).product(elsewhere).quantity(5).build());
+        inventories.flush();
+
+        var result = mockMvc.perform(get("/products").param("keyword", "Branch search")
+                        .param("storeId", selected.getId().toString()))
+                .andExpect(status().isOk()).andReturn();
+        var model = result.getModelAndView().getModel();
+        var products = (java.util.List<Product>) model.get("products");
+        assertThat(products).extracting(Product::getId).containsExactlyInAnyOrder(own.getId(), shared.getId());
+        assertThat(model.get("selectedStore")).isEqualTo(selected);
+        assertThat(result.getResponse().getContentAsString()).contains("Chi nhánh:", "Bỏ lọc chi nhánh");
+    }
+
+    @Test
+    void branchSearchRetainsSelectionKeywordSortAndPagination() throws Exception {
+        Product product = productRepository.findAll().getFirst();
+        Long branchId = product.getStore().getId();
+        var result = mockMvc.perform(get("/products").param("keyword", "Bó Hoa Hồng Đỏ Tươi")
+                        .param("storeId", branchId.toString()).param("sort", "price_asc").param("page", "2"))
+                .andExpect(status().isOk()).andReturn();
+        var model = result.getModelAndView().getModel();
+        assertThat(model.get("totalItems")).isEqualTo(15L);
+        assertThat(model.get("currentPage")).isEqualTo(2);
+        assertThat(model.get("storeId")).isEqualTo(branchId);
+        assertThat(model.get("sort")).isEqualTo("price_asc");
+        String html = result.getResponse().getContentAsString();
+        assertThat(html).contains("id=\"catalogStoreSelect\"", "storeId=" + branchId, "sort=price_asc");
+        String headerForm = html.substring(html.indexOf("id=\"globalSearchForm\""));
+        headerForm = headerForm.substring(0, headerForm.indexOf("</form>"));
+        assertThat(headerForm).contains("name=\"storeId\" value=\"" + branchId + "\"");
+    }
+
+    @Test
+    void closedBranchesAreNotOfferedAndCannotExposeSharedProducts() throws Exception {
+        var closed = storeRepository.save(com.finalproject.entity.Store.builder()
+                .name("Closed search branch").address("Closed street").status(true).isOpen(false).build());
+        var inactive = storeRepository.save(com.finalproject.entity.Store.builder()
+                .name("Inactive search branch").address("Inactive street").status(false).isOpen(true).build());
+        Product shared = branchSearchProduct("Closed branch shared fixture",
+                productRepository.findAll().getFirst().getCategory(), null);
+        inventories.saveAndFlush(com.finalproject.entity.StoreInventory.builder()
+                .store(closed).product(shared).quantity(5).build());
+        var model = mockMvc.perform(get("/products").param("keyword", shared.getName())
+                        .param("storeId", closed.getId().toString()))
+                .andExpect(status().isOk()).andReturn().getModelAndView().getModel();
+        assertThat(model.get("totalItems")).isEqualTo(0L);
+        assertThat((java.util.List<com.finalproject.entity.Store>) model.get("catalogStores"))
+                .extracting(com.finalproject.entity.Store::getId).doesNotContain(closed.getId(), inactive.getId());
+    }
+
+    private Product branchSearchProduct(String name, Category category, com.finalproject.entity.Store branch) {
+        return productRepository.saveAndFlush(Product.builder().name(name).category(category).store(branch)
+                .priceBuy(new BigDecimal("300000")).importPrice(new BigDecimal("200000"))
+                .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO)
+                .isActive(true).isSelling(true).isDeleted(false).build());
     }
 
     @Test

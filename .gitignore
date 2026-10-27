@@ -53,3 +53,10 @@ application-local.properties
 
 # Local HTTP authentication sessions
 /cookies.txt
+
+# Local agent instructions
+/AGENTS.md
+
+# Local repo notes and preview launcher (preview artifacts are under target/)
+/docs/REPO_MAP.md
+/start-web.ps1

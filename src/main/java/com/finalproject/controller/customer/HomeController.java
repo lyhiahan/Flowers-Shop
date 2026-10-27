@@ -275,7 +275,12 @@ public class HomeController {
             }
             model.addAttribute("discoverCategories", rootCategories);
             model.addAttribute("categories", categoryRepository.findActiveCategories().stream().filter(categoryService::visible).toList());
-            model.addAttribute("stores", storeRepository.findByStatusTrue());
+            var stores = storeRepository.findByStatusTrue();
+            model.addAttribute("stores", stores);
+            model.addAttribute("catalogStores", stores.stream()
+                    .filter(store -> Boolean.TRUE.equals(store.getIsOpen())).toList());
+            model.addAttribute("selectedStore", stores.stream()
+                    .filter(store -> store.getId().equals(storeId)).findFirst().orElse(null));
 
             if (principal != null) {
                 try {
