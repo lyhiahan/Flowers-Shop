@@ -22,7 +22,8 @@
 4. [PHẦN II: DANH SÁCH PROMPT NGUYÊN VĂN KHÔI PHỤC TỪ NHẬT KÝ THỰC TẾ](#phan-4-prompt-nguyen-van)
 5. [PHẦN III: DANH SÁCH 23 PROMPT KỸ THUẬT TÁI DỰNG TỪ LỊCH SỬ COMMIT](#phan-5-prompt-commit)
 6. [PHẦN IV: ĐỐI CHIẾU SAI SÓT CỦA AI VÀ CÁC ĐIỀU CHỈNH CỦA NHÓM](#phan-6-lam-chu)
-7. [TỔNG KẾT MINH CHỨNG THEO RUBRIC CHẤM ĐIỂM](#phan-7-tong-ket)
+7. [PHẦN V: BỘ 49 PROMPT BỔ SUNG CHO CHỨC NĂNG USER VÀ HOÀN THIỆN DỰ ÁN](#phan-8-prompt-user-bo-sung)
+8. [TỔNG KẾT MINH CHỨNG THEO RUBRIC CHẤM ĐIỂM](#phan-7-tong-ket)
 
 ---
 
@@ -414,6 +415,213 @@ flowchart TD
 │ người dùng mà không kiểm tra.  │ inspect để xem đơn shop khác.  │ thông tin đăng nhập trong DB.  │
 └────────────────────────────────┴────────────────────────────────┴────────────────────────────────┘
 ```
+
+---
+
+<a name="phan-8-prompt-user-bo-sung"></a>
+# PHẦN V: BỘ 49 PROMPT BỔ SUNG CHO CHỨC NĂNG USER VÀ HOÀN THIỆN DỰ ÁN
+
+**Nguồn và cách sử dụng:** Bộ prompt dưới đây được biên soạn lại trong cuộc hội thoại với OpenAI Codex/ChatGPT, dựa trên các yêu cầu đã trao đổi và phạm vi chức năng khách hàng của dự án. Đây là các mẫu yêu cầu theo chức năng để tham khảo, sao chép và sử dụng lại; **không phải bản trích nguyên văn nhật ký**. Các mã `BS-01` đến `BS-49` chỉ dùng để định danh nội dung bổ sung, không đại diện cho commit hoặc kết quả kiểm thử đã xác minh.
+
+Gửi prompt `BS-01` để cung cấp ngữ cảnh chung, sau đó gửi từng prompt chức năng cần thực hiện. Việc liệt kê một prompt không khẳng định chức năng đã hoàn thành hoặc toàn bộ ca kiểm thử đã đạt. Các prompt về Playwright vẫn được giữ làm tài liệu tham khảo; bộ kiểm thử chưa commit trước đó đã được xóa theo yêu cầu của người dùng.
+
+---
+
+### Prompt BS-01: Yêu cầu chung khi phát triển dự án
+
+> Hãy đọc cấu trúc dự án website Hoa Tươi Sài Gòn trước khi sửa code. Sử dụng Java Spring Boot, Spring Security, Spring Data JPA, Thymeleaf, Bootstrap và database theo cấu hình hiện có. Giữ giao diện và cách tổ chức code thống nhất với dự án. Chỉ sửa những phần liên quan đến yêu cầu, không làm mất dữ liệu, không tự commit hoặc push. Kiểm tra hoạt động trước khi bàn giao và báo rõ những phần chưa kiểm chứng.
+
+### Prompt BS-02: Xây dựng giao diện chung cho khách hàng
+
+> Hãy xây dựng giao diện khách hàng với nền hồng nhạt, màu chủ đạo xanh đậm và màu nhấn hồng. Đồng bộ header, thanh tìm kiếm, menu danh mục, footer, nút bấm và thông báo giữa các trang. Giao diện phải dễ đọc và sử dụng được trên máy tính, máy tính bảng, điện thoại.
+
+### Prompt BS-03: Đăng ký tài khoản khách hàng
+
+> Hãy xây dựng chức năng đăng ký tài khoản khách hàng. Kiểm tra các trường bắt buộc, định dạng email, số điện thoại, tên đăng nhập và mật khẩu; không cho đăng ký trùng tên đăng nhập hoặc email. Hiển thị lỗi bằng tiếng Việt và giữ lại các thông tin hợp lệ khi biểu mẫu bị từ chối.
+
+### Prompt BS-04: Xác thực tài khoản bằng OTP
+
+> Hãy bổ sung xác thực email bằng OTP khi đăng ký. Kiểm tra mã sai, hết hạn, đã sử dụng và mã không thuộc email đang xác thực. Có chức năng gửi lại OTP với giới hạn số lần gửi. Chỉ kích hoạt tài khoản sau khi xác thực thành công.
+
+### Prompt BS-05: Đăng nhập, đăng xuất và phân quyền
+
+> Hãy xây dựng chức năng đăng nhập bằng tên đăng nhập hoặc email, đăng xuất và chuyển hướng phù hợp với vai trò. Tài khoản khách hàng không được truy cập chức năng quản lý hoặc quản trị. Xử lý rõ trường hợp nhập sai thông tin, tài khoản bị khóa hoặc phiên đăng nhập hết hạn.
+
+### Prompt BS-06: Quên và đặt lại mật khẩu
+
+> Hãy xây dựng luồng quên mật khẩu qua email và OTP. Chỉ cho đặt lại mật khẩu khi mã xác thực hợp lệ, chưa hết hạn và chưa sử dụng. Kiểm tra mật khẩu mới và xác nhận mật khẩu. Không tiết lộ thông tin tài khoản qua thông báo lỗi.
+
+### Prompt BS-07: Trang chủ và danh sách mẫu hoa
+
+> Hãy xây dựng trang chủ hiển thị banner, danh mục và danh sách mẫu hoa. Mỗi thẻ sản phẩm có ảnh, tên, giá bán, tình trạng tồn kho, đánh giá và nút thêm vào giỏ. Xử lý rõ sản phẩm hết hàng, ngừng bán, bị cấm kinh doanh hoặc đã xóa.
+
+### Prompt BS-08: Thanh tìm kiếm thống nhất
+
+> Hãy xây dựng thanh tìm kiếm dùng chung trên các trang khách hàng, cho phép chọn tìm mẫu hoa, cửa hàng hoặc người dùng. Thanh tìm kiếm phải gọn, không xuất hiện khung thừa quanh ô chọn, không bị chồng chữ và giữ đúng từ khóa khi chuyển trang.
+
+### Prompt BS-09: Bộ lọc sản phẩm
+
+> Hãy xây dựng bảng “Tất cả bộ lọc” gồm chi nhánh, kiểu dáng, loại hoa, màu sắc, dịp tặng và khoảng giá. Cho phép kết hợp nhiều điều kiện. Bên ngoài chỉ giữ nút “Tất cả bộ lọc” và các điều kiện đang áp dụng; không hiển thị lại những bộ lọc riêng bị trùng.
+
+### Prompt BS-10: Lọc sản phẩm theo chi nhánh
+
+> Hãy bảo đảm sản phẩm riêng của chi nhánh A chỉ xuất hiện khi tìm tại A, không xuất hiện tại chi nhánh B. Phân biệt sản phẩm riêng với sản phẩm chung toàn chuỗi. Khi kết hợp từ khóa và chi nhánh, số kết quả, thẻ sản phẩm và tồn kho phải thống nhất.
+
+### Prompt BS-11: Xóa và đặt lại bộ lọc
+
+> Hãy sửa chức năng “Xóa bộ lọc” để xóa toàn bộ điều kiện, bao gồm chi nhánh. Cho phép bỏ từng điều kiện riêng mà vẫn giữ các điều kiện còn lại. Nút “Đặt lại” trong bảng lọc phải cập nhật đúng các lựa chọn trên giao diện.
+
+### Prompt BS-12: Sắp xếp và phân trang
+
+> Hãy xây dựng chức năng sắp xếp và phân trang cho danh sách sản phẩm. Giữ nguyên từ khóa, bộ lọc và cách sắp xếp khi đổi trang. Khi có nhiều trang, hiển thị trang đầu, trang cuối, các trang lân cận và dấu “…”. Thanh phân trang phải phẳng, gọn và không có nền hoặc bóng thừa.
+
+### Prompt BS-13: Trang chi tiết sản phẩm
+
+> Hãy xây dựng trang chi tiết mẫu hoa gồm ảnh, tên, mô tả, thuộc tính, giá bán, chi nhánh cung cấp, tồn kho và đánh giá. Có lựa chọn số lượng, thêm vào giỏ, mua ngay và liên hệ cửa hàng. Kiểm tra trạng thái bán và tồn kho ở cả giao diện lẫn máy chủ.
+
+### Prompt BS-14: Theo dõi sản phẩm
+
+> Hãy xây dựng chức năng theo dõi hoặc bỏ theo dõi sản phẩm cho khách hàng đã đăng nhập. Đồng bộ trạng thái nút, số người theo dõi và danh sách sản phẩm đã theo dõi. Không tạo bản ghi trùng khi người dùng bấm nhiều lần.
+
+### Prompt BS-15: Danh sách sản phẩm đã xem
+
+> Hãy bổ sung trang sản phẩm đã xem gần đây của từng khách hàng. Khi xem lại cùng một sản phẩm, cập nhật thời điểm xem thay vì tạo nhiều dòng trùng. Cho phép xóa lịch sử và không để người dùng xem lịch sử của tài khoản khác.
+
+### Prompt BS-16: Danh sách và chi tiết cửa hàng
+
+> Hãy xây dựng trang danh sách cửa hàng có tìm kiếm và phân trang. Trang chi tiết hiển thị tên, ảnh, địa chỉ, số điện thoại, trạng thái hoạt động, bộ sưu tập hoa, đánh giá và thông tin chi nhánh. Các sản phẩm phải thuộc đúng phạm vi cửa hàng đang xem.
+
+### Prompt BS-17: Theo dõi cửa hàng và bỏ nút Follow trùng
+
+> Hãy xây dựng chức năng theo dõi, bỏ theo dõi cửa hàng và trang danh sách cửa hàng đã theo dõi. Đồng bộ số người theo dõi sau thao tác. Trang chi tiết cửa hàng chỉ giữ một nút Follow ở phần thông tin trên cùng, bỏ nút dư phía dưới thanh tab.
+
+### Prompt BS-18: Danh sách và hồ sơ người dùng công khai
+
+> Hãy xây dựng chức năng tìm kiếm người dùng và xem hồ sơ công khai. Chỉ hiển thị những thông tin được phép công khai; không để lộ mật khẩu, OTP, địa chỉ riêng hoặc thông tin liên hệ cá nhân không được phép hiển thị.
+
+### Prompt BS-19: Quản lý hồ sơ cá nhân
+
+> Hãy xây dựng trang tài khoản để khách hàng cập nhật họ tên, số điện thoại, địa chỉ, ảnh đại diện và ảnh bìa. Kiểm tra dữ liệu nhập và loại, dung lượng ảnh tải lên. Nếu lưu thất bại, giữ nguyên dữ liệu và ảnh hợp lệ trước đó.
+
+### Prompt BS-20: Quản lý sổ địa chỉ
+
+> Hãy xây dựng chức năng thêm, sửa, xóa và đặt địa chỉ mặc định. Mỗi địa chỉ gồm tên người nhận, số điện thoại và địa chỉ chi tiết. Bảo đảm địa chỉ thuộc đúng tài khoản và danh sách địa chỉ được sử dụng ở bước đặt hàng.
+
+### Prompt BS-21: Đổi mật khẩu trong tài khoản
+
+> Hãy xây dựng chức năng đổi mật khẩu cho khách hàng đã đăng nhập, sử dụng bước xác thực theo cơ chế hiện có của dự án. Kiểm tra thông tin xác thực, mật khẩu mới và xác nhận mật khẩu. Không cho dùng OTP của tài khoản khác hoặc dùng lại mã đã hết hiệu lực.
+
+### Prompt BS-22: Quản lý giỏ hàng
+
+> Hãy xây dựng giỏ hàng với chức năng thêm sản phẩm, tăng giảm số lượng, xóa sản phẩm và chọn các dòng để thanh toán. Phân biệt cùng một sản phẩm ở các chi nhánh khác nhau. Cập nhật tổng tiền và số lượng trên header; chặn số lượng không hợp lệ hoặc vượt tồn kho.
+
+### Prompt BS-23: Mua ngay
+
+> Hãy xây dựng chức năng “Mua ngay” từ trang sản phẩm. Đưa đúng sản phẩm, số lượng và chi nhánh được chọn sang bước thanh toán. Không tự chọn thanh toán những sản phẩm khác đang có trong giỏ của khách hàng.
+
+### Prompt BS-24: Đặt hàng giao tận nơi hoặc nhận tại quầy
+
+> Hãy xây dựng trang đặt hàng hỗ trợ giao tận nơi và đến lấy tại cửa hàng. Cho phép nhập người nhận, số điện thoại, địa chỉ, ngày giờ nhận và lời chúc trên thiệp. Khi nhận tại quầy, kiểm tra chi nhánh hoạt động và đủ tồn kho cho các sản phẩm đã chọn.
+
+### Prompt BS-25: Tính tổng thanh toán và áp dụng khuyến mãi
+
+> Hãy tính lại tiền hàng, giảm giá, phí giao hàng và tổng thanh toán ở máy chủ. Kiểm tra điều kiện, thời hạn, số lượt sử dụng và phạm vi chi nhánh của mã giảm giá. Không tin giá tiền hoặc số tiền giảm được gửi từ trình duyệt. Khi thay đổi thông tin đặt hàng, cập nhật lại tổng tiền tương ứng.
+
+### Prompt BS-26: Thanh toán COD và thu tiền tại quầy
+
+> Hãy xây dựng phương thức thanh toán COD. Đơn chưa thu tiền không được ghi nhận là đã thanh toán. Với đơn nhận tại quầy, nhân viên phải xác nhận đã giao hoa và thu đủ tiền trước khi hoàn tất; máy chủ cũng phải chặn yêu cầu thiếu xác nhận này.
+
+### Prompt BS-27: Thanh toán MoMo mô phỏng bằng điện thoại
+
+> Hãy xây dựng luồng MoMo mô phỏng cho đồ án: tạo phiên thanh toán có thời hạn, hiển thị mã QR để mở trang xác nhận trên điện thoại và cập nhật trạng thái trên máy tính. Xử lý phiên hết hạn, thanh toán lại và xác nhận lặp. Phải phân biệt rõ thanh toán mô phỏng với giao dịch MoMo thật.
+
+### Prompt BS-28: Thanh toán chuyển khoản
+
+> Hãy hoàn thiện luồng chuyển khoản theo chế độ hiện có của dự án. Hiển thị thông tin đơn và trạng thái thanh toán rõ ràng. Khách hàng không được tự sửa trạng thái thành đã thanh toán bằng tham số gửi lên; việc xác nhận phải đi qua đúng cơ chế được hệ thống cho phép.
+
+### Prompt BS-29: Ví riêng cho khách hàng
+
+> Hãy xây dựng một ví riêng cho mỗi tài khoản khách hàng. Ví dùng để nhận hoàn tiền và thanh toán đơn hàng; không bổ sung nạp, rút hoặc chuyển tiền khi chưa có yêu cầu. Hiển thị số dư, lịch sử tăng giảm, mã đơn liên quan và bộ lọc từ ngày đến ngày.
+
+### Prompt BS-30: Thanh toán bằng số dư ví
+
+> Hãy hiển thị số dư ví ngay dưới lựa chọn thanh toán bằng ví. Chỉ cho chọn khi số dư đủ trả toàn bộ đơn. Nếu thiếu tiền, làm mờ lựa chọn, vô hiệu hóa thao tác và hiển thị “Số dư ví không đủ”. Kiểm tra lại số dư ở máy chủ và không trừ tiền hai lần khi gửi yêu cầu lặp.
+
+### Prompt BS-31: Đơn hàng của tôi
+
+> Hãy xây dựng trang “Đơn hàng của tôi” có phân trang, lọc trạng thái và xem chi tiết. Hiển thị sản phẩm, chi nhánh phục vụ, hình thức nhận, tổng tiền, thanh toán và tiến trình xử lý. Chỉ cho khách xem đơn của chính mình. Giao diện cần rõ ràng, đơn giản và thống nhất với trang chủ.
+
+### Prompt BS-32: Hủy đơn và hoàn tiền vào ví
+
+> Hãy xây dựng chức năng hủy đơn có lý do bắt buộc và kiểm tra trạng thái được phép hủy ở máy chủ. Đơn chưa thanh toán không được cộng tiền hoàn. Đơn đã thanh toán xử lý hoàn tiền theo quy trình của dự án, ghi đúng người hủy và lý do. Tiền chỉ được hoàn một lần vào đúng ví khách hàng; tồn kho cũng chỉ được trả lại một lần.
+
+### Prompt BS-33: Hiển thị đơn đã hủy và trạng thái hoàn tiền
+
+> Hãy sửa bộ lọc “Đã hủy” để khách vẫn tìm thấy những đơn đã hủy nhưng đang chờ hoàn tiền hoặc đã hoàn tiền. Trên từng đơn vẫn hiển thị rõ trạng thái thanh toán và hoàn tiền hiện tại. Không thay đổi dữ liệu trạng thái chỉ để làm cho bộ lọc hiển thị đúng.
+
+### Prompt BS-34: Yêu cầu trả hàng và hoàn tiền
+
+> Hãy hoàn thiện chức năng gửi yêu cầu trả hàng, hoàn tiền theo điều kiện nghiệp vụ hiện có. Chỉ chủ đơn hàng được gửi yêu cầu. Kiểm tra trạng thái đơn và ngăn yêu cầu trùng hoặc thao tác sau khi quy trình đã kết thúc. Hiển thị kết quả xử lý để khách theo dõi.
+
+### Prompt BS-35: Đánh giá sản phẩm sau khi mua
+
+> Hãy xây dựng chức năng đánh giá cho khách đã nhận sản phẩm trong đơn hợp lệ. Cho chọn từ 1 đến 5 sao, nhập nội dung từ 50 đến 1.000 ký tự và tải ảnh nếu có. Không cho đánh giá đơn của người khác, sản phẩm chưa mua hoặc đánh giá trùng cùng sản phẩm trong một đơn.
+
+### Prompt BS-36: Chat với cửa hàng
+
+> Hãy xây dựng chức năng chat giữa khách hàng và cửa hàng, hỗ trợ tin nhắn, ảnh và ngữ cảnh sản phẩm. Hội thoại phải thuộc đúng khách và chi nhánh. Người ngoài không được xem hoặc gửi tin vào hội thoại bằng cách thay mã trên URL hoặc trong yêu cầu.
+
+### Prompt BS-37: Thông báo cho khách hàng
+
+> Hãy xây dựng danh sách thông báo, số thông báo chưa đọc, đánh dấu từng thông báo hoặc tất cả là đã đọc. Khi mở thông báo, chuyển đến đúng đơn hàng hoặc nội dung liên quan. Không cho đọc hoặc cập nhật thông báo của tài khoản khác.
+
+### Prompt BS-38: Đồng bộ nội dung tiếng Việt và xử lý lỗi
+
+> Hãy rà soát thông báo và nhãn trạng thái trên giao diện khách hàng. Sử dụng tiếng Việt dễ hiểu, không để lộ các mã như PREPARING hoặc COMPLETED trong câu thông báo. Xử lý rõ trường hợp không có kết quả, dữ liệu không tồn tại, hết phiên đăng nhập và lỗi xử lý yêu cầu.
+
+### Prompt BS-39: Chỉnh lại giao diện ví
+
+> Hãy đơn giản hóa giao diện ví khách hàng: bỏ dòng số thẻ trang trí “•••• •••• •••• WALLET”, phần “Thanh toán 1 chạm” bên phải và chỉ số “Tổng lượt giao dịch”. Điều chỉnh màu sắc cho dễ đọc, tập trung vào số dư và lịch sử giao dịch có lọc ngày tháng.
+
+### Prompt BS-40: Đồng bộ xử lý đơn với ví cửa hàng
+
+> Hãy kiểm tra việc ghi tiền cửa hàng theo tiến trình đơn. Tiền thanh toán trước chưa hoàn tất phải được quản lý đúng số dư chờ; khi đủ điều kiện thì chuyển sang thu nhập sau hoa hồng. Không ghi thu nhập lặp. Khi admin từ chối yêu cầu rút tiền, hoàn lại đúng số tiền đã giữ một lần và ghi lịch sử rõ ràng.
+
+### Prompt BS-41: Cố định thanh bên admin
+
+> Hãy sửa thanh bên admin để giữ vị trí khi cuộn nội dung trang, tương tự trang manager. Danh sách menu dài phải cuộn riêng trong chiều cao màn hình; phần thương hiệu và nút đăng xuất vẫn nhìn thấy. Giữ nguyên màu sắc, liên kết và các chức năng khác.
+
+### Prompt BS-42: Cấu hình Aiven và chuyển dữ liệu
+
+> Hãy cấu hình dự án sử dụng PostgreSQL trên Aiven qua kết nối TLS có xác minh chứng chỉ. Nếu chuyển dữ liệu từ SQL Server, hãy kiểm tra khác biệt cấu trúc và kiểu dữ liệu, sao lưu, lập kế hoạch và đối chiếu dữ liệu sau chuyển. Không xóa database nguồn hoặc ghi đè dữ liệu đích khi chưa xác định rõ phạm vi.
+
+### Prompt BS-43: Khởi động dự án và Cloudflare bằng một lệnh
+
+> Hãy cấu hình để chạy `mvn spring-boot:run` là ứng dụng khởi động cùng tiến trình Cloudflare cần cho luồng thanh toán điện thoại. Lấy địa chỉ truy cập được tạo để cập nhật mã QR, xử lý lỗi kết nối và dừng tiến trình do ứng dụng tạo khi ứng dụng tắt. Không công khai các chức năng quản trị qua cổng dành cho thanh toán.
+
+### Prompt BS-44: Hướng dẫn cấu hình máy mới
+
+> Hãy viết tài liệu Markdown hướng dẫn thành viên khác cài công cụ, lấy mã nguồn, cấu hình Aiven, chứng chỉ CA, Cloudflare và chạy dự án. Phân biệt file có trên GitHub với thông tin phải tự cấu hình. Không đưa mật khẩu hoặc khóa bí mật vào tài liệu.
+
+### Prompt BS-45: Xây dựng kịch bản kiểm thử
+
+> Hãy viết các trường hợp kiểm thử bằng tiếng Việt cho toàn bộ chức năng, đặc biệt phần khách hàng. Mỗi trường hợp cần có điều kiện chuẩn bị, bước thực hiện, dữ liệu nhập và kết quả mong đợi. Bao gồm luồng hợp lệ, dữ liệu sai, giới hạn đầu vào, phân quyền và thao tác lặp.
+
+### Prompt BS-46: Tự động hóa kiểm thử bằng Playwright và Python
+
+> Hãy tạo bộ kiểm thử Playwright bằng Python và script PowerShell để chạy bằng một lệnh. Hỗ trợ kiểm tra giao diện, tài khoản, giỏ hàng, đặt hàng, thanh toán, hủy đơn, ví, đánh giá, chat và thông báo. Tạo báo cáo và ảnh khi lỗi; phân biệt rõ đạt, lỗi, bỏ qua và chưa đủ bằng chứng.
+
+### Prompt BS-47: Phân tích kết quả kiểm thử
+
+> Hãy đọc báo cáo kiểm thử và phân biệt lỗi ứng dụng với lỗi của kịch bản kiểm thử hoặc môi trường. Với mỗi trường hợp chưa đạt, chỉ rõ bằng chứng và viết hướng dẫn kiểm tra thủ công từng bước. Không kết luận chức năng sai chỉ vì khác nội dung thông báo hoặc thiếu một lớp CSS.
+
+### Prompt BS-48: Dọn dữ liệu kiểm thử
+
+> Hãy xác định chính xác toàn bộ dữ liệu do kiểm thử tạo ra và các bản ghi phụ thuộc. Chỉ sao lưu các bản ghi thử cần xóa, kiểm tra liên kết với dữ liệu thật, diễn tập có hoàn tác rồi mới thực hiện. Không xóa hoặc thay đổi dữ liệu thật, số dư ví thật hay cấu hình ngoài phạm vi.
+
+### Prompt BS-49: Dọn file trước khi commit
+
+> Hãy rà soát các file chưa commit và giải thích file nào thuộc chức năng, kiểm thử hoặc file tạm. Sau khi tôi xác định phạm vi cần giữ, hãy xóa đúng các file không cần thiết, kiểm tra lại danh sách thay đổi và đề xuất tên commit. Không tự commit hoặc push.
 
 ---
 
