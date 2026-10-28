@@ -8,7 +8,7 @@ import com.finalproject.repository.NotificationRepository;
 import com.finalproject.repository.StoreRepository;
 import com.finalproject.repository.UserRepository;
 import com.finalproject.service.NotificationService;
-import com.finalproject.service.impl.NotificationServiceImpl;
+import com.finalproject.service.NotificationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -35,14 +35,14 @@ import static org.mockito.Mockito.*;
 class NotificationServiceAndControllerTests {
 
     @Nested
-    @DisplayName("NotificationServiceImpl Unit Tests")
+    @DisplayName("NotificationService Unit Tests")
     class ServiceTests {
         @Mock NotificationRepository notificationRepository;
         @Mock UserRepository userRepository;
         @Mock StoreRepository storeRepository;
         @Mock SimpMessagingTemplate messagingTemplate;
         @org.mockito.Spy com.finalproject.service.NotificationNavigationResolver navigationResolver = new com.finalproject.service.NotificationNavigationResolver();
-        @InjectMocks NotificationServiceImpl notificationService;
+        @InjectMocks NotificationService notificationService;
 
         @Test
         @DisplayName("sendNotification creates entity, saves, and pushes to user WebSocket topic")

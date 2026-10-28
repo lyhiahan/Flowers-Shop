@@ -4,7 +4,7 @@ import com.finalproject.dto.PendingRegistration;
 import com.finalproject.dto.request.RegisterRequest;
 import com.finalproject.repository.*;
 import com.finalproject.service.*;
-import com.finalproject.service.impl.AuthServiceImpl;
+import com.finalproject.service.AuthService;
 import java.time.*;
 import java.util.*;
 import jakarta.persistence.EntityManager;
@@ -21,7 +21,7 @@ class PendingRegistrationSafetyTests {
         when(validator.validate(any(RegisterRequest.class))).thenReturn(Set.of());
         var encoder=new BCryptPasswordEncoder();
         var clock=Clock.fixed(Instant.parse("2026-10-21T17:01:00Z"),ZoneId.of("Asia/Bangkok"));
-        var auth=new AuthServiceImpl(mock(UserRepository.class),mock(OtpVerificationRepository.class),mock(CartRepository.class),
+        var auth=new AuthService(mock(UserRepository.class),mock(OtpVerificationRepository.class),mock(CartRepository.class),
                 mock(EmailService.class),encoder,validator,mock(EntityManager.class),clock);
         var request=new RegisterRequest();
         request.setUsername("pending-user"); request.setEmail("pending@test.local"); request.setPassword("safe-password");

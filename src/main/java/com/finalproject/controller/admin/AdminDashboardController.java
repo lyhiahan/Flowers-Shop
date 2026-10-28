@@ -81,7 +81,6 @@ public class AdminDashboardController {
             model.addAttribute("totalManagers", managers); model.addAttribute("totalVendors", managers);
             model.addAttribute("pendingOrders", orderRepository.count(createdOrders.and((r, q, cb) -> cb.equal(r.get("status"), OrderStatus.PENDING))));
             model.addAttribute("completedOrders", orderRepository.count(createdOrders.and((r, q, cb) -> cb.equal(r.get("status"), OrderStatus.COMPLETED))));
-            model.addAttribute("rentingOrders", orderRepository.count(createdOrders.and((r, q, cb) -> cb.equal(r.get("status"), OrderStatus.RENTING))));
             var pendingProducts = createdProducts.and((r, q, cb) -> cb.isFalse(r.get("isActive")));
             model.addAttribute("pendingProducts", productRepository.count(pendingProducts));
             model.addAttribute("pendingApprovalProducts", productRepository.findAll(pendingProducts, PageRequest.of(0, 10)).getContent());

@@ -104,7 +104,9 @@ public class DemoPaymentTunnel {
             } else if ("STARTING".equals(event.state())) {
                 connection = new Connection("STARTING", null, "Đang bật kết nối điện thoại…");
             } else if ("ERROR".equals(event.state())) {
-                connection = new Connection("ERROR", null, "Chưa kết nối được Internet cho điện thoại. Hệ thống đang thử lại…");
+                connection = new Connection("ERROR", null, "RATE_LIMITED".equals(event.code())
+                        ? "Dịch vụ kết nối đang giới hạn yêu cầu. Hệ thống sẽ tự thử lại sau…"
+                        : "Chưa kết nối được Internet cho điện thoại. Hệ thống đang thử lại…");
                 log.warn("Demo phone connection unavailable: {}", event.code());
             }
         } catch (RuntimeException ignored) {

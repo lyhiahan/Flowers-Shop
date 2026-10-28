@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<div id="product-catalog" class="card filter-card p-4 mb-4" style="scroll-margin-top: 85px;"
+             th:attr="data-stock-catalog=${loadError == null ? 'true' : null}"
+             th:data-stock-endpoint="${loadError == null} ? @{/api/public/catalog-stock(storeId=${storeId})} : null" th:fragment="catalog">
+            <small data-stock-status class="text-warning mb-2" role="status" hidden></small>
+
+            <!-- Breadcrumb điều hướng quay lại danh mục cha / trang chủ (Rubric 3-5c) -->
+            <nav aria-label="breadcrumb" class="mb-3" th:if="${selectedCategory != null or (keyword != null and !keyword.isEmpty())}">
+                <ol class="breadcrumb bg-light p-2 px-3 rounded-3 small mb-0 align-items-center">
+                    <li class="breadcrumb-item">
+                        <a th:href="@{/}" class="text-decoration-none fw-semibold" style="color: var(--flower-primary);">
+                            <i class="bi bi-house-door me-1"></i>Trang Chủ (Home)
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a th:href="@{/products} + '#product-catalog'" class="text-secondary text-decoration-none">
+                            Sản phẩm
+                        </a>
+                    </li>
+                    <!-- Category cha nếu có (3-5c. Chọn category cha ở breadcrumb để quay lại) -->
+                    <li th:if="${parentCategory != null}" class="breadcrumb-item">
+                        <a th:href="@{/products(categoryId=${parentCategory.id})} + '#product-catalog'"
+                           class="text-decoration-none fw-bold"
+                           style="color: var(--flower-accent);"
+                           th:text="${parentCategory.name}"
+                           id="breadcrumbParentCategory"
+                           title="Bấm để quay lại danh mục cha"></a>
+                    </li>
+                    <!-- Category đang chọn -->
+                    <li th:if="${selectedCategory != null}" class="breadcrumb-item active fw-bold text-dark" th:text="${selectedCategory.name}"></li>
+                    <li th:if="${keyword != null and !keyword.isEmpty()}" class="breadcrumb-item active fw-semibold" style="color: var(--flower-accent);" th:text="'Từ khóa: &quot;' + ${keyword} + '&quot;'"></li>
+                </ol>
+            </nav>
+
+            <!-- Banner hiển thị Category đã chọn và danh sách Category con (Rubric 3-5a & 3-5b) -->
+            <div th:if="${selectedCategory != null}" class="p-3 mb-4 rounded-4 border bg-white shadow-sm">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge rounded-circle p-2 d-inline-flex align-items-center justify-content-center" style="background-color: var(--flower-sub-bg); color: var(--flower-accent); width: 38px; height: 38px;">
+                            <i class="bi bi-grid-fill fs-6"></i>
+                        </span>
+                        <div>
+                            <h4 class="fw-bold mb-0" style="color: var(--flower-primary); font-size: 20px;">
+                                <span th:text="${selectedCategory.name}"></span>
+                                <span th:if="${parentCategory != null}" class="text-muted fw-normal fs-6">
+                                    (thuộc danh mục: <a th:href="@{/products(categoryId=${parentCategory.id})} + '#product-catalog'" class="text-decoration-none fw-semibold" style="color: var(--flower-accent);" th:text="${parentCategory.name}"></a>)
+                                </span>
+                            </h4>
+                            <p class="text-muted small mb-0" th:text="${selectedCategory.description != null ? selectedCategory.description : 'Danh sách sản phẩm thuộc danh mục ' + selectedCategory.name}"></p>
+                        </div>
+                    </div>
+                    <span class="badge px-3 py-2 rounded-pill bg-light text-secondary border">
+                        <span th:text="${totalItems != null ? totalItems : 0}">0</span> sản phẩm
+                    </span>
+                </div>
+
+                <!-- Danh sách Category con (Rubric 3-5a & 3-5b) -->
+                <div th:if="${not #lists.isEmpty(subCategories)}" class="pt-2 border-top mt-2">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="small fw-bold text-secondary flex-shrink-0">
+                            <i class="bi bi-diagram-3 me-1"></i> Danh mục con:
+                        </span>
+                        <a th:each="sub : ${subCategories}"
+                           th:href="@{/products(categoryId=${sub.id})} + '#product-catalog'"
+                           class="btn btn-sm rounded-pill px-3 py-1 sub-category-btn"
+                           th:classappend="${selectedCategory.id == sub.id} ? 'btn-flower-accent text-white fw-bold shadow-sm' : 'btn-outline-secondary'"
+                           th:text="${sub.name}"
+                           th:id="'sub-category-' + ${sub.id}">
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- TIÊU ĐỀ KẾT QUẢ & SỐ LƯỢNG SẢN PHẨM & SẮP XẾP (Quy chuẩn 2 & 4) -->
+            <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-3 pb-3 border-bottom">
+                <div>
+                    <!-- Tiêu đề chuẩn hóa: "Tất cả sản phẩm" / "Kết quả tìm kiếm: ‘...’" / "Bó hoa" / "Kết quả lọc sản phẩm" -->
+                    <h2 class="fw-bold mb-1" style="font-family: 'Nunito', sans-serif; color: var(--flower-primary); font-size: 24px;" th:text="${activeFilterTitle}">Tất cả sản phẩm</h2>
+                    <!-- Số lượng hiển thị: Tìm thấy 14 sản phẩm · Hiển thị 1–8 · Trang 1/2 -->
+                    <div class="text-secondary small fw-medium" id="catalogProductCount">
+                        <th:block th:if="${totalItems != null and totalItems > 0}">
+                            Tìm thấy <strong style="color: var(--flower-accent); font-size: 15px;" th:text="${totalItems}">14</strong> mẫu hoa &middot; Hiển thị <span th:text="${startIndex} + '–' + ${endIndex}">1–8</span> &middot; Trang <span th:text="${currentPage} + '/' + ${totalPages}">1/2</span>
+                        </th:block>
+                        <th:block th:if="${totalItems == null or totalItems == 0}">
+                            Tìm thấy <strong style="color: var(--flower-accent); font-size: 15px;">0</strong> mẫu hoa
+                        </th:block>
+                    </div>
+                </div>
+
+                <!-- Sắp xếp toàn bộ kết quả trước khi phân trang (Quy chuẩn 4) -->
+                <div class="d-flex align-items-center gap-2">
+                    <label for="catalogSortSelect" class="small text-secondary fw-semibold text-nowrap mb-0 d-none d-sm-inline">
+                        <i class="bi bi-arrow-down-up me-1" style="color: var(--flower-primary);"></i>Sắp xếp:
+                    </label>
+                    <select id="catalogSortSelect" class="form-select form-select-sm rounded-pill px-3 py-1 shadow-sm" style="min-width: 175px;" onchange="applyCatalogSort(this.value)">
+                        <option value="default" th:selected="${sort == null or sort == 'default'}">Mới nhất / Nổi bật</option>
+                        <option value="price_asc" th:selected="${sort == 'price_asc'}">Giá: Thấp → Cao</option>
+                        <option value="price_desc" th:selected="${sort == 'price_desc'}">Giá: Cao → Thấp</option>
+                        <option value="sold_desc" th:selected="${sort == 'sold_desc'}">Bán chạy nhất</option>
+                        <option value="rating_desc" th:selected="${sort == 'rating_desc'}">Đánh giá cao nhất</option>
+                        <option value="name_asc" th:selected="${sort == 'name_asc'}">Tên: A → Z</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- THANH BỘ LỌC (Quy chuẩn 3: Tất cả bộ lọc · Kiểu dáng · Loại hoa · Màu sắc · Dịp tặng · Giá) -->
+            <div class="d-flex align-items-center gap-2 flex-wrap" id="catalogFilterBar">
+                <!-- NÚT CHỌN NHANH DANH MỤC: [▦ Danh mục: Tất cả ▾] -->
+                <div class="position-relative d-inline-block" id="catalogCategoryDropdownWrapper">
+                    <button type="button"
+                            class="btn btn-category-picker d-inline-flex align-items-center gap-2"
+                            id="btnCategoryPicker"
+                            onclick="toggleFlowerMegaMenu(event, 'catalog')"
+                            aria-expanded="false"
+                            aria-controls="flowerMegaMenuPanel"
+                            title="Bấm để mở bảng chọn nhanh danh mục hoa">
+                        <i class="bi bi-grid-fill" style="color: var(--flower-accent); font-size: 16px;"></i>
+                        <span id="categoryPickerLabel"
+                              th:text="${(selectedCategory != null) ? 'Danh mục: ' + selectedCategory.name : 'Danh mục: Tất cả'}">
+                            Danh mục: Tất cả
+                        </span>
+                        <i class="bi bi-chevron-down ms-1" style="font-size: 13px;"></i>
+                    </button>
+                </div>
+
+                <!-- Nút Tất cả bộ lọc: mở bảng Offcanvas -->
+                <button class="btn btn-sm rounded-pill px-3 py-2 fw-semibold border d-inline-flex align-items-center gap-2"
+                        th:classappend="${hasAttributeFilters} ? 'btn-flower-accent text-white shadow-sm' : 'btn-light text-secondary'"
+                        type="button" data-bs-toggle="offcanvas" data-bs-target="#allFiltersOffcanvas"
+                        id="btnAllFilters">
+                    <i class="bi bi-sliders"></i>
+                    <span>Tất cả bộ lọc</span>
+                    <span th:if="${hasAttributeFilters}" class="badge bg-white text-danger rounded-pill">●</span>
+                </button>
+
+                <!-- Nút Kiểu dáng -->
+                <button class="btn btn-sm rounded-pill px-3 py-2 fw-semibold border d-inline-flex align-items-center gap-1"
+                        th:classappend="${flowerStyles != null and !flowerStyles.isEmpty()} ? 'btn-flower-accent text-white shadow-sm' : 'btn-light text-secondary'"
+                        type="button" data-bs-toggle="offcanvas" data-bs-target="#allFiltersOffcanvas" onclick="scrollToFilterGroup('filterGroupStyle')">
+                    <span>Kiểu dáng</span>
+                    <span th:if="${flowerStyles != null and !flowerStyles.isEmpty()}" class="badge bg-white text-danger rounded-pill" th:text="${#lists.size(flowerStyles)}"></span>
+                    <i class="bi bi-chevron-down ms-1" style="font-size: 11px;"></i>
+                </button>
+
+                <!-- Nút Loại hoa -->
+                <button class="btn btn-sm rounded-pill px-3 py-2 fw-semibold border d-inline-flex align-items-center gap-1"
+                        th:classappend="${flowerTypes != null and !flowerTypes.isEmpty()} ? 'btn-flower-accent text-white shadow-sm' : 'btn-light text-secondary'"
+                        type="button" data-bs-toggle="offcanvas" data-bs-target="#allFiltersOffcanvas" onclick="scrollToFilterGroup('filterGroupType')">
+                    <span>Loại hoa</span>
+                    <span th:if="${flowerTypes != null and !flowerTypes.isEmpty()}" class="badge bg-white text-danger rounded-pill" th:text="${#lists.size(flowerTypes)}"></span>
+                    <i class="bi bi-chevron-down ms-1" style="font-size: 11px;"></i>
+                </button>
+
+                <!-- Nút Màu sắc -->
+                <button class="btn btn-sm rounded-pill px-3 py-2 fw-semibold border d-inline-flex align-items-center gap-1"
+                        th:classappend="${flowerColors != null and !flowerColors.isEmpty()} ? 'btn-flower-accent text-white shadow-sm' : 'btn-light text-secondary'"
+                        type="button" data-bs-toggle="offcanvas" data-bs-target="#allFiltersOffcanvas" onclick="scrollToFilterGroup('filterGroupColor')">
+                    <span>Màu sắc</span>
+                    <span th:if="${flowerColors != null and !flowerColors.isEmpty()}" class="badge bg-white text-danger rounded-pill" th:text="${#lists.size(flowerColors)}"></span>
+                    <i class="bi bi-chevron-down ms-1" style="font-size: 11px;"></i>
+                </button>
+
+                <!-- Nút Dịp tặng -->
+                <button class="btn btn-sm rounded-pill px-3 py-2 fw-semibold border d-inline-flex align-items-center gap-1"
+                        th:classappend="${flowerOccasions != null and !flowerOccasions.isEmpty()} ? 'btn-flower-accent text-white shadow-sm' : 'btn-light text-secondary'"
+                        type="button" data-bs-toggle="offcanvas" data-bs-target="#allFiltersOffcanvas" onclick="scrollToFilterGroup('filterGroupOccasion')">
+                    <span>Dịp tặng</span>
+                    <span th:if="${flowerOccasions != null and !flowerOccasions.isEmpty()}" class="badge bg-white text-danger rounded-pill" th:text="${#lists.size(flowerOccasions)}"></span>
+                    <i class="bi bi-chevron-down ms-1" style="font-size: 11px;"></i>
+                </button>
+
+                <!-- Nút Giá -->
+                <button class="btn btn-sm rounded-pill px-3 py-2 fw-semibold border d-inline-flex align-items-center gap-1"
+                        th:classappend="${minPrice != null or maxPrice != null} ? 'btn-flower-accent text-white shadow-sm' : 'btn-light text-secondary'"
+                        type="button" data-bs-toggle="offcanvas" data-bs-target="#allFiltersOffcanvas" onclick="scrollToFilterGroup('filterGroupPrice')">
+                    <span>Giá</span>
+                    <span th:if="${minPrice != null or maxPrice != null}" class="badge bg-white text-danger rounded-pill">●</span>
+                    <i class="bi bi-chevron-down ms-1" style="font-size: 11px;"></i>
+                </button>
+            </div>
+
+            <!-- HÀNG RIÊNG: ĐANG LỌC (Quy chuẩn 2: Đang lọc: [Kiểu dáng: Bó hoa ×] ...) -->
+            <div th:if="${hasActiveFilter}" class="filter-active-bar mt-3 d-flex align-items-center gap-2 flex-wrap" id="activeFilterRow">
+                <span class="fw-bold text-dark me-1" style="font-size: 13.5px;">Đang lọc:</span>
+
+                <!-- Từ khóa -->
+                <span th:if="${keyword != null and !keyword.isEmpty()}" class="active-filter-badge">
+                    <span>Từ khóa: <strong th:text="'“' + ${keyword} + '”'"></strong></span>
+                    <button type="button" class="btn-remove-filter" onclick="removeKeywordFilter()" title="Bỏ từ khóa">×</button>
+                </span>
+
+                <!-- Danh mục nếu đang chọn -->
+                <span th:if="${selectedCategory != null}" class="active-filter-badge">
+                    <span>Danh mục: <strong th:text="${selectedCategory.name}"></strong></span>
+                    <button type="button" class="btn-remove-filter" onclick="removeCategoryFilter()" title="Bỏ lọc danh mục">×</button>
+                </span>
+
+                <!-- Kiểu dáng -->
+                <th:block th:if="${flowerStyles != null}">
+                    <span th:each="st : ${flowerStyles}" class="active-filter-badge filter-pill-tag">
+                        <span>Kiểu dáng: <strong th:text="${st}"></strong></span>
+                        <button type="button" class="btn-remove-filter" th:attr="data-group='flowerStyle',data-val=${st}" onclick="removeSingleFilter(this.getAttribute('data-group'), this.getAttribute('data-val'))" title="Bỏ điều kiện này">×</button>
+                    </span>
+                </th:block>
+
+                <!-- Loại hoa -->
+                <th:block th:if="${flowerTypes != null}">
+                    <span th:each="tp : ${flowerTypes}" class="active-filter-badge filter-pill-tag">
+                        <span>Loại hoa: <strong th:text="${tp}"></strong></span>
+                        <button type="button" class="btn-remove-filter" th:attr="data-group='flowerType',data-val=${tp}" onclick="removeSingleFilter(this.getAttribute('data-group'), this.getAttribute('data-val'))" title="Bỏ điều kiện này">×</button>
+                    </span>
+                </th:block>
+
+                <!-- Màu sắc -->
+                <th:block th:if="${flowerColors != null}">
+                    <span th:each="cl : ${flowerColors}" class="active-filter-badge filter-pill-tag">
+                        <span>Màu sắc: <strong th:text="${cl}"></strong></span>
+                        <button type="button" class="btn-remove-filter" th:attr="data-group='flowerColor',data-val=${cl}" onclick="removeSingleFilter(this.getAttribute('data-group'), this.getAttribute('data-val'))" title="Bỏ điều kiện này">×</button>
+                    </span>
+                </th:block>
+
+                <!-- Dịp tặng -->
+                <th:block th:if="${flowerOccasions != null}">
+                    <span th:each="oc : ${flowerOccasions}" class="active-filter-badge filter-pill-tag">
+                        <span>Dịp tặng: <strong th:text="${oc}"></strong></span>
+                        <button type="button" class="btn-remove-filter" th:attr="data-group='flowerOccasion',data-val=${oc}" onclick="removeSingleFilter(this.getAttribute('data-group'), this.getAttribute('data-val'))" title="Bỏ điều kiện này">×</button>
+                    </span>
+                </th:block>
+
+                <!-- Khoảng giá -->
+                <span th:if="${minPrice != null or maxPrice != null}" class="active-filter-badge">
+                    <span>Giá:
+                        <strong th:if="${minPrice != null and maxPrice != null}" th:text="${#numbers.formatDecimal(minPrice, 0, 'COMMA', 0, 'POINT')} + '–' + ${#numbers.formatDecimal(maxPrice, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></strong>
+                        <strong th:if="${minPrice != null and maxPrice == null}" th:text="'Từ ' + ${#numbers.formatDecimal(minPrice, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></strong>
+                        <strong th:if="${minPrice == null and maxPrice != null}" th:text="'Dưới ' + ${#numbers.formatDecimal(maxPrice, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></strong>
+                    </span>
+                    <button type="button" class="btn-remove-filter" onclick="removePriceFilter()" title="Bỏ lọc khoảng giá">×</button>
+                </span>
+
+                <!-- Đánh giá -->
+                <span th:if="${minRating != null}" class="active-filter-badge">
+                    <span>Đánh giá: <strong th:text="'★ ' + ${minRating} + ' trở lên'"></strong></span>
+                    <button type="button" class="btn-remove-filter" onclick="removeRatingFilter()" title="Bỏ lọc đánh giá">×</button>
+                </span>
+
+                <!-- Nút "Xóa bộ lọc": Bỏ các thuộc tính lọc, giữ từ khóa và danh mục đang xem -->
+                <button th:if="${hasAttributeFilters}" type="button" onclick="resetAttributeFiltersOnly()"
+                        class="btn btn-link btn-sm p-0 ms-2 text-decoration-none fw-bold"
+                        style="color: var(--flower-accent); font-size: 13.5px;"
+                        title="Bỏ các thuộc tính lọc, giữ từ khóa và danh mục đang xem">
+                    Xóa bộ lọc
+                </button>
+            </div>
+        </div>
+</body>
+</html>

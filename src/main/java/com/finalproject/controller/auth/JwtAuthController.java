@@ -1,7 +1,7 @@
 package com.finalproject.controller.auth;
 
 import com.finalproject.service.JwtTokenService;
-import com.finalproject.service.impl.CustomUserDetailsService;
+import com.finalproject.service.CustomUserDetailsService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

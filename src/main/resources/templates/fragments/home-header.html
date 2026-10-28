@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<header class="sticky-top shadow-sm" style="z-index: 1020;" th:fragment="header">
+
+
+
+        <!-- Dòng chính: Logo, Ô Tìm Kiếm, Giỏ Hàng & Tài Khoản TRÊN CÙNG MỘT HÀNG -->
+        <div class="header-main-bar">
+            <div class="container flower-container">
+                <div class="row align-items-center g-3">
+                    <!-- Logo -->
+                    <div class="col-lg-3 col-md-3 col-6">
+                        <a class="d-flex align-items-center text-decoration-none gap-2" th:href="@{/}">
+                            <img th:src="@{/images/flower-logo.png}" alt="Hoa Tươi Sài Gòn" class="brand-logo-img">
+                            <span class="brand-logo-text">HOA TƯƠI SÀI GÒN</span>
+                        </a>
+                    </div>
+
+                    <!-- Ô Tìm Kiếm -->
+                    <div class="col-lg-6 col-md-6 col-12 order-3 order-md-2">
+                        <form th:replace="~{fragments/floral :: search}"></form>
+                    </div>
+
+                    <!-- Giỏ Hàng + Tài Khoản (Trên cùng một hàng) -->
+                    <div
+                        class="storefront-header-actions col-lg-3 col-md-3 col-6 order-2 order-md-3 d-flex align-items-center justify-content-end gap-3">
+                        <!-- Following shortcut -->
+
+                        <a sec:authorize="hasRole('USER')" th:href="@{/following}" class="header-cart-link" id="navFollowingHeader" title="Bộ sưu tập theo dõi">
+
+                            <i class="bi bi-bookmark-heart"></i>
+                        </a>
+
+                        <!-- Giỏ hàng -->
+                        <a sec:authorize="hasRole('USER')" th:href="@{/cart}" class="header-cart-link" id="headerCartLink"
+                            title="Giỏ hoa của bạn" aria-label="Giỏ hàng">
+                            <i class="bi bi-cart3"></i>
+                            <span id="headerCartBadge" class="cart-badge-pill" aria-live="polite" aria-atomic="true"
+                                th:style="${cartItemCount == null or cartItemCount == 0} ? 'display:none' : ''"
+                                th:text="${cartItemCount != null ? cartItemCount : 0}">0</span>
+                        </a>
+
+                        <!-- Chuông thông báo -->
+                        <div sec:authorize="isAuthenticated()" class="dropdown notif-dropdown-wrapper">
+                            <a class="header-cart-link position-relative border-0 bg-transparent dropdown-toggle no-caret" th:href="@{/notifications}" id="notifBellDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Thông báo hệ thống" aria-label="Thông báo">
+                                <i class="bi bi-bell"></i>
+                                <span id="headerNotifBadge" class="cart-badge-pill" style="display:none;">0</span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-0 notif-dropdown-menu" style="min-width: 320px; max-width: 380px; overflow: hidden; z-index: 1055;" aria-labelledby="notifBellDropdown">
+                                <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0 fw-bold"><i class="bi bi-bell me-2 text-danger"></i>Thông báo</h6>
+                                    <button id="headerMarkAllReadBtn" class="btn btn-link btn-sm text-decoration-none p-0 text-muted small" style="font-size: 12px;">Đã đọc tất cả</button>
+                                </div>
+                                <div id="headerNotifList" class="notif-dropdown-list" style="max-height: 320px; overflow-y: auto;">
+                                    <div class="p-3 text-center text-muted small">Đang tải thông báo...</div>
+                                </div>
+                                <div class="p-2 bg-light border-top text-center">
+                                    <a th:href="@{/notifications}" class="text-decoration-none small fw-semibold text-danger">Xem tất cả thông báo <i class="bi bi-arrow-right ms-1"></i></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dropdown Tài khoản Tinh Gọn -->
+                        <div sec:authorize="isAuthenticated()" class="dropdown">
+                            <button class="account-pill-btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                                id="accountDropdown" title="Tài khoản" aria-label="Tài khoản">
+                                <i class="bi bi-person-circle fs-6"></i>
+                                <span class="d-none d-sm-inline">Tài khoản</span>
+                            </button>
+
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border border-light-subtle rounded-3 py-2" style="min-width: 250px;">
+                                <!-- Header: Tên tài khoản + Nhãn Vai trò (Xanh nhạt) + Trạng thái chế độ -->
+                                <li class="px-3 py-2 border-bottom mb-2 bg-light bg-opacity-50">
+                                    <div class="d-flex align-items-center justify-content-between gap-2">
+                                        <span class="fw-bold text-dark text-truncate" sec:authentication="name" style="font-size: 15px;">admin</span>
+                                        <!-- Nhãn vai trò chuẩn: nền xanh nhạt, chữ xanh đậm cho Admin -->
+                                        <span class="badge rounded-pill" style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="hasRole('ADMIN')">
+                                            Quản trị viên
+                                        </span>
+                                        <span class="badge rounded-pill" style="background-color: #E3F2FD; color: #1565C0; border: 1px solid #BBDEFB; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')">
+                                            Quản lý chi nhánh
+                                        </span>
+                                        <span class="badge rounded-pill" style="background-color: #FFF3E0; color: #E65100; border: 1px solid #FFE0B2; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="hasRole('STAFF') and !hasAnyRole('ADMIN', 'MANAGER')">
+                                            Nhân viên cửa hàng
+                                        </span>
+                                        <span class="badge rounded-pill" style="background-color: #F5F5F5; color: #424242; border: 1px solid #E0E0E0; font-size: 11.5px; font-weight: 700; padding: 4px 10px;" sec:authorize="!hasAnyRole('ADMIN', 'MANAGER', 'STAFF')">
+                                            Khách hàng
+                                        </span>
+                                    </div>
+                                    <div sec:authorize="hasRole('ADMIN')" class="mt-1 d-flex align-items-center gap-1.5" style="font-size: 12.5px; color: #20382E; font-weight: 700;">
+                                        <i class="bi bi-shield-check text-success" style="font-size: 12px;"></i>
+                                        <span>Chế độ quản trị viên (Xem website)</span>
+                                    </div>
+                                    <div sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')" class="mt-1 d-flex align-items-center gap-1.5" style="font-size: 12.5px; color: #20382E; font-weight: 700;">
+                                        <i class="bi bi-shop text-success" style="font-size: 12px;"></i>
+                                        <span>Chế độ quản lý chi nhánh (Xem website)</span>
+                                    </div>
+                                    <div sec:authorize="!hasAnyRole('ADMIN', 'MANAGER', 'STAFF')" class="mt-1 d-flex align-items-center gap-1.5" style="font-size: 12.5px; color: #2E7D32; font-weight: 600;">
+                                        <i class="bi bi-check-circle-fill text-success" style="font-size: 11px;"></i>
+                                        <span>Đang ở chế độ mua hàng</span>
+                                    </div>
+                                </li>
+
+                                <!-- Nút Vào trang quản trị (Nổi bật cho Admin) -->
+                                <li sec:authorize="hasRole('ADMIN')" class="px-2 mb-2">
+                                    <a th:href="@{/admin/dashboard}" class="btn btn-sm w-100 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
+                                       style="background-color: #20382E; color: #FFFFFF; border-radius: 8px; padding: 7px 12px; font-size: 13.5px; text-decoration: none;">
+                                        <i class="bi bi-speedometer2"></i>
+                                        <span>Vào trang quản trị</span>
+                                    </a>
+                                </li>
+
+                                <!-- Nút Kênh Quản lý cửa hàng (Nổi bật cho Manager) -->
+                                <li sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')" class="px-2 mb-2">
+                                    <a th:href="@{/manager/dashboard}" class="btn btn-sm w-100 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
+                                       id="navManagerDashboardDropdown"
+                                       style="background-color: #20382E; color: #FFFFFF; border-radius: 8px; padding: 7px 12px; font-size: 13.5px; text-decoration: none;">
+                                        <i class="bi bi-speedometer2"></i>
+                                        <span>Vào kênh quản lý cửa hàng</span>
+                                    </a>
+                                </li>
+
+                                <!-- Nút Shop Manager (cho Vendor) -->
+                                <li sec:authorize="hasRole('STAFF') and !hasAnyRole('ADMIN', 'MANAGER')" class="px-2 mb-2">
+                                    <a th:href="@{/staff/orders}" class="btn btn-sm w-100 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
+                                       id="navStaffOrdersDropdown"
+                                       style="background-color: #20382E; color: #FFFFFF; border-radius: 8px; padding: 7px 12px; font-size: 13.5px; text-decoration: none;">
+                                        <i class="bi bi-shop-window"></i>
+                                        <span>Bàn làm việc nhân viên</span>
+                                    </a>
+                                </li>
+
+                                <!-- Hồ sơ cá nhân -->
+                                <li sec:authorize="!hasRole('STAFF')">
+                                    <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/customer/profile}">
+                                        <i class="bi bi-person text-secondary"></i>
+                                        <span>Hồ sơ cá nhân</span>
+                                    </a>
+                                </li>
+
+                                <!-- Phím tắt nhanh dành cho Quản lý chi nhánh -->
+                                <li sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')">
+                                    <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/manager/orders}">
+                                        <i class="bi bi-receipt text-success"></i>
+                                        <span>Đơn hàng chi nhánh</span>
+                                    </a>
+                                </li>
+                                <li sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')">
+                                    <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/manager/products}">
+                                        <i class="bi bi-flower1 text-success"></i>
+                                        <span>Sản phẩm chi nhánh</span>
+                                    </a>
+                                </li>
+                                <li sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')">
+                                    <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/manager/wallet}">
+                                        <i class="bi bi-coin text-warning"></i>
+                                        <span>Ví cửa hàng</span>
+                                    </a>
+                                </li>
+
+                                <!-- Đơn hàng của tôi (Khách hàng) -->
+                                <li sec:authorize="hasRole('USER')">
+                                    <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/customer/orders}">
+                                        <i class="bi bi-bag-check text-secondary"></i>
+                                        <span>Đơn hàng của tôi</span>
+                                    </a>
+                                </li>
+
+                                <li sec:authorize="hasRole('USER')">
+                                    <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/customer/wallet}"><i class="bi bi-wallet2 text-secondary" aria-hidden="true"></i><span>Ví của tôi</span></a>
+                                </li>
+                                <th:block th:replace="~{fragments/chat-widget :: system-chat-link}"></th:block>
+                                <!-- Thông báo của tôi -->
+                                <li>
+                                    <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/notifications}">
+                                        <i class="bi bi-bell text-secondary"></i>
+                                        <span>Thông báo của tôi</span>
+                                    </a>
+                                </li>
+
+                                <!-- Yêu thích -->
+                                <li sec:authorize="hasRole('USER')">
+                                    <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/customer/wishlist}">
+                                        <i class="bi bi-heart text-danger"></i>
+                                        <span>Yêu thích</span>
+                                    </a>
+                                </li>
+
+
+
+                                <li><hr class="dropdown-divider my-1"></li>
+
+                                <!-- Đăng xuất -->
+                                <li>
+                                    <button type="button" class="dropdown-item py-2 text-danger small fw-semibold d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#signOutModal" id="btnSignOut">
+                                        <i class="bi bi-box-arrow-right"></i>
+                                        <span>Đăng xuất</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Khách chưa đăng nhập -->
+                        <div sec:authorize="!isAuthenticated()" class="d-flex align-items-center gap-2">
+                            <a th:href="@{/login}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">Đăng
+                                Nhập</a>
+                            <a th:href="@{/register}" class="btn btn-flower-primary btn-sm rounded-pill px-3">Đăng
+                                Ký</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dòng Thanh Điều Hướng Tinh Gọn: Danh mục hoa · Tất cả mẫu hoa · Danh mục chính · Bán chạy · Cửa hàng · Kênh Quản lý -->
+        <div class="nav-categories-bar position-relative">
+            <div class="container flower-container">
+                <div class="d-flex align-items-center justify-content-start gap-4 flex-wrap">
+
+                    <!-- 1. Nút Danh Mục Hoa ở đầu (mở Mega-Menu đầy đủ 3 nhóm) -->
+                    <div class="position-relative d-inline-block" id="navbarCategoryDropdownWrapper">
+                        <button type="button"
+                                id="btnFlowerMegaMenu"
+                                class="btn-mega-menu-trigger"
+                                onclick="toggleFlowerMegaMenu(event, 'navbar')"
+                                aria-expanded="false"
+                                aria-controls="flowerMegaMenuPanel"
+                                title="Mở bảng danh mục hoa đầy đủ (Kiểu dáng, Dịp tặng, Loại hoa)">
+                            <i class="bi bi-grid-fill me-1"></i>
+                            <span>Danh mục hoa</span>
+                            <i class="bi bi-chevron-down ms-1" style="font-size: 13px;"></i>
+                        </button>
+                    </div>
+
+                    <!-- 2. Tất cả mẫu hoa -->
+                    <a th:href="@{/products} + '#product-catalog'"
+                       class="cat-nav-link"
+                       th:classappend="${(categoryId == null or categoryId == 0) and (keyword == null or keyword.isEmpty()) and (tab == null or tab != 'bestseller')} ? 'active' : ''">
+                        Tất cả mẫu hoa
+                    </a>
+
+                    <!-- 3. Danh mục hệ thống chính (Hiển thị tối đa 4 danh mục gốc để thanh điều hướng luôn gọn đẹp 1 hàng) -->
+                    <th:block th:if="${discoverCategories != null and not #lists.isEmpty(discoverCategories)}">
+                        <a th:each="cat, iterStat : ${discoverCategories}"
+                           th:if="${iterStat.index < 4}"
+                           th:href="@{/products(categoryId=${cat.id})} + '#product-catalog'"
+                           class="cat-nav-link"
+                           th:classappend="${selectedCategory != null and selectedCategory.id == cat.id} ? 'active' : ''"
+                           th:text="${cat.name}">
+                        </a>
+                    </th:block>
+
+                    <!-- 4. Bán chạy (cuộn nhanh đến mục hoa bán chạy) -->
+                    <a th:href="@{/#best-seller}"
+                       class="cat-nav-link"
+                       th:classappend="${tab == 'bestseller'} ? 'active' : ''">
+                        <i class="bi bi-fire me-1 text-danger"></i>Bán chạy
+                    </a>
+
+                    <!-- 5. Cửa hàng -->
+                    <a th:href="@{/stores}"
+                       class="cat-nav-link">
+                        <i class="bi bi-shop me-1 text-success"></i>Cửa hàng
+                    </a>
+
+                    <!-- 6. Kênh Quản trị / Quản lý theo từng vai trò -->
+                    <a sec:authorize="hasRole('ADMIN')"
+                       th:href="@{/admin/dashboard}"
+                       class="cat-nav-link fw-bold" id="navAdminNav"
+                       style="color: var(--flower-primary);"
+                       title="Chuyển đến trang quản trị hệ thống">
+                        <i class="bi bi-speedometer2 me-1 text-success"></i>Trang quản trị
+                    </a>
+                    <a sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')"
+                       th:href="@{/manager/dashboard}"
+                       class="cat-nav-link fw-bold" id="navManagerNav"
+                       style="color: var(--flower-primary);"
+                       title="Chuyển đến kênh quản lý chi nhánh cửa hàng">
+                        <i class="bi bi-shop me-1 text-success"></i>Kênh Quản Lý
+                    </a>
+                    <a sec:authorize="hasRole('STAFF') and !hasAnyRole('ADMIN', 'MANAGER')"
+                       th:href="@{/staff/orders}"
+                       class="cat-nav-link fw-semibold" id="navStaffNav"
+                       title="Chuyển đến bàn làm việc nhân viên">
+                        <i class="bi bi-shop-window me-1 text-primary"></i>Nhân viên cửa hàng
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- BẢNG DANH MỤC HOA (MEGA-MENU PANEL) -->
+        <div class="flower-mega-menu-backdrop" id="flowerMegaMenuBackdrop" onclick="closeFlowerMegaMenu()"></div>
+        <div class="flower-mega-menu-panel" id="flowerMegaMenuPanel" role="dialog" aria-modal="true" aria-labelledby="megaMenuTitle">
+            <!-- Đầu bảng: Tiêu đề + Ô tìm kiếm tức thì -->
+            <div class="mega-menu-header">
+                <h3 class="mega-menu-title" id="megaMenuTitle">
+                    <i class="bi bi-grid-fill" style="color: var(--flower-accent); font-size: 19px;"></i>
+                    <span>Tìm theo danh mục</span>
+                </h3>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="mega-menu-search-box">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text" id="megaMenuSearchInput" placeholder="Tìm danh mục..." oninput="filterMegaMenu(this.value)" autocomplete="off">
+                    </div>
+                    <button type="button" class="btn-close d-md-none" onclick="closeFlowerMegaMenu()" aria-label="Đóng"></button>
+                </div>
+            </div>
+
+            <!-- 3 Nhóm Chuyển Đổi (Tabs): Kiểu dáng · Dịp tặng · Loại hoa -->
+            <div class="mega-menu-nav-tabs" role="tablist">
+                <button type="button" class="mega-tab-btn active" id="tabBtnKieuDang" onclick="switchMegaTab('paneKieuDang', this)" role="tab" aria-selected="true">
+                    Kiểu dáng
+                </button>
+                <button type="button" class="mega-tab-btn" id="tabBtnDipTang" onclick="switchMegaTab('paneDipTang', this)" role="tab" aria-selected="false">
+                    Dịp tặng
+                </button>
+                <button type="button" class="mega-tab-btn" id="tabBtnLoaiHoa" onclick="switchMegaTab('paneLoaiHoa', this)" role="tab" aria-selected="false">
+                    Loại hoa
+                </button>
+            </div>
+
+            <!-- Vùng Danh Mục Các Ô Hình Ảnh -->
+            <div class="mega-menu-body"><div class="mega-tab-pane active" id="paneKieuDang" role="tabpanel"><div class="mega-catalog-grid">
+    <a th:each="value : ${catalogAttributeGroups['Kiểu dáng']}" th:href="@{/products(flowerStyle=${value.name})} + '#product-catalog'" class="mega-cat-card" th:data-name="${value.name}" onclick="closeFlowerMegaMenu()">
+        <img class="mega-cat-thumb" th:src="${#strings.containsIgnoreCase(value.name, 'kệ') ? '/images/ke_hoa_stand.jpg' : (#strings.containsIgnoreCase(value.name, 'bình') ? '/images/binh_hoa_vase.jpg' : '/images/gio_hoa_basket.jpg')}" th:alt="${value.name}" loading="lazy"><span class="mega-cat-name" th:text="${value.name}"></span>
+    </a></div><p th:if="${#lists.isEmpty(catalogAttributeGroups['Kiểu dáng'])}" class="text-muted p-3">Chưa có lựa chọn trong nhóm này.</p></div><div class="mega-tab-pane" id="paneDipTang" role="tabpanel"><div class="mega-catalog-grid">
+    <a th:each="value : ${catalogAttributeGroups['Dịp tặng']}" th:href="@{/products(flowerOccasion=${value.name})} + '#product-catalog'" class="mega-cat-card" th:data-name="${value.name}" onclick="closeFlowerMegaMenu()">
+        <img class="mega-cat-thumb" th:src="${#strings.containsIgnoreCase(value.name, 'kệ') ? '/images/ke_hoa_stand.jpg' : (#strings.containsIgnoreCase(value.name, 'bình') ? '/images/binh_hoa_vase.jpg' : '/images/gio_hoa_basket.jpg')}" th:alt="${value.name}" loading="lazy"><span class="mega-cat-name" th:text="${value.name}"></span>
+    </a></div><p th:if="${#lists.isEmpty(catalogAttributeGroups['Dịp tặng'])}" class="text-muted p-3">Chưa có lựa chọn trong nhóm này.</p></div><div class="mega-tab-pane" id="paneLoaiHoa" role="tabpanel"><div class="mega-catalog-grid">
+    <a th:each="value : ${catalogAttributeGroups['Loại hoa']}" th:href="@{/products(flowerType=${value.name})} + '#product-catalog'" class="mega-cat-card" th:data-name="${value.name}" onclick="closeFlowerMegaMenu()">
+        <img class="mega-cat-thumb" th:src="${#strings.containsIgnoreCase(value.name, 'kệ') ? '/images/ke_hoa_stand.jpg' : (#strings.containsIgnoreCase(value.name, 'bình') ? '/images/binh_hoa_vase.jpg' : '/images/gio_hoa_basket.jpg')}" th:alt="${value.name}" loading="lazy"><span class="mega-cat-name" th:text="${value.name}"></span>
+    </a></div><p th:if="${#lists.isEmpty(catalogAttributeGroups['Loại hoa'])}" class="text-muted p-3">Chưa có lựa chọn trong nhóm này.</p></div></div>
+            <!-- Chân bảng: Bỏ dòng quảng cáo cuối menu để tiết kiệm chiều cao; giữ “Xem tất cả sản phẩm →” -->
+            <div class="mega-menu-footer">
+                <a th:href="@{/products} + '#product-catalog'" class="mega-footer-link" onclick="closeFlowerMegaMenu()">
+                    <span>Xem tất cả sản phẩm</span>
+                    <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+</body>
+</html>

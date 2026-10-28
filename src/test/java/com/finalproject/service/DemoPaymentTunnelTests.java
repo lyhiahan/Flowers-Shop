@@ -70,6 +70,16 @@ class DemoPaymentTunnelTests {
         service.stop();
     }
 
+    @Test void rateLimitRevokesQrAndExplainsTheAutomaticRetry() {
+        var service = new DemoPaymentTunnel(environment("aiven"));
+        service.acceptEvent("{\"state\":\"READY\",\"url\":\"https://phone.trycloudflare.com\"}");
+        service.acceptEvent("{\"state\":\"ERROR\",\"code\":\"RATE_LIMITED\"}");
+        assertThat(service.connection().state()).isEqualTo("ERROR");
+        assertThat(service.connection().baseUrl()).isNull();
+        assertThat(service.connection().message()).contains("giới hạn", "tự thử lại");
+        service.stop();
+    }
+
     @Test void missingToolsProduceAnActionableErrorWithoutFailingWebsiteStartup() {
         var service = new DemoPaymentTunnel(environment("dev"));
         service.start();

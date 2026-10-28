@@ -1,14 +1,114 @@
 package com.finalproject.service;
 
 import com.finalproject.entity.Notification;
+import com.finalproject.entity.Store;
 import com.finalproject.entity.User;
+import com.finalproject.repository.NotificationRepository;
+import com.finalproject.repository.StoreRepository;
+import com.finalproject.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
-public interface NotificationService {
-    Notification sendNotification(User user, String title, String content, String type, Long relatedOrderId);
-    void sendNotificationToStoreManagers(Long storeId, String title, String content, String type, Long relatedOrderId);
-    List<Notification> getUserNotifications(Long userId);
-    long getUnreadCount(Long userId);
-    void markAsRead(Long notificationId, Long userId);
-    void markAllAsRead(Long userId);
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class NotificationService {
+
+    private final NotificationRepository notificationRepository;
+    private final UserRepository userRepository;
+    private final StoreRepository storeRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final com.finalproject.service.NotificationNavigationResolver navigationResolver;
+
+    @Transactional
+    public Notification sendNotification(User user, String title, String content, String type, Long relatedOrderId) {
+        if (user == null) return null;
+        Notification notif = Notification.builder()
+                .user(user)
+                .title(title)
+                .content(content)
+                .type(type != null ? type : "SYSTEM")
+                .relatedOrderId(relatedOrderId)
+                .isRead(false)
+                .createdAt(LocalDateTime.now())
+                .build();
+        Notification saved = notificationRepository.save(notif);
+        String targetUrl = navigationResolver != null ? navigationResolver.resolveTargetUrl(user, saved.getId(), saved.getRelatedOrderId()) : null;
+        saved.setTargetUrl(targetUrl);
+        var event = com.finalproject.dto.response.NotificationEvent.from(saved, targetUrl);
+
+        Runnable publish = () -> {
+            try { messagingTemplate.convertAndSend("/topic/user/" + user.getId() + "/notifications", event); }
+            catch (Exception ex) { log.debug("WebSocket push notification bypassed: {}", ex.getMessage()); }
+        };
+        if (org.springframework.transaction.support.TransactionSynchronizationManager.isSynchronizationActive()) {
+            org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+                    new org.springframework.transaction.support.TransactionSynchronization() {
+                         public void afterCommit() { publish.run(); }
+                    });
+        } else publish.run();
+        return saved;
+    }
+
+    @Transactional
+    public void sendNotificationToStoreManagers(Long storeId, String title, String content, String type, Long relatedOrderId) {
+        if (storeId == null) return;
+        Store store = storeRepository.findById(storeId).orElse(null);
+        if (store == null) return;
+
+        // Gửi cho chủ cửa hàng
+        if (store.getOwner() != null) {
+            sendNotification(store.getOwner(), title, content, type, relatedOrderId);
+        }
+
+        // Gửi cho tất cả nhân viên / quản lý trực thuộc chi nhánh
+        List<User> storeStaff = userRepository.findByStoreId(storeId);
+        for (User u : storeStaff) {
+            if (store.getOwner() == null || !u.getId().equals(store.getOwner().getId())) {
+                sendNotification(u, title, content, type, relatedOrderId);
+            }
+        }
+    }
+
+    public List<Notification> getUserNotifications(Long userId) {
+        List<Notification> list = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        if (navigationResolver != null && !list.isEmpty()) {
+            User user = userRepository.findById(userId).orElse(null);
+            for (Notification n : list) {
+                n.setTargetUrl(navigationResolver.resolveTargetUrl(user, n.getId(), n.getRelatedOrderId()));
+            }
+        }
+        return list;
+    }
+
+    public long getUnreadCount(Long userId) {
+        return notificationRepository.countByUserIdAndIsReadFalse(userId);
+    }
+
+    @Transactional
+    public void markAsRead(Long notificationId, Long userId) {
+        notificationRepository.findById(notificationId).ifPresent(n -> {
+            if (n.getUser() != null && n.getUser().getId().equals(userId)) {
+                n.setIsRead(true);
+                notificationRepository.save(n);
+            }
+        });
+    }
+
+    @Transactional
+    public void markAllAsRead(Long userId) {
+        List<Notification> list = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        for (Notification n : list) {
+            if (!Boolean.TRUE.equals(n.getIsRead())) {
+                n.setIsRead(true);
+            }
+        }
+        notificationRepository.saveAll(list);
+    }
 }

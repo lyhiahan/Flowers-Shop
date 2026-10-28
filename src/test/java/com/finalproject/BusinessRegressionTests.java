@@ -587,7 +587,7 @@ class BusinessRegressionTests {
         User created = users.findByUsername(request.getUsername()).orElseThrow();
         assertThat(created.getRole()).isEqualTo(Role.USER); assertThat(created.getIsActive()).isTrue();
         assertThat(created.getPhone()).isEqualTo(customer.getPhone());
-        var detailsService = new com.finalproject.service.impl.CustomUserDetailsService(users);
+        var detailsService = new com.finalproject.service.CustomUserDetailsService(users);
         assertThat(detailsService.loadUserByUsername(created.getEmail()).getUsername()).isEqualTo(created.getUsername());
         assertThatThrownBy(() -> detailsService.loadUserByUsername(created.getPhone()))
                 .isInstanceOf(org.springframework.security.core.userdetails.UsernameNotFoundException.class);

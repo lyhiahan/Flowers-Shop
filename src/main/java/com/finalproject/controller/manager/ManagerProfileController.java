@@ -50,7 +50,7 @@ public class ManagerProfileController {
 
     /**
      * Main Flow – Cập nhật ảnh đại diện cửa hàng.
-     * Validation định dạng/kích thước được thực hiện trong CloudinaryServiceImpl.
+     * Validation định dạng/kích thước được thực hiện trong CloudinaryService.
      */
     @PostMapping("/avatar")
     public String updateAvatar(Principal principal,

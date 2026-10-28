@@ -21,10 +21,10 @@ import static org.mockito.Mockito.*;
 class CheckoutPhoneValidationTests {
 
     @Test
-    @DisplayName("Kiểm tra logic làm sạch và regex số điện thoại trong OrderServiceImpl")
+    @DisplayName("Kiểm tra logic làm sạch và regex số điện thoại trong OrderService")
     void testPhoneSanitizationAndValidationLogic() throws Exception {
-        Class<?> orderServiceImplClass = Class.forName("com.finalproject.service.impl.OrderServiceImpl");
-        Object instance = mock(com.finalproject.service.impl.OrderServiceImpl.class);
+        Class<?> orderServiceImplClass = Class.forName("com.finalproject.service.OrderService");
+        Object instance = mock(com.finalproject.service.OrderService.class);
 
         Method cleanPhoneMethod = orderServiceImplClass.getDeclaredMethod("cleanPhone", String.class);
         cleanPhoneMethod.setAccessible(true);

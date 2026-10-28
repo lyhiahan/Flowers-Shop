@@ -167,8 +167,7 @@ public class CartController {
                 m.put("quantity", q);
                 m.put("stock", availability.stock());
                 m.put("paused", availability.paused());
-                m.put("subtotal", it.getOrderType() == com.finalproject.enums.OrderType.BUY ? it.getBuyAmount() : it.getRentAmount());
-                m.put("deposit", it.getDepositAmount());
+                m.put("subtotal", it.getBuyAmount());
                 m.put("total", it.getTotalAmount());
                 items.add(m);
             }
@@ -184,7 +183,7 @@ public class CartController {
     private CartAvailability availabilityFor(com.finalproject.entity.CartItem item) {
         var product = item.getProduct();
         var store = item.getStore();
-        if (store == null || !com.finalproject.service.ProductAvailability.supportsBranch(product, store)
+        if (item.getOrderType() != com.finalproject.enums.OrderType.BUY || store == null || !com.finalproject.service.ProductAvailability.supportsBranch(product, store)
                 || !com.finalproject.service.ProductAvailability.isPublic(product)
                 || !Boolean.TRUE.equals(store.getStatus()) || !Boolean.TRUE.equals(store.getIsOpen())) {
             return new CartAvailability(0, true);

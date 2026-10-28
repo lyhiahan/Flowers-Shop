@@ -506,3 +506,13 @@ Triển khai thành Đơn hàng, Chi tiết đơn, Chuẩn bị hoa, Giao & nh�
 
 - Yêu cầu: “nâng cấp database lên tài khoản quản trị”. Xác nhận phạm vi: “Cả tv_thanhtai và tv_quocanh”.
 - Đã cấp db_owner cho hai tài khoản trong RentalShop và kiểm tra tư cách thành viên thành công. Không cấp sysadmin trên SQL Server; giữ nguyên mật khẩu. Hai tài khoản có quyền tạo/sửa/xóa bảng và dữ liệu, chạy migration trong RentalShop.
+
+
+### Bổ sung prompt — thử kết nối Aiven (26/10/2026)
+
+- Yêu cầu: đồng đội đã cấu hình cloud, muốn thử trên máy với tài khoản database được cấp; kèm hướng dẫn, chứng chỉ CA và Cloudflare. Không ghi mật khẩu vào tài liệu.
+- Đã cập nhật code fast-forward tới c61c466, chuẩn bị CA và Cloudflare có chữ ký hợp lệ trong .tools (Git bỏ qua).
+- Kiểm tra chỉ đọc bằng JDBC PostgreSQL, sslmode=verify-full: máy chủ trả SQLSTATE 28P01 (từ chối tài khoản/mật khẩu). Chưa lưu .env.aiven, chưa chạy ứng dụng với cloud, chưa nhập dữ liệu hay chạy migration trên cloud. Cần người phụ trách xác nhận đúng dịch vụ và mật khẩu hiện tại trước khi tiếp tục.
+
+- Kiểm tra lại ngày 26/10/2026 sau khi người dùng cấp mật khẩu hiện tại: đăng nhập PostgreSQL và TLS verify-full thành công; đã lưu .env.aiven với ACL riêng, chuẩn bị CA/Cloudflare và đường dẫn Node cục bộ. Không ghi mật khẩu vào tài liệu.
+- Phiên smoke riêng trên 8081 dùng kết nối PostgreSQL read-only, không migration/seed/đơn hết hạn: đăng nhập khách demo và đọc trang chủ, sản phẩm, giỏ, ví, lọc ví theo ngày, đơn hàng đều trả HTTP 200. Số bản ghi và tổng số dư ví trước/sau không đổi. Đã dừng phiên test. Cloudflare còn lỗi DNS ENOTFOUND, chưa xác nhận luồng QR điện thoại.

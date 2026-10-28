@@ -6,7 +6,7 @@ import com.finalproject.entity.*;
 import com.finalproject.enums.*;
 import com.finalproject.repository.*;
 import com.finalproject.security.*;
-import com.finalproject.service.impl.*;
+import com.finalproject.service.*;
 import java.util.*;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -39,7 +39,7 @@ class SecurityRemediationTests {
             var config = config(mode, "dev", "prod");
             assertThat(config.isEnabled()).isFalse();
             if (!mode.equals("disabled")) assertThatThrownBy(config::validate).hasMessageContaining("Production");
-            var service = new MomoServiceImpl(config, null, null, null, null, null, null, null, null);
+            var service = new MomoService(config, null, null, null, null, null, null, null, null);
             assertThatThrownBy(() -> service.simulatePayment(1L, "customer")).isInstanceOf(IllegalStateException.class);
             assertThatThrownBy(() -> service.createPaymentUrl(null, null)).isInstanceOf(IllegalStateException.class);
         }
@@ -47,7 +47,7 @@ class SecurityRemediationTests {
     }
 
     @Test void backendCheckoutRejectsMomoInProductionBeforeCreatingOrdersOrLockingStock() {
-        var service = mock(OrderServiceImpl.class, CALLS_REAL_METHODS);
+        var service = mock(OrderService.class, CALLS_REAL_METHODS);
         ReflectionTestUtils.setField(service, "momoConfig", config("disabled", "prod"));
         assertThatThrownBy(() -> service.checkout("customer", List.of(1L), PaymentMethod.MOMO))
                 .isInstanceOf(IllegalStateException.class).hasMessageContaining("MoMo thử nghiệm");

@@ -69,10 +69,12 @@ public class Product {
     private BigDecimal priceBuy; // Giá bán đứt
 
     @Column(nullable = false)
-    private BigDecimal priceRentPerDay; // Giá thuê theo ngày
+    // Legacy database field: retained for historical records; never used by flower checkout.
+    private BigDecimal priceRentPerDay;
 
     @Column(nullable = false)
-    private BigDecimal depositFee; // Tiền cọc tối thiểu khi thuê
+    // Legacy database field: retained for historical records; never used by flower checkout.
+    private BigDecimal depositFee;
 
     @Column(name = "promotional_price")
     private BigDecimal promotionalPrice;

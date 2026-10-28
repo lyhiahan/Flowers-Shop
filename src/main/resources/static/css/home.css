@@ -1,0 +1,1217 @@
+:root {
+    /* 1. Nền toàn trang: Kem ấm #FFF0F3 */
+    --flower-bg: #FFF0F3;
+
+    /* 2. Header và thẻ sản phẩm, ô tìm kiếm: Trắng ngà #FFFCF8 */
+    --flower-surface: #FFFCF8;
+    --flower-border: #E7DED4;
+    --flower-border-hover: #DDD3C8;
+
+    /* 3. Logo, tiêu đề, nút chính: Xanh lá đậm #355447 */
+    --flower-primary: #355447;
+    --flower-primary-hover: #284136;
+    --flower-primary-subtle: #EBF3EE;
+
+    /* 4. Giá, mục đang chọn, số giỏ hàng: Hồng trầm #A64060 */
+    --flower-accent: #A64060;
+    --flower-accent-hover: #8C3450;
+
+    /* 5. Thanh thông tin, nền nhãn nhỏ: Hồng kem #F3E6E1 */
+    --flower-sub-bg: #F3E6E1;
+    --flower-sub-border: #E7DED4;
+
+    /* 6. Chữ nội dung: Xám xanh đậm #293B32 */
+    --flower-text-main: #293B32;
+    --flower-text-heading: #355447;
+
+    /* 7. Chữ phụ: Xám ấm #686E65 */
+    --flower-text-muted: #686E65;
+
+    /* Màu sao đánh giá */
+    --flower-star: #E5A038;
+}
+
+html {
+    scroll-behavior: auto !important;
+}
+
+/* Toàn bộ giao diện dùng font Nunito: mềm mại, bo tròn đều */
+body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, p, span, a, label, strong, div {
+    font-family: 'Nunito', Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-style: normal !important;
+    text-decoration: none !important;
+}
+
+body {
+    background-color: var(--flower-bg);
+    color: var(--flower-text-main);
+    font-size: 17.5px;
+    font-weight: 400;
+    line-height: 1.6;
+}
+
+.flower-container {
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+/* Thông tin phụ: 16 px, 400 */
+.top-subbar {
+    background-color: var(--flower-sub-bg);
+    border-bottom: 1px solid var(--flower-sub-border);
+    font-size: 16px;
+    color: var(--flower-primary);
+    padding: 8px 0;
+    font-weight: 400;
+}
+
+.top-subbar a {
+    color: var(--flower-primary);
+    text-decoration: none;
+    transition: color 0.15s ease, opacity 0.15s ease;
+}
+
+.top-subbar a:hover {
+    color: var(--flower-primary-hover);
+    opacity: 0.85;
+    text-decoration: underline;
+}
+
+.top-subbar .bi {
+    color: var(--flower-primary) !important;
+}
+
+/* Main Header: nền trắng ngà, biểu tượng hoa hồng và tên cửa hàng xanh trầm */
+.header-main-bar {
+    background-color: var(--flower-surface);
+    border-bottom: 1px solid var(--flower-border);
+    padding: 14px 0;
+}
+
+.brand-logo-text {
+    font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--flower-primary);
+    letter-spacing: 0.5px;
+    line-height: 1;
+}
+
+.brand-logo-icon {
+    color: var(--flower-primary) !important;
+}
+
+.brand-logo-img {
+    width: 42px !important;
+    height: 42px !important;
+    max-width: 42px !important;
+    max-height: 42px !important;
+    object-fit: contain !important;
+    flex-shrink: 0 !important;
+}
+
+/* Cart & Account buttons */
+.header-cart-link {
+    color: var(--flower-text-main);
+    text-decoration: none;
+    font-size: 22px;
+    padding: 6px;
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    transition: color 0.15s ease;
+}
+
+.header-cart-link:hover {
+    color: var(--flower-accent);
+}
+
+.cart-badge-pill {
+    position: absolute;
+    top: 2px;
+    right: -2px;
+    background-color: var(--flower-accent);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1px 4px 0 4px;
+    line-height: 1;
+    box-sizing: border-box;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.no-caret::after,
+.dropdown-toggle.no-caret::after {
+    display: none !important;
+}
+
+.account-pill-btn {
+    border: 1px solid var(--flower-border);
+    background-color: var(--flower-surface);
+    color: var(--flower-text-main);
+    border-radius: 9999px;
+    padding: 8px 18px;
+    font-size: 16px;
+    font-weight: 400;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+}
+
+.account-pill-btn:hover,
+.account-pill-btn:focus {
+    background-color: var(--flower-sub-bg);
+    border-color: var(--flower-sub-border);
+    color: var(--flower-primary);
+}
+
+/* Menu, ô nhập, nút bấm: 16–18 px, 400 */
+.nav-categories-bar {
+    background-color: var(--flower-surface);
+    border-bottom: 1px solid var(--flower-border);
+    padding: 8px 0;
+    overflow-x: auto;
+}
+
+.nav-categories-bar .flower-container > div {
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.nav-categories-bar .flower-container > div::-webkit-scrollbar {
+    display: none;
+}
+
+.nav-categories-bar .flower-container > div > * { flex-shrink: 0; }
+.cat-nav-link {
+    color: var(--flower-text-main);
+    text-decoration: none;
+    font-size: 17px;
+    font-weight: 400;
+    padding: 6px 10px;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.cat-nav-link:hover {
+    color: var(--flower-accent);
+}
+
+.cat-nav-link.active {
+    color: var(--flower-accent);
+    font-weight: 400;
+    border-bottom: 2px solid var(--flower-accent);
+}
+
+/* ========================================================
+   NÚT CHỌN DANH MỤC & BẢNG DANH MỤC THÔNG MINH (POPUP PANEL)
+   ======================================================== */
+/* Nút chọn danh mục dạng pill: Nunito 16–18 px */
+.btn-category-picker,
+.btn-mega-menu-trigger {
+    font-family: 'Nunito', Arial, sans-serif !important;
+    font-size: 16.5px !important;
+    font-weight: 700 !important;
+    color: var(--flower-text-main) !important;
+    background-color: #FFFFFF !important;
+    border: 1.5px solid var(--flower-border) !important;
+    border-radius: 9999px !important;
+    padding: 7px 18px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 2px 6px rgba(41, 59, 50, 0.04) !important;
+    white-space: nowrap !important;
+    user-select: none !important;
+    text-decoration: none !important;
+}
+.btn-category-picker:hover,
+.btn-category-picker.is-active,
+.btn-mega-menu-trigger:hover,
+.btn-mega-menu-trigger.is-active {
+    background-color: #FFF0F3 !important;
+    border-color: var(--flower-accent) !important;
+    color: var(--flower-accent) !important;
+    box-shadow: 0 3px 10px rgba(166, 64, 96, 0.15) !important;
+}
+.btn-category-picker i.bi-chevron-down,
+.btn-mega-menu-trigger i.bi-chevron-down {
+    transition: transform 0.2s ease;
+}
+.btn-category-picker.is-active i.bi-chevron-down,
+.btn-mega-menu-trigger.is-active i.bi-chevron-down {
+    transform: rotate(180deg);
+}
+
+/* Backdrop mờ nền khi mở bảng danh mục */
+.flower-mega-menu-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(30, 42, 36, 0.2);
+    z-index: 1045;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+.flower-mega-menu-backdrop.is-open {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Bảng Danh Mục: Nền trắng ngà, bo góc 12–16 px, bóng nhẹ, mở nổi phía trên nội dung */
+.flower-mega-menu-panel {
+    position: fixed;
+    top: 100px;
+    left: 0;
+    background: #FFFCF8; /* Trắng ngà */
+    border: 1px solid #E7DED4;
+    border-radius: 16px;
+    box-shadow: 0 12px 36px rgba(41, 59, 50, 0.12);
+    z-index: 1050;
+    max-width: 1060px;
+    width: min(1060px, calc(100vw - 32px));
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.2s ease;
+    overflow: hidden;
+    font-family: 'Nunito', Arial, sans-serif !important;
+}
+.flower-mega-menu-panel.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Thanh tiêu đề & tìm kiếm của bảng */
+.mega-menu-header {
+    padding: 16px 24px 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px solid #EDE5DC;
+    background-color: #FAF7F2;
+}
+.mega-menu-title {
+    font-family: 'Nunito', Arial, sans-serif !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: var(--flower-text-main) !important;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.mega-menu-search-box {
+    position: relative;
+    max-width: 280px;
+    width: 100%;
+}
+.mega-menu-search-box input {
+    width: 100%;
+    font-size: 15px;
+    font-family: 'Nunito', Arial, sans-serif;
+    padding: 7px 14px 7px 34px;
+    border: 1px solid var(--flower-border);
+    border-radius: 20px;
+    outline: none;
+    background-color: #FFFFFF;
+    color: var(--flower-text-main);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.mega-menu-search-box input:focus {
+    border-color: var(--flower-accent);
+    box-shadow: 0 0 0 3px rgba(166, 64, 96, 0.12);
+}
+.mega-menu-search-box .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8C9993;
+    font-size: 14px;
+    pointer-events: none;
+}
+
+/* 3 Tab Nhóm Danh Mục: [Kiểu dáng] [Dịp tặng] [Loại hoa] */
+.mega-menu-nav-tabs {
+    display: flex;
+    gap: 10px;
+    padding: 14px 24px 10px 24px;
+    background-color: #FFFCF8;
+    border-bottom: 1px solid #EDE5DC;
+}
+.mega-tab-btn {
+    font-family: 'Nunito', Arial, sans-serif !important;
+    font-size: 16px !important;
+    font-weight: 600;
+    color: #64748B;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 20px;
+    padding: 6px 18px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-decoration: none !important;
+    outline: none;
+}
+.mega-tab-btn:hover {
+    color: #A64060;
+    background-color: #FFF0F3;
+}
+/* Tab đang chọn: nền hồng nhạt, chữ hồng trầm, không cần gạch chân */
+.mega-tab-btn.active {
+    background-color: #F8EBEF !important;
+    color: #A64060 !important;
+    border: 1px solid #F0D5DE !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+    border-bottom: 1px solid #F0D5DE !important;
+}
+
+/* Vùng nội dung danh mục: máy tính 6 ô mỗi hàng, điện thoại 2 hoặc 3 ô */
+.mega-menu-body {
+    padding: 20px 24px;
+    max-height: 440px;
+    overflow-y: auto;
+}
+.mega-tab-pane {
+    display: none;
+}
+.mega-tab-pane.active {
+    display: block;
+}
+.mega-catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 14px;
+}
+@media (max-width: 900px) {
+    .mega-catalog-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+}
+@media (max-width: 520px) {
+    .mega-catalog-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+}
+
+/* Thẻ danh mục (Ảnh vuông, tên Nunito 16-17px, không gạch chân) */
+.mega-cat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 10px 6px;
+    border-radius: 12px;
+    text-decoration: none !important;
+    background-color: #FFFFFF;
+    border: 1px solid #EDE5DC;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    cursor: pointer;
+}
+.mega-cat-card:hover {
+    background-color: #FFFFFF;
+    border-color: #A64060;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(166, 64, 96, 0.12);
+    text-decoration: none !important;
+}
+.mega-cat-thumb {
+    width: 96px;
+    height: 96px;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #F8F4EF;
+    border: 1px solid #EDE5DC;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.mega-cat-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.25s ease;
+}
+.mega-cat-card:hover .mega-cat-thumb img {
+    transform: scale(1.06);
+}
+.mega-cat-name {
+    font-family: 'Nunito', Arial, sans-serif !important;
+    font-size: 16.5px !important;
+    font-weight: 700 !important;
+    color: #293B32 !important;
+    text-decoration: none !important;
+    line-height: 1.3;
+    transition: color 0.15s ease;
+}
+.mega-cat-card:hover .mega-cat-name {
+    color: #A64060 !important;
+}
+
+/* Chân bảng: Bỏ dòng quảng cáo cuối menu để tiết kiệm chiều cao; giữ “Xem tất cả sản phẩm →” */
+.mega-menu-footer {
+    padding: 12px 24px;
+    background-color: #FAF7F2;
+    border-top: 1px solid #EDE5DC;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+.mega-footer-link {
+    font-family: 'Nunito', Arial, sans-serif !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #A64060 !important;
+    text-decoration: none !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.15s ease;
+}
+.mega-footer-link:hover {
+    color: #832742 !important;
+    text-decoration: underline !important;
+}
+
+/* ========================================================
+   BANNER THƯƠNG HIỆU HOA TƯƠI ẤM ÁP (BRAND HERO BANNER)
+   Kích thước: rộng bằng khung sản phẩm, cao 340-400px trên máy tính.
+   Bố cục: trái ~45% chữ, phải ~55% ảnh hoa nghệ nhân.
+   Nền: Kem ấm, hòa nhẹ với nền ảnh, tránh viền/bóng đậm.
+   Slogan: Playfair Display serif, xanh trầm #355447, 28-32px, 600.
+   ======================================================== */
+.brand-hero-banner {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    background-color: var(--flower-bg);
+    border-radius: 20px;
+    overflow: hidden;
+    min-height: 350px;
+    max-height: 400px;
+    margin-bottom: 40px;
+    position: relative;
+    border: 1px solid rgba(231, 222, 212, 0.45);
+    box-shadow: 0 2px 10px rgba(53, 84, 71, 0.03);
+}
+
+.brand-hero-content {
+    flex: 0 0 45%;
+    width: 45%;
+    padding: 44px 36px 44px 44px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: var(--flower-bg);
+    z-index: 2;
+}
+
+/* Thông tin phụ: 16 px, 400 */
+.brand-hero-badge {
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--flower-accent);
+    opacity: 0.95;
+    margin-bottom: 12px;
+}
+
+/* Tiêu đề trang: 30–32 px | 700 — đậm | Xanh đậm #293B32 */
+
+.brand-hero-title {
+    font-size: 32px !important;
+    font-weight: 700 !important;
+    line-height: 1.25;
+    color: var(--flower-text-main) !important;
+    margin-bottom: 16px;
+    letter-spacing: -0.3px;
+}
+
+/* Nội dung mô tả: 17–18 px | 400 — thường | Xám đậm #475569 */
+
+.brand-hero-subtext {
+    font-size: 17.5px !important;
+    font-weight: 400 !important;
+    line-height: 1.65;
+    color: #475569 !important;
+    margin-bottom: 26px;
+}
+
+/* Nút hành động: 17–18 px | 700 — đậm | Trắng trên nền xanh #355447 */
+
+.btn-brand-hero {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--flower-primary, #355447);
+    color: #ffffff !important;
+    font-size: 17.5px !important;
+    font-weight: 700 !important;
+    padding: 12px 28px;
+    border-radius: 9999px;
+    text-decoration: none;
+    border: none;
+    transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 12px rgba(53, 84, 71, 0.15);
+}
+
+.btn-brand-hero:hover {
+    background-color: var(--flower-primary-hover);
+    color: #ffffff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(53, 84, 71, 0.22);
+}
+
+.brand-hero-image-wrap {
+    flex: 0 0 55%;
+    width: 55%;
+    position: relative;
+    overflow: hidden;
+}
+
+.brand-hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+.brand-hero-image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 18%;
+    background: linear-gradient(to right, var(--flower-bg) 0%, rgba(255, 240, 243, 0.4) 50%, transparent 100%);
+    pointer-events: none;
+}
+
+@media (max-width: 991px) {
+    .brand-hero-banner {
+        flex-direction: column;
+        max-height: none;
+        min-height: auto;
+    }
+
+    .brand-hero-content {
+        flex: 0 0 100%;
+        width: 100%;
+        padding: 32px 24px 28px 24px;
+        order: 1;
+    }
+
+    .brand-hero-title {
+        font-size: 28px;
+    }
+
+    .brand-hero-image-wrap {
+        flex: 0 0 100%;
+        width: 100%;
+        height: 250px;
+        order: 2;
+    }
+
+    .brand-hero-image-overlay {
+        display: none;
+    }
+}
+
+/* Tiêu đề mục / khối: 20–22 px | 600 — đậm vừa | Xanh đậm #293B32 */
+.section-title {
+    font-size: 22px !important;
+    font-weight: 600 !important;
+    color: var(--flower-text-main) !important;
+    letter-spacing: -0.2px;
+    margin-bottom: 24px;
+}
+
+/* Thẻ sản phẩm nhẹ hơn: nền trắng ngà #FFFCF8, viền be mảnh #E7DED4, bóng rất nhẹ */
+.flower-card {
+    border: 1px solid var(--flower-border);
+    border-radius: 14px;
+    background-color: var(--flower-surface);
+    box-shadow: 0 2px 6px rgba(53, 84, 71, 0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.flower-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(53, 84, 71, 0.06);
+    border-color: var(--flower-border-hover);
+}
+
+/* Khung ảnh vuông, tỷ lệ 1:1, khoảng 280-300px mỗi cạnh trên máy tính */
+.flower-card-img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.flower-card:hover .flower-card-img {
+    transform: scale(1.02);
+}
+
+.flower-card-body {
+    padding: 14px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+/* Tên sản phẩm trên thẻ: 18 px, 600, Xanh đậm #293B32, tối đa 2 dòng */
+
+.flower-card-title {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: var(--flower-text-main) !important;
+    line-height: 1.35;
+    text-transform: none;
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 48px;
+    text-decoration: none !important;
+    transition: color 0.15s ease;
+}
+
+.flower-card-title:hover {
+    color: var(--flower-accent) !important;
+}
+
+.flower-card-meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: auto;
+    margin-bottom: 12px;
+}
+
+/* Giá trên thẻ sản phẩm: 22–24 px | 700 — đậm | Hồng trầm #A64060, không gạch chân */
+.flower-price {
+    font-size: 23px !important;
+    font-weight: 700 !important;
+    color: #A64060 !important;
+
+    text-decoration: none !important;
+    line-height: 1.2;
+    white-space: nowrap !important;
+}
+
+.flower-rating {
+    font-size: 14.5px;
+    font-weight: 400;
+    color: var(--flower-text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.star-gold {
+    color: var(--flower-star);
+}
+
+/* Nút mua hàng: 17–18 px | 700 — đậm | Trắng trên nền xanh #355447 */
+.btn-add-cart {
+    background-color: var(--flower-primary, #355447) !important;
+    color: #ffffff !important;
+    border: none !important;
+    font-weight: 700 !important;
+    font-size: 17px !important;
+    height: 44px !important;
+    border-radius: 9999px !important;
+    padding: 0 16px;
+    width: 100%;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px;
+    transition: background-color 0.2s ease, transform 0.15s ease !important;
+    text-decoration: none !important;
+}
+
+.btn-add-cart:hover {
+    background-color: var(--flower-primary-hover, #284136) !important;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+}
+
+.filter-card {
+    background: var(--flower-surface);
+    border: 1px solid var(--flower-border);
+    border-radius: 14px;
+    box-shadow: 0 1px 4px rgba(41, 59, 50, 0.03);
+}
+
+.filter-chevron {
+    transition: transform 0.2s ease-in-out;
+    font-size: 0.8rem;
+}
+
+#btnAllFilters[aria-expanded="true"] .filter-chevron {
+    transform: rotate(180deg);
+}
+
+.category-pill {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--flower-text-main);
+    background-color: var(--flower-bg);
+    border: 1px solid var(--flower-border);
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.category-pill:hover {
+    background-color: var(--flower-sub-bg);
+    color: var(--flower-accent);
+    border-color: var(--flower-sub-border);
+}
+
+.category-pill.active {
+    background-color: var(--flower-accent);
+    color: #ffffff;
+    border-color: var(--flower-accent);
+    font-weight: 600;
+}
+
+/* Vùng nội dung chuẩn 1.280 px */
+.flower-container {
+    max-width: 1280px !important;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 16px;
+    padding-right: 16px;
+    box-sizing: border-box;
+}
+
+/* ========================================================
+   THẺ SẢN PHẨM ĐỒNG NHẤT (PRODUCT CARD STANDARDIZATION)
+   - Ảnh: Khung vuông 1:1, co theo chiều rộng thẻ, không kéo méo
+   - Tên: Nunito 18 px, đậm 700, tối đa 2 dòng
+   - Giá: 22–24 px, đậm 800, màu hồng trầm #A64060, không gạch chân (dạng 390.000 ₫)
+   - Nút thêm vào giỏ: Cao 44 px, chữ 16 px, nền xanh #355447
+   - Khoảng đệm: 16 px
+   - Nền và viền: Thẻ trắng, viền nhẹ, bo góc thống nhất 16px
+   - Các thẻ cùng hàng có chiều cao bằng nhau; giá và nút mua thẳng hàng
+   ======================================================== */
+.flower-card {
+    background-color: #FFFFFF !important;
+    border: 1px solid #ECE5D8 !important;
+    border-radius: 16px !important;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    box-shadow: 0 2px 8px rgba(32, 56, 46, 0.04);
+    position: relative;
+}
+.flower-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(32, 56, 46, 0.1) !important;
+    border-color: #D6C8B8 !important;
+}
+
+/* Ảnh: Khung vuông (1:1), co theo thẻ, không méo */
+.flower-card-img-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background-color: #FBF8F5;
+}
+.flower-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}
+.flower-card:hover .flower-card-img {
+    transform: scale(1.05);
+}
+
+/* Nút yêu thích / theo dõi góc trên bên phải */
+.flower-card-wishlist {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(231, 222, 212, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748B;
+    z-index: 5;
+    transition: all 0.18s ease;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    padding: 0;
+    text-decoration: none !important;
+}
+.flower-card-wishlist:hover {
+    background: #FFFFFF;
+    color: #DC2626;
+    transform: scale(1.08);
+}
+.flower-card-wishlist.active,
+.flower-card-wishlist.text-danger {
+    color: #DC2626 !important;
+}
+
+/* Nội dung thẻ: khoảng đệm 16px */
+.flower-card-body {
+    padding: 16px !important;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    background-color: #FFFFFF;
+}
+
+/* Tên sản phẩm: Nunito 18 px, đậm 700, tối đa 2 dòng */
+.flower-card-title {
+    font-family: 'Nunito', Arial, sans-serif !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    line-height: 1.35 !important;
+    color: #20382E !important;
+    margin-bottom: 10px !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: 48px;
+    text-decoration: none !important;
+    transition: color 0.15s ease;
+}
+.flower-card-title:hover {
+    color: #A64060 !important;
+    text-decoration: none !important;
+}
+
+/* Metadata: Giá + Đánh giá căn hàng */
+.flower-card-meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: auto;
+    margin-bottom: 14px;
+}
+/* Giá: 22-24 px, đậm 800, hồng trầm #A64060, không gạch chân (dạng 390.000 ₫) */
+.flower-price {
+    font-family: 'Nunito', Arial, sans-serif !important;
+    font-size: 23px !important;
+    font-weight: 800 !important;
+    color: #A64060 !important;
+    letter-spacing: -0.2px;
+    text-decoration: none !important;
+    line-height: 1;
+}
+/* Đánh giá: chỉ hiển thị từ dữ liệu thực tế */
+.flower-rating {
+    font-size: 14px;
+    font-weight: 700;
+    color: #B45309;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+/* Nút thêm vào giỏ: Cao 44 px, chữ 16 px, nền xanh #355447 */
+.btn-add-cart {
+    height: 44px !important;
+    min-height: 44px !important;
+    background-color: #355447 !important;
+    color: #FFFFFF !important;
+    font-family: 'Nunito', Arial, sans-serif !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    border: none !important;
+    border-radius: 22px !important;
+    width: 100% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    transition: background-color 0.2s ease, transform 0.12s ease !important;
+    text-decoration: none !important;
+    padding: 0 16px !important;
+    cursor: pointer;
+}
+.btn-add-cart:hover {
+    background-color: #243D32 !important;
+    color: #FFFFFF !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(53, 84, 71, 0.2);
+}
+.btn-add-cart:active {
+    transform: translateY(0);
+}
+
+/* Hàng Đang lọc: [...] */
+.filter-active-bar {
+    background-color: #FAF7F2;
+    border: 1px solid #ECE5D8;
+    border-radius: 12px;
+    padding: 10px 16px;
+}
+.active-filter-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #FFFFFF;
+    color: #20382E;
+    border: 1px solid #D6C8B8;
+    border-radius: 20px;
+    padding: 4px 10px 4px 12px;
+    font-size: 13.5px;
+    font-weight: 500;
+    font-family: 'Nunito', Arial, sans-serif;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+.active-filter-badge strong {
+    font-weight: 700;
+    color: #A64060;
+}
+.active-filter-badge .btn-remove-filter {
+    border: none;
+    background: transparent;
+    color: #8C9993;
+    font-size: 17px;
+    line-height: 1;
+    padding: 0 2px;
+    cursor: pointer;
+    transition: color 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.active-filter-badge .btn-remove-filter:hover {
+    color: #DC2626;
+}
+
+/* Bảng Tất cả bộ lọc (Offcanvas Drawer) */
+.offcanvas-filter {
+    width: 440px !important;
+    max-width: 90vw !important;
+    background-color: #FAF7F2 !important;
+    border-left: 1px solid #EDE5DC !important;
+}
+.offcanvas-filter .offcanvas-header {
+    border-bottom: 1px solid #EDE5DC;
+    padding: 18px 24px;
+    background-color: #FFFFFF;
+}
+.offcanvas-filter .offcanvas-body {
+    padding: 20px 24px;
+}
+.offcanvas-filter .offcanvas-footer {
+    border-top: 1px solid #EDE5DC;
+    padding: 16px 24px;
+    background-color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.filter-group-title {
+    font-family: 'Nunito', Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: #20382E;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.drawer-filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 22px;
+}
+.drawer-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-family: 'Nunito', Arial, sans-serif;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: #475569;
+    background-color: #FFFFFF;
+    border: 1.5px solid #E2D9CC;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+    outline: none;
+}
+.drawer-filter-chip:hover {
+    border-color: #355447;
+    color: #355447;
+    background-color: #F6F4EF;
+}
+.drawer-filter-chip .chip-check {
+    display: none;
+    font-weight: 800;
+    font-size: 13px;
+    color: #A64060;
+}
+.drawer-filter-chip.active {
+    background-color: #F8EBEF !important;
+    border-color: #A64060 !important;
+    color: #A64060 !important;
+    font-weight: 700 !important;
+}
+.drawer-filter-chip.active .chip-check {
+    display: inline-block;
+}
+
+/* Phân trang: ‹ Trước · 1 · 2 · 3 · Sau › */
+.custom-pagination-container {
+    padding: 2.5rem 0 1rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.custom-pagination {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.custom-pagination .page-item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.custom-pagination .page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    height: 38px;
+    padding: 0 12px;
+    color: #475569;
+    font-family: 'Nunito', Arial, sans-serif;
+    font-size: 15.5px;
+    font-weight: 600;
+    text-decoration: none !important;
+    background-color: #FFFFFF;
+    border: 1px solid #E2D9CC;
+    border-radius: 10px;
+    transition: all 0.15s ease;
+    cursor: pointer;
+}
+.custom-pagination .page-link:hover:not(.disabled):not(.page-ellipsis) {
+    color: #A64060;
+    border-color: #A64060;
+    background-color: #FFF0F3;
+}
+.custom-pagination .page-item.active .page-link {
+    background-color: #355447 !important;
+    border-color: #355447 !important;
+    color: #FFFFFF !important;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(53, 84, 71, 0.25);
+}
+.custom-pagination .page-item.disabled .page-link,
+.custom-pagination .page-item.disabled .page-nav-arrow {
+    color: #C0B7AB !important;
+    border-color: #EDE5DC !important;
+    background-color: #F8F5F0 !important;
+    cursor: not-allowed;
+    pointer-events: none;
+    opacity: 0.6;
+}
+.custom-pagination .page-nav-arrow {
+    font-weight: 700;
+    padding: 0 14px;
+}
+.custom-pagination .page-ellipsis {
+    border: none;
+    background: transparent;
+    color: #94A3B8;
+    cursor: default;
+}
+
+.btn-flower-primary {
+    background-color: var(--flower-primary);
+    border-color: var(--flower-primary);
+    color: #ffffff;
+}
+.btn-flower-primary:hover {
+    background-color: var(--flower-primary-hover);
+    border-color: var(--flower-primary-hover);
+    color: #ffffff;
+}
+.btn-flower-accent {
+    background-color: var(--flower-accent);
+    border-color: var(--flower-accent);
+    color: #ffffff;
+}
+.btn-flower-accent:hover {
+    background-color: var(--flower-accent-hover);
+    border-color: var(--flower-accent-hover);
+    color: #ffffff;
+}
+.badge-flower-accent {
+    background-color: var(--flower-sub-bg);
+    color: var(--flower-accent);
+    border: 1px solid var(--flower-sub-border);
+}

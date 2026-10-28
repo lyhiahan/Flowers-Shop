@@ -24,11 +24,12 @@ function probeGateway(url, healthId) {
 }
 
 function createAutoTunnel({appPort, cloudflared, emit, spawn = spawnProcess, probe = probeGateway,
-    retryDelayMs = 5000, healthIntervalMs = 10000, startupTimeoutMs = 60000}) {
+    retryDelayMs = 5000, healthIntervalMs = 10000, startupTimeoutMs = 60000,
+    maxRetryDelayMs = 60000, rateLimitDelayMs = 60000}) {
     const healthId = randomUUID();
     const gateway = createGateway({appPort, healthId});
     let child, readers = [], retryTimer, healthTimer, startupTimer;
-    let stopped = false, generation = 0, candidate, checking = false, failures = 0, lastState;
+    let stopped = false, generation = 0, candidate, checking = false, failures = 0, lastState, wasReady = false, retries = 0;
     function report(state, code = '', url = null) {
         const value = JSON.stringify({state, code, url});
         if (value !== lastState) { lastState = value; emit(JSON.parse(value)); }
@@ -48,7 +49,8 @@ function createAutoTunnel({appPort, cloudflared, emit, spawn = spawnProcess, pro
         generation++;
         clearTimers(); disposeChild(); candidate = null; checking = false;
         report('ERROR', code);
-        retryTimer = setTimeout(launch, retryDelayMs);
+        const delay = Math.min(maxRetryDelayMs, retryDelayMs * 2 ** Math.min(retries++, 10));
+        retryTimer = setTimeout(launch, code === 'RATE_LIMITED' ? Math.max(rateLimitDelayMs, delay) : delay);
     }
     async function check(current) {
         if (stopped || current !== generation || !candidate || checking) return;
@@ -59,19 +61,21 @@ function createAutoTunnel({appPort, cloudflared, emit, spawn = spawnProcess, pro
         if (stopped || current !== generation) return;
         checking = false;
         if (healthy) {
-            failures = 0; clearTimeout(startupTimer);
+            wasReady = true; failures = 0; retries = 0; clearTimeout(startupTimer);
             report('READY', '', url);
         } else {
             failures++;
             report('STARTING', 'CHECKING_CONNECTION');
-            if (failures >= 3) restart('NETWORK_UNAVAILABLE');
+            // A new quick-tunnel hostname may take time to resolve. Keep it until
+            // the startup deadline instead of continuously replacing its DNS name.
+            if (wasReady && failures >= 3) restart('NETWORK_UNAVAILABLE');
         }
     }
     function launch() {
         if (stopped) return;
         clearTimers();
         const current = ++generation;
-        candidate = null; checking = false; failures = 0;
+        candidate = null; checking = false; failures = 0; wasReady = false;
         report('STARTING', 'STARTING_TUNNEL');
         try {
             child = spawn(cloudflared, ['--no-autoupdate','tunnel','--protocol','http2','--url',
@@ -84,6 +88,9 @@ function createAutoTunnel({appPort, cloudflared, emit, spawn = spawnProcess, pro
             readers.push(reader);
             reader.on('line', line => {
                 if (stopped || current !== generation) return;
+                if (/quick tunnel provisioning failed with status 429|Too Many Requests/i.test(line)) {
+                    restart('RATE_LIMITED'); return;
+                }
                 if (line.includes('Unauthorized: Tunnel not found')) { restart('TUNNEL_EXPIRED'); return; }
                 const url = tunnelUrl(line);
                 if (url) { candidate = url; check(current); }

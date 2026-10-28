@@ -1,0 +1,12 @@
+Using JDK 21: D:\LAPTRINH\LAPTRINHWEB\BAITAP\finalproject\.tools\jdk-21.0.12.1+1
+Using JDK 21: D:\LAPTRINH\LAPTRINHWEB\BAITAP\finalproject\.tools\jdk-21.0.12.1+1
+10:23:29.807 [main] INFO org.springframework.boot.devtools.restart.RestartApplicationListener -- Restart disabled due to System property 'spring.devtools.restart.enabled' being set to false
+PASS: current Aiven application starts; JPA schema validates; connections are read-only; migration, seed, expiry and tunnel disabled
+PASS: HTTP 200 /
+PASS: HTTP 200 /products
+PASS: HTTP 200 /stores
+PASS: HTTP 200 /css/home.css
+PASS: HTTP 200 /js/home-navigation.js
+PASS: HTTP 200 /js/home-follow.js
+PASS: HTTP 200 /js/home-filters.js
+PASS: read-only application smoke complete; context closes automatically; no order/payment created

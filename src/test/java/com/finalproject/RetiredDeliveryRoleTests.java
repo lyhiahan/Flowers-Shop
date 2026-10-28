@@ -5,7 +5,7 @@ import com.finalproject.entity.*;
 import com.finalproject.enums.*;
 import com.finalproject.repository.*;
 import com.finalproject.service.AuthService;
-import com.finalproject.service.impl.CustomUserDetailsService;
+import com.finalproject.service.CustomUserDetailsService;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

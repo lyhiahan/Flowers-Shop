@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.*;
 
 @Component @Profile("!test") @Order(30) @RequiredArgsConstructor @Slf4j
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
+        name = "app.order-expiry.enabled", havingValue = "true", matchIfMissing = true)
 public class OrderExpirySchedule implements ApplicationRunner {
     private final OrderRepository orders;
     private final OrderWorkflowService workflow;

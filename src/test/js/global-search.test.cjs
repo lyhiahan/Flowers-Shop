@@ -55,7 +55,9 @@ test('unrelated pages do not accidentally select a different scope', () => {
 });
 
 test('home and shared header use one search fragment without local style overrides', () => {
-    const home = fs.readFileSync(path.join(__dirname, '../../main/resources/templates/index.html'), 'utf8');
+    const index = fs.readFileSync(path.join(__dirname, '../../main/resources/templates/index.html'), 'utf8');
+    assert.match(index, /fragments\/home-header :: header/);
+    const home = fs.readFileSync(path.join(__dirname, '../../main/resources/templates/fragments/home-header.html'), 'utf8');
     const shared = fs.readFileSync(path.join(__dirname, '../../main/resources/templates/fragments/floral.html'), 'utf8');
     assert.match(home, /th:replace="~\{fragments\/floral :: search\}"/);
     assert.match(shared, /th:replace="~\{fragments\/floral :: search\}"/);

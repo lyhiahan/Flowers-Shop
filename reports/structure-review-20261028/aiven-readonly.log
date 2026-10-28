@@ -1,0 +1,12 @@
+PASS: PostgreSQL TLS verify-full; transaction_read_only=on
+PASS: Flyway schema version=1
+PASS: users readable
+PASS: stores readable
+PASS: products readable
+PASS: store_inventories readable
+PASS: orders readable
+PASS: payments readable
+PASS: customer_wallets readable
+PASS: customer_wallet_entries readable
+PASS: no negative customer wallet balances
+PASS: read-only check finished; no migration, seed, order or payment writes

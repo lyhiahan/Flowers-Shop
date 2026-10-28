@@ -1,46 +1,407 @@
 package com.finalproject.service;
 
 import com.finalproject.dto.request.ProductForm;
-import com.finalproject.entity.Product;
-import org.springframework.data.domain.Page;
+import com.finalproject.entity.*;
+import com.finalproject.exception.ResourceNotFoundException;
+import com.finalproject.repository.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.util.List;
 
-public interface ProductService {
-    List<Product> getAllProducts();
-    Product getProductById(Long id);
-    Product createProduct(ProductForm form) throws IOException;
-    Product updateProduct(Long id, ProductForm form) throws IOException;
-    void softDeleteProduct(Long id);
-    void restoreProduct(Long id);
-    void deleteProduct(Long id);
+@Service
+@RequiredArgsConstructor
+public class ProductService {
 
-    // Guest: Trên 10 sản phẩm bán chạy nhất sắp xếp giảm dần
-    List<Product> getGuestFeaturedProducts();
+    private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
+    private final ProductImageRepository productImageRepository;
+    private final StoreRepository storeRepository;
+    private final StoreInventoryRepository storeInventoryRepository;
+    private final CloudinaryService cloudinaryService;
+    private final ProductWishlistRepository wishlistRepository;
+    private final RecentlyViewedRepository recentlyViewedRepository;
+    private final UserRepository userRepository;
+    private final OrderDetailRepository orderDetailRepository;
+    private final jakarta.validation.Validator validator;
+    private final com.finalproject.service.ProductAttributeService attributes;
+    private final com.finalproject.service.CategoryService categoryService;
 
-    // Trang chủ: Tối đa 8 sản phẩm bán chạy nhất (dựa trên đơn hoàn thành 30 ngày gần nhất hoặc số lượng bán thực tế)
-    List<Product> getTop8BestSellingProducts();
+    private void validateForm(ProductForm form) {
+        if (form == null) throw new IllegalArgumentException("Thông tin sản phẩm không hợp lệ.");
+        var errors = validator.validate(form);
+        if (!errors.isEmpty()) throw new IllegalArgumentException(errors.stream().map(jakarta.validation.ConstraintViolation::getMessage)
+                .sorted().collect(java.util.stream.Collectors.joining("; ")));
+    }
 
-    // Top 20 theo các tiêu chí
-    List<Product> getTop20Newest();
-    List<Product> getTop20BestSelling();
-    List<Product> getTop20TopRated();
-    List<Product> getTop20Wishlisted();
+    public List<Product> getAllProducts() {
+        return productRepository.findAll();
+    }
 
-    // Phân trang tìm kiếm, danh mục, sắp xếp
-    Page<Product> getProducts(Long categoryId, String keyword, String sort, int page, int size);
+    public Product getProductById(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm có ID: " + id));
+    }
 
-    // Sản phẩm của cửa hàng
-    List<Product> getProductsByStore(Long storeId);
+    public List<Product> getGuestFeaturedProducts() {
+        return getTop8BestSellingProducts();
+    }
 
-    // Wishlist / Follow (Sản phẩm yêu thích / Theo dõi)
-    boolean toggleWishlist(Long userId, Long productId);
-    boolean isWishlisted(Long userId, Long productId);
-    List<Product> getWishlist(Long userId);
-    long getFollowerCount(Long productId);
+    public List<Product> getTop8BestSellingProducts() {
+        java.time.LocalDateTime thirtyDaysAgo = java.time.LocalDateTime.now().minusDays(30);
+        List<Long> topProductIds = orderDetailRepository.findTopSellingProductIdsSince(
+                thirtyDaysAgo, org.springframework.data.domain.PageRequest.of(0, 8));
 
-    // Sản phẩm đã xem gần đây
-    void recordRecentlyViewed(Long userId, Long productId);
-    List<Product> getRecentlyViewed(Long userId);
-    void clearRecentlyViewed(Long userId);
+        List<Product> result = new java.util.ArrayList<>();
+        if (topProductIds != null && !topProductIds.isEmpty()) {
+            List<Product> productsFromOrders = productRepository.findAllById(topProductIds);
+            java.util.Map<Long, Product> productMap = productsFromOrders.stream()
+                    .filter(com.finalproject.service.ProductAvailability::isPublic)
+                    .collect(java.util.stream.Collectors.toMap(Product::getId, java.util.function.Function.identity()));
+            for (Long id : topProductIds) {
+                Product p = productMap.get(id);
+                if (p != null) {
+                    result.add(p);
+                }
+            }
+        }
+
+        // Bổ sung từ top sản phẩm có số lượng bán cao nhất (p.sold > 0) nếu trong 30 ngày chưa đủ 8 sản phẩm
+        if (result.size() < 8) {
+            java.util.Set<Long> existingIds = result.stream().map(Product::getId).collect(java.util.stream.Collectors.toSet());
+            List<Product> additional = productRepository.findTopBestSellers(org.springframework.data.domain.PageRequest.of(0, 16));
+            for (Product p : additional) {
+                if (com.finalproject.service.ProductAvailability.isPublic(p) && !existingIds.contains(p.getId())) {
+                    result.add(p);
+                    existingIds.add(p.getId());
+                    if (result.size() >= 8) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Tối đa 8 sản phẩm, chỉ hiển thị số lượng thực tế phù hợp, không lặp sản phẩm
+        return result.stream().limit(8).collect(java.util.stream.Collectors.toList());
+    }
+
+    public List<Product> getTop20Newest() {
+        return productRepository.findTop20ByIsActiveTrueAndIsSellingTrueOrderByCreatedAtDesc().stream().filter(com.finalproject.service.ProductAvailability::isPublic).toList();
+    }
+
+    public List<Product> getTop20BestSelling() {
+        return productRepository.findTop20ByIsActiveTrueAndIsSellingTrueOrderBySoldDesc().stream().filter(com.finalproject.service.ProductAvailability::isPublic).toList();
+    }
+
+    public List<Product> getTop20TopRated() {
+        return productRepository.findTop20ByIsActiveTrueAndIsSellingTrueOrderByRatingDesc().stream().filter(com.finalproject.service.ProductAvailability::isPublic).toList();
+    }
+
+    public List<Product> getTop20Wishlisted() {
+        // Lấy danh sách sản phẩm bán chạy hoặc rating cao làm top yêu thích
+        return productRepository.findTop20ByIsActiveTrueAndIsSellingTrueOrderByRatingDesc().stream().filter(com.finalproject.service.ProductAvailability::isPublic).toList();
+    }
+
+    public org.springframework.data.domain.Page<Product> getProducts(Long categoryId, String keyword, String sort, int page, int size) {
+        org.springframework.data.domain.Sort sortObj = org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "id");
+        if ("price_asc".equalsIgnoreCase(sort)) {
+            sortObj = org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.ASC, "priceBuy");
+        } else if ("price_desc".equalsIgnoreCase(sort)) {
+            sortObj = org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "priceBuy");
+        } else if ("sold_desc".equalsIgnoreCase(sort)) {
+            sortObj = org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "sold");
+        } else if ("rating_desc".equalsIgnoreCase(sort)) {
+            sortObj = org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "rating");
+        }
+
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, sortObj);
+
+        if (categoryId != null && categoryId > 0 && keyword != null && !keyword.trim().isEmpty()) {
+            return productRepository.searchByCategoryAndKeyword(categoryId, keyword.trim(), pageable);
+        } else if (categoryId != null && categoryId > 0) {
+            return productRepository.findByCategoryId(categoryId, pageable);
+        } else if (keyword != null && !keyword.trim().isEmpty()) {
+            return productRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword.trim(), keyword.trim(), pageable);
+        } else {
+            return productRepository.findByIsActiveTrueAndIsSellingTrue(pageable);
+        }
+    }
+
+    public List<Product> getProductsByStore(Long storeId) {
+        return productRepository.findByStoreIdOrderByCreatedAtDesc(storeId);
+    }
+
+    @Transactional
+    public boolean toggleWishlist(Long userId, Long productId) {
+        var existing = wishlistRepository.findByUserIdAndProductId(userId, productId);
+        if (existing.isPresent()) {
+            wishlistRepository.delete(existing.get());
+            return false;
+        } else {
+            User user = userRepository.findById(userId).orElseThrow();
+            Product product = productRepository.findById(productId).orElseThrow();
+            wishlistRepository.save(ProductWishlist.builder().user(user).product(product).build());
+            return true;
+        }
+    }
+
+    public boolean isWishlisted(Long userId, Long productId) {
+        if (userId == null) return false;
+        return wishlistRepository.existsByUserIdAndProductId(userId, productId);
+    }
+
+    public List<Product> getWishlist(Long userId) {
+        List<ProductWishlist> items = wishlistRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        return items.stream().map(ProductWishlist::getProduct).toList();
+    }
+
+    public long getFollowerCount(Long productId) {
+        if (productId == null) return 0;
+        return wishlistRepository.countByProductId(productId);
+    }
+
+    @Transactional
+    public void recordRecentlyViewed(Long userId, Long productId) {
+        if (userId == null) return;
+        var existing = recentlyViewedRepository.findByUserIdAndProductId(userId, productId);
+        if (existing.isPresent()) {
+            RecentlyViewed rv = existing.get();
+            rv.setViewedAt(java.time.LocalDateTime.now());
+            recentlyViewedRepository.save(rv);
+        } else {
+            User user = userRepository.findById(userId).orElse(null);
+            Product product = productRepository.findById(productId).orElse(null);
+            if (user != null && product != null) {
+                recentlyViewedRepository.save(RecentlyViewed.builder().user(user).product(product).build());
+            }
+        }
+    }
+
+    public List<Product> getRecentlyViewed(Long userId) {
+        if (userId == null) return List.of();
+        List<RecentlyViewed> list = recentlyViewedRepository.findTop10ByUserIdOrderByViewedAtDesc(userId);
+        return list.stream().map(RecentlyViewed::getProduct).toList();
+    }
+
+    @Transactional
+    public void clearRecentlyViewed(Long userId) {
+        if (userId != null) recentlyViewedRepository.deleteByUserId(userId);
+    }
+
+    @Transactional(rollbackFor = IOException.class)
+    public Product createProduct(ProductForm form) throws IOException {
+        validateForm(form);
+        Store selectedStore = form.getStoreId() != null && form.getStoreId() > 0
+                ? storeRepository.findById(form.getStoreId()).orElseThrow(() -> new IllegalArgumentException("Chi nhánh không tồn tại.")) : null;
+        // Kiểm tra danh mục
+        Category category = categoryRepository.findById(form.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Danh mục không tồn tại"));
+        if (Boolean.TRUE.equals(category.getIsDeleted())) throw new IllegalArgumentException("Danh mục đã bị xóa.");
+        if (!categoryService.visible(category)) throw new IllegalArgumentException("Danh mục cha đã bị ẩn.");
+
+        // Chống bán lỗ: Nếu giá bán < giá nhập mà chưa xác nhận bán lỗ thì ném lỗi
+        if (form.getPriceBuy().compareTo(form.getImportPrice()) < 0 && !form.isConfirmSellAtLoss()) {
+            throw new IllegalArgumentException("WARN_SELL_AT_LOSS");
+        }
+
+        // 1. Lưu thông tin sản phẩm
+        Product product = Product.builder()
+                .category(category)
+                .store(selectedStore)
+                .name(form.getName())
+                .description(form.getDescription())
+                .importPrice(form.getImportPrice())
+                .priceBuy(form.getPriceBuy())
+                .priceRentPerDay(java.math.BigDecimal.ZERO)
+                .depositFee(java.math.BigDecimal.ZERO)
+                .isActive(true)
+                .isSelling(true)
+                .sold(0)
+                .rating(5.0)
+                .build();
+        categoryService.assignAdditional(product, form.getAdditionalCategoryIds(), form.isCategoriesSubmitted());
+        if (form.isFlowerAttributesSubmitted()) {
+            attributes.assignOther(product, form.getStyleValueIds(), form.isAttributesSubmitted());
+            attributes.assignText(product, form.getFlowerTypes(), form.getFlowerColors(), form.getFlowerStyles(), true);
+        }
+        else attributes.assign(product, form.getStyleValueIds(), form.isAttributesSubmitted());
+        Product savedProduct = productRepository.save(product);
+
+        // 2. Upload danh sách ảnh lên Cloudinary
+        if (form.getImageFiles() != null && !form.getImageFiles().isEmpty()) {
+            int mainIndex = (form.getMainImageIndex() != null && form.getMainImageIndex() >= 0) ? form.getMainImageIndex() : 0;
+            int currentIndex = 0;
+            String chosenMainUrl = null;
+            for (MultipartFile file : form.getImageFiles()) {
+                if (file != null && !file.isEmpty()) {
+                    CloudinaryService.UploadResult result = cloudinaryService.upload(file, "rental_shop_products");
+                    if (result == null) continue;
+                    boolean isMain = (currentIndex == mainIndex);
+                    ProductImage productImage = ProductImage.builder()
+                            .product(savedProduct)
+                            .imageUrl(result.secureUrl())
+                            .cloudinaryPublicId(result.publicId())
+                            .isMain(isMain)
+                            .build();
+                    productImageRepository.save(productImage);
+                    if (isMain) {
+                        chosenMainUrl = result.secureUrl();
+                    } else if (chosenMainUrl == null) {
+                        chosenMainUrl = result.secureUrl();
+                    }
+                    currentIndex++;
+                }
+            }
+            if (chosenMainUrl != null) {
+                savedProduct.setImageUrl(chosenMainUrl);
+                productRepository.save(savedProduct);
+            }
+        }
+
+        // 3. Tự động khởi tạo tồn kho tại tất cả chi nhánh
+        List<Store> activeStores = selectedStore != null ? List.of(selectedStore) : storeRepository.findByStatusTrue();
+        for (Store store : activeStores) {
+            StoreInventory inventory = StoreInventory.builder()
+                    .store(store)
+                    .product(savedProduct)
+                    .quantity(form.getInitialStock())
+                    .build();
+            storeInventoryRepository.save(inventory);
+        }
+
+        return savedProduct;
+    }
+
+    @Transactional(rollbackFor = IOException.class)
+    public Product updateProduct(Long id, ProductForm form) throws IOException {
+        validateForm(form);
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm có ID: " + id));
+        if (Boolean.TRUE.equals(product.getIsDeleted())) throw new IllegalArgumentException("Không thể sửa sản phẩm đã xóa.");
+
+        Category category = categoryRepository.findById(form.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Danh mục không tồn tại"));
+        if (Boolean.TRUE.equals(category.getIsDeleted())) throw new IllegalArgumentException("Danh mục đã bị xóa.");
+        if (!categoryService.visible(category)) throw new IllegalArgumentException("Danh mục cha đã bị ẩn.");
+
+        // Chống bán lỗ: Nếu giá bán < giá nhập mà chưa xác nhận bán lỗ thì ném cảnh báo
+        if (form.getPriceBuy() != null && form.getImportPrice() != null
+                && form.getPriceBuy().compareTo(form.getImportPrice()) < 0 && !form.isConfirmSellAtLoss()) {
+            throw new IllegalArgumentException("WARN_SELL_AT_LOSS");
+        }
+
+        product.setName(form.getName());
+        product.setCategory(category);
+        categoryService.assignAdditional(product, form.getAdditionalCategoryIds(), form.isCategoriesSubmitted());
+        if (form.isFlowerAttributesSubmitted()) {
+            attributes.assignOther(product, form.getStyleValueIds(), form.isAttributesSubmitted());
+            attributes.assignText(product, form.getFlowerTypes(), form.getFlowerColors(), form.getFlowerStyles(), true);
+        }
+        else attributes.assign(product, form.getStyleValueIds(), form.isAttributesSubmitted());
+        product.setDescription(form.getDescription());
+        product.setImportPrice(form.getImportPrice());
+        product.setPriceBuy(form.getPriceBuy());
+
+        // Cửa hàng hoặc phạm vi áp dụng (null hoặc <= 0 là Toàn hệ thống)
+        if (form.getStoreId() != null && form.getStoreId() > 0) {
+            Store store = storeRepository.findById(form.getStoreId()).orElseThrow(() -> new IllegalArgumentException("Chi nhánh không tồn tại."));
+            product.setStore(store);
+        } else {
+            product.setStore(null);
+        }
+
+        if (form.getIsSelling() != null) {
+            product.setIsSelling(form.getIsSelling());
+        }
+        if (form.getIsActive() != null) {
+            product.setIsActive(form.getIsActive());
+        }
+
+        // Không cho phép sửa trực tiếp số lượng đã bán (sold) - bảo toàn từ đơn hàng
+
+        // Upload ảnh mới nếu có
+        if (form.getImageFiles() != null && !form.getImageFiles().isEmpty()) {
+            int mainIndex = (form.getMainImageIndex() != null && form.getMainImageIndex() >= 0) ? form.getMainImageIndex() : 0;
+            int currentIndex = 0;
+            String newMainUrl = null;
+            boolean resetPrevious = false;
+            for (MultipartFile file : form.getImageFiles()) {
+                if (file != null && !file.isEmpty()) {
+                    if (!resetPrevious) {
+                        var previous = productImageRepository.findByProductId(product.getId());
+                        previous.forEach(img -> img.setIsMain(false));
+                        productImageRepository.saveAll(previous);
+                        resetPrevious = true;
+                    }
+                    CloudinaryService.UploadResult result = cloudinaryService.upload(file, "rental_shop_products");
+                    if (result == null) continue;
+                    boolean isMain = (currentIndex == mainIndex);
+                    ProductImage productImage = ProductImage.builder()
+                            .product(product)
+                            .imageUrl(result.secureUrl())
+                            .cloudinaryPublicId(result.publicId())
+                            .isMain(isMain)
+                            .build();
+                    productImageRepository.save(productImage);
+                    if (isMain) {
+                        newMainUrl = result.secureUrl();
+                    } else if (newMainUrl == null) {
+                        newMainUrl = result.secureUrl();
+                    }
+                    currentIndex++;
+                }
+            }
+            if (newMainUrl != null) {
+                product.setImageUrl(newMainUrl);
+            }
+        }
+
+        return productRepository.save(product);
+    }
+
+    @Transactional
+    public void softDeleteProduct(Long id) {
+        Product product = productRepository.findLockedById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm có ID: " + id));
+        long openOrders = orderDetailRepository.countOpenOrders(id);
+        if (openOrders > 0) {
+            throw new IllegalArgumentException("Không thể xóa sản phẩm #" + id + " vì còn " + openOrders
+                    + " đơn đang xử lý. Hãy ngừng bán và hoàn tất các đơn trước.");
+        }
+        // Soft delete: loại khỏi danh sách bán nhưng bảo toàn toàn bộ đơn hàng và lịch sử
+        product.setIsDeleted(true);
+        product.setIsSelling(false);
+        productRepository.save(product);
+    }
+
+    @Transactional
+    public void restoreProduct(Long id) {
+        Product product = productRepository.findLockedById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm có ID: " + id));
+        if (!Boolean.TRUE.equals(product.getIsDeleted())) {
+            throw new IllegalArgumentException("Sản phẩm chưa bị xóa.");
+        }
+        product.setIsDeleted(false);
+        product.setIsActive(true);
+        product.setIsSelling(false);
+        productRepository.save(product);
+    }
+
+    @Transactional
+    public void deleteProduct(Long id) {
+        if (!productRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Sản phẩm không tồn tại");
+        }
+        // Xóa ảnh cũ trên Cloudinary (best-effort)
+        List<ProductImage> images = productImageRepository.findByProductId(id);
+        for (ProductImage img : images) {
+            if (img.getCloudinaryPublicId() != null) {
+                cloudinaryService.delete(img.getCloudinaryPublicId());
+            }
+        }
+        productRepository.deleteById(id);
+    }
 }

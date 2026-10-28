@@ -831,11 +831,7 @@
                             <div class="checkout-card-body p-4">
                                 <div class="summary-row">
                                     <span>Tiền hàng:</span>
-                                    <span id="displaySubtotal" class="summary-val" th:text="${#numbers.formatDecimal(subtotalRentAndBuy, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
-                                </div>
-                                <div class="summary-row" th:if="${totalDeposit != null and totalDeposit > 0}">
-                                    <span>Tiền cọc:</span>
-                                    <span class="summary-val text-warning" th:text="${#numbers.formatDecimal(totalDeposit, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
+                                    <span id="displaySubtotal" class="summary-val" th:text="${#numbers.formatDecimal(subtotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
                                 </div>
                                 <div class="summary-row" id="shippingFeeRow">
                                     <span>Phí giao hàng:</span>

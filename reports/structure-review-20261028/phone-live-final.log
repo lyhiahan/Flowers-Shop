@@ -1,0 +1,5 @@
+Tunnel: STARTING STARTING_TUNNEL
+Tunnel: ERROR RATE_LIMITED
+Tunnel: STARTING STARTING_TUNNEL
+Tunnel: ERROR RATE_LIMITED
+FAIL: live phone connectivity check (TUNNEL_NOT_READY). No database was used.

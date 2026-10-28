@@ -90,7 +90,7 @@ public class CatalogFilterTests {
         String html = result.getResponse().getContentAsString();
         // Main uses URL-driven filters rather than the legacy duplicated form inputs.
         assertThat(html.split("id=\"catalogSortSelect\"", -1)).hasSize(2);
-        assertThat(html).contains("applyCatalogSort", "removeRatingFilter");
+        assertThat(html).contains("applyCatalogSort", "src=\"/js/home-filters.js\"");
         assertThat(html).doesNotContain("btnApplyFilterSecondary");
     }
 

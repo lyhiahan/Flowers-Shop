@@ -5,7 +5,7 @@ import com.finalproject.dto.request.AddToCartRequest;
 import com.finalproject.enums.*;
 import com.finalproject.repository.*;
 import com.finalproject.service.*;
-import com.finalproject.service.impl.CustomUserDetailsService;
+import com.finalproject.service.CustomUserDetailsService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -65,6 +65,18 @@ class CheckoutEdgeSafetyTests {
 
     Delivery carrier(String name) {
         return deliveries.save(Delivery.builder().name(name).price(BigDecimal.ZERO).isActive(true).isDeleted(false).build());
+    }
+
+    @Test void legacyRentalCartCannotReachCheckoutOrCreateAnOrder() throws Exception {
+        first.setOrderType(OrderType.RENT);
+        items.saveAndFlush(first);
+        mvc.perform(get("/checkout").with(user(customer.getUsername()).roles("USER")))
+                .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/cart"));
+        assertThatThrownBy(() -> orderService.checkout(customer.getUsername(), java.util.List.of(first.getId()),
+                PaymentMethod.COD, "Recipient", "0900000000", "Test address", null, null,
+                LocalDate.now(), "PICKUP", store.getId(), null))
+                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("chỉ hỗ trợ mua hoa");
+        assertThat(first.getTotalAmount()).isEqualByComparingTo(BigDecimal.ZERO);
     }
     ShippingTariff tariff(Delivery carrier, String area, boolean active) {
         return tariffs.save(ShippingTariff.builder().store(store).delivery(carrier).destinationArea(area)

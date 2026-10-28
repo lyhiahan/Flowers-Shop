@@ -82,7 +82,7 @@ public class CheckoutController {
         for (CartItem item : checkoutItems) {
             var product = item.getProduct();
             var store = item.getStore();
-            if (store == null || !com.finalproject.service.ProductAvailability.supportsBranch(product, store)
+            if (item.getOrderType() != com.finalproject.enums.OrderType.BUY || store == null || !com.finalproject.service.ProductAvailability.supportsBranch(product, store)
                     || !com.finalproject.service.ProductAvailability.isPublic(product)
                     || !Boolean.TRUE.equals(store.getStatus()) || !Boolean.TRUE.equals(store.getIsOpen())) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Sản phẩm " + product.getName()
@@ -104,19 +104,9 @@ public class CheckoutController {
 
         // Kiểm tra tồn kho tại chi nhánh: Chặn thanh toán nếu có sản phẩm hết hàng
         // Verify stock for the selected fulfillment branch in quote and transactional checkout.
-        BigDecimal subtotalRentAndBuy = BigDecimal.ZERO;
-        BigDecimal totalDeposit = BigDecimal.ZERO;
-
-        for (CartItem item : checkoutItems) {
-            if (item.getOrderType() == com.finalproject.enums.OrderType.BUY) {
-                subtotalRentAndBuy = subtotalRentAndBuy.add(item.getBuyAmount());
-            } else {
-                subtotalRentAndBuy = subtotalRentAndBuy.add(item.getRentAmount());
-                totalDeposit = totalDeposit.add(item.getDepositAmount());
-            }
-        }
-
-        BigDecimal grandTotal = subtotalRentAndBuy.add(totalDeposit);
+        BigDecimal subtotal = checkoutItems.stream().map(CartItem::getBuyAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal grandTotal = subtotal;
         User customer = userRepository.findByUsername(principal.getName()).orElse(null);
 
         model.addAttribute("customer", customer);
@@ -127,8 +117,7 @@ public class CheckoutController {
         model.addAttribute("deliveries", deliveryRepository.findAll().stream()
                 .filter(d -> Boolean.TRUE.equals(d.getIsActive()) && !Boolean.TRUE.equals(d.getIsDeleted())).toList());
         model.addAttribute("checkoutItems", checkoutItems);
-        model.addAttribute("subtotalRentAndBuy", subtotalRentAndBuy);
-        model.addAttribute("totalDeposit", totalDeposit);
+        model.addAttribute("subtotal", subtotal);
         model.addAttribute("grandTotal", grandTotal);
         model.addAttribute("paymentMethods", demoPayments.isEnabled()
                 ? List.of(PaymentMethod.COD, PaymentMethod.MOMO_DEMO, PaymentMethod.WALLET_DEMO) : List.of(PaymentMethod.COD));

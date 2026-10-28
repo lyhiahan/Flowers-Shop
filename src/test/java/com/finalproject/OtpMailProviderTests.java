@@ -1,7 +1,7 @@
 package com.finalproject;
 
 import com.finalproject.service.*;
-import com.finalproject.service.impl.EmailServiceImpl;
+import com.finalproject.service.EmailService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -14,7 +14,7 @@ import static org.mockito.Mockito.*;
 class OtpMailProviderTests {
     private final JavaMailSender smtp = mock(JavaMailSender.class);
     private final BrevoOtpSender api = mock(BrevoOtpSender.class);
-    private final EmailServiceImpl service = new EmailServiceImpl(smtp, api);
+    private final EmailService service = new EmailService(smtp, api);
 
     @Test void defaultApiProviderDoesNotRequireOrCallGmailSmtp() {
         service.sendOtpEmail(" buyer+flowers@outlook.com ", "123456");

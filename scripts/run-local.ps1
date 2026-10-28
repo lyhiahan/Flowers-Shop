@@ -33,7 +33,7 @@ try {
     $arguments= switch($Mode) {
         'Validate' {@('compile','flyway:validate','-B')}
         'Migrate' {@('compile','flyway:migrate','-B')}
-        'Run' {@('spring-boot:run',"-Dspring-boot.run.arguments=--app.demo-payment.base-url=http://localhost:$Port --app.demo-payment.auto-tunnel.enabled=false")}
+        'Run' {@('spring-boot:run','-Dspring-boot.run.profiles=dev',"-Dspring-boot.run.arguments=--app.demo-payment.base-url=http://localhost:$Port --app.demo-payment.auto-tunnel.enabled=false")}
     }
     & (Join-Path $PSScriptRoot 'maven.ps1') -MavenArguments $arguments
     $result=$LASTEXITCODE

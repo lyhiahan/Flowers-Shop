@@ -78,7 +78,7 @@ try {
         if ($confirmation -cne $DatabaseName) { throw 'Database operation cancelled; no migration performed.' }
     }
     $mavenScript = Join-Path $PSScriptRoot 'maven.ps1'
-    if ($Action -eq 'run') { & $mavenScript 'spring-boot:run' }
+    if ($Action -eq 'run') { & $mavenScript 'spring-boot:run' '-Dspring-boot.run.profiles=dev' }
     else { & $mavenScript 'compile' ('flyway:' + $Action) }
     $scriptExitCode = $LASTEXITCODE
 } finally {

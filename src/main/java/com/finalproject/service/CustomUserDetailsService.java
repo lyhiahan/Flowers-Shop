@@ -1,4 +1,4 @@
-package com.finalproject.service.impl;
+package com.finalproject.service;
 
 import com.finalproject.entity.User;
 import com.finalproject.repository.UserRepository;

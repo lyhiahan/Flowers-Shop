@@ -27,7 +27,7 @@ class StaffRoleSeparationTests {
     @Autowired StoreMembershipRepository memberships;
     @Autowired OrderRepository orders;
     @Autowired ChatService chat;
-    @Autowired com.finalproject.service.impl.CustomUserDetailsService details;
+    @Autowired com.finalproject.service.CustomUserDetailsService details;
     @Autowired org.springframework.security.crypto.password.PasswordEncoder encoder;
     User manager, staff, customer, admin;
     Store own, foreign;

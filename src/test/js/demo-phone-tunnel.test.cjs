@@ -95,3 +95,28 @@ test('a child with no advertised origin times out and retries without hanging th
     assert.equal(f.children[0].killed, true);
     assert.equal(f.events.some(e => e.state === 'READY'), false);
 });
+
+test('new hostname survives several failed probes while DNS propagates', async t => {
+    let attempts = 0;
+    const f = fixture({startupTimeoutMs:2000, probe:async () => ++attempts >= 5});
+    t.after(() => f.tunnel.stop());
+    await f.tunnel.start();
+    f.children[0].stderr.write('https://propagating-phone.trycloudflare.com\n');
+    await until(() => f.events.at(-1).state === 'READY');
+    assert.ok(attempts >= 5);
+    assert.equal(f.children.length, 1);
+    assert.equal(f.children[0].killed, false);
+});
+
+test('provider rate limit clears the origin and waits before provisioning again', async t => {
+    const f = fixture({rateLimitDelayMs:150});
+    t.after(() => f.tunnel.stop());
+    await f.tunnel.start();
+    f.children[0].stderr.write('quick tunnel provisioning failed with status 429\n');
+    assert.equal(f.events.at(-1).code, 'RATE_LIMITED');
+    assert.equal(f.events.at(-1).url, null);
+    await pause(60);
+    assert.equal(f.children.length, 1);
+    await until(() => f.children.length === 2);
+    assert.equal(f.children[0].killed, true);
+});

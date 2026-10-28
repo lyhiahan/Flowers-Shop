@@ -9,7 +9,7 @@ import com.finalproject.enums.Role;
 import com.finalproject.repository.UserRepository;
 import com.finalproject.service.CartService;
 import com.finalproject.service.OrderService;
-import com.finalproject.service.impl.CustomUserDetailsService;
+import com.finalproject.service.CustomUserDetailsService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

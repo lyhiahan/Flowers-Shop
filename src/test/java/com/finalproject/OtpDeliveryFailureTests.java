@@ -6,7 +6,7 @@ import com.finalproject.entity.User;
 import com.finalproject.enums.Role;
 import com.finalproject.repository.*;
 import com.finalproject.service.*;
-import com.finalproject.service.impl.AuthServiceImpl;
+import com.finalproject.service.AuthService;
 import jakarta.persistence.EntityManager;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.Test;
@@ -21,10 +21,10 @@ class OtpDeliveryFailureTests {
     private final OtpVerificationRepository otps = mock(OtpVerificationRepository.class);
     private final EmailService email = mock(EmailService.class);
     private final CartRepository carts = mock(CartRepository.class);
-    private AuthServiceImpl auth() {
+    private AuthService auth() {
         var validator = mock(Validator.class);
         when(validator.validate(any(RegisterRequest.class))).thenReturn(Set.of());
-        return new AuthServiceImpl(users, otps, carts, email, mock(PasswordEncoder.class), validator, mock(EntityManager.class), java.time.Clock.system(java.time.ZoneId.of("Asia/Bangkok")));
+        return new AuthService(users, otps, carts, email, mock(PasswordEncoder.class), validator, mock(EntityManager.class), java.time.Clock.system(java.time.ZoneId.of("Asia/Bangkok")));
     }
     private RegisterRequest request() {
         var request = new RegisterRequest();

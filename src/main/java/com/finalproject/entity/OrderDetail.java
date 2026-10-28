@@ -32,9 +32,13 @@ public class OrderDetail {
     @Column(length = 10)
     private OrderType orderType;
 
+    // Legacy database field: retained for historical records; never used by flower checkout.
     private BigDecimal depositFee;
+    // Legacy database field: retained for historical records; never used by flower checkout.
     private LocalDate rentStartDate;
+    // Legacy database field: retained for historical records; never used by flower checkout.
     private LocalDate rentEndDate;
+    // Legacy database field: retained for historical records; never used by flower checkout.
     private LocalDate actualReturnDate;
 
     public long getRentalDays() {

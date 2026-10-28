@@ -1,6 +1,6 @@
 package com.finalproject;
 
-import com.finalproject.service.impl.EmailServiceImpl;
+import com.finalproject.service.EmailService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.system.CapturedOutput;
@@ -18,8 +18,8 @@ import static org.mockito.Mockito.*;
 class OtpLoggingSafetyTests {
     private static final String OTP = "918273";
     private final JavaMailSender sender = mock(JavaMailSender.class);
-    private EmailServiceImpl service(String password) {
-        var service = new EmailServiceImpl(sender, mock(com.finalproject.service.BrevoOtpSender.class));
+    private EmailService service(String password) {
+        var service = new EmailService(sender, mock(com.finalproject.service.BrevoOtpSender.class));
         ReflectionTestUtils.setField(service, "provider", "smtp");
         ReflectionTestUtils.setField(service, "mailPassword", password);
         ReflectionTestUtils.setField(service, "fromEmail", "sender@example.test");
