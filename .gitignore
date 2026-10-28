@@ -46,6 +46,7 @@ build/
 !.env.example
 !.env.aiven.example
 !.env.local-postgres.example
+!.env.render.example
 application-local.properties
 *.zip
 *.rar

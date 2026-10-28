@@ -5,7 +5,11 @@ target/
 docs/*.docx
 *.log
 .env
-.env.aiven
-.env.local-postgres
+.env.*
+*.pem
+*.key
+.codex/
+docs/
+scripts/
 reports/
 upload/

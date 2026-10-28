@@ -62,6 +62,13 @@ class SystemHttpSmokeTests {
                 .connectTimeout(Duration.ofSeconds(5)).build();
     }
 
+    @Test void deploymentHealthCheckIsPublicAndExposesOnlyLiveness() throws Exception {
+        var response = get(client(), "/healthz");
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(response.headers().firstValue("content-type").orElse("")).contains("application/json");
+        assertThat(response.body()).isEqualTo("{\"status\":\"UP\"}");
+    }
+
     @Test void failedLoginRetainsSubmittedEmailThroughRealRedirectAndSessionCookie() throws Exception {
         var browser = client();
         String login = get(browser, "/login").body();

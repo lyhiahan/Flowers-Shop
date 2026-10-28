@@ -1,0 +1,48 @@
+services:
+  - type: web
+    name: flowers-shop
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    autoDeployTrigger: "off"
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: aiven
+      - key: SERVER_ADDRESS
+        value: 0.0.0.0
+      - key: SERVER_FORWARD_HEADERS_STRATEGY
+        value: framework
+      - key: SESSION_COOKIE_SECURE
+        value: "true"
+      - key: AIVEN_HOST
+        value: pg-2679153a-rental-retail-shop.c.aivencloud.com
+      - key: AIVEN_PORT
+        value: "16325"
+      - key: AIVEN_DATABASE
+        value: defaultdb
+      - key: AIVEN_USER
+        value: avnadmin
+      - key: AIVEN_PASSWORD
+        sync: false
+      - key: AIVEN_SSLMODE
+        value: require
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DEMO_PAYMENT_AUTO_TUNNEL_ENABLED
+        value: "false"
+      - key: CLOUDINARY_CLOUD_NAME
+        value: rbw3u9td
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: MAIL_PROVIDER
+        value: brevo
+      - key: MAIL_FROM_EMAIL
+        sync: false
+      - key: MAIL_FROM_NAME
+        value: Hoa Tươi Sài Gòn
+      - key: BREVO_API_KEY
+        sync: false

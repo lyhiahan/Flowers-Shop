@@ -66,6 +66,18 @@ class BrevoOtpSenderTests {
         server.verify(); assertThat(output.getAll()).doesNotContain(KEY, OTP);
     }
 
+    @Test void deploymentPlaceholderKeyIsRejectedBeforeCallingBrevo() {
+        ReflectionTestUtils.setField(sender, "apiKey", "replace_with_your_brevo_key");
+        assertThatThrownBy(() -> send("buyer@example.test")).hasMessageContaining("Chưa cấu hình");
+        server.verify();
+    }
+
+    @Test void deploymentPlaceholderSenderIsRejectedBeforeCallingBrevo() {
+        ReflectionTestUtils.setField(sender, "fromEmail", "your_verified_sender@example.com");
+        assertThatThrownBy(() -> send("buyer@example.test")).hasMessageContaining("địa chỉ gửi");
+        server.verify();
+    }
+
     @Test void incompleteKeyFailsBeforeMakingAProviderRequest(CapturedOutput output) {
         ReflectionTestUtils.setField(sender, "apiKey", "*");
         assertThatThrownBy(() -> send("buyer@example.test")).isInstanceOf(IllegalStateException.class)

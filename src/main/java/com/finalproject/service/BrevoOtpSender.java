@@ -24,11 +24,11 @@ public class BrevoOtpSender {
     public BrevoOtpSender(@Lazy @Qualifier("otpMailRestClient") RestClient client) { this.client = client; }
 
     public void send(String recipient, String subject, String text) {
-        if (apiKey == null || apiKey.trim().length() < 20 || apiKey.contains("placeholder") || apiKey.trim().equals("replace_locally")) {
+        if (apiKey == null || apiKey.trim().length() < 20 || apiKey.contains("placeholder") || apiKey.trim().startsWith("replace_")) {
             log.warn("BREVO_API_KEY thiếu hoặc chưa đầy đủ: email OTP chưa được gửi.");
             throw new IllegalStateException("Chưa cấu hình dịch vụ gửi email. Vui lòng liên hệ quản trị viên.");
         }
-        if (fromEmail == null || fromEmail.isBlank()) {
+        if (fromEmail == null || fromEmail.isBlank() || fromEmail.trim().equalsIgnoreCase("your_verified_sender@example.com")) {
             log.warn("Thiếu MAIL_FROM_EMAIL: cần địa chỉ gửi đã xác minh tại nhà cung cấp mail.");
             throw new IllegalStateException("Chưa cấu hình địa chỉ gửi email. Vui lòng liên hệ quản trị viên.");
         }

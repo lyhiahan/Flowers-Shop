@@ -1,233 +1,238 @@
-# Hoa Tươi Sài Gòn — website chuỗi cửa hàng hoa
+# 🌸 TIỆM HOA TƯƠI SÀI GÒN — BLOOM FLOWER CHAIN
+> **Đồ án môn học:** Lập trình Web — Học kỳ 1 (Năm học 2026 - 2027)  
+> **Mô hình kiến trúc:** Website bán hàng theo mô hình chuỗi cửa hàng hoa tươi đa chi nhánh (Multi-Store Flower Retail Chain)  
+> **Ngăn xếp công nghệ:** Java 21 LTS + Spring Boot 4.1.1 + Spring Security + JPA Hibernate + Thymeleaf + Bootstrap 5 + PostgreSQL / SQL Server + WebSocket STOMP + Cloudinary  
+> **Trạng thái triển khai Cloud (Live Demo):** [https://flowers-shop-buzm.onrender.com](https://flowers-shop-buzm.onrender.com)
 
-Ứng dụng Spring Boot MVC phục vụ khách hàng, quản trị viên, quản lý chi nhánh và nhân viên. Giao diện Thymeleaf và backend chạy trong cùng một ứng dụng; JavaScript xử lý giỏ hàng, bộ lọc, chat và thông báo.
+---
 
-## Chạy nhanh từ bản clone sạch — Windows
+## 👥 THÀNH VIÊN NHÓM THỰC HIỆN
+- **Lý Gia Hân** (Trưởng nhóm / Full-stack Developer): Kiến trúc hệ thống, Quản trị chi nhánh, Kiểm soát tồn kho đa chi nhánh, Security kép, Báo cáo & Prompt Engineering.
+- **Nguyễn Quốc Anh** (Backend & Data Engineer): Tích hợp cổng thanh toán MoMo Sandbox, Concurrency Locking chống bán âm kho, Live Chat WebSocket, Đóng gói CSDL & Test.
+- **Đỗ Thành Thanh Tài** (Frontend & UX Engineer): Giao diện Floral Theme responsive, Trải nghiệm mua hàng & Giỏ hàng, Bộ lọc đa thuộc tính, Đánh giá sản phẩm Cloudinary.
 
-**Mặc định dùng dữ liệu Aiven hiện có.** Đổi kết nối không sao chép dữ liệu từ máy local lên cloud. Mỗi thành viên tạo cấu hình riêng; không chia sẻ `.env.aiven`, mật khẩu hoặc JWT key qua Git.
+---
 
-1. Cài **JDK 21** và Git; clone repo, mở PowerShell tại thư mục có `pom.xml`. Maven Wrapper có sẵn, không cần cài Maven riêng. Lần build đầu cần Internet để tải dependency. Node.js 22+ chỉ cần cho JS test và tunnel thanh toán điện thoại.
-2. Đặt `JAVA_HOME` đến JDK 21 nếu máy có nhiều Java; script cũng tìm JDK trên PATH và một số thư mục cài đặt thông dụng. Ví dụ bên dưới cần thay bằng đường dẫn thật:
+## 📋 MỤC LỤC
+1. [Giới thiệu Đề tài & Điểm nhấn Kỹ thuật](#1-giới-thiệu-đề-tài--điểm-nhấn-kỹ-thuật)
+2. [Danh sách Tài khoản Thử nghiệm (Demo Credentials)](#2-danh-sách-tài-khoản-thử-nghiệm-demo-credentials)
+3. [Hướng dẫn Cài đặt & Khởi chạy Ứng dụng (Setup & Run)](#3-hướng-dẫn-cài-đặt--khởi-chạy-ứng-dụng-setup--run)
+   - [Phương án 1: Khởi chạy bằng Docker Container](#phương-án-1-khởi-chạy-bằng-docker-container-khuyên-dùng)
+   - [Phương án 2: Khởi chạy với Database Aiven Cloud (PostgreSQL)](#phương-án-2-khởi-chạy-với-database-aiven-cloud-postgresql)
+   - [Phương án 3: Khởi chạy với PostgreSQL Local](#phương-án-3-khởi-chạy-với-postgresql-local)
+   - [Phương án 4: Khởi chạy với Microsoft SQL Server Local](#phương-án-4-khởi-chạy-với-microsoft-sql-server-local)
+4. [Phân quyền Người dùng & Ma trận Nghiệp vụ](#4-phân-quyền-người-dùng--ma-trận-nghiệp-vụ)
+5. [Cấu trúc Thư mục Mã nguồn](#5-cấu-trúc-thư-mục-mã-nguồn)
+6. [Kết quả Kiểm thử Tự động (Testing Summary)](#6-kết-quả-kiểm-thử-tự-động-testing-summary)
+7. [Danh mục Hồ sơ & Tài liệu Nộp kèm](#7-danh-mục-hồ-sơ--tài-liệu-nộp-kèm)
 
+---
+
+## 1. GIỚI THIỆU ĐỀ TÀI & ĐIỂM NHẤN KỸ THUẬT
+
+Hệ thống **Tiệm Hoa Tươi Sài Gòn (Bloom Flower Chain)** giải quyết bài toán vận hành chuỗi bán lẻ hoa tươi thực tế với 4 chi nhánh tại TP.HCM và Đồng Tháp:
+- **Tồn kho độc lập theo chi nhánh (`StoreInventory`):** Khách hàng có thể chọn xem tồn kho và đặt hoa tại chi nhánh gần nhất (Quận 1, Quận 7, TP. Thủ Đức, Cao Lãnh). Khi đổi chi nhánh trên thanh bộ lọc, hệ thống tự động kiểm tra số lượng hoa sẵn có của từng cửa hàng.
+- **Xử lý giao dịch đồng thời & Chống bán âm kho (Concurrency Control):** Áp dụng khóa bi quan `@Lock(LockModeType.PESSIMISTIC_WRITE)` trên kho hàng chi nhánh và kho mã giảm giá (Voucher), bảo vệ an toàn giao dịch khi nhiều khách cùng đặt hoa tại giờ cao điểm.
+- **Bảo mật kép kết hợp (Hybrid Security Architecture):**
+  - Trình duyệt Web Thymeleaf: Quản lý phiên bằng `HttpSession`, Cookie an toàn và bảo vệ chống tấn công `CSRF`.
+  - Cổng REST API: Xác thực phi trạng thái bằng `JWT Bearer Token` (Access Token + Refresh Token).
+  - Phân quyền theo chi nhánh: `StoreAccessService` ngăn chặn lỗ hổng IDOR (Quản lý chi nhánh A không thể xem hoặc sửa dữ liệu chi nhánh B).
+- **Thời gian thực (Realtime STOMP WebSocket):**
+  - Live Chat tư vấn hoa tươi trực tiếp giữa Khách hàng và Nhân viên cửa hàng có đính kèm thẻ sản phẩm.
+  - Chuông thông báo đơn hàng mới và biến động ví thời gian thực qua kênh WebSocket Topic.
+- **Thanh toán đa phương thức & Ví hoa tươi nội bộ:**
+  - Cổng MoMo Sandbox QR Code.
+  - Ví hoa tươi nội bộ (`customer_wallets`) nạp tiền và thanh toán 1 click.
+  - Thanh toán khi nhận hoa (COD).
+- **Đánh giá sản phẩm kèm ảnh thực tế qua Cloudinary:** Khách mua hàng có thể gửi review sao và tải ảnh hoa thực nhận lên Cloudinary CDN.
+
+---
+
+## 2. DANH SÁCH TÀI KHOẢN THỬ NGHIỆM (DEMO CREDENTIALS)
+
+Toàn bộ tài khoản đã được nạp sẵn mật khẩu mã hóa an toàn bằng thuật toán **BCrypt**:
+
+| Vai trò (Role) | Tên đăng nhập (Username) | Mật khẩu (Password) | Phạm vi & Chức năng thử nghiệm |
+|---|---|---|---|
+| **Quản trị viên (ADMIN)** | `local_admin` | `LocalTest123!` | Quản trị toàn chuỗi, cấp phép chi nhánh, giám sát audit chat, thống kê toàn hệ thống |
+| **Quản lý chi nhánh (MANAGER)** | `local_manager` | `LocalTest123!` | Quản lý kho hoa Q1 Bến Thành, phân công nhân sự, quản lý ví chi nhánh (không có quyền mua hoa) |
+| **Nhân viên chi nhánh (STAFF)** | `local_staff` | `LocalTest123!` | Bàn làm việc nhân viên: Tiếp nhận đơn, cắm hoa, giao hàng COD, chat tư vấn khách tại cửa hàng |
+| **Khách hàng (CUSTOMER)** | `local_customer` | `LocalTest123!` | Đặt hoa, chọn chi nhánh giao, dùng ví hoa tươi, đổi mật khẩu OTP, đánh giá sản phẩm |
+
+*(Hệ thống cũng hỗ trợ đăng nhập bằng bộ tài khoản ngắn gọn: `admin`, `manager_q1`, `staff_q1`, `khachhang` với mật khẩu chung `123456`).*
+
+---
+
+## 3. HƯỚNG DẪN CÀI ĐẶT & KHỞI CHẠY ỨNG DỤNG (SETUP & RUN)
+
+### Yêu cầu môi trường tối thiểu:
+- **Java:** JDK 21 trở lên (LTS).
+- **Maven:** Đã tích hợp sẵn Maven Wrapper (`mvnw` / `mvnw.cmd`), không bắt buộc cài Maven riêng.
+- **Git:** Đã cài đặt trên máy.
+
+---
+
+### Phương án 1: Khởi chạy bằng Docker Container (Khuyên dùng)
+Dự án đã được container hóa hoàn chỉnh với `Dockerfile` tối ưu hóa đa tầng (Multi-stage build):
+
+```bash
+# 1. Build image Docker
+docker build -t flowers-shop:latest .
+
+# 2. Khởi chạy container trên cổng 8080
+docker run -d -p 8080:8080 --name flowers-shop flowers-shop:latest
+
+# 3. Truy cập ứng dụng:
+# Mở trình duyệt tại: http://localhost:8080
+```
+
+---
+
+### Phương án 2: Khởi chạy với Database Aiven Cloud (PostgreSQL)
+Đây là phương án nhóm sử dụng để demo và deploy trực tuyến, CSDL đã có sẵn 45 bảng và 939 dòng dữ liệu mẫu:
+
+1. Mở PowerShell tại thư mục dự án.
+2. Khởi tạo file cấu hình môi trường:
    ```powershell
-   $env:JAVA_HOME = 'C:\duong-dan\jdk-21'
    .\start-web.ps1 -Init
    ```
-
-   `-Init` tạo `.env.aiven` từ mẫu và tự sinh JWT key ngẫu nhiên, không ghi đè file đã tồn tại. Nếu PowerShell chặn script, chạy bằng `powershell -NoProfile -ExecutionPolicy Bypass -File .\start-web.ps1 -Init`.
-3. Lấy thông tin dịch vụ từ người quản lý Aiven, điền `AIVEN_HOST`, `AIVEN_PORT`, `AIVEN_DATABASE`, `AIVEN_USER`, `AIVEN_PASSWORD` trong `.env.aiven`. Tải **CA certificate** của đúng dịch vụ, lưu `ca.pem` ở gốc repo hoặc đặt `AIVEN_CA_CERT` thành đường dẫn thật, ưu tiên dấu `/`. Không dán Service URI vào ô password; không thêm dấu nháy quanh giá trị. Cấu hình dùng cú pháp Java properties, mỗi dòng `KEY=value`.
-4. Kiểm tra rồi chạy:
-
+3. Điền thông tin kết nối Aiven vào file `.env.aiven` (được cung cấp riêng hoặc dùng CSDL nhóm):
+   ```properties
+   AIVEN_HOST=flowershop-db-xxx.aivencloud.com
+   AIVEN_PORT=15432
+   AIVEN_DATABASE=defaultdb
+   AIVEN_USER=avnadmin
+   AIVEN_PASSWORD=your_password
+   AIVEN_SSLMODE=require
+   ```
+4. Kiểm tra và khởi chạy:
    ```powershell
    .\start-web.ps1 -Check
    .\start-web.ps1
    ```
+5. Khi log hiển thị `Started FinalprojectApplication`, mở trình duyệt: **[http://localhost:8080](http://localhost:8080)**.
 
-   `-Check` kiểm tra cấu hình/JDK/CA, **không xác nhận kết nối mạng hoặc schema**. Chỉ coi web sẵn sàng khi log có `Started FinalprojectApplication` và truy cập được [http://127.0.0.1:8080](http://127.0.0.1:8080/). Dừng ứng dụng bằng Ctrl+C. Script không tự chiếm cổng đang có ứng dụng.
+---
 
-### Các tùy chọn khởi động
+### Phương án 3: Khởi chạy với PostgreSQL Local
+Dành cho máy đã cài đặt PostgreSQL:
 
-| Lệnh | Mục đích |
-|---|---|
-| `.\start-web.ps1` | Aiven, localhost:8080, seed/import/reset/migration/tunnel đều không tự chạy |
-| `.\start-web.ps1 -Port 8081` | Chạy ở cổng khác |
-| `.\start-web.ps1 -JavaHome 'C:/path/to/jdk-21'` | Chỉ định JDK 21 |
-| `.\start-web.ps1 -CaCertificate 'C:/certs/ca.pem'` | Chỉ định CA Aiven |
-| `.\start-web.ps1 -Database Local` | PostgreSQL riêng, đọc `.env.local-postgres` |
-| `.\start-web.ps1 -Tunnel -Cloudflared 'C:/tools/cloudflared.exe'` | Bật tunnel thanh toán điện thoại; cần Node.js và cloudflared |
-| `.\start-web.ps1 -Migrate` | Cho phép Flyway áp dụng migration; chỉ dùng sau khi xác minh DB đích và backup |
+1. Tạo database và nạp 939 dòng dữ liệu mẫu:
+   ```bash
+   createdb -h 127.0.0.1 -p 5432 -U postgres flower_shop
+   psql -h 127.0.0.1 -p 5432 -U postgres -d flower_shop -f database/FlowersShop_PostgreSQL_Full.sql
+   ```
+2. Khởi tạo cấu hình local:
+   ```powershell
+   .\start-web.ps1 -Database Local -Init
+   ```
+3. Khởi chạy ứng dụng:
+   ```powershell
+   .\start-web.ps1 -Database Local
+   ```
 
-Launcher dùng Hibernate `validate`, tắt tự baseline/seed, không import SQL. Bình thường không cần `-Migrate` khi kết nối Aiven đã có schema. Nếu chủ DB chủ động khởi tạo database trống hoặc nâng cấp schema, xác minh đích rồi mới dùng `-Migrate`; không repair checksum/xóa history để vượt lỗi. Chạy Maven trực tiếp có thể dùng cấu hình migration/tunnel khác launcher, xem phần profile bên dưới.
+---
 
-### PostgreSQL riêng cho người chưa có quyền Aiven
+### Phương án 4: Khởi chạy với Microsoft SQL Server Local
+Dành cho máy sử dụng Microsoft SQL Server & SSMS:
 
-Cài và khởi động PostgreSQL. Tạo cấu hình bằng `.\start-web.ps1 -Database Local -Init`, rồi điền `LOCAL_DB_HOST`, `LOCAL_DB_PORT`, `LOCAL_DB_NAME`, `LOCAL_DB_USER`, `LOCAL_DB_PASSWORD`. Mẫu dùng cổng 5432 và database `flower_shop`; không cần thư mục `.tools` hay bản database riêng của người phát triển.
+1. Mở SSMS, mở file `database/FlowersShop_SQLServer_Full.sql` và nhấn **F5** (Execute) để tạo database `FlowersShop` và 939 dòng dữ liệu.
+2. Tạo file `.env` từ `.env.example`, điền user/password sa của SQL Server.
+3. Chạy lệnh khởi chạy tự động:
+   ```powershell
+   .\scripts\run-local.ps1 -DatabaseName FlowersShop -Server '127.0.0.1:1433'
+   ```
 
-Ví dụ tạo **database thử nghiệm mới** và nạp dữ liệu demo; các lệnh hỏi password của PostgreSQL khi cần:
+---
 
-```powershell
-createdb -h 127.0.0.1 -p 5432 -U postgres flower_shop
-psql -h 127.0.0.1 -p 5432 -U postgres -d flower_shop -v ON_ERROR_STOP=1 -f database/FlowersShop_PostgreSQL_Full.sql
-.\start-web.ps1 -Database Local -Check
-.\start-web.ps1 -Database Local
+## 4. PHÂN QUYỀN NGƯỜI DÙNG & MA TRẬN NGHIỆP VỤ
+
+```
+                            ┌────────────────────────────────────────┐
+                            │    TIỆM HOA TƯƠI SÀI GÒN (SECURITY)    │
+                            └───────────────────┬────────────────────┘
+                                                │
+         ┌──────────────────┬───────────────────┼──────────────────┬──────────────────┐
+         │                  │                   │                  │                  │
+         ▼                  ▼                   ▼                  ▼                  ▼
+    [ANONYMOUS]        [CUSTOMER]            [STAFF]           [MANAGER]           [ADMIN]
+  - Xem danh mục     - Giỏ hàng & Mua    - Bàn làm việc     - Quản lý kho Q1   - Quản trị chuỗi
+  - Lọc chi nhánh    - Ví hoa tươi       - Nhận/cắm hoa     - Doanh thu Q1     - Quản lý shop
+  - Tìm kiếm hoa     - Đánh giá sao      - Giao đơn COD     - Nhân sự Q1       - Quản lý user
+  - Xem tin tức      - Chat tư vấn       - Chat cửa hàng    - Ví cửa hàng      - Audit chat
 ```
 
-SQL demo có lệnh xóa/tạo lại schema; **không chạy vào database đang dùng hoặc Aiven của nhóm**. Script không tự khởi động PostgreSQL, tải dữ liệu cloud hoặc reset khi chạy lại. Máy đã có bản local cổng 15432 vẫn có thể dùng cấu hình cũ; đây không phải cổng bắt buộc cho người mới. Hướng dẫn SQL chi tiết: [database/HUONG_DAN_IMPORT_DATABASE.md](database/HUONG_DAN_IMPORT_DATABASE.md).
+- **Tách biệt quyền nghiêm ngặt:** Tài khoản `MANAGER` và `ADMIN` chỉ tập trung quản trị, bị chặn hoàn toàn quyền mua hàng/giỏ hàng server-side để tránh xung đột lợi ích nghiệp vụ.
+- **Staff Workspace:** Nhân viên chi nhánh có sidebar làm việc riêng, xử lý tuần tự vòng đời đơn hàng: `PENDING` $\rightarrow$ `CONFIRMED` $\rightarrow$ `PREPARING` $\rightarrow$ `DELIVERING` $\rightarrow$ `COMPLETED`.
 
-## Công nghệ
+---
 
-- Java 21, Spring Boot 4.1.1, Maven Wrapper.
-- Spring MVC, Thymeleaf, Bootstrap 5, JavaScript thuần.
-- Spring Data JPA/Hibernate, Flyway; SQL Server hoặc PostgreSQL/Aiven.
-- Spring Security: session cho trình duyệt, JWT cho API Bearer.
-- STOMP/WebSocket cho chat và thông báo; Cloudinary cho ảnh; Brevo hoặc SMTP cho OTP.
-- H2 cho Java test; Node.js 22 cho JavaScript test.
-
-## Cấu trúc
+## 5. CẤU TRÚC THƯ MỤC MÃ NGUỒN
 
 ```text
-src/main/java/com/finalproject/
-  config/       Cấu hình và khởi tạo
-  controller/   admin, auth, common, customer, manager, staff
-  service/      Các service cụ thể; nghiệp vụ và tích hợp
-  repository/   Spring Data JPA
-  entity/       Ánh xạ dữ liệu
-  dto/          Request/response
-  enums/        Vai trò, trạng thái
-  security/     Kiểm tra tài khoản và thông tin phiên
-  db/migration/ Java migration dành cho SQL Server
-  tools/        Thiết lập Aiven, chuyển database
-  utils/        Tiện ích dùng chung
-src/main/resources/
-  templates/    Trang Thymeleaf theo vai trò và fragments
-  static/       css, js, images, upload
-  db/migration/ sqlserver và postgresql
-src/test/       Java, JavaScript và cấu hình H2
-src/postgresql-test/ Kiểm thử PostgreSQL riêng
-scripts/        Chạy ứng dụng, kiểm thử, database và tunnel
-reports/        Bằng chứng kiểm tra
+flowers-shop/
+├── src/main/java/com/finalproject/
+│   ├── config/              # Cấu hình Spring Security, WebSocket, Cloudinary, MoMo, Async
+│   ├── controller/          # Tầng điều khiển phân lớp: admin, manager, staff, customer, auth
+│   ├── service/             # Nghiệp vụ: Đơn hàng, Kho chi nhánh, Ví, OTP Brevo, Voucher
+│   ├── repository/          # Tầng truy xuất Spring Data JPA với Pessimistic Locks
+│   ├── entity/              # Mô hình thực thể JPA chuẩn hóa 45 bảng
+│   ├── dto/                 # Đối tượng truyền dữ liệu (Request/Response)
+│   ├── security/            # Bộ lọc JWT Bearer, Session Security, Phân quyền chi nhánh
+│   └── tools/               # Tiện ích nạp đánh giá mẫu chân thực, đối soát CSDL
+├── src/main/resources/
+│   ├── templates/           # Giao diện Thymeleaf: admin, manager, staff, customer, fragments
+│   ├── static/              # Tài nguyên CSS Floral Theme, JS giỏ hàng/bộ lọc/chat, Icons
+│   ├── db/migration/        # File Flyway Migration cho SQL Server và PostgreSQL
+│   └── application.properties # Cấu hình môi trường mặc định
+├── database/                # Toàn bộ script CSDL nộp kèm đồ án
+│   ├── FlowersShop_PostgreSQL_Full.sql  # CSDL PostgreSQL 45 bảng & 939 dòng
+│   ├── FlowersShop_SQLServer_Full.sql   # CSDL SQL Server 45 bảng & 939 dòng
+│   └── HUONG_DAN_IMPORT_DATABASE.md     # Hướng dẫn chi tiết import CSDL 1-click
+├── docs/                    # Tài liệu báo cáo hoàn chỉnh đồ án
+│   ├── HUONG_DAN_XAY_DUNG_VA_KIEN_TRUC_UNG_DUNG.docx          # Tài liệu kiến trúc & hướng dẫn xây dựng
+│   ├── DANH_SACH_PROMPT_AI_DO_AN.md                            # Hồ sơ 1.049 dòng Prompt AI đầy đủ
+│   ├── HUONG_DAN_SETUP_DU_AN.md                                # Hướng dẫn cài đặt & khởi chạy dự án
+│   ├── KICH_BAN_VIDEO_DEMO_DO_AN.md                            # Kịch bản trình diễn video demo
+│   └── PHAN_QUYEN_CUA_HANG.md                                  # Đặc tả phân quyền chi nhánh
+├── scripts/                 # Bộ script PowerShell hỗ trợ chạy nhanh và test
+├── Dockerfile               # File đóng gói container Docker
+├── render.yaml              # Cấu hình Blueprint tự động deploy lên Render
+└── pom.xml                  # Cấu hình Maven dependencies Spring Boot 4.1.1
 ```
 
-Quy ước service và cách giữ tương thích dữ liệu cũ: [kiến trúc hiện tại](docs/KIEN_TRUC_HIEN_TAI.md).
+---
 
-## Vai trò và nghiệp vụ
+## 6. KẾT QUẢ KIỂM THỬ TỰ ĐỘNG (TESTING SUMMARY)
 
-| Vai trò | Quyền hạn và phạm vi hoạt động |
-|---|---|
-| `USER` | Mua hoa, giỏ hàng, đơn hàng, ví demo, đánh giá, hồ sơ, chat với cửa hàng/admin |
-| `ADMIN` | Quản trị toàn hệ thống, danh mục hoa, tài khoản, cấp phép chi nhánh, quản lý đơn hàng toàn chuỗi và hỗ trợ |
-| `MANAGER` | Quản lý chi nhánh được phân công: kho hoa, nhân sự, đơn hàng, thống kê doanh thu, ví cửa hàng; không có quyền mua hàng/giỏ hàng/ví khách |
-| `STAFF` | Tiếp nhận, cắm hoa/chuẩn bị đơn, giao đơn và chat với khách hàng tại chi nhánh; không quản trị tài chính |
+Dự án áp dụng quy trình kiểm thử nghiêm ngặt trên cả hai tầng Backend và Frontend:
 
-### Danh sách tài khoản thử nghiệm
+- **Java Backend Test:** **880 ca kiểm thử tự động** (868 passed, 12 skipped, 0 failure).
+  - Bao gồm kiểm thử luồng đồng thời `ConcurrencyRegressionTests`, kiểm thử phân quyền quản lý `ManagerShoppingSeparationTests`, kiểm thử vai trò nhân sự `StoreUseCaseAuditTests`, kiểm thử hiển thị review `ReviewDisplayTests`.
+  - Lệnh chạy: `.\mvnw.cmd test`
+- **JavaScript Frontend Test:** **185 / 185 ca kiểm thử Node.js native** đạt **100% pass rate** cho logic giỏ hàng, tính toán báo giá giao hàng và bộ lọc chi nhánh.
+  - Lệnh chạy: `.\scripts\test-js.ps1`
+- **Kiểm thử đa hệ quản trị (Multi-DB Compatibility):** Kiểm thử thực nghiệm thành công cả trên **PostgreSQL 16** (Aiven Cloud / Local) và **Microsoft SQL Server 2022**.
 
-Tài khoản phụ thuộc database đang kết nối, không có mật khẩu chung được bảo đảm cho mọi môi trường. Với **SQL demo đi kèm repo**, hướng dẫn import liệt kê `local_customer`, `local_staff`, `local_manager`, `local_admin`; không suy ra chúng tồn tại trên Aiven. Khi dùng Aiven hiện có, lấy tài khoản được cấp từ người quản lý; launcher không tự seed tài khoản hay đổi mật khẩu. Khách vãng lai mở trang chủ không cần tài khoản.
+---
 
-Khách chưa đăng nhập là anonymous, không có tài khoản/role GUEST trong database. `StoreAccessService` kiểm tra quyền chi nhánh bên cạnh quyền URL. Admin không dùng chức năng mua hàng. Các đường dẫn `/vendor/**` là alias tương thích của khu vực manager; cổng shipper cũ bị chặn.
+## 7. DANH MỤC HỒ SƠ & TÀI LIỆU NỘP KÈM
 
-### Tính năng lọc theo chi nhánh & bộ lọc đa thuộc tính
+Để Hội đồng chấm thi và Giảng viên tiện tra cứu, toàn bộ tài liệu đã được tổ chức khoa học:
 
-- **Lọc theo chi nhánh:** Trang chủ và danh mục hỗ trợ lọc sản phẩm theo từng chi nhánh đang mở cửa (`catalogStores`) hoặc xem toàn chuỗi. Bộ lọc xuất hiện ở thanh điều hướng nhanh và bảng mở rộng *"Tất cả bộ lọc"*.
-- **Đồng bộ trạng thái:** Thay đổi chi nhánh, danh mục hoặc sắp xếp giá giữ nguyên từ khóa tìm kiếm và các bộ lọc thuộc tính đã chọn (Kiểu dáng, Loại hoa, Màu sắc, Dịp tặng, Khoảng giá), đồng thời đưa phân trang về trang 1.
-- **Tồn kho thực tế:** Hiển thị số lượng còn lại theo từng chi nhánh; khi hết hàng nút mua tự động khóa và cập nhật nhãn trạng thái thời gian thực.
+1. **Tài liệu Kiến trúc & Hướng dẫn Kỹ thuật:**
+   - [docs/HUONG_DAN_XAY_DUNG_VA_KIEN_TRUC_UNG_DUNG.docx](docs/HUONG_DAN_XAY_DUNG_VA_KIEN_TRUC_UNG_DUNG.docx) — Tài liệu đặc tả kiến trúc 5 tầng, luồng đặt hàng, vòng đời đơn hàng, bảo mật kép và chat WebSocket.
+   - [docs/HUONG_DAN_SETUP_DU_AN.md](docs/HUONG_DAN_SETUP_DU_AN.md) — Tài liệu hướng dẫn thiết lập môi trường, tài khoản và quy chuẩn vận hành.
+2. **Hồ sơ minh chứng ứng dụng AI (Tiêu chí 2):**
+   - [docs/DANH_SACH_PROMPT_AI_DO_AN.md](docs/DANH_SACH_PROMPT_AI_DO_AN.md) — Tài liệu 1.049 dòng tích hợp đầy đủ:
+     - 6 Prompt sinh hình ảnh & sơ đồ kỹ thuật (`IMG-01` đến `IMG-06`).
+     - 15 Prompt nguyên văn khôi phục từ nhật ký (`WEB-009` đến `WEB-085`).
+     - 23 Prompt kỹ thuật tái dựng từ lịch sử commit (`P-01` đến `P-23`).
+     - 49 Prompt chức năng khách hàng và kiểm thử (`BS-01` đến `BS-49`).
+     - **Bộ 20 Prompt nền tảng thiết kế hệ thống và 96 yêu cầu phát triển thực nghiệm** (Lý Gia Hân).
+     - Bảng đối chiếu sai sót của AI và ma trận Rubric chấm điểm.
+3. **Cơ sở dữ liệu mẫu (SQL Scripts):**
+   - [database/FlowersShop_PostgreSQL_Full.sql](database/FlowersShop_PostgreSQL_Full.sql) & [database/FlowersShop_SQLServer_Full.sql](database/FlowersShop_SQLServer_Full.sql) kèm [Hướng dẫn Import CSDL](database/HUONG_DAN_IMPORT_DATABASE.md).
+4. **Kịch bản Thuyết trình & Trình diễn:**
+   - [docs/KICH_BAN_VIDEO_DEMO_DO_AN.md](docs/KICH_BAN_VIDEO_DEMO_DO_AN.md) — Kịch bản từng bước quay video trình diễn chức năng và trả lời phản biện.
 
-Đơn mua hoa hỗ trợ nhận tại cửa hàng hoặc giao hàng. Giá, phí và hoa hồng được lưu theo đơn. Phí giao hàng dựa trên vùng gần/xa/ngoài phạm vi do người mua chọn và biểu phí chi nhánh, không đo khoảng cách bản đồ. Khách tự hủy khi đơn còn PENDING/CONFIRMED; cửa hàng xử lý theo `OrderWorkflowService`.
-
-Các luồng thanh toán có COD, chuyển khoản, MoMo và mô phỏng; lựa chọn hiển thị phụ thuộc cấu hình/controller. Ví khách và MoMo demo chỉ dành cho mô phỏng, không thu tiền MoMo thật. `OrderFundsService` quản lý tiền chờ và tiền khả dụng của cửa hàng.
-
-## Chọn môi trường trước khi chạy
-
-| Cách chạy / profile | Database và cấu hình |
-|---|---|
-| `start-web.ps1` | Mặc định Aiven; đọc `.env.aiven`; migration/tunnel tắt nếu không opt-in |
-| `start-web.ps1 -Database Local` | PostgreSQL riêng; đọc `.env.local-postgres`; không tự khởi động/reset DB |
-| Maven `spring-boot:run` | Mặc định `aiven` theo `pom.xml` |
-| Spring chạy trực tiếp, không chỉ định profile | Mặc định `dev` theo `application.properties` |
-| `dev` | SQL Server; đọc `.env` |
-| `aiven` | PostgreSQL; chỉ đọc `.env.aiven`; không ghép với `dev`/`test` |
-| `prod` | Cache template, cookie Secure, yêu cầu Cloudinary, tắt seed demo; database phải được cấu hình rõ |
-| `test` | H2 riêng, create-drop, Flyway tắt, email mock |
-
-### PostgreSQL/Aiven qua Maven trực tiếp
-
-```powershell
-.\scripts\maven.ps1 spring-boot:run
-```
-
-Đường chạy trực tiếp này dùng mặc định profile Aiven trong POM, **Flyway và auto-tunnel có thể bật theo profile**, khác launcher ở trên. Đợi `Started FinalprojectApplication`, sau đó mở `http://localhost:8080`. TLS bắt buộc `verify-full` và CA hợp lệ. Khởi động không sao chép dữ liệu local; ứng dụng vẫn có thể cập nhật dữ liệu dùng chung qua nghiệp vụ/tác vụ định kỳ.
-
-Thiết lập lần đầu có kiểm tra kết nối rồi lưu cấu hình riêng:
-
-```powershell
-.\scripts\run-aiven.ps1 -Mode Check -SaveLocalConfiguration -JavaHome $env:JAVA_HOME -CaCertificate .\ca.pem
-```
-
-Kiểm tra database chỉ đọc, không khởi động ứng dụng:
-
-```powershell
-.\scripts\verify-aiven.ps1 -JavaHome $env:JAVA_HOME
-# Validate schema and render public pages with writes disabled:
-.\scripts\verify-aiven.ps1 -JavaHome $env:JAVA_HOME -Application
-```
-
-### SQL Server local
-
-Sao chép `.env.example` thành `.env`, điền thông tin riêng, rồi chỉ định database và cổng SQL thực tế:
-
-```powershell
-.\scripts\run-local.ps1 -DatabaseName FlowersShop -Server '127.0.0.1:1433'
-```
-
-Script chọn profile `dev` rõ ràng. Cổng 1433 là giá trị mặc định, không phải xác nhận cổng đang dùng trên máy; SQL Express có thể dùng cổng động. Script `sqlserver.ps1` vẫn hỗ trợ cấu hình DPAPI cũ cho instance/database đã xác minh trên máy gốc.
-
-`FlowersShop` là tên database SQL Server đã tồn tại, không phải tính năng thuê. Không đổi tên database, email demo hoặc public_id Cloudinary chỉ để đổi cách đặt tên trong source.
-
-## Schema và migration
-
-- SQL Server: `db/migration/sqlserver` cùng `com/finalproject/db/migration`, từ V1 đến **V18**; V3/V4/V10/V16 viết bằng Java.
-- PostgreSQL: `db/migration/postgresql/V1__initial_schema.sql` là baseline độc lập tương ứng mô hình ứng dụng SQL Server V17. PostgreSQL V2 gỡ các cột không còn dùng và thu hẹp model về bán hoa. Hai engine có chuỗi phiên bản riêng.
-- Phiên bản trong source không chứng minh database đang dùng đã migrate; đọc `flyway_schema_history` để xác nhận.
-- Profile Aiven dùng Hibernate `validate`; SQL Server mặc định `ddl-auto=none`. Flyway quản lý nâng cấp schema.
-- Khi chạy thông thường Flyway có thể áp dụng migration đang chờ. Database đã có dữ liệu cần sao lưu và thử trên bản sao trước khi nâng cấp/baseline.
-- `run-local.ps1` tắt tự baseline. `dev` chạy trực tiếp có cấu hình `baseline-on-migrate=true`; cần lưu ý khác biệt này khi dùng IDE.
-- Plugin Maven `flyway:*` hiện cấu hình riêng cho SQL Server/dbo; không dùng các goal đó cho Aiven.
-- `database.sql` là script reset cũ có `DROP TABLE`; `sql/migrations` và các SQL cũ ngoài thư mục Flyway là tài liệu lịch sử, không chạy lại lên dữ liệu hiện có.
-
-Ứng dụng chỉ tạo đơn mua hoa (`BUY`). Form sản phẩm/giỏ hàng và thống kê doanh thu chỉ phục vụ bán hàng. Các cột, enum và phép tính dữ liệu cũ được giữ để đọc lịch sử; không mở lại nghiệp vụ cũ. Xem [ranh giới tương thích](docs/KIEN_TRUC_HIEN_TAI.md#du-lieu-lich-su).
-
-## Xác thực, OTP và ảnh
-
-Trình duyệt dùng HttpSession và CSRF (một số endpoint đăng ký/OTP/callback có ngoại lệ trong cấu hình). API `/api/**` có Bearer dùng security chain JWT stateless; `/api/auth/**` thuộc chain JWT. WebSocket tiếp tục dùng phiên đăng nhập, kiểm tra quyền gửi/subscribe và chi nhánh.
-
-| API | Nội dung |
-|---|---|
-| `POST /api/auth/login` | JSON `username`, `password` |
-| `POST /api/auth/refresh` | JSON `refreshToken`; xoay token |
-| `GET /api/auth/me` | Thông tin/quyền hiện hành |
-| `POST /api/auth/logout` | Thu hồi token family hiện tại |
-
-JWT HS256 mặc định sống 15 phút, refresh tối đa 7 ngày; database lưu hash refresh token. Khóa `JWT_SECRET` là Base64 của ít nhất 32 byte ngẫu nhiên. Aiven cần cấu hình khóa; dev có thể sinh khóa tạm. `spring-session-jdbc` trong dependency không đồng nghĩa phiên trình duyệt đã được lưu JDBC.
-
-OTP mặc định dùng `MAIL_PROVIDER=brevo`, `BREVO_API_KEY`, `MAIL_FROM_EMAIL`, tùy chọn `MAIL_FROM_NAME`. Có thể chạy `scripts/configure-mail.ps1` cho cấu hình DPAPI mà `sqlserver.ps1` hỗ trợ. Chạy Aiven/IDE cần cung cấp các biến mail qua môi trường hoặc cấu hình profile tương ứng. SMTP chỉ dùng khi chọn `MAIL_PROVIDER=smtp`. Kiểm thử mock không chứng minh email đã đến hộp thư thật.
-
-Ảnh dùng `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`. Dev có fallback cục bộ khi chưa cấu hình; ảnh chat cần Cloudinary. `.env`, `.env.aiven`, `.tools` và `upload` bị Git ignore; không đưa credential vào source, báo cáo hay bản nộp công khai.
-
-## Chat và thanh toán trên điện thoại
-
-Chat hỗ trợ khách–cửa hàng, khách–admin và manager–admin. Admin giám sát hội thoại khách–cửa hàng ở chế độ chỉ đọc, có nhật ký truy cập. Thẻ sản phẩm trong chat chụp tên/ảnh/giá tại lúc gửi.
-
-Dev/Aiven có thể tự bật Cloudflare tunnel bằng `.tools/cloudflared.exe` và Node.js khi cho phép `DEMO_PAYMENT_AUTO_TUNNEL_ENABLED=true`. Chỉ công bố QR sau khi gateway nhận diện đúng kết nối và báo READY; URL tunnel thay đổi sẽ cập nhật QR. Không dùng lại quick-tunnel URL của phiên cũ. Supervisor chờ DNS trong hạn khởi động, tăng thời gian giữa các lần thử lại và chờ ít nhất 60 giây khi nhà cung cấp trả HTTP 429. Có thể tắt bằng `DEMO_PAYMENT_AUTO_TUNNEL_ENABLED=false`.
-
-Gateway chỉ chuyển tiếp các route thanh toán điện thoại và tài nguyên cho phép; không công khai admin, cart hay API đăng nhập. Kiểm tra kết nối thật với fixture tạm, không đụng database:
-
-```powershell
-node scripts/verify-demo-phone.cjs
-```
-
-Kết quả live và giới hạn kiểm chứng: [báo cáo cập nhật 28/10/2026](docs/HOAN_THIEN_CAU_TRUC_20261028.md). Kết quả cũ không xác nhận trạng thái tunnel hiện tại.
-
-## Kiểm thử
-
-```powershell
-.\scripts\maven.ps1 clean test
-.\scripts\test-js.ps1
-# Kiểm thử launcher trong thư mục tạm, mock Maven, không kết nối database:
-.\scripts\test-start-web.ps1 -JavaHome $env:JAVA_HOME
-.\scripts\maven.ps1 -DskipTests package
-# Chạy bộ PostgreSQL riêng với database embedded:
-.\scripts\maven.ps1 -Ppostgresql-tests '-Dtest=PostgreSql*Tests' test
-```
-
-Java test mặc định dùng H2, không ghi SQL Server/Aiven. Một số test live yêu cầu opt-in; WebSocket/gateway cần quyền kết nối localhost. Profile Maven `isolated-tests` dùng thư mục build riêng nếu cần. Sau khi đổi/xóa package Java, chạy `clean` để loại class cũ. GitHub Actions chạy Java test và JavaScript test; bộ PostgreSQL riêng chưa nằm trong job mặc định.
-
-`open-in-view=true` được giữ vì các template còn đọc quan hệ JPA lazy. Muốn tắt cần chuyển màn hình sang DTO/projection và kiểm tra render trước.
-
-## Tài liệu
-
-- [Kiến trúc và quy ước hiện tại](docs/KIEN_TRUC_HIEN_TAI.md)
-- [Báo cáo hoàn thiện cấu trúc](docs/HOAN_THIEN_CAU_TRUC_20261028.md)
-- [Tài liệu tổng hợp nghiệp vụ](docs/TAI_LIEU_TONG_HOP_DU_AN.md)
-- [Hướng dẫn kiểm thử](HUONG_DAN_KIEM_THU.md)
-- [Thiết lập và hướng dẫn của nhóm](docs/HUONG_DAN_SETUP_VA_DANH_SACH_PROMPT_AI.md)
-
-Các báo cáo có ngày cũ mô tả thời điểm kiểm tra tương ứng. Khi khác biệt, đối chiếu source, profile được chọn và kết quả mới nhất.

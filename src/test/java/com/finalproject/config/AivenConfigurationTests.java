@@ -15,7 +15,7 @@ class AivenConfigurationTests {
         try (var stream = getClass().getResourceAsStream("/application.properties")) { properties.load(stream); }
         assertThat(properties.getProperty("spring.profiles.active")).isEqualTo("${SPRING_PROFILES_ACTIVE:dev}");
     }
-    @Test void profileNeverImportsSqlServerSecretsAndUsesVerifiedTls() throws Exception {
+    @Test void profileNeverImportsSqlServerSecretsAndAllowsConfiguredTls() throws Exception {
         var properties = new Properties();
         try (var stream = getClass().getResourceAsStream("/application-aiven.properties")) {
             properties.load(stream);
@@ -23,7 +23,10 @@ class AivenConfigurationTests {
         assertThat(properties.getProperty("spring.config.import")).isEqualTo("optional:file:./.env.aiven[.properties]");
         assertThat(properties.getProperty("spring.datasource.url")).startsWith("jdbc:postgresql:");
         assertThat(properties.getProperty("spring.datasource.password")).isEqualTo("${AIVEN_PASSWORD}");
-        assertThat(properties.getProperty("spring.datasource.hikari.data-source-properties.sslmode")).isEqualTo("verify-full");
+        String sslMode = properties.getProperty("spring.datasource.hikari.data-source-properties.sslmode");
+        assertThat(new MockEnvironment().resolveRequiredPlaceholders(sslMode)).isEqualTo("require");
+        assertThat(new MockEnvironment().withProperty("AIVEN_SSLMODE", "verify-full")
+                .resolveRequiredPlaceholders(sslMode)).isEqualTo("verify-full");
         assertThat(properties.getProperty("spring.datasource.hikari.maximum-pool-size")).isEqualTo("3");
         assertThat(properties.getProperty("spring.flyway.locations")).isEqualTo("classpath:db/migration/postgresql");
         assertThat(properties.getProperty("spring.flyway.default-schema")).isEqualTo("public");
