@@ -6,6 +6,7 @@
         <label class="form-label small fw-bold mb-1" th:for="${idPrefix + 'Select'}">Khoảng thời gian</label>
         <select data-report-period th:id="${idPrefix + 'Select'}" th:name="${parameterName}" class="form-select form-select-sm">
             <option th:id="${idPrefix + 'Today'}" value="today" th:selected="${reportRange.period == 'today'}">Hôm nay</option>
+            <option th:id="${idPrefix + '3Days'}" value="3days" th:selected="${reportRange.period == '3days'}">3 ngày gần nhất</option>
             <option th:id="${idPrefix + 'Day'}" value="7days" th:selected="${reportRange.period == '7days'}">7 ngày gần nhất</option>
             <option th:id="${idPrefix + '30Days'}" value="30days" th:selected="${reportRange.period == '30days'}">30 ngày gần nhất</option>
             <option th:id="${idPrefix + 'Custom'}" value="custom" th:selected="${reportRange.period == 'custom'}">Từ ngày… đến ngày…</option>

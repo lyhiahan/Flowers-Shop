@@ -24,6 +24,7 @@ public record ReportRange(String period, LocalDate startDate, LocalDate endDate,
         LocalDate today = LocalDate.now(clock);
         return switch (period) {
             case "today" -> new ReportRange("today", today, today, Bucket.DAY);
+            case "3days", "3day" -> new ReportRange("3days", today.minusDays(2), today, Bucket.DAY);
             case "7days", "day" -> new ReportRange("7days", today.minusDays(6), today, Bucket.DAY);
             case "30days" -> new ReportRange("30days", today.minusDays(29), today, Bucket.DAY);
             case "custom" -> {

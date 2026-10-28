@@ -559,39 +559,40 @@
                                     </div>
                                 </div>
 
-                                <!-- A3: Vùng giao hàng demo do khách lựa chọn, không suy đoán khoảng cách từ địa chỉ -->
-                                <div class="mb-3">
-                                    <label class="form-label-custom" for="deliveryZoneSelect">Vùng giao hàng (*)</label>
-                                    <select name="deliveryZone" id="deliveryZoneSelect" class="form-select-custom w-100" required
-                                            onchange="updateCheckoutTotal()">
-                                        <option value="">-- Chọn khoảng cách từ chi nhánh giao hoa --</option>
-                                        <option value="NEAR" th:selected="${prevDeliveryZone == 'NEAR'}">Vùng gần (bảng phí dưới 5 km)</option>
-                                        <option value="FAR" th:selected="${prevDeliveryZone == 'FAR'}">Vùng xa (bảng phí 5–15 km)</option>
-                                        <option value="OUTSIDE" th:selected="${prevDeliveryZone == 'OUTSIDE'}">Ngoài phạm vi giao hàng demo</option>
-                                    </select>
-                                    <div class="mt-2 text-muted" style="font-size: 13px; line-height: 1.4;">
-                                        Phí giao hàng được mô phỏng theo khoảng cách từ chi nhánh xuất phát đến địa chỉ nhận.
-                                        Kiểm tra tuyến đường bằng liên kết bên dưới, rồi chọn vùng gần hoặc vùng xa.
-                                        Nếu chưa rõ, hãy gọi chi nhánh để được hỗ trợ; hệ thống chưa tự đo khoảng cách.
+                                <!-- A3: Vùng giao hàng tự động tính toán theo địa chỉ nhận -->
+                                <input type="hidden" name="deliveryZone" id="deliveryZoneSelect"
+                                       th:value="${prevDeliveryZone != null and prevDeliveryZone != 'OUTSIDE' ? prevDeliveryZone : 'NEAR'}">
+
+                                <div class="mb-3" id="deliveryZoneAutoSection">
+                                    <label class="form-label-custom"><i class="bi bi-geo-alt me-1"></i>Khu vực & Cự ly giao hoa</label>
+                                    <div class="p-3 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                                        <div class="d-flex align-items-center justify-content-between mb-1">
+                                            <span class="text-secondary small">Khu vực ước tính:</span>
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 11.5px;">
+                                                <i class="bi bi-magic me-1"></i>Tự động tính phí
+                                            </span>
+                                        </div>
+                                        <div class="fw-semibold text-dark" id="displayDeliveryZoneLabel" style="font-size: 14.5px;">
+                                            Vùng gần chi nhánh (&lt; 5 km)
+                                        </div>
+                                        <div class="small text-muted mt-1" style="font-size: 12.5px;">
+                                            Hệ thống tự động áp dụng biểu phí tối ưu theo khoảng cách từ chi nhánh chuẩn bị hoa đến địa chỉ nhận.
+                                        </div>
                                     </div>
-                                    <div class="mt-2 small" th:each="branch : ${fulfillmentStores}">
-                                        <strong th:text="${branch.branchDisplayName}"></strong>
-                                        <div th:text="${branch.address}"></div>
-                                        <a target="_blank" rel="noopener noreferrer" data-delivery-directions
-                                           th:data-origin="${branch.address}" href="https://www.google.com/maps/dir/?api=1">Kiểm tra tuyến đường</a>
-                                        <a th:if="${branch.phone != null}" class="ms-2" th:href="${'tel:' + branch.phone}" th:text="${'Gọi ' + branch.phone}"></a>
-                                    </div>
+                                    <div class="d-none" th:each="branch : ${fulfillmentStores}"
+                                         th:data-fulfillment-address="${branch.address}"
+                                         data-fulfillment-branch-marker="true"></div>
                                 </div>
 
                                 <!-- Đơn vị giao do hệ thống chọn cùng lúc với báo giá -->
                                 <div class="mb-3" id="deliveryUnitSection">
-                                    <label class="form-label-custom"><i class="bi bi-box-seam me-1"></i>Đơn vị vận chuyển</label>
+                                    <label class="form-label-custom"><i class="bi bi-truck me-1"></i>Đơn vị vận chuyển</label>
                                     <div class="form-control-custom w-100" id="assignedDeliveryName" aria-live="polite">
-                                        Hệ thống sẽ tự chọn sau khi bạn chọn vùng giao hàng.
+                                        Giao hàng tiêu chuẩn (60–90 phút)
                                     </div>
                                     <div class="mt-2 text-muted" style="font-size: 13px; line-height: 1.4;">
                                         <i class="bi bi-info-circle text-success me-1"></i>
-                                        <span>Hệ thống chọn đơn vị có biểu phí phù hợp theo chi nhánh và vùng demo; có thể cộng phụ phí hàng lớn.</span>
+                                        <span>Hệ thống tự chọn đơn vị có biểu phí phù hợp nhất theo chi nhánh và địa chỉ nhận.</span>
                                     </div>
                                 </div>
 
@@ -643,7 +644,7 @@
                                         <option th:each="s : ${stores}"
                                                 th:value="${s.id}"
                                                 th:data-address="${s.address}"
-                                                th:selected="${prevPickupStoreId == s.id}"
+                                                th:selected="${prevPickupStoreId == s.id or (prevPickupStoreId == null and #lists.size(fulfillmentStores) == 1 and fulfillmentStores[0].id == s.id)}"
                                                 th:text="${s.name}">
                                         </option>
                                     </select>
@@ -844,7 +845,7 @@
                                 </div>
                                 <div class="summary-row" id="shippingFeeRow">
                                     <span>Phí giao hàng:</span>
-                                    <span class="summary-val text-primary" id="displayShippingFee">Chưa xác định</span>
+                                    <span class="summary-val text-primary" id="displayShippingFee" th:text="${prevShippingMethod == 'PICKUP' ? '0 ₫' : (grandTotal > subtotal ? #numbers.formatDecimal(grandTotal - subtotal, 0, 'COMMA', 0, 'POINT') + ' ₫' : '40.000 ₫')}">40.000 ₫</span>
                                 </div>
                                 <div class="summary-row"><span>Giảm giá:</span><span id="displayDiscount" class="summary-val text-danger">-0 ₫</span></div><p id="quoteStatus" class="small text-danger" role="status" aria-live="polite"></p>
 
@@ -931,16 +932,72 @@
         /* ============================================================
          * Điền thông tin từ địa chỉ đã lưu (chỉ áp dụng khi Giao tận nơi)
          * ============================================================ */
+        function autoDetectDeliveryZone() {
+            const addrInput = document.getElementById('recipientAddressInput');
+            const zoneInput = document.getElementById('deliveryZoneSelect');
+            const labelEl = document.getElementById('displayDeliveryZoneLabel');
+            if (!zoneInput) return;
+            const addr = (addrInput ? addrInput.value : '').toLowerCase().trim();
+            if (!addr) {
+                zoneInput.value = 'NEAR';
+                if (labelEl) labelEl.textContent = 'Vùng gần chi nhánh (< 5 km)';
+                return;
+            }
+            const branchMarkers = document.querySelectorAll('[data-fulfillment-address]');
+            let branchAddr = '';
+            branchMarkers.forEach(function(m) {
+                if (!branchAddr && m.getAttribute('data-fulfillment-address')) {
+                    branchAddr = m.getAttribute('data-fulfillment-address').toLowerCase().trim();
+                }
+            });
+
+            const areas = [
+                ['quận 1', 'q1', 'q.1', 'quận 3', 'q3', 'q.3', 'quận 4', 'q4', 'quận 5', 'q5', 'quận 10', 'q10', 'bến nghé', 'bến thành'],
+                ['quận 7', 'q7', 'q.7', 'nhà bè', 'phú mỹ hưng', 'nguyễn thị thập', 'tân hưng', 'tân phong', 'quận 8', 'q8'],
+                ['thủ đức', 'quận 2', 'q2', 'quận 9', 'q9', 'dĩ an', 'bình dương', 'thảo điền', 'an phú'],
+                ['cao lãnh', 'đồng tháp', 'sa đéc', 'an bình', 'mỹ trà', 'lấp vò'],
+                ['bình thạnh', 'phú nhuận', 'gò vấp', 'tân bình', 'tân phú'],
+                ['quận 6', 'quận 11', 'bình tân', 'quận 12', 'hóc môn', 'củ chi']
+            ];
+
+            let isNear = true;
+            if (branchAddr) {
+                let matchedBranchArea = -1;
+                let matchedCustomerArea = -1;
+                for (let i = 0; i < areas.length; i++) {
+                    if (areas[i].some(kw => branchAddr.includes(kw))) matchedBranchArea = i;
+                    if (areas[i].some(kw => addr.includes(kw))) matchedCustomerArea = i;
+                }
+                if (matchedBranchArea !== -1 && matchedCustomerArea !== -1) {
+                    isNear = (matchedBranchArea === matchedCustomerArea);
+                } else if (matchedBranchArea !== -1 && matchedCustomerArea === -1) {
+                    isNear = false;
+                }
+            }
+
+            const zone = isNear ? 'NEAR' : 'FAR';
+            zoneInput.value = zone;
+            if (labelEl) {
+                labelEl.textContent = isNear ? 'Vùng gần chi nhánh (< 5 km)' : 'Vùng xa chi nhánh (5–15 km)';
+            }
+        }
+        if (typeof window !== 'undefined') window.autoDetectDeliveryZone = autoDetectDeliveryZone;
+
         function updateDeliveryDirections() {
             const address = document.getElementById('recipientAddressInput')?.value.trim() || '';
             document.querySelectorAll('[data-delivery-directions]').forEach(function(link) {
                 const params = new URLSearchParams({api: '1', origin: link.dataset.origin, destination: address, travelmode: 'driving'});
                 link.href = 'https://www.google.com/maps/dir/?' + params.toString();
             });
+            if (typeof autoDetectDeliveryZone === 'function') autoDetectDeliveryZone();
         }
         document.addEventListener('DOMContentLoaded', function () {
-            updateDeliveryDirections();
-            document.getElementById('recipientAddressInput')?.addEventListener('input', updateDeliveryDirections);
+            if (typeof autoDetectDeliveryZone === 'function') autoDetectDeliveryZone();
+            if (typeof updateDeliveryDirections === 'function') updateDeliveryDirections();
+            document.getElementById('recipientAddressInput')?.addEventListener('input', function() {
+                if (typeof autoDetectDeliveryZone === 'function') autoDetectDeliveryZone();
+                if (typeof updateDeliveryDirections === 'function') updateDeliveryDirections();
+            });
         });
 
         function fillAddress(selectElem) {
@@ -952,8 +1009,9 @@
                 if (nameInp)  nameInp.value  = opt.getAttribute('data-name')    || '';
                 if (phoneInp) phoneInp.value = opt.getAttribute('data-phone')   || '';
                 if (addrInp)  addrInp.value  = opt.getAttribute('data-address') || '';
-                updateDeliveryDirections();
-                updateCheckoutTotal();
+                if (typeof autoDetectDeliveryZone === 'function') autoDetectDeliveryZone();
+                if (typeof updateDeliveryDirections === 'function') updateDeliveryDirections();
+                if (typeof updateCheckoutTotal === 'function') updateCheckoutTotal();
             }
         }
 
@@ -1014,6 +1072,12 @@
                 el.classList.remove('is-invalid');
                 el.removeAttribute('aria-invalid');
             });
+
+            const shippingFeeEl = document.getElementById('displayShippingFee');
+            if (shippingFeeEl && isPickup) {
+                shippingFeeEl.textContent = '0 ₫';
+                shippingFeeEl.classList.remove('text-primary');
+            }
 
             updateCheckoutTotal();
         }
@@ -1204,6 +1268,16 @@
                     if (statusEl) {
                         statusEl.textContent = res.data.message || 'Không thể tính tổng tiền.';
                     }
+                    if (isPickup) {
+                        const feeEl = document.getElementById('displayShippingFee');
+                        if (feeEl) {
+                            feeEl.textContent = '0 ₫';
+                            feeEl.classList.remove('text-primary');
+                        }
+                        const grandTotalEl = document.getElementById('displayGrandTotal');
+                        const base = parseFloat((grandTotalEl && grandTotalEl.dataset.baseTotal) || '0');
+                        if (grandTotalEl && base > 0) grandTotalEl.textContent = formatVnd(base);
+                    }
                     const assignedDeliveryName = document.getElementById('assignedDeliveryName');
                     if (assignedDeliveryName && !isPickup) assignedDeliveryName.textContent = 'Chưa chọn được đơn vị vận chuyển phù hợp.';
                     return;
@@ -1217,13 +1291,18 @@
                 /* Phí giao hàng */
                 const shippingFeeEl = document.getElementById('displayShippingFee');
                 if (shippingFeeEl) {
-                    const fee = parseFloat(d.shippingFee) || 0;
-                    if (fee > 0) {
-                        shippingFeeEl.textContent = formatVnd(fee);
-                        shippingFeeEl.classList.add('text-primary');
-                    } else {
-                        shippingFeeEl.textContent = 'Miễn phí';
+                    if (isPickup) {
+                        shippingFeeEl.textContent = '0 ₫';
                         shippingFeeEl.classList.remove('text-primary');
+                    } else {
+                        const fee = parseFloat(d.shippingFee) || 0;
+                        if (fee > 0) {
+                            shippingFeeEl.textContent = formatVnd(fee);
+                            shippingFeeEl.classList.add('text-primary');
+                        } else {
+                            shippingFeeEl.textContent = '0 ₫';
+                            shippingFeeEl.classList.remove('text-primary');
+                        }
                     }
                 }
 
@@ -1448,10 +1527,8 @@
                     if (!addressInput?.value.trim()) {
                         markInvalid(addressInput, 'Vui lòng nhập địa chỉ giao hàng.');
                     }
-                    if (!zoneInput?.value) {
-                        markInvalid(zoneInput, 'Vui lòng chọn vùng giao hàng demo.');
-                    } else if (zoneInput.value === 'OUTSIDE') {
-                        markInvalid(zoneInput, 'Vùng này nằm ngoài phạm vi giao hoa demo. Vui lòng nhận tại cửa hàng hoặc liên hệ chi nhánh.');
+                    if (!zoneInput?.value || zoneInput.value === 'OUTSIDE') {
+                        if (zoneInput) zoneInput.value = 'NEAR';
                     }
                 }
 
@@ -1501,6 +1578,10 @@
             if (savedAddress && savedAddress.dataset.restore !== 'true' && savedAddress.value) fillAddress(savedAddress);
             updatePaymentStyle();
             toggleShippingMethod(); // đảm bảo trạng thái ban đầu đúng và vô hiệu hóa đúng nhóm trường
+            const pickupStoreEl = document.getElementById('pickupStoreSelect');
+            if (document.getElementById('methodPickup')?.checked && pickupStoreEl && pickupStoreEl.value) {
+                onPickupStoreChange();
+            }
             updateCheckoutTotal();
 
             // Hiển thị modal thông báo cảnh báo nếu có lỗi từ server

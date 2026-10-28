@@ -64,6 +64,17 @@ test('quote rejection and expired login keep checkout clickable so the error can
     }
 });
 
+test('store pickup method always sets shipping fee to 0 ₫ even when quote fails or branch not selected', async () => {
+    const app = checkout(async () => ({ ok: false, json: async () => ({ message: 'Vui lòng chọn chi nhánh nhận hàng.' }) }));
+    app.node('checkoutForm').querySelector = selector => selector === '#methodPickup' ? { checked: true } : null;
+    app.node('displayGrandTotal').dataset.baseTotal = '1000000';
+    app.update();
+    assert.equal(app.node('displayShippingFee').textContent, '0 ₫');
+    await app.run();
+    assert.equal(app.node('displayShippingFee').textContent, '0 ₫');
+    assert.match(app.node('displayGrandTotal').textContent, /1[.,]000[.,]000/);
+});
+
 test('late quote response cannot overwrite the latest selection', async () => {
     let resolveFirst, calls = 0;
     const app = checkout(() => ++calls === 1 ? new Promise(resolve => { resolveFirst = resolve; }) : Promise.resolve(ok(200000)));

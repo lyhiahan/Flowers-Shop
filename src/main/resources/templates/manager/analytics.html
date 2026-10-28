@@ -41,7 +41,24 @@
 
             <form method="get" action="/manager/analytics" class="card border-0 shadow-sm p-3 mb-4">
                 <input type="hidden" name="type" th:value="${type}">
-                <div th:replace="~{fragments/report-period :: controls('timeframe', 'analyticsTime')}"></div>
+                <div class="d-flex flex-wrap justify-content-between align-items-end gap-3">
+                    <div th:replace="~{fragments/report-period :: controls('timeframe', 'analyticsTime')}"></div>
+                    <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
+                        <span class="small text-muted me-1 fw-semibold"><i class="bi bi-clock-history me-1 text-success"></i>Chọn nhanh:</span>
+                        <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold"
+                                th:style="${reportRange.period == '3days'} ? 'background-color: #20382E; color: #FFFFFF;' : 'background-color: #F0F4F2; color: #20382E; border: 1px solid #D1E5DA;'"
+                                onclick="const s = document.getElementById('analyticsTimeSelect'); if(s) { s.value='3days'; s.dispatchEvent(new Event('change')); }">3 ngày</button>
+                        <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold"
+                                th:style="${reportRange.period == '7days'} ? 'background-color: #20382E; color: #FFFFFF;' : 'background-color: #F0F4F2; color: #20382E; border: 1px solid #D1E5DA;'"
+                                onclick="const s = document.getElementById('analyticsTimeSelect'); if(s) { s.value='7days'; s.dispatchEvent(new Event('change')); }">7 ngày</button>
+                        <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold"
+                                th:style="${reportRange.period == '30days'} ? 'background-color: #20382E; color: #FFFFFF;' : 'background-color: #F0F4F2; color: #20382E; border: 1px solid #D1E5DA;'"
+                                onclick="const s = document.getElementById('analyticsTimeSelect'); if(s) { s.value='30days'; s.dispatchEvent(new Event('change')); }">30 ngày</button>
+                        <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold"
+                                th:style="${reportRange.period == 'custom'} ? 'background-color: #20382E; color: #FFFFFF;' : 'background-color: #F0F4F2; color: #20382E; border: 1px solid #D1E5DA;'"
+                                onclick="const s = document.getElementById('analyticsTimeSelect'); if(s) { s.value='custom'; s.dispatchEvent(new Event('change')); }">Từ ngày… đến ngày…</button>
+                    </div>
+                </div>
             </form>
             <p class="fw-bold">Doanh thu trong khoảng chọn:
                 <span th:text="${#numbers.formatDecimal(revenueChart.total, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></span>

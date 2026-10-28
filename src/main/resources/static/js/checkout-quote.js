@@ -9,15 +9,27 @@
         const current = ++sequence;
         ready = false;
         window.updateWalletAvailability?.(null, false);
-        status.textContent = 'Đang cập nhật số tiền…';
-        document.getElementById('displayShippingFee').textContent = 'Đang tính…';
+        const isPickup = !!form.querySelector('#methodPickup')?.checked;
+        const shippingFeeEl = document.getElementById('displayShippingFee');
+        if (shippingFeeEl) {
+            if (isPickup) {
+                shippingFeeEl.textContent = '0 ₫';
+                shippingFeeEl.classList.remove('text-primary');
+            } else if (!shippingFeeEl.textContent || shippingFeeEl.textContent.trim() === 'Chưa xác định') {
+                const zone = form.querySelector('#deliveryZoneSelect')?.value;
+                shippingFeeEl.textContent = (zone === 'FAR' ? '40.000 ₫' : '25.000 ₫');
+            }
+        }
         request?.abort();
         timer = setTimeout(async () => {
             request = new AbortController();
             try {
+                const csrf = form.querySelector?.('input[name="_csrf"]')?.value;
+                const headers = { 'X-Requested-With': 'XMLHttpRequest' };
+                if (csrf) headers['X-CSRF-TOKEN'] = csrf;
                 const response = await fetch(form.dataset.quoteUrl, {
                     method: 'POST', body: new FormData(form), signal: request.signal,
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    headers
                 });
                 if (response.redirected) throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
                 let result;
@@ -29,7 +41,14 @@
                 if (!response.ok) throw new Error(result.message || 'Không tính được số tiền. Vui lòng thử lại.');
                 if (current !== sequence) return;
                 document.getElementById('displaySubtotal').textContent = money(result.subtotal);
-                document.getElementById('displayShippingFee').textContent = money(result.shippingFee);
+                if (shippingFeeEl) {
+                    if (isPickup) {
+                        shippingFeeEl.textContent = '0 ₫';
+                        shippingFeeEl.classList.remove('text-primary');
+                    } else {
+                        shippingFeeEl.textContent = money(result.shippingFee);
+                    }
+                }
                 document.getElementById('displayDiscount').textContent = '-' + money(result.discount);
                 document.getElementById('displayGrandTotal').textContent = money(result.total);
                 const deliveryName = document.getElementById('assignedDeliveryName');
@@ -43,8 +62,23 @@
             } catch (error) {
                 if (error.name === 'AbortError' || current !== sequence) return;
                 status.textContent = error.message;
-                document.getElementById('displayGrandTotal').textContent = 'Chưa xác định';
-                document.getElementById('displayShippingFee').textContent = 'Chưa xác định';
+                const isPickupNow = !!form.querySelector('#methodPickup')?.checked;
+                if (isPickupNow) {
+                    if (shippingFeeEl) {
+                        shippingFeeEl.textContent = '0 ₫';
+                        shippingFeeEl.classList.remove('text-primary');
+                    }
+                    const grandTotalEl = document.getElementById('displayGrandTotal');
+                    const baseTotal = grandTotalEl?.dataset?.baseTotal;
+                    if (baseTotal && Number(baseTotal) > 0) {
+                        grandTotalEl.textContent = money(Number(baseTotal));
+                    }
+                } else {
+                    document.getElementById('displayGrandTotal').textContent = 'Chưa xác định';
+                    if (shippingFeeEl) {
+                        shippingFeeEl.textContent = 'Chưa xác định';
+                    }
+                }
                 const deliveryName = document.getElementById('assignedDeliveryName');
                 if (deliveryName && form.querySelector('#methodDelivery')?.checked) {
                     deliveryName.textContent = 'Chưa chọn được đơn vị vận chuyển phù hợp.';
@@ -52,13 +86,23 @@
                 button.disabled = button.dataset.pickupStockBlocked === 'true';
                 window.updateWalletAvailability?.(null, false);
             }
-        }, 250);
+        }, 50);
     };
     form.addEventListener('input', event => {
-        if (['voucherCode', 'recipientAddress'].includes(event.target.name)) updateCheckoutTotal();
+        if (['voucherCode', 'recipientAddress'].includes(event.target.name)) {
+            if (event.target.name === 'recipientAddress' && typeof window.autoDetectDeliveryZone === 'function') {
+                window.autoDetectDeliveryZone();
+            }
+            updateCheckoutTotal();
+        }
     });
     form.addEventListener('change', event => {
-        if (['shippingMethod', 'pickupStoreId', 'deliveryZone', 'voucherCode'].includes(event.target.name)) updateCheckoutTotal();
+        if (['shippingMethod', 'pickupStoreId', 'deliveryZone', 'voucherCode'].includes(event.target.name)) {
+            if (event.target.name === 'shippingMethod' && typeof window.autoDetectDeliveryZone === 'function') {
+                window.autoDetectDeliveryZone();
+            }
+            updateCheckoutTotal();
+        }
     });
     form.addEventListener('submit', event => {
         if (event.defaultPrevented) return;

@@ -11,7 +11,7 @@ class ReportRangeTests {
     private final Clock clock = Clock.fixed(Instant.parse("2026-10-12T16:59:00Z"), ZoneId.of("Asia/Ho_Chi_Minh"));
 
     @ParameterizedTest
-    @CsvSource({"today,2026-10-12,1", "7days,2026-10-06,7", "30days,2026-09-13,30", "day,2026-10-06,7"})
+    @CsvSource({"today,2026-10-12,1", "3days,2026-10-10,3", "7days,2026-10-06,7", "30days,2026-09-13,30", "day,2026-10-06,7"})
     void presetsIncludeTodayAndExactlyTheSelectedDays(String period, LocalDate start, int count) {
         var range = ReportRange.resolve(period, null, null, clock);
         assertEquals(start, range.startDate());
