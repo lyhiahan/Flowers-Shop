@@ -375,7 +375,7 @@
             </div>
         </div>
 
-        <!-- Store Navigation Bar (UC_015 Step 2) with Follow / Following button -->
+        <!-- Store navigation; the follow action is in the store header. -->
         <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
             <div class="store-tab-nav" id="storeNav">
                 <a class="store-tab-link" id="tabCollection"
@@ -395,14 +395,6 @@
                 </a>
             </div>
 
-            <form sec:authorize="hasRole('USER')" th:action="@{/stores/{id}/follow(id=${store.id})}" method="post" class="m-0">
-                <button type="submit" id="btnToggleFollowStoreNav" class="btn rounded-pill px-4 py-2 fw-bold shadow-sm d-flex align-items-center gap-2"
-                        th:classappend="${isFollowed} ? 'btn-danger' : 'btn-outline-danger'"
-                        title="Bấm để theo dõi hoặc hủy theo dõi cửa hàng">
-                    <i class="bi" th:classappend="${isFollowed} ? 'bi-check-circle-fill' : 'bi-plus-circle'"></i>
-                    <span th:text="${isFollowed} ? 'Following' : 'Follow'"></span>
-                </button>
-            </form>
         </div>
 
         <!-- TAB 1: COLLECTION (BỘ SƯU TẬP & TÌM KIẾM SẢN PHẨM TRONG SHOP) -->
