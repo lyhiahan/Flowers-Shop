@@ -3,7 +3,6 @@ package com.finalproject.service;
 import com.finalproject.config.JwtProperties;
 import com.finalproject.entity.*;
 import com.finalproject.repository.*;
-import com.finalproject.service.impl.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
