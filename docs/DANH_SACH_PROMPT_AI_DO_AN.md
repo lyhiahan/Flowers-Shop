@@ -1020,7 +1020,7 @@ Yêu cầu: “bạn có thể tạo khoảng từ 2-6 đánh giá ảo có hìn
 
 - Cập nhật cùng ngày: người dùng báo “tại sao chưa có đánh giá” trên `/product/22` và xác nhận “tôi chuyển sang dùng local cho load web nhanh rồi”. Chuyển website chính về SQL Server FlowersShop local, profile dev, cổng 8080 và code mới. Local đã có 107 đánh giá; sản phẩm #22 có 2 ảnh đánh giá nên không seed thêm. Kiểm tra đăng nhập khách và GET `/product/22`: HTTP 200, HTML đầy đủ, hiển thị 2 ảnh đánh giá. Đã dừng hai phiên Aiven tạm ở 8080/8081; dữ liệu đánh giá Aiven vẫn giữ riêng.
 
-- Prompt bổ sung: “sửa lại cho giống thật và push lên github” (ảnh tên Khách mẫu/Demo). Đổi tên hiển thị nhân vật mẫu thành tên tự nhiên, rút gọn nhãn thành “Dữ liệu mẫu”, bỏ tiền tố lặp trong phần nội dung hiển thị. Giữ nhận diện dữ liệu mẫu và ảnh minh họa; không sửa danh tính/tài khoản hoặc nội dung đánh giá thật trong database.
+- Prompt bổ sung: “sửa lại cho giống thật” (ảnh tên Khách mẫu/Demo). Đổi tên hiển thị nhân vật mẫu thành tên tự nhiên, rút gọn nhãn thành “Dữ liệu mẫu”, bỏ tiền tố lặp trong phần nội dung hiển thị. Giữ nhận diện dữ liệu mẫu và ảnh minh họa; không sửa danh tính/tài khoản hoặc nội dung đánh giá thật trong database.
 
 - Người dùng yêu cầu tiếp: “làm tên và bố cục tự nhiên hơn bỏ nhãn demo luôn”. Bỏ nhãn cạnh từng tên và chữ DEMO trên avatar, dùng tên nhân vật tự nhiên và bố cục thoáng hơn; giữ một thông báo chung về đánh giá mô phỏng ở đầu khu vực và chú thích ảnh minh họa. Không sửa đánh giá thật hay định danh tài khoản trong database.
 
@@ -1126,19 +1126,15 @@ Khách hàng	leminhhoa	[ĐÃ CHE BÍ MẬT]
 
 > thêm những promt của tôi vào file .md promt AI
 
-**NV-12 — Yêu cầu**
-
-> push code lên github, comiit tiếng việt ngắn gọn
-
-**NV-13 — Yêu cầu kèm ảnh Tailscale**
+**NV-12 — Yêu cầu kèm ảnh Tailscale**
 
 > tôi tải taisacle rồi làm sao nữa để các thành viên khác sử dụng chung database với tôi
 
-**NV-14 — Tin chỉ gửi ảnh**
+**NV-13 — Tin chỉ gửi ảnh**
 
 Không có lời nhắn; ảnh danh sách Machines của Tailscale.
 
-**NV-15 — Câu hỏi và đoạn hướng dẫn người dùng dán lại**
+**NV-14 — Câu hỏi và đoạn hướng dẫn người dùng dán lại**
 
 > cái này làm sao: **2. Mở cổng SQL Server trên máy bạn**
 >
@@ -1157,11 +1153,11 @@ Không có lời nhắn; ảnh danh sách Machines của Tailscale.
 >
 > Lệnh này cho phép kết nối SQL qua card Tailscale. **Không cần tắt toàn bộ firewall.** SQL Server cần được cho phép qua đúng cổng đang sử dụng. [Hướng dẫn Microsoft](https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/configure-a-windows-firewall-for-database-engine-access?view=sql-server-ver17).
 
-**NV-16 — Tin chỉ gửi ảnh**
+**NV-15 — Tin chỉ gửi ảnh**
 
 Không có lời nhắn; ảnh PowerShell tạo firewall rule thành công.
 
-**NV-17 — Đoạn hướng dẫn người dùng dán lại**
+**NV-16 — Đoạn hướng dẫn người dùng dán lại**
 
 > **4. Cấp tài khoản SQL cho thành viên**
 >
@@ -1176,55 +1172,55 @@ Không có lời nhắn; ảnh PowerShell tạo firewall rule thành công.
 >
 > Gửi thông tin đăng nhập riêng cho từng người; không đưa mật khẩu lên GitHub.
 
-**NV-18 — Câu hỏi**
+**NV-17 — Câu hỏi**
 
 > sql server của dự án hay của cái gì
 
-**NV-19 — Yêu cầu**
+**NV-18 — Yêu cầu**
 
 > bạn tự làm cho toi được không
 
-**NV-20 — Trả lời biểu mẫu, tên thành viên**
+**NV-19 — Trả lời biểu mẫu, tên thành viên**
 
 > quocanh và thanhtai
 
-**NV-21 — Câu hỏi**
+**NV-20 — Câu hỏi**
 
 > rồi giờ làm gì nữa
 
-**NV-22 — Yêu cầu kèm ảnh Manager**
+**NV-21 — Yêu cầu kèm ảnh Manager**
 
 > 1. Nghiệp vụ của manager chưa rõ, một người có thể quản lý nhiều cửa hàng
 
-**NV-23 — Trả lời biểu mẫu, chốt phạm vi Manager**
+**NV-22 — Trả lời biểu mẫu, chốt phạm vi Manager**
 
 > Mỗi manager chỉ được quản lý một cửa hàng; chỉ chủ chuỗi/admin quản lý nhiều cửa hàng.
 
-**NV-24 — Câu hỏi kèm ảnh dashboard**
+**NV-23 — Câu hỏi kèm ảnh dashboard**
 
 > tại sao bị trống
 
-**NV-25 — Yêu cầu kèm ảnh nhân sự**
+**NV-24 — Yêu cầu kèm ảnh nhân sự**
 
 > 1. Vai trò staff chưa rõ, vai trò cửa hàng chưa rõ
 
-**NV-26 — Trả lời biểu mẫu, chốt tách quyền Staff**
+**NV-25 — Trả lời biểu mẫu, chốt tách quyền Staff**
 
 > Tách riêng quyền Staff như trên (đề xuất)
 
-**NV-27 — Yêu cầu**
+**NV-26 — Yêu cầu**
 
 > tạo role đăng nhập nhanh staff cho tôi
 
-**NV-28 — Câu hỏi**
+**NV-27 — Câu hỏi**
 
 > nhân viên được làm gì
 
-**NV-29 — Yêu cầu kèm ảnh đầu trang**
+**NV-28 — Yêu cầu kèm ảnh đầu trang**
 
 > xóa phần này và đặt nút thông báo về vị trí phù hợp, menu và thống kê không cần vì nó đã có trang riêng
 
-**NV-30 — Yêu cầu**
+**NV-29 — Yêu cầu**
 
 > Bổ sung đầy đủ chức năng của staff, có thể trang thành các trang trong role nhân viên
 >
@@ -1234,47 +1230,43 @@ Không có lời nhắn; ảnh PowerShell tạo firewall rule thành công.
 > 4. Giao hoa, thu tiền COD tại quầy khi hoàn tất đơn.
 > 5. Đọc và trả lời tin nhắn khách của cửa hàng.
 
-**NV-31 — Yêu cầu kèm ảnh quản lý nhân sự**
+**NV-30 — Yêu cầu kèm ảnh quản lý nhân sự**
 
 > tôi muốn caccs khu vực là thanh dọc như trong role admin
 
-**NV-32 — Yêu cầu và câu hỏi**
+**NV-31 — Yêu cầu và câu hỏi**
 
 > hiển thị đã xóa tài khoản.... thành công, không hiển thị dài dòng và nếu như khi admin muốn xóa tài khaonr nhưng tài khoản đó có đơn hàng đang được đặt thì có xóa được không, nếu là nhận viên, quản lý thì sao mà bijadmin xóa tài khoản thì sao
 
-**NV-33 — Trả lời biểu mẫu, chốt quy tắc xóa tài khoản**
+**NV-32 — Trả lời biểu mẫu, chốt quy tắc xóa tài khoản**
 
 > Chặn xóa đến khi đơn xử lý xong (đề xuất)
 
-**NV-34 — Yêu cầu kèm ảnh giỏ hàng**
+**NV-33 — Yêu cầu kèm ảnh giỏ hàng**
 
 > Ngừng bán ko được chọn nhưng vẫn tính vào tổng mục sản phẩ
 
-**NV-35 — Tin chỉ gửi ảnh**
+**NV-34 — Tin chỉ gửi ảnh**
 
 Không có lời nhắn; ảnh trao đổi về migration V16, bảng ví và quyền của `tv_thanhtai`.
 
-**NV-36 — Yêu cầu**
+**NV-35 — Yêu cầu**
 
 > nâng cấp database lên tài khoản quản trị
 
-**NV-37 — Trả lời biểu mẫu, tài khoản được chọn**
+**NV-36 — Trả lời biểu mẫu, tài khoản được chọn**
 
 > Cả tv_thanhtai và tv_quocanh
 
-**NV-38 — Câu hỏi kèm ảnh yêu cầu bật ví**
+**NV-37 — Câu hỏi kèm ảnh yêu cầu bật ví**
 
 > đã thực hiện cái này chưa vfa làm sao để tài sử dụng được
 
-**NV-39 — Yêu cầu**
-
-> push lên github
-
-**NV-40 — Câu hỏi kèm ảnh yêu cầu bật ví**
+**NV-38 — Câu hỏi kèm ảnh yêu cầu bật ví**
 
 > giờ tài cần làm gì để đạt yêu cầu này
 
-**NV-41 — Yêu cầu kèm file hướng dẫn, CA và cloudflared**
+**NV-39 — Yêu cầu kèm file hướng dẫn, CA và cloudflared**
 
 > đồng đội tôi đxa làm coud và yêu cầu tôi test thử với User
 > avnadmin
@@ -1282,67 +1274,59 @@ Không có lời nhắn; ảnh trao đổi về migration V16, bảng ví và qu
 > Password
 > [ĐÃ CHE BÍ MẬT]
 
-**NV-42 — Trả lời biểu mẫu, cung cấp mật khẩu Aiven thay thế**
+**NV-40 — Trả lời biểu mẫu, cung cấp mật khẩu Aiven thay thế**
 
 > [ĐÃ CHE BÍ MẬT]
 
-**NV-43 — Yêu cầu**
+**NV-41 — Yêu cầu**
 
 > bạn có thể tạo khoảng từ 2-6 đánh giá ảo có hình ảnh giúp tôi tùy theo mẫu hoa số lượng bán giúp tôi được không
 
-**NV-44 — Trả lời biểu mẫu, nơi xem dữ liệu**
+**NV-42 — Trả lời biểu mẫu, nơi xem dữ liệu**
 
 > Xem trên Aiven dùng chung (đề xuất)
 
-**NV-45 — Yêu cầu**
-
-> push lên github
-
-**NV-46 — Câu hỏi kèm ảnh trạng thái commit GitHub**
+**NV-43 — Câu hỏi kèm ảnh trạng thái commit GitHub**
 
 > tại sao bị như này
 
-**NV-47 — Tin chỉ gửi ảnh**
+**NV-44 — Tin chỉ gửi ảnh**
 
 Không có lời nhắn; ảnh GitHub hiển thị Tests đang chạy.
 
-**NV-48 — Câu hỏi kèm ảnh đánh giá sản phẩm**
+**NV-45 — Câu hỏi kèm ảnh đánh giá sản phẩm**
 
 > tại sao chưa có đánh giá
 
-**NV-49 — Thông tin chuyển môi trường**
+**NV-46 — Thông tin chuyển môi trường**
 
 > toi chuyển snag dùng local cho load web nhanh rồi
 
-**NV-50 — Yêu cầu kèm ảnh tên và nhãn đánh giá**
+**NV-47 — Yêu cầu kèm ảnh tên và nhãn đánh giá**
 
-> sửa lại cho giống thạt và push lên github
+> sửa lại cho giống thật
 
-**NV-51 — Yêu cầu**
+**NV-48 — Yêu cầu**
 
 > bỏ nhãn demo luôn
 
-**NV-52 — Yêu cầu**
+**NV-49 — Yêu cầu**
 
 > làm tên và bố cục tự nhiên hơn bỏ nhãn demo luôn
 
-**NV-53 — Yêu cầu kèm ảnh lỗi chữ**
+**NV-50 — Yêu cầu kèm ảnh lỗi chữ**
 
 > bị lỗi chữ và sửa đánh giá đa dạng, không pahir toàn 5 sao và đánh giá khen
 
-**NV-54 — Yêu cầu**
+**NV-51 — Yêu cầu**
 
 > xóa toàn bộ các Phiên bản hiện tại tập trung vào nghiệp vụ bán hoa và quản lý chuỗi cửa hàng, trong khi một số tên lớp hoặc thành phần kế thừa từ nghiệp vụ thuê vẫn còn trong mã nguồn nhưng đã được vô hiệu hóa bằng cấu hình.
 
-**NV-55 — Trả lời biểu mẫu, chốt phạm vi xóa nghiệp vụ thuê**
+**NV-52 — Trả lời biểu mẫu, chốt phạm vi xóa nghiệp vụ thuê**
 
 > Xóa hẳn phần nghiệp vụ thuê trong code và cập nhật báo cáo
 
-**NV-56 — Yêu cầu**
-
-> push lên github
-
-**NV-57 — Đoạn cấu hình và lưu ý người dùng gửi**
+**NV-53 — Đoạn cấu hình và lưu ý người dùng gửi**
 
 ```dotenv
 SPRING_PROFILES_ACTIVE=aiven
@@ -1381,7 +1365,7 @@ BREVO_API_KEY=replace_with_your_brevo_key
 > - Nếu bạn có tài khoản Brevo gửi mail OTP, hãy thay 2 dòng cuối bằng email người gửi và API key Brevo thật của bạn.
 > - Bấm **Save** / **Add** để Render tự tách thành các dòng Key - Value tương ứng.
 
-**NV-58 — Yêu cầu hoàn chỉnh cấu hình**
+**NV-54 — Yêu cầu hoàn chỉnh cấu hình**
 
 > thêm vô viết code hoàn chỉnh để tôi deploy: SPRING_PROFILES_ACTIVE=aiven
 >
@@ -1418,11 +1402,11 @@ BREVO_API_KEY=replace_with_your_brevo_key
 > > - Nếu bạn có tài khoản Brevo gửi mail OTP, hãy thay 2 dòng cuối bằng email người gửi và API key Brevo thật của bạn.
 > > - Bấm **Save** / **Add** để Render tự tách thành các dòng Key - Value tương ứng.
 
-**NV-59 — Người dùng sửa lại phạm vi công việc**
+**NV-55 — Người dùng sửa lại phạm vi công việc**
 
 > tôi kêu bạn hoàn chỉnh đoạn code và gửi tôi, không push lên git mà
 
-**NV-60 — Yêu cầu cập nhật tài liệu lần này**
+**NV-56 — Yêu cầu cập nhật tài liệu lần này**
 
 > đọc lại hết tất cả các nguyên văn promt tôi đã yêu cầu abnj và tóm tắt thật ngắn gọn những gì bạn đã làm được bào file promt AI .md
 
@@ -1442,69 +1426,67 @@ Phần này chép **chữ người dùng đã gửi**, kể cả lỗi gõ và c
 | HT-06 | bị lỗi tab sản phẩm role quản lý |
 | HT-07 | đã xong nhưng không tự gửi queued |
 | HT-08 | tại sao không show ra tất cả người dùng đang có |
-| HT-09 | thực hiện, xong thì push code lên  github, commit tiếng việt ngắn gọn |
-| HT-10 | tiếp |
-| HT-11 | tại sao khi vào trang sản phẩm tại role quản lý lại bị phát sinh lỗi này |
-| HT-12 | kiểm tra cấu trúc toàn bộ dự án và đánh giá tổng thể, xem tôi có điểm nào chưa hoàn thiện cần sửa chửa không hãy sửa giúp tôi. Bạn cũng hãy test toàn bộ web và đưa ra những lỗi chưa chạy đúng luồng hoạt động |
-| HT-13 | tôi không thực hiện giao hàng cái đó chỉ là demo thì sao vậy sửa **Khoảng cách giao hàng đang suy đoán từ địa chỉ**, chưa phải khoảng cách bản đồ.  và Chuẩn hóa vùng giao, dịch vụ và phụ phí; thanh toán hiện còn cấu hình mock/sandbox như thế nào |
-| HT-14 | phần thanh toán tôi không làm vì có thành viên khác làm, tôi cần làm gì, bạn gaiir thích rõ giúp tôi |
-| HT-15 | thực hiện ý này **81 dòng tồn kho cũ lệch chi nhánh** cần đối soát trước khi chuyển hoặc xóa. |
-| HT-16 | bạn hãy xem lại giúp tôi cách thêm sản phẩm mới, tôi thấy nó có quá nhiều mục nhất là ở ô thuộc tính, ví du hoa đó không phải là các loại hoa sẵn có thì sao, nó là màu không có trong các màu để tick thì sao, tôi nghĩ nên có 2 lựa chọn là tự điền hoặc có thể chọn |
-| HT-17 | không ý tôi là ở mục thuộc tính hoa: loại hoa, màu sắc và phong cách có thể tự điền vì cái này rất rộng và có thể 1 bó hoa kết hợp nhiều loại hoa |
-| HT-18 | đúng, sửa giúp tôi |
-| HT-19 | rôi sao thuộc tính trống trơn vậy, khong thêm mây scai scaau chèn vô như Tự nhập hoặc chọn gợi ý. Nhấn Enter hoặc nút Thêm sau mỗi giá trị; một bó hoa có thể có nhiều loại hoa, màu và phong cách. |
-| HT-20 | còn các thuộc tính củ của tôi đâu, và cách trình bày quá xấu |
-| HT-21 | kiểm tra lại cấu trúc toàn bộ dự án của tôi và đánh giá lại xem giúp tôi đã thực hiện đúng các yêu cầu chưa, và chạy các test xem có lỗi không |
-| HT-22 | tiếp |
-| HT-23 | sửa tất cả cho tôi, tự sửa |
-| HT-24 | Không, đó là dữ liệu kho cũ bị nhân bản |
-| HT-25 | bạn hãy nhớ lại toàn bộ lịch sử chat và các promt tôi yêu cầu bạn để viết thêm vào báo cáo này |
-| HT-26 | đã đủ cái promt chưa |
-| HT-27 | ghi thê cả codex và tóm tắt luôn những ảnh tôi gửi bạn sửa thành promt |
-| HT-28 | dự án của tôi đã hoàn thiện 100% chưa |
-| HT-29 | sao không tự sửa hết cho tôi đi, dòng nhân bản thì xóa |
-| HT-30 | dự án của tôi đã hoàn thiện 100% chưa |
-| HT-31 | khắc phục những lỗi này: Tuy nhiên, chưa thể kết luận hoàn thiện 100% hoặc chắc chắn đạt 10 điểm: bộ test hiện còn thất bại, database thật chưa cập nhật theo mã nguồn mới nhất, tồn kho cũ chưa đối soát xong, logic xác định vùng giao demo có lỗi và tài liệu còn thông tin cũ. |
-| HT-32 | push code lên github với commit ngắn gọn bằng tiếng việt |
-| HT-33 | khi bấm vào nút đăng kí nó tự hiển thị thông tin có sẵn, điều này không cần thiết vì khi đăng kí thì người dùng phải tự nhập không hiển thị sẵn như này mà cần bỏ trống |
-| HT-34 | khi nhập từ khóa tìm kiếm sản phẩm, kết quả hiển thị không đúng theo từ khóa, kiểm tra luồng và chỉnh sửa |
-| HT-35 | tại sao khi tìm hoa hướng dương lại ra các cái khác |
-| HT-36 | khi sửa địa chỉ và khi nhập sai có thông báo nhưng không giữ lại những gì tôi đã nhập |
-| HT-37 | **trong chi tiết sản phẩm thì nên là nút yêu thích, không phải theo dõi và tại sao khi bỏ yêu thích lại hiện thông báo này mà không phải là thông báo "bạn đã hủy theo dõi ...."** |
-| HT-38 | chưa nhập Thiếu tên, số điện thoại hoặc địa chỉ giao thì phải hiển thị thông báo lên chứ đứng im thì ai biết sai<br>Đơn vị giao hàng thì hệ thống tự chọn chứ, người mua tự chọn thì chưa hợp lí và đúng thực tế |
-| HT-39 | viết promt vào file .md AI |
-| HT-40 | tôi là admin/người bán thì tại sao tôi không được tăng số lượng sản phẩm muốn bán thêm, ví dụ hoa chậu lan hồ điệp này đã hết hàng và tôi vào phần sửa chỉ có thống kê số lượng đã bán mà không cho tôi bổ sung thêm hàng để bán. Đề xấu hướng giải quyết và chỉnh sửa |
-| HT-41 | tôi không thao tác được nút |
-| HT-42 | xem danh mục nào chưa từng có đơn đặt hàng hay cái gì liên quan thì xóa luôn giùm tôi trong database cho gọn, bạn hãy đề xuất thêm các danh mục bao quát giúp tôi |
-| HT-43 | tại sao khi ấn đăng nhập luôn tự hiển thị cái này, tôi muốn đăng nhập người khác thì sao vậy để trống đi |
-| HT-44 | giúp tôi đồng bộ chữ và form chữ của trang chi tiết đơn hàng và bộ icon của "Đã tiếp nhận" và khung viền bao quanh |
-| HT-45 | giúp tôi đồng bộ giao diện với trang chủ, lấy trang chủ tham chiếu và đồng bộ chữ và form chữ của trang chi tiết đơn hàng và bộ icon của "Đã tiếp nhận" và khung viền bao quanh |
-| HT-46 | ở trang chi tiết cần thêm nút mua ngay sản phẩm, và bạn hãy giúp tôi thiết kế luồng khi nguwofi dùng ấn vào nút mua ngay và thực hiện |
-| HT-47 | khi gửi đánh giá bị hiện lỗi |
-| HT-48 | tiếp |
-| HT-49 | khi nguwofi dùng nhận hàng thành công thì được đánh giá, khi ấn vào nút đánh giá thì cần chuyển ngay đến khung đánh giá chứ không phải hình aanhr của chi tiết sản phẩm |
-| HT-50 | tại sao trong máy của tôi có hoa và ảnh này nhưng khi tui push lên github thì thành viên của tôi pull về không thấy và các ảnh tôi thay đổi ảnh sản phẩm |
-| HT-51 | vậy có push được database lên guthub không |
-| HT-52 | tôi đã chia sẻ cho đồng đỗi khóa Cloudinary rồi, hiện giwof tôi cần khi tôi thêm sản phẩm, thay đổi ảnh sản phẩm, thêm sửa xóa nguwoif dùng.... và push lên github thì đồng đội tôi pull về cũng phải thấy |
-| HT-53 | ủa hiện tôi không có database sao |
-| HT-54 | vậy làm sao để đồng đọi đọc được database của tôi |
-| HT-55 | cách thực hiện cách test này: **16. Thông tin cửa hàng và nhân sự** (toàn văn nhiều dòng ở dưới) |
-| HT-56 | Cho khách thêm sản phẩm vào giỏ, sau đó quản lý ngừng bán sản phẩm, Khách quay lại đặt hàng khách vẫn đặt được hàng |
-| HT-57 | có phải khi xem đơn hàng, cái mà nguwofi mua muốn xem kiểm tra lại sản phẩm của mình là gì, số lượng là bao nhiêu và tổng tiền bao nhiều đúng không. nhưng sao trong ảnh tôi thấy thứ nổi bật lại là địa chỉ chưa không phải những thứ tôi liệt kê |
-| HT-58 | rồi tại sao sửa mất hết nút thêm giỏ hàng, mua ngay, nhận xét, chăm hoa,... của tôi hết rồi |
-| HT-59 | thêm những promt của tôi vào file .md promt AI |
-| HT-60 | tôi đang dùng tailscale các thành viên khác phải phụ thuộc vào tôi có cách nào khác không, tôi có thể sử dụng cloud không |
-| HT-61 | có muốn chuyển qua thử cloud hong là sao |
-| HT-62 | vậy tôi có làm được không |
-| HT-63 | vậy azure có trả phí không |
-| HT-64 | làm giúp tôi miễn phí |
-| HT-65 | kiểm tra tôi đã đăg kí brevo và thực hienj gọi api để gửi mail được chưa |
-| HT-66 | đã được cấu hình trong biến môi trường hay cái gì để đồng đội toi có thể sử dụng không |
-| HT-67 | tạo một file để tôi gửi cho đồng đội và đồng đội có thể biết và sử dụng |
-| HT-68 | tạo một file có các khóa bí mật tôi gửi riêng |
-| HT-69 | với sự yêu cầu này, tôi cần làm thêm gì nữa: 1. Với sự hỗ trợ của AI, Nhóm hãy viết tài liệu bằng file .docx chi tiết hướng dẫn xây dựng từng chức năng của ứng dụng gồm các phần:các hình kiến trúc úng dụng, các hình sơ đồ hoạt động của chức năng + hình diễn giải Source Code, hình diễn giải giao diện, file hướng dẫn setup ứng dụng, danh sách các prompt nhóm đã sử dụng để AI hỗ trợ sinh code, sinh hình,... |
-| HT-70 | font end là cái nào |
-| HT-71 | đọc lại hết tất cả các nguyên văn promt tôi đã yêu cầu abnj và tóm tắt thật ngắn gọn những gì bạn đã làm được bào file promt AI .md |
+| HT-09 | tiếp |
+| HT-10 | tại sao khi vào trang sản phẩm tại role quản lý lại bị phát sinh lỗi này |
+| HT-11 | kiểm tra cấu trúc toàn bộ dự án và đánh giá tổng thể, xem tôi có điểm nào chưa hoàn thiện cần sửa chửa không hãy sửa giúp tôi. Bạn cũng hãy test toàn bộ web và đưa ra những lỗi chưa chạy đúng luồng hoạt động |
+| HT-12 | tôi không thực hiện giao hàng cái đó chỉ là demo thì sao vậy sửa **Khoảng cách giao hàng đang suy đoán từ địa chỉ**, chưa phải khoảng cách bản đồ.  và Chuẩn hóa vùng giao, dịch vụ và phụ phí; thanh toán hiện còn cấu hình mock/sandbox như thế nào |
+| HT-13 | phần thanh toán tôi không làm vì có thành viên khác làm, tôi cần làm gì, bạn gaiir thích rõ giúp tôi |
+| HT-14 | thực hiện ý này **81 dòng tồn kho cũ lệch chi nhánh** cần đối soát trước khi chuyển hoặc xóa. |
+| HT-15 | bạn hãy xem lại giúp tôi cách thêm sản phẩm mới, tôi thấy nó có quá nhiều mục nhất là ở ô thuộc tính, ví du hoa đó không phải là các loại hoa sẵn có thì sao, nó là màu không có trong các màu để tick thì sao, tôi nghĩ nên có 2 lựa chọn là tự điền hoặc có thể chọn |
+| HT-16 | không ý tôi là ở mục thuộc tính hoa: loại hoa, màu sắc và phong cách có thể tự điền vì cái này rất rộng và có thể 1 bó hoa kết hợp nhiều loại hoa |
+| HT-17 | đúng, sửa giúp tôi |
+| HT-18 | rôi sao thuộc tính trống trơn vậy, khong thêm mây scai scaau chèn vô như Tự nhập hoặc chọn gợi ý. Nhấn Enter hoặc nút Thêm sau mỗi giá trị; một bó hoa có thể có nhiều loại hoa, màu và phong cách. |
+| HT-19 | còn các thuộc tính củ của tôi đâu, và cách trình bày quá xấu |
+| HT-20 | kiểm tra lại cấu trúc toàn bộ dự án của tôi và đánh giá lại xem giúp tôi đã thực hiện đúng các yêu cầu chưa, và chạy các test xem có lỗi không |
+| HT-21 | tiếp |
+| HT-22 | sửa tất cả cho tôi, tự sửa |
+| HT-23 | Không, đó là dữ liệu kho cũ bị nhân bản |
+| HT-24 | bạn hãy nhớ lại toàn bộ lịch sử chat và các promt tôi yêu cầu bạn để viết thêm vào báo cáo này |
+| HT-25 | đã đủ cái promt chưa |
+| HT-26 | ghi thê cả codex và tóm tắt luôn những ảnh tôi gửi bạn sửa thành promt |
+| HT-27 | dự án của tôi đã hoàn thiện 100% chưa |
+| HT-28 | sao không tự sửa hết cho tôi đi, dòng nhân bản thì xóa |
+| HT-29 | dự án của tôi đã hoàn thiện 100% chưa |
+| HT-30 | khắc phục những lỗi này: Tuy nhiên, chưa thể kết luận hoàn thiện 100% hoặc chắc chắn đạt 10 điểm: bộ test hiện còn thất bại, database thật chưa cập nhật theo mã nguồn mới nhất, tồn kho cũ chưa đối soát xong, logic xác định vùng giao demo có lỗi và tài liệu còn thông tin cũ. |
+| HT-31 | khi bấm vào nút đăng kí nó tự hiển thị thông tin có sẵn, điều này không cần thiết vì khi đăng kí thì người dùng phải tự nhập không hiển thị sẵn như này mà cần bỏ trống |
+| HT-32 | khi nhập từ khóa tìm kiếm sản phẩm, kết quả hiển thị không đúng theo từ khóa, kiểm tra luồng và chỉnh sửa |
+| HT-33 | tại sao khi tìm hoa hướng dương lại ra các cái khác |
+| HT-34 | khi sửa địa chỉ và khi nhập sai có thông báo nhưng không giữ lại những gì tôi đã nhập |
+| HT-35 | **trong chi tiết sản phẩm thì nên là nút yêu thích, không phải theo dõi và tại sao khi bỏ yêu thích lại hiện thông báo này mà không phải là thông báo "bạn đã hủy theo dõi ...."** |
+| HT-36 | chưa nhập Thiếu tên, số điện thoại hoặc địa chỉ giao thì phải hiển thị thông báo lên chứ đứng im thì ai biết sai<br>Đơn vị giao hàng thì hệ thống tự chọn chứ, người mua tự chọn thì chưa hợp lí và đúng thực tế |
+| HT-37 | viết promt vào file .md AI |
+| HT-38 | tôi là admin/người bán thì tại sao tôi không được tăng số lượng sản phẩm muốn bán thêm, ví dụ hoa chậu lan hồ điệp này đã hết hàng và tôi vào phần sửa chỉ có thống kê số lượng đã bán mà không cho tôi bổ sung thêm hàng để bán. Đề xấu hướng giải quyết và chỉnh sửa |
+| HT-39 | tôi không thao tác được nút |
+| HT-40 | xem danh mục nào chưa từng có đơn đặt hàng hay cái gì liên quan thì xóa luôn giùm tôi trong database cho gọn, bạn hãy đề xuất thêm các danh mục bao quát giúp tôi |
+| HT-41 | tại sao khi ấn đăng nhập luôn tự hiển thị cái này, tôi muốn đăng nhập người khác thì sao vậy để trống đi |
+| HT-42 | giúp tôi đồng bộ chữ và form chữ của trang chi tiết đơn hàng và bộ icon của "Đã tiếp nhận" và khung viền bao quanh |
+| HT-43 | giúp tôi đồng bộ giao diện với trang chủ, lấy trang chủ tham chiếu và đồng bộ chữ và form chữ của trang chi tiết đơn hàng và bộ icon của "Đã tiếp nhận" và khung viền bao quanh |
+| HT-44 | ở trang chi tiết cần thêm nút mua ngay sản phẩm, và bạn hãy giúp tôi thiết kế luồng khi nguwofi dùng ấn vào nút mua ngay và thực hiện |
+| HT-45 | khi gửi đánh giá bị hiện lỗi |
+| HT-46 | tiếp |
+| HT-47 | khi nguwofi dùng nhận hàng thành công thì được đánh giá, khi ấn vào nút đánh giá thì cần chuyển ngay đến khung đánh giá chứ không phải hình aanhr của chi tiết sản phẩm |
+| HT-48 | tại sao trong máy của tôi có hoa và ảnh này nhưng khi tui push lên github thì thành viên của tôi pull về không thấy và các ảnh tôi thay đổi ảnh sản phẩm |
+| HT-49 | vậy có push được database lên guthub không |
+| HT-50 | tôi đã chia sẻ cho đồng đỗi khóa Cloudinary rồi, hiện giwof tôi cần khi tôi thêm sản phẩm, thay đổi ảnh sản phẩm, thêm sửa xóa nguwoif dùng.... và push lên github thì đồng đội tôi pull về cũng phải thấy |
+| HT-51 | ủa hiện tôi không có database sao |
+| HT-52 | vậy làm sao để đồng đọi đọc được database của tôi |
+| HT-53 | cách thực hiện cách test này: **16. Thông tin cửa hàng và nhân sự** (toàn văn nhiều dòng ở dưới) |
+| HT-54 | Cho khách thêm sản phẩm vào giỏ, sau đó quản lý ngừng bán sản phẩm, Khách quay lại đặt hàng khách vẫn đặt được hàng |
+| HT-55 | có phải khi xem đơn hàng, cái mà nguwofi mua muốn xem kiểm tra lại sản phẩm của mình là gì, số lượng là bao nhiêu và tổng tiền bao nhiều đúng không. nhưng sao trong ảnh tôi thấy thứ nổi bật lại là địa chỉ chưa không phải những thứ tôi liệt kê |
+| HT-56 | rồi tại sao sửa mất hết nút thêm giỏ hàng, mua ngay, nhận xét, chăm hoa,... của tôi hết rồi |
+| HT-57 | thêm những promt của tôi vào file .md promt AI |
+| HT-58 | tôi đang dùng tailscale các thành viên khác phải phụ thuộc vào tôi có cách nào khác không, tôi có thể sử dụng cloud không |
+| HT-59 | có muốn chuyển qua thử cloud hong là sao |
+| HT-60 | vậy tôi có làm được không |
+| HT-61 | vậy azure có trả phí không |
+| HT-62 | làm giúp tôi miễn phí |
+| HT-63 | kiểm tra tôi đã đăg kí brevo và thực hienj gọi api để gửi mail được chưa |
+| HT-64 | đã được cấu hình trong biến môi trường hay cái gì để đồng đội toi có thể sử dụng không |
+| HT-65 | tạo một file để tôi gửi cho đồng đội và đồng đội có thể biết và sử dụng |
+| HT-66 | tạo một file có các khóa bí mật tôi gửi riêng |
+| HT-67 | với sự yêu cầu này, tôi cần làm thêm gì nữa: 1. Với sự hỗ trợ của AI, Nhóm hãy viết tài liệu bằng file .docx chi tiết hướng dẫn xây dựng từng chức năng của ứng dụng gồm các phần:các hình kiến trúc úng dụng, các hình sơ đồ hoạt động của chức năng + hình diễn giải Source Code, hình diễn giải giao diện, file hướng dẫn setup ứng dụng, danh sách các prompt nhóm đã sử dụng để AI hỗ trợ sinh code, sinh hình,... |
+| HT-68 | font end là cái nào |
+| HT-69 | đọc lại hết tất cả các nguyên văn promt tôi đã yêu cầu abnj và tóm tắt thật ngắn gọn những gì bạn đã làm được bào file promt AI .md |
 
 Các prompt nhiều dòng và những yêu cầu khác cũng còn thấy trong lịch sử được chép riêng để giữ đúng dấu xuống dòng:
 
