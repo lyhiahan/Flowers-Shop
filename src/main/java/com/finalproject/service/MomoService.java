@@ -155,7 +155,7 @@ public class MomoService {
     }
 
     private void requireActiveOwner(Order order) {
-        if (!Boolean.TRUE.equals(order.getUser().getIsActive()) || order.getUser().isRetiredDeliveryAccount()) {
+        if (!Boolean.TRUE.equals(order.getUser().getIsActive()) || !order.getUser().isCustomerAccount()) {
             throw new org.springframework.security.access.AccessDeniedException("Tài khoản đã bị khóa hoặc vô hiệu hóa.");
         }
     }

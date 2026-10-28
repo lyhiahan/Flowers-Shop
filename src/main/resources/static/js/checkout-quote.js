@@ -20,7 +20,12 @@
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
                 if (response.redirected) throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
-                const result = await response.json();
+                let result;
+                try {
+                    result = await response.json();
+                } catch (_) {
+                    result = { message: 'Lỗi máy chủ khi tính tổng tiền. Vui lòng thử lại sau.' };
+                }
                 if (!response.ok) throw new Error(result.message || 'Không tính được số tiền. Vui lòng thử lại.');
                 if (current !== sequence) return;
                 document.getElementById('displaySubtotal').textContent = money(result.subtotal);

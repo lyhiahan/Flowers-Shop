@@ -495,7 +495,7 @@ public class OrderService {
         }
         BigDecimal discount = BigDecimal.ZERO;
         if (voucherCode != null && !voucherCode.isBlank()) {
-            Voucher voucher = voucherService.findByCode(voucherCode.trim());
+            Voucher voucher = voucherService.findByCodeReadOnly(voucherCode.trim());
             if (voucher == null) throw new IllegalArgumentException("Mã giảm giá không hợp lệ.");
             if (voucher.getStore() != null && !voucher.getStore().getId().equals(store.getId())) {
                 throw new IllegalArgumentException("Mã giảm giá không áp dụng cho chi nhánh này.");
@@ -556,13 +556,16 @@ public class OrderService {
     }
 
     private void requireActiveCustomer(User user) {
-        if (!Boolean.TRUE.equals(user.getIsActive()) || user.isRetiredDeliveryAccount()) {
+        if (!Boolean.TRUE.equals(user.getIsActive()) || Boolean.TRUE.equals(user.getAccountDisabledByAdmin()) || user.isRetiredDeliveryAccount()) {
             throw new org.springframework.security.access.AccessDeniedException("Tài khoản đã bị khóa hoặc vô hiệu hóa.");
         }
         boolean isAdmin = (user.getRole() == Role.ADMIN)
                 || (user.getRoles() != null && user.getRoles().contains(Role.ADMIN));
         if (isAdmin) {
             throw new org.springframework.security.access.AccessDeniedException("Tài khoản Quản trị viên không thể thực hiện tạo đơn hoặc mua hàng.");
+        }
+        if (!user.isCustomerAccount()) {
+            throw new org.springframework.security.access.AccessDeniedException("Chỉ tài khoản khách hàng được tạo đơn hoặc mua hoa.");
         }
     }
 

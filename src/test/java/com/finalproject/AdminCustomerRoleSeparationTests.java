@@ -74,7 +74,7 @@ class AdminCustomerRoleSeparationTests {
     }
 
     @Test
-    @DisplayName("2. Khách hàng, Quản lý, Người bán khi đăng nhập vẫn giữ ROLE_USER bình thường")
+    @DisplayName("2. Chỉ khách hàng giữ ROLE_USER; quản lý chỉ nhận ROLE_MANAGER")
     void normalUsers_retainCustomerAuthority() {
         User customer = userRepository.save(User.builder()
                 .username("test_cust_sep")
@@ -104,7 +104,7 @@ class AdminCustomerRoleSeparationTests {
         Set<String> vendorAuths = vendorDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toSet());
-        assertThat(vendorAuths).contains("ROLE_USER", "ROLE_MANAGER");
+        assertThat(vendorAuths).containsExactly("ROLE_MANAGER");
     }
 
     @Test

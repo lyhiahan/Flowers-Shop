@@ -86,10 +86,14 @@
         // The server decides desktop status; a phone can immediately disable an expired form.
         if (!remaining && !root.dataset.statusUrl) render('EXPIRED');
     }
-    document.getElementById('confirm-form')?.addEventListener('submit', () => {
-        const button = document.getElementById('confirm-button');
-        button.disabled = true;
-        button.textContent = 'Đang xác nhận…';
+    document.querySelectorAll('form[action*="/confirm"]').forEach(formEl => {
+        formEl.addEventListener('submit', () => {
+            const button = formEl.querySelector('button');
+            if (button) {
+                button.disabled = true;
+                button.textContent = 'Đang xác nhận…';
+            }
+        });
     });
     render(state);
     countdown();

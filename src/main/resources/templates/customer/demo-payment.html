@@ -40,6 +40,11 @@
                     <p id="phone-connection-message" class="muted" role="status" th:hidden="${phoneUrl != null}" th:text="${phoneConnection.message}"></p>
                     <img id="payment-qr" class="payment-qr" th:src="${phoneUrl != null} ? @{/customer/demo-payment/{token}/qr(token=${payment.token})} : null" th:hidden="${phoneUrl == null}" alt="Mã QR thanh toán MoMo" width="280" height="280">
                     <a id="phone-payment-link" class="phone-link" th:href="${phoneUrl}" th:hidden="${phoneUrl == null}" target="_blank" rel="noreferrer">Mở trang xác nhận <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></a>
+                    <form id="desktop-confirm-form" method="post" th:action="@{/demo-payment/{token}/confirm(token=${payment.token})}" style="margin-top: 20px; width: 100%; max-width: 280px;">
+                        <button id="desktop-confirm-button" type="submit" class="confirm-button" style="padding: 12px; font-size: 15px; border-radius: 8px;">
+                            <i class="bi bi-check-circle me-1" aria-hidden="true"></i> Xác nhận thanh toán ngay (Demo)
+                        </button>
+                    </form>
                 </div>
                 <form th:unless="${desktop}" id="confirm-form" method="post" th:action="@{/demo-payment/{token}/confirm(token=${payment.token})}">
                     <h2>Giao dịch thử nghiệm</h2>

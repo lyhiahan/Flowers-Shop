@@ -156,11 +156,6 @@ public class ManagerVoucherController {
                 }
             }
 
-            if (quantity < v.getUsedCount()) {
-                ra.addFlashAttribute("errorMessage", "Số lượng phát hành (" + quantity + ") không được nhỏ hơn số lượt đã dùng (" + v.getUsedCount() + ")!");
-                return "redirect:/manager/vouchers";
-            }
-
             LocalDate start = LocalDate.parse(startDate);
             LocalDate end = LocalDate.parse(endDate);
             if (start.isAfter(end)) {
@@ -168,18 +163,24 @@ public class ManagerVoucherController {
                 return "redirect:/manager/vouchers";
             }
 
-            v.setName(cleanName);
-            v.setDiscountType(discountType);
-            v.setDiscountValue(discountValue);
-            v.setMinOrderValue(minOrderValue);
-            v.setMaxDiscountAmount(maxDiscountAmount != null && maxDiscountAmount.compareTo(BigDecimal.ZERO) > 0 ? maxDiscountAmount : null);
-            v.setQuantity(quantity);
-            v.setStartDate(start);
-            v.setEndDate(end);
-            v.setIsActive(isActive);
+            final BigDecimal finalDiscountValue = discountValue;
+            Voucher updated = voucherService.updateVoucherDetails(id, existing -> {
+                storeAccess.requireManager(existing.getStore());
+                if (quantity < existing.getUsedCount()) {
+                    throw new IllegalArgumentException("Số lượng phát hành (" + quantity + ") không được nhỏ hơn số lượt đã dùng (" + existing.getUsedCount() + ")!");
+                }
+                existing.setName(cleanName);
+                existing.setDiscountType(discountType);
+                existing.setDiscountValue(finalDiscountValue);
+                existing.setMinOrderValue(minOrderValue);
+                existing.setMaxDiscountAmount(maxDiscountAmount != null && maxDiscountAmount.compareTo(BigDecimal.ZERO) > 0 ? maxDiscountAmount : null);
+                existing.setQuantity(quantity);
+                existing.setStartDate(start);
+                existing.setEndDate(end);
+                existing.setIsActive(isActive);
+            });
 
-            voucherRepository.save(v);
-            ra.addFlashAttribute("successMessage", "Cập nhật mã khuyến mãi [" + v.getCode() + "] thành công!");
+            ra.addFlashAttribute("successMessage", "Cập nhật mã khuyến mãi [" + updated.getCode() + "] thành công!");
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", "Lỗi cập nhật: " + ex.getMessage());
         }
@@ -190,9 +191,7 @@ public class ManagerVoucherController {
     public String toggleVoucher(@PathVariable("id") Long id, RedirectAttributes ra) {
         Voucher v = voucherRepository.findById(id).orElseThrow();
         storeAccess.requireManager(v.getStore());
-        boolean newStatus = !Boolean.TRUE.equals(v.getIsActive());
-        v.setIsActive(newStatus);
-        voucherRepository.save(v);
+        boolean newStatus = voucherService.toggleVoucherActive(id);
         ra.addFlashAttribute("successMessage", "Đã " + (newStatus ? "bật" : "tắt") + " mã khuyến mãi [" + v.getCode() + "]!");
         return "redirect:/manager/vouchers";
     }

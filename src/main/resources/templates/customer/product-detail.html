@@ -512,7 +512,7 @@
 
                 <!-- Right Menu: Cart & Account -->
                 <div class="d-flex align-items-center gap-2">
-                    <a th:href="@{/cart}" id="headerCartLink" class="btn btn-light rounded-pill px-3 py-2 d-flex align-items-center gap-2 border position-relative" style="background:#ffffff; font-size:14px; text-decoration:none;" title="Giỏ hàng">
+                    <a sec:authorize="hasRole('USER')" th:href="@{/cart}" id="headerCartLink" class="btn btn-light rounded-pill px-3 py-2 d-flex align-items-center gap-2 border position-relative" style="background:#ffffff; font-size:14px; text-decoration:none;" title="Giỏ hàng">
                         <i class="bi bi-bag-heart text-danger" style="font-size: 17px; line-height: 1;"></i>
                         <span class="d-none d-sm-inline fw-semibold text-dark" style="font-size: 14px; line-height: 1;">Giỏ hàng</span>
                         <span id="headerCartBadge" class="cart-btn-badge"
@@ -549,6 +549,9 @@
                             <th:block th:replace="~{fragments/chat-widget :: system-chat-link}"></th:block>
                             <li sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')">
                                 <a class="dropdown-item py-2 fw-semibold text-success" th:href="@{/manager/dashboard}"><i class="bi bi-shop me-2"></i> Kênh Quản lý cửa hàng</a>
+                            </li>
+                            <li sec:authorize="hasRole('STAFF') and !hasAnyRole('ADMIN', 'MANAGER')">
+                                <a class="dropdown-item py-2 fw-semibold text-success" th:href="@{/staff/orders}"><i class="bi bi-person-badge me-2"></i> Bàn làm việc nhân viên</a>
                             </li>
                             <li sec:authorize="hasRole('ADMIN')">
                                 <a class="dropdown-item py-2 fw-semibold text-success" th:href="@{/admin/dashboard}"><i class="bi bi-shield-check me-2"></i> Quản trị hệ thống</a>
@@ -700,7 +703,7 @@
                                 <span th:text="${isFollowed} ? 'Đã yêu thích' : 'Yêu thích'">Yêu thích</span>
                             </button>
                         </form>
-                        <a sec:authorize="!hasRole('USER')" th:href="@{/login(continue=${'/product/' + product.id})}"
+                        <a sec:authorize="isAnonymous()" th:href="@{/login(continue=${'/product/' + product.id})}"
                            class="product-follow-button btn rounded-pill px-3 py-1 fw-medium d-inline-flex align-items-center shadow-xs"
                            style="background-color: #FFF1F2; color: #E11D48; border: 1px solid #FECDD3; font-size: 13px;">
                             <i class="bi bi-heart" style="font-size: 14px;"></i>
@@ -820,6 +823,24 @@
                                 <i class="bi bi-gear-fill me-1"></i> Quản lý sản phẩm
                             </a>
                         </div>
+                    </div>
+
+                    <div sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')" id="managerProductPreview"
+                         class="p-3 rounded-3 mb-3 border bg-light">
+                        <strong class="d-block mb-1">Chế độ xem sản phẩm của quản lý</strong>
+                        <p class="small text-muted mb-2">Xem thông tin mẫu hoa và quản lý sản phẩm, đơn hàng của chi nhánh.</p>
+                        <a th:href="@{/manager/products}" class="btn btn-sm btn-outline-success rounded-pill">
+                            <i class="bi bi-arrow-left me-1"></i> Quản lý sản phẩm
+                        </a>
+                    </div>
+
+                    <div sec:authorize="hasRole('STAFF') and !hasAnyRole('ADMIN', 'MANAGER')" id="staffProductPreview"
+                         class="p-3 rounded-3 mb-3 border bg-light">
+                        <strong class="d-block mb-1">Chế độ xem sản phẩm của nhân viên</strong>
+                        <p class="small text-muted mb-2">Xem thông tin mẫu hoa và quay lại bàn làm việc để xử lý đơn hàng.</p>
+                        <a th:href="@{/staff/orders}" class="btn btn-sm btn-outline-success rounded-pill">
+                            <i class="bi bi-arrow-left me-1"></i> Bàn làm việc nhân viên
+                        </a>
                     </div>
 
                     <!-- Khi chưa đăng nhập (Khách vãng lai): Số lượng và nút đăng nhập cùng hàng, cách nhau 12px -->

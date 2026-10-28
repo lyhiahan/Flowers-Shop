@@ -44,7 +44,7 @@ Quy ước service và cách giữ tương thích dữ liệu cũ: [kiến trúc
 |---|---|
 | `USER` | Mua hoa, giỏ hàng, đơn hàng, ví demo, đánh giá, hồ sơ, chat với cửa hàng/admin |
 | `ADMIN` | Quản trị toàn hệ thống, danh mục hoa, tài khoản, cấp phép chi nhánh, quản lý đơn hàng toàn chuỗi và hỗ trợ |
-| `MANAGER` | Quản lý chi nhánh được phân công: kho hoa, nhân sự, đơn hàng, thống kê doanh thu, ví cửa hàng |
+| `MANAGER` | Quản lý chi nhánh được phân công: kho hoa, nhân sự, đơn hàng, thống kê doanh thu, ví cửa hàng; không có quyền mua hàng/giỏ hàng/ví khách |
 | `STAFF` | Tiếp nhận, cắm hoa/chuẩn bị đơn, giao đơn và chat với khách hàng tại chi nhánh; không quản trị tài chính |
 
 ### Danh sách tài khoản thử nghiệm

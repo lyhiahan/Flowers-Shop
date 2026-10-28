@@ -1275,6 +1275,9 @@ class BusinessRegressionTests {
         Order order = checkout(PaymentMethod.MOMO_DEMO);
         demo.confirm(demo.create(List.of(order.getId()), customer.getUsername()));
         mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(outsider.getUsername()).roles("USER")).with(csrf()).param("reasonCode", "NO_LONGER_NEEDED"))
+                .andExpect(status().isForbidden());
+        User otherCustomer = createUser("other_refund_customer", Role.USER, null);
+        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(otherCustomer.getUsername()).roles("USER")).with(csrf()).param("reasonCode", "NO_LONGER_NEEDED"))
                 .andExpect(flash().attributeExists("errorMessage"));
         assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
         login(manager);

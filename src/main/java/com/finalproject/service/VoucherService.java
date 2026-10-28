@@ -19,10 +19,16 @@ public class VoucherService {
     private final jakarta.persistence.EntityManager entityManager;
     private final java.time.Clock clock;
 
+    @Transactional(readOnly = true)
+    public Voucher findByCodeReadOnly(String code) {
+        if (code == null || code.trim().isEmpty()) return null;
+        return voucherRepository.findByCodeAndIsActiveTrue(code.trim().toUpperCase(java.util.Locale.ROOT)).orElse(null);
+    }
+
     @Transactional
     public Voucher findByCode(String code) {
         if (code == null || code.trim().isEmpty()) return null;
-        Voucher voucher = voucherRepository.findByCodeAndIsActiveTrue(code.trim().toUpperCase(java.util.Locale.ROOT)).orElse(null);
+        Voucher voucher = voucherRepository.findByCodeAndIsActiveTrueForUpdate(code.trim().toUpperCase(java.util.Locale.ROOT)).orElse(null);
         if (voucher != null) entityManager.refresh(voucher, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
         return voucher;
     }
@@ -117,5 +123,25 @@ public class VoucherService {
 
     public List<Voucher> getSystemVouchers() {
         return voucherRepository.findByStoreIsNullOrderByCreatedAtDesc();
+    }
+
+    @Transactional
+    public Voucher updateVoucherDetails(Long id, java.util.function.Consumer<Voucher> updater) {
+        Voucher v = voucherRepository.findByIdForUpdate(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy mã khuyến mãi cần sửa."));
+        entityManager.refresh(v, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        updater.accept(v);
+        return voucherRepository.save(v);
+    }
+
+    @Transactional
+    public boolean toggleVoucherActive(Long id) {
+        Voucher v = voucherRepository.findByIdForUpdate(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy mã khuyến mãi."));
+        entityManager.refresh(v, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        boolean newStatus = !Boolean.TRUE.equals(v.getIsActive());
+        v.setIsActive(newStatus);
+        voucherRepository.save(v);
+        return newStatus;
     }
 }

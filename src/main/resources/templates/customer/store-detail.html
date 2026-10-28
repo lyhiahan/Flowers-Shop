@@ -270,7 +270,7 @@
 
                 <!-- Right Menu: Cart & Account -->
                 <div class="d-flex align-items-center gap-2">
-                    <a th:href="@{/cart}" class="btn btn-light rounded-pill px-3 py-2 d-flex align-items-center gap-2 border position-relative" style="background:#ffffff; font-size:14px; text-decoration:none;" title="Giỏ hàng">
+                    <a sec:authorize="hasRole('USER')" th:href="@{/cart}" class="btn btn-light rounded-pill px-3 py-2 d-flex align-items-center gap-2 border position-relative" style="background:#ffffff; font-size:14px; text-decoration:none;" title="Giỏ hàng">
                         <i class="bi bi-bag-heart text-danger" style="font-size: 17px; line-height: 1;"></i>
                         <span class="d-none d-sm-inline fw-semibold text-dark" style="font-size:14px; line-height: 1;">Giỏ hàng</span>
                         <span th:if="${cartItemCount != null and cartItemCount > 0}" class="cart-btn-badge" th:text="${cartItemCount}">0</span>
