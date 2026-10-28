@@ -61,5 +61,8 @@ application-local.properties
 /AGENTS.md
 
 # Local repo notes and preview launcher (preview artifacts are under target/)
-/docs/REPO_MAP.md
 ca.pem
+
+# Office temporary files
+~$*.docx
+~$*.xlsx
