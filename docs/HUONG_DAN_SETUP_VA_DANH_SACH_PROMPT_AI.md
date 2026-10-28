@@ -529,3 +529,5 @@ Yêu cầu: “bạn có thể tạo khoảng từ 2-6 đánh giá ảo có hìn
 - Prompt bổ sung: “sửa lại cho giống thật và push lên github” (ảnh tên Khách mẫu/Demo). Đổi tên hiển thị nhân vật mẫu thành tên tự nhiên, rút gọn nhãn thành “Dữ liệu mẫu”, bỏ tiền tố lặp trong phần nội dung hiển thị. Giữ nhận diện dữ liệu mẫu và ảnh minh họa; không sửa danh tính/tài khoản hoặc nội dung đánh giá thật trong database.
 
 - Người dùng yêu cầu tiếp: “làm tên và bố cục tự nhiên hơn bỏ nhãn demo luôn”. Bỏ nhãn cạnh từng tên và chữ DEMO trên avatar, dùng tên nhân vật tự nhiên và bố cục thoáng hơn; giữ một thông báo chung về đánh giá mô phỏng ở đầu khu vực và chú thích ảnh minh họa. Không sửa đánh giá thật hay định danh tài khoản trong database.
+
+- Prompt bổ sung: “bị lỗi chữ và sửa đánh giá đa dạng, không phải toàn 5 sao và đánh giá khen”. Chẩn đoán lỗi UTF-8/Windows-1252 từ seed SQL legacy. Đã sao lưu, rehearsal rollback, sửa 106 mẫu trên local bằng NVARCHAR, luân phiên 1–5 sao với nội dung khen/trung tính/góp ý tương ứng; giữ 1 đánh giá khác và cập nhật lại điểm trung bình, không đổi dữ liệu giao dịch.

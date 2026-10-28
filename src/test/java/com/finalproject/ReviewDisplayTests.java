@@ -2,6 +2,7 @@ package com.finalproject;
 
 import com.finalproject.entity.Review;
 import com.finalproject.entity.User;
+import com.finalproject.entity.Order;
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,10 +19,21 @@ class ReviewDisplayTests {
     }
     @Test void realCustomerNameAndContentArePreserved() {
         Review review = Review.builder().user(User.builder().username("customer").fullName("Tên khách thật").build())
-                .content("[Đánh giá mẫu] Khách nhập nội dung có tiền tố giống mẫu.").build();
+                .order(Order.builder().id(99L).build()).content("[Đánh giá mẫu] Khách nhập nội dung có tiền tố giống mẫu.").build();
         assertThat(review.isDemo()).isFalse();
         assertThat(review.getReviewerDisplayName()).isEqualTo("Tên khách thật");
         assertThat(review.getDisplayContent()).isEqualTo(review.getContent());
+    }
+    @Test void markedLegacyFixtureHasSampleDisclosureWithoutChangingCustomerIdentity() {
+        User customer = User.builder().id(7L).username("customer").fullName("Tên khách").build();
+        Review review = Review.builder().user(customer).content("[Đánh giá mẫu] Bố cục chưa cân đối, cần thêm ảnh mô tả kích thước.").rating(2).build();
+        assertThat(review.isDemo()).isTrue();
+        assertThat(review.getReviewerDisplayName()).isEqualTo("Hoàng Nam");
+        assertThat(review.getDisplayContent()).startsWith("Bố cục chưa cân đối");
+        assertThat(customer.getFullName()).isEqualTo("Tên khách");
+        review.setOrder(Order.builder().id(1L).build());
+        assertThat(review.isDemo()).isFalse();
+        assertThat(review.getReviewerDisplayName()).isEqualTo("Tên khách");
     }
     @Test void unknownSampleAndMissingCustomerHaveSafeFallbacks() {
         assertThat(Review.builder().user(User.builder().username("demo_review_unknown").build())
