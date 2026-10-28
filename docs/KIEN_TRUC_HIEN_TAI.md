@@ -46,7 +46,7 @@ Nghiệp vụ đang hỗ trợ là mua hoa (`BUY`). Không còn scheduler quét 
 
 Các thành phần dưới đây được giữ để không làm hỏng database và lịch sử:
 
-- Tên database SQL Server `RentalShop`; email demo và folder/public_id Cloudinary cũ.
+- Tên database SQL Server `RentalShop`, email demo và public_id Cloudinary đã lưu. Upload mới dùng tiền tố `flower_shop_`; không đổi tên/move ảnh cũ trên cloud.
 - Enum `RENT`, `RENTING`, `RETURNED`, `OVERDUE` để Hibernate đọc bản ghi cũ.
 - Ánh xạ các cột ngày thuê, giá thuê/cọc, `returnStore`, `totalDeposit`, `fineAmount`.
 - Cách tính subtotal chi tiết đơn thuê và thông tin tiền cọc/phạt trên lịch sử đơn đã tồn tại.
@@ -55,11 +55,13 @@ Các thành phần dưới đây được giữ để không làm hỏng databas
 
 Không có migration DROP cột hoặc đổi database trong đợt này. Nếu muốn xóa hoàn toàn các cột/enum cũ cần kiểm kê dữ liệu, chuyển/đóng đơn lịch sử, sao lưu và triển khai migration riêng cho từng engine.
 
+Form/API giỏ hàng không nhận ngày bắt đầu/kết thúc nghiệp vụ cũ; form sản phẩm không còn giá ngày và tiền cọc kể cả hidden input. Seed sản phẩm mới đặt các cột tương thích này bằng 0. DTO doanh thu chỉ trả doanh thu bán hàng, bỏ các chỉ số thuê/phạt luôn bằng 0. UI dùng mô tả trung tính cho giao dịch lịch sử, giữ số tiền cần đối chiếu thay vì giả thành đơn mua hoặc bỏ khoản đã ghi nhận.
+
 ## Database
 
 SQL Server dùng chuỗi migration V1–V17 (kết hợp SQL/Java). PostgreSQL dùng baseline V1 riêng đã chứa mô hình hiện tại. Không chạy migration SQL Server lên PostgreSQL. Xác nhận database thật bằng profile và `flyway_schema_history`; không suy từ tên version giữa hai engine.
 
-Aiven đọc `.env.aiven` riêng và chặn ghép với dev/test. Maven spring-boot:run mặc định Aiven; Spring chạy trực tiếp mặc định dev. Script run-local chọn dev rõ ràng.
+Aiven đọc `.env.aiven` riêng và chặn ghép với dev/test. `start-web.ps1` là launcher được theo dõi trong Git, mặc định Aiven; `-Database Local` đọc cấu hình PostgreSQL riêng, cho phép chọn host/port/database/user. `-Init` tạo cấu hình mẫu và JWT key, `-Check` chỉ kiểm tra cấu hình. Launcher tắt seed/tunnel/migration mặc định, bật riêng bằng `-Tunnel`/`-Migrate`, không tự import/reset. Maven spring-boot:run trực tiếp mặc định Aiven và dùng cờ của profile; Spring trực tiếp mặc định dev. Script run-local chọn dev rõ ràng.
 
 ## Kiểm chứng
 

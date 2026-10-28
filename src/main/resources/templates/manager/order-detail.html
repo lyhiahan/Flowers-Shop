@@ -160,7 +160,7 @@
                                                  alt="Hoa" class="flower-item-thumb">
                                             <div>
                                                 <div class="fw-bold" style="font-size: 15.5px; color: #20382E;" th:text="${d.product.name}">Hoa Bó</div>
-                                                <small class="text-muted" th:text="${d.orderType == 'RENT' ? 'Dịch vụ: Thuê mẫu hoa/phụ kiện' : 'Mua mẫu hoa tươi'}">Mua mẫu hoa</small>
+                                                <small class="text-muted" th:text="${d.orderType != null ? d.orderType.displayName : 'Giao dịch lịch sử'}">Mua hoa tươi</small>
                                             </div>
                                         </div>
                                     </td>

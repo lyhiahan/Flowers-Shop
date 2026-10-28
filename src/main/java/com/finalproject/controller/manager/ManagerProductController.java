@@ -364,7 +364,7 @@ public class ManagerProductController {
     private com.finalproject.service.CloudinaryService.UploadResult uploadProductImage(org.springframework.web.multipart.MultipartFile file) {
         if (file == null || file.isEmpty()) return null;
         try {
-            return cloudinaryService.upload(file, "rental_shop_products");
+            return cloudinaryService.upload(file, "flower_shop_products");
         } catch (java.io.IOException ex) {
             throw new IllegalStateException("Không thể tải ảnh lên Cloudinary. Vui lòng thử lại.", ex);
         }
@@ -376,7 +376,7 @@ public class ManagerProductController {
         for (var file : files) {
             if (file != null && !file.isEmpty()) {
                 try {
-                    var res = cloudinaryService.upload(file, "rental_shop_products");
+                    var res = cloudinaryService.upload(file, "flower_shop_products");
                     if (res != null) results.add(res);
                 } catch (java.io.IOException ex) {
                     throw new IllegalStateException("Không thể tải ảnh lên Cloudinary. Vui lòng thử lại.", ex);

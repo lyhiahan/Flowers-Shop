@@ -237,7 +237,7 @@ public class ProductService {
             String chosenMainUrl = null;
             for (MultipartFile file : form.getImageFiles()) {
                 if (file != null && !file.isEmpty()) {
-                    CloudinaryService.UploadResult result = cloudinaryService.upload(file, "rental_shop_products");
+                    CloudinaryService.UploadResult result = cloudinaryService.upload(file, "flower_shop_products");
                     if (result == null) continue;
                     boolean isMain = (currentIndex == mainIndex);
                     ProductImage productImage = ProductImage.builder()
@@ -336,7 +336,7 @@ public class ProductService {
                         productImageRepository.saveAll(previous);
                         resetPrevious = true;
                     }
-                    CloudinaryService.UploadResult result = cloudinaryService.upload(file, "rental_shop_products");
+                    CloudinaryService.UploadResult result = cloudinaryService.upload(file, "flower_shop_products");
                     if (result == null) continue;
                     boolean isMain = (currentIndex == mainIndex);
                     ProductImage productImage = ProductImage.builder()

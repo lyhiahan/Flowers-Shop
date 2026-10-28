@@ -67,7 +67,7 @@ public class ManagerProfileController {
             String newPublicId = null;
 
             if (avatarFile != null && !avatarFile.isEmpty()) {
-                CloudinaryService.UploadResult result = cloudinaryService.upload(avatarFile, "rental_shop_stores/avatars");
+                CloudinaryService.UploadResult result = cloudinaryService.upload(avatarFile, "flower_shop_stores/avatars");
                 if (result != null) {
                     newUrl = result.secureUrl();
                     newPublicId = result.publicId();
@@ -118,7 +118,7 @@ public class ManagerProfileController {
             String newPublicId = null;
 
             if (coverFile != null && !coverFile.isEmpty()) {
-                CloudinaryService.UploadResult result = cloudinaryService.upload(coverFile, "rental_shop_stores/covers");
+                CloudinaryService.UploadResult result = cloudinaryService.upload(coverFile, "flower_shop_stores/covers");
                 if (result != null) {
                     newUrl = result.secureUrl();
                     newPublicId = result.publicId();
@@ -168,7 +168,7 @@ public class ManagerProfileController {
             String newPublicId = null;
 
             if (featuredFile != null && !featuredFile.isEmpty()) {
-                CloudinaryService.UploadResult result = cloudinaryService.upload(featuredFile, "rental_shop_stores/featured");
+                CloudinaryService.UploadResult result = cloudinaryService.upload(featuredFile, "flower_shop_stores/featured");
                 if (result != null) { newUrl = result.secureUrl(); newPublicId = result.publicId(); }
             } else if (imageUrl != null && !imageUrl.trim().isEmpty()) {
                 if (!isValidImageUrl(imageUrl)) {
@@ -223,7 +223,7 @@ public class ManagerProfileController {
             String updatedUrl = null;
             String newPublicId = null;
             if (editFile != null && !editFile.isEmpty()) {
-                CloudinaryService.UploadResult result = cloudinaryService.upload(editFile, "rental_shop_stores/featured");
+                CloudinaryService.UploadResult result = cloudinaryService.upload(editFile, "flower_shop_stores/featured");
                 if (result != null) { updatedUrl = result.secureUrl(); newPublicId = result.publicId(); }
             } else if (editUrl != null && !editUrl.trim().isEmpty()) {
                 if (!isValidImageUrl(editUrl)) {

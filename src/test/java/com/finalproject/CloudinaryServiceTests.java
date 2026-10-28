@@ -43,9 +43,9 @@ class CloudinaryServiceTests {
         try (var in = Files.newInputStream(Path.of("src/main/resources/application.properties"))) { properties.load(in); }
         Cloudinary sdk = new Cloudinary(ObjectUtils.asMap("cloud_name", credential(properties, "cloudinary.cloud-name"),
                 "api_key", credential(properties, "cloudinary.api-key"), "api_secret", credential(properties, "cloudinary.api-secret"), "secure", true));
-        var result = new CloudinaryService(sdk).upload(image(), "rental_shop_checks");
+        var result = new CloudinaryService(sdk).upload(image(), "flower_shop_checks");
         try {
-            assertThat(result.publicId()).startsWith("rental_shop_checks/");
+            assertThat(result.publicId()).startsWith("flower_shop_checks/");
             assertThat(result.secureUrl()).startsWith("https://res.cloudinary.com/" + sdk.config.cloudName + "/");
             var request = java.net.http.HttpRequest.newBuilder(java.net.URI.create(result.secureUrl())).GET().build();
             assertThat(java.net.http.HttpClient.newHttpClient().send(request, java.net.http.HttpResponse.BodyHandlers.discarding()).statusCode()).isEqualTo(200);

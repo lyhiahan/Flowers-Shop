@@ -10,6 +10,4 @@ import java.math.BigDecimal;
 @Builder
 public class RevenueChartDto {
     private BigDecimal totalBuyRevenue;   // Tổng doanh thu Mua
-    private BigDecimal totalRentRevenue;  // Tổng doanh thu Thuê
-    private BigDecimal totalFineRevenue;  // Tổng tiền phạt thu được
 }

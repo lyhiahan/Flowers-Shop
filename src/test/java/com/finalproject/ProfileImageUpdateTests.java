@@ -43,8 +43,8 @@ class ProfileImageUpdateTests {
     @Test void bothImagesSaveWithBlankOptionalContactFieldsAndRemainAfterReload() throws Exception {
         preview("profile-before.html", profile());
         var avatar=image("avatarFile"); var cover=image("coverFile");
-        when(cloud.upload(any(),eq("rental_shop_avatars"))).thenReturn(new CloudinaryService.UploadResult("https://res.cloudinary.com/test/avatar.png","avatars/new"));
-        when(cloud.upload(any(),eq("rental_shop_covers"))).thenReturn(new CloudinaryService.UploadResult("https://res.cloudinary.com/test/cover.png","covers/new"));
+        when(cloud.upload(any(),eq("flower_shop_avatars"))).thenReturn(new CloudinaryService.UploadResult("https://res.cloudinary.com/test/avatar.png","avatars/new"));
+        when(cloud.upload(any(),eq("flower_shop_covers"))).thenReturn(new CloudinaryService.UploadResult("https://res.cloudinary.com/test/cover.png","covers/new"));
         mvc.perform(multipart("/customer/profile/update").file(avatar).file(cover).with(user(customer.getUsername()).roles("USER"))
                         .with(csrf()).param("fullName",customer.getFullName()).param("phone","").param("address",""))
                 .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("successMessage"));
@@ -59,8 +59,8 @@ class ProfileImageUpdateTests {
     }
 
     @Test void secondUploadFailurePreservesBothOldImagesAndRemovesTheUncommittedUpload() throws Exception {
-        when(cloud.upload(any(),eq("rental_shop_avatars"))).thenReturn(new CloudinaryService.UploadResult("https://res.cloudinary.com/test/new.png","avatars/new"));
-        when(cloud.upload(any(),eq("rental_shop_covers"))).thenThrow(new IOException("Upload unavailable"));
+        when(cloud.upload(any(),eq("flower_shop_avatars"))).thenReturn(new CloudinaryService.UploadResult("https://res.cloudinary.com/test/new.png","avatars/new"));
+        when(cloud.upload(any(),eq("flower_shop_covers"))).thenThrow(new IOException("Upload unavailable"));
         mvc.perform(multipart("/customer/profile/update").file(image("avatarFile")).file(image("coverFile"))
                         .with(user(customer.getUsername()).roles("USER")).with(csrf()).param("fullName","Changed name"))
                 .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("errorMessage"));
@@ -74,7 +74,7 @@ class ProfileImageUpdateTests {
 
     @Test void avatarOnlyPreservesExistingCoverAndContactDetails() throws Exception {
         customer.setPhone("0901234567"); customer.setAddress("Existing address"); users.save(customer);
-        when(cloud.upload(any(),eq("rental_shop_avatars"))).thenReturn(new CloudinaryService.UploadResult("https://res.cloudinary.com/test/new.png","avatars/new"));
+        when(cloud.upload(any(),eq("flower_shop_avatars"))).thenReturn(new CloudinaryService.UploadResult("https://res.cloudinary.com/test/new.png","avatars/new"));
         mvc.perform(multipart("/customer/profile/update").file(image("avatarFile")).with(user(customer.getUsername()).roles("USER"))
                         .with(csrf()).param("fullName",customer.getFullName()))
                 .andExpect(flash().attributeExists("successMessage"));
@@ -82,7 +82,7 @@ class ProfileImageUpdateTests {
         assertThat(saved.getCover()).isEqualTo(customer.getCover());
         assertThat(saved.getPhone()).isEqualTo(customer.getPhone());
         assertThat(saved.getAddress()).isEqualTo(customer.getAddress());
-        verify(cloud,never()).upload(any(),eq("rental_shop_covers"));
+        verify(cloud,never()).upload(any(),eq("flower_shop_covers"));
     }
 
     @Test void rejectedUploadsNeverReportSuccessOrOverwriteTheStoredImages() throws Exception {
