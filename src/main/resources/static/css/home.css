@@ -1117,6 +1117,17 @@ body {
     display: inline-block;
 }
 
+.catalog-sort-control {
+    max-width: 100%;
+}
+#catalogSortSelect {
+    width: 240px;
+    max-width: 100%;
+    padding: 6px 44px 6px 16px;
+    background-position: right 16px center;
+    line-height: 1.5;
+}
+
 .drawer-store-options {
     display: grid;
     gap: 8px;

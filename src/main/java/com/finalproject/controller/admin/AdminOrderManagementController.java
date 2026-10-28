@@ -197,7 +197,7 @@ public class AdminOrderManagementController {
                 case COMPLETED -> "Hoàn thành";
                 case CANCELLED -> "Đã hủy";
                 case REFUNDED -> "Đã xác nhận hoàn tiền";
-                default -> status.name();
+                default -> status.getDisplayName();
             };
             if (status == OrderStatus.CANCELLED && orderService.getOrderById(id).getStatus() == OrderStatus.REFUND_REQUESTED) {
                 statusLabel = "Đã hủy, chờ hoàn tiền — vui lòng hoàn tiền lại cho khách hàng";

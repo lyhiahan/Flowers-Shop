@@ -1378,7 +1378,8 @@ class BusinessRegressionTests {
                         "id=\"confirmCancelOrderModal_" + order.getId() + "\"")));
         mvc.perform(post("/manager/orders/update-status/" + order.getId()).with(user(manager.getUsername()).roles("MANAGER")).with(csrf())
                         .param("status", "PREPARING"))
-                .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("successMessage"));
+                .andExpect(status().is3xxRedirection()).andExpect(flash().attribute("successMessage",
+                        "Đã cập nhật đơn #" + order.getId() + " sang trạng thái “Đang chuẩn bị hoa”."));
         for (String path : List.of("/customer/orders", "/customer/orders/" + order.getId())) {
             mvc.perform(get(path).with(user(customer.getUsername()).roles("USER")))
                     .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("bạn không thể tự hủy đơn")))

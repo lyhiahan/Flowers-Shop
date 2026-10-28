@@ -91,11 +91,11 @@
                 </div>
 
                 <!-- Sắp xếp toàn bộ kết quả trước khi phân trang (Quy chuẩn 4) -->
-                <div class="d-flex align-items-center gap-2">
+                <div class="catalog-sort-control d-flex flex-wrap align-items-center gap-2">
                     <label for="catalogSortSelect" class="small text-secondary fw-semibold text-nowrap mb-0 d-none d-sm-inline">
                         <i class="bi bi-arrow-down-up me-1" style="color: var(--flower-primary);"></i>Sắp xếp:
                     </label>
-                    <select id="catalogSortSelect" class="form-select form-select-sm rounded-pill px-3 py-1 shadow-sm" style="min-width: 175px;" onchange="applyCatalogSort(this.value)">
+                    <select id="catalogSortSelect" class="form-select form-select-sm rounded-pill shadow-sm" aria-label="Sắp xếp sản phẩm" onchange="applyCatalogSort(this.value)">
                         <option value="default" th:selected="${sort == null or sort == 'default'}">Mới nhất / Nổi bật</option>
                         <option value="price_asc" th:selected="${sort == 'price_asc'}">Giá: Thấp → Cao</option>
                         <option value="price_desc" th:selected="${sort == 'price_desc'}">Giá: Cao → Thấp</option>
@@ -106,48 +106,8 @@
                 </div>
             </div>
 
-            <!-- THANH BỘ LỌC (Quy chuẩn 3: Tất cả bộ lọc · Kiểu dáng · Loại hoa · Màu sắc · Dịp tặng · Giá) -->
+            <!-- Các lựa chọn được tập trung trong bảng Tất cả bộ lọc. -->
             <div class="d-flex align-items-center gap-2 flex-wrap" id="catalogFilterBar">
-                <!-- NÚT CHỌN NHANH DANH MỤC: [▦ Danh mục: Tất cả ▾] -->
-                <div class="position-relative d-inline-block" id="catalogCategoryDropdownWrapper">
-                    <button type="button"
-                            class="btn btn-category-picker d-inline-flex align-items-center gap-2"
-                            id="btnCategoryPicker"
-                            onclick="toggleFlowerMegaMenu(event, 'catalog')"
-                            aria-expanded="false"
-                            aria-controls="flowerMegaMenuPanel"
-                            title="Bấm để mở bảng chọn nhanh danh mục hoa">
-                        <i class="bi bi-grid-fill" style="color: var(--flower-accent); font-size: 16px;"></i>
-                        <span id="categoryPickerLabel"
-                              th:text="${(selectedCategory != null) ? 'Danh mục: ' + selectedCategory.name : 'Danh mục: Tất cả'}">
-                            Danh mục: Tất cả
-                        </span>
-                        <i class="bi bi-chevron-down ms-1" style="font-size: 13px;"></i>
-                    </button>
-                </div>
-
-                <!-- Chi nhánh dùng cùng kiểu nút với các điều kiện lọc khác. -->
-                <div class="dropdown">
-                    <button id="catalogStoreSelect" type="button" data-bs-toggle="dropdown" aria-expanded="false"
-                            aria-label="Lọc sản phẩm theo chi nhánh"
-                            class="btn btn-sm rounded-pill px-3 py-2 fw-semibold border d-inline-flex align-items-center gap-1"
-                            th:classappend="${storeId != null} ? 'btn-flower-accent text-white shadow-sm' : 'btn-light text-secondary'">
-                        <span>Chi nhánh</span>
-                        <span th:if="${storeId != null}" class="badge bg-white text-danger rounded-pill">●</span>
-                        <i class="bi bi-chevron-down ms-1" style="font-size: 11px;" aria-hidden="true"></i>
-                    </button>
-                    <ul class="dropdown-menu shadow-sm" aria-labelledby="catalogStoreSelect" style="width: 320px; max-width: 85vw;">
-                        <li><button type="button" class="dropdown-item text-wrap" onclick="applyCatalogStore('')"
-                                    th:classappend="${storeId == null} ? 'active'">Tất cả chi nhánh</button></li>
-                        <li th:each="branch : ${catalogStores}">
-                            <button type="button" class="dropdown-item text-wrap"
-                                    th:classappend="${branch.id == storeId} ? 'active'"
-                                    th:attr="data-store-id=${branch.id}" th:text="${branch.name}"
-                                    onclick="applyCatalogStore(this.dataset.storeId)"></button>
-                        </li>
-                    </ul>
-                </div>
-
                 <!-- Nút Tất cả bộ lọc: mở bảng Offcanvas -->
                 <button class="btn btn-sm rounded-pill px-3 py-2 fw-semibold border d-inline-flex align-items-center gap-2"
                         th:classappend="${hasAttributeFilters} ? 'btn-flower-accent text-white shadow-sm' : 'btn-light text-secondary'"
@@ -158,50 +118,6 @@
                     <span th:if="${hasAttributeFilters}" class="badge bg-white text-danger rounded-pill">●</span>
                 </button>
 
-                <!-- Nút Kiểu dáng -->
-                <button class="btn btn-sm rounded-pill px-3 py-2 fw-semibold border d-inline-flex align-items-center gap-1"
-                        th:classappend="${flowerStyles != null and !flowerStyles.isEmpty()} ? 'btn-flower-accent text-white shadow-sm' : 'btn-light text-secondary'"
-                        type="button" data-bs-toggle="offcanvas" data-bs-target="#allFiltersOffcanvas" onclick="scrollToFilterGroup('filterGroupStyle')">
-                    <span>Kiểu dáng</span>
-                    <span th:if="${flowerStyles != null and !flowerStyles.isEmpty()}" class="badge bg-white text-danger rounded-pill" th:text="${#lists.size(flowerStyles)}"></span>
-                    <i class="bi bi-chevron-down ms-1" style="font-size: 11px;"></i>
-                </button>
-
-                <!-- Nút Loại hoa -->
-                <button class="btn btn-sm rounded-pill px-3 py-2 fw-semibold border d-inline-flex align-items-center gap-1"
-                        th:classappend="${flowerTypes != null and !flowerTypes.isEmpty()} ? 'btn-flower-accent text-white shadow-sm' : 'btn-light text-secondary'"
-                        type="button" data-bs-toggle="offcanvas" data-bs-target="#allFiltersOffcanvas" onclick="scrollToFilterGroup('filterGroupType')">
-                    <span>Loại hoa</span>
-                    <span th:if="${flowerTypes != null and !flowerTypes.isEmpty()}" class="badge bg-white text-danger rounded-pill" th:text="${#lists.size(flowerTypes)}"></span>
-                    <i class="bi bi-chevron-down ms-1" style="font-size: 11px;"></i>
-                </button>
-
-                <!-- Nút Màu sắc -->
-                <button class="btn btn-sm rounded-pill px-3 py-2 fw-semibold border d-inline-flex align-items-center gap-1"
-                        th:classappend="${flowerColors != null and !flowerColors.isEmpty()} ? 'btn-flower-accent text-white shadow-sm' : 'btn-light text-secondary'"
-                        type="button" data-bs-toggle="offcanvas" data-bs-target="#allFiltersOffcanvas" onclick="scrollToFilterGroup('filterGroupColor')">
-                    <span>Màu sắc</span>
-                    <span th:if="${flowerColors != null and !flowerColors.isEmpty()}" class="badge bg-white text-danger rounded-pill" th:text="${#lists.size(flowerColors)}"></span>
-                    <i class="bi bi-chevron-down ms-1" style="font-size: 11px;"></i>
-                </button>
-
-                <!-- Nút Dịp tặng -->
-                <button class="btn btn-sm rounded-pill px-3 py-2 fw-semibold border d-inline-flex align-items-center gap-1"
-                        th:classappend="${flowerOccasions != null and !flowerOccasions.isEmpty()} ? 'btn-flower-accent text-white shadow-sm' : 'btn-light text-secondary'"
-                        type="button" data-bs-toggle="offcanvas" data-bs-target="#allFiltersOffcanvas" onclick="scrollToFilterGroup('filterGroupOccasion')">
-                    <span>Dịp tặng</span>
-                    <span th:if="${flowerOccasions != null and !flowerOccasions.isEmpty()}" class="badge bg-white text-danger rounded-pill" th:text="${#lists.size(flowerOccasions)}"></span>
-                    <i class="bi bi-chevron-down ms-1" style="font-size: 11px;"></i>
-                </button>
-
-                <!-- Nút Khoảng giá -->
-                <button class="btn btn-sm rounded-pill px-3 py-2 fw-semibold border d-inline-flex align-items-center gap-1"
-                        th:classappend="${minPrice != null or maxPrice != null} ? 'btn-flower-accent text-white shadow-sm' : 'btn-light text-secondary'"
-                        type="button" data-bs-toggle="offcanvas" data-bs-target="#allFiltersOffcanvas" onclick="scrollToFilterGroup('filterGroupPrice')">
-                    <span>Khoảng giá</span>
-                    <span th:if="${minPrice != null or maxPrice != null}" class="badge bg-white text-danger rounded-pill">●</span>
-                    <i class="bi bi-chevron-down ms-1" style="font-size: 11px;"></i>
-                </button>
             </div>
 
             <!-- HÀNG RIÊNG: ĐANG LỌC (Quy chuẩn 2: Đang lọc: [Kiểu dáng: Bó hoa ×] ...) -->
@@ -274,11 +190,11 @@
                     <button type="button" class="btn-remove-filter" onclick="removeRatingFilter()" title="Bỏ lọc đánh giá">×</button>
                 </span>
 
-                <!-- Nút "Xóa bộ lọc": Bỏ các thuộc tính lọc, giữ từ khóa và danh mục đang xem -->
+                <!-- Bỏ cả chi nhánh và thuộc tính, giữ từ khóa và danh mục đang xem. -->
                 <button th:if="${hasAttributeFilters}" type="button" onclick="resetAttributeFiltersOnly()"
                         class="btn btn-link btn-sm p-0 ms-2 text-decoration-none fw-bold"
                         style="color: var(--flower-accent); font-size: 13.5px;"
-                        title="Bỏ các thuộc tính lọc, giữ từ khóa và danh mục đang xem">
+                        title="Bỏ lọc chi nhánh và các thuộc tính, giữ từ khóa và danh mục đang xem">
                     Xóa bộ lọc
                 </button>
             </div>

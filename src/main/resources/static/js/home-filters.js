@@ -322,6 +322,7 @@
 
     window.resetAttributeFiltersOnly = function () {
         const p = getQueryParams();
+        p.delete('storeId');
         p.delete('flowerStyle');
         p.delete('flowerType');
         p.delete('flowerColor');

@@ -188,7 +188,7 @@ class StoreManagementOrderUseCaseTests {
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/manager/orders/" + processingOrder.getId()))
-                .andExpect(flash().attributeExists("successMessage"));
+                .andExpect(flash().attribute("successMessage", "Đã cập nhật đơn #" + processingOrder.getId() + " sang trạng thái “Đã xác nhận”."));
 
         Order updated = orderRepository.findById(processingOrder.getId()).orElseThrow();
         assertThat(updated.getStatus()).isEqualTo(OrderStatus.CONFIRMED);

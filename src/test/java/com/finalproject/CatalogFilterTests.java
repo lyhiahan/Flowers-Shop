@@ -188,7 +188,10 @@ public class CatalogFilterTests {
         assertThat(model.get("storeId")).isEqualTo(branchId);
         assertThat(model.get("sort")).isEqualTo("price_asc");
         String html = result.getResponse().getContentAsString();
-        assertThat(html).contains("id=\"catalogStoreSelect\"", "storeId=" + branchId, "sort=price_asc");
+        assertThat(html).contains("id=\"btnAllFilters\"", "storeId=" + branchId, "sort=price_asc");
+        String filterBar = html.substring(html.indexOf("id=\"catalogFilterBar\""), html.indexOf("id=\"activeFilterRow\""));
+        assertThat(filterBar.split("<button", -1)).hasSize(2);
+        assertThat(filterBar).doesNotContain("catalogStoreSelect", "btnCategoryPicker", "scrollToFilterGroup");
         String headerForm = html.substring(html.indexOf("id=\"globalSearchForm\""));
         headerForm = headerForm.substring(0, headerForm.indexOf("</form>"));
         assertThat(headerForm).contains("name=\"storeId\" value=\"" + branchId + "\"");

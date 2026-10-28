@@ -261,6 +261,20 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default-cli</id>
+						<configuration>
+							<!-- Read saved UI files directly during local spring-boot:run. -->
+							<addResources>true</addResources>
+							<systemPropertyVariables>
+								<spring.thymeleaf.cache>false</spring.thymeleaf.cache>
+								<spring.web.resources.cache.period>0</spring.web.resources.cache.period>
+								<spring.web.resources.cache.cachecontrol.no-store>true</spring.web.resources.cache.cachecontrol.no-store>
+							</systemPropertyVariables>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

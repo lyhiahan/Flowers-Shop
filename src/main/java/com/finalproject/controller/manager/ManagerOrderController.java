@@ -170,7 +170,8 @@ public class ManagerOrderController {
                                RedirectAttributes ra) {
         try {
             orderService.updateOrderStatus(id, status, cancellationReason);
-            ra.addFlashAttribute("successMessage", "Cập nhật trạng thái đơn #" + id + " thành [" + status + "] thành công!");
+            OrderStatus updatedStatus = orderService.getOrderById(id).getStatus();
+            ra.addFlashAttribute("successMessage", "Đã cập nhật đơn #" + id + " sang trạng thái “" + updatedStatus.getDisplayName() + "”.");
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
