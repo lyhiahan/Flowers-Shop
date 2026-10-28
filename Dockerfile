@@ -28,6 +28,7 @@ USER spring:spring
 
 # Copy built jar from build stage
 COPY --from=build /app/target/*.jar app.jar
+COPY ca.pem* ./
 
 # Expose default port
 ENV PORT=8080
