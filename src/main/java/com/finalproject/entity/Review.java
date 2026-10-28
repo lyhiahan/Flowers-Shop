@@ -52,6 +52,41 @@ public class Review {
         updatedAt = LocalDateTime.now();
     }
 
+    /** Sample fixtures are visible as demo content, never as verified customer feedback. */
+    @Transient
+    public boolean isDemo() {
+        // A real submitted review always references its received order. Legacy fixtures may use
+        // demo customer accounts, so use the explicit marker and missing order as provenance.
+        return order == null && content != null && content.startsWith("[Đánh giá mẫu] ");
+    }
+
+    /** Fictional display names for marked fixtures; account identities remain unchanged. */
+    @Transient
+    public String getReviewerDisplayName() {
+        if (isDemo()) {
+            String[] names = {"Mai Anh", "Hoàng Nam", "Thu Hà", "Khánh Linh", "Quỳnh Trang", "Bảo Ngọc"};
+            if (user == null || user.getUsername() == null || !user.getUsername().startsWith("demo_review_")) {
+                long identity = user != null && user.getId() != null ? user.getId() : id != null ? id : 0;
+                return names[Math.floorMod(identity, names.length)];
+            }
+            try {
+                int index = Integer.parseInt(user.getUsername().substring("demo_review_".length())) - 1;
+                if (index >= 0 && index < names.length) return names[index];
+            } catch (NumberFormatException ignored) {}
+            return "Khách tham khảo";
+        }
+        return user != null && user.getFullName() != null && !user.getFullName().isBlank()
+                ? user.getFullName() : "Khách hàng";
+    }
+
+    @Transient
+    public String getDisplayContent() {
+        if (!isDemo()) return content;
+        String text = content.substring("[Đánh giá mẫu] ".length());
+        String suffix = " Ảnh minh họa từ ảnh sản phẩm; đây là dữ liệu demo.";
+        return text.endsWith(suffix) ? text.substring(0, text.length() - suffix.length()) : text;
+    }
+
     @Transient
     public Integer getStars() {
         return rating != null ? rating : 5;
