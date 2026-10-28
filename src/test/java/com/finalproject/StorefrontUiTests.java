@@ -60,7 +60,8 @@ class StorefrontUiTests {
             String footer = html.substring(start, html.indexOf("</footer>", start) + 9);
             assertThat(html.split("<footer\\b", -1)).as(route).hasSize(2);
             assertThat(html).contains("href=\"/css/site-footer.css\"");
-            assertThat(footer).contains("Chi nhánh Q.1:", "Chi nhánh Q.7:", "Chi nhánh Thủ Đức:", "atelier@hoatuoisaigon.vn", "60–90 phút");
+            assertThat(footer).contains(store.getBranchDisplayName(), store.getAddress(), "href=\"/stores/" + store.getId() + "\"",
+                    "atelier@hoatuoisaigon.vn", "60–90 phút");
             if (expected == null) expected = footer;
             else assertThat(footer).as(route).isEqualTo(expected);
             preview(route.equals("/") ? "home-empty.html" : route.replaceAll("[^a-zA-Z0-9]", "_") + ".html", html);

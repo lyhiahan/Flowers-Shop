@@ -10,6 +10,7 @@
         ready = false;
         window.updateWalletAvailability?.(null, false);
         status.textContent = 'Đang cập nhật số tiền…';
+        document.getElementById('displayShippingFee').textContent = 'Đang tính…';
         request?.abort();
         timer = setTimeout(async () => {
             request = new AbortController();
@@ -38,6 +39,7 @@
                 if (error.name === 'AbortError' || current !== sequence) return;
                 status.textContent = error.message;
                 document.getElementById('displayGrandTotal').textContent = 'Chưa xác định';
+                document.getElementById('displayShippingFee').textContent = 'Chưa xác định';
                 const deliveryName = document.getElementById('assignedDeliveryName');
                 if (deliveryName && form.querySelector('#methodDelivery')?.checked) {
                     deliveryName.textContent = 'Chưa chọn được đơn vị vận chuyển phù hợp.';

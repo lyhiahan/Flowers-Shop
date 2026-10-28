@@ -241,7 +241,7 @@
              class="product-item group flex flex-col rounded-2xl bg-white border border-[#EFE8E1] overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-card shadow-xs"
              th:data-id="${p.id}"
              th:data-price="${p.priceBuy != null ? p.priceBuy : (p.sellingPrice != null ? p.sellingPrice : 0)}"
-             th:data-rating="${p.rating != null ? p.rating : 5.0}"
+             th:data-rating="${p.customerRating != null ? p.customerRating : 0}"
              th:data-category="${p.name != null and (p.name.toLowerCase().contains('sinh nhật') or p.name.toLowerCase().contains('sn')) ? 'sinh-nhat' : (p.name != null and (p.name.toLowerCase().contains('tình yêu') or p.name.toLowerCase().contains('yêu') or p.name.toLowerCase().contains('hồng') or p.name.toLowerCase().contains('rose') or p.name.toLowerCase().contains('cưới')) ? 'tinh-yeu' : (p.name != null and (p.name.toLowerCase().contains('khai trương') or p.name.toLowerCase().contains('kệ') or p.name.toLowerCase().contains('chúc mừng') or p.name.toLowerCase().contains('lẵng')) ? 'khai-truong' : 'khac'))}">
 
           <!-- Image Thumbnail & Badges -->
@@ -283,7 +283,7 @@
               <div class="flex items-center justify-between text-xs text-[#777] mb-1.5 font-medium">
                 <span class="flex items-center gap-1 text-[#e5a01d] font-bold">
                   <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
-                  <span th:text="${p.rating != null ? p.rating : '5.0'}">5.0</span>
+                  <span th:text="${p.customerRating != null ? p.customerRating : 'Chưa có đánh giá'}">5.0</span>
                   <span class="text-[#888] font-normal" th:text="'(' + ${p.sold != null ? p.sold : 12} + ')'"></span>
                 </span>
                 <span class="text-botanic-green font-bold flex items-center gap-0.5">

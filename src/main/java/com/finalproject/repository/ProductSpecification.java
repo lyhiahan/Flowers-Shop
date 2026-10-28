@@ -81,7 +81,7 @@ public class ProductSpecification {
             if (minPrice != null) predicates.add(cb.greaterThanOrEqualTo(sellingPrice, minPrice));
             if (maxPrice != null) predicates.add(cb.lessThanOrEqualTo(sellingPrice, maxPrice));
             if (minRating != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("rating"), minRating));
+                predicates.add(cb.greaterThanOrEqualTo(root.get("customerRating"), minRating));
             }
             if (storeId != null) {
                 var inventory = query.subquery(Long.class);

@@ -116,6 +116,8 @@ public class CheckoutController {
                 .filter(store -> checkoutItems.stream().allMatch(item -> com.finalproject.service.ProductAvailability.supportsBranch(item.getProduct(), store))).toList());
         model.addAttribute("deliveries", deliveryRepository.findAll().stream()
                 .filter(d -> Boolean.TRUE.equals(d.getIsActive()) && !Boolean.TRUE.equals(d.getIsDeleted())).toList());
+        model.addAttribute("fulfillmentStores", checkoutItems.stream().map(CartItem::getStore)
+                .filter(java.util.Objects::nonNull).distinct().toList());
         model.addAttribute("checkoutItems", checkoutItems);
         model.addAttribute("subtotal", subtotal);
         model.addAttribute("grandTotal", grandTotal);

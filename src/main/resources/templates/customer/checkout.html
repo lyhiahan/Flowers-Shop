@@ -442,6 +442,7 @@
             <div>
                 <h1 class="checkout-page-title">Thanh toán</h1>
                 <p class="checkout-page-subtitle">Kiểm tra thông tin trước khi đặt hàng</p>
+                    <a class="d-md-none small" href="#displayGrandTotal">Xem tổng thanh toán ↓</a>
             </div>
             <a th:href="@{/cart}" class="text-secondary text-decoration-none small d-inline-flex align-items-center gap-1">
                 <i class="bi bi-arrow-left"></i> Quay lại giỏ hàng
@@ -520,14 +521,14 @@
                                             <i class="bi bi-bookmark-check text-danger me-1"></i>Chọn địa chỉ đã lưu:
                                         </span>
                                     </div>
-                                    <select class="form-select form-select-sm bg-white" onchange="fillAddress(this)">
+                                    <select id="savedAddressSelect" class="form-select form-select-sm bg-white" onchange="fillAddress(this)" th:data-restore="${prevRecipientName != null or prevRecipientPhone != null or prevRecipientAddress != null}">
                                         <option value="">-- Bấm để chọn địa chỉ đã lưu --</option>
                                         <option th:each="a : ${addresses}"
                                                 th:value="${a.id}"
                                                 th:data-name="${a.recipientName}"
                                                 th:data-phone="${a.phone}"
                                                 th:data-address="${a.addressDetail}"
-                                                th:selected="${a.isDefault}"
+                                                th:selected="${a.isDefault and prevRecipientName == null and prevRecipientPhone == null and prevRecipientAddress == null}"
                                                 th:text="${a.recipientName + ' - ' + a.phone + ' (' + a.addressDetail + ')' + (a.isDefault ? ' [Mặc định]' : '')}">
                                         </option>
                                     </select>
@@ -560,17 +561,25 @@
 
                                 <!-- A3: Vùng giao hàng demo do khách lựa chọn, không suy đoán khoảng cách từ địa chỉ -->
                                 <div class="mb-3">
-                                    <label class="form-label-custom" for="deliveryZoneSelect">Vùng giao hàng demo (*)</label>
+                                    <label class="form-label-custom" for="deliveryZoneSelect">Vùng giao hàng (*)</label>
                                     <select name="deliveryZone" id="deliveryZoneSelect" class="form-select-custom w-100" required
                                             onchange="updateCheckoutTotal()">
-                                        <option value="">-- Chọn vùng theo bảng phí của cửa hàng --</option>
+                                        <option value="">-- Chọn khoảng cách từ chi nhánh giao hoa --</option>
                                         <option value="NEAR" th:selected="${prevDeliveryZone == 'NEAR'}">Vùng gần (bảng phí dưới 5 km)</option>
                                         <option value="FAR" th:selected="${prevDeliveryZone == 'FAR'}">Vùng xa (bảng phí 5–15 km)</option>
                                         <option value="OUTSIDE" th:selected="${prevDeliveryZone == 'OUTSIDE'}">Ngoài phạm vi giao hàng demo</option>
                                     </select>
                                     <div class="mt-2 text-muted" style="font-size: 13px; line-height: 1.4;">
-                                        Đây là vùng giao hàng mô phỏng; hệ thống không tính khoảng cách bằng bản đồ.
-                                        Nếu chưa rõ vùng phù hợp, vui lòng hỏi chi nhánh trước khi đặt.
+                                        Phí giao hàng được mô phỏng theo khoảng cách từ chi nhánh xuất phát đến địa chỉ nhận.
+                                        Kiểm tra tuyến đường bằng liên kết bên dưới, rồi chọn vùng gần hoặc vùng xa.
+                                        Nếu chưa rõ, hãy gọi chi nhánh để được hỗ trợ; hệ thống chưa tự đo khoảng cách.
+                                    </div>
+                                    <div class="mt-2 small" th:each="branch : ${fulfillmentStores}">
+                                        <strong th:text="${branch.branchDisplayName}"></strong>
+                                        <div th:text="${branch.address}"></div>
+                                        <a target="_blank" rel="noopener noreferrer" data-delivery-directions
+                                           th:data-origin="${branch.address}" href="https://www.google.com/maps/dir/?api=1">Kiểm tra tuyến đường</a>
+                                        <a th:if="${branch.phone != null}" class="ms-2" th:href="${'tel:' + branch.phone}" th:text="${'Gọi ' + branch.phone}"></a>
                                     </div>
                                 </div>
 
@@ -835,13 +844,13 @@
                                 </div>
                                 <div class="summary-row" id="shippingFeeRow">
                                     <span>Phí giao hàng:</span>
-                                    <span class="summary-val text-primary" id="displayShippingFee">Miễn phí</span>
+                                    <span class="summary-val text-primary" id="displayShippingFee">Chưa xác định</span>
                                 </div>
                                 <div class="summary-row"><span>Giảm giá:</span><span id="displayDiscount" class="summary-val text-danger">-0 ₫</span></div><p id="quoteStatus" class="small text-danger" role="status" aria-live="polite"></p>
 
                                 <div class="grand-total-row">
                                     <span class="grand-total-label">Tổng thanh toán:</span>
-                                    <span class="grand-total-price" id="displayGrandTotal"
+                                    <span class="grand-total-price" id="displayGrandTotal" tabindex="-1"
                                           th:data-base-total="${grandTotal}"
                                           th:text="${#numbers.formatDecimal(grandTotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
                                 </div>
@@ -922,6 +931,18 @@
         /* ============================================================
          * Điền thông tin từ địa chỉ đã lưu (chỉ áp dụng khi Giao tận nơi)
          * ============================================================ */
+        function updateDeliveryDirections() {
+            const address = document.getElementById('recipientAddressInput')?.value.trim() || '';
+            document.querySelectorAll('[data-delivery-directions]').forEach(function(link) {
+                const params = new URLSearchParams({api: '1', origin: link.dataset.origin, destination: address, travelmode: 'driving'});
+                link.href = 'https://www.google.com/maps/dir/?' + params.toString();
+            });
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            updateDeliveryDirections();
+            document.getElementById('recipientAddressInput')?.addEventListener('input', updateDeliveryDirections);
+        });
+
         function fillAddress(selectElem) {
             const opt = selectElem.options[selectElem.selectedIndex];
             if (opt && opt.value) {
@@ -931,6 +952,7 @@
                 if (nameInp)  nameInp.value  = opt.getAttribute('data-name')    || '';
                 if (phoneInp) phoneInp.value = opt.getAttribute('data-phone')   || '';
                 if (addrInp)  addrInp.value  = opt.getAttribute('data-address') || '';
+                updateDeliveryDirections();
                 updateCheckoutTotal();
             }
         }
@@ -1475,6 +1497,8 @@
                         String(today.getDate()).padStart(2, '0')].join('-');
                 }
             });
+            const savedAddress = document.getElementById('savedAddressSelect');
+            if (savedAddress && savedAddress.dataset.restore !== 'true' && savedAddress.value) fillAddress(savedAddress);
             updatePaymentStyle();
             toggleShippingMethod(); // đảm bảo trạng thái ban đầu đúng và vô hiệu hóa đúng nhóm trường
             updateCheckoutTotal();

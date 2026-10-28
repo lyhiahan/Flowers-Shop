@@ -293,7 +293,7 @@
             <div class="flex items-center justify-between gap-1 mb-1.5 text-[12px]">
               <div class="flex items-center gap-1 font-bold text-[#D97706]">
                 <span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">star</span>
-                <span th:text="${p.rating != null ? p.rating : '5.0'}">5.0</span>
+                <span th:text="${p.customerRating != null ? p.customerRating : 'Chưa có đánh giá'}">5.0</span>
               </div>
               <span th:if="${p.sold != null and p.sold > 0}" class="text-[11.5px] text-[#7E726D]">Đã bán <span th:text="${p.sold}">12</span></span>
               <span th:if="${p.sold == null or p.sold == 0}" class="text-[11.5px] text-[#264E43] font-semibold flex items-center gap-0.5">

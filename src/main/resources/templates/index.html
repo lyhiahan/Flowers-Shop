@@ -106,9 +106,9 @@
                                 <div class="flower-card-meta">
                                     <span class="flower-price"
                                         th:text="${#numbers.formatDecimal(fp.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
-                                    <span class="flower-rating">
+                                    <span class="flower-rating" th:if="${fp.customerRating != null}">
                                         <i class="bi bi-star-fill star-gold"></i>
-                                        <span th:text="${fp.rating != null ? fp.rating : '5.0'}"></span>
+                                        <span th:text="${fp.customerRating}"></span>
                                     </span>
                                 </div>
                             </div>
@@ -174,7 +174,7 @@
                                 th:classappend="${followedProductIds != null and followedProductIds.contains(p.id)} ? 'bi-heart-fill' : 'bi-heart'"></i>
                         </button>
                     </form>
-                    <a sec:authorize="!hasRole('USER')" th:href="@{/login}"
+                    <a sec:authorize="!hasRole('USER')" th:href="@{/login(continue=${'/product/' + p.id})}"
                         class="flower-card-wishlist position-absolute top-0 end-0 m-2 z-2"
                         title="Đăng nhập để lưu yêu thích">
                         <i class="bi bi-heart"></i>
@@ -200,9 +200,9 @@
                         <div class="flower-card-meta">
                             <span class="flower-price"
                                 th:text="${#numbers.formatDecimal(p.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
-                            <span class="flower-rating" th:if="${p.rating != null and p.rating > 0}">
+                            <span class="flower-rating" th:if="${p.customerRating != null and p.customerRating > 0}">
                                 <i class="bi bi-star-fill star-gold"></i>
-                                <span th:text="${p.rating}"></span>
+                                <span th:text="${p.customerRating}"></span>
                             </span>
                         </div>
 
@@ -231,7 +231,7 @@
 
                         <!-- 3. Dành cho Khách vãng lai chưa đăng nhập: Chuyển hướng đăng nhập -->
                         <div sec:authorize="isAnonymous()" class="mt-auto">
-                            <a th:if="${remaining > 0 and !salePaused}" th:href="@{/login}" class="btn-add-cart text-decoration-none d-flex align-items-center justify-content-center gap-1.5">
+                            <a th:if="${remaining > 0 and !salePaused}" th:href="@{/login(continue=${'/product/' + p.id})}" class="btn-add-cart text-decoration-none d-flex align-items-center justify-content-center gap-1.5">
                                 <i class="bi bi-cart-plus"></i> Thêm vào giỏ
                             </a>
                             <button th:unless="${remaining > 0 and !salePaused}" type="button" class="btn-add-cart" disabled>

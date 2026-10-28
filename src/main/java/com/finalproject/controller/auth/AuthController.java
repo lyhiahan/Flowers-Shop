@@ -22,6 +22,12 @@ public class AuthController {
                                 @RequestParam(value = "logout", required = false) String logout,
                                 @RequestParam(value = "activated", required = false) String activated,
                                 Model model, jakarta.servlet.http.HttpServletRequest request) {
+        String returnTo = com.finalproject.config.CustomAuthenticationSuccessHandler.safeCustomerTarget(request.getParameter("continue"));
+        if (returnTo != null) {
+            request.getSession().setAttribute(com.finalproject.config.CustomAuthenticationSuccessHandler.CUSTOMER_RETURN_TO, returnTo);
+        } else if (error == null && request.getSession(false) != null) {
+            request.getSession(false).removeAttribute(com.finalproject.config.CustomAuthenticationSuccessHandler.CUSTOMER_RETURN_TO);
+        }
         var session = request.getSession(false);
         String identifier = "";
         if (session != null) {

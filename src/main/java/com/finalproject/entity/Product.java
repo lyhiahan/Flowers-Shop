@@ -85,6 +85,14 @@ public class Product {
     @Builder.Default
     private Double rating = 5.0;
 
+    // Read actual customer feedback rather than the historical seeded rating.
+    @org.hibernate.annotations.Formula("(select avg(r.rating * 1.0) from reviews r where r.product_id = id)")
+    private Double customerRating;
+
+    public Double getCustomerRating() {
+        return customerRating == null ? null : Math.round(customerRating * 10.0) / 10.0;
+    }
+
     @Column(name = "view_count")
     @Builder.Default
     private Integer viewCount = 0;

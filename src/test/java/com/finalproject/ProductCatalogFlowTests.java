@@ -44,6 +44,31 @@ class ProductCatalogFlowTests {
                 .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).build());
     }
 
+    @Autowired ReviewRepository reviews;
+
+    @Test void customerRatingUsesOnlyReviewsOfTheSameProduct() {
+        product.setRating(4.9);
+        products.saveAndFlush(product);
+        em.clear();
+        assertThat(products.findById(product.getId()).orElseThrow().getCustomerRating()).isNull();
+        var customer = users.save(User.builder().username("rating_customer").password("test-only")
+                .email("rating_customer@example.com").fullName("Rating customer").role(Role.USER).isActive(true).build());
+        for (int stars : new int[]{3, 5}) {
+            var reviewer = users.save(User.builder().username("rating_customer_" + stars).password("test-only")
+                    .email("rating_customer_" + stars + "@example.com").fullName("Rating customer").role(Role.USER).isActive(true).build());
+            reviews.save(Review.builder().product(product).user(reviewer).rating(stars)
+                    .content("Customer review for rating aggregation regression").build());
+        }
+        var other = products.save(Product.builder().name("Other flower").category(main).store(product.getStore())
+                .priceBuy(new BigDecimal("120000")).importPrice(new BigDecimal("60000"))
+                .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).build());
+        reviews.saveAndFlush(Review.builder().product(other).user(customer).rating(1)
+                .content("Unrelated customer review for another flower").build());
+        em.clear();
+        assertThat(products.findById(product.getId()).orElseThrow().getCustomerRating()).isEqualTo(4.0);
+        assertThat(products.findById(other.getId()).orElseThrow().getCustomerRating()).isEqualTo(1.0);
+    }
+
     @Test @WithMockUser(username="catalog_manager", roles="MANAGER")
     void managerCanSaveSeveralCategoriesAndEditFormRestoresThem() throws Exception {
         mvc.perform(post("/manager/products/update/" + product.getId()).with(csrf())

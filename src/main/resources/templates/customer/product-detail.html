@@ -522,7 +522,7 @@
 
                     <!-- Account: Not Authenticated -->
                     <div sec:authorize="!isAuthenticated()">
-                        <a th:href="@{/login}" class="btn btn-danger rounded-pill py-2 px-3 text-nowrap" style="background-color: var(--flower-primary); font-size:14px;">
+                        <a th:href="@{/login(continue=${'/product/' + product.id})}" class="btn btn-danger rounded-pill py-2 px-3 text-nowrap" style="background-color: var(--flower-primary); font-size:14px;">
                             <i class="bi bi-person me-1"></i> Đăng nhập
                         </a>
                     </div>
@@ -672,7 +672,7 @@
                         <!-- Đánh giá thực tế -->
                         <span th:if="${reviews != null and !#lists.isEmpty(reviews)}" class="rating-inline d-inline-flex align-items-center gap-1 ms-2">
                             <span class="text-warning">⭐</span>
-                            <strong style="color: var(--flower-text-main);" th:text="${product.rating != null ? product.rating : '5.0'}">5.0</strong>
+                            <strong style="color: var(--flower-text-main);" th:text="${product.customerRating != null ? product.customerRating : '5.0'}">5.0</strong>
                             <a href="#review-section" class="text-muted" th:text="'(' + ${#lists.size(reviews)} + ' đánh giá)'">(1 đánh giá)</a>
                         </span>
                         <span th:if="${reviews == null or #lists.isEmpty(reviews)}" class="rating-inline ms-2 text-muted">
@@ -700,7 +700,7 @@
                                 <span th:text="${isFollowed} ? 'Đã yêu thích' : 'Yêu thích'">Yêu thích</span>
                             </button>
                         </form>
-                        <a sec:authorize="!hasRole('USER')" th:href="@{/login}"
+                        <a sec:authorize="!hasRole('USER')" th:href="@{/login(continue=${'/product/' + product.id})}"
                            class="product-follow-button btn rounded-pill px-3 py-1 fw-medium d-inline-flex align-items-center shadow-xs"
                            style="background-color: #FFF1F2; color: #E11D48; border: 1px solid #FECDD3; font-size: 13px;">
                             <i class="bi bi-heart" style="font-size: 14px;"></i>
@@ -723,11 +723,9 @@
                             <span class="flower-info-value" th:text="${#strings.isEmpty(product.attributeLabel('Loại hoa')) ? flowerType : product.attributeLabel('Loại hoa')}">Hoa tươi tự nhiên</span>
                         </div>
 
-                        <!-- Dòng 2: Kiểu dáng -->
-                        <div class="flower-info-row"
-                             th:with="flowerStyle=${product.name.contains('Giỏ') ? 'Giỏ hoa để bàn' : (product.name.contains('Hộp') ? 'Hộp hoa sang trọng' : (product.name.contains('Kệ') or product.name.contains('2 Tầng') ? 'Kệ hoa khai trương 2 tầng' : (product.name.contains('Lọ') or product.name.contains('Bình') ? 'Bình hoa / Lọ hoa để bàn' : (product.name.contains('Chậu') ? 'Chậu hoa trang trí' : 'Bó hoa tươi nghệ thuật'))))}">
+                        <div class="flower-info-row">
                             <span class="flower-info-label">Kiểu dáng</span>
-                            <span class="flower-info-value" th:text="${#strings.isEmpty(product.attributeLabel('Kiểu dáng')) ? flowerStyle : product.attributeLabel('Kiểu dáng')}">Bó hoa tươi nghệ thuật</span>
+                            <span class="flower-info-value" th:text="${#strings.isEmpty(product.attributeLabel('Kiểu dáng')) ? 'Đang cập nhật' : product.attributeLabel('Kiểu dáng')}"></span>
                         </div>
 
                         <!-- Dòng 3: Màu sắc -->
@@ -742,18 +740,13 @@
                             <span class="flower-info-value" th:text="${product.attributeLabel('Phong cách')}"></span>
                         </div>
 
-                        <!-- Dòng 4: Thành phần tóm tắt ngắn (Gọn gàng trong khu vực mua hàng) -->
-                        <div class="flower-info-row"
-                             th:with="recipe=${product.name.contains('Hướng Dương') ? '5 bông hướng dương, cúc tana, lá bạc cao cấp' : (product.name.contains('Hồng') ? 'Hoa hồng tuyển chọn, hoa baby, lá phụ trang trí' : (product.name.contains('Tulip') ? '15 cành tulip Hà Lan, giấy gói cao cấp, nơ lụa' : (product.name.contains('Cẩm Tú Cầu') ? 'Cẩm tú cầu Đà Lạt, hoa hồng kem, lá khuynh diệp' : (product.name.contains('Kệ') ? 'Hoa hồng môn đỏ, hướng dương, hoa đồng tiền, kệ sắt 2 tầng' : (product.name.contains('Chậu') ? 'Hoa lá phối cảnh chậu gốm trang trí văn phòng' : (product.name.contains('Lọ') or product.name.contains('Bình') ? 'Hoa hồng nhung và hoa phụ cắm bình thủy tinh' : 'Hoa tươi loại 1 kết hợp hoa lá phụ cao cấp'))))))}">
+                        <div class="flower-info-row">
                             <span class="flower-info-label">Thành phần</span>
-                            <span class="flower-info-value" th:text="${recipe}">Hoa tươi loại 1 kết hợp hoa lá phụ cao cấp</span>
+                            <span class="flower-info-value">Xem mô tả sản phẩm bên dưới để biết các thành phần đi kèm.</span>
                         </div>
-
-                        <!-- Dòng 5: Kích thước tham khảo -->
-                        <div class="flower-info-row"
-                             th:with="dimensions=${product.name.contains('Kệ') or product.name.contains('2 Tầng') ? 'Cao khoảng 175–185 cm, tán rộng 75–80 cm' : (product.name.contains('Giỏ') ? 'Cao khoảng 40–45 cm, ngang khoảng 35–40 cm' : (product.name.contains('Hộp') ? 'Đường kính 25–30 cm, cao 20 cm' : (product.name.contains('Lọ') or product.name.contains('Bình') ? 'Cao khoảng 45–55 cm, rộng 30–35 cm' : (product.name.contains('Chậu') ? 'Cao khoảng 50–65 cm, rộng 35–45 cm' : 'Cao khoảng 50–55 cm, rộng khoảng 35 cm'))))}">
+                        <div class="flower-info-row">
                             <span class="flower-info-label">Kích thước</span>
-                            <span class="flower-info-value" th:text="${dimensions}">Cao khoảng 50–55 cm, rộng khoảng 35 cm</span>
+                            <span class="flower-info-value" th:text="${#strings.isEmpty(product.attributeLabel('Kích thước')) ? 'Liên hệ chi nhánh để xác nhận kích thước mẫu hoa.' : product.attributeLabel('Kích thước')}"></span>
                         </div>
                     </div>
 
@@ -836,7 +829,7 @@
                             <input type="number" value="1" class="qty-input" readonly disabled>
                             <button class="btn-qty-step" type="button" disabled><i class="bi bi-plus"></i></button>
                         </div>
-                        <a th:href="@{/login}" class="btn btn-flower-add flex-grow-1 text-decoration-none">
+                        <a th:href="@{/login(continue=${'/product/' + product.id})}" class="btn btn-flower-add flex-grow-1 text-decoration-none">
                             <i class="bi bi-box-arrow-in-right me-2"></i> Đăng nhập để đặt hoa
                         </a>
                     </div>
@@ -883,20 +876,9 @@
                     <div id="collapseDetail" class="accordion-collapse collapse show" aria-labelledby="headingDetail" data-bs-parent="#flowerDetailAccordion">
                         <div class="accordion-body">
                             <div class="flower-info-table">
-                                <!-- 1. Kiểu dáng -->
-                                <div class="flower-info-row"
-                                     th:with="isBasket=${product.name.contains('Giỏ')},
-                                              isBox=${product.name.contains('Hộp')},
-                                              isStand=${product.name.contains('Kệ') or product.name.contains('2 Tầng')},
-                                              isVase=${product.name.contains('Lọ') or product.name.contains('Bình')},
-                                              isPot=${product.name.contains('Chậu')}">
+                                <div class="flower-info-row">
                                     <span class="flower-info-label">Kiểu dáng</span>
-                                    <span class="flower-info-value" th:if="${isBasket}">Giỏ hoa để bàn</span>
-                                    <span class="flower-info-value" th:if="${!isBasket and isBox}">Hộp hoa sang trọng</span>
-                                    <span class="flower-info-value" th:if="${!isBasket and !isBox and isStand}">Kệ hoa khai trương 2 tầng</span>
-                                    <span class="flower-info-value" th:if="${!isBasket and !isBox and !isStand and isVase}">Bình hoa / Lọ hoa để bàn</span>
-                                    <span class="flower-info-value" th:if="${!isBasket and !isBox and !isStand and !isVase and isPot}">Chậu hoa trang trí</span>
-                                    <span class="flower-info-value" th:if="${!isBasket and !isBox and !isStand and !isVase and !isPot}">Bó hoa tươi nghệ thuật</span>
+                                    <span class="flower-info-value" th:text="${#strings.isEmpty(product.attributeLabel('Kiểu dáng')) ? 'Đang cập nhật' : product.attributeLabel('Kiểu dáng')}"></span>
                                 </div>
 
                                 <!-- 2. Dịp tặng -->
@@ -913,20 +895,9 @@
                                     <span class="flower-info-value" th:if="${!isOpening and !isBirthday and !isLove and !isOffice}">Sinh nhật, Chúc mừng, Kỷ niệm, Tri ân</span>
                                 </div>
 
-                                <!-- 3. Kích thước tham khảo -->
-                                <div class="flower-info-row"
-                                     th:with="isStand=${product.name.contains('Kệ') or product.name.contains('2 Tầng')},
-                                              isBasket=${product.name.contains('Giỏ')},
-                                              isBox=${product.name.contains('Hộp')},
-                                              isVase=${product.name.contains('Lọ') or product.name.contains('Bình')},
-                                              isPot=${product.name.contains('Chậu')}">
+                                <div class="flower-info-row">
                                     <span class="flower-info-label">Kích thước tham khảo</span>
-                                    <span class="flower-info-value" th:if="${isStand}">Cao khoảng 175–185 cm, tán rộng 75–80 cm</span>
-                                    <span class="flower-info-value" th:if="${!isStand and isBasket}">Cao khoảng 40–45 cm, ngang khoảng 35–40 cm</span>
-                                    <span class="flower-info-value" th:if="${!isStand and !isBasket and isBox}">Đường kính 25–30 cm, cao 20 cm</span>
-                                    <span class="flower-info-value" th:if="${!isStand and !isBasket and !isBox and isVase}">Cao khoảng 45–55 cm, rộng 30–35 cm</span>
-                                    <span class="flower-info-value" th:if="${!isStand and !isBasket and !isBox and !isVase and isPot}">Cao khoảng 50–65 cm, rộng 35–45 cm</span>
-                                    <span class="flower-info-value" th:if="${!isStand and !isBasket and !isBox and !isVase and !isPot}">Cao khoảng 50–55 cm, rộng khoảng 35 cm</span>
+                                    <span class="flower-info-value" th:text="${#strings.isEmpty(product.attributeLabel('Kích thước')) ? 'Liên hệ chi nhánh để xác nhận kích thước mẫu hoa.' : product.attributeLabel('Kích thước')}"></span>
                                 </div>
 
                                 <!-- 4. Ý nghĩa hoa -->
@@ -993,7 +964,7 @@
                     Chức năng đánh giá chỉ dành cho khách hàng <strong>đã đặt hàng và nhận được hoa thành công</strong>.<br>
                     Vui lòng đăng nhập bằng tài khoản mua hàng để thực hiện đánh giá.
                 </p>
-                <a th:href="@{/login}" class="btn btn-outline-danger btn-sm rounded-pill px-4 fw-semibold">
+                <a th:href="@{/login(continue=${'/product/' + product.id})}" class="btn btn-outline-danger btn-sm rounded-pill px-4 fw-semibold">
                     <i class="bi bi-box-arrow-in-right me-1"></i> Đăng Nhập
                 </a>
             </div>

@@ -266,9 +266,15 @@
                 <section aria-labelledby="footer-branches-title">
                     <h2 id="footer-branches-title" class="site-footer__heading">HỆ THỐNG ATELIER &amp; CHI NHÁNH</h2>
                     <ul class="site-footer__lines">
-                        <li class="site-footer__line"><i class="bi bi-geo-alt" aria-hidden="true"></i><span><strong>Chi nhánh Q.1:</strong> 123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM</span></li>
-                        <li class="site-footer__line"><i class="bi bi-geo-alt" aria-hidden="true"></i><span><strong>Chi nhánh Q.7:</strong> 456 Nguyễn Thị Thập, Tân Hưng, Quận 7, TP.HCM</span></li>
-                        <li class="site-footer__line"><i class="bi bi-geo-alt" aria-hidden="true"></i><span><strong>Chi nhánh Thủ Đức:</strong> 1 Võ Văn Ngân, Linh Chiểu, TP. Thủ Đức, TP.HCM</span></li>
+                        <li th:each="branch : ${footerStores}" class="site-footer__line">
+                            <i class="bi bi-geo-alt" aria-hidden="true"></i>
+                            <span><strong><a th:href="@{/stores/{id}(id=${branch.id})}" th:text="${branch.branchDisplayName}"></a>:</strong>
+                                <span th:text="${branch.address}"></span>
+                            </span>
+                        </li>
+                        <li th:if="${footerStores == null or #lists.isEmpty(footerStores)}" class="site-footer__line">
+                            <a th:href="@{/stores}">Xem địa chỉ và thông tin các chi nhánh</a>
+                        </li>
                     </ul>
                 </section>
             </div>

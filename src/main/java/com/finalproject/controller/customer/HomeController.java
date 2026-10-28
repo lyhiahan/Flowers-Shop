@@ -103,7 +103,7 @@ public class HomeController {
             } else if ("sold_desc".equalsIgnoreCase(sort)) {
                 sortObj = Sort.by(Sort.Direction.DESC, "sold");
             } else if ("rating_desc".equalsIgnoreCase(sort)) {
-                sortObj = Sort.by(Sort.Direction.DESC, "rating");
+                sortObj = Sort.by(Sort.Direction.DESC, "customerRating");
             } else if ("name_asc".equalsIgnoreCase(sort)) {
                 sortObj = Sort.by(Sort.Direction.ASC, "name");
             } else if (trimmedKeyword != null) {
@@ -120,7 +120,7 @@ public class HomeController {
                 sortObj = Sort.by(Sort.Direction.DESC, "sold");
                 size = 8;
             } else if ("toprated".equalsIgnoreCase(tab)) {
-                sortObj = Sort.by(Sort.Direction.DESC, "rating");
+                sortObj = Sort.by(Sort.Direction.DESC, "customerRating");
                 size = 8;
             }
 
@@ -230,6 +230,13 @@ public class HomeController {
             List<Product> stockProducts = new ArrayList<>(productPage.getContent());
             if (guestFeatured != null) stockProducts.addAll(guestFeatured);
             var catalogStock = catalogStockService.summarize(stockProducts, storeId);
+            if (guestFeatured != null) {
+                guestFeatured = guestFeatured.stream().sorted(java.util.Comparator.comparingInt(product -> {
+                    var stock = catalogStock.get(product.getId());
+                    return stock != null && stock.quantity() > 0 && !stock.paused() ? 0 : 1;
+                })).toList();
+                model.addAttribute("guestFeaturedProducts", guestFeatured);
+            }
             model.addAttribute("catalogStock", catalogStock);
             model.addAttribute("catalogPausedIds", catalogStock.entrySet().stream()
                     .filter(entry -> entry.getValue().paused()).map(java.util.Map.Entry::getKey).collect(java.util.stream.Collectors.toSet()));

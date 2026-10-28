@@ -14,6 +14,20 @@ import java.util.Set;
 @Component
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
+    public static final String CUSTOMER_RETURN_TO = "customerReturnTo";
+
+    public static String safeCustomerTarget(String target) {
+        if (target == null || target.chars().anyMatch(Character::isISOControl)) return null;
+        try {
+            var uri = java.net.URI.create(target);
+            if (uri.isAbsolute() || uri.getRawAuthority() != null || uri.getRawFragment() != null) return null;
+            String path = uri.getRawPath();
+            return path != null && path.matches("/(?:product/[0-9]+|products(?:/[0-9]+)?|cart|checkout)") ? target : null;
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
+    }
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
@@ -23,6 +37,17 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             session.removeAttribute(CustomAuthenticationFailureHandler.ATTEMPTED_USERNAME);
             session.removeAttribute(org.springframework.security.web.WebAttributes.AUTHENTICATION_EXCEPTION);
         }
+        String customerTarget = session == null ? null : safeCustomerTarget((String) session.getAttribute(CUSTOMER_RETURN_TO));
+        if (session != null) session.removeAttribute(CUSTOMER_RETURN_TO);
+        var cache = new org.springframework.security.web.savedrequest.HttpSessionRequestCache();
+        var saved = cache.getRequest(request, response);
+        if (customerTarget == null && saved != null && "GET".equals(saved.getMethod())) {
+            var uri = java.net.URI.create(saved.getRedirectUrl());
+            String query = uri.getRawQuery() == null ? "" : java.util.Arrays.stream(uri.getRawQuery().split("&"))
+                    .filter(part -> !part.equals("continue")).collect(java.util.stream.Collectors.joining("&"));
+            customerTarget = safeCustomerTarget(uri.getRawPath() + (query.isEmpty() ? "" : "?" + query));
+        }
+        cache.removeRequest(request, response);
         Set<String> roles = AuthorityUtils.authorityListToSet(authentication.getAuthorities());
 
         if (roles.contains("ROLE_ADMIN")) {
@@ -32,7 +57,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         } else if (roles.contains("ROLE_STAFF")) {
             response.sendRedirect("/staff/orders");
         } else {
-            response.sendRedirect("/");
+            response.sendRedirect(customerTarget == null ? "/" : customerTarget);
         }
     }
 }
