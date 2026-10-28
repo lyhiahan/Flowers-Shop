@@ -130,7 +130,7 @@ Hệ thống được thiết kế theo mô hình phân tầng chặt chẽ nh�
 | **Dựng giao diện** | Thymeleaf | Thymeleaf Spring 6 | Tạo trang HTML tại máy chủ an toàn, tích hợp kiểm tra quyền trực tiếp trên giao diện. |
 | **Khung hiển thị** | Bootstrap & Icons | Bootstrap 5.3.3 | Thiết kế giao diện tương thích, bố cục co giãn tốt trên máy tính và điện thoại. |
 | **Cơ sở dữ liệu chính** | PostgreSQL (Aiven Cloud) | PostgreSQL 18.6 (SSL verify-full) | Lưu trữ chính khi chạy ứng dụng (profile `aiven`), kiểm soát truy cập an toàn. |
-| **Cơ sở dữ liệu phát triển** | Microsoft SQL Server | SQLEXPRESS / RentalShop | Môi trường phát triển nội bộ cục bộ (profile `dev`). |
+| **Cơ sở dữ liệu phát triển** | Microsoft SQL Server | SQLEXPRESS / FlowersShop | Môi trường phát triển nội bộ cục bộ (profile `dev`). |
 | **Quản lý dữ liệu** | Spring Data JPA | Hibernate 7.x | Ánh xạ đối tượng quan hệ, thực thi lệnh khóa bi quan khi trừ số lượng kho. |
 | **Quản lý cấu trúc bảng** | Flyway | Flyway Core | Quản lý lịch sử nâng cấp bảng dữ liệu (SQL Server V1–V17; PostgreSQL baseline V1). |
 | **Bảo mật hệ thống** | Spring Security | Spring Security 6.x | Phân quyền hai lớp: Phiên làm việc cho web Thymeleaf, mã JWT cho các cổng API. |

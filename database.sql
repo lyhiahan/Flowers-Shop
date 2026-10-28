@@ -5,13 +5,13 @@
 -- HỆ QUẢN TRỊ CƠ SỞ DỮ LIỆU: MICROSOFT SQL SERVER
 -- ============================================================================
 
-IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'RentalShop')
+IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'FlowersShop')
 BEGIN
-    CREATE DATABASE RentalShop;
+    CREATE DATABASE FlowersShop;
 END
 GO
 
-USE RentalShop;
+USE FlowersShop;
 GO
 
 -- ============================================================================

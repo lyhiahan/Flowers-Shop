@@ -1,8 +1,8 @@
 param(
     [ValidateSet('run', 'info', 'validate', 'baseline', 'migrate')][string]$Action = 'run',
     [ValidatePattern('^[A-Za-z0-9_.\\-]+$')][string]$ServerInstance = '127.0.0.1\SQLEXPRESS',
-    [ValidatePattern('^[A-Za-z0-9_]+$')][string]$DatabaseName = 'RentalShop',
-    [string]$SqlUsername = 'rental_user'
+    [ValidatePattern('^[A-Za-z0-9_]+$')][string]$DatabaseName = 'FlowersShop',
+    [string]$SqlUsername = 'flowers_user'
 )
 $ErrorActionPreference = 'Stop'
 $savedSettings = @{}

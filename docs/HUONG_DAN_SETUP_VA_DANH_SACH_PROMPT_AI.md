@@ -16,7 +16,7 @@
 
 - [PHẦN 1: HƯỚNG DẪN SETUP VÀ VẬN HÀNH ỨNG DỤNG](#phan-1-setup)
   - [1.1. Yêu cầu môi trường & Phần mềm cần thiết](#11-yeu-cau-moi-truong)
-  - [1.2. Cấu hình Cơ sở dữ liệu SQL Server (`RentalShop`)](#12-cau-hinh-csdl)
+  - [1.2. Cấu hình Cơ sở dữ liệu SQL Server (`FlowersShop`)](#12-cau-hinh-csdl)
   - [1.3. Cấu hình biến môi trường (`.env`)](#13-cau-hinh-env)
   - [1.4. Lệnh khởi chạy ứng dụng (2 phương thức)](#14-lenh-khoi-chay)
   - [1.5. Danh sách tài khoản thử nghiệm theo các vai trò](#15-tai-khoan-thu-nghiem)
@@ -43,7 +43,7 @@
 ---
 
 <a name="12-cau-hinh-csdl"></a>
-### 1.2. Cấu hình Cơ sở dữ liệu SQL Server (`RentalShop`)
+### 1.2. Cấu hình Cơ sở dữ liệu SQL Server (`FlowersShop`)
 1. **Khởi động dịch vụ SQL Server**:
    - Đảm bảo dịch vụ `SQL Server (SQLEXPRESS)` và `SQL Server Browser` đang ở trạng thái **Running** trong `services.msc`.
    - Bật giao thức **TCP/IP** trong `SQL Server Configuration Manager` (mục *SQL Server Network Configuration* &rarr; *Protocols for SQLEXPRESS*).
@@ -51,11 +51,11 @@
    - Mở SQL Server Management Studio (SSMS) hoặc Azure Data Studio, kết nối tới instance `.\SQLEXPRESS`.
    - Chạy lệnh SQL tạo database:
      ```sql
-     CREATE DATABASE RentalShop;
+     CREATE DATABASE FlowersShop;
      GO
      ```
 3. **Cơ chế Migration tự động (Flyway)**:
-   - Bạn **không cần chạy script tạo bảng thủ công**. Với database rỗng, Flyway áp dụng các migration `V1`–`V10` khi ứng dụng khởi động. Với database đã có dữ liệu, phải sao lưu, thử trên bản sao và kiểm tra `flyway_schema_history` trước. Database `RentalShop` cục bộ đã được nâng lên V10 ngày 19/10/2026; điều này **không** có nghĩa database trên máy khác cũng đã lên V10. Migration nằm trong `src/main/resources/db/migration/sqlserver` và `src/main/java/com/finalproject/db/migration`.
+   - Bạn **không cần chạy script tạo bảng thủ công**. Với database rỗng, Flyway áp dụng các migration `V1`–`V10` khi ứng dụng khởi động. Với database đã có dữ liệu, phải sao lưu, thử trên bản sao và kiểm tra `flyway_schema_history` trước. Database `FlowersShop` cục bộ đã được nâng lên V10 ngày 19/10/2026; điều này **không** có nghĩa database trên máy khác cũng đã lên V10. Migration nằm trong `src/main/resources/db/migration/sqlserver` và `src/main/java/com/finalproject/db/migration`.
 
 ---
 
@@ -250,7 +250,7 @@ Dưới đây là 20 mục có sẵn trong bản báo cáo trước và phần b
 ### Prompt 14:
 > *"Đặt lại tên toàn bộ sản phẩm của cửa hàng cho đúng và dễ hiểu không đặt tên trừ tượng như 'Bó Hoa Hướng Dương Ánh Dương Rạng Rỡ'."*
 * **Kết quả AI sinh**:
-  - Viết script cập nhật toàn bộ tên hoa trong CSDL `RentalShop` sang các tên cụ thể, thực tế: *"Bó hoa hướng dương tươi"*, *"Bó hoa hồng đỏ Đà Lạt"*, *"Giỏ hoa cẩm tú cầu xanh"*.
+  - Viết script cập nhật toàn bộ tên hoa trong CSDL `FlowersShop` sang các tên cụ thể, thực tế: *"Bó hoa hướng dương tươi"*, *"Bó hoa hồng đỏ Đà Lạt"*, *"Giỏ hoa cẩm tú cầu xanh"*.
 
 ### Prompt 15:
 > *"Lỗi khi thêm sản phẩm, tôi muốn nó có nút bấm sổ xuống để có thể lựa chọn thay vì phải gõ tay."*
@@ -454,8 +454,8 @@ Tài liệu liên quan: [Kịch bản tự test toàn dự án](KICH_BAN_TU_TEST
 
 ### Kết quả kiểm chứng và phần chưa hoàn tất tại thời điểm cập nhật
 
-- Trên máy cục bộ, `RentalShop` đã được sao lưu và nâng Flyway V9–V10; kiểm tra HTTP cơ bản và đối soát số dư demo chỉ đọc đạt. Java **622 ca: 616 đạt, 6 bỏ qua**, JavaScript **102/102 đạt**. Đây là kết quả test tự động, không thay thế việc demo mọi thao tác bằng trình duyệt trên máy chấm.
-- Người dùng đã xác nhận 81 dòng kho lệch là dữ liệu nhân bản và yêu cầu xóa. Sau khi sao lưu và diễn tập trên **bản sao**, đã xóa 81 dòng/2.003 đơn vị khỏi `RentalShop` thật; bảng audit và backup giữ bản gốc. Còn 73 dòng kho/1.336 đơn vị, không còn kho lệch; các đơn, gồm `#23`, không bị sửa.
+- Trên máy cục bộ, `FlowersShop` đã được sao lưu và nâng Flyway V9–V10; kiểm tra HTTP cơ bản và đối soát số dư demo chỉ đọc đạt. Java **622 ca: 616 đạt, 6 bỏ qua**, JavaScript **102/102 đạt**. Đây là kết quả test tự động, không thay thế việc demo mọi thao tác bằng trình duyệt trên máy chấm.
+- Người dùng đã xác nhận 81 dòng kho lệch là dữ liệu nhân bản và yêu cầu xóa. Sau khi sao lưu và diễn tập trên **bản sao**, đã xóa 81 dòng/2.003 đơn vị khỏi `FlowersShop` thật; bảng audit và backup giữ bản gốc. Còn 73 dòng kho/1.336 đơn vị, không còn kho lệch; các đơn, gồm `#23`, không bị sửa.
 - Một số yêu cầu trong lịch sử là **hướng dẫn, đánh giá hoặc câu hỏi**; không nên ghi tất cả thành “AI đã sinh code”. Với mỗi tính năng đem trình bày, hãy gắn commit, test hoặc ảnh demo tương ứng. Không công bố khóa Brevo/Cloudinary/JWT từng dùng trong quá trình thử nghiệm.
 
 ---
@@ -505,7 +505,7 @@ Triển khai thành Đơn hàng, Chi tiết đơn, Chuẩn bị hoa, Giao & nh�
 ### Bổ sung prompt — quyền quản trị database dùng chung (24/10/2026)
 
 - Yêu cầu: “nâng cấp database lên tài khoản quản trị”. Xác nhận phạm vi: “Cả tv_thanhtai và tv_quocanh”.
-- Đã cấp db_owner cho hai tài khoản trong RentalShop và kiểm tra tư cách thành viên thành công. Không cấp sysadmin trên SQL Server; giữ nguyên mật khẩu. Hai tài khoản có quyền tạo/sửa/xóa bảng và dữ liệu, chạy migration trong RentalShop.
+- Đã cấp db_owner cho hai tài khoản trong FlowersShop và kiểm tra tư cách thành viên thành công. Không cấp sysadmin trên SQL Server; giữ nguyên mật khẩu. Hai tài khoản có quyền tạo/sửa/xóa bảng và dữ liệu, chạy migration trong FlowersShop.
 
 
 ### Bổ sung prompt — thử kết nối Aiven (26/10/2026)
@@ -524,7 +524,7 @@ Yêu cầu: “bạn có thể tạo khoảng từ 2-6 đánh giá ảo có hìn
 
 - Người dùng chọn “Xem trên Aiven dùng chung (đề xuất)”. Đã lưu 137 đánh giá mẫu có ảnh cho 33 mẫu; giữ đánh giá có sẵn, kiểm tra không thêm trùng. Bản xem Aiven ở cổng 8081 đã hiển thị đúng dữ liệu, nhãn Demo và chú thích ảnh.
 
-- Cập nhật cùng ngày: người dùng báo “tại sao chưa có đánh giá” trên `/product/22` và xác nhận “tôi chuyển sang dùng local cho load web nhanh rồi”. Chuyển website chính về SQL Server RentalShop local, profile dev, cổng 8080 và code mới. Local đã có 107 đánh giá; sản phẩm #22 có 2 ảnh đánh giá nên không seed thêm. Kiểm tra đăng nhập khách và GET `/product/22`: HTTP 200, HTML đầy đủ, hiển thị 2 ảnh đánh giá. Đã dừng hai phiên Aiven tạm ở 8080/8081; dữ liệu đánh giá Aiven vẫn giữ riêng.
+- Cập nhật cùng ngày: người dùng báo “tại sao chưa có đánh giá” trên `/product/22` và xác nhận “tôi chuyển sang dùng local cho load web nhanh rồi”. Chuyển website chính về SQL Server FlowersShop local, profile dev, cổng 8080 và code mới. Local đã có 107 đánh giá; sản phẩm #22 có 2 ảnh đánh giá nên không seed thêm. Kiểm tra đăng nhập khách và GET `/product/22`: HTTP 200, HTML đầy đủ, hiển thị 2 ảnh đánh giá. Đã dừng hai phiên Aiven tạm ở 8080/8081; dữ liệu đánh giá Aiven vẫn giữ riêng.
 
 - Prompt bổ sung: “sửa lại cho giống thật và push lên github” (ảnh tên Khách mẫu/Demo). Đổi tên hiển thị nhân vật mẫu thành tên tự nhiên, rút gọn nhãn thành “Dữ liệu mẫu”, bỏ tiền tố lặp trong phần nội dung hiển thị. Giữ nhận diện dữ liệu mẫu và ảnh minh họa; không sửa danh tính/tài khoản hoặc nội dung đánh giá thật trong database.
 

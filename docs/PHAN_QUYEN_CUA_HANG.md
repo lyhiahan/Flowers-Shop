@@ -54,7 +54,7 @@ Triển khai đồng bộ mã mới và V16; khởi động lại ứng dụng. 
 
 ## Kết quả trên máy cục bộ ngày 24/10/2026
 
-- Đã sao lưu và kiểm tra bản sao lưu trước khi cập nhật; chạy V16 trên database thử nghiệm riêng rồi mới áp dụng vào `RentalShop` thật. Bản thử nghiệm đã được dọn; bản sao lưu vẫn giữ trong thư mục Backup của SQL Server.
+- Đã sao lưu và kiểm tra bản sao lưu trước khi cập nhật; chạy V16 trên database thử nghiệm riêng rồi mới áp dụng vào `FlowersShop` thật. Bản thử nghiệm đã được dọn; bản sao lưu vẫn giữ trong thư mục Backup của SQL Server.
 - Sau cập nhật: 2 tài khoản MANAGER, 4 tài khoản STAFF. Các nhân viên được chuyển là `tranminhtuan`, `nguyenmailan`, `tranbaophuc`, `lehoangkhoi`; giữ nguyên mật khẩu và chi nhánh.
 - Số đơn vẫn là 35; số cửa hàng vẫn là 4; tổng số dư ví cửa hàng vẫn là 50.965.000 đồng. Không sửa lịch sử đơn hoặc số dư trong tác vụ phân quyền.
 - Các bộ kiểm thử Java về quyền, chat, phiên đăng nhập, JWT và migration đều đạt; 25 ca JavaScript chat đạt. Đã thử HTTP trên ứng dụng thật: Staff vào `/staff/orders` được, các trang quản lý trả 403; Manager mở tổng quan và nhân sự được.

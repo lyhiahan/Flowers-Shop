@@ -47,7 +47,7 @@ Ví dụ tạo **database thử nghiệm mới** và nạp dữ liệu demo; cá
 
 ```powershell
 createdb -h 127.0.0.1 -p 5432 -U postgres flower_shop
-psql -h 127.0.0.1 -p 5432 -U postgres -d flower_shop -v ON_ERROR_STOP=1 -f database/RentalShop_PostgreSQL_Full.sql
+psql -h 127.0.0.1 -p 5432 -U postgres -d flower_shop -v ON_ERROR_STOP=1 -f database/FlowersShop_PostgreSQL_Full.sql
 .\start-web.ps1 -Database Local -Check
 .\start-web.ps1 -Database Local
 ```
@@ -155,12 +155,12 @@ Kiểm tra database chỉ đọc, không khởi động ứng dụng:
 Sao chép `.env.example` thành `.env`, điền thông tin riêng, rồi chỉ định database và cổng SQL thực tế:
 
 ```powershell
-.\scripts\run-local.ps1 -DatabaseName RentalShop -Server '127.0.0.1:1433'
+.\scripts\run-local.ps1 -DatabaseName FlowersShop -Server '127.0.0.1:1433'
 ```
 
 Script chọn profile `dev` rõ ràng. Cổng 1433 là giá trị mặc định, không phải xác nhận cổng đang dùng trên máy; SQL Express có thể dùng cổng động. Script `sqlserver.ps1` vẫn hỗ trợ cấu hình DPAPI cũ cho instance/database đã xác minh trên máy gốc.
 
-`RentalShop` là tên database SQL Server đã tồn tại, không phải tính năng thuê. Không đổi tên database, email demo hoặc public_id Cloudinary chỉ để đổi cách đặt tên trong source.
+`FlowersShop` là tên database SQL Server đã tồn tại, không phải tính năng thuê. Không đổi tên database, email demo hoặc public_id Cloudinary chỉ để đổi cách đặt tên trong source.
 
 ## Schema và migration
 

@@ -20,7 +20,7 @@ try {
     }
     $ruleName = "RentalShopDemo-$Port"
     if (-not (Get-NetFirewallRule -Name $ruleName -ErrorAction SilentlyContinue)) {
-        New-NetFirewallRule -Name $ruleName -DisplayName "Rental Shop Demo $Port" -Direction Inbound -Action Allow `
+        New-NetFirewallRule -Name $ruleName -DisplayName "Flowers Shop Demo $Port" -Direction Inbound -Action Allow `
             -Protocol TCP -LocalPort $Port -RemoteAddress LocalSubnet -InterfaceAlias 'Wi-Fi' -Profile Any `
             -Program $javaExecutable | Out-Null
     } else {

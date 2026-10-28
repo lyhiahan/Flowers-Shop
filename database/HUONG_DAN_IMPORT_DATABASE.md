@@ -6,8 +6,8 @@
 
 Tài liệu này hướng dẫn import hai bộ SQL mẫu của đồ án. Chọn đúng hệ quản trị và thử trên database riêng trước khi sử dụng; việc có tệp SQL chưa thay thế kết quả restore và kiểm tra ứng dụng.
 
-1. **`RentalShop_PostgreSQL_Full.sql`**: Dành cho **PostgreSQL** (pgAdmin / DBeaver / psql / Cloud Aiven / Supabase).
-2. **`RentalShop_SQLServer_Full.sql`**: Dành cho **Microsoft SQL Server** (SQL Server Management Studio - SSMS / Azure Data Studio).
+1. **`FlowersShop_PostgreSQL_Full.sql`**: Dành cho **PostgreSQL** (pgAdmin / DBeaver / psql / Cloud Aiven / Supabase).
+2. **`FlowersShop_SQLServer_Full.sql`**: Dành cho **Microsoft SQL Server** (SQL Server Management Studio - SSMS / Azure Data Studio).
 
 ---
 
@@ -47,16 +47,16 @@ Toàn bộ tài khoản đã được nạp sẵn mật khẩu mã hóa BCrypt a
 
 ### Cách 1: Sử dụng giao diện pgAdmin
 1. Mở **pgAdmin 4**, kết nối vào Server PostgreSQL của bạn.
-2. Tạo mới một database tên: `flower_local_20261028` (hoặc `RentalShop`).
+2. Tạo mới một database tên: `flower_local_20261028` (hoặc `FlowersShop`).
 3. Chuột phải vào database vừa tạo $\rightarrow$ Chọn **Query Tool**.
-4. Mở file **`RentalShop_PostgreSQL_Full.sql`** (bằng nút Open Folder hoặc kéo thả toàn bộ nội dung file vào Query Tool).
+4. Mở file **`FlowersShop_PostgreSQL_Full.sql`** (bằng nút Open Folder hoặc kéo thả toàn bộ nội dung file vào Query Tool).
 5. Nhấn phím **F5** (hoặc bấm nút **Execute / Run** hình tam giác).
 6. Thông báo thành công: `Query returned successfully in ... secs`. Toàn bộ 45 bảng và 939 dòng dữ liệu đã sẵn sàng!
 
 ### Cách 2: Sử dụng dòng lệnh `psql`
 ```bash
 psql -U postgres -d postgres -c "CREATE DATABASE flower_local_20261028;"
-psql -U postgres -d flower_local_20261028 -f RentalShop_PostgreSQL_Full.sql
+psql -U postgres -d flower_local_20261028 -f FlowersShop_PostgreSQL_Full.sql
 ```
 
 ---
@@ -67,15 +67,15 @@ Script có thao tác xóa bảng/ràng buộc cũ trong database đích. Chỉ d
 
 ### Cách 1: Sử dụng SQL Server Management Studio (SSMS)
 1. Mở **SQL Server Management Studio (SSMS)** và kết nối vào instance SQL Server (ví dụ: `.\SQLEXPRESS` hoặc `localhost`).
-2. Vào menu **File > Open > File...** (phím tắt `Ctrl + O`), duyệt và chọn file **`RentalShop_SQLServer_Full.sql`**.
-3. File SQL đã có sẵn lệnh `CREATE DATABASE RentalShop;` và `USE RentalShop;`.
+2. Vào menu **File > Open > File...** (phím tắt `Ctrl + O`), duyệt và chọn file **`FlowersShop_SQLServer_Full.sql`**.
+3. File SQL đã có sẵn lệnh `CREATE DATABASE FlowersShop;` và `USE FlowersShop;`.
 4. Nhấn phím **F5** (hoặc bấm nút **! Execute** trên thanh công cụ).
 5. Chờ vài giây khi xuất hiện thông báo:
    ```text
    Commands completed successfully.
    (45 tables created, 939 rows inserted)
    ```
-6. Toàn bộ CSDL `RentalShop` đã được khởi tạo hoàn chỉnh!
+6. Toàn bộ CSDL `FlowersShop` đã được khởi tạo hoàn chỉnh!
 
 ---
 

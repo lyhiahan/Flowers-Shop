@@ -5,13 +5,13 @@
 -- Ngày xuất bản: 2026-10-28 17:03:42
 -- ============================================================================
 
-IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'RentalShop')
+IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'FlowersShop')
 BEGIN
-    CREATE DATABASE RentalShop;
+    CREATE DATABASE FlowersShop;
 END
 GO
 
-USE RentalShop;
+USE FlowersShop;
 GO
 
 -- 1. XÓA RÀNG BUỘC KHÓA NGOẠI VÀ CÁC BẢNG CŨ (NẾU CÓ)

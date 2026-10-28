@@ -56,7 +56,7 @@ flowchart TD
 | **5. Giao dịch, Cổng thanh toán & Ví (Payments & Wallet)** | 5 prompt | Cổng MoMo Sandbox QR, ví khách hàng (`customer_wallets`), ví cửa hàng (`stores.e_wallet`). | `MomoConfig.java`, `CustomerWalletService.java`, `start-web.ps1` |
 | **6. Giao diện người dùng & Trải nghiệm (UI/UX)** | 7 prompt | Thiết kế Floral Theme mềm mại, bộ lọc chi nhánh đa cấp, phân trang AJAX, mobile responsive. | `floral.html`, `home-filters.js`, `customer-wallet.css`, `orders.html` |
 | **7. Thời gian thực & Tương tác (Realtime STOMP)** | 4 prompt | Live chat WebSocket đính kèm thẻ hoa, chuông thông báo đơn hàng realtime có badge đếm số. | `WebSocketConfig.java`, `ChatController.java`, `chat-widget.js` |
-| **8. Đóng gói & Dữ liệu thực nghiệm (Database & Packaging)** | 4 prompt | Xuất CSDL dump PostgreSQL & SQL Server 939 dòng dữ liệu, kịch bản test, tài liệu Word có ảnh. | `RentalShop_PostgreSQL_Full.sql`, `RentalShop_SQLServer_Full.sql` |
+| **8. Đóng gói & Dữ liệu thực nghiệm (Database & Packaging)** | 4 prompt | Xuất CSDL dump PostgreSQL & SQL Server 939 dòng dữ liệu, kịch bản test, tài liệu Word có ảnh. | `FlowersShop_PostgreSQL_Full.sql`, `FlowersShop_SQLServer_Full.sql` |
 
 ---
 
@@ -78,13 +78,13 @@ flowchart TD
   > 4. Sơ đồ cơ chế bảo mật kép kết hợp Spring Security Session Cookie cho Web MVC và JWT Bearer Stateless cho REST API.
   > 5. Sơ đồ kiến trúc WebSocket STOMP với SockJS cho hệ thống Live Chat tư vấn hoa theo từng chi nhánh."*
 * **Kết quả sinh ra:**
-  - Script tự động sinh ra 5 tệp sơ đồ ảnh sắc nét nằm tại [docs/diagrams/](file:///D:/uni/hk1nam3/web/web-final_project/Rental-Retail-Shop/docs/diagrams):
+  - Script tự động sinh ra 5 tệp sơ đồ ảnh sắc nét nằm tại [docs/diagrams/](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/docs/diagrams):
     - `architecture_diagram.png`
     - `order_flow_diagram.png`
     - `order_state_machine.png`
     - `dual_security_model.png`
     - `websocket_chat_architecture.png`
-  - Đã chèn trực tiếp vào bản báo cáo [docs/BAO_CAO_LAP_TRINH_WEB_BAN_THUC_NGHIEM_CO_ANH.docx](file:///D:/uni/hk1nam3/web/web-final_project/Rental-Retail-Shop/docs/BAO_CAO_LAP_TRINH_WEB_BAN_THUC_NGHIEM_CO_ANH.docx).
+  - Đã chèn trực tiếp vào bản báo cáo [docs/BAO_CAO_LAP_TRINH_WEB_BAN_THUC_NGHIEM_CO_ANH.docx](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/docs/BAO_CAO_LAP_TRINH_WEB_BAN_THUC_NGHIEM_CO_ANH.docx).
 
 ---
 
@@ -99,7 +99,7 @@ flowchart TD
   > - Dịp tặng, màu sắc chủ đạo và mô tả chi tiết ý nghĩa của loài hoa."*
 * **Kết quả sinh ra:**
   - Bộ dữ liệu mẫu 41 sản phẩm hoàn chỉnh với hình ảnh hoa tươi sắc nét, không bị lỗi vỡ ảnh hay placeholder trống.
-  - Được nạp trực tiếp vào CSDL qua [DataInitializer.java](file:///D:/uni/hk1nam3/web/web-final_project/Rental-Retail-Shop/src/main/java/com/finalproject/config/DataInitializer.java) và tích hợp vào 2 tệp dump SQL [RentalShop_PostgreSQL_Full.sql](file:///D:/uni/hk1nam3/web/web-final_project/Rental-Retail-Shop/database/RentalShop_PostgreSQL_Full.sql) và [RentalShop_SQLServer_Full.sql](file:///D:/uni/hk1nam3/web/web-final_project/Rental-Retail-Shop/database/RentalShop_SQLServer_Full.sql).
+  - Được nạp trực tiếp vào CSDL qua [DataInitializer.java](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/src/main/java/com/finalproject/config/DataInitializer.java) và tích hợp vào 2 tệp dump SQL [FlowersShop_PostgreSQL_Full.sql](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/database/FlowersShop_PostgreSQL_Full.sql) và [FlowersShop_SQLServer_Full.sql](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/database/FlowersShop_SQLServer_Full.sql).
 
 ---
 
@@ -113,7 +113,7 @@ flowchart TD
   > 3. Hỗ trợ hàm xóa ảnh cũ trên Cloudinary khi quản lý cửa hàng cập nhật ảnh đại diện hoặc thay đổi ảnh mẫu hoa.
   > 4. Xử lý ngoại lệ an toàn nếu mất kết nối mạng hoặc ảnh vượt quá kích thước cho phép."*
 * **Kết quả sinh ra:**
-  - Viết [CloudinaryService.java](file:///D:/uni/hk1nam3/web/web-final_project/Rental-Retail-Shop/src/main/java/com/finalproject/service/CloudinaryService.java) và [CloudinaryConfig.java](file:///D:/uni/hk1nam3/web/web-final_project/Rental-Retail-Shop/src/main/java/com/finalproject/config/CloudinaryConfig.java).
+  - Viết [CloudinaryService.java](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/src/main/java/com/finalproject/service/CloudinaryService.java) và [CloudinaryConfig.java](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/src/main/java/com/finalproject/config/CloudinaryConfig.java).
   - Tích hợp thành công chức năng upload file multipart tại các màn hình quản lý chi nhánh (`/manager/products/new`, `/manager/profile`).
 
 ---
@@ -128,7 +128,7 @@ flowchart TD
   > - Một số đánh giá có đính kèm ảnh chụp hoa thực nhận (Customer Proof Photo) tải lên qua Cloudinary để tăng độ tin cậy của website.
   > - Hiển thị nhãn rõ ràng 'Đánh giá mẫu minh họa' để đảm bảo tính minh bạch, không gây hiểu lầm với khách hàng thật."*
 * **Kết quả sinh ra:**
-  - Tệp [DemoReviewSeed.java](file:///D:/uni/hk1nam3/web/web-final_project/Rental-Retail-Shop/src/main/java/com/finalproject/tools/DemoReviewSeed.java) và cập nhật hiển thị tại `product-detail.html`.
+  - Tệp [DemoReviewSeed.java](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/src/main/java/com/finalproject/tools/DemoReviewSeed.java) và cập nhật hiển thị tại `product-detail.html`.
   - Bộ kiểm thử `ReviewDisplayTests` (43 dòng test) xác minh tỷ lệ hiển thị sao và ảnh đính kèm chuẩn xác.
 
 ---
@@ -141,7 +141,7 @@ flowchart TD
   > 1. Viết directive onerror trong Thymeleaf để tự động thay thế bằng một ảnh hoa mặc định thẩm mỹ (`/images/flower-placeholder.jpg`) khi link ảnh gốc bị lỗi.
   > 2. Cố định tỷ lệ khung hình ảnh sản phẩm (Aspect Ratio 1:1) bằng CSS Flexbox/Grid, dùng `object-fit: cover` để ảnh hoa không bị méo mó trên các thiết bị di động."*
 * **Kết quả sinh ra:**
-  - Cập nhật [index.html](file:///D:/uni/hk1nam3/web/web-final_project/Rental-Retail-Shop/src/main/resources/templates/index.html) và [product-detail.html](file:///D:/uni/hk1nam3/web/web-final_project/Rental-Retail-Shop/src/main/resources/templates/customer/product-detail.html).
+  - Cập nhật [index.html](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/src/main/resources/templates/index.html) và [product-detail.html](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/src/main/resources/templates/customer/product-detail.html).
   - Khắc phục 100% hiện tượng vỡ khung thẻ hoa trên toàn hệ thống.
 
 ---
@@ -184,7 +184,7 @@ flowchart TD
 | **WEB-064** | **Codex**<br>27/10/2026 | *"chạy bản nào thử trước đi, hãy thêm tính năng lọc thêm chi nhánh cho tính năng tìm kiếm sản phẩm"* | Yêu cầu mở rộng chức năng tìm kiếm: Khách hàng tìm tên hoa nhưng có thể chọn đích danh chi nhánh để xem tồn kho. | Nâng cấp `ProductSpecification`: bổ sung mệnh đề `JOIN store_inventories` lọc theo `storeId` và còn hàng. |
 | **WEB-072** | **Codex**<br>28/10/2026 | *"hiện tại dùng cloud làm web tôi quá chậm hãy thực hiện kéo dữ liệu về local để tôi test các tính năng của web trước"* | Cơ sở dữ liệu đám mây Aiven đặt máy chủ nước ngoài gây độ trễ mạng cao, ảnh hưởng đến tốc độ chạy kiểm thử. | Xây dựng script kéo toàn bộ 45 bảng và 861 dòng từ Cloud về PostgreSQL local trên cổng `15432`, tăng tốc độ test gấp 10 lần. |
 | **WEB-078** | **Codex**<br>28/10/2026 | *"bỏ quyền mua hàng của quản lý và chỉnh sửa các thành phần liên quan"* | Nghiệp vụ mới: Tài khoản Quản lý (MANAGER) chỉ làm việc vận hành chi nhánh, không được phép đặt hoa hay dùng giỏ hàng. | Sửa `User.isCustomerAccount()`, ẩn giỏ hàng trên UI, cấu hình server chặn 403 nếu Manager truy cập `/cart` hay `/checkout`. |
-| **WEB-085** | **Antigravity**<br>28/10/2026 | *"Chuẩn bị File Cơ sở dữ liệu (.sql) nộp kèm"* | Đóng gói bộ tệp CSDL hoàn chỉnh kèm dữ liệu mẫu thực nghiệm để nộp cho Hội đồng chấm thi theo quy định. | Xuất 2 tệp [RentalShop_PostgreSQL_Full.sql](file:///D:/uni/hk1nam3/web/web-final_project/Rental-Retail-Shop/database/RentalShop_PostgreSQL_Full.sql) & [RentalShop_SQLServer_Full.sql](file:///D:/uni/hk1nam3/web/web-final_project/Rental-Retail-Shop/database/RentalShop_SQLServer_Full.sql) kèm hướng dẫn import 1 click. |
+| **WEB-085** | **Antigravity**<br>28/10/2026 | *"Chuẩn bị File Cơ sở dữ liệu (.sql) nộp kèm"* | Đóng gói bộ tệp CSDL hoàn chỉnh kèm dữ liệu mẫu thực nghiệm để nộp cho Hội đồng chấm thi theo quy định. | Xuất 2 tệp [FlowersShop_PostgreSQL_Full.sql](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/database/FlowersShop_PostgreSQL_Full.sql) & [FlowersShop_SQLServer_Full.sql](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/database/FlowersShop_SQLServer_Full.sql) kèm hướng dẫn import 1 click. |
 
 ---
 
@@ -375,10 +375,10 @@ flowchart TD
 * **Tiêu đề commit gốc:** `feat: bo sung database dump full postgresql va sqlserver kem huong dan import va datasheet ai`
 * **Nội dung Prompt tái dựng:**
   > *"Hãy chuẩn bị đầy đủ gói tài liệu và cơ sở dữ liệu nộp đồ án:
-  > 1. Trích xuất toàn bộ cấu trúc 45 bảng và 939 dòng dữ liệu mẫu ra 2 file script SQL độc lập: `RentalShop_PostgreSQL_Full.sql` (tương thích pgAdmin, Aiven, Supabase) và `RentalShop_SQLServer_Full.sql` (tương thích SSMS, Azure Data Studio).
+  > 1. Trích xuất toàn bộ cấu trúc 45 bảng và 939 dòng dữ liệu mẫu ra 2 file script SQL độc lập: `FlowersShop_PostgreSQL_Full.sql` (tương thích pgAdmin, Aiven, Supabase) và `FlowersShop_SQLServer_Full.sql` (tương thích SSMS, Azure Data Studio).
   > 2. Viết tài liệu `HUONG_DAN_IMPORT_DATABASE.md` hướng dẫn Giảng viên import CSDL với 1 cú click (F5), cung cấp sẵn danh sách tài khoản test cho cả 4 vai trò (Admin, Manager, Staff, Customer).
   > 3. Lập bảng dữ liệu Prompt AI `datasheet_ai_prompts.csv` đối chiếu quá trình ứng dụng AI theo tiêu chí Rubrics."*
-* **Mã nguồn liên quan:** `database/RentalShop_PostgreSQL_Full.sql`, `database/RentalShop_SQLServer_Full.sql`, `database/HUONG_DAN_IMPORT_DATABASE.md`, `database/datasheet_ai_prompts.csv`.
+* **Mã nguồn liên quan:** `database/FlowersShop_PostgreSQL_Full.sql`, `database/FlowersShop_SQLServer_Full.sql`, `database/HUONG_DAN_IMPORT_DATABASE.md`, `docs/MINH_CHUNG_PROMPT_KHOI_PHUC_20261028.csv`.
 
 ---
 
@@ -633,7 +633,7 @@ Nhóm xin khẳng định các kết quả đạt được từ việc ứng d�
 1. **Hiệu suất & Tiến độ:** Giúp nhóm rút ngắn thời gian thiết kế cấu trúc nền tảng và sinh dữ liệu mẫu thực nghiệm, dành nhiều thời gian hơn để giải quyết các bài toán hóc búa về kiến trúc phân tán, concurrency và bảo mật.
 2. **Minh chứng minh bạch:** 
    - 100% các prompt và kết quả đều có tệp mã nguồn, tệp test và commit Git tương ứng để Giảng viên đối chiếu.
-   - Toàn bộ cơ sở dữ liệu đã được xuất hoàn chỉnh tại thư mục [database/](file:///D:/uni/hk1nam3/web/web-final_project/Rental-Retail-Shop/database) kèm hướng dẫn import 1 click.
+   - Toàn bộ cơ sở dữ liệu đã được xuất hoàn chỉnh tại thư mục [database/](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/database) kèm hướng dẫn import 1 click.
 3. **Chất lượng kiểm thử:**
    - **Java Backend Test:** 880 ca kiểm thử (868 passed, 12 skipped, 0 failure).
    - **JavaScript Frontend Test:** 185 / 185 ca kiểm thử Node.js native đạt 100%.
