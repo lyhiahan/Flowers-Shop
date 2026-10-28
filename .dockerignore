@@ -1,0 +1,11 @@
+target/
+.git/
+.tools/
+.agents/
+docs/*.docx
+*.log
+.env
+.env.aiven
+.env.local-postgres
+reports/
+upload/
