@@ -81,13 +81,13 @@ flowchart TD
   > 4. Sơ đồ cơ chế bảo mật kép kết hợp Spring Security Session Cookie cho Web MVC và JWT Bearer Stateless cho REST API.
   > 5. Sơ đồ kiến trúc WebSocket STOMP với SockJS cho hệ thống Live Chat tư vấn hoa theo từng chi nhánh."*
 * **Kết quả sinh ra:**
-  - Script tự động sinh ra 5 tệp sơ đồ ảnh sắc nét nằm tại [docs/diagrams/](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/docs/diagrams):
+  - Script tự động sinh ra 5 tệp sơ đồ ảnh sắc nét nằm tại docs/diagrams/:
     - `architecture_diagram.png`
     - `order_flow_diagram.png`
     - `order_state_machine.png`
     - `dual_security_model.png`
     - `websocket_chat_architecture.png`
-  - Đã chèn trực tiếp vào bản báo cáo [docs/BAO_CAO_LAP_TRINH_WEB_BAN_THUC_NGHIEM_CO_ANH.docx](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/docs/BAO_CAO_LAP_TRINH_WEB_BAN_THUC_NGHIEM_CO_ANH.docx).
+  - Đã chèn trực tiếp vào bản báo cáo docs/BAO_CAO_LAP_TRINH_WEB_BAN_THUC_NGHIEM_CO_ANH.docx.
 
 ---
 
@@ -101,7 +101,7 @@ flowchart TD
   > - Dịp tặng, màu sắc chủ đạo và mô tả chi tiết ý nghĩa của loài hoa."*
 * **Kết quả sinh ra:**
   - Bộ dữ liệu mẫu 41 sản phẩm hoàn chỉnh với hình ảnh hoa tươi sắc nét, không bị lỗi vỡ ảnh hay placeholder trống.
-  - Được nạp trực tiếp vào CSDL qua [DataInitializer.java](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/src/main/java/com/finalproject/config/DataInitializer.java) và tích hợp vào 2 tệp dump SQL [FlowersShop_PostgreSQL_Full.sql](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/database/FlowersShop_PostgreSQL_Full.sql) và [FlowersShop_SQLServer_Full.sql](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/database/FlowersShop_SQLServer_Full.sql).
+  - Được nạp trực tiếp vào CSDL qua DataInitializer.java và tích hợp vào 2 tệp dump SQL FlowersShop_PostgreSQL_Full.sql và FlowersShop_SQLServer_Full.sql.
 
 ---
 
@@ -114,7 +114,7 @@ flowchart TD
   > 3. Hỗ trợ hàm xóa ảnh cũ trên Cloudinary khi quản lý cửa hàng cập nhật ảnh đại diện hoặc thay đổi ảnh mẫu hoa.
   > 4. Xử lý ngoại lệ an toàn nếu mất kết nối mạng hoặc ảnh vượt quá kích thước cho phép."*
 * **Kết quả sinh ra:**
-  - Viết [CloudinaryService.java](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/src/main/java/com/finalproject/service/CloudinaryService.java) và [CloudinaryConfig.java](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/src/main/java/com/finalproject/config/CloudinaryConfig.java).
+  - Viết CloudinaryService.java và CloudinaryConfig.java.
   - Tích hợp thành công chức năng upload file multipart tại các màn hình quản lý chi nhánh (`/manager/products/new`, `/manager/profile`).
 
 ---
@@ -128,7 +128,7 @@ flowchart TD
   > - Một số đánh giá có đính kèm ảnh chụp hoa thực nhận (Customer Proof Photo) tải lên qua Cloudinary để tăng độ tin cậy của website.
   > - Hiển thị nhãn rõ ràng 'Đánh giá mẫu minh họa' để đảm bảo tính minh bạch, không gây hiểu lầm với khách hàng thật."*
 * **Kết quả sinh ra:**
-  - Tệp [DemoReviewSeed.java](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/src/main/java/com/finalproject/tools/DemoReviewSeed.java) và cập nhật hiển thị tại `product-detail.html`.
+  - Tệp DemoReviewSeed.java và cập nhật hiển thị tại `product-detail.html`.
   - Bộ kiểm thử `ReviewDisplayTests` (43 dòng test) xác minh tỷ lệ hiển thị sao và ảnh đính kèm chuẩn xác.
 
 ---
@@ -140,7 +140,7 @@ flowchart TD
   > 1. Viết directive onerror trong Thymeleaf để tự động thay thế bằng một ảnh hoa mặc định thẩm mỹ (`/images/flower-placeholder.jpg`) khi link ảnh gốc bị lỗi.
   > 2. Cố định tỷ lệ khung hình ảnh sản phẩm (Aspect Ratio 1:1) bằng CSS Flexbox/Grid, dùng `object-fit: cover` để ảnh hoa không bị méo mó trên các thiết bị di động."*
 * **Kết quả sinh ra:**
-  - Cập nhật [index.html](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/src/main/resources/templates/index.html) và [product-detail.html](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/src/main/resources/templates/customer/product-detail.html).
+  - Cập nhật index.html và product-detail.html.
   - Khắc phục 100% hiện tượng vỡ khung thẻ hoa trên toàn hệ thống.
 
 ---
@@ -182,7 +182,7 @@ flowchart TD
 | **WEB-064** | **Codex**<br>27/10/2026 | *"chạy bản nào thử trước đi, hãy thêm tính năng lọc thêm chi nhánh cho tính năng tìm kiếm sản phẩm"* | Yêu cầu mở rộng chức năng tìm kiếm: Khách hàng tìm tên hoa nhưng có thể chọn đích danh chi nhánh để xem tồn kho. | Nâng cấp `ProductSpecification`: bổ sung mệnh đề `JOIN store_inventories` lọc theo `storeId` và còn hàng. |
 | **WEB-072** | **Codex**<br>28/10/2026 | *"hiện tại dùng cloud làm web tôi quá chậm hãy thực hiện kéo dữ liệu về local để tôi test các tính năng của web trước"* | Cơ sở dữ liệu đám mây Aiven đặt máy chủ nước ngoài gây độ trễ mạng cao, ảnh hưởng đến tốc độ chạy kiểm thử. | Xây dựng script kéo toàn bộ 45 bảng và 861 dòng từ Cloud về PostgreSQL local trên cổng `15432`, tăng tốc độ test gấp 10 lần. |
 | **WEB-078** | **Codex**<br>28/10/2026 | *"bỏ quyền mua hàng của quản lý và chỉnh sửa các thành phần liên quan"* | Nghiệp vụ mới: Tài khoản Quản lý (MANAGER) chỉ làm việc vận hành chi nhánh, không được phép đặt hoa hay dùng giỏ hàng. | Sửa `User.isCustomerAccount()`, ẩn giỏ hàng trên UI, cấu hình server chặn 403 nếu Manager truy cập `/cart` hay `/checkout`. |
-| **WEB-085** | **Antigravity**<br>28/10/2026 | *"Chuẩn bị File Cơ sở dữ liệu (.sql) nộp kèm"* | Đóng gói bộ tệp CSDL hoàn chỉnh kèm dữ liệu mẫu thực nghiệm để nộp cho Hội đồng chấm thi theo quy định. | Xuất 2 tệp [FlowersShop_PostgreSQL_Full.sql](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/database/FlowersShop_PostgreSQL_Full.sql) & [FlowersShop_SQLServer_Full.sql](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/database/FlowersShop_SQLServer_Full.sql) kèm hướng dẫn import 1 click. |
+| **WEB-085** | **Antigravity**<br>28/10/2026 | *"Chuẩn bị File Cơ sở dữ liệu (.sql) nộp kèm"* | Đóng gói bộ tệp CSDL hoàn chỉnh kèm dữ liệu mẫu thực nghiệm để nộp cho Hội đồng chấm thi theo quy định. | Xuất 2 tệp FlowersShop_PostgreSQL_Full.sql & FlowersShop_SQLServer_Full.sql kèm hướng dẫn import 1 click. |
 
 ---
 
@@ -634,7 +634,7 @@ Gửi prompt `BS-01` để cung cấp ngữ cảnh chung, sau đó gửi từng 
 > *"Tôi cần xây dựng đồ án website bán hàng theo mô hình chuỗi cửa hàng hoa tươi bằng Spring Boot, giao diện Thymeleaf + Bootstrap 5, ORM JPA, CSDL SQL Server, hỗ trợ WebSocket, JWT và Cloudinary. Hãy phân tích cấu trúc gói (package structure) chuẩn MVC 3 lớp và file `pom.xml` với các dependency cần thiết."*
 * **Ngữ cảnh & Ràng buộc**: Yêu cầu Java 21 LTS, Spring Boot 4.1.1, phân tách rõ ràng giữa Web Thymeleaf và REST API.
 * **Kết quả AI sinh**:
-  - Sinh toàn bộ file [pom.xml](file:///d:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/pom.xml) với đầy đủ starters: `data-jpa`, `thymeleaf`, `security`, `oauth2-resource-server`, `websocket`, `flyway-sqlserver`, `mssql-jdbc` và `cloudinary-http44`.
+  - Sinh toàn bộ file pom.xml với đầy đủ starters: `data-jpa`, `thymeleaf`, `security`, `oauth2-resource-server`, `websocket`, `flyway-sqlserver`, `mssql-jdbc` và `cloudinary-http44`.
   - Thiết lập cấu trúc thư mục phân lớp: `config`, `controller/{customer, manager, admin, auth}`, `service`, `repository`, `entity`, `dto`, `security`.
 
 ---
@@ -643,14 +643,14 @@ Gửi prompt `BS-01` để cung cấp ngữ cảnh chung, sau đó gửi từng 
 > *"Trong mô hình chuỗi cửa hàng hoa tươi, có sản phẩm dùng chung toàn chuỗi và có sản phẩm riêng của từng chi nhánh. Mỗi chi nhánh có tồn kho độc lập. Hãy thiết kế các Entity JPA: `Store`, `Product`, `StoreInventory`, `Category`, `Style`, `StyleValue`, `Order`, `OrderItem` với các mối quan hệ quan hệ 1-N, N-N chuẩn xác."*
 * **Ngữ cảnh & Ràng buộc**: Sản phẩm chung có `product.store = null`, sản phẩm riêng có `product.store != null`. Tồn kho quản lý tại `StoreInventory` với ràng buộc `UNIQUE(store_id, product_id)`.
 * **Kết quả AI sinh**:
-  - Mã nguồn các Entity JPA trong package [com.finalproject.entity](file:///d:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/src/main/java/com/finalproject/entity/).
+  - Mã nguồn các Entity JPA trong package com.finalproject.entity.
   - Bảng `store_inventories` liên kết `@ManyToOne` với `Store` và `Product` lưu số lượng tồn kho `quantity` và cờ hoạt động `isActive`.
 
 ### Prompt 3:
 > *"Để tránh lỗi schema bị thay đổi tùy tiện khi restart server và đảm bảo tính toàn vẹn dữ liệu, hãy cấu hình Flyway migration trên SQL Server từ V1 đến V8, tắt ddl-auto của Hibernate."*
 * **Kết quả AI sinh**:
   - Cấu hình `spring.jpa.hibernate.ddl-auto=none` trong `application.properties`.
-  - Sinh 8 bản migration SQL trong [src/main/resources/db/migration/sqlserver](file:///d:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/src/main/resources/db/migration/sqlserver), kiểm soát chặt chẽ schema `dbo`.
+  - Sinh 8 bản migration SQL trong src/main/resources/db/migration/sqlserver, kiểm soát chặt chẽ schema `dbo`.
 
 ---
 
@@ -658,7 +658,7 @@ Gửi prompt `BS-01` để cung cấp ngữ cảnh chung, sau đó gửi từng 
 > *"Đề bài yêu cầu vừa có Thymeleaf vừa có JWT. Làm thế nào để giao diện web dùng Session Cookie + CSRF bảo vệ form, trong khi các endpoint REST API `/api/**` được bảo vệ độc lập bằng JWT Bearer Token không sử dụng Session?"*
 * **Ngữ cảnh & Ràng buộc**: Không được để cấu hình JWT làm hỏng cơ chế CSRF và đăng nhập form của Thymeleaf.
 * **Kết quả AI sinh**:
-  - Thiết lập [JwtSecurityConfig.java](file:///d:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/src/main/java/com/finalproject/config/JwtSecurityConfig.java) với 2 `SecurityFilterChain`:
+  - Thiết lập JwtSecurityConfig.java với 2 `SecurityFilterChain`:
     - Chain 1 (`@Order(1)`): Khớp `/api/**`, `SessionCreationPolicy.STATELESS`, tắt CSRF, xác thực Bearer Token.
     - Chain 2 (`@Order(2)`): Áp dụng cho Web MVC, bật CSRF, quản lý Session, phân quyền URL theo role.
 
@@ -682,7 +682,7 @@ Gửi prompt `BS-01` để cung cấp ngữ cảnh chung, sau đó gửi từng 
 > *"Nghiệp vụ yêu cầu: Khi khách hàng đặt đơn thành công (kể cả chọn hình thức COD thanh toán khi nhận hàng), hệ thống phải trừ tồn kho ngay tại chi nhánh được chọn, không chờ đến khi duyệt đơn hay bắt đầu giao. Nếu khách hủy đơn trước khi cắm hoa thì phải hoàn kho đúng 1 lần. Hãy cài đặt logic này an toàn chống race condition."*
 * **Ngữ cảnh & Ràng buộc**: Khi 2 người cùng bấm mua bông hoa cuối cùng, không được để xảy ra hiện tượng âm kho.
 * **Kết quả AI sinh**:
-  - Cài đặt `@Lock(LockModeType.PESSIMISTIC_WRITE)` trên truy vấn tồn kho trong [ProductServiceImpl.java](file:///d:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/src/main/java/com/finalproject/service/impl/ProductServiceImpl.java).
+  - Cài đặt `@Lock(LockModeType.PESSIMISTIC_WRITE)` trên truy vấn tồn kho trong ProductServiceImpl.java.
   - Trừ kho tức thời trong transaction `REPEATABLE_READ`.
   - Hàm `reconcileInventoryOnCancel()` kiểm tra trạng thái và hoàn kho đúng 1 lần duy nhất khi đơn bị hủy hợp lệ.
 
@@ -693,7 +693,7 @@ Gửi prompt `BS-01` để cung cấp ngữ cảnh chung, sau đó gửi từng 
 * **Kết quả AI sinh**:
   - Cập nhật enum `OrderStatus`, thêm trạng thái `PREPARING`.
   - Backend chặn request hủy của khách nếu trạng thái `>= PREPARING`.
-  - Tạo modal hủy đơn cho Quản lý trong [manager/orders.html](file:///d:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/src/main/resources/templates/manager/orders.html) bắt buộc nhập `cancelReason` (not empty, max 300 chars), lưu vết người hủy và gửi thông báo cho khách.
+  - Tạo modal hủy đơn cho Quản lý trong manager/orders.html bắt buộc nhập `cancelReason` (not empty, max 300 chars), lưu vết người hủy và gửi thông báo cho khách.
 
 ---
 
@@ -708,7 +708,7 @@ Gửi prompt `BS-01` để cung cấp ngữ cảnh chung, sau đó gửi từng 
 ### Prompt 10:
 > *"Hãy cấu hình WebSocket STOMP trong Spring Boot để khách hàng có thể chat trực tiếp với chi nhánh cửa hàng. Tin nhắn phải gửi tức thì không cần tải lại trang, có hỗ trợ gửi ảnh và phân biệt hội thoại theo từng chi nhánh."*
 * **Kết quả AI sinh**:
-  - Tạo [WebSocketConfig.java](file:///d:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/src/main/java/com/finalproject/config/WebSocketConfig.java) với endpoint `/ws-chat`, prefix `/topic` và `/app`.
+  - Tạo WebSocketConfig.java với endpoint `/ws-chat`, prefix `/topic` và `/app`.
   - Tạo entity `ChatSession`, `ChatMessage` lưu lịch sử trong SQL Server.
   - Phân luồng tin nhắn qua `/topic/messages.{chatSessionId}` và thông báo cho shop qua `/topic/store.{storeId}`.
 
@@ -717,7 +717,7 @@ Gửi prompt `BS-01` để cung cấp ngữ cảnh chung, sau đó gửi từng 
 ### Prompt 11:
 > *"Tích hợp Cloudinary để tải lên ảnh sản phẩm hoa tươi, ảnh đại diện cửa hàng và ảnh tin nhắn chat. Yêu cầu: Không lưu cứng (hardcode) API Key và Secret trong mã nguồn; tự động đọc từ file `.env` cục bộ."*
 * **Kết quả AI sinh**:
-  - Tạo [CloudinaryService.java](file:///d:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/src/main/java/com/finalproject/service/CloudinaryService.java) nạp cấu hình từ environment variables.
+  - Tạo CloudinaryService.java nạp cấu hình từ environment variables.
   - Hàm `uploadImage()` trả về `secure_url` và `public_id`, hỗ trợ xóa ảnh cũ khi cập nhật.
 
 ---
@@ -725,7 +725,7 @@ Gửi prompt `BS-01` để cung cấp ngữ cảnh chung, sau đó gửi từng 
 ### Prompt 12:
 > *"Cho các KPIs này nằm cùng 1 hàng."*
 * **Kết quả AI sinh**:
-  - Chỉnh sửa CSS Flexbox và Grid trên [manager/dashboard.html](file:///d:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/src/main/resources/templates/manager/dashboard.html) và [admin/dashboard.html](file:///d:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/src/main/resources/templates/admin/dashboard.html).
+  - Chỉnh sửa CSS Flexbox và Grid trên manager/dashboard.html và admin/dashboard.html.
   - Đưa 4 thẻ chỉ số: *Đơn hàng mới*, *Doanh thu trong kỳ*, *Mẫu hoa kinh doanh* và *Tồn kho còn lại* nằm cân đối trên 1 hàng ngang màn hình Desktop, tự co giãn trên mobile.
 
 ### Prompt 13:
@@ -743,7 +743,7 @@ Gửi prompt `BS-01` để cung cấp ngữ cảnh chung, sau đó gửi từng 
 ### Prompt 15:
 > *"Lỗi khi thêm sản phẩm, tôi muốn nó có nút bấm sổ xuống để có thể lựa chọn thay vì phải gõ tay."*
 * **Kết quả AI sinh**:
-  - Tạo component [fragments/flower-attributes.html](file:///d:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/src/main/resources/templates/fragments/flower-attributes.html) và [flower-attributes.js](file:///d:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/src/main/resources/static/js/flower-attributes.js).
+  - Tạo component fragments/flower-attributes.html và flower-attributes.js.
   - Tích hợp nút dropdown sổ xuống danh sách các tùy chọn có sẵn (Loại hoa, Màu sắc, Phong cách, Dịp tặng) click tạo tag nhanh chóng.
 
 ---
@@ -757,9 +757,9 @@ Gửi prompt `BS-01` để cung cấp ngữ cảnh chung, sau đó gửi từng 
 > *"Bạn giúp tôi, sau khi tôi sửa các thuộc tính thì các thuộc tính cũ của tôi bị mất đi."*
 * **Nguyên nhân phân tích**: Lệch tên alias `"Phong cách"` vs `"Phong cách thiết kế"` trong CSDL; hàm `assignText` ghi đè giá trị rỗng.
 * **Kết quả AI sinh**:
-  - Bổ sung ánh xạ alias trong [FlowerAttributes.java](file:///d:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/src/main/java/com/finalproject/utils/FlowerAttributes.java).
-  - Sửa [ProductAttributeService.java](file:///d:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/src/main/java/com/finalproject/service/ProductAttributeService.java) giữ nguyên thuộc tính cũ khi trường bị bỏ qua.
-  - Bổ sung hàm [Product.getSelectedStyleValueIds()](file:///d:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/src/main/java/com/finalproject/entity/Product.java#L236) giúp Thymeleaf tick sẵn mọi tag/checkbox cũ.
+  - Bổ sung ánh xạ alias trong FlowerAttributes.java.
+  - Sửa ProductAttributeService.java giữ nguyên thuộc tính cũ khi trường bị bỏ qua.
+  - Bổ sung hàm Product.getSelectedStyleValueIds() giúp Thymeleaf tick sẵn mọi tag/checkbox cũ.
 
 ### Prompt 18:
 > *"Bạn kiểm tra giúp tôi xóa toàn bộ các file không cần đến trong dự án và tự động tạo trong quá trình biên dịch."*
@@ -770,12 +770,12 @@ Gửi prompt `BS-01` để cung cấp ngữ cảnh chung, sau đó gửi từng 
 > *"Với sự hỗ trợ của AI, Nhóm hãy viết tài liệu bằng file .docx chi tiết hướng dẫn xây dựng từng chức năng của ứng dụng gồm các phần: các hình kiến trúc ứng dụng, các hình sơ đồ hoạt động của chức năng + hình diễn giải Source Code, hình diễn giải giao diện, file hướng dẫn setup ứng dụng, danh sách các prompt nhóm đã sử dụng để AI hỗ trợ sinh code, sinh hình,..."*
 * **Kết quả AI sinh**:
   - Viết script Python sinh 5 sơ đồ chất lượng cao bằng `matplotlib` (kiến trúc 5 tầng, luồng đặt hàng, vòng đời đơn hàng, bảo mật kép, chat WebSocket).
-  - Tự động biên soạn và xuất file Word chuẩn mực: [docs/HUONG_DAN_XAY_DUNG_VA_KIEN_TRUC_UNG_DUNG.docx](file:///d:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/docs/HUONG_DAN_XAY_DUNG_VA_KIEN_TRUC_UNG_DUNG.docx).
+  - Tự động biên soạn và xuất file Word chuẩn mực: docs/HUONG_DAN_XAY_DUNG_VA_KIEN_TRUC_UNG_DUNG.docx.
 
 ### Prompt 20:
 > *"Tổng hợp các file trong docs và viết lại cho tôi thành một file .md xóa các file sau khi tổng hợp."*
 * **Kết quả AI sinh**:
-  - Viết script Python đọc toàn bộ 24 file markdown rời rạc, tổng hợp thành một tài liệu duy nhất [docs/TAI_LIEU_TONG_HOP_DU_AN.md](file:///d:/LAPTRINH/LAPTRINHWEB/BAITAP/finalproject/docs/TAI_LIEU_TONG_HOP_DU_AN.md) với 10 chương toàn diện, sau đó xóa sạch 24 file cũ.
+  - Viết script Python đọc toàn bộ 24 file markdown rời rạc, tổng hợp thành một tài liệu duy nhất docs/TAI_LIEU_TONG_HOP_DU_AN.md với 10 chương toàn diện, sau đó xóa sạch 24 file cũ.
 
 ---
 
@@ -1569,7 +1569,7 @@ Nhóm xin khẳng định các kết quả đạt được từ việc ứng d�
 1. **Hiệu suất & Tiến độ:** Giúp nhóm rút ngắn thời gian thiết kế cấu trúc nền tảng và sinh dữ liệu mẫu thực nghiệm, dành nhiều thời gian hơn để giải quyết các bài toán hóc búa về kiến trúc phân tán, concurrency và bảo mật.
 2. **Minh chứng minh bạch:** 
    - 100% các prompt và kết quả đều có tệp mã nguồn, tệp test và commit Git tương ứng để Giảng viên đối chiếu.
-   - Toàn bộ cơ sở dữ liệu đã được xuất hoàn chỉnh tại thư mục [database/](file:///D:/uni/hk1nam3/web/web-final_project/Flowers-Shop/database) kèm hướng dẫn import 1 click.
+   - Toàn bộ cơ sở dữ liệu đã được xuất hoàn chỉnh tại thư mục database/ kèm hướng dẫn import 1 click.
 3. **Chất lượng kiểm thử:**
    - **Java Backend Test:** 880 ca kiểm thử (868 passed, 12 skipped, 0 failure).
    - **JavaScript Frontend Test:** 185 / 185 ca kiểm thử Node.js native đạt 100%.
