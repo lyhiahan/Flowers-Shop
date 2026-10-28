@@ -87,6 +87,7 @@ public class ProductSpecification {
                 var inventory = query.subquery(Long.class);
                 var stock = inventory.from(com.finalproject.entity.StoreInventory.class);
                 inventory.select(stock.get("id")).where(cb.equal(stock.get("product").get("id"), root.get("id")), cb.equal(stock.get("store").get("id"), storeId),
+                        cb.isTrue(stock.get("store").get("status")), cb.isTrue(stock.get("store").get("isOpen")),
                         cb.isFalse(stock.get("isDeleted")));
                 predicates.add(cb.or(cb.equal(ownerStore.get("id"), storeId), cb.and(cb.isNull(ownerStore.get("id")), cb.exists(inventory))));
             }

@@ -17,6 +17,7 @@
 </head>
 
 <form th:fragment="search" id="globalSearchForm" th:action="@{/products#product-catalog}" method="get" class="w-100" role="search">
+    <input th:if="${storeId != null}" type="hidden" name="storeId" th:value="${storeId}">
     <div class="header-search-box d-flex align-items-center">
         <div class="header-search-type-wrapper">
             <select id="searchScopeSelect" class="header-search-type" aria-label="Phạm vi tìm kiếm">

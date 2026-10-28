@@ -22,7 +22,8 @@
             flowerColor: new Set(parseParamValues(p, 'flowerColor')),
             flowerOccasion: new Set(parseParamValues(p, 'flowerOccasion')),
             minPrice: p.get('minPrice') || '',
-            maxPrice: p.get('maxPrice') || ''
+            maxPrice: p.get('maxPrice') || '',
+            storeId: p.get('storeId') || ''
         };
     }
 
@@ -33,7 +34,8 @@
         flowerColor: new Set(appliedFilters.flowerColor),
         flowerOccasion: new Set(appliedFilters.flowerOccasion),
         minPrice: appliedFilters.minPrice,
-        maxPrice: appliedFilters.maxPrice
+        maxPrice: appliedFilters.maxPrice,
+        storeId: appliedFilters.storeId
     };
 
     const drawerEl = document.getElementById('allFiltersOffcanvas');
@@ -44,6 +46,13 @@
 
     function syncDrawerUI() {
         if (!drawerEl) return;
+        // Sync nhóm chi nhánh
+        drawerEl.querySelectorAll('.drawer-filter-chip[data-store-id]').forEach(function (btn) {
+            const selected = btn.getAttribute('data-store-id') === draftFilters.storeId;
+            btn.classList.toggle('active', selected);
+            btn.setAttribute('aria-pressed', String(selected));
+        });
+
         // Sync nhóm thuộc tính: Kiểu dáng, Loại hoa, Màu sắc, Dịp tặng
         drawerEl.querySelectorAll('.drawer-filter-chip[data-group]').forEach(function (btn) {
             const grp = btn.getAttribute('data-group');
@@ -83,7 +92,8 @@
                 flowerColor: new Set(appliedFilters.flowerColor),
                 flowerOccasion: new Set(appliedFilters.flowerOccasion),
                 minPrice: appliedFilters.minPrice,
-                maxPrice: appliedFilters.maxPrice
+                maxPrice: appliedFilters.maxPrice,
+                storeId: appliedFilters.storeId
             };
             syncDrawerUI();
         });
@@ -96,7 +106,8 @@
                 flowerColor: new Set(appliedFilters.flowerColor),
                 flowerOccasion: new Set(appliedFilters.flowerOccasion),
                 minPrice: appliedFilters.minPrice,
-                maxPrice: appliedFilters.maxPrice
+                maxPrice: appliedFilters.maxPrice,
+                storeId: appliedFilters.storeId
             };
             syncDrawerUI();
         });
@@ -107,6 +118,13 @@
         drawerEl.addEventListener('click', function (e) {
             const chipBtn = e.target.closest('.drawer-filter-chip');
             if (!chipBtn) return;
+
+            if (chipBtn.hasAttribute('data-store-id')) {
+                e.preventDefault();
+                draftFilters.storeId = chipBtn.getAttribute('data-store-id');
+                syncDrawerUI();
+                return;
+            }
 
             const grp = chipBtn.getAttribute('data-group');
             const val = chipBtn.getAttribute('data-val');
@@ -180,6 +198,7 @@
             draftFilters.flowerOccasion.clear();
             draftFilters.minPrice = '';
             draftFilters.maxPrice = '';
+            draftFilters.storeId = '';
             syncDrawerUI();
         });
     }
@@ -203,6 +222,8 @@
 
             if (draftFilters.minPrice) p.set('minPrice', draftFilters.minPrice);
             if (draftFilters.maxPrice) p.set('maxPrice', draftFilters.maxPrice);
+            if (draftFilters.storeId) p.set('storeId', draftFilters.storeId);
+            else p.delete('storeId');
 
             // Quay về trang kết quả số 1
             p.set('page', '1');
@@ -279,6 +300,7 @@
 
     window.resetAllCatalogFilters = function () {
         const p = getQueryParams();
+        p.delete('storeId');
         p.delete('flowerStyle');
         p.delete('flowerType');
         p.delete('flowerColor');
@@ -308,6 +330,17 @@
         p.delete('maxPrice');
         p.delete('minRating');
         p.delete('tab');
+        p.set('page', '1');
+        window.location.href = window.location.pathname + '?' + p.toString() + '#product-catalog';
+    };
+
+    window.applyCatalogStore = function (storeId) {
+        const p = getQueryParams();
+        if (storeId) {
+            p.set('storeId', storeId);
+        } else {
+            p.delete('storeId');
+        }
         p.set('page', '1');
         window.location.href = window.location.pathname + '?' + p.toString() + '#product-catalog';
     };
