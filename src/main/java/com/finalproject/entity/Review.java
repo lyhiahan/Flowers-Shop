@@ -52,6 +52,13 @@ public class Review {
         updatedAt = LocalDateTime.now();
     }
 
+    /** Sample fixtures are visible as demo content, never as verified customer feedback. */
+    @Transient
+    public boolean isDemo() {
+        return user != null && user.getUsername() != null && user.getUsername().startsWith("demo_review_")
+                && content != null && content.startsWith("[Đánh giá mẫu] ");
+    }
+
     @Transient
     public Integer getStars() {
         return rating != null ? rating : 5;

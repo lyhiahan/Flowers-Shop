@@ -112,11 +112,13 @@ public class DemoReviewSeed {
         for(long id:stores)snapshotRating(c,"stores",id,snapshot);
         for(var f:list)if(target(f.sold)>f.existing)snapshotRating(c,"products",f.id,snapshot);
         int added=0;
+        long[] sampleUsers=new long[6];
         for(var f:list) {
             int remaining=Math.max(0,target(f.sold)-f.existing);
             if(remaining==0)continue;
             for(int i=0;i<6&&remaining>0;i++) {
-                long user=ensureUser(c,i,snapshot);
+                if(sampleUsers[i]==0)sampleUsers[i]=ensureUser(c,i,snapshot);
+                long user=sampleUsers[i];
                 try(var exists=c.prepareStatement("SELECT 1 FROM reviews WHERE user_id=? AND product_id=?")) {
                     exists.setLong(1,user);exists.setLong(2,f.id);
                     try(var r=exists.executeQuery()){if(r.next())continue;}
@@ -230,6 +232,10 @@ public class DemoReviewSeed {
                     undo(c,Path.of(args[1]));return;
                 }
                 var list=flowers(c);int expected=printPlan(list);
+                if(mode.equals("--plan")) {
+                    Files.createDirectories(Path.of("target"));
+                    Files.write(Path.of("target/demo-review-images.tsv"),list.stream().map(f -> f.id+"\t"+image(f)).toList());
+                }
                 if(mode.equals("--plan")||expected==0){c.rollback();return;}
                 Properties snapshot=new Properties();snapshot.setProperty("created_at",LocalDateTime.now(ZONE).toString());
                 String before=businessState(c);

@@ -1719,6 +1719,22 @@ class BusinessRegressionTests {
     @Autowired ReviewService reviewService;
     @Autowired VendorDataSeederService vendorSeeder;
 
+    @Test void sampleReviewsAreClearlyMarkedWithIllustrationCaption() throws Exception {
+        User sample = createUser("demo_review_01", Role.USER, null);
+        sample.setFullName("Khách mẫu 01 (Demo)"); sample.setIsActive(false); users.save(sample);
+        Review review = Review.builder().user(sample).product(product).store(store).rating(4)
+                .content("[Đánh giá mẫu] Bố cục hoa hài hòa, ảnh được dùng để minh họa giao diện thử nghiệm.")
+                .imageUrl("/images/demo-rose-bouquet.jpg").build();
+        em.persist(review); em.flush();
+        assertThat(review.isDemo()).isTrue();
+        assertThat(Review.builder().user(customer).content(review.getContent()).build().isDemo()).isFalse();
+        assertThat(Review.builder().user(sample).content("Đánh giá thông thường").build().isDemo()).isFalse();
+        mvc.perform(get("/product/" + product.getId()).with(user(customer.getUsername()).roles("USER")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Demo · Đánh giá mẫu")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Ảnh minh họa của sản phẩm, không phải ảnh khách gửi.")));
+    }
+
     @Test void deletingCustomerWithChatPreservesHistoryAndDisablesAccount() throws Exception {
         ChatConversation conversation=em.merge(ChatConversation.builder().conversationKey("ADMIN:"+customer.getId()).kind("ADMIN")
                 .customer(customer).createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).build());

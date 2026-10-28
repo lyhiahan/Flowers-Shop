@@ -950,7 +950,7 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h3 class="fw-semibold mb-1" style="font-size: 22px; color: var(--flower-text-heading);">⭐ Đánh giá khách hàng</h3>
-                    <p class="text-muted small mb-0">Đánh giá thực tế từ khách hàng đã đặt hoa tại hệ thống</p>
+                    <p class="text-muted small mb-0" th:text="${reviews != null and !#lists.isEmpty(reviews.?[demo]) ? 'Đánh giá mẫu được gắn nhãn Demo để minh họa giao diện.' : 'Đánh giá thực tế từ khách hàng đã đặt hoa tại hệ thống'}">Đánh giá từ khách hàng đã đặt hoa tại hệ thống</p>
                 </div>
             </div>
 
@@ -1044,6 +1044,7 @@
                                  class="rounded-circle border" width="40" height="40" style="object-fit: cover;">
                             <div>
                                 <strong class="d-block text-dark small" th:text="${r.user.fullName}">Tên khách hàng</strong>
+                                <span th:if="${r.demo}" class="badge bg-secondary-subtle text-secondary border mt-1">Demo · Đánh giá mẫu</span>
                                 <small class="text-muted" style="font-size: 12px;" th:text="${#temporals.format(r.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</small>
                             </div>
                         </div>
@@ -1053,7 +1054,8 @@
                     </div>
                     <p class="text-dark small mb-2 ps-1" th:text="${r.content}"></p>
                     <div th:if="${r.imageUrl != null and !r.imageUrl.isEmpty()}" class="ps-1">
-                        <img th:src="${r.imageUrl}" class="rounded-3 border" width="120" height="120" style="object-fit: cover;">
+                        <img th:src="${r.imageUrl}" th:alt="${r.demo ? 'Ảnh minh họa của sản phẩm' : 'Ảnh đánh giá khách hàng'}" class="rounded-3 border" width="120" height="120" style="object-fit: cover;">
+                        <small th:if="${r.demo}" class="d-block text-muted mt-1">Ảnh minh họa của sản phẩm, không phải ảnh khách gửi.</small>
                     </div>
                 </div>
             </div>
