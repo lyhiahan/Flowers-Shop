@@ -106,9 +106,9 @@
                                 <div class="flower-card-meta">
                                     <span class="flower-price"
                                         th:text="${#numbers.formatDecimal(fp.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
-                                    <span class="flower-rating" th:if="${fp.customerRating != null}">
+                                    <span class="flower-rating">
                                         <i class="bi bi-star-fill star-gold"></i>
-                                        <span th:text="${fp.customerRating}"></span>
+                                        <span th:text="${fp.customerRating != null ? fp.customerRating : (fp.rating != null ? fp.rating : '5.0')}"></span>
                                     </span>
                                 </div>
                             </div>
@@ -200,9 +200,9 @@
                         <div class="flower-card-meta">
                             <span class="flower-price"
                                 th:text="${#numbers.formatDecimal(p.priceBuy, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
-                            <span class="flower-rating" th:if="${p.customerRating != null and p.customerRating > 0}">
+                            <span class="flower-rating">
                                 <i class="bi bi-star-fill star-gold"></i>
-                                <span th:text="${p.customerRating}"></span>
+                                <span th:text="${p.customerRating != null ? p.customerRating : (p.rating != null ? p.rating : '5.0')}"></span>
                             </span>
                         </div>
 
