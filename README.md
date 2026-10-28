@@ -164,8 +164,8 @@ Script chọn profile `dev` rõ ràng. Cổng 1433 là giá trị mặc định,
 
 ## Schema và migration
 
-- SQL Server: `db/migration/sqlserver` cùng `com/finalproject/db/migration`, từ V1 đến **V17**; V3/V4/V10/V16 viết bằng Java.
-- PostgreSQL: `db/migration/postgresql/V1__initial_schema.sql` là baseline độc lập tương ứng mô hình ứng dụng SQL Server V17. PostgreSQL V1 không có nghĩa là thiếu 16 migration SQL Server.
+- SQL Server: `db/migration/sqlserver` cùng `com/finalproject/db/migration`, từ V1 đến **V18**; V3/V4/V10/V16 viết bằng Java.
+- PostgreSQL: `db/migration/postgresql/V1__initial_schema.sql` là baseline độc lập tương ứng mô hình ứng dụng SQL Server V17. PostgreSQL V2 gỡ các cột không còn dùng và thu hẹp model về bán hoa. Hai engine có chuỗi phiên bản riêng.
 - Phiên bản trong source không chứng minh database đang dùng đã migrate; đọc `flyway_schema_history` để xác nhận.
 - Profile Aiven dùng Hibernate `validate`; SQL Server mặc định `ddl-auto=none`. Flyway quản lý nâng cấp schema.
 - Khi chạy thông thường Flyway có thể áp dụng migration đang chờ. Database đã có dữ liệu cần sao lưu và thử trên bản sao trước khi nâng cấp/baseline.

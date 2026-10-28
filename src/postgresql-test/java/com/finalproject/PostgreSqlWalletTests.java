@@ -64,7 +64,7 @@ class PostgreSqlWalletTests extends CustomerWalletTests {
 
     @Test void freshMigrationValidatesAndSecondRunDoesNotModifyData() {
         long usersBefore = users.count();
-        assertThat(flyway.info().applied()).hasSize(1);
+        assertThat(flyway.info().applied()).hasSize(2);
         assertThat(flyway.info().applied()[0].getVersion().getVersion()).isEqualTo("1");
         flyway.validate();
         assertThat(flyway.migrate().migrationsExecuted).isZero();

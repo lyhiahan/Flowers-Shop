@@ -52,7 +52,7 @@ class ManagerShoppingSeparationTests {
         manager.setStore(store);users.saveAndFlush(manager);
         var category=categories.save(Category.builder().name("Manager shopping flowers").build());
         product=products.save(Product.builder().name("Manager preview flower").category(category).store(store)
-                .priceBuy(new BigDecimal("100000")).importPrice(BigDecimal.ONE).priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).build());
+                .priceBuy(new BigDecimal("100000")).importPrice(BigDecimal.ONE).build());
         stocks.saveAndFlush(StoreInventory.builder().product(product).store(store).quantity(10).build());
     }
     @AfterEach void clear() { SecurityContextHolder.clearContext(); }

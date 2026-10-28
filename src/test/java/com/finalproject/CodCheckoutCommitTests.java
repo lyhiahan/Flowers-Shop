@@ -45,7 +45,7 @@ class CodCheckoutCommitTests {
             var category = categories.save(Category.builder().name("Commit flowers").build());
             var product = products.save(Product.builder().name("Commit bouquet").store(store).category(category)
                     .priceBuy(new BigDecimal("100000")).importPrice(new BigDecimal("50000"))
-                    .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).build());
+                    .build());
             inventories.save(StoreInventory.builder().store(store).product(product).quantity(10).build());
             var cart = carts.save(Cart.builder().user(customer).items(new ArrayList<>()).build());
             var item = items.save(CartItem.builder().cart(cart).store(store).product(product).orderType(OrderType.BUY).quantity(2).build());

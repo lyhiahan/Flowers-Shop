@@ -30,5 +30,5 @@ public class Promotion {
 
     @Enumerated(EnumType.STRING)
     @Column(length = 10)
-    private OrderType applyType; // BUY, RENT hoặc null nếu áp dụng cho cả hai
+    private OrderType applyType; // BUY hoặc null nếu áp dụng chung cho bán hoa
 }

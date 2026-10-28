@@ -47,8 +47,7 @@ public class CustomerAccountClosureService {
                 entityManager.refresh(order, LockModeType.PESSIMISTIC_WRITE);
                 boolean finished = order.getStatus() == OrderStatus.COMPLETED
                         || order.getStatus() == OrderStatus.CANCELLED
-                        || order.getStatus() == OrderStatus.REFUNDED
-                        || order.getStatus() == OrderStatus.RETURNED;
+                        || order.getStatus() == OrderStatus.REFUNDED;
                 boolean awaitingRefund = order.getStatus() == OrderStatus.CANCELLED
                         && "PAID".equalsIgnoreCase(order.getPaymentStatus());
                 if (!finished || awaitingRefund)

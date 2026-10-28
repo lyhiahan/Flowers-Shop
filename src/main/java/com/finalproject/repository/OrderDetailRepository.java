@@ -16,8 +16,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
         select count(distinct d.order.id) from OrderDetail d where d.product.id=:productId
         and d.order.status in (com.finalproject.enums.OrderStatus.PENDING, com.finalproject.enums.OrderStatus.CONFIRMED,
             com.finalproject.enums.OrderStatus.PREPARING, com.finalproject.enums.OrderStatus.PICKED_UP,
-            com.finalproject.enums.OrderStatus.DELIVERING, com.finalproject.enums.OrderStatus.RENTING,
-            com.finalproject.enums.OrderStatus.OVERDUE)
+            com.finalproject.enums.OrderStatus.DELIVERING)
         """)
     long countOpenOrders(@Param("productId") Long productId);
 
@@ -29,8 +28,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
         select d.product.id, count(distinct d.order.id) from OrderDetail d
         where d.order.status in (com.finalproject.enums.OrderStatus.PENDING, com.finalproject.enums.OrderStatus.CONFIRMED,
             com.finalproject.enums.OrderStatus.PREPARING, com.finalproject.enums.OrderStatus.PICKED_UP,
-            com.finalproject.enums.OrderStatus.DELIVERING, com.finalproject.enums.OrderStatus.RENTING,
-            com.finalproject.enums.OrderStatus.OVERDUE)
+            com.finalproject.enums.OrderStatus.DELIVERING)
         group by d.product.id
         """)
     List<Object[]> countOpenOrdersByProduct();
@@ -39,8 +37,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
         select count(d) > 0 from OrderDetail d where d.product.id=:productId and d.order.pickupStore.id=:storeId
         and d.order.status in (com.finalproject.enums.OrderStatus.PENDING, com.finalproject.enums.OrderStatus.CONFIRMED,
             com.finalproject.enums.OrderStatus.PREPARING, com.finalproject.enums.OrderStatus.PICKED_UP,
-            com.finalproject.enums.OrderStatus.DELIVERING,
-            com.finalproject.enums.OrderStatus.RENTING, com.finalproject.enums.OrderStatus.OVERDUE)
+            com.finalproject.enums.OrderStatus.DELIVERING)
         """)
     boolean hasOpenOrdersAtStore(Long productId, Long storeId);
     interface SalesRank {
@@ -69,14 +66,14 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
            "FROM OrderDetail od " +
            "WHERE od.order.user.id = :userId " +
            "AND od.product.id = :productId " +
-           "AND od.order.status IN (com.finalproject.enums.OrderStatus.DELIVERED, com.finalproject.enums.OrderStatus.COMPLETED, com.finalproject.enums.OrderStatus.RETURNED)")
+           "AND od.order.status IN (com.finalproject.enums.OrderStatus.DELIVERED, com.finalproject.enums.OrderStatus.COMPLETED)")
     boolean hasPurchasedAndReceived(@Param("userId") Long userId, @Param("productId") Long productId);
 
     @Query("SELECT od.order.id " +
            "FROM OrderDetail od " +
            "WHERE od.order.user.id = :userId " +
            "AND od.product.id = :productId " +
-           "AND od.order.status IN (com.finalproject.enums.OrderStatus.DELIVERED, com.finalproject.enums.OrderStatus.COMPLETED, com.finalproject.enums.OrderStatus.RETURNED) " +
+           "AND od.order.status IN (com.finalproject.enums.OrderStatus.DELIVERED, com.finalproject.enums.OrderStatus.COMPLETED) " +
            "ORDER BY od.order.createdAt DESC")
     List<Long> findReceivedOrderIdsByProduct(@Param("userId") Long userId, @Param("productId") Long productId);
 

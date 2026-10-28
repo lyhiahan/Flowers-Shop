@@ -215,8 +215,8 @@ public class ProductService {
                 .description(form.getDescription())
                 .importPrice(form.getImportPrice())
                 .priceBuy(form.getPriceBuy())
-                .priceRentPerDay(java.math.BigDecimal.ZERO)
-                .depositFee(java.math.BigDecimal.ZERO)
+
+
                 .isActive(true)
                 .isSelling(true)
                 .sold(0)

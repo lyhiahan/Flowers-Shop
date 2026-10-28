@@ -309,8 +309,8 @@ public class DemoOrderSeeder {
                             .category(cat)
                             .priceBuy(price)
                             .importPrice(price.multiply(new BigDecimal("0.6")).setScale(0, java.math.RoundingMode.HALF_UP))
-                            .priceRentPerDay(BigDecimal.ZERO)
-                            .depositFee(BigDecimal.ZERO)
+
+
                             .imageUrl(imageUrl)
                             .description(name + " tươi mới tuyển chọn từ các nhà vườn danh tiếng.")
                             .isActive(true)

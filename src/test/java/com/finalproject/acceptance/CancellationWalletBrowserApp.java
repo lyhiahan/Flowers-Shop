@@ -68,7 +68,7 @@ public class CancellationWalletBrowserApp {
                     var category = categories.save(Category.builder().name("Acceptance flowers").build());
                     var product = products.save(Product.builder().name("Acceptance rose bouquet").category(category).store(store)
                             .priceBuy(new BigDecimal("100000")).importPrice(BigDecimal.ONE)
-                            .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).build());
+                            .build());
                     inventories.save(StoreInventory.builder().store(store).product(product).quantity(8).build());
                     var cart = carts.save(Cart.builder().user(customer).items(new ArrayList<>()).build());
                     cartItems.save(CartItem.builder().cart(cart).store(store).product(product).quantity(1).orderType(OrderType.BUY).build());

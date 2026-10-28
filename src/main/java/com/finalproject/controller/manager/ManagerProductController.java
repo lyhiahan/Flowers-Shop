@@ -155,8 +155,8 @@ public class ManagerProductController {
                 .store(store)
                 .priceBuy(priceBuy)
                 .importPrice(priceBuy.multiply(BigDecimal.valueOf(0.6)))
-                .priceRentPerDay(BigDecimal.ZERO)
-                .depositFee(BigDecimal.ZERO)
+
+
                 .promotionalPrice(promotionalPrice != null ? promotionalPrice : priceBuy)
                 .sold(0)
                 .rating(5.0)

@@ -149,7 +149,7 @@ class ChatSessionIntegrationTests {
             var category=categories.saveAndFlush(Category.builder().name("Socket product context").build());
             var product=products.saveAndFlush(Product.builder().name("Lan hỏi qua WebSocket").store(store).category(category)
                 .imageUrl("https://example.test/orchid.jpg").priceBuy(java.math.BigDecimal.TEN).importPrice(java.math.BigDecimal.ONE)
-                .priceRentPerDay(java.math.BigDecimal.ZERO).depositFee(java.math.BigDecimal.ZERO).build());
+                .build());
             send(customerSocket,branch,"Tôi hỏi mẫu lan này",product.getId());
             assertThat(customerInbox.poll(10,TimeUnit.SECONDS)).contains("\"product\":", "Lan hỏi qua WebSocket", "orchid.jpg");
             assertThat(managerInbox.poll(10,TimeUnit.SECONDS)).contains("\"product\":", "Lan hỏi qua WebSocket");

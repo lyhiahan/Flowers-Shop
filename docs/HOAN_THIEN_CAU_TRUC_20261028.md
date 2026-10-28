@@ -16,13 +16,11 @@ README đã được viết lại dựa trên source hiện tại:
 - Giải thích Flyway, cấu hình mail/ảnh, test, database lịch sử và giới hạn kiểm chứng.
 - Thêm `KIEN_TRUC_HIEN_TAI.md` làm quy ước cho source sau refactor. Các báo cáo cũ tiếp tục là lịch sử của ngày tương ứng.
 
-## 2. Nghiệp vụ thuê
+## 2. Cập nhật ngày 29/10/2026
 
-Đã bỏ scheduler thuê quá hạn, truy vấn quét quá hạn và các phương thức service trả/chuyển đơn thuê không còn dùng. Không còn cờ app.rental.enabled.
+Đã xóa các trường giá thuê, cọc, ngày thuê/trả, cửa hàng trả và tiền phạt khỏi model; bỏ enum/trạng thái và các phép tính/truy vấn/giao diện tương ứng. Đơn bán chỉ có loại BUY. Thông tin cọc/phạt không còn xuất hiện trong lịch sử đơn và nhãn hoàn tiền được dùng nhất quán.
 
-Giỏ/checkout chỉ tính tiền mua hoa, không có dòng tiền cọc hoặc JavaScript cộng tiền cọc. Dòng giỏ loại RENT cũ không thể thanh toán; service đặt đơn cũng kiểm tra BUY trước khi tạo đơn. Sản phẩm mới do manager tạo không còn được gán giá thuê/cọc theo tỷ lệ giá bán. Bỏ thống kê thuê không dùng ở dashboard admin và hàm toggleRentDates không còn dùng trên trang chủ.
-
-Không DROP cột, đổi tên database hoặc viết lại migration cũ. `RentalShop`, email demo, public_id Cloudinary, các cột/enum thuê và phép tính chi tiết đơn lịch sử được giữ để đọc dữ liệu đã tồn tại. Thông tin cọc/phạt của đơn cũ vẫn có thể hiển thị trong lịch sử. Xem ranh giới tương thích trong tài liệu kiến trúc.
+Không sửa migration đã chạy. SQL Server V18 và PostgreSQL V2 lưu giá trị cột cũ vào schema_change_archive trước khi gỡ cột. Migration dừng khi còn giao dịch không phù hợp cần đối chiếu; không tự đổi trạng thái hay số tiền. Các mã kết nối, email và định danh ảnh đang dùng vẫn là định danh triển khai. Chi tiết và kết quả test: XOA_NGHIEP_VU_THUE_20261029.md.
 
 ## 3. Trang chủ
 

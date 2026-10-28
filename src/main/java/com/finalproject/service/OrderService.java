@@ -238,7 +238,7 @@ public class OrderService {
                     .quantity(item.getQuantity())
                     .unitPrice(unitPrice)
                     .orderType(OrderType.BUY)
-                    .depositFee(BigDecimal.ZERO)
+
                     .build();
             orderDetails.add(detail);
         }
@@ -262,7 +262,6 @@ public class OrderService {
         order.setShippingFee(amounts.shippingFee());
         order.setDeliveryUnitId(isPickup ? null : amounts.deliveryUnitId());
         order.setTotalAmount(finalAmount);
-        order.setTotalDeposit(BigDecimal.ZERO);
         order.setPaymentMethod(paymentMethod != null ? paymentMethod.name() : "COD");
         order.setPaymentStatus("UNPAID");
         if (paymentMethod == PaymentMethod.MOMO) order.setPaymentExpiresAt(LocalDateTime.now(clock).plusMinutes(30));

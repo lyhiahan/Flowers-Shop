@@ -69,7 +69,7 @@ class DemoPendingFundsTests {
         Category category = categories.save(Category.builder().name("Pending flowers").build());
         product = products.save(Product.builder().name("Hoa thử nghiệm").category(category).store(store)
                 .priceBuy(new BigDecimal("100000")).importPrice(BigDecimal.ONE)
-                .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).build());
+                .build());
         inventories.save(StoreInventory.builder().store(store).product(product).quantity(10).build());
         login(customer);
     }

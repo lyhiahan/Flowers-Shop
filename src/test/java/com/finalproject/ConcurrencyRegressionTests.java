@@ -53,7 +53,7 @@ class ConcurrencyRegressionTests {
             Store store = stores.save(Store.builder().name(prefix).address("Quận 1").eWallet(new BigDecimal("100000")).build());
             Category category = categories.save(Category.builder().name(prefix).build());
             Product product = products.save(Product.builder().name(prefix).category(category).store(store).priceBuy(new BigDecimal("50000"))
-                    .importPrice(BigDecimal.ONE).priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).build());
+                    .importPrice(BigDecimal.ONE).build());
             inventories.save(StoreInventory.builder().store(store).product(product).quantity(1).build());
             List<Long> userIds = new ArrayList<>(), itemIds = new ArrayList<>();
             List<String> customerNames = new ArrayList<>();

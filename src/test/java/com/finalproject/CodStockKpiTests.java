@@ -76,7 +76,7 @@ class CodStockKpiTests {
     Product product(String name, Category category, Store store, int quantity) {
         Product product = products.save(Product.builder().name(name).category(category).store(store)
                 .priceBuy(new BigDecimal("100000")).importPrice(new BigDecimal("50000"))
-                .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).build());
+                .build());
         inventories.save(StoreInventory.builder().store(store).product(product).quantity(quantity).build());
         return product;
     }

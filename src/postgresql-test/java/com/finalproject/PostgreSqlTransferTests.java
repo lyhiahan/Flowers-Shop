@@ -31,7 +31,7 @@ class PostgreSqlTransferTests {
         }
         String url = postgres.getJdbcUrl("postgres", name);
         Flyway.configure().dataSource(url, "postgres", "postgres").defaultSchema("public")
-                .locations("classpath:db/migration/postgresql").cleanDisabled(true).load().migrate();
+                .locations("classpath:db/migration/postgresql").target("1").cleanDisabled(true).load().migrate();
         return DriverManager.getConnection(url, "postgres", "postgres");
     }
 

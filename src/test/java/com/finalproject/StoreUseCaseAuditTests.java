@@ -65,7 +65,7 @@ class StoreUseCaseAuditTests {
     Product product(String name, boolean selling) {
         return products.save(Product.builder().name(name).store(store).category(category)
                 .priceBuy(new BigDecimal("100000")).importPrice(BigDecimal.ZERO)
-                .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO)
+
                 .isActive(true).isSelling(selling).build());
     }
 

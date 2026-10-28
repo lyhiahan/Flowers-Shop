@@ -58,7 +58,7 @@ class StoreProductCatalogTests {
     Product flower(String name,Store owner) {
         return products.save(Product.builder().name(name).category(category).store(owner)
                 .priceBuy(new BigDecimal("120000")).importPrice(new BigDecimal("60000"))
-                .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).imageUrl("https://res.cloudinary.com/test/history.png").build());
+                .imageUrl("https://res.cloudinary.com/test/history.png").build());
     }
     StoreInventory stock(Product product,Store store,int quantity) {
         return stocks.save(StoreInventory.builder().product(product).store(store).quantity(quantity).build());

@@ -88,8 +88,8 @@ public class CartBadgeAjaxUpdateTests {
                 .category(cat)
                 .priceBuy(new BigDecimal("350000"))
                 .importPrice(new BigDecimal("200000"))
-                .depositFee(new BigDecimal("100000"))
-                .priceRentPerDay(new BigDecimal("50000"))
+
+
                 .isSelling(true)
                 .isActive(true)
                 .isDeleted(false)

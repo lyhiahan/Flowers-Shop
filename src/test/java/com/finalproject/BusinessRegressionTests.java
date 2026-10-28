@@ -83,7 +83,7 @@ class BusinessRegressionTests {
         Category category = categories.save(Category.builder().name("Hoa").build());
         product = products.save(Product.builder().name("Hoa hồng").category(category).store(store)
                 .importPrice(new BigDecimal("50000")).priceBuy(new BigDecimal("100000"))
-                .promotionalPrice(new BigDecimal("80000")).priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).build());
+                .promotionalPrice(new BigDecimal("80000")).build());
         inventory.save(StoreInventory.builder().store(store).product(product).quantity(10).build());
         cart = carts.save(Cart.builder().user(customer).items(new ArrayList<>()).build());
         item = items.save(CartItem.builder().cart(cart).product(product).store(store).quantity(2).orderType(OrderType.BUY).build());
@@ -169,7 +169,7 @@ class BusinessRegressionTests {
 
     @org.junit.jupiter.params.ParameterizedTest
     @org.junit.jupiter.params.provider.EnumSource(value = OrderStatus.class,
-            names = {"COMPLETED", "CANCELLED", "REFUNDED", "RETURNED"}, mode = org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE)
+            names = {"COMPLETED", "CANCELLED", "REFUNDED"}, mode = org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE)
     void deletingCustomerWithUnfinishedOrderIsBlocked(OrderStatus state) throws Exception {
         Order order = checkout(PaymentMethod.COD);
         order.setStatus(state); orders.saveAndFlush(order);
@@ -182,7 +182,7 @@ class BusinessRegressionTests {
     }
 
     @org.junit.jupiter.params.ParameterizedTest
-    @org.junit.jupiter.params.provider.EnumSource(value = OrderStatus.class, names = {"COMPLETED", "CANCELLED", "REFUNDED", "RETURNED"})
+    @org.junit.jupiter.params.provider.EnumSource(value = OrderStatus.class, names = {"COMPLETED", "CANCELLED", "REFUNDED"})
     void deletingCustomerWithFinishedOrderPreservesInvoice(OrderStatus state) throws Exception {
         Order order = checkout(PaymentMethod.COD);
         order.setStatus(state); orders.saveAndFlush(order);
@@ -738,7 +738,7 @@ class BusinessRegressionTests {
     @Test void cartHeaderCountsOnlyAvailableRowsAndQuantities() throws Exception {
         Product paused = products.save(Product.builder().name("Hoa ngừng bán").category(product.getCategory()).store(store)
                 .priceBuy(new BigDecimal("90000")).importPrice(BigDecimal.ZERO)
-                .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).isSelling(false).build());
+                .isSelling(false).build());
         inventory.save(StoreInventory.builder().store(store).product(paused).quantity(20).build());
         CartItem pausedItem = items.save(CartItem.builder().cart(cart).product(paused).store(store)
                 .quantity(5).orderType(OrderType.BUY).build());
@@ -1351,7 +1351,7 @@ class BusinessRegressionTests {
 
     @org.junit.jupiter.params.ParameterizedTest
     @org.junit.jupiter.params.provider.EnumSource(value = OrderStatus.class,
-            names = {"PREPARING", "DELIVERING", "DELIVERED", "COMPLETED", "PICKED_UP", "RENTING", "RETURNED", "OVERDUE", "REFUNDED"})
+            names = {"PREPARING", "DELIVERING", "DELIVERED", "COMPLETED", "PICKED_UP", "REFUNDED"})
     void cancellationIsBlockedOncePreparationStartedOrOrderEnded(OrderStatus state) throws Exception {
         Order order = checkout(PaymentMethod.COD);
         order.setStatus(state); orders.saveAndFlush(order);

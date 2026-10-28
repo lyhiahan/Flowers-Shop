@@ -17,7 +17,7 @@ public class ActivityLog {
     private User user;
 
     @Column(nullable = false, length = 50)
-    private String action; // APPROVE_ORDER, CONFIRM_RETURN, REFUND_DEPOSIT
+    private String action; // APPROVE_ORDER, CONFIRM_PAYMENT, REFUND_ORDER
 
     @Column(length = 50)
     private String targetType; // Order, Product, Store

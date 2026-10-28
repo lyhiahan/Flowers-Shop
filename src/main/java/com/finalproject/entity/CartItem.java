@@ -32,10 +32,6 @@ public class CartItem {
     @Column(nullable = false)
     private Integer quantity;
 
-    // Legacy database field: retained for historical records; never used by flower checkout.
-    private LocalDate rentStartDate;
-    // Legacy database field: retained for historical records; never used by flower checkout.
-    private LocalDate rentEndDate;
 
     private LocalDate deliveryDate; // Ngày nhận/giao hoa
     @org.hibernate.annotations.Nationalized

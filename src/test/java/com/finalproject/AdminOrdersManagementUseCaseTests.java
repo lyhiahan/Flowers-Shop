@@ -120,8 +120,8 @@ class AdminOrdersManagementUseCaseTests {
                 .store(store)
                 .importPrice(new BigDecimal("200000"))
                 .priceBuy(new BigDecimal("450000"))
-                .priceRentPerDay(new BigDecimal("50000"))
-                .depositFee(new BigDecimal("100000"))
+
+
                 .sold(12)
                 .isActive(true)
                 .createdAt(LocalDateTime.now())

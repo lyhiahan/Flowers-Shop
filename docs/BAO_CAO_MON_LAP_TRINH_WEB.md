@@ -132,7 +132,7 @@ Hệ thống được thiết kế theo mô hình phân tầng chặt chẽ nh�
 | **Cơ sở dữ liệu chính** | PostgreSQL (Aiven Cloud) | PostgreSQL 18.6 (SSL verify-full) | Lưu trữ chính khi chạy ứng dụng (profile `aiven`), kiểm soát truy cập an toàn. |
 | **Cơ sở dữ liệu phát triển** | Microsoft SQL Server | SQLEXPRESS / FlowersShop | Môi trường phát triển nội bộ cục bộ (profile `dev`). |
 | **Quản lý dữ liệu** | Spring Data JPA | Hibernate 7.x | Ánh xạ đối tượng quan hệ, thực thi lệnh khóa bi quan khi trừ số lượng kho. |
-| **Quản lý cấu trúc bảng** | Flyway | Flyway Core | Quản lý lịch sử nâng cấp bảng dữ liệu (SQL Server V1–V17; PostgreSQL baseline V1). |
+| **Quản lý cấu trúc bảng** | Flyway | Flyway Core | Quản lý lịch sử nâng cấp bảng dữ liệu (SQL Server V1–V18; PostgreSQL V1–V2). |
 | **Bảo mật hệ thống** | Spring Security | Spring Security 6.x | Phân quyền hai lớp: Phiên làm việc cho web Thymeleaf, mã JWT cho các cổng API. |
 | **Truyền tin thời gian thực** | Spring WebSocket | STOMP over SockJS | Đẩy tin nhắn trò chuyện và cập nhật thông báo tức thời giữa khách và chi nhánh. |
 | **Lưu trữ đám mây** | Cloudinary CDN | Cloudinary Java SDK | Tải lên và quản lý ảnh sản phẩm, ảnh đại diện và ảnh gửi trong khung chat. |
@@ -247,7 +247,7 @@ Hệ thống triển khai song song hai chuỗi kiểm soát bảo mật độc 
 
 ### 4.6. Kiểm soát cấu trúc cơ sở dữ liệu với Flyway Migration
 - Tuyệt đối không để công cụ tự động thay đổi cấu trúc bảng khi khởi động ứng dụng trên môi trường thực tế nhằm bảo đảm an toàn dữ liệu.
-- Quản lý toàn bộ lịch sử thay đổi bảng thông qua các tệp nâng cấp có đánh số phiên bản rõ ràng: cơ sở dữ liệu phát triển SQL Server có chuỗi nâng cấp từ V1 đến V17; cơ sở dữ liệu chính PostgreSQL sở hữu một phiên bản khởi đầu độc lập chứa toàn bộ cấu trúc bảng chuẩn hiện hành.
+- Quản lý toàn bộ lịch sử thay đổi bảng thông qua các tệp nâng cấp có đánh số phiên bản rõ ràng: cơ sở dữ liệu phát triển SQL Server có chuỗi nâng cấp từ V1 đến V18; cơ sở dữ liệu chính PostgreSQL có baseline V1 độc lập và migration V2 để chỉ giữ cấu trúc nghiệp vụ bán hoa.
 
 ---
 

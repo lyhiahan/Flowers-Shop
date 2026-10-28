@@ -24,26 +24,17 @@ public class Order {
     @Column(nullable = false, length = 10)
     private OrderType orderType;
 
-    // Chi nhánh xuất đồ
+    // Chi nhánh chuẩn bị hoa
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pickup_store_id", nullable = false)
     private Store pickupStore;
 
-    // Chi nhánh nhận trả đồ (hỗ trợ trả chéo kho)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "return_store_id")
-    // Legacy database field: retained for historical records; never used by flower checkout.
-    private Store returnStore;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private OrderStatus status;
 
     private BigDecimal totalAmount;
-    // Legacy database field: retained for historical records; never used by flower checkout.
-    private BigDecimal totalDeposit;
-    // Legacy database field: retained for historical records; never used by flower checkout.
-    private BigDecimal fineAmount;
 
     // Snapshot: subsequent delivery tariff changes must not change existing orders.
     @Column(name = "shipping_fee", precision = 18, scale = 2)

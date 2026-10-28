@@ -49,7 +49,7 @@ class ChatBranchFlowTests {
         manager.setStore(a);users.save(manager);
         var category=categories.save(Category.builder().name("Scope flowers").build());
         flower=products.save(Product.builder().name("Scope orchid").store(b).category(category)
-                .priceBuy(BigDecimal.TEN).importPrice(BigDecimal.ONE).priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).build());
+                .priceBuy(BigDecimal.TEN).importPrice(BigDecimal.ONE).build());
         inventory.saveAndFlush(StoreInventory.builder().store(b).product(flower).quantity(5).build());
     }
     User account(String name,Role role) { return users.save(User.builder().username(name).email(name+"@scope.test")

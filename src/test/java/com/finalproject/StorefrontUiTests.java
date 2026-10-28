@@ -46,8 +46,8 @@ class StorefrontUiTests {
         store = stores.save(Store.builder().name("Storefront branch").address("Test address").status(true).isOpen(true).build());
         var category = categories.save(Category.builder().name("Storefront flowers").build());
         product = products.save(Product.builder().name("Storefront bouquet").category(category).store(store)
-                .priceBuy(new BigDecimal("150000")).importPrice(BigDecimal.ONE).priceRentPerDay(BigDecimal.ZERO)
-                .depositFee(BigDecimal.ZERO).imageUrl("/images/flower-logo.png").build());
+                .priceBuy(new BigDecimal("150000")).importPrice(BigDecimal.ONE)
+                .imageUrl("/images/flower-logo.png").build());
         inventories.saveAndFlush(StoreInventory.builder().store(store).product(product).quantity(10).build());
     }
 

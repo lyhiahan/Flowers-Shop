@@ -48,7 +48,7 @@ class CartLineMergingTests {
         var category = categories.save(Category.builder().name("Merge flowers").build());
         product = products.save(Product.builder().name("Rose bouquet").category(category).store(store)
                 .priceBuy(new BigDecimal("100000")).importPrice(BigDecimal.TEN)
-                .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).build());
+                .build());
         inventories.saveAndFlush(StoreInventory.builder().store(store).product(product).quantity(10).build());
     }
 
@@ -111,7 +111,7 @@ class CartLineMergingTests {
     @Test void differentProductsStaySeparate() {
         var other = products.save(Product.builder().name("Other bouquet").category(product.getCategory()).store(store)
                 .priceBuy(new BigDecimal("200000")).importPrice(BigDecimal.TEN)
-                .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).build());
+                .build());
         inventories.saveAndFlush(StoreInventory.builder().store(store).product(other).quantity(10).build());
         cartService.addToCart(customer.getUsername(), request(1, null));
         var request = request(2, null); request.setProductId(other.getId());
@@ -159,7 +159,7 @@ class CartLineMergingTests {
     @Test void buyNowSelectsOnlyRequestedProductWithoutIncludingOtherCartLines() throws Exception {
         var other = products.save(Product.builder().name("Other bouquet").category(product.getCategory()).store(store)
                 .priceBuy(new BigDecimal("200000")).importPrice(BigDecimal.TEN)
-                .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).build());
+                .build());
         inventories.saveAndFlush(StoreInventory.builder().store(store).product(other).quantity(10).build());
         var otherRequest = request(2, null); otherRequest.setProductId(other.getId());
         cartService.addToCart(customer.getUsername(), otherRequest);

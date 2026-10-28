@@ -111,8 +111,8 @@ class StoreManagementRevenueUseCaseTests {
                 .category(cat)
                 .importPrice(new BigDecimal("200000"))
                 .priceBuy(new BigDecimal("300000"))
-                .priceRentPerDay(new BigDecimal("50000"))
-                .depositFee(new BigDecimal("100000"))
+
+
                 .sold(25)
                 .isActive(true)
                 .createdAt(LocalDateTime.now())
@@ -124,8 +124,8 @@ class StoreManagementRevenueUseCaseTests {
                 .category(cat)
                 .importPrice(new BigDecimal("300000"))
                 .priceBuy(new BigDecimal("450000"))
-                .priceRentPerDay(new BigDecimal("70000"))
-                .depositFee(new BigDecimal("150000"))
+
+
                 .sold(15)
                 .isActive(true)
                 .createdAt(LocalDateTime.now())

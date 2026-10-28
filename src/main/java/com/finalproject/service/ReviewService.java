@@ -52,7 +52,7 @@ public class ReviewService {
             order = orderRepository.findById(orderId).orElse(null);
             if (order != null) {
                 // Kiểm tra đơn hàng đã giao thành công chưa
-                if (order.getStatus() != OrderStatus.DELIVERED && order.getStatus() != OrderStatus.COMPLETED && order.getStatus() != OrderStatus.RETURNED) {
+                if (order.getStatus() != OrderStatus.DELIVERED && order.getStatus() != OrderStatus.COMPLETED) {
                     throw new IllegalStateException("Bạn chỉ có thể đánh giá sản phẩm sau khi đơn hàng đã được giao thành công!");
                 }
             }

@@ -4,7 +4,6 @@ import com.finalproject.enums.OrderType;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "order_details")
@@ -26,37 +25,18 @@ public class OrderDetail {
     private Integer quantity;
 
     @Column(nullable = false)
-    private BigDecimal unitPrice; // Giá bán hoặc đơn giá thuê/ngày tại thời điểm chốt
+    private BigDecimal unitPrice; // Giá bán tại thời điểm đặt hàng
 
     @Enumerated(EnumType.STRING)
     @Column(length = 10)
     private OrderType orderType;
 
-    // Legacy database field: retained for historical records; never used by flower checkout.
-    private BigDecimal depositFee;
-    // Legacy database field: retained for historical records; never used by flower checkout.
-    private LocalDate rentStartDate;
-    // Legacy database field: retained for historical records; never used by flower checkout.
-    private LocalDate rentEndDate;
-    // Legacy database field: retained for historical records; never used by flower checkout.
-    private LocalDate actualReturnDate;
-
-    public long getRentalDays() {
-        if (orderType == OrderType.RENT && rentStartDate != null && rentEndDate != null) {
-            long days = java.time.temporal.ChronoUnit.DAYS.between(rentStartDate, rentEndDate);
-            return days <= 0 ? 1 : days;
-        }
-        return 0;
-    }
 
     public BigDecimal getSubtotal() {
         if (unitPrice == null || quantity == null) {
             return BigDecimal.ZERO;
         }
-        if (orderType == OrderType.RENT) {
-            long days = getRentalDays();
-            return unitPrice.multiply(BigDecimal.valueOf(quantity)).multiply(BigDecimal.valueOf(days > 0 ? days : 1));
-        }
+
         return unitPrice.multiply(BigDecimal.valueOf(quantity));
     }
 }

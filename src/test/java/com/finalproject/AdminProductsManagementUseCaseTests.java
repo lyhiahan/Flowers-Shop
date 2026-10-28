@@ -90,8 +90,8 @@ class AdminProductsManagementUseCaseTests {
                 .category(category)
                 .importPrice(new BigDecimal("150000"))
                 .priceBuy(new BigDecimal("250000"))
-                .priceRentPerDay(new BigDecimal("40000"))
-                .depositFee(new BigDecimal("80000"))
+
+
                 .sold(10)
                 .isActive(true)
                 .isSelling(true)
@@ -103,8 +103,8 @@ class AdminProductsManagementUseCaseTests {
                 .category(category)
                 .importPrice(new BigDecimal("300000"))
                 .priceBuy(new BigDecimal("500000"))
-                .priceRentPerDay(new BigDecimal("70000"))
-                .depositFee(new BigDecimal("150000"))
+
+
                 .sold(5)
                 .isActive(true)
                 .isSelling(true)
@@ -116,8 +116,8 @@ class AdminProductsManagementUseCaseTests {
                 .category(category)
                 .importPrice(new BigDecimal("100000"))
                 .priceBuy(new BigDecimal("180000"))
-                .priceRentPerDay(new BigDecimal("30000"))
-                .depositFee(new BigDecimal("60000"))
+
+
                 .sold(8)
                 .isActive(true)
                 .isSelling(true)
@@ -138,8 +138,8 @@ class AdminProductsManagementUseCaseTests {
                 .category(category)
                 .importPrice(new BigDecimal("400000"))
                 .priceBuy(new BigDecimal("700000"))
-                .priceRentPerDay(new BigDecimal("90000"))
-                .depositFee(new BigDecimal("200000"))
+
+
                 .sold(0)
                 .isActive(false)
                 .isSelling(false)
@@ -175,8 +175,6 @@ class AdminProductsManagementUseCaseTests {
                 .filter(p -> "Hoa bán mới không phụ phí UC28".equals(p.getName()))
                 .findFirst().orElseThrow();
         org.assertj.core.api.Assertions.assertThat(created.getPriceBuy()).isEqualByComparingTo("100000");
-        org.assertj.core.api.Assertions.assertThat(created.getPriceRentPerDay()).isZero();
-        org.assertj.core.api.Assertions.assertThat(created.getDepositFee()).isZero();
     }
 
     /**
@@ -369,7 +367,7 @@ class AdminProductsManagementUseCaseTests {
     void restockRejectsZeroAndWrongBranchForOwnedProduct() throws Exception {
         var owned = productRepository.save(Product.builder().name("Lan riêng chi nhánh")
                 .category(category).store(store1).importPrice(BigDecimal.TEN).priceBuy(new BigDecimal("100000"))
-                .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).sold(39).build());
+                .sold(39).build());
         var other = storeRepository.save(com.finalproject.entity.Store.builder()
                 .name("Chi nhánh không sở hữu").address("Đường số 3").status(true).isOpen(true).build());
         for (String amount : new String[]{"0", "-2", "1000001"}) {

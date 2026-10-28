@@ -7,7 +7,7 @@
 
 <main class="floral-main-content py-4">
     <div class="flower-container" style="max-width: 1240px; margin: 0 auto; padding: 0 20px;">
-        
+
         <section class="customer-orders-heading" aria-labelledby="customerOrdersTitle">
             <div class="row align-items-center g-3">
                 <div class="col-lg-7">
@@ -102,9 +102,6 @@
                         <span th:if="${o.status.name() == 'COMPLETED'}" class="order-status-badge order-status-completed">
                             <i class="bi bi-check-circle-fill"></i> Giao thành công
                         </span>
-                        <span th:if="${o.status.legacy}" class="order-status-badge order-status-pending">
-                            <i class="bi bi-archive"></i> <span th:text="${o.status.displayName}">Giao dịch lịch sử</span>
-                        </span>
                         <span th:if="${o.status.name() == 'REFUND_REQUESTED'}" class="order-status-badge order-status-refund-requested">
                             <i class="bi bi-arrow-counterclockwise"></i> Chờ hoàn tiền
                         </span>
@@ -157,14 +154,6 @@
                         <div class="order-total-breakdown">
                             <span th:if="${o.shippingFee != null and o.shippingFee.signum() > 0}" th:text="'Phí giao hàng: ' + ${#numbers.formatDecimal(o.shippingFee, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
                             <span th:if="${o.discountAmount != null and o.discountAmount.signum() > 0}" th:text="'Giảm giá: -' + ${#numbers.formatDecimal(o.discountAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
-                            <div th:if="${o.totalDeposit != null and o.totalDeposit > 0}">
-                                <span class="text-muted" style="font-size: 14px;">Khoản bảo đảm lịch sử:</span>
-                                <strong class="text-warning ms-1" style="font-size: 15px;" th:text="${#numbers.formatDecimal(o.totalDeposit, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
-                            </div>
-                            <div th:if="${o.fineAmount != null and o.fineAmount > 0}">
-                                <span class="text-muted" style="font-size: 14px;">Điều chỉnh lịch sử:</span>
-                                <strong class="text-danger ms-1" style="font-size: 15px;" th:text="${#numbers.formatDecimal(o.fineAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
-                            </div>
                         </div>
                         <div class="order-total-amount">
                             <span>Tổng thanh toán</span>
@@ -185,8 +174,8 @@
                                th:href="@{/checkout/bank/{id}(id=${o.id})}" class="btn btn-outline-success order-action-btn fw-bold">Hướng dẫn chuyển khoản</a>
                             <!-- Nút thanh toán MoMo nếu chưa thanh toán và đơn chưa hủy -->
                             <a th:if="${o.paymentMethod == 'MOMO' and o.paymentStatus != 'PAID' and o.status.name() != 'CANCELLED'}"
-                               th:href="@{'/checkout/momo/' + ${o.id}}" 
-                               class="btn order-action-btn text-white fw-bold shadow-sm" 
+                               th:href="@{'/checkout/momo/' + ${o.id}}"
+                               class="btn order-action-btn text-white fw-bold shadow-sm"
                                style="background-color: #D82D8B;"
                                title="Thanh toán ngay bằng MoMo">
                                 <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo" style="height: 14px; width: 14px; vertical-align: -2px;" class="me-1"> Thanh Toán MoMo
@@ -210,10 +199,10 @@
                                 <i class="bi bi-chat-dots me-1"></i> Liên hệ cửa hàng
                             </button>
                             <!-- Khách chỉ được hủy trước khi bắt đầu cắm hoa/chuẩn bị. -->
-                            <button th:if="${o.isCancellable()}" type="button" 
-                                    class="btn btn-outline-danger order-action-btn fw-bold" 
+                            <button th:if="${o.isCancellable()}" type="button"
+                                    class="btn btn-outline-danger order-action-btn fw-bold"
                                     title="Hủy đơn hàng"
-                                    data-bs-toggle="modal" 
+                                    data-bs-toggle="modal"
                                     th:data-bs-target="'#confirmCancelOrderModal_' + ${o.id}">
                                 <i class="bi bi-slash-circle me-1"></i> Hủy Đơn Hàng
                             </button>

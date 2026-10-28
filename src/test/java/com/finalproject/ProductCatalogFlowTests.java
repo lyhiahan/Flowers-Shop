@@ -41,7 +41,7 @@ class ProductCatalogFlowTests {
                 .fullName("Catalog manager").role(Role.MANAGER).isActive(true).store(store).build());
         product = products.save(Product.builder().name("Catalog test flower").category(main).store(store)
                 .priceBuy(new BigDecimal("120000")).importPrice(new BigDecimal("60000"))
-                .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).build());
+                .build());
     }
 
     @Autowired ReviewRepository reviews;
@@ -61,7 +61,7 @@ class ProductCatalogFlowTests {
         }
         var other = products.save(Product.builder().name("Other flower").category(main).store(product.getStore())
                 .priceBuy(new BigDecimal("120000")).importPrice(new BigDecimal("60000"))
-                .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).build());
+                .build());
         reviews.saveAndFlush(Review.builder().product(other).user(customer).rating(1)
                 .content("Unrelated customer review for another flower").build());
         em.clear();

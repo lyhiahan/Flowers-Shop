@@ -72,7 +72,7 @@ class ReportDateFilteringTests {
     private Product product(Store store, String name, LocalDateTime date) {
         return products.save(Product.builder().name(name).store(store)
                 .category(categories.save(Category.builder().name(name + " category").build())).priceBuy(BigDecimal.valueOf(50))
-                .importPrice(BigDecimal.TEN).depositFee(BigDecimal.ZERO).priceRentPerDay(BigDecimal.ZERO)
+                .importPrice(BigDecimal.TEN)
                 .isActive(true).isDeleted(false).createdAt(date).build());
     }
     private void order(Store store, Product product, LocalDateTime date, int amount, boolean paid) {

@@ -88,7 +88,7 @@ class CustomerWalletTests {
             Category category = categories.save(Category.builder().name(prefix).build());
             Product product = products.save(Product.builder().name("Wallet rose bouquet").category(category).store(branch)
                     .priceBuy(new BigDecimal("100000")).importPrice(BigDecimal.ONE)
-                    .depositFee(BigDecimal.ZERO).priceRentPerDay(BigDecimal.ZERO).build()); productId = product.getId();
+                    .build()); productId = product.getId();
             stock.save(StoreInventory.builder().store(branch).product(product).quantity(20).build());
             Cart cart = carts.save(Cart.builder().user(owner).items(new ArrayList<>()).build());
             cartItemId = cartItems.save(CartItem.builder().cart(cart).product(product).store(branch).orderType(OrderType.BUY).quantity(1).build()).getId();

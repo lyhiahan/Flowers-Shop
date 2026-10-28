@@ -531,3 +531,8 @@ Yêu cầu: “bạn có thể tạo khoảng từ 2-6 đánh giá ảo có hìn
 - Người dùng yêu cầu tiếp: “làm tên và bố cục tự nhiên hơn bỏ nhãn demo luôn”. Bỏ nhãn cạnh từng tên và chữ DEMO trên avatar, dùng tên nhân vật tự nhiên và bố cục thoáng hơn; giữ một thông báo chung về đánh giá mô phỏng ở đầu khu vực và chú thích ảnh minh họa. Không sửa đánh giá thật hay định danh tài khoản trong database.
 
 - Prompt bổ sung: “bị lỗi chữ và sửa đánh giá đa dạng, không phải toàn 5 sao và đánh giá khen”. Chẩn đoán lỗi UTF-8/Windows-1252 từ seed SQL legacy. Đã sao lưu, rehearsal rollback, sửa 106 mẫu trên local bằng NVARCHAR, luân phiên 1–5 sao với nội dung khen/trung tính/góp ý tương ứng; giữ 1 đánh giá khác và cập nhật lại điểm trung bình, không đổi dữ liệu giao dịch.
+
+
+### Prompt ngày 29/10/2026 — bỏ hoàn toàn nghiệp vụ thuê
+
+Người dùng trích đoạn báo cáo về lớp/thành phần thuê chỉ bị vô hiệu hóa và chọn “Xóa hẳn phần nghiệp vụ thuê trong code và cập nhật báo cáo”. Thực hiện xóa model/enum/luồng tính thuê, chuẩn bị migration bảo toàn giá trị cũ và cập nhật bốn bản báo cáo. Chi tiết tại XOA_NGHIEP_VU_THUE_20261029.md.

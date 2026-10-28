@@ -55,8 +55,8 @@ public class CatalogFilterTests {
                     .description("Mẫu hoa tươi sinh nhật tặng bạn bè " + i)
                     .importPrice(new BigDecimal("200000"))
                     .priceBuy(BigDecimal.valueOf(300000 + i * 20000))
-                    .priceRentPerDay(new BigDecimal("50000"))
-                    .depositFee(new BigDecimal("100000"))
+
+
                     .category(cat).store(store)
                     .isActive(true)
                     .isSelling(true)
@@ -218,7 +218,7 @@ public class CatalogFilterTests {
     private Product branchSearchProduct(String name, Category category, com.finalproject.entity.Store branch) {
         return productRepository.saveAndFlush(Product.builder().name(name).category(category).store(branch)
                 .priceBuy(new BigDecimal("300000")).importPrice(new BigDecimal("200000"))
-                .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO)
+
                 .isActive(true).isSelling(true).isDeleted(false).build());
     }
 

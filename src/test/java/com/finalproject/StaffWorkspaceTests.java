@@ -58,7 +58,7 @@ class StaffWorkspaceTests {
         other.setRecipientName("Khách ở chi nhánh khác"); orders.save(other);
         var category=categories.save(Category.builder().name("Hoa kiểm thử nhân viên").build());
         var flower=products.save(Product.builder().name("Bó hoa cho nhân viên chuẩn bị").category(category).store(own)
-                .priceBuy(new BigDecimal("999999")).importPrice(BigDecimal.ZERO).priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).isSelling(false).build());
+                .priceBuy(new BigDecimal("999999")).importPrice(BigDecimal.ZERO).isSelling(false).build());
         var line=details.save(OrderDetail.builder().order(order).product(flower).orderType(OrderType.BUY)
                 .quantity(2).unitPrice(new BigDecimal("100000")).build());
         order.setOrderDetails(new java.util.ArrayList<>(List.of(line))); orders.save(order);

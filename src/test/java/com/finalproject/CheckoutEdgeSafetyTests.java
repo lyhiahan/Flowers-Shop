@@ -45,7 +45,7 @@ class CheckoutEdgeSafetyTests {
         var category=categories.save(Category.builder().name("Hoa").build());
         product=products.save(Product.builder().name("Hoa hồng").store(store).category(category)
                 .importPrice(BigDecimal.TEN).priceBuy(new BigDecimal("100000"))
-                .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).build());
+                .build());
         stocks.save(StoreInventory.builder().store(store).product(product).quantity(10).build());
         cart=carts.save(Cart.builder().user(customer).items(new ArrayList<>()).build());
         first=items.saveAndFlush(CartItem.builder().cart(cart).product(product).store(store).quantity(2)
@@ -67,16 +67,9 @@ class CheckoutEdgeSafetyTests {
         return deliveries.save(Delivery.builder().name(name).price(BigDecimal.ZERO).isActive(true).isDeleted(false).build());
     }
 
-    @Test void legacyRentalCartCannotReachCheckoutOrCreateAnOrder() throws Exception {
-        first.setOrderType(OrderType.RENT);
-        items.saveAndFlush(first);
-        mvc.perform(get("/checkout").with(user(customer.getUsername()).roles("USER")))
-                .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/cart"));
-        assertThatThrownBy(() -> orderService.checkout(customer.getUsername(), java.util.List.of(first.getId()),
-                PaymentMethod.COD, "Recipient", "0900000000", "Test address", null, null,
-                LocalDate.now(), "PICKUP", store.getId(), null))
-                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("chỉ hỗ trợ mua hoa");
-        assertThat(first.getTotalAmount()).isEqualByComparingTo(BigDecimal.ZERO);
+    @Test void unsupportedOrderTypeIsNotPartOfTheSalesModel() {
+        assertThatThrownBy(() -> OrderType.valueOf("RENT")).isInstanceOf(IllegalArgumentException.class);
+        assertThat(OrderType.values()).containsExactly(OrderType.BUY);
     }
     ShippingTariff tariff(Delivery carrier, String area, boolean active) {
         return tariffs.save(ShippingTariff.builder().store(store).delivery(carrier).destinationArea(area)

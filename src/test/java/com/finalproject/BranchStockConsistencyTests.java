@@ -52,7 +52,7 @@ class BranchStockConsistencyTests {
         var category = categories.save(Category.builder().name("Branch stock flowers").build());
         product = products.save(Product.builder().name("Branch orchid").category(category).store(owner)
                 .priceBuy(new BigDecimal("2300000")).importPrice(new BigDecimal("1000000"))
-                .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).build());
+                .build());
         inventories.save(StoreInventory.builder().store(nearest).product(product).quantity(25).build());
         inventories.save(StoreInventory.builder().store(owner).product(product).quantity(15).build());
         var cart = carts.save(Cart.builder().user(customer).items(new ArrayList<>()).build());

@@ -141,7 +141,7 @@ class CatalogStockDisplayTests {
     Product product(String name, Store store) {
         return products.save(Product.builder().name(name).category(category).store(store).sold(100)
                 .importPrice(BigDecimal.ONE).priceBuy(new BigDecimal("150000"))
-                .priceRentPerDay(BigDecimal.ZERO).depositFee(BigDecimal.ZERO).build());
+                .build());
     }
     void stock(Product product, Store store, int quantity) {
         inventories.save(StoreInventory.builder().product(product).store(store).quantity(quantity).build());

@@ -305,8 +305,8 @@ public class ProductSeederService {
                         .description(t.description())
                         .priceBuy(t.priceBuy())
                         .importPrice(t.importPrice())
-                        .priceRentPerDay(BigDecimal.ZERO)
-                        .depositFee(BigDecimal.ZERO)
+
+
                         .imageUrl(t.imageUrl())
                         .sold(t.sold())
                         .rating(t.rating())

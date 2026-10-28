@@ -53,7 +53,7 @@ class SystemHttpSmokeTests {
         var category = categories.saveAndFlush(Category.builder().name("Smoke flowers").build());
         product = products.saveAndFlush(Product.builder().name("Smoke bouquet").store(store).category(category)
                 .importPrice(BigDecimal.valueOf(10000)).priceBuy(BigDecimal.valueOf(20000))
-                .depositFee(BigDecimal.ZERO).priceRentPerDay(BigDecimal.ZERO).isActive(true).isSelling(true).build());
+                .isActive(true).isSelling(true).build());
         inventory.saveAndFlush(StoreInventory.builder().store(store).product(product).quantity(8).build());
     }
 
