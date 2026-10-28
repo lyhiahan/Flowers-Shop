@@ -40,14 +40,31 @@ Quy ước service và cách giữ tương thích dữ liệu cũ: [kiến trúc
 
 ## Vai trò và nghiệp vụ
 
-| Vai trò | Phạm vi |
+| Vai trò | Quyền hạn và phạm vi hoạt động |
 |---|---|
-| `USER` | Mua hoa, giỏ hàng, đơn hàng, ví demo, đánh giá, hồ sơ, chat |
-| `ADMIN` | Quản trị toàn hệ thống, dữ liệu danh mục, tài khoản, cửa hàng, đơn hàng và hỗ trợ |
-| `MANAGER` | Quản lý chi nhánh được phân công, sản phẩm, nhân sự, đơn hàng, thống kê, ví |
-| `STAFF` | Tiếp nhận/chuẩn bị/giao đơn và chat khách trong chi nhánh; không quản trị tài chính |
+| `USER` | Mua hoa, giỏ hàng, đơn hàng, ví demo, đánh giá, hồ sơ, chat với cửa hàng/admin |
+| `ADMIN` | Quản trị toàn hệ thống, danh mục hoa, tài khoản, cấp phép chi nhánh, quản lý đơn hàng toàn chuỗi và hỗ trợ |
+| `MANAGER` | Quản lý chi nhánh được phân công: kho hoa, nhân sự, đơn hàng, thống kê doanh thu, ví cửa hàng |
+| `STAFF` | Tiếp nhận, cắm hoa/chuẩn bị đơn, giao đơn và chat với khách hàng tại chi nhánh; không quản trị tài chính |
+
+### Danh sách tài khoản thử nghiệm
+
+> **Mật khẩu chung cho tất cả tài khoản:** `123456`
+
+| Vai trò | Tên đăng nhập | Mật khẩu | Trang đích sau khi đăng nhập |
+|:---|:---|:---:|:---|
+| **Khách vãng lai** | *(Truy cập trực tiếp)* | — | [http://localhost:8080/](http://localhost:8080/) |
+| **Khách hàng (`USER`)** | `khachhang` | `123456` | [http://localhost:8080/](http://localhost:8080/) |
+| **Quản lý chi nhánh (`MANAGER`)** | `manager_q1` | `123456` | [http://localhost:8080/manager/dashboard](http://localhost:8080/manager/dashboard) |
+| **Quản trị viên (`ADMIN`)** | `admin` | `123456` | [http://localhost:8080/admin/dashboard](http://localhost:8080/admin/dashboard) |
 
 Khách chưa đăng nhập là anonymous, không có tài khoản/role GUEST trong database. `StoreAccessService` kiểm tra quyền chi nhánh bên cạnh quyền URL. Admin không dùng chức năng mua hàng. Các đường dẫn `/vendor/**` là alias tương thích của khu vực manager; cổng shipper cũ bị chặn.
+
+### Tính năng lọc theo chi nhánh & bộ lọc đa thuộc tính
+
+- **Lọc theo chi nhánh:** Trang chủ và danh mục hỗ trợ lọc sản phẩm theo từng chi nhánh đang mở cửa (`catalogStores`) hoặc xem toàn chuỗi. Bộ lọc xuất hiện ở thanh điều hướng nhanh và bảng mở rộng *"Tất cả bộ lọc"*.
+- **Đồng bộ trạng thái:** Thay đổi chi nhánh, danh mục hoặc sắp xếp giá giữ nguyên từ khóa tìm kiếm và các bộ lọc thuộc tính đã chọn (Kiểu dáng, Loại hoa, Màu sắc, Dịp tặng, Khoảng giá), đồng thời đưa phân trang về trang 1.
+- **Tồn kho thực tế:** Hiển thị số lượng còn lại theo từng chi nhánh; khi hết hàng nút mua tự động khóa và cập nhật nhãn trạng thái thời gian thực.
 
 Đơn mua hoa hỗ trợ nhận tại cửa hàng hoặc giao hàng. Giá, phí và hoa hồng được lưu theo đơn. Phí giao hàng dựa trên vùng gần/xa/ngoài phạm vi do người mua chọn và biểu phí chi nhánh, không đo khoảng cách bản đồ. Khách tự hủy khi đơn còn PENDING/CONFIRMED; cửa hàng xử lý theo `OrderWorkflowService`.
 
