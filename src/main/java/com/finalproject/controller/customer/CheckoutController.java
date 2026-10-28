@@ -239,6 +239,10 @@ public class CheckoutController {
                     recipientAddress, voucherCode, shippingMethod, pickupStoreId, null, deliveryZone));
         } catch (IllegalArgumentException | IllegalStateException ex) {
             return org.springframework.http.ResponseEntity.badRequest().body(java.util.Map.of("message", ex.getMessage()));
+        } catch (Exception ex) {
+            org.slf4j.LoggerFactory.getLogger(CheckoutController.class).error("Lỗi khi tính tổng thanh toán checkout quote", ex);
+            return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(java.util.Map.of("message", "Không thể tính tổng tiền lúc này. Vui lòng thử lại sau."));
         }
     }
 

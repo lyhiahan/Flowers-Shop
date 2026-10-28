@@ -55,10 +55,6 @@ public class ProductForm {
         return value == null ? null : value.stripTrailingZeros().scale() <= 0 ? value.setScale(0) : value;
     }
 
-    private BigDecimal priceRentPerDay = BigDecimal.ZERO;
-
-    private BigDecimal depositFee = BigDecimal.ZERO;
-
     @jakarta.validation.constraints.Min(0)
     @jakarta.validation.constraints.Max(1000000)
     private int initialStock = 0;

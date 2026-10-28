@@ -76,9 +76,15 @@ public class GlobalExceptionHandler {
 
     // 4. Bắt các lỗi Runtime chung
     @ExceptionHandler(Exception.class)
-    @org.springframework.web.bind.annotation.ResponseStatus(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
-    public String handleGeneralException(Exception ex, Model model) {
+    public Object handleGeneralException(Exception ex, Model model, jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response) {
         org.slf4j.LoggerFactory.getLogger(GlobalExceptionHandler.class).error("Unexpected application error", ex);
+        response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        if ("XMLHttpRequest".equalsIgnoreCase(request.getHeader("X-Requested-With"))
+                || (request.getHeader("Accept") != null && request.getHeader("Accept").contains("application/json"))) {
+            return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+                    .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                    .body(java.util.Map.of("success", false, "message", "Đã xảy ra lỗi xử lý. Vui lòng thử lại hoặc liên hệ cửa hàng."));
+        }
         model.addAttribute("errorMessage", "Đã xảy ra lỗi xử lý. Vui lòng thử lại hoặc liên hệ cửa hàng.");
         return "common/error";
     }

@@ -435,12 +435,13 @@ class StoreUseCaseAuditTests {
         // A branch-owned SKU must first be added through its selling branch.
         // The foreign inventory remains to verify banning the owner cannot be bypassed.
         request.setStoreId(store.getId());
-        cartService.addToCart(owner.getUsername(), request);
+        User buyer = account("eligibility_customer", Role.USER);
+        cartService.addToCart(buyer.getUsername(), request);
         store.setStatus(false); stores.saveAndFlush(store);
         mvc.perform(get("/products/" + p.getId())).andExpect(status().isNotFound());
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> cartService.addToCart(owner.getUsername(), request))
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> cartService.addToCart(buyer.getUsername(), request))
                 .isInstanceOf(IllegalStateException.class);
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> orderService.quote(owner.getUsername(), null, null, null, "PICKUP", foreignStore.getId(), null))
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> orderService.quote(buyer.getUsername(), null, null, null, "PICKUP", foreignStore.getId(), null))
                 .isInstanceOf(IllegalStateException.class);
     }
 }

@@ -57,7 +57,7 @@ public class CloudinaryService {
                 Map<?, ?> uploadResult = cloudinary.uploader().upload(
                         file.getBytes(),
                         ObjectUtils.asMap(
-                                "folder", folder != null ? folder : "rental_shop_general",
+                                "folder", folder != null ? folder : "flower_shop_general",
                                 "resource_type", "image",
                                 "allowed_formats", new String[]{"jpg", "jpeg", "png", "webp", "gif"},
                                 "transformation", new com.cloudinary.Transformation<>().quality("auto")

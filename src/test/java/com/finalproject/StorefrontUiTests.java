@@ -5,6 +5,8 @@ import com.finalproject.enums.Role;
 import com.finalproject.repository.*;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -47,6 +49,55 @@ class StorefrontUiTests {
                 .priceBuy(new BigDecimal("150000")).importPrice(BigDecimal.ONE).priceRentPerDay(BigDecimal.ZERO)
                 .depositFee(BigDecimal.ZERO).imageUrl("/images/flower-logo.png").build());
         inventories.saveAndFlush(StoreInventory.builder().store(store).product(product).quantity(10).build());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Role.class, names = {"USER", "MANAGER", "STAFF", "ADMIN"})
+    void productDetailShoppingControlsMatchTheAuthenticatedRole(Role role) throws Exception {
+        customer.setRole(role);
+        users.saveAndFlush(customer);
+        for (String route : List.of("/product/" + product.getId(), "/products/" + product.getId())) {
+            String html = mvc.perform(get(route).with(user(customer.getUsername()).roles(role.name())))
+                    .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+            if (role == Role.USER) {
+                assertThat(html).as("%s %s", role, route).contains("id=\"headerCartLink\"",
+                        "id=\"detailAddToCartForm\"", "id=\"detailBuyNowForm\"");
+            } else {
+                assertThat(html).as("%s %s", role, route).doesNotContain("href=\"/cart\"",
+                        "id=\"headerCartLink\"", "id=\"headerCartBadge\"", "id=\"detailAddToCartForm\"",
+                        "id=\"detailBuyNowForm\"", "id=\"detailAddToCartBtn\"", "id=\"detailBuyNowBtn\"",
+                        "href=\"/login");
+            }
+            if (role == Role.STAFF) {
+                assertThat(html).contains("id=\"staffProductPreview\"", "href=\"/staff/orders\"")
+                        .doesNotContain("href=\"/customer/profile\"", "href=\"/customer/orders\"");
+            }
+            if (role == Role.MANAGER) {
+                assertThat(html).contains("id=\"managerProductPreview\"", "href=\"/manager/products\"")
+                        .doesNotContain("href=\"/customer/profile\"", "href=\"/customer/orders\"");
+            }
+        }
+    }
+
+    @Test void staffStillCannotAccessShoppingEndpointsDirectly() throws Exception {
+        customer.setRole(Role.STAFF);
+        users.saveAndFlush(customer);
+        for (String route : List.of("/cart", "/checkout")) {
+            mvc.perform(get(route).with(user(customer.getUsername()).roles("STAFF")))
+                    .andExpect(status().isForbidden());
+        }
+        for (String route : List.of("/cart/add", "/cart/buy-now", "/checkout/quote")) {
+            mvc.perform(post(route).with(user(customer.getUsername()).roles("STAFF")).with(csrf())
+                            .param("productId", product.getId().toString()).param("quantity", "1"))
+                    .andExpect(status().isForbidden());
+        }
+    }
+
+    @Test void anonymousProductDetailOffersLoginWithoutACartLink() throws Exception {
+        String html = mvc.perform(get("/product/" + product.getId())).andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        assertThat(html).contains("Đăng nhập để đặt hoa", "href=\"/login?continue=/product/" + product.getId() + "\"")
+                .doesNotContain("id=\"headerCartLink\"", "id=\"detailAddToCartForm\"", "id=\"staffProductPreview\"");
     }
 
     @Test void storefrontPagesRenderOneIdenticalFooterIncludingTailwindPages() throws Exception {

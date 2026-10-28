@@ -40,11 +40,11 @@ public class UserService {
         if (phone != null) user.setPhone(phone.trim());
         if (address != null) user.setAddress(address.trim());
         if (avatar != null && !avatar.isEmpty()) {
-            var uploaded = uploadProfileImage(avatar, "rental_shop_avatars", user.getAvatarPublicId());
+            var uploaded = uploadProfileImage(avatar, "flower_shop_avatars", user.getAvatarPublicId());
             user.setAvatarUrl(uploaded.secureUrl()); user.setAvatarPublicId(uploaded.publicId());
         }
         if (cover != null && !cover.isEmpty()) {
-            var uploaded = uploadProfileImage(cover, "rental_shop_covers", user.getCoverPublicId());
+            var uploaded = uploadProfileImage(cover, "flower_shop_covers", user.getCoverPublicId());
             user.setCover(uploaded.secureUrl()); user.setCoverPublicId(uploaded.publicId());
         }
         return userRepository.save(user);

@@ -56,3 +56,20 @@ Người dùng chuyển về local để tải nhanh. Website hiện chạy SQL 
 Tên mẫu trên thẻ đánh giá hiển thị bằng tên nhân vật hư cấu tự nhiên (Mai Anh, Hoàng Nam, Thu Hà, Khánh Linh, Quỳnh Trang, Bảo Ngọc). Tài khoản gốc và nội dung đánh dấu trong database vẫn giữ để nhận diện/gỡ dữ liệu. Phần hiển thị bỏ tiền tố và câu giải thích lặp; thông báo chung về nội dung mô phỏng và chú thích ảnh minh họa vẫn hiện rõ.
 
 Cập nhật giao diện theo yêu cầu: bỏ nhãn cạnh tên và chữ DEMO trên avatar, dùng tên hiển thị tự nhiên; thẻ đánh giá ngăn bằng đường mảnh, căn nội dung và ảnh cùng cột. Thông báo minh họa chỉ xuất hiện một lần ở đầu khu vực có đánh giá mô phỏng.
+
+
+## Sửa Unicode và đa dạng đánh giá local — 28/10/2026
+
+Một script legacy từng được đọc sai UTF-8 thành Windows-1252, làm dấu tiếng Việt biến thành `Ã`, `Ä`, `áº...`. Công cụ `repair-local-review-samples.ps1` chỉ chọn nhận xét không gắn đơn và khớp chính xác nội dung fixture cũ (hoặc marker mẫu đã sửa), truyền tham số NVARCHAR và đọc nguồn bằng UTF-8. File PowerShell có BOM để tương thích Windows PowerShell 5.1. Script SQL legacy đã được chặn chạy trực tiếp để tránh tái tạo lỗi và gán đánh giá mẫu cho tài khoản khách.
+
+```powershell
+.\scripts\repair-local-review-samples.ps1 -Mode Plan
+.\scripts\repair-local-review-samples.ps1 -Mode Rehearse
+.\scripts\repair-local-review-samples.ps1 -Mode Apply
+```
+
+Đã rehearsal rollback rồi sửa 106 đánh giá mẫu, giữ nguyên 1 đánh giá còn lại. Các mức sao của nhóm mẫu: 1 sao: 6; 2 sao: 17; 3 sao: 30; 4 sao: 35; 5 sao: 18. Nội dung gồm hạn chế về bố cục, mức giá, thông tin kích thước, ưu điểm và đề xuất cải thiện, tương ứng số sao. Các đánh giá cùng sản phẩm luân phiên mức sao để tránh một loạt nhận xét giống nhau. Giữ ảnh, ngày tạo, định danh và số bản ghi; cập nhật điểm trung bình sản phẩm/cửa hàng. Không đổi đơn, tồn kho, số bán hoặc ví.
+
+Bản sao trước sửa: `.tools/demo-review-backups/local-review-repair-20261028-153008.json`. Chỉ sửa local, không ghi vào Aiven. Mẫu legacy không có đơn được nhận diện bằng marker để áp dụng thông báo minh họa chung; đánh giá thật gắn đơn không bị đổi tên/nội dung/số sao.
+
+Xác minh sau sửa: 5 ca Java đạt; đọc trang #22, #1, #32 đều HTTP 200 và tiếng Việt đúng. Sao hiển thị lần lượt [2,4], [2,5,4,3], [1,3,2,4]. Kiểm tra SQL bằng collation nhị phân không còn chuỗi mojibake ở 106 mẫu; điểm trung bình khớp. Tổng 107 đánh giá local sau sửa: 1 sao 6, 2 sao 17, 3 sao 30, 4 sao 35, 5 sao 19 (bao gồm 1 đánh giá không sửa).

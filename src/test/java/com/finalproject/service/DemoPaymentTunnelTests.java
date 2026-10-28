@@ -26,7 +26,7 @@ class DemoPaymentTunnelTests {
         return environment;
     }
 
-    @ParameterizedTest @ValueSource(strings = {"dev", "aiven"})
+    @ParameterizedTest @ValueSource(strings = {"dev", "aiven", "local-postgres"})
     void testAndProductionNeverLaunchEvenWhenBothFlagsAreEnabled(String baseProfile) {
         for (String profile : new String[]{"test", "prod"}) {
             var service = new DemoPaymentTunnel(environment(baseProfile, profile)) {
@@ -39,7 +39,7 @@ class DemoPaymentTunnelTests {
         }
     }
 
-    @ParameterizedTest @ValueSource(strings = {"dev", "aiven"})
+    @ParameterizedTest @ValueSource(strings = {"dev", "aiven", "local-postgres"})
     void explicitOptOutAndDisabledDemoDoNotLaunch(String profile) {
         var environment = environment(profile);
         environment.setProperty("app.demo-payment.auto-tunnel.enabled", "false");
@@ -51,6 +51,10 @@ class DemoPaymentTunnelTests {
 
     @Test void unrelatedProfilesNeverLaunchAnAutomaticPublicTunnel() {
         assertThat(new DemoPaymentTunnel(environment("staging")).automatic()).isFalse();
+    }
+
+    @Test void persistentLocalPostgresSupportsThePhonePaymentGateway() {
+        assertThat(new DemoPaymentTunnel(environment("local-postgres")).automatic()).isTrue();
     }
 
     @Test void onlyValidatedSupervisorOriginsCanBeAdvertisedAndAnErrorRevokesThem() {

@@ -158,6 +158,27 @@ class AdminProductsManagementUseCaseTests {
                 .store(store1).product(unlicensedProduct1).quantity(0).build());
     }
 
+    @Test
+    @WithMockUser(username = "admin_uc28", roles = {"ADMIN"})
+    void obsoletePricingParametersCannotCreateNonSalesCharges() throws Exception {
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                        .post("/admin/products-manage/create")
+                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("name", "Hoa bán mới không phụ phí UC28")
+                        .param("categoryId", category.getId().toString())
+                        .param("importPrice", "50000")
+                        .param("priceBuy", "100000")
+                        .param("priceRentPerDay", "999999")
+                        .param("depositFee", "888888"))
+                .andExpect(status().is3xxRedirection());
+        Product created = productRepository.findAll().stream()
+                .filter(p -> "Hoa bán mới không phụ phí UC28".equals(p.getName()))
+                .findFirst().orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(created.getPriceBuy()).isEqualByComparingTo("100000");
+        org.assertj.core.api.Assertions.assertThat(created.getPriceRentPerDay()).isZero();
+        org.assertj.core.api.Assertions.assertThat(created.getDepositFee()).isZero();
+    }
+
     /**
      * Pre-condition: Chỉ người dùng có vai trò ADMIN mới được truy cập vào trang Quản lý sản phẩm.
      * Người dùng vai trò USER sẽ bị từ chối truy cập (403 Forbidden).

@@ -85,7 +85,7 @@ public class SecurityConfig {
                 .requestMatchers("/customer/**", "/cart", "/cart/**", "/checkout", "/checkout/**", "/following", "/api/customer/**").hasRole("USER")
                 // Các tài nguyên công khai
                 .requestMatchers(
-                    "/", "/products/**", "/product/**", "/stores/**", "/users/**",
+                    "/", "/products/**", "/product/**", "/search", "/search/**", "/stores/**", "/users/**",
                     "/login", "/register", "/verify-otp", "/resend-otp", "/forgot-password", "/reset-password",
                         "/api/inventory/check", "/api/public/**",
                     "/css/**", "/js/**", "/images/**", "/upload/**", "/error", "/favicon.ico", "/webjars/**"

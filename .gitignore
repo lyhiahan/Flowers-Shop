@@ -44,6 +44,8 @@ build/
 .env
 .env.*
 !.env.example
+!.env.aiven.example
+!.env.local-postgres.example
 application-local.properties
 *.zip
 *.rar
@@ -59,4 +61,4 @@ application-local.properties
 
 # Local repo notes and preview launcher (preview artifacts are under target/)
 /docs/REPO_MAP.md
-/start-web.ps1
+ca.pem

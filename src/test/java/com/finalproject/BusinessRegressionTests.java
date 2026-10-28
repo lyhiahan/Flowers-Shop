@@ -1275,6 +1275,9 @@ class BusinessRegressionTests {
         Order order = checkout(PaymentMethod.MOMO_DEMO);
         demo.confirm(demo.create(List.of(order.getId()), customer.getUsername()));
         mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(outsider.getUsername()).roles("USER")).with(csrf()).param("reasonCode", "NO_LONGER_NEEDED"))
+                .andExpect(status().isForbidden());
+        User otherCustomer = createUser("other_refund_customer", Role.USER, null);
+        mvc.perform(post("/customer/orders/cancel/" + order.getId()).with(user(otherCustomer.getUsername()).roles("USER")).with(csrf()).param("reasonCode", "NO_LONGER_NEEDED"))
                 .andExpect(flash().attributeExists("errorMessage"));
         assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
         login(manager);
@@ -1727,7 +1730,7 @@ class BusinessRegressionTests {
                 .imageUrl("/images/demo-rose-bouquet.jpg").build();
         em.persist(review); em.flush();
         assertThat(review.isDemo()).isTrue();
-        assertThat(Review.builder().user(customer).content(review.getContent()).build().isDemo()).isFalse();
+        assertThat(Review.builder().user(customer).order(Order.builder().id(99L).build()).content(review.getContent()).build().isDemo()).isFalse();
         assertThat(Review.builder().user(sample).content("Đánh giá thông thường").build().isDemo()).isFalse();
         mvc.perform(get("/product/" + product.getId()).with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk())

@@ -16,6 +16,7 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class AdminVoucherController {
     private final VoucherRepository voucherRepository;
+    private final com.finalproject.service.VoucherService voucherService;
 
     // --- 4. Quản lý Khuyến mãi toàn sàn (Vouchers) ---
     @GetMapping("/vouchers")
@@ -200,18 +201,23 @@ public class AdminVoucherController {
                 return "redirect:/admin/vouchers";
             }
 
-            v.setName(cleanName);
-            v.setDiscountType(discountType);
-            v.setDiscountValue(discountValue);
-            v.setMinOrderValue(minOrderValue);
-            v.setMaxDiscountAmount(maxDiscountAmount != null && maxDiscountAmount.compareTo(BigDecimal.ZERO) > 0 ? maxDiscountAmount : null);
-            v.setQuantity(quantity);
-            v.setStartDate(start);
-            v.setEndDate(end);
-            v.setIsActive(isActive);
+            final BigDecimal finalDiscountValue = discountValue;
+            Voucher updated = voucherService.updateVoucherDetails(id, existing -> {
+                if (quantity < existing.getUsedCount()) {
+                    throw new IllegalArgumentException("Số lượng phát hành (" + quantity + ") không được nhỏ hơn số lượt mã đã sử dụng (" + existing.getUsedCount() + " lượt)!");
+                }
+                existing.setName(cleanName);
+                existing.setDiscountType(discountType);
+                existing.setDiscountValue(finalDiscountValue);
+                existing.setMinOrderValue(minOrderValue);
+                existing.setMaxDiscountAmount(maxDiscountAmount != null && maxDiscountAmount.compareTo(BigDecimal.ZERO) > 0 ? maxDiscountAmount : null);
+                existing.setQuantity(quantity);
+                existing.setStartDate(start);
+                existing.setEndDate(end);
+                existing.setIsActive(isActive);
+            });
 
-            voucherRepository.save(v);
-            ra.addFlashAttribute("successMessage", "Đã cập nhật mã khuyến mãi [" + v.getCode() + "] thành công!");
+            ra.addFlashAttribute("successMessage", "Đã cập nhật mã khuyến mãi [" + updated.getCode() + "] thành công!");
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", "Lỗi cập nhật mã khuyến mãi: " + ex.getMessage());
         }
@@ -225,9 +231,7 @@ public class AdminVoucherController {
             ra.addFlashAttribute("errorMessage", "Không tìm thấy mã khuyến mãi!");
             return "redirect:/admin/vouchers";
         }
-        boolean newStatus = !Boolean.TRUE.equals(v.getIsActive());
-        v.setIsActive(newStatus);
-        voucherRepository.save(v);
+        boolean newStatus = voucherService.toggleVoucherActive(id);
         ra.addFlashAttribute("successMessage", "Đã " + (newStatus ? "bật kích hoạt" : "tắt") + " mã khuyến mãi [" + v.getCode() + "] thành công!");
         return "redirect:/admin/vouchers";
     }

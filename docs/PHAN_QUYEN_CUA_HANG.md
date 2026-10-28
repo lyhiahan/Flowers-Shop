@@ -5,6 +5,7 @@ Quy định được xác nhận ngày 24/10/2026. Cửa hàng là chi nhánh ho
 | Công việc | Admin / Chủ chuỗi | Manager / Quản lý chi nhánh | Staff / Nhân viên | Khách hàng |
 |---|---|---|---|---|
 | Phạm vi làm việc | Toàn chuỗi | Một chi nhánh được phân công | Một chi nhánh được phân công | Đơn của chính mình |
+| Mua hoa, giỏ hàng, checkout và ví khách hàng | Không | Không | Không | Có |
 | Xem, xác nhận, chuẩn bị và giao đơn | Có | Có | Có, trong chi nhánh | Theo dõi đơn của mình |
 | Giao hoa và ghi nhận tiền COD tại quầy | Có | Có | Có, qua thao tác hoàn tất đơn | Không |
 | Hủy đơn từ cửa hàng, xác nhận chuyển khoản, hoàn tiền | Có | Có | Không | Chỉ yêu cầu/hủy đơn của mình theo điều kiện |
@@ -16,6 +17,10 @@ Quy định được xác nhận ngày 24/10/2026. Cửa hàng là chi nhánh ho
 | Cấu hình cửa hàng, khuyến mãi | Có | Có | Không | Không |
 
 ## Thêm nhân viên
+
+Cập nhật 28/10/2026: MANAGER không còn được cấp quyền USER. Quản lý dùng `/manager/profile`, `/manager/orders` và `/manager/wallet` cho công việc chi nhánh; các trang `/customer/**`, giỏ hàng và checkout chỉ dành cho khách hàng. Session cũ được làm mới quyền ở request tiếp theo, JWT đọc lại quyền từ database. Dữ liệu cũ gán đồng thời MANAGER và USER không cấp quyền mua hàng; không cần xóa đơn, giỏ hoặc sổ ví lịch sử để áp dụng quy định mới.
+
+Xác minh 28/10: Java 875 ca (863 đạt, 12 skipped, 0 lỗi), JS 185/185 đạt. Trên web PostgreSQL local, MANAGER vào dashboard/sản phẩm/đơn/ví cửa hàng/hồ sơ/thông báo trả 200; cart/checkout/đơn cá nhân/ví khách/hồ sơ khách trả 403; JWT chỉ nhận MANAGER. Hai alias xem sản phẩm của guest/USER/STAFF/MANAGER/ADMIN đều render đúng quyền. Log local: `target/manager-shopping-java-final.log`, `target/manager-shopping-js.log`, `target/manager-permission-live-check.json`, `target/staff-product-live-check.json`.
 
 1. Quản lý mở **Nhân viên → Thêm nhân viên**.
 2. Chọn tài khoản **Nhân viên cửa hàng** chưa có chi nhánh, hoặc tạo tài khoản mới bằng tên đăng nhập, email và mật khẩu.

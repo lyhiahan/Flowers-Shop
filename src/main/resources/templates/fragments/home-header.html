@@ -132,7 +132,7 @@
                                 </li>
 
                                 <!-- Hồ sơ cá nhân -->
-                                <li sec:authorize="!hasRole('STAFF')">
+                                <li sec:authorize="hasRole('USER')">
                                     <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/customer/profile}">
                                         <i class="bi bi-person text-secondary"></i>
                                         <span>Hồ sơ cá nhân</span>
@@ -140,6 +140,11 @@
                                 </li>
 
                                 <!-- Phím tắt nhanh dành cho Quản lý chi nhánh -->
+                                <li sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')">
+                                    <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/manager/profile}">
+                                        <i class="bi bi-person text-secondary"></i><span>Hồ sơ quản lý</span>
+                                    </a>
+                                </li>
                                 <li sec:authorize="hasRole('MANAGER') and !hasRole('ADMIN')">
                                     <a class="dropdown-item py-2 small d-flex align-items-center gap-2" th:href="@{/manager/orders}">
                                         <i class="bi bi-receipt text-success"></i>

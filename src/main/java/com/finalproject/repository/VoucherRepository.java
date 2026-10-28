@@ -11,8 +11,15 @@ import java.util.Optional;
 
 @Repository
 public interface VoucherRepository extends JpaRepository<Voucher, Long> {
-    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     Optional<Voucher> findByCodeAndIsActiveTrue(String code);
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT v FROM Voucher v WHERE v.code = :code AND v.isActive = true")
+    Optional<Voucher> findByCodeAndIsActiveTrueForUpdate(@org.springframework.data.repository.query.Param("code") String code);
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT v FROM Voucher v WHERE v.id = :id")
+    Optional<Voucher> findByIdForUpdate(@org.springframework.data.repository.query.Param("id") Long id);
 
     Optional<Voucher> findByCode(String code);
 

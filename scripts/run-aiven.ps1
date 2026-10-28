@@ -4,7 +4,7 @@ param(
     [ValidateRange(1, 65535)][int]$DatabasePort = 16325,
     [ValidatePattern('^[A-Za-z_][A-Za-z0-9_]*$')][string]$DatabaseName = 'defaultdb',
     [string]$DatabaseUser = 'avnadmin',
-    [string]$CaCertificate = (Join-Path (Split-Path -Parent $PSScriptRoot) '../ca.pem'),
+    [string]$CaCertificate = (Join-Path (Split-Path -Parent $PSScriptRoot) 'ca.pem'),
     [ValidateRange(1024, 65535)][int]$Port = 8080,
     [string]$JavaHome = $env:JAVA_HOME,
     [switch]$SaveLocalConfiguration,

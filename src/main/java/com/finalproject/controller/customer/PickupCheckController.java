@@ -49,6 +49,7 @@ public class PickupCheckController {
         Map<Long, Integer> stock = new HashMap<>();
         for (Long productId : neededByProduct.keySet()) {
             stock.put(productId, storeInventoryRepository.findByStoreIdAndProductId(storeId, productId)
+                    .filter(StoreInventory::isAvailableForSale)
                     .map(StoreInventory::getQuantity).map(q -> Math.max(0, q)).orElse(0));
         }
         boolean allOk = true;

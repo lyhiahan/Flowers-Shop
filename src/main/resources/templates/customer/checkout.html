@@ -1069,10 +1069,10 @@
                 if (stockStatusEl) {
                     if (data.ok) {
                         stockStatusEl.innerHTML =
-                            '<span class="pickup-status-ok"><i class="bi bi-check-circle-fill me-1"></i>' + data.message + '</span>';
+                            '<span class="pickup-status-ok"><i class="bi bi-check-circle-fill me-1"></i>' + escHtml(data.message) + '</span>';
                     } else {
                         stockStatusEl.innerHTML =
-                            '<span class="pickup-status-err"><i class="bi bi-exclamation-circle-fill me-1"></i>' + data.message + '</span>';
+                            '<span class="pickup-status-err"><i class="bi bi-exclamation-circle-fill me-1"></i>' + escHtml(data.message) + '</span>';
                     }
                 }
 

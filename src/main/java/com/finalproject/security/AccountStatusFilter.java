@@ -50,7 +50,7 @@ public class AccountStatusFilter extends OncePerRequestFilter {
             if (user.hasRole(com.finalproject.enums.Role.ADMIN)) {
                 roles.add(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_ADMIN"));
             } else {
-                if (!user.hasRole(com.finalproject.enums.Role.STAFF) || user.hasRole(com.finalproject.enums.Role.MANAGER))
+                if (user.isCustomerAccount())
                     roles.add(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"));
                 if (user.hasRole(com.finalproject.enums.Role.MANAGER))
                     roles.add(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_MANAGER"));

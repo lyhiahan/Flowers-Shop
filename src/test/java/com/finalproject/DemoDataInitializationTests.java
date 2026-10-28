@@ -23,6 +23,10 @@ class DemoDataInitializationTests {
     @Test void demoBuildsChainAndRepeatedStartupPreservesEditedFixtures() throws Exception {
         assertThat(stores.count()).isGreaterThanOrEqualTo(3);
         assertThat(products.count()).isGreaterThan(5);
+        assertThat(products.findAll()).allSatisfy(product -> {
+            assertThat(product.getPriceRentPerDay()).isZero();
+            assertThat(product.getDepositFee()).isZero();
+        });
         assertThat(users.findByUsername("nguyenthanhminh")).hasValueSatisfying(user ->
                 assertThat(user.getRole()).isEqualTo(com.finalproject.enums.Role.ADMIN));
         var product = products.findAll().getFirst();

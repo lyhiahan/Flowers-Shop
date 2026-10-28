@@ -1,3 +1,6 @@
+﻿-- Legacy signatures are retained for safe repair; do not run this old fixture writer.
+;THROW 51000, 'Legacy script disabled. Use repair-local-review-samples.ps1 or seed-demo-reviews.ps1.', 1;
+
 -- =====================================================================
 -- KỊCH BẢN TẠO DỮ LIỆU ĐÁNH GIÁ MẪU CHÂN THỰC CHO ĐỒ ÁN (SQL SERVER)
 -- Điểm sao phân bổ tự nhiên: 3, 4, 5 sao => Trung bình từ 4.2 đến 4.9 sao

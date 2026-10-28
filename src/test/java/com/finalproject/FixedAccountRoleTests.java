@@ -108,6 +108,10 @@ class FixedAccountRoleTests {
         assertThat(addresses.findById(address.getId()).orElseThrow().getRecipientName()).isEqualTo("Tên mới");
         mvc.perform(post(route).with(user(manager.getUsername()).roles("USER", "MANAGER")).with(csrf())
                 .param("recipientName", "Forbidden").param("phone", "0912345678").param("addressDetail", "Other address"))
+                .andExpect(status().isForbidden());
+        User otherCustomer = account("foreign_address_customer", Role.USER);
+        mvc.perform(post(route).with(user(otherCustomer.getUsername()).roles("USER")).with(csrf())
+                .param("recipientName", "Forbidden").param("phone", "0912345678").param("addressDetail", "Other address"))
                 .andExpect(flash().attributeExists("errorMessage"));
         mvc.perform(post(route).with(user(customer.getUsername()).roles("USER")).with(csrf())
                 .param("recipientName", " ").param("phone", "").param("addressDetail", " "))

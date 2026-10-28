@@ -175,8 +175,7 @@ public class DemoPaymentService {
 
     private boolean activeCustomer(User user) {
         return Boolean.TRUE.equals(user.getIsActive()) && !Boolean.TRUE.equals(user.getAccountDisabledByAdmin())
-                && !user.isRetiredDeliveryAccount() && user.hasRole(Role.USER)
-                && !user.hasRole(Role.ADMIN) && !user.isStoreWorker();
+                && user.isCustomerAccount();
     }
 
     private void requireActiveCustomer(User user) {

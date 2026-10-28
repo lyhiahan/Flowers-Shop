@@ -134,6 +134,11 @@ public class User {
         return hasRole(Role.MANAGER) || hasRole(Role.STAFF);
     }
 
+    /** Legacy USER assignments never grant shopping rights to store workers or admins. */
+    public boolean isCustomerAccount() {
+        return hasRole(Role.USER) && !hasRole(Role.ADMIN) && !isStoreWorker() && !isRetiredDeliveryAccount();
+    }
+
     public String getRoleDisplayName() {
         if (hasRole(Role.ADMIN)) return "Chủ chuỗi / Quản trị viên";
         if (hasRole(Role.MANAGER)) return "Quản lý chi nhánh";
@@ -144,17 +149,17 @@ public class User {
     public void addRole(Role newRole) {
         if (this.roles == null) this.roles = new java.util.HashSet<>();
         this.roles.add(newRole);
-        if (hasRole(Role.ADMIN) || (hasRole(Role.STAFF) && !hasRole(Role.MANAGER))) {
-            this.roles.remove(Role.USER); // Admin không bao giờ giữ vai trò Khách hàng
+        if (hasRole(Role.ADMIN) || isStoreWorker()) {
+            this.roles.remove(Role.USER);
         } else {
-            this.roles.add(Role.USER); // Quản lý và Người bán vẫn giữ quyền khách hàng
+            this.roles.add(Role.USER);
         }
     }
 
     public void removeRole(Role targetRole) {
         if (this.roles != null) {
             this.roles.remove(targetRole);
-            if (hasRole(Role.ADMIN) || (hasRole(Role.STAFF) && !hasRole(Role.MANAGER))) {
+            if (hasRole(Role.ADMIN) || isStoreWorker()) {
                 this.roles.remove(Role.USER);
             } else {
                 this.roles.add(Role.USER);

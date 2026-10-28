@@ -24,9 +24,7 @@ public class CartService {
     public Cart getCartByUsername(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại"));
-        if (isAdminUser(user)) {
-            throw new org.springframework.security.access.AccessDeniedException("Tài khoản Quản trị viên không thể sử dụng giỏ hàng.");
-        }
+        requireCustomer(user);
         return cartRepository.findByUserId(user.getId())
                 .orElseGet(() -> cartRepository.save(Cart.builder().user(user).items(new ArrayList<>()).build()));
     }
@@ -34,7 +32,7 @@ public class CartService {
     public int getCartItemCount(String username) {
         if (username == null || username.isBlank()) return 0;
         User user = userRepository.findByUsername(username).orElse(null);
-        if (user != null && isAdminUser(user)) {
+        if (user != null && !user.isCustomerAccount()) {
             return 0;
         }
         return Math.toIntExact(cartItemRepository.countUnitsByUsername(username));
@@ -44,9 +42,7 @@ public class CartService {
     public int addToCart(String username, AddToCartRequest request) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Tài khoản không tồn tại."));
-        if (isAdminUser(user)) {
-            throw new org.springframework.security.access.AccessDeniedException("Tài khoản Quản trị viên không thể thực hiện thao tác mua hàng hoặc sử dụng giỏ hàng.");
-        }
+        requireCustomer(user);
 
         // --- Kiểm tra đầu vào trước khi lấy khóa ---
         if (request == null || request.getProductId() == null || request.getProductId() <= 0)
@@ -275,17 +271,17 @@ public class CartService {
         if (!Boolean.TRUE.equals(user.getIsActive()) || user.isRetiredDeliveryAccount()) {
             throw new org.springframework.security.access.AccessDeniedException("Tài khoản đã bị khóa hoặc vô hiệu hóa.");
         }
-        if (isAdminUser(user)) {
-            throw new org.springframework.security.access.AccessDeniedException("Tài khoản Quản trị viên không thể thực hiện thao tác mua hàng hoặc sử dụng giỏ hàng.");
-        }
+        requireCustomer(user);
         Cart cart = cartRepository.findLockedByUserId(user.getId())
                 .orElseGet(() -> cartRepository.save(Cart.builder().user(user).items(new ArrayList<>()).build()));
         return cart;
     }
 
-    private boolean isAdminUser(User user) {
-        if (user == null) return false;
-        return user.getRole() == com.finalproject.enums.Role.ADMIN
-                || (user.getRoles() != null && user.getRoles().contains(com.finalproject.enums.Role.ADMIN));
+    private void requireCustomer(User user) {
+        if (!user.isCustomerAccount()) {
+            throw new org.springframework.security.access.AccessDeniedException(user.hasRole(com.finalproject.enums.Role.ADMIN)
+                    ? "Tài khoản Quản trị viên không thể thực hiện thao tác mua hàng hoặc sử dụng giỏ hàng."
+                    : "Tài khoản quản lý hoặc nhân viên không có quyền mua hàng hoặc sử dụng giỏ hàng.");
+        }
     }
 }

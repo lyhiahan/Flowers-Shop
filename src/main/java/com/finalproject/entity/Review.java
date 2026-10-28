@@ -55,8 +55,9 @@ public class Review {
     /** Sample fixtures are visible as demo content, never as verified customer feedback. */
     @Transient
     public boolean isDemo() {
-        return user != null && user.getUsername() != null && user.getUsername().startsWith("demo_review_")
-                && content != null && content.startsWith("[Đánh giá mẫu] ");
+        // A real submitted review always references its received order. Legacy fixtures may use
+        // demo customer accounts, so use the explicit marker and missing order as provenance.
+        return order == null && content != null && content.startsWith("[Đánh giá mẫu] ");
     }
 
     /** Fictional display names for marked fixtures; account identities remain unchanged. */
@@ -64,6 +65,10 @@ public class Review {
     public String getReviewerDisplayName() {
         if (isDemo()) {
             String[] names = {"Mai Anh", "Hoàng Nam", "Thu Hà", "Khánh Linh", "Quỳnh Trang", "Bảo Ngọc"};
+            if (user == null || user.getUsername() == null || !user.getUsername().startsWith("demo_review_")) {
+                long identity = user != null && user.getId() != null ? user.getId() : id != null ? id : 0;
+                return names[Math.floorMod(identity, names.length)];
+            }
             try {
                 int index = Integer.parseInt(user.getUsername().substring("demo_review_".length())) - 1;
                 if (index >= 0 && index < names.length) return names[index];

@@ -126,7 +126,7 @@ public class CustomerWalletService {
 
     private User requireOwner(String username) {
         User owner = access.currentUser();
-        if (!owner.hasRole(Role.USER) || owner.hasRole(Role.ADMIN) || !owner.getUsername().equals(username))
+        if (!owner.isCustomerAccount() || !owner.getUsername().equals(username))
             throw new AccessDeniedException("Bạn chỉ được sử dụng ví của mình.");
         return owner;
     }

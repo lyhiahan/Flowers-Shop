@@ -86,8 +86,8 @@ public class AnalyticsService {
     }
 
     public RevenueChartDto getStoreRevenueStats(Long storeId) {
-        return RevenueChartDto.builder().totalBuyRevenue(orders.recognizedRevenue(storeId, null, null))
-                .totalRentRevenue(BigDecimal.ZERO).totalFineRevenue(BigDecimal.ZERO).build();
+        return RevenueChartDto.builder()
+                .totalBuyRevenue(orders.recognizedRevenue(storeId, null, null)).build();
     }
 
     public ChartSeriesDto getRevenueChart(String timeframe, Long storeId) {

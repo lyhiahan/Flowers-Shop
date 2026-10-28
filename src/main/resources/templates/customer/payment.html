@@ -587,7 +587,7 @@
                                                 <span th:text="'SL: ' + ${d.quantity}">SL: 1</span>
                                                 <span class="mx-1">•</span>
                                                 <span th:class="${d.orderType.name() == 'BUY' ? 'badge bg-success-subtle text-success' : 'badge bg-info-subtle text-info'}"
-                                                      th:text="${d.orderType.name() == 'BUY' ? 'Mua' : 'Thuê'}" style="font-size: 10.5px;">Mua</span>
+                                                      th:text="${d.orderType.displayName}" style="font-size: 10.5px;">Mua hoa tươi</span>
                                             </div>
                                         </div>
                                         <div class="text-end font-semibold small text-danger" 

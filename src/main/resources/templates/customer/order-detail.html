@@ -254,7 +254,7 @@
                         </tbody>
                         <tfoot class="border-top">
                             <tr>
-                                <td th:colspan="${order.orderType.name() == 'RENT' ? 5 : 3}" class="text-end fw-semibold">Tổng tiền:</td>
+                                <td colspan="3" class="text-end fw-semibold">Tổng tiền:</td>
                                 <td class="text-end fw-bold fs-5 text-danger" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
                                 <td th:if="${order.status.name() == 'COMPLETED' or order.status.name() == 'DELIVERED'}"></td>
                             </tr>

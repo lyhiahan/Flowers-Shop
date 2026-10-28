@@ -177,7 +177,7 @@
                                 th:classappend="${followedProductIds != null and followedProductIds.contains(p.id)} ? 'bi-heart-fill' : 'bi-heart'"></i>
                         </button>
                     </form>
-                    <a sec:authorize="!hasRole('USER')" th:href="@{/login(continue=${'/product/' + p.id})}"
+                    <a sec:authorize="isAnonymous()" th:href="@{/login(continue=${'/product/' + p.id})}"
                         class="flower-card-wishlist position-absolute top-0 end-0 m-2 z-2"
                         title="Đăng nhập để lưu yêu thích">
                         <i class="bi bi-heart"></i>
@@ -228,7 +228,7 @@
                         </form>
 
                         <!-- 2. Dành cho Quản trị viên: Xem chi tiết sản phẩm (chặn mua) -->
-                        <div sec:authorize="hasRole('ADMIN')" class="mt-auto">
+                        <div sec:authorize="hasAnyRole('ADMIN', 'MANAGER', 'STAFF')" class="mt-auto">
                             <a th:href="@{/product/{id}(id=${p.id})}" class="btn-add-cart text-decoration-none d-flex align-items-center justify-content-center gap-1.5"
                                style="background-color: #20382E; color: #FFFFFF;" title="Xem chi tiết sản phẩm">
                                 <i class="bi bi-eye"></i> Xem chi tiết

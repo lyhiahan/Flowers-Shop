@@ -105,16 +105,16 @@ public class ManagerRoleInterfaceSyncTests {
 
     @Test
     @WithMockUser(username = "test_manager_sync", roles = {"MANAGER", "USER"})
-    @DisplayName("2. Trang hồ sơ khách hàng hiển thị nút Kênh Quản lý cửa hàng cho Manager")
+    @DisplayName("2. Manager dùng hồ sơ quản lý và không được truy cập hồ sơ khách hàng")
     void testProfilePage_ShowsManagerDashboardLink() throws Exception {
-        MvcResult result = mockMvc.perform(get("/customer/profile"))
+        mockMvc.perform(get("/customer/profile")).andExpect(status().isForbidden());
+        MvcResult result = mockMvc.perform(get("/manager/profile"))
                 .andExpect(status().isOk())
                 .andReturn();
         String html = result.getResponse().getContentAsString();
 
-        assertThat(html).contains("Quản lý chi nhánh");
-        assertThat(html).contains("Vào kênh quản lý cửa hàng");
-        assertThat(html).contains("/manager/dashboard");
+        assertThat(html).contains("/manager/dashboard", "/manager/profile")
+                .doesNotContain("href=\"/customer/profile\"", "href=\"/cart\"");
     }
 
     @Test

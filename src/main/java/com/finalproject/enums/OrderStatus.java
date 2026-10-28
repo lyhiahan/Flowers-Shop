@@ -11,9 +11,14 @@ public enum OrderStatus {
     CANCELLED,  // Đã hủy đơn
     REFUND_REQUESTED,
     REFUNDED,   // Trả hàng - Hoàn tiền
-    RENTING,    // Đang thuê phụ kiện/cổng hoa
-    RETURNED,   // Đã hoàn trả phụ kiện
-    OVERDUE;     // Quá hạn hoàn trả
+    // Historical database values; the sales workflow cannot enter these states.
+    RENTING,
+    RETURNED,
+    OVERDUE;
+
+    public boolean isLegacy() {
+        return this == RENTING || this == RETURNED || this == OVERDUE;
+    }
 
     public String getDisplayName() {
         return switch (this) {
@@ -27,9 +32,9 @@ public enum OrderStatus {
             case CANCELLED -> "Đã hủy";
             case REFUND_REQUESTED -> "Chờ hoàn tiền";
             case REFUNDED -> "Đã hoàn tiền";
-            case RENTING -> "Đang thuê";
-            case RETURNED -> "Đã trả";
-            case OVERDUE -> "Quá hạn";
+            case RENTING -> "Giao dịch lịch sử đang mở";
+            case RETURNED -> "Giao dịch lịch sử đã đóng";
+            case OVERDUE -> "Giao dịch lịch sử cần đối chiếu";
         };
     }
 }
