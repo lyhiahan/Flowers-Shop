@@ -73,7 +73,6 @@ flowchart TD
 
 ### Prompt IMG-01: Sinh bộ sơ đồ kiến trúc ứng dụng kỹ thuật cao bằng Python Matplotlib
 * **Công cụ AI:** Google Antigravity (Gemini)
-* **Thời điểm:** Tuần 13 (Giai đoạn hoàn thiện tài liệu nộp)
 * **Yêu cầu (Prompt):**
   > *"Hãy viết một script Python sử dụng thư viện `matplotlib` và `networkx` để sinh 5 sơ đồ kiến trúc chất lượng cao (độ phân giải 300 DPI, xuất file PNG) phục vụ chèn vào báo cáo đồ án Word. Các sơ đồ bao gồm:
   > 1. Sơ đồ kiến trúc 5 tầng của hệ thống (Presentation, Security, Controller, Service & Business, Persistence JPA & Database).
@@ -94,7 +93,6 @@ flowchart TD
 
 ### Prompt IMG-02: Sinh dữ liệu hình ảnh hoa tươi nghệ thuật chuẩn danh mục bán lẻ
 * **Công cụ AI:** Google Antigravity / Unsplash API Generator
-* **Thời điểm:** Giai đoạn Seed Data & Chuẩn hóa Catalog
 * **Yêu cầu (Prompt):**
   > *"Tôi đang xây dựng dữ liệu mẫu cho website bán hoa tươi 'Hoa Tươi Sài Gòn'. Hãy sinh danh sách 41 mẫu hoa tươi thực tế phân loại theo các chủ đề: Hoa sinh nhật, Hoa khai trương, Hoa chúc mừng tốt nghiệp, Hoa tình yêu & Hoa cưới. Với mỗi sản phẩm, hãy cung cấp:
   > - Tên hoa thương mại gần gũi, không trừu tượng (ví dụ: 'Bó hoa hồng đỏ Ohara Đà Lạt', 'Giỏ hoa hướng dương rực rỡ', 'Chậu lan hồ điệp trắng 5 cành').
@@ -109,7 +107,6 @@ flowchart TD
 
 ### Prompt IMG-03: Tích hợp dịch vụ đám mây Cloudinary để Upload & Quản lý ảnh động
 * **Công cụ AI:** OpenAI Codex & Google Antigravity
-* **Thời điểm:** Commit `bc82f7c` & `cde3d56`
 * **Yêu cầu (Prompt):**
   > *"Hãy hướng dẫn cấu hình và viết `CloudinaryService` trong Spring Boot để xử lý upload ảnh sản phẩm, ảnh đại diện cửa hàng và ảnh đính kèm trong tin nhắn chat. Yêu cầu kỹ thuật:
   > 1. Không hardcode API key, Secret vào mã nguồn mà nạp qua biến môi trường trong file `.env` (`CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`).
@@ -124,7 +121,6 @@ flowchart TD
 
 ### Prompt IMG-04: Sinh dữ liệu đánh giá sản phẩm kèm ảnh thực nhận hoa và Avatar khách hàng
 * **Công cụ AI:** Google Antigravity (Gemini)
-* **Thời điểm:** Commit `683ba56` & `4de0cd3`
 * **Yêu cầu (Prompt):**
   > *"Hãy tạo script Java `DemoReviewSeed` để sinh ngẫu nhiên nhưng chân thực các lượt đánh giá đánh giá sản phẩm (Review):
   > - Đánh giá từ 4 sao đến 5 sao với lời nhận xét thực tế về độ tươi của hoa, tốc độ giao hàng của chi nhánh và thiệp chúc mừng đi kèm.
@@ -139,7 +135,6 @@ flowchart TD
 
 ### Prompt IMG-05: Khắc phục lỗi ảnh trang chủ bị vỡ và thiết lập cơ chế Fallback ảnh tự động
 * **Công cụ AI:** Google Antigravity (Gemini)
-* **Thời điểm:** Trích xuất từ log `WEB-014` & Commit `bf16a4b`
 * **Yêu cầu (Prompt):**
   > *"Ở trang chủ và trang danh mục hiện tại có một số mẫu hoa ảnh bị lỗi liên kết 404 hoặc trống link khiến giao diện bị vỡ khung thẻ sản phẩm. Hãy:
   > 1. Viết directive onerror trong Thymeleaf để tự động thay thế bằng một ảnh hoa mặc định thẩm mỹ (`/images/flower-placeholder.jpg`) khi link ảnh gốc bị lỗi.
@@ -152,7 +147,6 @@ flowchart TD
 
 ### Prompt IMG-06: Thiết kế biểu tượng và Theme màu sắc hoa tươi đồng bộ (Floral Theme)
 * **Công cụ AI:** OpenAI Codex & Google Antigravity
-* **Thời điểm:** Commit `2284d60` & `33d489c`
 * **Yêu cầu (Prompt):**
   > *"Hãy thiết kế một bảng mã màu CSS chuẩn dành riêng cho thương hiệu cửa hàng hoa 'Bloom Flower Chain / Hoa Tươi Sài Gòn':
   > - Màu chủ đạo (Primary): Xanh rừng trầm (`#355447` hoặc `#1E3A2B`) tạo cảm giác cành lá tự nhiên, sang trọng.
