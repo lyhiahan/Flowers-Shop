@@ -1117,6 +1117,57 @@ body {
     display: inline-block;
 }
 
+.drawer-store-options {
+    display: grid;
+    gap: 8px;
+}
+.drawer-filter-chip.drawer-store-option {
+    width: 100%;
+    padding: 12px;
+    gap: 10px;
+    border-radius: 12px;
+    text-align: left;
+    white-space: normal;
+}
+.drawer-store-option:focus-visible {
+    outline: 2px solid #355447;
+    outline-offset: 2px;
+}
+.drawer-store-indicator {
+    display: grid;
+    place-items: center;
+    flex: 0 0 18px;
+    height: 18px;
+    border: 1.5px solid #94A39B;
+    border-radius: 50%;
+}
+.drawer-store-option.active .drawer-store-indicator {
+    border-color: currentColor;
+}
+.drawer-store-option.active .drawer-store-indicator::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+.drawer-store-details {
+    display: grid;
+    min-width: 0;
+    gap: 4px;
+}
+.drawer-store-name {
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+.drawer-store-address {
+    color: #53645C;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
 /* Phân trang: ‹ Trước · 1 · 2 · 3 · Sau › */
 .custom-pagination-container {
     padding: 2.5rem 0 1rem 0;
