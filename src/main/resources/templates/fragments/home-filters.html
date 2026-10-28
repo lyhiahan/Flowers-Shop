@@ -11,15 +11,26 @@
         </div>
         <div class="offcanvas-body p-4" style="overflow-y: auto;">
             <div class="mb-4" id="filterGroupStore">
-                <div class="fw-bold mb-2 text-dark" style="font-size: 15px;">Chi nhánh</div>
-                <div class="d-flex flex-wrap gap-2">
-                    <button type="button" class="drawer-filter-chip" data-store-id="" aria-pressed="false">
-                        <span class="chip-check">✓</span>Tất cả chi nhánh
+                <div class="fw-bold mb-2 text-dark" id="filterStoreLocationLabel" style="font-size: 15px;">
+                    <i class="bi bi-geo-alt me-1" aria-hidden="true"></i>Địa điểm cửa hàng
+                </div>
+                <p class="small text-secondary mb-3" id="filterStoreLocationHelp">Chọn chi nhánh để xem các mẫu hoa có bán tại địa điểm đó.</p>
+                <div class="drawer-store-options" role="group" aria-labelledby="filterStoreLocationLabel" aria-describedby="filterStoreLocationHelp">
+                    <button type="button" class="drawer-filter-chip drawer-store-option" data-store-id=""
+                            th:classappend="${storeId == null} ? 'active'" th:attr="aria-pressed=${storeId == null}">
+                        <span class="drawer-store-indicator" aria-hidden="true"></span>
+                        <span class="drawer-store-name">Tất cả chi nhánh</span>
                     </button>
-                    <button th:each="branch : ${catalogStores}" type="button" class="drawer-filter-chip"
-                            th:attr="data-store-id=${branch.id}" aria-pressed="false">
-                        <span class="chip-check">✓</span><span th:text="${branch.name}"></span>
+                    <button th:each="branch : ${catalogStores}" type="button" class="drawer-filter-chip drawer-store-option"
+                            th:classappend="${branch.id == storeId} ? 'active'"
+                            th:attr="data-store-id=${branch.id},aria-pressed=${branch.id == storeId}">
+                        <span class="drawer-store-indicator" aria-hidden="true"></span>
+                        <span class="drawer-store-details">
+                            <span class="drawer-store-name" th:text="${branch.name}"></span>
+                            <span class="drawer-store-address" th:text="${branch.address}"></span>
+                        </span>
                     </button>
+                    <p th:if="${#lists.isEmpty(catalogStores)}" class="small text-secondary mb-0">Chưa có địa điểm cửa hàng đang mở bán.</p>
                 </div>
             </div>
 
