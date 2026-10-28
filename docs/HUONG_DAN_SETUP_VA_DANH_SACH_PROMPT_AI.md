@@ -516,3 +516,10 @@ Triển khai thành Đơn hàng, Chi tiết đơn, Chuẩn bị hoa, Giao & nh�
 
 - Kiểm tra lại ngày 26/10/2026 sau khi người dùng cấp mật khẩu hiện tại: đăng nhập PostgreSQL và TLS verify-full thành công; đã lưu .env.aiven với ACL riêng, chuẩn bị CA/Cloudflare và đường dẫn Node cục bộ. Không ghi mật khẩu vào tài liệu.
 - Phiên smoke riêng trên 8081 dùng kết nối PostgreSQL read-only, không migration/seed/đơn hết hạn: đăng nhập khách demo và đọc trang chủ, sản phẩm, giỏ, ví, lọc ví theo ngày, đơn hàng đều trả HTTP 200. Số bản ghi và tổng số dư ví trước/sau không đổi. Đã dừng phiên test. Cloudflare còn lỗi DNS ENOTFOUND, chưa xác nhận luồng QR điện thoại.
+
+
+### Bổ sung prompt — đánh giá mẫu (28/10/2026)
+
+Yêu cầu: “bạn có thể tạo khoảng từ 2-6 đánh giá ảo có hình ảnh giúp tôi tùy theo mẫu hoa số lượng bán giúp tôi được không”. Bổ sung dữ liệu mẫu theo số bán và số đánh giá hiện có, có ảnh minh họa, tài khoản vô hiệu hóa và nhãn Demo rõ ràng; giữ đánh giá thật, đơn, kho và tiền. Chi tiết/công cụ chạy và gỡ tại `DU_LIEU_DANH_GIA_MAU.md`.
+
+- Người dùng chọn “Xem trên Aiven dùng chung (đề xuất)”. Đã lưu 137 đánh giá mẫu có ảnh cho 33 mẫu; giữ đánh giá có sẵn, kiểm tra không thêm trùng. Bản xem Aiven ở cổng 8081 đã hiển thị đúng dữ liệu, nhãn Demo và chú thích ảnh.
