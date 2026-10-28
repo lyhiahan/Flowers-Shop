@@ -1731,7 +1731,11 @@ class BusinessRegressionTests {
         assertThat(Review.builder().user(sample).content("Đánh giá thông thường").build().isDemo()).isFalse();
         mvc.perform(get("/product/" + product.getId()).with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Demo · Đánh giá mẫu")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Phần này có nội dung đánh giá mô phỏng để minh họa giao diện.")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Mai Anh")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Demo · Đánh giá mẫu"))))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Dữ liệu mẫu</small>"))))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Khách mẫu 01 (Demo)"))))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Ảnh minh họa của sản phẩm, không phải ảnh khách gửi.")));
     }
 

@@ -1,6 +1,6 @@
 # Đánh giá mẫu có ảnh
 
-Dữ liệu phục vụ trình diễn, có nhãn **Demo · Đánh giá mẫu** và chú thích ảnh minh họa. Không dùng danh tính khách thật hoặc tạo đơn hàng giả để hợp thức hóa đánh giá.
+Dữ liệu phục vụ trình diễn, có thông báo chung về nội dung mô phỏng ở đầu khu vực đánh giá và chú thích ảnh minh họa. Không dùng danh tính khách thật hoặc tạo đơn hàng giả để hợp thức hóa đánh giá.
 
 ## Số lượng theo số đã bán
 
@@ -47,3 +47,12 @@ Kế hoạch: bổ sung 137 đánh giá cho 33 mẫu hoa, giữ đánh giá hi�
 Đã áp dụng thành công **137 đánh giá mẫu cho 33 mẫu hoa trên Aiven**, theo lựa chọn của người dùng. Kiểm tra lại cho kết quả cần thêm 0 đánh giá (không thêm trùng). Snapshot batch: `.tools/demo-review-backups/reviews-1793173975555.properties`.
 
 Đã kiểm tra HTTP chi tiết các sản phẩm #1, #4, #21, #31: hiển thị đúng số nhãn Demo và ảnh minh họa; đánh giá có sẵn ở #21 vẫn còn. Avatar mẫu tải được. Bản xem Aiven hiện mở tại http://localhost:8081/product/1#review-section; website SQL Server cũ ở 8080 không được chuyển database trong tác vụ này. Bản xem tắt migration, seed và tác vụ hết hạn; trang chi tiết vẫn tăng lượt xem theo luồng thông thường.
+
+
+### Lựa chọn chạy cuối cùng: SQL Server local
+
+Người dùng chuyển về local để tải nhanh. Website hiện chạy SQL Server `RentalShop`, profile `dev`, tại http://localhost:8080. Local đã có 107 đánh giá, trong đó sản phẩm #22 có 2 đánh giá có ảnh; không thêm trùng. Đã nạp code mới, xác nhận trang #22 trả HTTP 200, HTML đầy đủ và hiển thị 2 ảnh đánh giá sau đăng nhập khách. Hai phiên Aiven tạm đã dừng; bản ghi đánh giá trên Aiven vẫn tồn tại trong database cloud riêng.
+
+Tên mẫu trên thẻ đánh giá hiển thị bằng tên nhân vật hư cấu tự nhiên (Mai Anh, Hoàng Nam, Thu Hà, Khánh Linh, Quỳnh Trang, Bảo Ngọc). Tài khoản gốc và nội dung đánh dấu trong database vẫn giữ để nhận diện/gỡ dữ liệu. Phần hiển thị bỏ tiền tố và câu giải thích lặp; thông báo chung về nội dung mô phỏng và chú thích ảnh minh họa vẫn hiện rõ.
+
+Cập nhật giao diện theo yêu cầu: bỏ nhãn cạnh tên và chữ DEMO trên avatar, dùng tên hiển thị tự nhiên; thẻ đánh giá ngăn bằng đường mảnh, căn nội dung và ảnh cùng cột. Thông báo minh họa chỉ xuất hiện một lần ở đầu khu vực có đánh giá mô phỏng.

@@ -523,3 +523,9 @@ Triển khai thành Đơn hàng, Chi tiết đơn, Chuẩn bị hoa, Giao & nh�
 Yêu cầu: “bạn có thể tạo khoảng từ 2-6 đánh giá ảo có hình ảnh giúp tôi tùy theo mẫu hoa số lượng bán giúp tôi được không”. Bổ sung dữ liệu mẫu theo số bán và số đánh giá hiện có, có ảnh minh họa, tài khoản vô hiệu hóa và nhãn Demo rõ ràng; giữ đánh giá thật, đơn, kho và tiền. Chi tiết/công cụ chạy và gỡ tại `DU_LIEU_DANH_GIA_MAU.md`.
 
 - Người dùng chọn “Xem trên Aiven dùng chung (đề xuất)”. Đã lưu 137 đánh giá mẫu có ảnh cho 33 mẫu; giữ đánh giá có sẵn, kiểm tra không thêm trùng. Bản xem Aiven ở cổng 8081 đã hiển thị đúng dữ liệu, nhãn Demo và chú thích ảnh.
+
+- Cập nhật cùng ngày: người dùng báo “tại sao chưa có đánh giá” trên `/product/22` và xác nhận “tôi chuyển sang dùng local cho load web nhanh rồi”. Chuyển website chính về SQL Server RentalShop local, profile dev, cổng 8080 và code mới. Local đã có 107 đánh giá; sản phẩm #22 có 2 ảnh đánh giá nên không seed thêm. Kiểm tra đăng nhập khách và GET `/product/22`: HTTP 200, HTML đầy đủ, hiển thị 2 ảnh đánh giá. Đã dừng hai phiên Aiven tạm ở 8080/8081; dữ liệu đánh giá Aiven vẫn giữ riêng.
+
+- Prompt bổ sung: “sửa lại cho giống thật và push lên github” (ảnh tên Khách mẫu/Demo). Đổi tên hiển thị nhân vật mẫu thành tên tự nhiên, rút gọn nhãn thành “Dữ liệu mẫu”, bỏ tiền tố lặp trong phần nội dung hiển thị. Giữ nhận diện dữ liệu mẫu và ảnh minh họa; không sửa danh tính/tài khoản hoặc nội dung đánh giá thật trong database.
+
+- Người dùng yêu cầu tiếp: “làm tên và bố cục tự nhiên hơn bỏ nhãn demo luôn”. Bỏ nhãn cạnh từng tên và chữ DEMO trên avatar, dùng tên nhân vật tự nhiên và bố cục thoáng hơn; giữ một thông báo chung về đánh giá mô phỏng ở đầu khu vực và chú thích ảnh minh họa. Không sửa đánh giá thật hay định danh tài khoản trong database.
