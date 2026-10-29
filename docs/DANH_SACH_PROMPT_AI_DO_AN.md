@@ -1578,6 +1578,14 @@ Các prompt nhiều dòng và những yêu cầu khác cũng còn thấy trong l
   - `AuthController.java`: Bắt lỗi `DisabledException` / `LockedException` và tham số `?locked=true` để hiển thị banner thông báo trực quan: *"Tài khoản của bạn đã bị khóa hoặc vô hiệu hóa bởi quản trị viên. Mọi thao tác đặt hàng và thanh toán đã bị chặn!"*.
   - `OrderService.java`, `CartService.java`, `MomoService.java`: Tự động chặn đặt hàng, giỏ hàng, thanh toán nếu tài khoản bị khóa.
 
+**HT-83 — Xóa nút tắt xác nhận thanh toán Demo trên máy tính**
+
+> xóa nút này
+
+- **Ảnh đính kèm:** Ảnh chụp nút màu tím *"Xác nhận thanh toán ngay (Demo)"* trên trang thanh toán MoMo.
+- **Kết quả đối chiếu:**
+  - Loại bỏ khối form và nút `desktop-confirm-button` tại `src/main/resources/templates/customer/demo-payment.html`, chỉ giữ lại hiển thị mã QR và liên kết mở trang quét mã xác thực trên điện thoại để đảm bảo tính thực tế của trải nghiệm thanh toán quét mã MoMo.
+
 **Tóm tắt kết quả có thể đối chiếu ngắn gọn:** đã viết tài liệu prompt và hướng dẫn setup; bổ sung kịch bản test; chỉnh nhiều luồng sản phẩm, tồn kho, đơn hàng, đánh giá, phân quyền và giao diện; chuẩn bị cấu hình cloud/email. Trạng thái thực tế của từng chức năng cần đối chiếu mã nguồn và kết quả kiểm thử tại thời điểm nộp; riêng các câu hỏi về Antigravity là hướng dẫn sử dụng công cụ, không phải thay đổi mã nguồn dự án.
 
 <a name="phan-7-tong-ket"></a>
