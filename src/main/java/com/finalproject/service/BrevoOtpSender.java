@@ -23,6 +23,20 @@ public class BrevoOtpSender {
 
     public BrevoOtpSender(@Lazy @Qualifier("otpMailRestClient") RestClient client) { this.client = client; }
 
+    private String sanitizeFromName(String name) {
+        if (name == null || name.isBlank()) return "Hoa Tươi Sài Gòn";
+        if (name.contains("Æ") || name.contains("Ã") || name.contains("Â") || name.contains("â")) {
+            try {
+                String fixed = new String(name.getBytes(java.nio.charset.StandardCharsets.ISO_8859_1), java.nio.charset.StandardCharsets.UTF_8);
+                if (!fixed.isBlank()) {
+                    return fixed;
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        return name;
+    }
+
     public void send(String recipient, String subject, String text) {
         if (apiKey == null || apiKey.trim().length() < 20 || apiKey.contains("placeholder") || apiKey.trim().startsWith("replace_")) {
             log.warn("BREVO_API_KEY thiếu hoặc chưa đầy đủ: email OTP chưa được gửi.");
@@ -36,7 +50,7 @@ public class BrevoOtpSender {
         try { sender = OtpEmailInput.address(fromEmail); }
         catch (IllegalArgumentException ex) { throw new IllegalStateException("Địa chỉ gửi email chưa được cấu hình hợp lệ."); }
         Map<String, Object> body = Map.of(
-                "sender", Map.of("email", sender, "name", fromName == null || fromName.isBlank() ? "Hoa Tươi Sài Gòn" : fromName),
+                "sender", Map.of("email", sender, "name", sanitizeFromName(fromName)),
                 "to", List.of(Map.of("email", OtpEmailInput.address(recipient))),
                 "subject", subject, "textContent", text);
         try {

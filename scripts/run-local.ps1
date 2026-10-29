@@ -10,7 +10,7 @@ $saved=@{}
 $settings=@{}
 $envPath=Join-Path $root '.env'
 if(Test-Path -LiteralPath $envPath) {
-    foreach($line in Get-Content -LiteralPath $envPath) {
+    foreach($line in Get-Content -LiteralPath $envPath -Encoding UTF8) {
         if($line -match '^\s*([A-Z][A-Z0-9_]*)\s*=(.*)$') {
             $key=$Matches[1];$value=$Matches[2].Trim()
             if(($value.StartsWith('"') -and $value.EndsWith('"')) -or ($value.StartsWith("'") -and $value.EndsWith("'"))){$value=$value.Substring(1,$value.Length-2)}

@@ -21,6 +21,7 @@ public class AuthController {
     public String showLoginForm(@RequestParam(value = "error", required = false) String error,
                                 @RequestParam(value = "logout", required = false) String logout,
                                 @RequestParam(value = "activated", required = false) String activated,
+                                @RequestParam(value = "locked", required = false) String locked,
                                 Model model, jakarta.servlet.http.HttpServletRequest request) {
         String returnTo = com.finalproject.config.CustomAuthenticationSuccessHandler.safeCustomerTarget(request.getParameter("continue"));
         if (returnTo != null) {
@@ -41,12 +42,20 @@ public class AuthController {
         model.addAttribute("loginUsername", identifier);
         model.addAttribute("loginFailed", error != null);
         if (error != null) {
-            boolean serviceUnavailable = session != null
-                    && session.getAttribute(org.springframework.security.web.WebAttributes.AUTHENTICATION_EXCEPTION)
-                    instanceof AuthenticationServiceException;
+            Object authEx = session != null
+                    ? session.getAttribute(org.springframework.security.web.WebAttributes.AUTHENTICATION_EXCEPTION)
+                    : null;
+            boolean serviceUnavailable = authEx instanceof AuthenticationServiceException;
+            boolean disabled = authEx instanceof org.springframework.security.authentication.DisabledException
+                    || authEx instanceof org.springframework.security.authentication.LockedException;
             model.addAttribute("errorMessage", serviceUnavailable
                     ? "Hệ thống đăng nhập đang tạm thời gián đoạn. Vui lòng thử lại sau."
-                    : "Đăng nhập thất bại: Email, tên đăng nhập hoặc mật khẩu không chính xác!");
+                    : (disabled
+                            ? "Tài khoản của bạn đã bị khóa hoặc vô hiệu hóa. Vui lòng liên hệ quản trị viên để được hỗ trợ!"
+                            : "Đăng nhập thất bại: Email, tên đăng nhập hoặc mật khẩu không chính xác!"));
+        }
+        if (locked != null) {
+            model.addAttribute("errorMessage", "Tài khoản của bạn đã bị khóa hoặc vô hiệu hóa bởi quản trị viên. Mọi thao tác đặt hàng và thanh toán đã bị chặn!");
         }
         if (logout != null) {
             model.addAttribute("successMessage", "Bạn đã đăng xuất thành công.");
@@ -121,7 +130,7 @@ public class AuthController {
                 return "redirect:/login?activated=true";
             } else {
                 model.addAttribute("email", email);
-                model.addAttribute("errorMessage", "Mã OTP không hợp lệ hoặc đã hết hạn!");
+                model.addAttribute("errorMessage", "Mã xác thực không chính xác hoặc đã hết hạn (hiệu lực trong 5 phút). Nếu bạn đã bấm gửi lại mã, vui lòng kiểm tra email mới nhất!");
                 return "auth/verify-otp";
             }
         } catch (Exception ex) {

@@ -86,11 +86,15 @@ public class AuthService {
         RegisterRequest pendingRequest = new RegisterRequest();
         org.springframework.beans.BeanUtils.copyProperties(request, pendingRequest);
         pendingRequest.setPassword(null);
+        java.util.Set<String> activeCodes = new java.util.concurrent.CopyOnWriteArraySet<>();
+        activeCodes.add(code);
         PendingRegistration pending = PendingRegistration.builder()
                 .request(pendingRequest)
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .otpCode(code)
+                .activeOtpCodes(activeCodes)
                 .createdAt(now)
+                .lastSentAt(now)
                 .expiredAt(now.plusMinutes(5))
                 .resendCount(0)
                 .build();
@@ -112,8 +116,9 @@ public class AuthService {
 
     @Transactional
     public synchronized boolean verifyOtp(String email, String otpCode) {
-        if (email == null || email.isBlank() || otpCode == null || !otpCode.trim().matches("[0-9]{6}")) return false;
-        otpCode = otpCode.trim();
+        if (email == null || email.isBlank() || otpCode == null) return false;
+        String cleanCode = otpCode.replaceAll("[\\s\\-]+", "").trim();
+        if (!cleanCode.matches("[0-9]{6}")) return false;
         String key = email.toLowerCase().trim();
         PendingRegistration pending = pendingRegistrations.get(key);
 
@@ -124,7 +129,7 @@ public class AuthService {
                 return false;
             }
             if (pending.getFailedAttempts() >= 5) return false;
-            if (!pending.getOtpCode().equals(otpCode)) {
+            if (!pending.matchesOtp(cleanCode)) {
                 pending.setFailedAttempts(pending.getFailedAttempts() + 1);
                 return false;
             }
@@ -163,7 +168,7 @@ public class AuthService {
             // Lưu bản ghi xác thực OTP vào database
             OtpVerification otp = OtpVerification.builder()
                     .user(user)
-                    .code(otpCode)
+                    .code(cleanCode)
                     .type(OtpType.ACTIVATE_ACCOUNT)
                     .createdAt(pending.getCreatedAt())
                     .expiredAt(pending.getExpiredAt())
@@ -181,16 +186,20 @@ public class AuthService {
         if (user != null) {
             lockAndRefreshUser(user);
             if (user.isRetiredDeliveryAccount() || Boolean.TRUE.equals(user.getAccountDisabledByAdmin())) return false;
+            
             OtpVerification otp = otpRepository
-                    .findTopByUserIdAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
-                            user.getId(), OtpType.ACTIVATE_ACCOUNT)
-                    .orElse(null);
+                    .findTopByUserIdAndCodeAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
+                            user.getId(), cleanCode, OtpType.ACTIVATE_ACCOUNT)
+                    .orElseGet(() -> otpRepository
+                            .findTopByUserIdAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
+                                    user.getId(), OtpType.ACTIVATE_ACCOUNT)
+                            .orElse(null));
 
             if (otp == null || otp.getExpiredAt().isBefore(LocalDateTime.now(clock)) || otp.getFailedAttempts() >= 5) {
                 return false;
             }
 
-            if (!otp.getCode().equals(otpCode)) {
+            if (!otp.getCode().equals(cleanCode)) {
                 otp.setFailedAttempts(otp.getFailedAttempts() + 1);
                 otpRepository.save(otp); return false;
             }
@@ -213,8 +222,11 @@ public class AuthService {
         PendingRegistration pending = pendingRegistrations.get(key);
 
         if (pending != null) {
-            if (pending.getCreatedAt().isBefore(LocalDateTime.now(clock).minusMinutes(10))) {
-                pending.setCreatedAt(LocalDateTime.now(clock)); pending.setResendCount(0);
+            LocalDateTime now = LocalDateTime.now(clock);
+            if (pending.getCreatedAt().isBefore(now.minusMinutes(10))) {
+                pending.setCreatedAt(now);
+                pending.setResendCount(0);
+                if (pending.getActiveOtpCodes() != null) pending.getActiveOtpCodes().clear();
             }
             if (pending.getResendCount() >= 3) {
                 throw new IllegalStateException("Bạn đã yêu cầu gửi mã quá 3 lần. Vui lòng đăng ký lại.");
@@ -226,9 +238,10 @@ public class AuthService {
                 log.warn("Không thể gửi email OTP. Loại lỗi: {}", ex.getClass().getSimpleName());
                 throw new IllegalStateException("Không thể gửi lại email xác thực. Mã cũ vẫn còn hiệu lực nếu chưa hết hạn.");
             }
-            pending.setOtpCode(newCode);
+            pending.addOtpCode(newCode);
+            pending.setLastSentAt(now);
             pending.setFailedAttempts(0);
-            pending.setExpiredAt(LocalDateTime.now(clock).plusMinutes(5));
+            pending.setExpiredAt(now.plusMinutes(5));
             pending.setResendCount(pending.getResendCount() + 1);
             return newCode;
         }
@@ -273,6 +286,7 @@ public class AuthService {
     @Transactional(readOnly = true)
     public boolean verifyForgotPasswordOtp(String email, String otpCode) {
         String query = email != null ? email.trim() : "";
+        String cleanCode = otpCode != null ? otpCode.replaceAll("[\\s\\-]+", "").trim() : "";
         User user = userRepository.findByEmail(query)
                 .or(() -> userRepository.findByUsername(query))
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản với email: " + query));
@@ -281,7 +295,7 @@ public class AuthService {
 
         OtpVerification otp = otpRepository
                 .findTopByUserIdAndCodeAndTypeAndIsUsedFalseOrderByExpiredAtDesc(
-                        user.getId(), otpCode != null ? otpCode.trim() : "", OtpType.RESET_PASSWORD)
+                        user.getId(), cleanCode, OtpType.RESET_PASSWORD)
                 .orElse(null);
 
         return otp != null && otp.getFailedAttempts() < 5 && !otp.getExpiredAt().isBefore(LocalDateTime.now(clock));
@@ -300,7 +314,8 @@ public class AuthService {
             throw new IllegalArgumentException("Mật khẩu mới phải có tối thiểu 6 ký tự!");
         }
 
-        if (otpCode == null || !otpCode.trim().matches("[0-9]{6}")) {
+        String cleanCode = otpCode != null ? otpCode.replaceAll("[\\s\\-]+", "").trim() : "";
+        if (!cleanCode.matches("[0-9]{6}")) {
             throw new IllegalArgumentException("Vui lòng nhập mã OTP đã gửi đến email của bạn!");
         }
         lockAndRefreshUser(user);
@@ -310,7 +325,7 @@ public class AuthService {
         if (Boolean.TRUE.equals(otp.getIsUsed()) || otp.getExpiredAt().isBefore(LocalDateTime.now(clock)) || otp.getFailedAttempts() >= 5) {
             throw new IllegalArgumentException("Mã OTP đã hết hạn, đã sử dụng hoặc bị khóa. Vui lòng yêu cầu mã mới.");
         }
-        if (!otp.getCode().equals(otpCode.trim())) {
+        if (!otp.getCode().equals(cleanCode)) {
             otp.setFailedAttempts(otp.getFailedAttempts() + 1);
             otpRepository.save(otp);
             throw new IllegalArgumentException("Mã OTP không hợp lệ.");

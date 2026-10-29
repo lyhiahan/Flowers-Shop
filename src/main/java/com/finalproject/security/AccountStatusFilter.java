@@ -42,7 +42,7 @@ public class AccountStatusFilter extends OncePerRequestFilter {
                 } else if (staleCredential) {
                     response.sendRedirect(request.getContextPath() + "/login");
                 } else {
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Tài khoản đã bị khóa hoặc vô hiệu hóa.");
+                    response.sendRedirect(request.getContextPath() + "/login?locked=true");
                 }
                 return;
             }

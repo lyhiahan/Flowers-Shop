@@ -1559,6 +1559,25 @@ Các prompt nhiều dòng và những yêu cầu khác cũng còn thấy trong l
 
 > rồi tại sao sửa mất hết nút thêm giỏ hàng, mua ngay, nhận xét, chăm hoa,... của tôi hết rồi
 
+**HT-81 — Sửa lỗi font chữ email và xác thực OTP mới gửi**
+
+> kieemr tra tại sao gửi mã otp mới gửi mà lại báo hết hạn, lỗi font chữ khi gửi email
+
+- **Kết quả đối chiếu:**
+  - Khắc phục lỗi font người gửi email Brevo (`Hoa TÆ°Æ¡i SÃ i GÃ²n` -> `Hoa Tươi Sài Gòn`) bằng cách cấu hình đọc `.env` chuẩn UTF-8 trong `scripts/run-local.ps1` và hàm khử mojibake tại `BrevoOtpSender.java`.
+  - Hỗ trợ chấp nhận các mã OTP còn hạn hiệu lực 5 phút tại `PendingRegistration.java` & `AuthService.java` để chống trường hợp click đúp gửi lại làm đè mất mã cũ người dùng đang nhập.
+  - Bổ sung bộ đếm ngược 60 giây và tự động làm sạch ký tự lạ tại `verify-otp.html`.
+
+**HT-82 — Kiểm tra luồng khóa tài khoản và chặn thao tác người dùng bị khóa**
+
+> kiểm tra luồng khi khóa tài khoản người dùng và người dùng đăng nhập vào tài khoản khóa thì như thế nào
+> nếu có thì hãy cho message thông báo tài khoản đã bị khóa và không cho thao tác đặt hàng và các thao tác khác
+
+- **Kết quả đối chiếu:**
+  - `AccountStatusFilter.java`: Chặn tức thì các request của tài khoản bị khóa/vô hiệu hóa, tự động hủy session và redirect về `/login?locked=true` hoặc trả về JSON 403 cho AJAX.
+  - `AuthController.java`: Bắt lỗi `DisabledException` / `LockedException` và tham số `?locked=true` để hiển thị banner thông báo trực quan: *"Tài khoản của bạn đã bị khóa hoặc vô hiệu hóa bởi quản trị viên. Mọi thao tác đặt hàng và thanh toán đã bị chặn!"*.
+  - `OrderService.java`, `CartService.java`, `MomoService.java`: Tự động chặn đặt hàng, giỏ hàng, thanh toán nếu tài khoản bị khóa.
+
 **Tóm tắt kết quả có thể đối chiếu ngắn gọn:** đã viết tài liệu prompt và hướng dẫn setup; bổ sung kịch bản test; chỉnh nhiều luồng sản phẩm, tồn kho, đơn hàng, đánh giá, phân quyền và giao diện; chuẩn bị cấu hình cloud/email. Trạng thái thực tế của từng chức năng cần đối chiếu mã nguồn và kết quả kiểm thử tại thời điểm nộp; riêng các câu hỏi về Antigravity là hướng dẫn sử dụng công cụ, không phải thay đổi mã nguồn dự án.
 
 <a name="phan-7-tong-ket"></a>
