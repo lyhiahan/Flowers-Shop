@@ -21,6 +21,7 @@ import java.time.*;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -159,6 +160,37 @@ class ReportDateFilteringTests {
         assertEquals(2, ((List<?>) model.get("topPointUsers")).size());
         assertEquals(1, ((List<?>) model.get("topPointStores")).size());
         assertEquals(4, ((List<?>) model.get("recentOrders")).size());
+    }
+
+    @Test @WithMockUser(username="range_admin", roles="ADMIN")
+    void adminCanSwitchReportBetweenBranchesAndWholeSystem() throws Exception {
+        var ownReport = mvc.perform(get("/admin/dashboard").param("timeframe", "today")
+                .param("storeId", own.getId().toString()))
+                .andExpect(status().isOk()).andExpect(model().attribute("selectedStoreId", own.getId()))
+                .andExpect(model().attribute("selectedStoreName", own.getName()))
+                .andExpect(model().attribute("totalOrdersCount", 2L))
+                .andExpect(model().attribute("totalProductsCount", 1L))
+                .andExpect(content().string(containsString("storeId=" + own.getId())))
+                .andExpect(content().string(containsString("Đang xem: <strong class=\"text-dark\">" + own.getName())))
+                .andExpect(content().string(containsString("<option value=\"" + foreign.getId() + "\"")))
+                .andExpect(content().string(not(containsString("id=\"usersChartSection\""))))
+                .andExpect(content().string(not(containsString("id=\"storesChartSection\""))))
+                .andReturn();
+        amount(100, (BigDecimal) ownReport.getModelAndView().getModel().get("flowerRevenue"));
+        assertEquals(2, ((List<?>) ownReport.getModelAndView().getModel().get("recentOrders")).size());
+        var foreignReport = mvc.perform(get("/admin/dashboard").param("timeframe", "today")
+                .param("storeId", foreign.getId().toString()))
+                .andExpect(status().isOk()).andExpect(model().attribute("totalOrdersCount", 1L))
+                .andExpect(model().attribute("totalProductsCount", 1L)).andReturn();
+        amount(900, (BigDecimal) foreignReport.getModelAndView().getModel().get("flowerRevenue"));
+        var allReport = mvc.perform(get("/admin/dashboard").param("timeframe", "today"))
+                .andExpect(status().isOk()).andExpect(model().attribute("totalOrdersCount", 3L))
+                .andExpect(content().string(containsString("id=\"usersChartSection\"")))
+                .andExpect(content().string(containsString("id=\"storesChartSection\"")))
+                .andReturn();
+        amount(1000, (BigDecimal) allReport.getModelAndView().getModel().get("flowerRevenue"));
+        mvc.perform(get("/admin/dashboard").param("storeId", "999999999"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test @WithMockUser(username="range_manager", roles="MANAGER")

@@ -15,9 +15,8 @@
             if (isPickup) {
                 shippingFeeEl.textContent = '0 ₫';
                 shippingFeeEl.classList.remove('text-primary');
-            } else if (!shippingFeeEl.textContent || shippingFeeEl.textContent.trim() === 'Chưa xác định') {
-                const zone = form.querySelector('#deliveryZoneSelect')?.value;
-                shippingFeeEl.textContent = (zone === 'FAR' ? '40.000 ₫' : '25.000 ₫');
+            } else {
+                shippingFeeEl.textContent = 'Chưa xác định';
             }
         }
         request?.abort();

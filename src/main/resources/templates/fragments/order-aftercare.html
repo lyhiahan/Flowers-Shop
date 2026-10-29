@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"><body>
+<section th:fragment="panel" th:if="${careEnabled == true}" class="card border-0 shadow-sm rounded-4 p-3 p-md-4 my-4" id="order-aftercare">
+    <h2 class="h5 fw-bold">Ảnh thành phẩm và hỗ trợ đơn hàng</h2>
+    <p class="small text-muted">Ảnh và phản hồi được lưu theo đơn. Ghi nhận bàn giao hoặc xử lý hỗ trợ không tự thay đổi trạng thái thanh toán.</p>
+    <div class="row g-4">
+        <div class="col-12 col-lg-6">
+            <h3 class="h6 fw-bold">Duyệt ảnh hoa trước khi giao</h3>
+            <p class="small" th:text="${care.photoStatusLabel}"></p>
+            <div th:if="${care.flowerPhotoUrl != null}">
+                <a th:href="${care.flowerPhotoUrl}" target="_blank" rel="noopener"><img th:src="${care.flowerPhotoUrl}" alt="Ảnh thành phẩm của đơn hàng" class="img-fluid rounded-3 mb-2" style="max-height:280px;object-fit:contain"></a>
+                <p class="small mb-1" th:text="${care.floristNote}"></p>
+                <p class="small text-muted">Ảnh số <span th:text="${care.photoRevision}"></span> · <span th:text="${#temporals.format(care.photoUploadedAt, 'HH:mm dd/MM/yyyy')}"></span></p>
+                <p class="small" th:if="${care.approvalComment != null}" th:text="${care.approvalComment}"></p>
+            </div>
+            <p th:if="${care.awaitingPhotoApproval}" class="alert alert-warning small">Cửa hàng cần nhận được sự đồng ý của khách trước khi bàn giao mẫu hoa đã gửi duyệt.</p>
+            <form th:if="${careOwner and order.status.name() == 'PREPARING' and care.photoStatus == 'WAITING'}" th:action="@{/order-care/{id}/photo-review(id=${order.id})}" method="post" class="d-grid gap-2">
+                <input type="hidden" name="revision" th:value="${care.photoRevision}">
+                <label class="small fw-semibold" for="careDecision">Phản hồi ảnh thành phẩm</label>
+                <select id="careDecision" name="decision" class="form-select" required><option value="APPROVED">Tôi đồng ý với mẫu hoa này</option><option value="CHANGES_REQUESTED">Tôi muốn cửa hàng chỉnh lại</option></select>
+                <label class="small" for="careComment">Ý kiến (khi yêu cầu chỉnh lại, nhập ít nhất 5 ký tự)</label>
+                <textarea id="careComment" name="comment" maxlength="500" rows="2" class="form-control"></textarea>
+                <button class="btn btn-success" type="submit">Gửi phản hồi ảnh</button>
+            </form>
+            <form th:if="${careWorker and order.status.name() == 'PREPARING'}" th:action="@{/order-care/{id}/flower-photo(id=${order.id})}" method="post" enctype="multipart/form-data" class="d-grid gap-2 mt-3">
+                <label class="small fw-semibold" for="careFlowerPhoto">Ảnh hoa đã cắm (tối đa 10 MB)</label>
+                <input id="careFlowerPhoto" type="file" name="photo" accept="image/jpeg,image/png,image/webp,image/gif" required class="form-control">
+                <label class="small" for="careFloristNote">Ghi chú hoặc nội dung điều chỉnh mẫu hoa</label>
+                <textarea id="careFloristNote" name="note" maxlength="500" rows="2" class="form-control"></textarea>
+                <p class="small text-muted mb-0">Gửi ảnh mới sẽ yêu cầu khách duyệt lại. Luồng duyệt ảnh được áp dụng khi cửa hàng gửi ảnh tại đây.</p>
+                <button class="btn btn-outline-success" type="submit">Gửi ảnh cho khách duyệt</button>
+            </form>
+        </div>
+        <div class="col-12 col-lg-6">
+            <h3 class="h6 fw-bold">Minh chứng giao và nhận hoa</h3>
+            <div th:if="${care.deliveryPhotoUrl != null}">
+                <a th:href="${care.deliveryPhotoUrl}" target="_blank" rel="noopener"><img th:src="${care.deliveryPhotoUrl}" alt="Ảnh minh chứng bàn giao hoa" class="img-fluid rounded-3 mb-2" style="max-height:280px;object-fit:contain"></a>
+                <p class="small mb-1" th:text="${care.deliveryNote}"></p>
+                <p class="small text-muted">Cửa hàng ghi nhận lúc <span th:text="${#temporals.format(care.deliveryRecordedAt, 'HH:mm dd/MM/yyyy')}"></span></p>
+            </div>
+            <p th:if="${care.deliveryPhotoUrl == null}" class="small text-muted">Chưa có ảnh bàn giao.</p>
+            <form th:if="${careWorker and (careAfterDelivery or order.status.name() == 'DELIVERING') and care.deliveryRecordedAt == null}" th:action="@{/order-care/{id}/delivery-proof(id=${order.id})}" method="post" enctype="multipart/form-data" class="d-grid gap-2">
+                <label class="small fw-semibold" for="careDeliveryPhoto">Ảnh bàn giao thực tế (tối đa 10 MB)</label>
+                <input id="careDeliveryPhoto" type="file" name="photo" accept="image/jpeg,image/png,image/webp,image/gif" required class="form-control">
+                <label class="small" for="careDeliveryNote">Nội dung bàn giao (5–500 ký tự, tránh thông tin nhạy cảm)</label>
+                <textarea id="careDeliveryNote" name="note" required minlength="5" maxlength="500" rows="2" class="form-control"></textarea>
+                <button type="submit" class="btn btn-outline-success">Lưu minh chứng bàn giao</button>
+            </form>
+            <p th:if="${care.customerReceivedAt != null}" class="alert alert-success small mt-3">Khách đã xác nhận nhận hoa lúc <span th:text="${#temporals.format(care.customerReceivedAt, 'HH:mm dd/MM/yyyy')}"></span>.</p>
+            <form th:if="${careOwner and careAfterDelivery and care.customerReceivedAt == null}" th:action="@{/order-care/{id}/received(id=${order.id})}" method="post" class="mt-3"><button type="submit" class="btn btn-success">Tôi đã nhận được hoa</button></form>
+        </div>
+    </div>
+    <hr class="my-4">
+    <h3 class="h6 fw-bold">Hỗ trợ sau giao</h3>
+    <p class="small text-muted">Nếu hoa bị hư hỏng, sai mẫu hoặc giao trễ, hãy gửi nội dung và ảnh thực tế để cửa hàng đối chiếu và phản hồi phương án xử lý trong đơn hàng.</p>
+    <div th:if="${care.complaintStatus != 'NONE'}" class="mb-3">
+        <p class="fw-semibold mb-1" th:text="${care.complaintStatusLabel}"></p>
+        <p class="small mb-1">Lý do: <span th:text="${care.complaintReasonLabel}"></span></p>
+        <p class="small" style="white-space:pre-wrap" th:text="${care.complaintDescription}"></p>
+        <a th:if="${care.complaintPhotoUrl != null}" th:href="${care.complaintPhotoUrl}" target="_blank" rel="noopener"><img th:src="${care.complaintPhotoUrl}" alt="Ảnh khách gửi kèm yêu cầu hỗ trợ" class="img-fluid rounded-3 mb-2" style="max-height:220px;object-fit:contain"></a>
+        <p class="small text-muted">Yêu cầu gửi lúc <span th:text="${#temporals.format(care.complaintCreatedAt, 'HH:mm dd/MM/yyyy')}"></span></p>
+        <div th:if="${care.supportResponse != null}" class="border rounded-3 p-3"><strong class="small">Phản hồi cửa hàng</strong><p class="small mb-1" style="white-space:pre-wrap" th:text="${care.supportResponse}"></p><p class="small text-muted mb-0" th:text="${#temporals.format(care.supportUpdatedAt, 'HH:mm dd/MM/yyyy')}"></p></div>
+    </div>
+    <form th:if="${careOwner and careAfterDelivery and care.complaintStatus == 'NONE'}" th:action="@{/order-care/{id}/support(id=${order.id})}" method="post" enctype="multipart/form-data" class="d-grid gap-2">
+        <label class="small fw-semibold" for="careSupportReason">Lý do cần hỗ trợ</label>
+        <select id="careSupportReason" name="reason" class="form-select" required><option value="">Chọn lý do</option><option value="DAMAGED">Hoa hư hỏng</option><option value="WRONG_ITEM">Không đúng mẫu hoặc thiếu hoa</option><option value="LATE">Giao trễ</option><option value="OTHER">Nội dung khác</option></select>
+        <label class="small" for="careSupportDescription">Mô tả sự việc (10–1.000 ký tự)</label>
+        <textarea id="careSupportDescription" name="description" required minlength="10" maxlength="1000" rows="3" class="form-control"></textarea>
+        <label class="small" for="careSupportPhoto">Ảnh minh chứng nếu có (tối đa 10 MB)</label>
+        <input id="careSupportPhoto" type="file" name="photo" accept="image/jpeg,image/png,image/webp,image/gif" class="form-control">
+        <button type="submit" class="btn btn-outline-success">Gửi yêu cầu hỗ trợ</button>
+    </form>
+    <form th:if="${careManager and (care.complaintStatus == 'OPEN' or care.complaintStatus == 'IN_REVIEW')}" th:action="@{/order-care/{id}/support-response(id=${order.id})}" method="post" class="d-grid gap-2 mt-3">
+        <label class="small fw-semibold" for="careSupportStatus">Cập nhật xử lý</label>
+        <select id="careSupportStatus" name="status" class="form-select" required><option value="IN_REVIEW">Đang xử lý</option><option value="RESOLVED">Đã giải quyết</option><option value="REJECTED">Không chấp nhận yêu cầu</option></select>
+        <label class="small" for="careSupportResponse">Phản hồi và kết quả cụ thể (10–1.000 ký tự)</label>
+        <textarea id="careSupportResponse" name="response" required minlength="10" maxlength="1000" rows="3" class="form-control"></textarea>
+        <button type="submit" class="btn btn-success">Gửi phản hồi cho khách</button>
+    </form>
+</section>
+</body></html>

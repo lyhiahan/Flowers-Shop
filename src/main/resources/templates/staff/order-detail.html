@@ -91,7 +91,8 @@
             <a th:href="@{/staff/chat}" class="btn btn-outline-success w-100"><i class="bi bi-chat-dots me-2" aria-hidden="true"></i>Mở hộp thư khách hàng</a>
         </div>
     </div>
-</main>
+    <th:block th:replace="~{fragments/order-aftercare :: panel}"></th:block>
+    </main>
 <th:block th:replace="~{fragments/staff-layout :: scripts}"></th:block>
 </body>
 </html>

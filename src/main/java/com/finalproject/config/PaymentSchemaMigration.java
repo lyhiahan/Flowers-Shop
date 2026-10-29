@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /** Production uses ddl-auto=none: install additive columns before reading mapped entities. */
 @Component @Order(2) @RequiredArgsConstructor
-@org.springframework.context.annotation.Profile("test")
+@org.springframework.context.annotation.Profile("test & !sql-integration")
 public class PaymentSchemaMigration implements ApplicationRunner {
     private final JdbcTemplate jdbc;
 

@@ -486,7 +486,7 @@
                                                 <i class="bi bi-truck fs-5"></i>
                                                 <div>
                                                     <div>Giao hàng tận nơi</div>
-                                                    <small class="text-muted fw-normal" style="font-size: 13px;">Giao nhanh 60–90 phút</small>
+                                                    <small class="text-muted fw-normal" style="font-size: 13px;">Giao theo ngày và khung giờ đã chọn</small>
                                                 </div>
                                             </label>
                                         </div>
@@ -559,40 +559,26 @@
                                     </div>
                                 </div>
 
-                                <!-- A3: Vùng giao hàng tự động tính toán theo địa chỉ nhận -->
-                                <input type="hidden" name="deliveryZone" id="deliveryZoneSelect"
-                                       th:value="${prevDeliveryZone != null and prevDeliveryZone != 'OUTSIDE' ? prevDeliveryZone : 'NEAR'}">
-
                                 <div class="mb-3" id="deliveryZoneAutoSection">
-                                    <label class="form-label-custom"><i class="bi bi-geo-alt me-1"></i>Khu vực & Cự ly giao hoa</label>
-                                    <div class="p-3 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
-                                        <div class="d-flex align-items-center justify-content-between mb-1">
-                                            <span class="text-secondary small">Khu vực ước tính:</span>
-                                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 11.5px;">
-                                                <i class="bi bi-magic me-1"></i>Tự động tính phí
-                                            </span>
-                                        </div>
-                                        <div class="fw-semibold text-dark" id="displayDeliveryZoneLabel" style="font-size: 14.5px;">
-                                            Vùng gần chi nhánh (&lt; 5 km)
-                                        </div>
-                                        <div class="small text-muted mt-1" style="font-size: 12.5px;">
-                                            Hệ thống tự động áp dụng biểu phí tối ưu theo khoảng cách từ chi nhánh chuẩn bị hoa đến địa chỉ nhận.
-                                        </div>
-                                    </div>
-                                    <div class="d-none" th:each="branch : ${fulfillmentStores}"
-                                         th:data-fulfillment-address="${branch.address}"
-                                         data-fulfillment-branch-marker="true"></div>
+                                    <label class="form-label-custom" for="deliveryZoneSelect">Khu vực giao hoa theo biểu phí (*)</label>
+                                    <select name="deliveryZone" id="deliveryZoneSelect" class="form-select" aria-describedby="deliveryEstimateHelp">
+                                        <option value="" th:selected="${prevDeliveryZone == null or prevDeliveryZone == ''}">Chọn khu vực giao hàng</option>
+                                        <option value="NEAR" th:selected="${prevDeliveryZone == 'NEAR'}">Khu vực gần chi nhánh</option>
+                                        <option value="FAR" th:selected="${prevDeliveryZone == 'FAR'}">Khu vực xa chi nhánh</option>
+                                    </select>
+                                    <p class="small text-muted mt-2" id="deliveryEstimateHelp">Phí được tính theo khu vực bạn chọn và biểu phí của chi nhánh, chưa phải khoảng cách đo bằng bản đồ. Nếu chưa rõ khu vực, hãy liên hệ cửa hàng trước khi đặt.</p>
+                                    <p id="displayDeliveryZoneLabel" class="small fw-semibold" aria-live="polite">Chưa chọn khu vực giao hàng</p>
                                 </div>
 
                                 <!-- Đơn vị giao do hệ thống chọn cùng lúc với báo giá -->
                                 <div class="mb-3" id="deliveryUnitSection">
                                     <label class="form-label-custom"><i class="bi bi-truck me-1"></i>Đơn vị vận chuyển</label>
                                     <div class="form-control-custom w-100" id="assignedDeliveryName" aria-live="polite">
-                                        Giao hàng tiêu chuẩn (60–90 phút)
+                                        Chưa xác định đơn vị giao hàng
                                     </div>
                                     <div class="mt-2 text-muted" style="font-size: 13px; line-height: 1.4;">
                                         <i class="bi bi-info-circle text-success me-1"></i>
-                                        <span>Hệ thống tự chọn đơn vị có biểu phí phù hợp nhất theo chi nhánh và địa chỉ nhận.</span>
+                                        <span>Đơn vị giao được chọn theo chi nhánh và khu vực biểu phí bạn cung cấp.</span>
                                     </div>
                                 </div>
 
@@ -845,7 +831,7 @@
                                 </div>
                                 <div class="summary-row" id="shippingFeeRow">
                                     <span>Phí giao hàng:</span>
-                                    <span class="summary-val text-primary" id="displayShippingFee" th:text="${prevShippingMethod == 'PICKUP' ? '0 ₫' : (grandTotal > subtotal ? #numbers.formatDecimal(grandTotal - subtotal, 0, 'COMMA', 0, 'POINT') + ' ₫' : '40.000 ₫')}">40.000 ₫</span>
+                                    <span class="summary-val text-primary" id="displayShippingFee" th:text="${prevShippingMethod == 'PICKUP' ? '0 ₫' : 'Chưa xác định'}">Chưa xác định</span>
                                 </div>
                                 <div class="summary-row"><span>Giảm giá:</span><span id="displayDiscount" class="summary-val text-danger">-0 ₫</span></div><p id="quoteStatus" class="small text-danger" role="status" aria-live="polite"></p>
 
@@ -867,7 +853,7 @@
                                 </div>
 
                                 <p class="text-center text-muted small mt-3 mb-0" style="font-size: 13px;">
-                                    <i class="bi bi-shield-check text-success me-1"></i>Cam kết hoa tươi 100%, đúng mẫu đã chọn
+                                    <i class="bi bi-shield-check text-success me-1"></i>Xem ảnh thành phẩm và gửi hỗ trợ trong chi tiết đơn hàng
                                 </p>
                             </div>
                         </div>
@@ -932,55 +918,16 @@
         /* ============================================================
          * Điền thông tin từ địa chỉ đã lưu (chỉ áp dụng khi Giao tận nơi)
          * ============================================================ */
+        // Reflect an explicit tariff zone; never infer kilometres from address keywords.
         function autoDetectDeliveryZone() {
-            const addrInput = document.getElementById('recipientAddressInput');
             const zoneInput = document.getElementById('deliveryZoneSelect');
-            const labelEl = document.getElementById('displayDeliveryZoneLabel');
-            if (!zoneInput) return;
-            const addr = (addrInput ? addrInput.value : '').toLowerCase().trim();
-            if (!addr) {
-                zoneInput.value = 'NEAR';
-                if (labelEl) labelEl.textContent = 'Vùng gần chi nhánh (< 5 km)';
-                return;
-            }
-            const branchMarkers = document.querySelectorAll('[data-fulfillment-address]');
-            let branchAddr = '';
-            branchMarkers.forEach(function(m) {
-                if (!branchAddr && m.getAttribute('data-fulfillment-address')) {
-                    branchAddr = m.getAttribute('data-fulfillment-address').toLowerCase().trim();
-                }
-            });
-
-            const areas = [
-                ['quận 1', 'q1', 'q.1', 'quận 3', 'q3', 'q.3', 'quận 4', 'q4', 'quận 5', 'q5', 'quận 10', 'q10', 'bến nghé', 'bến thành'],
-                ['quận 7', 'q7', 'q.7', 'nhà bè', 'phú mỹ hưng', 'nguyễn thị thập', 'tân hưng', 'tân phong', 'quận 8', 'q8'],
-                ['thủ đức', 'quận 2', 'q2', 'quận 9', 'q9', 'dĩ an', 'bình dương', 'thảo điền', 'an phú'],
-                ['cao lãnh', 'đồng tháp', 'sa đéc', 'an bình', 'mỹ trà', 'lấp vò'],
-                ['bình thạnh', 'phú nhuận', 'gò vấp', 'tân bình', 'tân phú'],
-                ['quận 6', 'quận 11', 'bình tân', 'quận 12', 'hóc môn', 'củ chi']
-            ];
-
-            let isNear = true;
-            if (branchAddr) {
-                let matchedBranchArea = -1;
-                let matchedCustomerArea = -1;
-                for (let i = 0; i < areas.length; i++) {
-                    if (areas[i].some(kw => branchAddr.includes(kw))) matchedBranchArea = i;
-                    if (areas[i].some(kw => addr.includes(kw))) matchedCustomerArea = i;
-                }
-                if (matchedBranchArea !== -1 && matchedCustomerArea !== -1) {
-                    isNear = (matchedBranchArea === matchedCustomerArea);
-                } else if (matchedBranchArea !== -1 && matchedCustomerArea === -1) {
-                    isNear = false;
-                }
-            }
-
-            const zone = isNear ? 'NEAR' : 'FAR';
-            zoneInput.value = zone;
-            if (labelEl) {
-                labelEl.textContent = isNear ? 'Vùng gần chi nhánh (< 5 km)' : 'Vùng xa chi nhánh (5–15 km)';
-            }
+            const label = document.getElementById('displayDeliveryZoneLabel');
+            if (label) label.textContent = zoneInput?.value === 'NEAR' ? 'Báo phí theo khu vực gần chi nhánh'
+                : zoneInput?.value === 'FAR' ? 'Báo phí theo khu vực xa chi nhánh' : 'Chưa chọn khu vực giao hàng';
         }
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('deliveryZoneSelect')?.addEventListener('change', autoDetectDeliveryZone);
+        });
         if (typeof window !== 'undefined') window.autoDetectDeliveryZone = autoDetectDeliveryZone;
 
         function updateDeliveryDirections() {
@@ -1198,159 +1145,7 @@
          * Cập nhật tổng tiền bằng cách gọi /checkout/quote (AJAX)
          * Bao gồm mã giảm giá, phí giao hàng theo đơn vị/chi nhánh đã chọn
          * ============================================================ */
-        let quoteTimer = null;
-        function updateCheckoutTotal() {
-            clearTimeout(quoteTimer);
-            quoteTimer = setTimeout(_doQuote, 300);
-        }
-
-        function _doQuote() {
-            const isPickup = document.getElementById('methodPickup') &&
-                             document.getElementById('methodPickup').checked;
-            const form = document.getElementById('checkoutForm');
-
-            /* Gom các item đã chọn */
-            const itemInputs = form.querySelectorAll('input[name="selectedItemIds"]');
-            const params = new URLSearchParams();
-            itemInputs.forEach(function(el) { params.append('selectedItemIds', el.value); });
-
-            /* Phương thức nhận */
-            params.append('shippingMethod', isPickup ? 'PICKUP' : 'DELIVERY');
-
-            /* Địa chỉ người nhận */
-            const addrEl = document.getElementById('recipientAddressInput');
-            if (addrEl && addrEl.value.trim()) {
-                params.append('recipientAddress', addrEl.value.trim());
-            }
-
-            /* Vùng giao demo; đơn vị giao được server tự chọn theo biểu phí */
-            if (!isPickup) {
-                const zoneSelect = document.getElementById('deliveryZoneSelect');
-                if (zoneSelect && zoneSelect.value) params.append('deliveryZone', zoneSelect.value);
-            }
-
-            /* Chi nhánh tự lấy */
-            if (isPickup) {
-                const storeSelect = document.getElementById('pickupStoreSelect');
-                if (storeSelect && storeSelect.value) {
-                    params.append('pickupStoreId', storeSelect.value);
-                }
-            }
-
-            /* Mã giảm giá */
-            const voucherEl = document.getElementById('voucherInput');
-            if (voucherEl && voucherEl.value.trim()) {
-                params.append('voucherCode', voucherEl.value.trim().toUpperCase());
-            }
-
-            /* CSRF */
-            const csrfInput = form.querySelector('input[name="_csrf"]');
-            if (csrfInput) {
-                params.append(csrfInput.name, csrfInput.value);
-            }
-
-            const quoteUrl = form.getAttribute('data-quote-url') || '/checkout/quote';
-            const statusEl = document.getElementById('quoteStatus');
-
-            if (statusEl) {
-                statusEl.textContent = '';
-            }
-
-            fetch(quoteUrl, {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: params.toString()
-            })
-            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
-            .then(function(res) {
-                if (!res.ok) {
-                    if (statusEl) {
-                        statusEl.textContent = res.data.message || 'Không thể tính tổng tiền.';
-                    }
-                    if (isPickup) {
-                        const feeEl = document.getElementById('displayShippingFee');
-                        if (feeEl) {
-                            feeEl.textContent = '0 ₫';
-                            feeEl.classList.remove('text-primary');
-                        }
-                        const grandTotalEl = document.getElementById('displayGrandTotal');
-                        const base = parseFloat((grandTotalEl && grandTotalEl.dataset.baseTotal) || '0');
-                        if (grandTotalEl && base > 0) grandTotalEl.textContent = formatVnd(base);
-                    }
-                    const assignedDeliveryName = document.getElementById('assignedDeliveryName');
-                    if (assignedDeliveryName && !isPickup) assignedDeliveryName.textContent = 'Chưa chọn được đơn vị vận chuyển phù hợp.';
-                    return;
-                }
-                const d = res.data;
-                const assignedDeliveryName = document.getElementById('assignedDeliveryName');
-                if (assignedDeliveryName && !isPickup) {
-                    assignedDeliveryName.textContent = d.deliveryUnitName || 'Chưa cấu hình đơn vị vận chuyển cho vùng này.';
-                }
-
-                /* Phí giao hàng */
-                const shippingFeeEl = document.getElementById('displayShippingFee');
-                if (shippingFeeEl) {
-                    if (isPickup) {
-                        shippingFeeEl.textContent = '0 ₫';
-                        shippingFeeEl.classList.remove('text-primary');
-                    } else {
-                        const fee = parseFloat(d.shippingFee) || 0;
-                        if (fee > 0) {
-                            shippingFeeEl.textContent = formatVnd(fee);
-                            shippingFeeEl.classList.add('text-primary');
-                        } else {
-                            shippingFeeEl.textContent = '0 ₫';
-                            shippingFeeEl.classList.remove('text-primary');
-                        }
-                    }
-                }
-
-                /* Giảm giá */
-                const discountEl = document.getElementById('displayDiscount');
-                if (discountEl) {
-                    const disc = parseFloat(d.discount) || 0;
-                    discountEl.textContent = '-' + formatVnd(disc);
-                    discountEl.style.color = disc > 0 ? '#16a34a' : '';
-                }
-
-                /* Tổng thanh toán */
-                const grandTotalEl = document.getElementById('displayGrandTotal');
-                if (grandTotalEl) {
-                    grandTotalEl.textContent = formatVnd(parseFloat(d.total) || 0);
-                }
-            })
-            .catch(function() {
-                /* Khi mất kết nối: tính cục bộ như trước để trang không đứng */
-                _calcLocalFallback();
-            });
-        }
-
-        /* Tính cục bộ khi không gọi được server (fallback, không tính voucher) */
-        function _calcLocalFallback() {
-            const isPickup = document.getElementById('methodPickup') &&
-                             document.getElementById('methodPickup').checked;
-            const shippingFeeEl = document.getElementById('displayShippingFee');
-            const grandTotalEl  = document.getElementById('displayGrandTotal');
-            const base = parseFloat((grandTotalEl && grandTotalEl.dataset.baseTotal) || '0');
-            let shippingFee = 0;
-            if (shippingFeeEl) {
-                if (isPickup) {
-                    shippingFeeEl.textContent = '0 ₫';
-                    shippingFeeEl.classList.remove('text-primary');
-                } else {
-                    shippingFeeEl.textContent = 'Chưa xác định';
-                    shippingFeeEl.classList.remove('text-primary');
-                }
-            }
-            if (grandTotalEl) {
-                grandTotalEl.textContent = isPickup ? formatVnd(base) : formatVnd(base) + ' + phí giao';
-            }
-        }
-
-        function formatVnd(amount) {
-            return amount.toLocaleString('vi-VN') + ' ₫';
-        }
+        // Server quote and submit readiness are handled by /js/checkout-quote.js.
 
         /* ============================================================
          * Phương thức thanh toán
@@ -1527,8 +1322,8 @@
                     if (!addressInput?.value.trim()) {
                         markInvalid(addressInput, 'Vui lòng nhập địa chỉ giao hàng.');
                     }
-                    if (!zoneInput?.value || zoneInput.value === 'OUTSIDE') {
-                        if (zoneInput) zoneInput.value = 'NEAR';
+                    if (!zoneInput?.value || !['NEAR', 'FAR'].includes(zoneInput.value)) {
+                        markInvalid(zoneInput, 'Vui lòng chọn khu vực giao hàng theo biểu phí.');
                     }
                 }
 

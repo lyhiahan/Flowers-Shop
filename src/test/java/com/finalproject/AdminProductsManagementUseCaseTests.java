@@ -184,6 +184,9 @@ class AdminProductsManagementUseCaseTests {
     @Test
     @WithMockUser(username = "customer_denied_uc28", roles = {"USER"})
     void testPreCondition_CustomerDeniedAccessToAdminProducts() throws Exception {
+        // Use a real active account so this checks authorization, not session revocation.
+        userRepository.saveAndFlush(User.builder().username("customer_denied_uc28").email("customer_denied_uc28@fixture.test")
+                .password("unused-fixture-password").fullName("Access test").role(Role.USER).isActive(true).build());
         mockMvc.perform(get("/admin/products-manage"))
                 .andExpect(status().isForbidden());
     }

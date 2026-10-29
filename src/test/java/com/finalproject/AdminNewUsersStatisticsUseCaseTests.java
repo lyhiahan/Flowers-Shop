@@ -194,6 +194,9 @@ class AdminNewUsersStatisticsUseCaseTests {
     @Test
     @WithMockUser(username = "customer_normal", roles = {"USER"})
     void testPreCondition_CustomerDeniedAccessToAdminDashboard() throws Exception {
+        // Use a real active account so this checks authorization, not session revocation.
+        userRepository.saveAndFlush(User.builder().username("customer_normal").email("customer_normal@fixture.test")
+                .password("unused-fixture-password").fullName("Access test").role(Role.USER).isActive(true).build());
         mockMvc.perform(get("/admin/dashboard"))
                 .andExpect(status().isForbidden());
     }

@@ -110,6 +110,9 @@ class CodStockKpiTests {
                 .andExpect(jsonPath("$.currentStockQuantity").value(own));
         mvc.perform(get("/admin/dashboard/stock").with(user(admin.getUsername()).roles("ADMIN")))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.currentStockQuantity").value(all));
+        mvc.perform(get("/admin/dashboard/stock").param("storeId", branch.getId().toString())
+                        .with(user(admin.getUsername()).roles("ADMIN")))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.currentStockQuantity").value(own));
         mvc.perform(get("/").with(user(customer.getUsername()).roles("USER")))
                 .andExpect(status().isOk()).andExpect(model().attribute("customerStockQuantity", all))
                 .andExpect(content().string(org.hamcrest.Matchers.not(containsString("id=\"customerStockQuantity\""))))

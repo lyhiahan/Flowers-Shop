@@ -165,6 +165,8 @@ Dành cho máy sử dụng Microsoft SQL Server & SSMS:
 - **Tách biệt quyền nghiêm ngặt:** Tài khoản `MANAGER` và `ADMIN` chỉ tập trung quản trị, bị chặn hoàn toàn quyền mua hàng/giỏ hàng server-side để tránh xung đột lợi ích nghiệp vụ.
 - **Staff Workspace:** Nhân viên chi nhánh có sidebar làm việc riêng, xử lý tuần tự vòng đời đơn hàng: `PENDING` $\rightarrow$ `CONFIRMED` $\rightarrow$ `PREPARING` $\rightarrow$ `DELIVERING` $\rightarrow$ `COMPLETED`.
 
+- **Ảnh thành phẩm và hỗ trợ sau giao:** Cửa hàng gửi ảnh theo đơn, khách duyệt đúng phiên bản trước khi bàn giao; bổ sung ảnh bàn giao, xác nhận nhận hoa và yêu cầu hỗ trợ do quản lý chi nhánh/admin phản hồi. Xem [hướng dẫn thao tác và migration](docs/HUONG_DAN_ANH_THANH_PHAM_VA_HO_TRO.md). Phí giao hàng lấy từ máy chủ theo khu vực biểu phí khách chọn, không suy khoảng cách từ địa chỉ.
+
 ---
 
 ## 5. CẤU TRÚC THƯ MỤC MÃ NGUỒN

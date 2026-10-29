@@ -85,4 +85,15 @@ try {
     Write-Host "All $passed launcher checks passed. Only fixture files and mocked Maven were used; no database connection."
 } finally {
     foreach ($key in $saved.Keys) { [Environment]::SetEnvironmentVariable($key, $saved[$key], 'Process') }
+    # This fixture contains only generated test configuration and mocked Maven.
+    # Keep repeated launcher checks from leaving private test files in target/.
+    $fixtureTarget = [IO.Path]::GetFullPath((Join-Path $root 'target'))
+    $fixturePath = [IO.Path]::GetFullPath($fixture)
+    if ([IO.Path]::GetDirectoryName($fixturePath) -ne $fixtureTarget -or
+        ![IO.Path]::GetFileName($fixturePath).StartsWith('start-web-fixture-')) {
+        throw 'Refusing to remove a launcher fixture outside target/.'
+    }
+    if (Test-Path -LiteralPath $fixturePath) {
+        Remove-Item -LiteralPath $fixturePath -Recurse -Force
+    }
 }

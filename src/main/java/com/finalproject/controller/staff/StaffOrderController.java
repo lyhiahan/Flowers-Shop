@@ -19,6 +19,7 @@ public class StaffOrderController {
     private final StaffService staffService;
     private final StoreAccessService access;
     private final com.finalproject.repository.DeliveryRepository deliveries;
+    private final com.finalproject.service.OrderAftercareService aftercare;
 
     @GetMapping({"", "/preparation", "/delivery"})
     public String list(@RequestParam(defaultValue="") String keyword,
@@ -65,6 +66,7 @@ public class StaffOrderController {
                 : List.of(OrderStatus.PENDING, OrderStatus.CONFIRMED, OrderStatus.PREPARING, OrderStatus.DELIVERING, OrderStatus.DELIVERED, OrderStatus.COMPLETED);
         model.addAttribute("steps", steps);
         model.addAttribute("stepIndex", steps.indexOf(order.getStatus()));
+        aftercare.addToModel(order, model);
         return "staff/order-detail";
     }
 

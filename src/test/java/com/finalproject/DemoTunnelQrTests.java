@@ -92,6 +92,9 @@ class DemoTunnelQrTests {
     }
 
     @Test void connectionEndpointIsOwnerOnlyAndCannotBeExposedByTheGateway() throws Exception {
+        // Use a real active account so this checks authorization, not session revocation.
+        users.saveAndFlush(User.builder().username("someone-else").email("someone-else@fixture.test")
+                .password("unused-fixture-password").fullName("Access test").role(Role.USER).isActive(true).build());
         mvc.perform(get("/customer/demo-payment/" + token + "/connection").with(user("someone-else").roles("USER")))
                 .andExpect(status().isForbidden());
         mvc.perform(get("/customer/demo-payment/" + token + "/connection"))

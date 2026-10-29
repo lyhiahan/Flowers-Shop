@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /** Keep legacy reviews without an order, while enforcing one review per purchased item/order. */
 @Component @Order(31) @RequiredArgsConstructor
-@org.springframework.context.annotation.Profile("test")
+@org.springframework.context.annotation.Profile("test & !sql-integration")
 public class ReviewIntegrityMigration implements ApplicationRunner {
     private final JdbcTemplate jdbc;
 

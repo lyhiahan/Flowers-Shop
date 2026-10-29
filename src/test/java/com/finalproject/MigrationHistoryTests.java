@@ -18,6 +18,6 @@ class MigrationHistoryTests {
         }
         assertThatCode(flyway::validate).doesNotThrowAnyException();
         assertThat(flyway.info().pending()).extracting(m -> m.getVersion().getVersion())
-                .containsExactly("12","13","14","15","17","18");
+                .containsExactly("12","13","14","15","17","18","19");
     }
 }

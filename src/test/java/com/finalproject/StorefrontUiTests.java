@@ -112,7 +112,7 @@ class StorefrontUiTests {
             assertThat(html.split("<footer\\b", -1)).as(route).hasSize(2);
             assertThat(html).contains("href=\"/css/site-footer.css\"");
             assertThat(footer).contains(store.getBranchDisplayName(), store.getAddress(), "href=\"/stores/" + store.getId() + "\"",
-                    "atelier@hoatuoisaigon.vn", "60–90 phút");
+                    "atelier@hoatuoisaigon.vn", "Giao theo ngày và khung giờ đã chọn", "/service-policy");
             if (expected == null) expected = footer;
             else assertThat(footer).as(route).isEqualTo(expected);
             preview(route.equals("/") ? "home-empty.html" : route.replaceAll("[^a-zA-Z0-9]", "_") + ".html", html);
@@ -270,8 +270,8 @@ class StorefrontUiTests {
             var section = Pattern.compile("(?s)<section\\b[^>]*id=\"wishlistPromises\"[^>]*>.*?</section>").matcher(html);
             assertThat(section.find()).isTrue();
             String promises = section.group();
-            assertThat(promises).contains("mt-8 md:mt-10", "gap-4 md:gap-6", "Cam Kết Tươi Mới 3 Ngày",
-                            "Chụp Ảnh Trước Khi Giao", "Đổi Trả &amp; Hoàn Tiền 100%")
+            assertThat(promises).contains("mt-8 md:mt-10", "gap-4 md:gap-6", "Hướng Dẫn Chăm Sóc Hoa",
+                            "Chụp Ảnh Trước Khi Giao", "Hỗ Trợ Sau Giao")
                     .doesNotContain("mt-space-xl", "gap-space-md", "p-space-md", "id=\"wishlistToast\"");
             assertThat(promises.split("class=\"p-5 ", -1)).hasSize(4);
         }

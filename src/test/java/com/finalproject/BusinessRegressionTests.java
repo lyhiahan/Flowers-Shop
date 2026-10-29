@@ -216,7 +216,7 @@ class BusinessRegressionTests {
         assertThat(membership.getActive()).isFalse();
         assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
         mvc.perform(get("/staff/orders").with(user(staff.getUsername()).roles("STAFF")))
-                .andExpect(status().isForbidden());
+                .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/login?locked=true"));
     }
 
     @Test void deletingResponsibleManagerRequiresReplacementFirst() throws Exception {
@@ -264,7 +264,7 @@ class BusinessRegressionTests {
         assertThat(customer.getIsActive()).isFalse();
         assertThat(em.find(JwtSession.class, session.getId())).isNotNull();
         mvc.perform(get("/customer/orders").with(user(customer.getUsername()).roles("USER")))
-                .andExpect(status().isForbidden());
+                .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/login?locked=true"));
     }
 
     @Test void deletingUnusedCustomerCleansCartAndRemovesAccount() throws Exception {
@@ -533,7 +533,7 @@ class BusinessRegressionTests {
     @Test void lockedAccountCannotUseOldSessionCartCheckoutOrMockPayment() throws Exception {
         Order order = checkout(PaymentMethod.MOMO);
         customer.setIsActive(false); users.saveAndFlush(customer);
-        mvc.perform(post("/checkout/momo/" + order.getId() + "/simulate").with(user(customer.getUsername()).roles("USER")).with(csrf()))
+        mvc.perform(post("/checkout/momo/" + order.getId() + "/simulate").header("X-Requested-With", "XMLHttpRequest").with(user(customer.getUsername()).roles("USER")).with(csrf()))
                 .andExpect(status().isForbidden());
         assertThatThrownBy(() -> momo.simulatePayment(order.getId(), customer.getUsername()))
                 .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
@@ -1055,6 +1055,7 @@ class BusinessRegressionTests {
     }
 
     @Test void bankInstructionsUseOrderTotalAndOnlyOwnerCanReadPaymentStatus() throws Exception {
+        createUser("another-customer", Role.USER, null);
         Order order = checkout(PaymentMethod.BANK_TRANSFER);
         String route = "/checkout/bank/" + order.getId();
         mvc.perform(get(route).with(user(customer.getUsername()).roles("USER")))
@@ -1077,6 +1078,7 @@ class BusinessRegressionTests {
     }
 
     @Test void customerPaymentCompatibilityRouteCannotSelfConfirmBankTransfer() throws Exception {
+        createUser("another-customer", Role.USER, null);
         Order order = checkout(PaymentMethod.BANK_TRANSFER);
         String route = "/customer/payment/" + order.getId();
         mvc.perform(get(route).with(user(customer.getUsername()).roles("USER")))
@@ -1691,7 +1693,7 @@ class BusinessRegressionTests {
 
     @Test void oldSessionCannotRetainAdminPrivilegesAndMissingActorIsRejected() throws Exception {
         mvc.perform(get("/admin/transactions").with(user(customer.getUsername()).roles("ADMIN"))).andExpect(status().isForbidden());
-        mvc.perform(get("/customer/profile").with(user("deleted-account").roles("USER"))).andExpect(status().isForbidden());
+        mvc.perform(get("/customer/profile").with(user("deleted-account").roles("USER"))).andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/login?locked=true"));
         mvc.perform(get("/admin/vouchers/delete/123").with(user("admin-test").roles("ADMIN"))).andExpect(status().isMethodNotAllowed());
         mvc.perform(post("/admin/vouchers/delete/123").with(user("admin-test").roles("ADMIN"))).andExpect(status().isForbidden());
     }

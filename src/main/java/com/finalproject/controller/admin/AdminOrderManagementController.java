@@ -22,6 +22,7 @@ import java.util.List;
 @RequestMapping({"/admin/orders", "/admin/orders-manage"})
 @RequiredArgsConstructor
 public class AdminOrderManagementController {
+    private final com.finalproject.service.OrderAftercareService aftercare;
 
     private final OrderService orderService;
     private final OrderWorkflowService workflow;
@@ -173,6 +174,7 @@ public class AdminOrderManagementController {
         model.addAttribute("order", order);
         model.addAttribute("isHandedOverToDelivery", isHandedOverToDelivery);
         model.addAttribute("availableStatuses", availableStatuses);
+        aftercare.addToModel(order, model);
 
         return "admin/order-detail";
     }

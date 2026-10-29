@@ -36,6 +36,33 @@ function checkout(fetch, walletBalance) {
 }
 const ok = total => ({ ok: true, redirected: false, json: async () => ({ subtotal: total, shippingFee: 0, discount: 0, total }) });
 
+test('delivery fees remain unknown until the server returns the current branch tariff', async () => {
+    let resolve;
+    const app = checkout(() => new Promise(done => { resolve = done; }));
+    app.node('displayShippingFee').textContent = '25.000 ₫';
+    app.update();
+    assert.equal(app.node('displayShippingFee').textContent, 'Chưa xác định');
+    const pending = app.run();
+    resolve({ ok: true, redirected: false, json: async () => ({ subtotal: 100000, shippingFee: 37000, discount: 0, total: 137000 }) });
+    await pending;
+    assert.match(app.node('displayShippingFee').textContent, /37[.,]000/);
+    app.update();
+    assert.equal(app.node('displayShippingFee').textContent, 'Chưa xác định');
+});
+
+test('changing address does not silently choose or overwrite a delivery zone', () => {
+    const html = fs.readFileSync(path.join(__dirname, '../../main/resources/templates/customer/checkout.html'), 'utf8');
+    const start = html.indexOf('        function autoDetectDeliveryZone()');
+    const code = html.slice(start, html.indexOf('        document.addEventListener', start));
+    for (const value of ['', 'NEAR', 'FAR']) {
+        const zone = { value }, label = {};
+        const context = { document: { getElementById: id => id === 'deliveryZoneSelect' ? zone : label } };
+        vm.runInNewContext(code + '\nautoDetectDeliveryZone();', context);
+        assert.equal(zone.value, value);
+        assert.ok(label.textContent.length > 0);
+    }
+});
+
 test('checkout remains clickable so missing-field validation can show an error while quote is pending', async () => {
     const app = checkout(async () => ok(150000));
     let prevented = false;

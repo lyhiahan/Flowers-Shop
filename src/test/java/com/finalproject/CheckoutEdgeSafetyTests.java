@@ -172,6 +172,9 @@ class CheckoutEdgeSafetyTests {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.ok").value(false));
     }
     @Test void foreignCartSelectionIsForbidden() throws Exception {
+        // Use a real active account so this checks authorization, not session revocation.
+        users.saveAndFlush(User.builder().username("another_customer").email("another_customer@fixture.test")
+                .password("unused-fixture-password").fullName("Access test").role(Role.USER).isActive(true).build());
         mvc.perform(get("/api/customer/pickup-check").with(user("another_customer").roles("USER"))
                 .param("storeId",store.getId().toString()).param("itemIds",first.getId().toString())).andExpect(status().isForbidden());
     }

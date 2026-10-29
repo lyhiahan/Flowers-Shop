@@ -1586,6 +1586,22 @@ Các prompt nhiều dòng và những yêu cầu khác cũng còn thấy trong l
 - **Kết quả đối chiếu:**
   - Loại bỏ khối form và nút `desktop-confirm-button` tại `src/main/resources/templates/customer/demo-payment.html`, chỉ giữ lại hiển thị mã QR và liên kết mở trang quét mã xác thực trên điện thoại để đảm bảo tính thực tế của trải nghiệm thanh toán quét mã MoMo.
 
+**HT-84 — Kiểm tra, xóa dữ liệu và giải phóng hoàn toàn email đăng ký**
+
+> xoa scacs tại khoản có các địa chỉ email sau và giải phóng: lygiahan17082006@gmail.com, lyhiahan02@gmail.com
+
+- **Kết quả đối chiếu:**
+  - Kiểm tra và dọn dẹp triệt để trên cả hai môi trường cơ sở dữ liệu (Microsoft SQL Server cục bộ và PostgreSQL trên Aiven Cloud): xác nhận không còn bất kỳ bản ghi tài khoản người dùng, giỏ hàng, đơn hàng, token hay ràng buộc khóa ngoại nào liên quan đến 2 email `lygiahan17082006@gmail.com` và `lyhiahan02@gmail.com`.
+  - Khởi động lại ứng dụng để giải phóng toàn bộ bộ nhớ đệm xác thực tạm thời (`pendingRegistrations` trong `AuthService`), cho phép người dùng đăng ký mới hoàn toàn mà không bị vướng lỗi "Email đang chờ xác thực" hay "Email đã tồn tại".
+
+**HT-85 — Khởi động lại hệ thống máy chủ ứng dụng web**
+
+> tắt web và chạy lại
+
+- **Kết quả đối chiếu:**
+  - Hủy tiến trình máy chủ web đang chạy, giải phóng hoàn toàn socket kết nối cổng 8080 và dọn sạch bộ nhớ cache session/OTP tạm.
+  - Chạy lại script `scripts/run-local.ps1` kết nối cơ sở dữ liệu `RentalShop` trên SQL Server cổng `53735`, tự động kiểm tra Flyway schema và đưa ứng dụng lên trạng thái sẵn sàng phục vụ tại `http://localhost:8080`.
+
 **Tóm tắt kết quả có thể đối chiếu ngắn gọn:** đã viết tài liệu prompt và hướng dẫn setup; bổ sung kịch bản test; chỉnh nhiều luồng sản phẩm, tồn kho, đơn hàng, đánh giá, phân quyền và giao diện; chuẩn bị cấu hình cloud/email. Trạng thái thực tế của từng chức năng cần đối chiếu mã nguồn và kết quả kiểm thử tại thời điểm nộp; riêng các câu hỏi về Antigravity là hướng dẫn sử dụng công cụ, không phải thay đổi mã nguồn dự án.
 
 <a name="phan-7-tong-ket"></a>

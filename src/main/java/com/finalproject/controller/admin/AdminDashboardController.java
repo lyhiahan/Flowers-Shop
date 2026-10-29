@@ -29,9 +29,11 @@ public class AdminDashboardController {
 
     @GetMapping("/dashboard/stock")
     @ResponseBody
-    public org.springframework.http.ResponseEntity<Map<String, Long>> stock() {
+    public org.springframework.http.ResponseEntity<Map<String, Long>> stock(@RequestParam(required = false) Long storeId) {
+        if (storeId != null && !storeRepository.existsById(storeId))
+            throw new IllegalArgumentException("Chi nhánh không tồn tại.");
         return org.springframework.http.ResponseEntity.ok().cacheControl(org.springframework.http.CacheControl.noStore())
-                .body(Map.of("currentStockQuantity", analyticsService.currentStockQuantity(null)));
+                .body(Map.of("currentStockQuantity", analyticsService.currentStockQuantity(storeId)));
     }
 
     @GetMapping({"", "/dashboard"})
@@ -39,6 +41,7 @@ public class AdminDashboardController {
             @RequestParam(value = "timeframe", required = false) String timeframe,
             @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(value = "storeId", required = false) Long storeId,
             @RequestParam(value = "userChartType", defaultValue = "line") String userChartType,
             @RequestParam(value = "storeChartType", defaultValue = "bar") String storeChartType,
             @RequestParam(value = "error", required = false) String error,
@@ -49,7 +52,12 @@ public class AdminDashboardController {
         if (!Set.of("line", "bar", "pie").contains(chartType) || !Set.of("line", "bar", "pie").contains(userChartType)
                 || !Set.of("line", "bar", "pie").contains(storeChartType))
             throw new IllegalArgumentException("Loại biểu đồ không hợp lệ.");
+        Store selectedStore = storeId == null ? null : storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("Chi nhánh không tồn tại."));
         model.addAttribute("reportRange", range);
+        model.addAttribute("selectedStoreId", storeId);
+        model.addAttribute("selectedStoreName", selectedStore == null ? "Toàn hệ thống" : selectedStore.getName());
+        model.addAttribute("reportStores", storeRepository.findAll(Sort.by("name", "id")));
         model.addAttribute("timeframe", timeframe == null ? range.period() : timeframe);
         model.addAttribute("userChartType", userChartType); model.addAttribute("storeChartType", storeChartType);
         model.addAttribute("criteria", criteria); model.addAttribute("chartType", chartType);
@@ -64,12 +72,14 @@ public class AdminDashboardController {
                     cb.greaterThanOrEqualTo(root.get("createdAt"), range.start()), cb.lessThan(root.get("createdAt"), range.endExclusive()));
             Specification<Product> createdProducts = (root, query, cb) -> cb.and(
                     cb.greaterThanOrEqualTo(root.get("createdAt"), range.start()), cb.lessThan(root.get("createdAt"), range.endExclusive()),
+                    storeId == null ? cb.conjunction() : cb.equal(root.get("store").get("id"), storeId),
                     cb.or(cb.isFalse(root.get("isDeleted")), cb.isNull(root.get("isDeleted"))));
             Specification<Order> createdOrders = (root, query, cb) -> cb.and(
-                    cb.greaterThanOrEqualTo(root.get("createdAt"), range.start()), cb.lessThan(root.get("createdAt"), range.endExclusive()));
+                    cb.greaterThanOrEqualTo(root.get("createdAt"), range.start()), cb.lessThan(root.get("createdAt"), range.endExclusive()),
+                    storeId == null ? cb.conjunction() : cb.equal(root.get("pickupStore").get("id"), storeId));
             var latest = PageRequest.of(0, 1000, Sort.by(Sort.Direction.DESC, "createdAt", "id"));
             var byPoints = PageRequest.of(0, 1000, Sort.by(Sort.Direction.DESC, "point", "id"));
-            model.addAllAttributes(analyticsService.dashboard(null, range, criteria));
+            model.addAllAttributes(analyticsService.dashboard(storeId, range, criteria));
             long totalUsers = userRepository.count(registered), totalStores = storeRepository.count(createdStores);
             model.addAttribute("totalUsers", totalUsers); model.addAttribute("totalUsersCount", totalUsers);
             model.addAttribute("totalStores", totalStores); model.addAttribute("totalStoresCount", totalStores);
@@ -89,7 +99,7 @@ public class AdminDashboardController {
             model.addAttribute("recentUsers", userRepository.findAll(registered, latest).getContent());
             model.addAttribute("topPointStores", storeRepository.findAll(createdStores, byPoints).getContent());
             model.addAttribute("recentStores", storeRepository.findAll(createdStores, latest).getContent());
-            model.addAttribute("revenueChart", analyticsService.getRevenueChart(range, null));
+            model.addAttribute("revenueChart", analyticsService.getRevenueChart(range, storeId));
             model.addAttribute("usersChart", analyticsService.getNewUsersChart(range));
             model.addAttribute("storesChart", analyticsService.getNewStoresChart(range));
             model.addAttribute("products", productRepository.findAll(createdProducts, latest).getContent());

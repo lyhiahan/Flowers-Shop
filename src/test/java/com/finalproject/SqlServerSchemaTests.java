@@ -42,7 +42,8 @@ class SqlServerSchemaTests {
                         + Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V6__chat_product_context.sql"))
                         + Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V7__product_categories.sql"))
                         + Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V8__branch_catalog_visibility.sql"))
-                        + Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V17__customer_demo_wallet.sql"));
+                        + Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V17__customer_demo_wallet.sql"))
+                        + Files.readString(Path.of("src/main/resources/db/migration/sqlserver/V19__order_aftercare.sql"));
                 String pendingFunds = Files.readString(Path.of("src/main/java/com/finalproject/db/migration/V10__demo_pending_funds.java"));
                 for (var table : metadata.collectTableMappings()) {
                     var pattern = java.util.regex.Pattern.compile("create\\s+table\\s+(?:dbo\\.)?"

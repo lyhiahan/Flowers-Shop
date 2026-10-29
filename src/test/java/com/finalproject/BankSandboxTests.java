@@ -104,6 +104,9 @@ class BankSandboxTests {
         assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
     }
     @Test void otherCustomersCannotReadOrPayOrder() throws Exception {
+        // Use a real active account so this checks authorization, not session revocation.
+        users.saveAndFlush(User.builder().username("someone_else").email("someone_else@fixture.test")
+                .password("unused-fixture-password").fullName("Access test").role(Role.USER).isActive(true).build());
         mvc.perform(get("/checkout/bank/"+order.getId()).with(user("someone_else").roles("USER"))).andExpect(status().isForbidden());
         mvc.perform(post("/checkout/bank/"+order.getId()+"/simulate").with(user("someone_else").roles("USER")).with(csrf())
                 .param("token","fake").param("amount","100000")).andExpect(status().isForbidden());

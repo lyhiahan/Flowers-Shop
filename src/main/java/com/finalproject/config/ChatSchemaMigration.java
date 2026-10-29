@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 
 /** Chat must install its schema explicitly because production uses ddl-auto=none. */
 @Component
-@org.springframework.context.annotation.Profile("test")
+@org.springframework.context.annotation.Profile("test & !sql-integration")
 @Order(3)
 @RequiredArgsConstructor
 @lombok.extern.slf4j.Slf4j

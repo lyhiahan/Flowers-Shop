@@ -17,6 +17,7 @@ public class CustomerOrderController {
     private final OrderService orderService;
     private final com.finalproject.repository.ReviewRepository reviewRepository;
     private final com.finalproject.repository.StoreRepository storeRepository;
+    private final com.finalproject.service.OrderAftercareService aftercare;
 
     // UC_011 Main Flow 5 & 6: Hiển thị danh sách tất cả đơn và phân trang
     @GetMapping
@@ -73,6 +74,7 @@ public class CustomerOrderController {
                 .map(r -> r.getProduct().getId())
                 .collect(java.util.stream.Collectors.toSet());
         model.addAttribute("reviewedProductIds", reviewedProductIds);
+        aftercare.addToModel(order, model);
 
         return "customer/order-detail";
     }

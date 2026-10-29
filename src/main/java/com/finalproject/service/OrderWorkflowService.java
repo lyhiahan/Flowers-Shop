@@ -26,6 +26,7 @@ public class OrderWorkflowService {
     private final OrderFundsService funds;
     private final CustomerWalletService customerWallet;
     private final UserRepository users;
+    private final OrderAftercareRepository aftercare;
 
     public Order lockedOrder(Long id) {
         // Match checkout, demo confirmation and account closure: user before order, stock and store.
@@ -82,6 +83,10 @@ public class OrderWorkflowService {
             throw new IllegalStateException("Đơn khách nhận tại tiệm không có bước vận chuyển. Khi khách đã nhận hoa, chọn 'Khách nhận hoa tại quầy - Hoàn tất'.");
         boolean allowed = availableTransitions(order).contains(next);
         if (!allowed) throw new IllegalStateException("Không thể chuyển đơn từ " + previous + " sang " + next);
+        if ((next == OrderStatus.DELIVERING || (order.isPickup() && next == OrderStatus.COMPLETED))
+                && aftercare.findById(id).map(OrderAftercare::isAwaitingPhotoApproval).orElse(false)) {
+            throw new IllegalStateException("Ảnh thành phẩm đang chờ khách duyệt hoặc chỉnh lại. Chỉ bàn giao khi khách đã đồng ý.");
+        }
         if (next == OrderStatus.DELIVERING && !"COD".equals(order.getPaymentMethod())
                 && !"CASH".equals(order.getPaymentMethod()) && !"PAID".equals(order.getPaymentStatus())) {
             throw new IllegalStateException("Cần xác nhận đã nhận thanh toán trước khi giao hoa.");

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/floral :: head('Giao nhận và hỗ trợ - Hoa Tươi Sài Gòn')}"></head>
+<body>
+<header th:replace="~{fragments/floral :: header}"></header>
+<main class="container py-4 py-md-5" style="max-width:900px">
+    <h1 class="h3 fw-bold mb-4">Giao nhận và hỗ trợ sau giao</h1>
+    <h2 class="h5">Phí giao hàng và khung giờ</h2>
+    <p>Phí giao được báo theo chi nhánh và khu vực biểu phí bạn chọn khi đặt hoa. Khu vực gần hoặc xa không phải kết quả đo khoảng cách bằng bản đồ. Nếu chưa xác định được khu vực, vui lòng trao đổi với cửa hàng trước khi đặt.</p>
+    <p>Bạn có thể chọn giao tận nơi hoặc nhận tại cửa hàng, kèm ngày và khung giờ. Khi có thay đổi địa chỉ, giờ nhận hoặc không liên lạc được người nhận, hãy trao đổi qua hội thoại của đơn để cửa hàng xác nhận phương án phù hợp.</p>
+    <h2 class="h5 mt-4">Ảnh thành phẩm</h2>
+    <p>Khi cửa hàng gửi ảnh mẫu hoa đã chuẩn bị, ảnh sẽ xuất hiện trong chi tiết đơn. Bạn có thể đồng ý hoặc yêu cầu chỉnh lại kèm ghi chú. Với đơn đã gửi ảnh chờ duyệt, cửa hàng chỉ bàn giao sau khi bạn đồng ý; nếu ảnh được thay mới, bạn cần xem và duyệt lại.</p>
+    <h2 class="h5 mt-4">Ghi nhận giao và nhận hoa</h2>
+    <p>Cửa hàng có thể bổ sung ảnh và ghi chú bàn giao. Khi đơn đã được ghi nhận giao thành công, bạn có thể xác nhận đã nhận hoa tại trang chi tiết. Ảnh nên tập trung vào sản phẩm; tránh đưa giấy tờ, khuôn mặt hoặc thông tin riêng tư không cần thiết vào ảnh.</p>
+    <h2 class="h5 mt-4">Yêu cầu hỗ trợ sau giao</h2>
+    <p>Nếu hoa hư hỏng, sai mẫu, thiếu hoa hoặc giao trễ, mở chi tiết đơn đã giao hoặc hoàn tất, chọn lý do, mô tả sự việc và đính kèm ảnh nếu có. Mỗi đơn có một yêu cầu hỗ trợ được theo dõi tại đây. Quản lý chi nhánh hoặc quản trị viên sẽ phản hồi nội dung và kết quả xử lý trong đơn.</p>
+    <p>Kết quả tùy theo nội dung và minh chứng của từng yêu cầu. Việc đóng yêu cầu hỗ trợ không tự ghi nhận đổi sản phẩm hoặc hoàn tiền; các khoản hoàn cần được đối chiếu và xử lý theo luồng thanh toán tương ứng.</p>
+    <h2 class="h5 mt-4">Hủy đơn và thanh toán</h2>
+    <p>Khách có thể tự hủy khi đơn còn chờ xác nhận hoặc đã xác nhận; khi cửa hàng bắt đầu chuẩn bị hoa, khách cần liên hệ cửa hàng để xử lý. Thanh toán MoMo demo và ví demo là giao dịch mô phỏng; khoản hoàn vào ví demo không phải hoàn về ngân hàng hoặc MoMo thật.</p>
+    <a class="btn btn-outline-success mt-3" th:href="@{/customer/orders}">Xem đơn hàng của tôi</a>
+</main>
+<footer th:replace="~{fragments/floral :: footer}"></footer>
+<th:block th:replace="~{fragments/floral :: scripts}"></th:block>
+</body></html>

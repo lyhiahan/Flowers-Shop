@@ -117,6 +117,9 @@ class MomoSandboxSecurityTests {
     }
 
     @Test void sandboxCannotUseMockButtonAndAnotherCustomerCannotViewOrder() throws Exception {
+        // Use a real active account so this checks authorization, not session revocation.
+        users.saveAndFlush(User.builder().username("other-customer").email("other-customer@fixture.test")
+                .password("unused-fixture-password").fullName("Access test").role(Role.USER).isActive(true).build());
         assertThatThrownBy(() -> momo.simulatePayment(order.getId(), "momo-customer")).hasMessageContaining("chế độ mock");
         mvc.perform(get("/checkout/momo/"+order.getId()).with(user("momo-customer").roles("USER")))
                 .andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("/simulate"))));

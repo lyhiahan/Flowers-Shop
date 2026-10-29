@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /** Idempotent permission migration. Accounts, status, ownership and business history are preserved. */
 @Component
-@org.springframework.context.annotation.Profile("test")
+@org.springframework.context.annotation.Profile("test & !sql-integration")
 @Order(Ordered.HIGHEST_PRECEDENCE + 1)
 @RequiredArgsConstructor
 public class RoleConsolidationMigration implements ApplicationRunner {

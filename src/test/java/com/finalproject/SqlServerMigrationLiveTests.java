@@ -67,9 +67,9 @@ class SqlServerMigrationLiveTests {
     @Test void emptyDatabaseMigratesAllVersionsAndValidatesAllEntities() throws Exception {
         String url = url("SQLSERVER_TEST_FRESH_DATABASE");
         var flyway = flyway(url);
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(18);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(19);
         flyway.validate();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("18");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("19");
         validateEntities(url);
         assertThat(flyway.migrate().migrationsExecuted).isZero();
     }
@@ -78,11 +78,11 @@ class SqlServerMigrationLiveTests {
         String url = url("SQLSERVER_TEST_COPY_DATABASE");
         var flyway = flyway(url);
         Map<String, Long> before = counts(url);
-        flyway.validateWithResult(); // Pending V12-V18 are expected before migrate.
+        flyway.validateWithResult(); // Pending V12-V19 are expected before migrate.
         assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("11");
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(7);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(8);
         flyway.validate();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("18");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("19");
         assertThat(java.util.Arrays.stream(flyway.info().applied()).filter(m -> "11".equals(m.getVersion().getVersion())).findFirst().orElseThrow().getChecksum())
                 .isEqualTo(306107251);
         validateEntities(url);
@@ -110,9 +110,9 @@ class SqlServerMigrationLiveTests {
         }
         var auditedVersion = Flyway.configure().configuration(flyway.getConfiguration()).target("5").load();
         assertThat(auditedVersion.migrate().migrationsExecuted).isEqualTo(1);
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(12);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(13);
         flyway.validate();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("18");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("19");
         validateEntities(url);
         assertThat(counts(url)).isEqualTo(before);
         try (var connection = connect(url); var statement = connection.createStatement()) {

@@ -28,6 +28,7 @@ import java.util.*;
 @RequestMapping({"/manager/orders", "/vendor/orders"})
 @RequiredArgsConstructor
 public class ManagerOrderController {
+    private final com.finalproject.service.OrderAftercareService aftercare;
 
     private final OrderService orderService;
     private final OrderWorkflowService workflow;
@@ -148,6 +149,7 @@ public class ManagerOrderController {
         model.addAttribute("currentUser", user);
         model.addAttribute("isProcessing", isProcessing);
         model.addAttribute("availableStatuses", availableStatuses);
+        aftercare.addToModel(order, model);
 
         return "manager/order-detail";
     }
